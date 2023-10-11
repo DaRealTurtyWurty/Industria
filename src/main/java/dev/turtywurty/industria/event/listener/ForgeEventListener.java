@@ -4,9 +4,12 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.event.ItemEnterWaterEvent;
 import dev.turtywurty.industria.init.ItemInit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -77,7 +80,10 @@ public class ForgeEventListener {
             double yMove = yDiff / timeLeft;
             double zMove = zDiff / timeLeft;
 
-            entity.setPos(entity.getX() + xMove, entity.getY() + yMove, entity.getZ() + zMove);
+            if(entity.level() instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.SMALL_FLAME, entity.getX(), entity.getY(), entity.getZ(), 10, 0, 0, 0, 0);
+            }
+            entity.move(MoverType.SELF, new Vec3(xMove, yMove, zMove));
             event.setCanceled(true);
         }
     }
