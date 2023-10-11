@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[48,)"
+license="LGPLv3"
+# issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/"
+[[mods]]
+modId="industria"
+version="${file.jarVersion}"
+displayName="Industria"
+# logoFile="industria.png"
+authors="TurtyWurty"
+displayTest="MATCH_VERSION"
+description='''Industria is a Chemistry-based Technology mod.'''
+
+[[dependencies.industria]]
+    modId="forge"
+    mandatory=true
+    versionRange="[48.0.22,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.industria]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.2,1.21)"
+    ordering="NONE"
+    side="BOTH"
