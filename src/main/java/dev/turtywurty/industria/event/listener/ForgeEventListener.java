@@ -3,15 +3,11 @@ package dev.turtywurty.industria.event.listener;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.event.ItemEnterWaterEvent;
 import dev.turtywurty.industria.init.ItemInit;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,19 +23,19 @@ public class ForgeEventListener {
         ItemEntity entity = event.getItemEntity();
         ItemStack stack = event.getItemEntity().getItem();
         Item item = stack.getItem();
-        if(item == ItemInit.LITHIUM.get()) {
+        if (item == ItemInit.LITHIUM.get()) {
+            event.setCanceled(true);
+
             Level level = entity.level();
-//            level.explode(entity, entity.getX(), entity.getY(), entity.getZ(), 1, true, Level.ExplosionInteraction.BLOCK);
-//            entity.remove(Entity.RemovalReason.DISCARDED);
 
             CompoundTag data = entity.getPersistentData();
             CompoundTag modidData = data.contains(Industria.MOD_ID, Tag.TAG_COMPOUND) ?
                     data.getCompound(Industria.MOD_ID) :
                     new CompoundTag();
-            if(!modidData.contains("NextPosition", Tag.TAG_COMPOUND) || !modidData.contains("ByTime", Tag.TAG_LONG)) {
-                double x = entity.getX() + (level.random.nextDouble() - 0.5D) * 10.0D;
+            if (!modidData.contains("NextPosition", Tag.TAG_COMPOUND) || !modidData.contains("ByTime", Tag.TAG_LONG)) {
+                double x = entity.getX() + (level.random.nextDouble() - 0.5D) * 5.0D;
                 double y = entity.getY();
-                double z = entity.getZ() + (level.random.nextDouble() - 0.5D) * 10.0D;
+                double z = entity.getZ() + (level.random.nextDouble() - 0.5D) * 5.0D;
 
                 var nextPosition = new CompoundTag();
                 nextPosition.putDouble("X", x);
@@ -57,34 +53,49 @@ public class ForgeEventListener {
 
             long byTime = modidData.getLong("ByTime");
 
-            if (entity.getX() == x && entity.getY() == y && entity.getZ() == z) {
+            if (isSamePosition(entity, x, y, z) || byTime < level.getGameTime() && !level.isClientSide()) {
                 level.explode(entity, entity.getX(), entity.getY(), entity.getZ(), 1, true, Level.ExplosionInteraction.BLOCK);
                 entity.remove(Entity.RemovalReason.DISCARDED);
-                event.setCanceled(true);
                 return;
             }
+
+            data.put(Industria.MOD_ID, modidData);
 
             entity.setDeltaMovement(Vec3.ZERO);
 
             long gameTime = level.getGameTime();
             long timeLeft = byTime - gameTime;
 
-            // set position between current position and next position over the time left
-            // we dont modify the motion, we have to directly modify the position because we have to cancel the event
+            double currentX = entity.getX();
+            double currentY = entity.getY();
+            double currentZ = entity.getZ();
 
-            double xDiff = x - entity.getX();
-            double yDiff = y - entity.getY();
-            double zDiff = z - entity.getZ();
+            double deltaX = x - currentX;
+            double deltaY = y - currentY;
+            double deltaZ = z - currentZ;
 
-            double xMove = xDiff / timeLeft;
-            double yMove = yDiff / timeLeft;
-            double zMove = zDiff / timeLeft;
+            double xPerTick = deltaX / timeLeft;
+            double yPerTick = deltaY / timeLeft;
+            double zPerTick = deltaZ / timeLeft;
 
-            if(entity.level() instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(ParticleTypes.SMALL_FLAME, entity.getX(), entity.getY(), entity.getZ(), 10, 0, 0, 0, 0);
+            double newX = currentX + xPerTick;
+            double newY = currentY + yPerTick;
+            double newZ = currentZ + zPerTick;
+
+            entity.setPos(newX, newY, newZ);
+
+            if (level instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.SMALL_FLAME, entity.getX(), entity.getY(), entity.getZ(), 10, 0, 0, 0, 0.1D);
+                if(level.getRandom().nextBoolean()) {
+                    serverLevel.sendParticles(ParticleTypes.SMOKE, entity.getX(), entity.getY(), entity.getZ(), 7, 0, 0, 0, 0.1D);
+                }
+
+                serverLevel.sendParticles(ParticleTypes.BUBBLE, entity.getX(), entity.getY(), entity.getZ(), 2, 0, 0, 0, 0.1D);
             }
-            entity.move(MoverType.SELF, new Vec3(xMove, yMove, zMove));
-            event.setCanceled(true);
         }
+    }
+
+    private static boolean isSamePosition(Entity entity, double x, double y, double z) {
+        return Math.abs(entity.getX() - x) < 0.1D && Math.abs(entity.getY() - y) < 0.1D && Math.abs(entity.getZ() - z) < 0.1D;
     }
 }
