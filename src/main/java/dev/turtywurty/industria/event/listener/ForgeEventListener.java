@@ -7,7 +7,10 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,10 +35,18 @@ public class ForgeEventListener {
             CompoundTag modidData = data.contains(Industria.MOD_ID, Tag.TAG_COMPOUND) ?
                     data.getCompound(Industria.MOD_ID) :
                     new CompoundTag();
-            if (!modidData.contains("NextPosition", Tag.TAG_COMPOUND) || !modidData.contains("ByTime", Tag.TAG_LONG)) {
-                double x = entity.getX() + (level.random.nextDouble() - 0.5D) * 5.0D;
+            if (!modidData.contains("NextPosition", Tag.TAG_COMPOUND)) {
+                double x = entity.getX() +
+                        level.random.triangle(0, 5) *
+                        Mth.randomBetweenInclusive(level.random, -1, 1) +
+                        level.random.nextDouble() - 0.5D;
+
+                double z = entity.getZ() +
+                        level.random.triangle(0, 5) *
+                                Mth.randomBetweenInclusive(level.random, -1, 1) +
+                        level.random.nextDouble() - 0.5D;
+
                 double y = entity.getY();
-                double z = entity.getZ() + (level.random.nextDouble() - 0.5D) * 5.0D;
 
                 var nextPosition = new CompoundTag();
                 nextPosition.putDouble("X", x);
@@ -43,7 +54,10 @@ public class ForgeEventListener {
                 nextPosition.putDouble("Z", z);
 
                 modidData.put("NextPosition", nextPosition);
-                modidData.putLong("ByTime", level.getGameTime() + 20L);
+            }
+
+            if(!modidData.contains("ByTime", Tag.TAG_LONG)) {
+                modidData.putLong("ByTime", level.getGameTime() + 100L);
             }
 
             CompoundTag nextPosition = modidData.getCompound("NextPosition");
@@ -52,19 +66,14 @@ public class ForgeEventListener {
             double z = nextPosition.getDouble("Z");
 
             long byTime = modidData.getLong("ByTime");
+            long gameTime = level.getGameTime();
+            long timeLeft = byTime - gameTime;
 
-            if (isSamePosition(entity, x, y, z) || byTime < level.getGameTime() && !level.isClientSide()) {
+            if (timeLeft < 0 && !level.isClientSide()) {
                 level.explode(entity, entity.getX(), entity.getY(), entity.getZ(), 1, true, Level.ExplosionInteraction.BLOCK);
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 return;
             }
-
-            data.put(Industria.MOD_ID, modidData);
-
-            entity.setDeltaMovement(Vec3.ZERO);
-
-            long gameTime = level.getGameTime();
-            long timeLeft = byTime - gameTime;
 
             double currentX = entity.getX();
             double currentY = entity.getY();
@@ -74,15 +83,25 @@ public class ForgeEventListener {
             double deltaY = y - currentY;
             double deltaZ = z - currentZ;
 
-            double xPerTick = deltaX / timeLeft;
-            double yPerTick = deltaY / timeLeft;
-            double zPerTick = deltaZ / timeLeft;
+            long totalTime = modidData.contains("TotalTime", Tag.TAG_LONG) ?
+                    modidData.getLong("TotalTime") :
+                    20L;
 
-            double newX = currentX + xPerTick;
-            double newY = currentY + yPerTick;
-            double newZ = currentZ + zPerTick;
+            if (totalTime > 0) {
+                double stepX = deltaX / totalTime;
+                double stepY = deltaY / totalTime;
+                double stepZ = deltaZ / totalTime;
 
-            entity.setPos(newX, newY, newZ);
+                entity.move(MoverType.SELF, new Vec3(stepX, stepY, stepZ));
+                modidData.putLong("TotalTime", totalTime - 1);
+            } else {
+                entity.setPos(x, y, z);
+                modidData.remove("NextPosition");
+                modidData.remove("TotalTime");
+            }
+
+            data.put(Industria.MOD_ID, modidData);
+            entity.hurtMarked = true;
 
             if (level instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(ParticleTypes.SMALL_FLAME, entity.getX(), entity.getY(), entity.getZ(), 10, 0, 0, 0, 0.1D);
@@ -90,7 +109,7 @@ public class ForgeEventListener {
                     serverLevel.sendParticles(ParticleTypes.SMOKE, entity.getX(), entity.getY(), entity.getZ(), 7, 0, 0, 0, 0.1D);
                 }
 
-                serverLevel.sendParticles(ParticleTypes.BUBBLE, entity.getX(), entity.getY(), entity.getZ(), 2, 0, 0, 0, 0.1D);
+                serverLevel.sendParticles(ParticleTypes.BUBBLE, entity.getX(), entity.getY(), entity.getZ(), 10, 0, 0, 0, 0.1D);
             }
         }
     }

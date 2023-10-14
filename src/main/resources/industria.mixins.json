@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "industria.refmap.json",
   "mixins": [
+    "ChunkMapMixin",
     "ItemEntityMixin"
   ],
   "client": [],
