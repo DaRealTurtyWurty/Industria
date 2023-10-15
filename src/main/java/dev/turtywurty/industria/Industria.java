@@ -18,7 +18,8 @@ public class Industria {
         ItemInit.ITEMS.register(bus);
         BlockInit.BLOCKS.register(bus);
         BlockEntityTypeInit.BLOCK_ENTITIES.register(bus);
-        MenuTypeInit.MENU_TYPES.register(bus);
+        MenuTypeInit.MENUS.register(bus);
         CreativeModeTabInit.CREATIVE_TABS.register(bus);
+        EntityTypeInit.ENTITIES.register(bus);
     }
 }

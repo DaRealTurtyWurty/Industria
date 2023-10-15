@@ -6,7 +6,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class MenuTypeInit {
-    public static final DeferredRegister<MenuType<?>> MENU_TYPES =
+    public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(ForgeRegistries.MENU_TYPES, Industria.MOD_ID);
 
 
