@@ -16,7 +16,7 @@ public class EntityTypeInit {
     public static final RegistryObject<EntityType<LithiumItemEntity>> LITHIUM_ITEM_ENTITY = ENTITIES.register("lithium_item_entity",
             () -> EntityType.Builder.<LithiumItemEntity>of(LithiumItemEntity::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F)
-                    .clientTrackingRange(4)
+                    .clientTrackingRange(6)
                     .updateInterval(1)
                     .build(new ResourceLocation(Industria.MOD_ID, "lithium_item_entity").toString()));
 }

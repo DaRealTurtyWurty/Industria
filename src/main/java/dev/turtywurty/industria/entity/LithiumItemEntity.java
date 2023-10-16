@@ -3,6 +3,8 @@ package dev.turtywurty.industria.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -17,6 +19,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
@@ -98,6 +102,7 @@ public class LithiumItemEntity extends ItemEntity {
     public void tick() {
         if (getItem().onEntityItemUpdate(this))
             return;
+
         if (getItem().isEmpty()) {
             discard();
         } else {
@@ -186,20 +191,24 @@ public class LithiumItemEntity extends ItemEntity {
         Level level = level();
         RandomSource random = level.random;
 
-        if (getTimeToReach() == 0) {
-            setTimeToReach(level.getGameTime() + random.nextInt(100) + 100L);
+        long totalTime;
+        if (getTimeToReach() <= 0) {
+            setTimeToReach(totalTime = 20L);
+            setNextPosition(EMPTY_VECTOR);
+        } else {
+            totalTime = getTimeToReach();
         }
 
         if (getNextPosition() == EMPTY_VECTOR || getNextPosition() == null) {
             double x = getX() +
                     random.triangle(0, 5) *
                             Mth.randomBetweenInclusive(random, -1, 1) +
-                    random.nextDouble() - 0.5D;
+                    (random.nextDouble() * 10D) - 5D;
 
             double z = getZ() +
                     random.triangle(0, 5) *
                             Mth.randomBetweenInclusive(random, -1, 1) +
-                    random.nextDouble() - 0.5D;
+                    (random.nextDouble() * 10D) - 5D;
 
             double y = getY();
 
@@ -233,28 +242,18 @@ public class LithiumItemEntity extends ItemEntity {
         double deltaY = y - currentY;
         double deltaZ = z - currentZ;
 
-        long totalTime;
-        if (getTimeToReach() <= 0) {
-            setTimeToReach(totalTime = 20L);
-        } else {
-            totalTime = getTimeToReach();
-        }
-
         if (totalTime >= 0) {
             double stepX = deltaX / totalTime;
             double stepY = deltaY / totalTime;
             double stepZ = deltaZ / totalTime;
 
-            move(MoverType.SELF, new Vec3(stepX, stepY, stepZ));
+            setPos(currentX + stepX, currentY + stepY, currentZ + stepZ);
             setTimeToReach(totalTime - 1);
-        } else {
-            setNextPosition(EMPTY_VECTOR);
-            setTimeToReach(0);
         }
 
         if (level instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(ParticleTypes.SMALL_FLAME, currentX, currentY, currentZ, 2, 0, 0, 0, 0.1D);
-            serverLevel.sendParticles(ParticleTypes.BUBBLE, currentX, currentY, currentZ, 2, 0, 0, 0, 0.1D);
+            serverLevel.sendParticles(ParticleTypes.BUBBLE, currentX, currentY, currentZ, 10, 0, 0, 0, 0.1D);
 
             if (random.nextBoolean())
                 serverLevel.sendParticles(ParticleTypes.SMOKE, currentX, currentY, currentZ, 7, 0, 0, 0, 0.1D);
