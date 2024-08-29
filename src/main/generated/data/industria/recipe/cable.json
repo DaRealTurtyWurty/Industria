@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "III",
+    "IRI",
+    "III"
+  ],
+  "result": {
+    "count": 8,
+    "id": "industria:cable"
+  }
+}

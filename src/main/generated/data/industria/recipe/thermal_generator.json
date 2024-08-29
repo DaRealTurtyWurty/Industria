@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:iron_block"
+    },
+    "B": {
+      "item": "minecraft:furnace"
+    },
+    "C": {
+      "item": "minecraft:redstone_block"
+    },
+    "D": {
+      "item": "minecraft:coal_block"
+    },
+    "E": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "CDC",
+    "AEA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "industria:thermal_generator"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "count": 1,
+    "ingredient": {
+      "item": "minecraft:gravel"
+    }
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "minecraft:sand"
+  },
+  "output_b": {
+    "chance": 0.1,
+    "count": 1,
+    "item": "minecraft:flint"
+  },
+  "process_time": 10
+}

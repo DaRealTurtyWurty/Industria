@@ -1,0 +1,9 @@
+{
+  "values": [
+    "industria:basic_battery",
+    "industria:advanced_battery",
+    "industria:elite_battery",
+    "industria:ultimate_battery",
+    "industria:creative_battery"
+  ]
+}

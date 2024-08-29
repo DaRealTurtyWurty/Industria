@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "industria:block/solar_panel",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "industria:block/solar_panel"
+    },
+    "facing=south": {
+      "model": "industria:block/solar_panel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industria:block/solar_panel",
+      "y": 270
+    }
+  }
+}

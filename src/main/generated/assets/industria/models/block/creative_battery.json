@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "industria:block/creative_battery_top",
+    "side": "industria:block/creative_battery"
+  }
+}

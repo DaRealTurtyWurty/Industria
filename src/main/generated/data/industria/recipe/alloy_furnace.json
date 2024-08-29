@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:copper_block"
+    },
+    "B": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "ABA",
+    "AAA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "industria:alloy_furnace"
+  }
+}

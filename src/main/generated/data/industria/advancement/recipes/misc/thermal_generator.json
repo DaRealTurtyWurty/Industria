@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_c:player_workstations/furnaces": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:player_workstations/furnaces"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:storage_blocks/coal": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:storage_blocks/coal"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:storage_blocks/iron": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:storage_blocks/iron"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:storage_blocks/redstone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:storage_blocks/redstone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_iron_bars": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:iron_bars"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "industria:thermal_generator"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_c:storage_blocks/iron",
+      "has_c:player_workstations/furnaces",
+      "has_c:storage_blocks/redstone",
+      "has_c:storage_blocks/coal",
+      "has_iron_bars"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:thermal_generator"
+    ]
+  }
+}

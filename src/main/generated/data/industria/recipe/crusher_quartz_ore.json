@@ -1,0 +1,24 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "count": 1,
+    "ingredient": {
+      "tag": "c:ores/quartz"
+    }
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "minecraft:quartz"
+  },
+  "output_b": {
+    "chance": 0.15,
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 3,
+      "min_inclusive": 1
+    },
+    "item": "minecraft:quartz"
+  },
+  "process_time": 10
+}

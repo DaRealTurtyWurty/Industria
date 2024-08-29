@@ -1,0 +1,20 @@
+{
+  "type": "industria:alloy_furnace",
+  "inputA": {
+    "count": 1,
+    "ingredient": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "inputB": {
+    "count": 4,
+    "ingredient": {
+      "tag": "minecraft:coals"
+    }
+  },
+  "output": {
+    "count": 1,
+    "id": "industria:steel_ingot"
+  },
+  "smelt_time": 400
+}

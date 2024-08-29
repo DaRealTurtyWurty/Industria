@@ -1,0 +1,20 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "count": 1,
+    "ingredient": {
+      "item": "minecraft:stone"
+    }
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "minecraft:cobblestone"
+  },
+  "output_b": {
+    "chance": 0.25,
+    "count": 1,
+    "item": "minecraft:gravel"
+  },
+  "process_time": 10
+}

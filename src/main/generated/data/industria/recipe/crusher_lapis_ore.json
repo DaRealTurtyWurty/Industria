@@ -1,0 +1,33 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "count": 1,
+    "ingredient": [
+      {
+        "item": "minecraft:lapis_ore"
+      },
+      {
+        "item": "minecraft:deepslate_lapis_ore"
+      }
+    ]
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 4,
+      "min_inclusive": 1
+    },
+    "item": "minecraft:lapis_lazuli"
+  },
+  "output_b": {
+    "chance": 0.15,
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 2,
+      "min_inclusive": 1
+    },
+    "item": "minecraft:lapis_lazuli"
+  },
+  "process_time": 10
+}

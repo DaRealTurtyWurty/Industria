@@ -1,0 +1,10 @@
+accessWidener v2 named
+
+accessible field net/minecraft/util/math/intprovider/ClampedNormalIntProvider mean F
+accessible field net/minecraft/util/math/intprovider/ClampedNormalIntProvider deviation F
+accessible field net/minecraft/util/math/intprovider/ClampedIntProvider source Lnet/minecraft/util/math/intprovider/IntProvider;
+accessible field net/minecraft/util/math/intprovider/WeightedListIntProvider weightedList Lnet/minecraft/util/collection/DataPool;
+accessible method net/minecraft/util/collection/DataPool <init> (Ljava/util/List;)V
+accessible field net/minecraft/util/math/floatprovider/ClampedNormalFloatProvider mean F
+accessible field net/minecraft/util/math/floatprovider/ClampedNormalFloatProvider deviation F
+accessible field net/minecraft/util/math/floatprovider/TrapezoidFloatProvider plateau F

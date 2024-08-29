@@ -1,0 +1,28 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "count": 1,
+    "ingredient": {
+      "item": "minecraft:nether_gold_ore"
+    }
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 6,
+      "min_inclusive": 2
+    },
+    "item": "minecraft:gold_nugget"
+  },
+  "output_b": {
+    "chance": 0.15,
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 3,
+      "min_inclusive": 1
+    },
+    "item": "minecraft:gold_nugget"
+  },
+  "process_time": 10
+}

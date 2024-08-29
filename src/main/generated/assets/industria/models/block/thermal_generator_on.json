@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "industria:block/thermal_generator_front_on",
+    "side": "industria:block/thermal_generator_side",
+    "top": "industria:block/thermal_generator_top"
+  }
+}

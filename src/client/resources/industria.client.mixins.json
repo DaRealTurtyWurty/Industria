@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "dev.turtywurty.industria.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
