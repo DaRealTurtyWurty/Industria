@@ -271,6 +271,9 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
         if(hasItemsInBuffer()) {
             var bufferArray = new NbtList();
             for (ItemStack stack : this.buffer) {
+                if(stack == null || stack.isEmpty())
+                    continue;
+
                 bufferArray.add(stack.encode(registryLookup));
             }
 
