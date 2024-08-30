@@ -25,5 +25,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.SOLAR_PANEL);
         addDrop(BlockInit.CRUSHER);
         addDrop(BlockInit.CABLE);
+        addDrop(BlockInit.WIND_TURBINE);
     }
 }

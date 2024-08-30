@@ -40,6 +40,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.CRUSHER, "Crusher");
         addText(translationBuilder, CrusherBlockEntity.TITLE, "Crusher");
         translationBuilder.add(BlockInit.CABLE, "Cable");
+        translationBuilder.add(BlockInit.WIND_TURBINE, "Wind Turbine");
+        addText(translationBuilder, WindTurbineBlockEntity.TITLE, "Wind Turbine");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

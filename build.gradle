@@ -11,7 +11,10 @@ base {
 }
 
 repositories {
-
+	maven {
+		url = "https://api.modrinth.com/maven"
+	}
+	maven { url "https://maven.terraformersmc.com/releases/" }
 }
 
 loom {
@@ -35,10 +38,11 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	include modApi("teamreborn:energy:${project.tech_reborn_energy_version}")
+
+	modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
 processResources {

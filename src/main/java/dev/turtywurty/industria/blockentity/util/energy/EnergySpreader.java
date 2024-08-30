@@ -21,10 +21,10 @@ public interface EnergySpreader {
         }
     }
 
-    default void spread(World level, BlockPos worldPosition, SimpleEnergyStorage thisStorage) {
+    default void spread(World world, BlockPos pos, SimpleEnergyStorage energyStorage) {
         List<EnergyStorage> storages = new ArrayList<>();
         for (Direction direction : Direction.values()) {
-            EnergyStorage storage = EnergyStorage.SIDED.find(level, worldPosition.offset(direction), direction.getOpposite());
+            EnergyStorage storage = EnergyStorage.SIDED.find(world, pos.offset(direction), direction.getOpposite());
             if (storage == null || !storage.supportsInsertion() || storage.getAmount() >= storage.getCapacity())
                 continue;
 
@@ -35,8 +35,8 @@ public interface EnergySpreader {
             return;
 
         try (Transaction transaction = Transaction.openOuter()) {
-            long currentEnergy = thisStorage.getAmount();
-            long totalExtractable = thisStorage.extract(Long.MAX_VALUE, transaction);
+            long currentEnergy = energyStorage.getAmount();
+            long totalExtractable = energyStorage.extract(Long.MAX_VALUE, transaction);
             long totalInserted = 0;
 
             for (EnergyStorage storage : storages) {
@@ -46,12 +46,12 @@ public interface EnergySpreader {
             }
 
             if (totalInserted < totalExtractable) {
-                thisStorage.amount += totalExtractable - totalInserted;
+                energyStorage.amount += totalExtractable - totalInserted;
             }
 
             transaction.commit();
 
-            if (currentEnergy != thisStorage.getAmount()) {
+            if (currentEnergy != energyStorage.getAmount()) {
                 if (this instanceof UpdatableBlockEntity updatableBlockEntity) {
                     updatableBlockEntity.update();
                 } else if (this instanceof BlockEntity blockEntity) {

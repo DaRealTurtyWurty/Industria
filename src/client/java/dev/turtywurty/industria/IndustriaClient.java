@@ -20,6 +20,7 @@ public class IndustriaClient implements ClientModInitializer {
 		HandledScreens.register(ScreenHandlerTypeInit.COMBUSTION_GENERATOR, CombustionGeneratorScreen::new);
 		HandledScreens.register(ScreenHandlerTypeInit.SOLAR_PANEL, SolarPanelScreen::new);
 		HandledScreens.register(ScreenHandlerTypeInit.CRUSHER, CrusherScreen::new);
+		HandledScreens.register(ScreenHandlerTypeInit.WIND_TURBINE, WindTurbineScreen::new);
 
 		// Registering Models
 		EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::createMainLayer);

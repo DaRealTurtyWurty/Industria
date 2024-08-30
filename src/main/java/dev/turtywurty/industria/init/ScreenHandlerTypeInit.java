@@ -33,6 +33,9 @@ public class ScreenHandlerTypeInit {
     public static final ScreenHandlerType<CrusherScreenHandler> CRUSHER =
             register("crusher", CrusherScreenHandler::new, BlockPosPayload.CODEC);
 
+    public static final ScreenHandlerType<WindTurbineScreenHandler> WIND_TURBINE =
+            register("wind_turbine", WindTurbineScreenHandler::new, BlockPosPayload.CODEC);
+
     public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
         return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));
     }

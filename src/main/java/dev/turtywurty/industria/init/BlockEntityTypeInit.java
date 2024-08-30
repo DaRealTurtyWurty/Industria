@@ -40,6 +40,10 @@ public class BlockEntityTypeInit {
             BlockEntityType.Builder.create(CableBlockEntity::new, BlockInit.CABLE)
                     .build());
 
+    public static final BlockEntityType<WindTurbineBlockEntity> WIND_TURBINE = register("wind_turbine",
+            BlockEntityType.Builder.create(WindTurbineBlockEntity::new, BlockInit.WIND_TURBINE)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }
