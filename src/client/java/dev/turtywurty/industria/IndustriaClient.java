@@ -3,7 +3,9 @@ package dev.turtywurty.industria;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.model.CrusherModel;
+import dev.turtywurty.industria.model.WindTurbineModel;
 import dev.turtywurty.industria.renderer.CrusherBlockEntityRenderer;
+import dev.turtywurty.industria.renderer.WindTurbineBlockEntityRenderer;
 import dev.turtywurty.industria.screen.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
@@ -24,8 +26,10 @@ public class IndustriaClient implements ClientModInitializer {
 
 		// Registering Models
 		EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::createMainLayer);
+		EntityModelLayerRegistry.registerModelLayer(WindTurbineModel.LAYER_LOCATION, WindTurbineModel::createMainLayer);
 
 		// Registering Block Entity Renderers
 		BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
 	}
 }
