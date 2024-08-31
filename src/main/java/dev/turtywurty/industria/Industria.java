@@ -10,11 +10,16 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.reborn.energy.api.EnergyStorage;
@@ -35,6 +40,7 @@ public class Industria implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Loading Industria...");
 
+        // Registries
         ItemInit.init();
         BlockInit.init();
         BlockEntityTypeInit.init();
@@ -43,9 +49,11 @@ public class Industria implements ModInitializer {
         RecipeSerializerInit.init();
         ItemGroupInit.init();
         BiomeModificationInit.init();
+        FluidInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
+        // Item Lookup
         ItemStorage.SIDED.registerForBlockEntity(AlloyFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ALLOY_FURNACE);
 
         EnergyStorage.SIDED.registerForBlockEntity(ThermalGeneratorBlockEntity::getEnergyProvider, BlockEntityTypeInit.THERMAL_GENERATOR);
@@ -67,8 +75,10 @@ public class Industria implements ModInitializer {
 
         EnergyStorage.SIDED.registerForBlockEntity(WindTurbineBlockEntity::getEnergyProvider, BlockEntityTypeInit.WIND_TURBINE);
 
+        // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
 
+        // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
                 context.server().execute(() -> {
                     ServerPlayerEntity player = context.player();
@@ -77,6 +87,17 @@ public class Industria implements ModInitializer {
                         batteryScreenHandler.getBlockEntity().setChargeMode(payload.chargeMode());
                     }
                 }));
+
+        // Fluid Properties
+        var crudeOilAttributes = new FluidVariantAttributeHandler() {
+            @Override
+            public int getViscosity(FluidVariant variant, @Nullable World world) {
+                return 7500;
+            }
+        };
+
+        FluidVariantAttributes.register(FluidInit.CRUDE_OIL, crudeOilAttributes);
+        FluidVariantAttributes.register(FluidInit.CRUDE_OIL_FLOWING, crudeOilAttributes);
 
         LOGGER.info("Industria has finished loading!");
     }

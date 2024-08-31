@@ -2,6 +2,7 @@ package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemGroupInit;
 import dev.turtywurty.industria.init.ItemInit;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -42,6 +43,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.CABLE, "Cable");
         translationBuilder.add(BlockInit.WIND_TURBINE, "Wind Turbine");
         addText(translationBuilder, WindTurbineBlockEntity.TITLE, "Wind Turbine");
+        translationBuilder.add(FluidInit.CRUDE_OIL_BLOCK, "Crude Oil");
+        translationBuilder.add(FluidInit.CRUDE_OIL_BUCKET, "Bucket of Crude Oil");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

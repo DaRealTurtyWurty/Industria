@@ -5,6 +5,7 @@
   "block.industria.cable": "Cable",
   "block.industria.combustion_generator": "Combustion Generator",
   "block.industria.creative_battery": "Creative Battery",
+  "block.industria.crude_oil": "Crude Oil",
   "block.industria.crusher": "Crusher",
   "block.industria.elite_battery": "Elite Battery",
   "block.industria.solar_panel": "Solar Panel",
@@ -19,6 +20,7 @@
   "container.industria.thermal_generator": "Thermal Generator",
   "container.industria.wind_turbine": "Wind Turbine",
   "gui.industria.battery.charge_mode_button.tooltip": "Charge/Discharge",
+  "item.industria.crude_oil_bucket": "Bucket of Crude Oil",
   "item.industria.steel_ingot": "Steel Ingot",
   "itemGroup.industria.main": "Industria"
 }

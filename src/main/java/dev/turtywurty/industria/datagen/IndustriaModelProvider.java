@@ -3,6 +3,7 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
@@ -28,6 +29,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerCooker(BlockInit.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.SOLAR_PANEL);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
+        blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL_BLOCK);
     }
 
     @Override
