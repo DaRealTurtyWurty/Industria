@@ -3,12 +3,16 @@ package dev.turtywurty.industria.renderer;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.model.WindTurbineModel;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 
 public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindTurbineBlockEntity> {
     private static final Identifier TEXTURE = Industria.id("textures/block/wind_turbine.png");
@@ -27,12 +31,16 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
         matrices.push();
         matrices.translate(0.5f, 0, 0.5f);
 
-        float outputPercentage = getEnergyPerTickPercent(entity);
-        this.model.getParts().propeller0().roll += 0.25f * outputPercentage;
-        this.model.getParts().propeller1().roll += 0.25f * outputPercentage;
-        this.model.getParts().propeller2().roll += 0.25f * outputPercentage;
+        Direction facing = entity.getCachedState().get(Properties.HORIZONTAL_FACING);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f + facing.getHorizontal() * 90f));
 
-        this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(TEXTURE)), light, overlay);
+        float outputPercentage = getEnergyPerTickPercent(entity);
+        entity.setPropellerRotation(entity.getPropellerRotation() + (outputPercentage * 0.25f));
+        model.getParts().propellers().roll = entity.getPropellerRotation();
+
+        VertexConsumer consumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE));
+        this.model.render(matrices, consumer, light, overlay);
+        this.model.getParts().propellers().roll = 0.0F;
         matrices.pop();
     }
 
