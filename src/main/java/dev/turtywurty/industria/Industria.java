@@ -1,7 +1,9 @@
 package dev.turtywurty.industria;
 
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.fluid.FluidData;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.network.BatteryChargeModePayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
@@ -14,6 +16,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -98,6 +101,23 @@ public class Industria implements ModInitializer {
 
         FluidVariantAttributes.register(FluidInit.CRUDE_OIL, crudeOilAttributes);
         FluidVariantAttributes.register(FluidInit.CRUDE_OIL_FLOWING, crudeOilAttributes);
+
+        // Fluid Data
+        var crudeOilData = new FluidData.Builder(TagList.Fluids.CRUDE_OIL)
+                .preventsBlockSpreading()
+                .canSwim()
+                .fluidMovementSpeed((entity, speed) -> 0.01F)
+                .applyWaterMovement()
+                .applyBuoyancy(itemEntity -> itemEntity.setVelocity(itemEntity.getVelocity().add(0.0D, 0.01D, 0.0D)))
+                .canCauseDrowning()
+                .shouldWitchDrinkWaterBreathing()
+                .affectsBlockBreakSpeed()
+                .bubbleParticle(ParticleTypes.ASH)
+                .splashParticle(ParticleTypes.HEART)
+                .build();
+
+        FluidData.registerFluidData(FluidInit.CRUDE_OIL, crudeOilData);
+        FluidData.registerFluidData(FluidInit.CRUDE_OIL_FLOWING, crudeOilData);
 
         LOGGER.info("Industria has finished loading!");
     }

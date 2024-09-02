@@ -1,11 +1,36 @@
 {
-	"required": true,
-	"package": "dev.turtywurty.industria.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "dev.turtywurty.industria.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "fluid.BoatDispenserBehaviorMixin",
+    "fluid.BoatEntityMixin",
+    "fluid.BucketItemMixin",
+    "fluid.ConcretePowderBlockMixin",
+    "fluid.CoralParentBlockMixin",
+    "fluid.DrownedEntityMixin",
+    "fluid.EndermanEntityMixin",
+    "fluid.EntityMixin",
+    "fluid.ExperienceOrbEntityMixin",
+    "fluid.FallingBlockEntityMixin",
+    "fluid.FarmlandBlockMixin",
+    "fluid.GuardianEntityMixin",
+    "fluid.KelpBlockMixin",
+    "fluid.LivingEntityMixin",
+    "fluid.PlayerEntityMixin",
+    "fluid.RespawnAnchorBlockMixin",
+    "fluid.SeagrassBlockMixin",
+    "fluid.SkeletonHorseEntityMixin",
+    "fluid.SpongeBlockMixin",
+    "fluid.SpreadableBlockMixin",
+    "fluid.SugarCaneBlockMixin",
+    "fluid.TropicalFishEntityMixin",
+    "fluid.TurtleEntityMixin",
+    "fluid.WaterCreatureEntityMixin",
+    "fluid.WitchEntityMixin",
+    "fluid.ZombieEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }
