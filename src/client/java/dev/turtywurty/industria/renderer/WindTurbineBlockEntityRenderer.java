@@ -32,7 +32,10 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
         matrices.translate(0.5f, 0, 0.5f);
 
         Direction facing = entity.getCachedState().get(Properties.HORIZONTAL_FACING);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f + facing.getHorizontal() * 90f));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(facing.asRotation()));
+        if (facing == Direction.NORTH || facing == Direction.SOUTH) {
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        }
 
         float outputPercentage = getEnergyPerTickPercent(entity);
         entity.setPropellerRotation(entity.getPropellerRotation() + (outputPercentage * 0.25f));
