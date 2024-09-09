@@ -53,6 +53,7 @@ public class Industria implements ModInitializer {
         ItemGroupInit.init();
         BiomeModificationInit.init();
         FluidInit.init();
+        AttachmentTypeInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 

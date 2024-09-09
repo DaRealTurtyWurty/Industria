@@ -44,6 +44,10 @@ public class BlockEntityTypeInit {
             BlockEntityType.Builder.create(WindTurbineBlockEntity::new, BlockInit.WIND_TURBINE)
                     .build());
 
+    public static final BlockEntityType<OilPumpJackBlockEntity> OIL_PUMP_JACK = register("oil_pump_jack",
+            BlockEntityType.Builder.create(OilPumpJackBlockEntity::new, BlockInit.OIL_PUMP_JACK)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

@@ -45,6 +45,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, WindTurbineBlockEntity.TITLE, "Wind Turbine");
         translationBuilder.add(FluidInit.CRUDE_OIL_BLOCK, "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL_BUCKET, "Bucket of Crude Oil");
+        translationBuilder.add(BlockInit.OIL_PUMP_JACK, "Oil Pump Jack");
+        addText(translationBuilder, OilPumpJackBlockEntity.TITLE, "Oil Pump Jack");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

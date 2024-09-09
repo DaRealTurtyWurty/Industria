@@ -1,10 +1,8 @@
 {
 	"required": true,
-	"package": "dev.turtywurty.industria.mixin.client",
+	"package": "dev.turtywurty.industria.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"client": [
-
-	],
+	"client": [],
 	"injectors": {
 		"defaultRequire": 1
 	}

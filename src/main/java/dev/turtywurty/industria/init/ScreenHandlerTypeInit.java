@@ -4,8 +4,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.*;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
@@ -35,6 +33,9 @@ public class ScreenHandlerTypeInit {
 
     public static final ScreenHandlerType<WindTurbineScreenHandler> WIND_TURBINE =
             register("wind_turbine", WindTurbineScreenHandler::new, BlockPosPayload.CODEC);
+
+    public static final ScreenHandlerType<OilPumpJackScreenHandler> OIL_PUMP_JACK =
+            register("oil_pump_jack", OilPumpJackScreenHandler::new, BlockPosPayload.CODEC);
 
     public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
         return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));
