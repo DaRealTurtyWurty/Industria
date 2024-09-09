@@ -14,7 +14,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
 public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPumpJackBlockEntity> {
@@ -22,11 +21,13 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
 
     private final BlockEntityRendererFactory.Context context;
     private final OilPumpJackModel model;
+    private final OilPumpJackModel.Parts parts;
 
     public OilPumpJackBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         this.context = context;
 
         this.model = new OilPumpJackModel(context.getLayerModelPart(OilPumpJackModel.LAYER_LOCATION));
+        this.parts = this.model.getParts();
     }
 
     @Override
@@ -48,86 +49,85 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
 
         entity.clientRotation = clientRotation;
 
-        OilPumpJackModel.Parts parts = this.model.getParts();
+        // Save previous values
         float previousWheelPitch = parts.wheel().pitch;
         float previousCounterWeightsPitch = parts.counterWeights().pitch;
         float previousPitmanArmPitch = parts.pitmanArm().pitch;
         float previousArmPitch = parts.arm().pitch;
 
+        Vector3f attachmentAPosition = getAttachmentPosition(parts.attachmentA());
+        Vector3f attachmentBPosition = getAttachmentPosition(parts.attachmentB());
+
+        Vector3f attachmentCPosition = getAttachmentPosition(parts.attachmentC())
+                .add(1, 1, 1)
+                .div(16f);
+
+        Vector3f attachmentDPosition = getAttachmentPosition(parts.attachmentD())
+                .add(1, 1, 1)
+                .div(16f);
+
+        Vector3f attachmentEPosition = getAttachmentPosition(parts.attachmentE());
+
         parts.wheel().pitch = -clientRotation;
-
-        // This is a bit of a hack to get the counter weights to move with the wheel
-        parts.counterWeights().pitch = entity.reverseCounterWeights ?
-                map(clientRotation, 0, (float) Math.PI * 2f, -0.5f, (float) Math.PI / 2f) :
-                map(clientRotation, 0, (float) Math.PI * 2f, (float) Math.PI / 2f, -0.5f);
-
-        // keep at a constant position on the arm
+        parts.counterWeights().pitch = -parts.wheel().pitch;
         parts.pitmanArm().pitch = -parts.counterWeights().pitch + (entity.reverseCounterWeights ?
                 map(clientRotation, 0, (float) Math.PI * 2f, 0, (float) -Math.PI / 8f) :
                 map(clientRotation, 0, (float) Math.PI * 2f, (float) -Math.PI / 8f, 0));
 
-        ModelPart attachmentAPart = parts.attachmentA();
-        ModelPart.Cuboid attachmentACuboid = attachmentAPart.getRandomCuboid(this.context.getTextRenderer().random);
-        Vec3d attachmentAPosition = new Vec3d(attachmentACuboid.minX, attachmentACuboid.minY, attachmentACuboid.minZ);
+        // Calculate arm pitch
+        calculateArmPitch(attachmentAPosition, attachmentBPosition);
 
-        double a = 11 * Math.sin(parts.counterWeights().pitch);
-        double b = 11 * Math.cos(parts.counterWeights().pitch);
-        attachmentAPosition = attachmentAPosition.add(0, a, -b);
+        // Draw bridle
+        drawBridle(matrices, vertexConsumers, attachmentBPosition, attachmentCPosition, attachmentDPosition);
 
-        double pitch = Math.toDegrees(parts.counterWeights().pitch + parts.pitmanArm().pitch);
-        double angle = Math.toRadians(Math.abs(90 - pitch));
-        double x = 44 * Math.cos(angle);
-        double y = 44 * Math.sin(angle);
-        attachmentAPosition = attachmentAPosition.add(0, y, x);
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION));
+        this.model.render(matrices, vertexConsumer, light, overlay);
+        matrices.pop();
 
-        attachmentAPosition = attachmentAPosition.add(15.5, 13, 0);
+        // Reset values
+        parts.wheel().pitch = previousWheelPitch;
+        parts.counterWeights().pitch = previousCounterWeightsPitch;
+        parts.pitmanArm().pitch = previousPitmanArmPitch;
+        parts.arm().pitch = previousArmPitch;
+    }
 
-        ModelPart attachmentBPart = parts.attachmentB();
-        ModelPart.Cuboid attachmentBCuboid = attachmentBPart.getRandomCuboid(this.context.getTextRenderer().random);
-        Vec3d attachmentBPosition = new Vec3d(attachmentBCuboid.minX, attachmentBCuboid.minY, attachmentBCuboid.minZ);
-
-        Vec3d difference = attachmentAPosition.subtract(attachmentBPosition);
-        double angleX = Math.atan2(difference.y, Math.sqrt(difference.x * difference.x + difference.z * difference.z));
-        parts.arm().pitch = (float) -angleX;
-
-        ModelPart attachmentCPart = parts.attachmentC();
-        ModelPart.Cuboid attachmentCCuboid = attachmentCPart.getRandomCuboid(this.context.getTextRenderer().random);
-        Vector3f attachmentCPosition = new Vector3f(attachmentCCuboid.minX, attachmentCCuboid.minY, attachmentCCuboid.minZ)
-                .add(1, 1, 1)
-                .div(16f);
-
-        // attachment c should rotate with the arm
-        float length = (float) Math.sqrt(difference.x * difference.x + difference.y * difference.y + difference.z * difference.z);
-        float height = (float) Math.sqrt(difference.y * difference.y + difference.z * difference.z);
-
-        ModelPart attachmentDPart = parts.attachmentD();
-        ModelPart.Cuboid attachmentDCuboid = attachmentDPart.getRandomCuboid(this.context.getTextRenderer().random);
-        Vector3f attachmentDPosition = new Vector3f(attachmentDCuboid.minX, attachmentDCuboid.minY, attachmentDCuboid.minZ)
-                .add(1, 1, 1)
-                .div(16f);
-
+    private void drawBridle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vector3f attachmentBPosition, Vector3f attachmentCPosition, Vector3f attachmentDPosition) {
         matrices.push();
         matrices.translate((attachmentBPosition.x - attachmentCPosition.x) / 16f, (attachmentBPosition.y - attachmentCPosition.y) / 16f, (attachmentBPosition.z - attachmentCPosition.z) / 16f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotation(parts.arm().pitch));
         matrices.translate((attachmentCPosition.x - attachmentBPosition.x) / 16f, (attachmentCPosition.y - attachmentBPosition.y) / 16f, (attachmentCPosition.z - attachmentBPosition.z) / 16f);
         VertexConsumer linesConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
         linesConsumer.vertex(matrices.peek(), attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
-                .color(255, 0, 0, 255)
+                .color(20, 20, 20, 255)
                 .normal(0, 0, 0);
         matrices.pop();
 
         linesConsumer.vertex(matrices.peek(), attachmentDPosition.x, attachmentDPosition.y, attachmentDPosition.z)
-                .color(255, 0, 0, 255)
+                .color(20, 20, 20, 255)
                 .normal(0, 0, 0);
+    }
 
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION));
-        this.model.render(matrices, vertexConsumer, light, overlay);
+    private void calculateArmPitch(Vector3f attachmentAPosition, Vector3f attachmentBPosition) {
+        float a = (float) (11 * Math.sin(parts.counterWeights().pitch));
+        float b = (float) (11 * Math.cos(parts.counterWeights().pitch));
+        attachmentAPosition = attachmentAPosition.add(0, a, -b);
 
-        parts.wheel().pitch = previousWheelPitch;
-        parts.counterWeights().pitch = previousCounterWeightsPitch;
-        parts.pitmanArm().pitch = previousPitmanArmPitch;
-        parts.arm().pitch = previousArmPitch;
-        matrices.pop();
+        double pitch = Math.toDegrees(parts.counterWeights().pitch + parts.pitmanArm().pitch);
+        double angle = Math.toRadians(Math.abs(90 - pitch));
+        float c = (float) (44 * Math.cos(angle));
+        float d = (float) (44 * Math.sin(angle));
+        attachmentAPosition = attachmentAPosition.add(0, d, c);
+
+        attachmentAPosition = attachmentAPosition.add(15.5f, 13, 0);
+
+        Vector3f difference = attachmentAPosition.sub(attachmentBPosition);
+        float angleX = (float) Math.atan2(difference.y, Math.sqrt(difference.x * difference.x + difference.z * difference.z));
+        parts.arm().pitch = -angleX;
+    }
+
+    private static Vector3f getAttachmentPosition(ModelPart part) {
+        ModelPart.Cuboid cuboid = part.cuboids.getFirst();
+        return new Vector3f(cuboid.minX, cuboid.minY, cuboid.minZ);
     }
 
     public static float map(float value, float fromStart, float fromEnd, float toStart, float toEnd) {

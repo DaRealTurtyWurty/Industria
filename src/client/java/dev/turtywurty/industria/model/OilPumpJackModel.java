@@ -1,7 +1,3 @@
-// Made with Blockbench 4.10.4
-// Exported for Minecraft version 1.17+ for Yarn
-// Paste this class into your mod and generate all required imports
-
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
@@ -31,10 +27,8 @@ public class OilPumpJackModel extends Model {
     private final ModelPart bone19;
     private final ModelPart bone20;
     private final ModelPart pitmanArm;
-    private final ModelPart arm;
-    private final ModelPart head;
-    private final ModelPart beam;
-    private final ModelPart bone37;
+    private final ModelPart pitmanArmLeftPivot;
+    private final ModelPart pitmanArmRightPivot;
     private final ModelPart staticParts;
     private final ModelPart supports;
     private final ModelPart bone28;
@@ -75,10 +69,15 @@ public class OilPumpJackModel extends Model {
     private final ModelPart bone4;
     private final ModelPart bone6;
     private final ModelPart bone8;
+    private final ModelPart arm;
+    private final ModelPart head;
+    private final ModelPart beam;
+    private final ModelPart bone37;
     private final ModelPart attachmentA;
     private final ModelPart attachmentB;
     private final ModelPart attachmentC;
     private final ModelPart attachmentD;
+    private final ModelPart attachmentE;
 
     private final Parts parts;
 
@@ -102,6 +101,8 @@ public class OilPumpJackModel extends Model {
         this.bone19 = rightCounterWeight.getChild("bone19");
         this.bone20 = rightCounterWeight.getChild("bone20");
         this.pitmanArm = counterWeights.getChild("pitmanArm");
+        this.pitmanArmLeftPivot = pitmanArm.getChild("pitmanArmLeftPivot");
+        this.pitmanArmRightPivot = pitmanArm.getChild("pitmanArmRightPivot");
         this.staticParts = main.getChild("staticParts");
         this.supports = staticParts.getChild("supports");
         this.bone28 = supports.getChild("bone28");
@@ -150,14 +151,16 @@ public class OilPumpJackModel extends Model {
         this.attachmentB = main.getChild("attachmentB");
         this.attachmentC = main.getChild("attachmentC");
         this.attachmentD = main.getChild("attachmentD");
+        this.attachmentE = main.getChild("attachmentE");
 
         this.attachmentA.hidden = true;
         this.attachmentB.hidden = true;
         this.attachmentC.hidden = true;
         this.attachmentD.hidden = true;
+        this.attachmentE.hidden = true;
 
         this.parts = new Parts(this.main, this.wheel, this.counterWeights, this.pitmanArm, this.arm,
-                this.attachmentA, this.attachmentB, this.attachmentC, this.attachmentD);
+                this.attachmentA, this.attachmentB, this.attachmentC, this.attachmentD, this.attachmentE);
     }
 
     public static TexturedModelData createMainLayer() {
@@ -170,8 +173,6 @@ public class OilPumpJackModel extends Model {
                 ModelTransform.pivot(0.0F, 42.0F, 24.0F));
 
         ModelPartData leftCounterWeight = counterWeights.addChild("leftCounterWeight", ModelPartBuilder.create()
-                        .uv(121, 220)
-                        .cuboid(6.0F, -3.0F, -14.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F))
                         .uv(17, 230)
                         .cuboid(0.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, new Dilation(0.0F))
                         .uv(242, 0)
@@ -225,9 +226,7 @@ public class OilPumpJackModel extends Model {
                         .uv(207, 19)
                         .cuboid(-6.0F, 19.0F, -22.4F, 2.0F, 1.027F, 6.4F, new Dilation(0.0F))
                         .uv(0, 230)
-                        .cuboid(-4.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, new Dilation(0.0F))
-                        .uv(68, 97)
-                        .cuboid(-8.0F, -3.0F, -14.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)),
+                        .cuboid(-4.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, new Dilation(0.0F)),
                 ModelTransform.pivot(-10.0F, 0.0F, 1.0F));
 
         ModelPartData bone15 = rightCounterWeight.addChild("bone15", ModelPartBuilder.create()
@@ -302,6 +301,16 @@ public class OilPumpJackModel extends Model {
                         .uv(0, 167)
                         .cuboid(-20.0F, 44.5F, 1.2222F, 2.0F, 6.0F, 2.0F, new Dilation(0.0F)),
                 ModelTransform.pivot(0.0F, 0.5F, -10.2222F));
+
+        ModelPartData pitmanArmLeftPivot = pitmanArm.addChild("pitmanArmLeftPivot", ModelPartBuilder.create()
+                        .uv(121, 220)
+                        .cuboid(0.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)),
+                ModelTransform.pivot(16.0F, -0.5F, 0.2222F));
+
+        ModelPartData pitmanArmRightPivot = pitmanArm.addChild("pitmanArmRightPivot", ModelPartBuilder.create()
+                        .uv(68, 97)
+                        .cuboid(-2.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)),
+                ModelTransform.pivot(-16.0F, -0.5F, 0.2222F));
 
         ModelPartData staticParts = main.addChild("staticParts", ModelPartBuilder.create(),
                 ModelTransform.pivot(0.0F, 0.0F, 0.0F));
@@ -666,6 +675,11 @@ public class OilPumpJackModel extends Model {
                         .cuboid(-1.0F, 0.0F, -87.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
                 ModelTransform.pivot(0.0F, 0.0F, 0.0F));
 
+        ModelPartData attachmentE = main.addChild("attachmentE", ModelPartBuilder.create()
+                        .uv(0, 0)
+                        .cuboid(-1.0F, 100.0F, 13.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
+                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+
         return TexturedModelData.of(modelData, 512, 512);
     }
 
@@ -679,6 +693,6 @@ public class OilPumpJackModel extends Model {
     }
 
     public record Parts(ModelPart main, ModelPart wheel, ModelPart counterWeights, ModelPart pitmanArm, ModelPart arm,
-                        ModelPart attachmentA, ModelPart attachmentB, ModelPart attachmentC, ModelPart attachmentD) {
+                        ModelPart attachmentA, ModelPart attachmentB, ModelPart attachmentC, ModelPart attachmentD, ModelPart attachmentE) {
     }
 }

@@ -8,3 +8,5 @@ accessible method net/minecraft/util/collection/DataPool <init> (Ljava/util/List
 accessible field net/minecraft/util/math/floatprovider/ClampedNormalFloatProvider mean F
 accessible field net/minecraft/util/math/floatprovider/ClampedNormalFloatProvider deviation F
 accessible field net/minecraft/util/math/floatprovider/TrapezoidFloatProvider plateau F
+accessible field net/minecraft/client/model/ModelPart children Ljava/util/Map;
+accessible field net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
