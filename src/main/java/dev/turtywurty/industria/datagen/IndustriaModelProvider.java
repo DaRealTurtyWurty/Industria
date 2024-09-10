@@ -8,14 +8,12 @@ import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-import net.minecraft.data.client.*;
-import net.minecraft.util.Identifier;
-
-import java.util.Optional;
+import net.minecraft.data.client.BlockStateModelGenerator;
+import net.minecraft.data.client.ItemModelGenerator;
+import net.minecraft.data.client.Models;
+import net.minecraft.data.client.TexturedModel;
 
 public class IndustriaModelProvider extends FabricModelProvider {
-    private static final Model BUILTIN_ENTITY = new Model(Optional.of(Identifier.ofVanilla("builtin/entity")), Optional.empty());
-
     public IndustriaModelProvider(FabricDataOutput output) {
         super(output);
     }

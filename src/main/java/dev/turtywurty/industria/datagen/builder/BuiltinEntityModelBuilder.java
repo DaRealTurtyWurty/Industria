@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.datagen.builder;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.data.client.ItemModelGenerator;
 import net.minecraft.data.client.ModelIds;
@@ -115,21 +116,31 @@ public class BuiltinEntityModelBuilder {
             var display = new JsonObject();
             for (DisplaySettings displaySetting : this.displaySettings) {
                 var displayObject = new JsonObject();
-                var rotation = new JsonObject();
-                rotation.addProperty("x", displaySetting.rotation.x);
-                rotation.addProperty("y", displaySetting.rotation.y);
-                rotation.addProperty("z", displaySetting.rotation.z);
-                displayObject.add("rotation", rotation);
-                var translation = new JsonObject();
-                translation.addProperty("x", displaySetting.translation.x);
-                translation.addProperty("y", displaySetting.translation.y);
-                translation.addProperty("z", displaySetting.translation.z);
-                displayObject.add("translation", translation);
-                var scale = new JsonObject();
-                scale.addProperty("x", displaySetting.scale.x);
-                scale.addProperty("y", displaySetting.scale.y);
-                scale.addProperty("z", displaySetting.scale.z);
-                displayObject.add("scale", scale);
+
+                if(displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0 || displaySetting.rotation.z != 0) {
+                    var rotation = new JsonArray();
+                    rotation.add(displaySetting.rotation.x);
+                    rotation.add(displaySetting.rotation.y);
+                    rotation.add(displaySetting.rotation.z);
+                    displayObject.add("rotation", rotation);
+                }
+
+                if(displaySetting.translation.x != 0 || displaySetting.translation.y != 0 || displaySetting.translation.z != 0) {
+                    var translation = new JsonArray();
+                    translation.add(displaySetting.translation.x);
+                    translation.add(displaySetting.translation.y);
+                    translation.add(displaySetting.translation.z);
+                    displayObject.add("translation", translation);
+                }
+
+                if(displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
+                    var scale = new JsonArray();
+                    scale.add(displaySetting.scale.x);
+                    scale.add(displaySetting.scale.y);
+                    scale.add(displaySetting.scale.z);
+                    displayObject.add("scale", scale);
+                }
+
                 display.add(displaySetting.name, displayObject);
             }
 
