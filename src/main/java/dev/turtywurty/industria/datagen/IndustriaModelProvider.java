@@ -36,8 +36,17 @@ public class IndustriaModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock());
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.OIL_PUMP_JACK, BuiltinEntityModelBuilder.defaultBlock());
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
+                .copyModifyGui(displaySettings -> {
+                    displaySettings.setTranslation(-2.5f, -2.5f, 0);
+                    displaySettings.setScale(0.5f, 0.5f, 0.5f);
+                }));
+
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.OIL_PUMP_JACK, BuiltinEntityModelBuilder.defaultBlock()
+                .copyModifyGui(displaySettings -> {
+                    displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                    displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                }));
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

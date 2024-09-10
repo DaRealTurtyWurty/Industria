@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class BuiltinEntityModelBuilder {
     private static final DefaultDisplaySettingsBuilder DEFAULT_ITEM = new DefaultDisplaySettingsBuilder()
@@ -61,7 +62,6 @@ public class BuiltinEntityModelBuilder {
                     .rotation(30, 225, 0)
                     .translation(0, 0, 0)
                     .scale(0.625f));
-
 
     private static final DefaultDisplaySettingsBuilder DEFAULT_WEAPON = new DefaultDisplaySettingsBuilder()
             .thirdPersonRightHand(new DisplaySettings.Builder()
@@ -225,6 +225,76 @@ public class BuiltinEntityModelBuilder {
             return addDisplaySettings("fixed", builder);
         }
 
+        public DefaultDisplaySettingsBuilder copy() {
+            var builder = new DefaultDisplaySettingsBuilder();
+            for (Map.Entry<String, DisplaySettings> displaySettingsEntry : this.displaySettings.entrySet()) {
+                builder.displaySettings.put(displaySettingsEntry.getKey(), displaySettingsEntry.getValue().copy());
+            }
+
+            return builder;
+        }
+
+        public DefaultDisplaySettingsBuilder copyModify(String name, Consumer<DisplaySettings> modifier) {
+            DefaultDisplaySettingsBuilder copy = copy();
+            DisplaySettings settings = copy.displaySettings.get(name);
+            if (settings == null) {
+                settings = new DisplaySettings(name);
+            }
+
+            modifier.accept(settings);
+            copy.displaySettings.put(name, settings);
+            return copy;
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyThirdPersonRightHand(Consumer<DisplaySettings> modifier) {
+            return copyModify("thirdperson_righthand", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyThirdPersonLeftHand(Consumer<DisplaySettings> modifier) {
+            return copyModify("thirdperson_lefthand", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyThirdPersonBothHands(Consumer<DisplaySettings> modifier) {
+            return copyModifyThirdPersonRightHand(modifier).copyModifyThirdPersonLeftHand(modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyFirstPersonRightHand(Consumer<DisplaySettings> modifier) {
+            return copyModify("firstperson_righthand", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyFirstPersonLeftHand(Consumer<DisplaySettings> modifier) {
+            return copyModify("firstperson_lefthand", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyFirstPersonBothHands(Consumer<DisplaySettings> modifier) {
+            return copyModifyFirstPersonRightHand(modifier).copyModifyFirstPersonLeftHand(modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyGround(Consumer<DisplaySettings> modifier) {
+            return copyModify("ground", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyGui(Consumer<DisplaySettings> modifier) {
+            return copyModify("gui", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyHead(Consumer<DisplaySettings> modifier) {
+            return copyModify("head", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyFixed(Consumer<DisplaySettings> modifier) {
+            return copyModify("fixed", modifier);
+        }
+
+        public DefaultDisplaySettingsBuilder copyModifyAll(Consumer<DisplaySettings> modifier) {
+            return copyModifyThirdPersonBothHands(modifier)
+                    .copyModifyFirstPersonBothHands(modifier)
+                    .copyModifyGround(modifier)
+                    .copyModifyGui(modifier)
+                    .copyModifyHead(modifier)
+                    .copyModifyFixed(modifier);
+        }
+
         public Map<String, DisplaySettings> build() {
             return this.displaySettings;
         }
@@ -294,6 +364,22 @@ public class BuiltinEntityModelBuilder {
 
         public void setScale(float x, float y, float z) {
             this.scale.set(x, y, z);
+        }
+
+        public void translate(float x, float y, float z) {
+            this.translation.add(x, y, z);
+        }
+
+        public void rotate(float x, float y, float z) {
+            this.rotation.add(x, y, z);
+        }
+
+        public void scale(float x, float y, float z) {
+            this.scale.mul(x, y, z);
+        }
+
+        public DisplaySettings copy() {
+            return new DisplaySettings(this.name, new Vector3f(this.rotation), new Vector3f(this.translation), new Vector3f(this.scale));
         }
 
         public static class Builder {
