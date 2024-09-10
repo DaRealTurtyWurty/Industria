@@ -1,4 +1,4 @@
-// 1.21.1	2024-09-05T23:52:58.004933	Industria/Model Definitions
+// 1.21.1	2024-09-10T14:23:07.0654167	Industria/Model Definitions
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
 9b7b8d1502bef5034a6336cd56ba343481938a31 assets\industria\blockstates\ultimate_battery.json
 790708a98fef9903d9e0d349a1aa94d3b3f35385 assets\industria\models\block\combustion_generator_on.json
@@ -14,10 +14,12 @@ e6a9eff6b8b16b733d3e3b1ab81f6616d7abdeac assets\industria\models\block\basic_bat
 bcceaaff57ab461b27a34bc508d002083ea8e065 assets\industria\blockstates\crude_oil.json
 97290a9e7e9da6f407650a35dd7152368f36faf7 assets\industria\models\item\elite_battery.json
 6c30c83f1dca2dbc73183fed44842a0d701ce5b6 assets\industria\models\item\combustion_generator.json
+b3e6578e892f814c5c15f935de5779c4df361e9f assets\industria\models\item\wind_turbine.json
 0ddf2cb26938e3b140c85bc129c8bf7db4351f2a assets\industria\models\block\thermal_generator.json
 7d2f0c626990d3673f6cb9f1c9d3cc22a8a8b2e6 assets\industria\blockstates\solar_panel.json
 0d0686d0e4f6c8934e58f1285dfa68675546d239 assets\industria\models\block\advanced_battery_horizontal.json
 f55f28ae9a7303b92bff526da20a2c8f7c35ab00 assets\industria\blockstates\basic_battery.json
+b3e6578e892f814c5c15f935de5779c4df361e9f assets\industria\models\item\oil_pump_jack.json
 04d649b4db32fa679095818f32f1a1046fc9e7fd assets\industria\models\item\creative_battery.json
 00283c1037827efb29722f68c8a0cf2a0fc225f9 assets\industria\models\item\solar_panel.json
 67fab225d0aa9a4524017c337511b3018ddffaaa assets\industria\models\item\advanced_battery.json

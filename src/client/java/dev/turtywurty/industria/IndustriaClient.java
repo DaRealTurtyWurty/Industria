@@ -1,12 +1,14 @@
 package dev.turtywurty.industria;
 
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.model.CrusherModel;
 import dev.turtywurty.industria.model.OilPumpJackModel;
 import dev.turtywurty.industria.model.WindTurbineModel;
 import dev.turtywurty.industria.renderer.CrusherBlockEntityRenderer;
+import dev.turtywurty.industria.renderer.IndustriaDynamicItemRenderer;
 import dev.turtywurty.industria.renderer.OilPumpJackBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.WindTurbineBlockEntityRenderer;
 import dev.turtywurty.industria.screen.*;
@@ -14,6 +16,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
@@ -41,6 +44,10 @@ public class IndustriaClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(BlockEntityTypeInit.OIL_PUMP_JACK, OilPumpJackBlockEntityRenderer::new);
+
+		// Registering BuiltinModelItemRenderers
+		BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);
+		BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.OIL_PUMP_JACK, IndustriaDynamicItemRenderer.INSTANCE);
 
 		// Register Fluid Renderers
 		FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
