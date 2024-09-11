@@ -5,10 +5,14 @@ import dev.turtywurty.industria.fluid.FluidData;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
+import dev.turtywurty.industria.init.worldgen.FeatureInit;
 import dev.turtywurty.industria.network.BatteryChargeModePayload;
+import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
+import dev.turtywurty.industria.network.SyncFluidMapPayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -16,6 +20,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -26,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.reborn.energy.api.EnergyStorage;
+
+import java.util.Map;
 
 public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
@@ -52,6 +59,7 @@ public class Industria implements ModInitializer {
         RecipeSerializerInit.init();
         ItemGroupInit.init();
         BiomeModificationInit.init();
+        FeatureInit.init();
         FluidInit.init();
         AttachmentTypeInit.init();
 
@@ -81,6 +89,8 @@ public class Industria implements ModInitializer {
 
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SyncFluidMapPayload.ID, SyncFluidMapPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -91,6 +101,16 @@ public class Industria implements ModInitializer {
                         batteryScreenHandler.getBlockEntity().setChargeMode(payload.chargeMode());
                     }
                 }));
+
+        ServerChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
+            Map<String, FluidState> fluidMap = chunk.getAttached(AttachmentTypeInit.FLUID_MAP_ATTACHMENT);
+            if(fluidMap == null || fluidMap.isEmpty())
+                return;
+
+            for (ServerPlayerEntity player : world.getPlayers()) {
+                ServerPlayNetworking.send(player, new SyncFluidMapPayload(chunk.getPos().getStartPos(), fluidMap));
+            }
+        });
 
         // Fluid Properties
         var crudeOilAttributes = new FluidVariantAttributeHandler() {

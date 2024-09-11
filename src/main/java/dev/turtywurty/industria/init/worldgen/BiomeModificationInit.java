@@ -1,5 +1,14 @@
 package dev.turtywurty.industria.init.worldgen;
 
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.gen.GenerationStep;
+
 public class BiomeModificationInit {
-    public static void init() {}
+    public static void init() {
+        BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.DESERT),
+                GenerationStep.Feature.FLUID_SPRINGS,
+                PlacedFeatureInit.CRUDE_OIL_POCKET);
+    }
 }

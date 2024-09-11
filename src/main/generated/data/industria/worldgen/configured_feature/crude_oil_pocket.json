@@ -1,0 +1,26 @@
+{
+  "type": "industria:crude_oil_pocket",
+  "config": {
+    "depth": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 4,
+      "min_inclusive": 2
+    },
+    "fluid_state": {
+      "Name": "industria:crude_oil",
+      "Properties": {
+        "falling": "true",
+        "level": "1"
+      }
+    },
+    "radius": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 6,
+      "min_inclusive": 4
+    },
+    "replaceable": {
+      "predicate_type": "minecraft:tag_match",
+      "tag": "minecraft:stone_ore_replaceables"
+    }
+  }
+}

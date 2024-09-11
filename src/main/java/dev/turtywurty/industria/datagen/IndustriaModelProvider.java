@@ -36,6 +36,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
+
         BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
                     displaySettings.setTranslation(-2.5f, -2.5f, 0);
@@ -47,6 +48,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
                     displaySettings.setTranslation(-1.5f, -2.75f, 0);
                     displaySettings.setScale(0.275f, 0.275f, 0.275f);
                 }));
+
+        itemModelGenerator.register(ItemInit.SEISMIC_SCANNER, Models.GENERATED);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

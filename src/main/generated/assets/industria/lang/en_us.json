@@ -23,6 +23,7 @@
   "container.industria.wind_turbine": "Wind Turbine",
   "gui.industria.battery.charge_mode_button.tooltip": "Charge/Discharge",
   "item.industria.crude_oil_bucket": "Bucket of Crude Oil",
+  "item.industria.seismic_scanner": "Seismic Scanner",
   "item.industria.steel_ingot": "Steel Ingot",
   "itemGroup.industria.main": "Industria"
 }

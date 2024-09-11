@@ -6,6 +6,7 @@ import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.gen.YOffset;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.PlacedFeature;
 import net.minecraft.world.gen.placementmodifier.*;
@@ -13,8 +14,14 @@ import net.minecraft.world.gen.placementmodifier.*;
 import java.util.List;
 
 public class PlacedFeatureInit {
+    public static final RegistryKey<PlacedFeature> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
+
     public static void bootstrap(Registerable<PlacedFeature> context) {
         RegistryEntryLookup<ConfiguredFeature<?, ?>> registryLookup = context.getRegistryLookup(RegistryKeys.CONFIGURED_FEATURE);
+
+        register(context, CRUDE_OIL_POCKET, registryLookup.getOrThrow(ConfiguredFeatureInit.CRUDE_OIL_POCKET),
+                Modifiers.modifiersCount(1,
+                        HeightRangePlacementModifier.uniform(YOffset.fixed(0), YOffset.fixed(64))));
     }
 
     private static RegistryKey<PlacedFeature> registerKey(String name) {

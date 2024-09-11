@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.Industria;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Map;
@@ -13,6 +14,10 @@ public class AttachmentTypeInit {
     public static final AttachmentType<Map<String, BlockPos>> OIL_PUMP_JACK_ATTACHMENT =
             AttachmentRegistry.createPersistent(Industria.id("oil_pump_jack_primary_pos"),
                     Codec.unboundedMap(Codec.STRING, BlockPos.CODEC));
+
+    public static final AttachmentType<Map<String, FluidState>> FLUID_MAP_ATTACHMENT =
+            AttachmentRegistry.createPersistent(Industria.id("fluid_map"),
+                    Codec.unboundedMap(Codec.STRING, FluidState.CODEC));
 
     public static void init() {}
 }
