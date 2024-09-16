@@ -8,22 +8,24 @@ import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.init.worldgen.FeatureInit;
 import dev.turtywurty.industria.network.BatteryChargeModePayload;
 import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
-import dev.turtywurty.industria.network.SyncFluidMapPayload;
+import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
+import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -31,8 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.reborn.energy.api.EnergyStorage;
-
-import java.util.Map;
 
 public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
@@ -62,6 +62,8 @@ public class Industria implements ModInitializer {
         FeatureInit.init();
         FluidInit.init();
         AttachmentTypeInit.init();
+        PositionSourceTypeInit.init();
+        ComponentTypeInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
@@ -90,7 +92,7 @@ public class Industria implements ModInitializer {
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncFluidMapPayload.ID, SyncFluidMapPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SyncFluidPocketsPayload.ID, SyncFluidPocketsPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -102,13 +104,17 @@ public class Industria implements ModInitializer {
                     }
                 }));
 
-        ServerChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
-            Map<String, FluidState> fluidMap = chunk.getAttached(AttachmentTypeInit.FLUID_MAP_ATTACHMENT);
-            if(fluidMap == null || fluidMap.isEmpty())
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld()));
+        });
+
+        PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
+            if (!(world instanceof ServerWorld serverWorld))
                 return;
 
-            for (ServerPlayerEntity player : world.getPlayers()) {
-                ServerPlayNetworking.send(player, new SyncFluidMapPayload(chunk.getPos().getStartPos(), fluidMap));
+            WorldFluidPocketsState serverState = WorldFluidPocketsState.getServerState(serverWorld);
+            if (serverState.removePosition(pos)) {
+                WorldFluidPocketsState.sync(serverWorld);
             }
         });
 

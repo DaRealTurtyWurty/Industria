@@ -1,4 +1,4 @@
-// 1.21.1	2024-09-11T17:09:16.0000867	Industria/Model Definitions
+// 1.21.1	2024-09-16T12:30:50.4725096	Industria/Model Definitions
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
 9b7b8d1502bef5034a6336cd56ba343481938a31 assets\industria\blockstates\ultimate_battery.json
 790708a98fef9903d9e0d349a1aa94d3b3f35385 assets\industria\models\block\combustion_generator_on.json
@@ -36,5 +36,5 @@ ffe7c89704cf4d0e807c7d34d8b5b540d816e52a assets\industria\models\block\ultimate_
 2bb2272be8f645a1664ff1d027f72795896ae49f assets\industria\models\item\basic_battery.json
 ea1705797fd3a9fa12f1370ced2cd5f057703915 assets\industria\models\block\basic_battery_horizontal.json
 7cbd660ceb9846a2c7bcf6112655e61c01973a56 assets\industria\models\block\alloy_furnace_on.json
-d51664555a53e551bf27aee90cfb0c259478dce4 assets\industria\models\item\seismic_scanner.json
+214e86ce749d4bfa236717e2b4f6d0cf0a12208e assets\industria\models\item\seismic_scanner.json
 73dd9505b2926684f8e64536ce7d519b2309a856 assets\industria\blockstates\alloy_furnace.json

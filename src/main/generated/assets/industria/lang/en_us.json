@@ -25,5 +25,6 @@
   "item.industria.crude_oil_bucket": "Bucket of Crude Oil",
   "item.industria.seismic_scanner": "Seismic Scanner",
   "item.industria.steel_ingot": "Steel Ingot",
-  "itemGroup.industria.main": "Industria"
+  "itemGroup.industria.main": "Industria",
+  "screen.industria.seismic_scanner": "Seismic Scanner"
 }

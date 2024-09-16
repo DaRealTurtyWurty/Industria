@@ -5,6 +5,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemGroupInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.item.SeismicScannerItem;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.registry.RegistryWrapper;
@@ -48,6 +49,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.OIL_PUMP_JACK, "Oil Pump Jack");
         addText(translationBuilder, OilPumpJackBlockEntity.TITLE, "Oil Pump Jack");
         translationBuilder.add(ItemInit.SEISMIC_SCANNER, "Seismic Scanner");
+        addText(translationBuilder, SeismicScannerItem.TITLE, "Seismic Scanner");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

@@ -1,14 +1,12 @@
 package dev.turtywurty.industria;
 
-import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.FluidInit;
-import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
+import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.model.CrusherModel;
 import dev.turtywurty.industria.model.OilPumpJackModel;
 import dev.turtywurty.industria.model.WindTurbineModel;
 import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
-import dev.turtywurty.industria.network.SyncFluidMapPayload;
+import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
+import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.renderer.CrusherBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.IndustriaDynamicItemRenderer;
 import dev.turtywurty.industria.renderer.OilPumpJackBlockEntityRenderer;
@@ -16,41 +14,38 @@ import dev.turtywurty.industria.renderer.WindTurbineBlockEntityRenderer;
 import dev.turtywurty.industria.screen.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.ParticleUtil;
-import net.minecraft.text.Text;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import org.gradle.tooling.GradleConnectionException;
-import org.gradle.tooling.GradleConnector;
-import org.gradle.tooling.ProjectConnection;
-import org.gradle.tooling.ResultHandler;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class IndustriaClient implements ClientModInitializer {
-    private static final Map<ChunkPos, Map<BlockPos, FluidState>> FLUID_MAP = new HashMap<>();
+    private static final Map<RegistryKey<World>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
+
+    public static final Identifier SEISMIC_SCANNER = Industria.id("item/seismic_scanner_model");
 
     @Override
     public void onInitializeClient() {
@@ -77,6 +72,7 @@ public class IndustriaClient implements ClientModInitializer {
         // Registering BuiltinModelItemRenderers
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.OIL_PUMP_JACK, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SEISMIC_SCANNER, IndustriaDynamicItemRenderer.INSTANCE);
 
         // Register Fluid Renderers
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
@@ -90,19 +86,9 @@ public class IndustriaClient implements ClientModInitializer {
                 context.client().execute(() ->
                         context.client().setScreen(new SeismicScannerScreen(payload.stack()))));
 
-        ClientPlayNetworking.registerGlobalReceiver(SyncFluidMapPayload.ID, (payload, context) -> {
-            var chunkPos = new ChunkPos(payload.pos());
-            var fluidMap = new HashMap<BlockPos, FluidState>();
-            payload.fluidMap().forEach((posStr, state) -> {
-                String[] posArr = posStr.split(",");
-                var pos = new BlockPos(Integer.parseInt(posArr[0].strip()),
-                        Integer.parseInt(posArr[1].strip()),
-                        Integer.parseInt(posArr[2].strip()));
-
-                fluidMap.put(pos, state);
-            });
-
-            FLUID_MAP.put(chunkPos, fluidMap);
+        ClientPlayNetworking.registerGlobalReceiver(SyncFluidPocketsPayload.ID, (payload, context) -> {
+            RegistryKey<World> worldKey = context.player().getEntityWorld().getRegistryKey();
+            FLUID_POCKETS.put(worldKey, payload.fluidPockets());
         });
 
         // Client Commands
@@ -113,12 +99,10 @@ public class IndustriaClient implements ClientModInitializer {
             if (player == null)
                 return;
 
-            List<ChunkPos> nearbyChunks = new ArrayList<>();
-            for (int x = -1; x <= 1; x++) {
-                for (int z = -1; z <= 1; z++) {
-                    nearbyChunks.add(new ChunkPos(player.getBlockPos().add(x * 16, 0, z * 16)));
-                }
-            }
+            List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getEntityWorld().getRegistryKey())
+                    .stream()
+                    .filter(fluidPocket -> fluidPocket.isWithinDistance(player.getBlockPos(), 64))
+                    .toList();
 
             MatrixStack matrixStack = context.matrixStack();
             if (matrixStack == null)
@@ -132,54 +116,31 @@ public class IndustriaClient implements ClientModInitializer {
             if (world == null)
                 return;
 
-            nearbyChunks.stream()
-                    .filter(FLUID_MAP::containsKey)
-                    .map(FLUID_MAP::get)
-                    .filter(map -> map != null && !map.isEmpty())
-                    .forEach(fluidMap -> {
-                        for (Map.Entry<BlockPos, FluidState> entry : fluidMap.entrySet()) {
-                            FluidState state = entry.getValue();
-                            if (state.isEmpty())
-                                continue;
+            for (WorldFluidPocketsState.FluidPocket pocket : nearbyFluidPockets) {
+                // TODO: Draw different colored particles based on fluid
 
-                            BlockPos pos = entry.getKey();
-                            ParticleUtil.spawnParticlesAround(world, pos, 1, ParticleTypes.DRIPPING_WATER);
-                        }
-                    });
+                for (BlockPos pos : pocket.fluidPositions()) {
+                    ParticleUtil.spawnParticlesAround(world, pos, 1, ParticleTypes.DRIPPING_WATER);
+                }
+            }
+        });
+
+        ModelLoadingPlugin.register(pluginContext -> {
+           pluginContext.addModels(SEISMIC_SCANNER);
         });
     }
 
-    private static void registerDevCommands() {
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
-                    ClientCommandManager.literal(Industria.MOD_ID).then(ClientCommandManager.literal("reload").executes(context -> {
-                        Industria.LOGGER.info("Reloading Industria...");
+    public static void updateHandPositions(LivingEntity entity, ModelPart leftArm, ModelPart rightArm) {
+        ItemStack stack = entity.getMainHandStack();
+        if(stack.isOf(ItemInit.SEISMIC_SCANNER)) {
+            leftArm.hidden = false;
+            rightArm.hidden = false;
 
-                        new Thread(() -> {
-                            var connector = GradleConnector.newConnector();
-                            connector.forProjectDirectory(FabricLoader.getInstance().getGameDir().getParent().toFile());
-                            try (ProjectConnection connection = connector.connect()) {
-                                connection.newBuild()
-                                        .forTasks("runDatagen", "build")
-                                        .run(new ResultHandler<>() {
-                                            @Override
-                                            public void onComplete(Void result) {
-                                                MinecraftClient.getInstance().execute(() ->
-                                                        MinecraftClient.getInstance().reloadResources().thenAccept(ignored ->
-                                                                context.getSource().sendFeedback(Text.literal("Reloaded Industria!"))));
-                                            }
+            leftArm.pitch = (float) Math.toRadians(-30F);
+            leftArm.yaw = (float) Math.toRadians(20F);
 
-                                            @Override
-                                            public void onFailure(GradleConnectionException failure) {
-                                                MinecraftClient.getInstance().execute(() ->
-                                                        context.getSource().sendError(Text.literal("Failed to reload Industria!")));
-                                            }
-                                        });
-                            }
-                        }).start();
-
-                        return 1;
-                    }))));
+            rightArm.pitch = (float) Math.toRadians(-30F);
+            rightArm.yaw = (float) Math.toRadians(-20F);
         }
     }
 }

@@ -49,7 +49,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
                     displaySettings.setScale(0.275f, 0.275f, 0.275f);
                 }));
 
-        itemModelGenerator.register(ItemInit.SEISMIC_SCANNER, Models.GENERATED);
+        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

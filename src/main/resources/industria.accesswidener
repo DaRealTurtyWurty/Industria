@@ -12,3 +12,4 @@ accessible field net/minecraft/client/model/ModelPart children Ljava/util/Map;
 accessible field net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
 accessible field net/minecraft/client/render/item/BuiltinModelItemRenderer blockEntityRenderDispatcher Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;
 accessible field net/minecraft/client/render/item/BuiltinModelItemRenderer entityModelLoader Lnet/minecraft/client/render/entity/model/EntityModelLoader;
+accessible method net/minecraft/client/render/item/ItemRenderer renderBakedItemModel (Lnet/minecraft/client/render/model/BakedModel;Lnet/minecraft/item/ItemStack;IILnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;)V

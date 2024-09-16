@@ -2,6 +2,7 @@ package dev.turtywurty.industria.datagen.builder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dev.turtywurty.industria.item.SeismicScannerItem;
 import net.minecraft.data.client.ItemModelGenerator;
 import net.minecraft.data.client.ModelIds;
 import net.minecraft.item.Item;
@@ -106,6 +107,10 @@ public class BuiltinEntityModelBuilder {
     private BuiltinEntityModelBuilder(Identifier id, ItemModelGenerator writer) {
         this.id = id;
         this.writer = writer;
+    }
+
+    public static void write(ItemModelGenerator itemModelGenerator, SeismicScannerItem seismicScanner) {
+        write(itemModelGenerator, seismicScanner, null);
     }
 
     private void write() {

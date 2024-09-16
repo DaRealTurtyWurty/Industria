@@ -1,25 +1,27 @@
 package dev.turtywurty.industria.worldgen.feature;
 
-import dev.turtywurty.industria.init.AttachmentTypeInit;
+import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.worldgen.config.FluidPocketConfig;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-@SuppressWarnings("UnstableApiUsage")
 public class FluidPocketFeature extends Feature<FluidPocketConfig> {
     public FluidPocketFeature() {
         super(FluidPocketConfig.CODEC);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean generate(FeatureContext<FluidPocketConfig> context) {
         BlockPos origin = context.getOrigin();
@@ -32,6 +34,18 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
         if(random.nextInt(100) < 50)
             return false;
 
+        ServerWorld serverWorld;
+        if(!(world instanceof ServerWorld)) {
+            if (world instanceof ChunkRegion) {
+                serverWorld = ((ChunkRegion) world).toServerWorld();
+            } else {
+                return false;
+            }
+        } else {
+            serverWorld = (ServerWorld) world;
+        }
+
+        Set<BlockPos> positions = new HashSet<>();
         // Define the base radius and depth of the pond
         int baseRadius = config.radius().get(random);
         int baseDepth = config.depth().get(random);
@@ -50,18 +64,15 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
                     BlockPos pos = origin.add(x, -y, z);
                     BlockState state = world.getBlockState(pos);
                     if (pos.isWithinDistance(origin, currentRadius) && !state.isAir() && config.replaceable().test(state, random)) {
-                        Chunk chunk = world.getChunk(pos);
-                        Map<String, FluidState> fluidMap = chunk.getAttachedOrSet(AttachmentTypeInit.FLUID_MAP_ATTACHMENT, new HashMap<>());
-                        if(fluidMap.containsKey(pos.toShortString()) && !fluidMap.get(pos.toShortString()).isEmpty())
-                            continue;
-
-                        Map<String, FluidState> copy = new HashMap<>(fluidMap);
-                        copy.put(pos.toShortString(), fluidState);
-                        chunk.setAttached(AttachmentTypeInit.FLUID_MAP_ATTACHMENT, copy);
+                        positions.add(pos);
                     }
                 }
             }
         }
+
+        var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, new ArrayList<>(positions));
+        WorldFluidPocketsState.getServerState(serverWorld).addFluidPocket(pocket);
+        WorldFluidPocketsState.sync(serverWorld);
 
         return true;
     }

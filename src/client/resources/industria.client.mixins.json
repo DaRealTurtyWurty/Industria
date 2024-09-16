@@ -1,10 +1,11 @@
 {
-	"required": true,
-	"package": "dev.turtywurty.industria.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"client": [
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "dev.turtywurty.industria.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BipedEntityModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }
