@@ -6,6 +6,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 
 public abstract class DefaultScreenElement extends ScreenElement {
     private static final Vec3d CENTER = new Vec3d(0.5, 0.5, 0.5);
@@ -71,7 +72,7 @@ public abstract class DefaultScreenElement extends ScreenElement {
         stack.translate(x, y, z);
         stack.scale((float) scale, (float) scale, (float) scale);
         stack.translate(localX, localY, localZ);
-        // stack.multiplyPositionMatrix(new Matrix4f().scaling(-1f));
+        stack.multiplyPositionMatrix(new Matrix4f().scaling(-1f));
         stack.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
         stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) rotationZ));
         stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees((float) rotationX));

@@ -8,15 +8,15 @@ import dev.turtywurty.industria.util.BlockStateScreenElement;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.util.math.RotationAxis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SeismicScannerScreen extends Screen {
@@ -27,6 +27,7 @@ public class SeismicScannerScreen extends Screen {
     private int x, y;
 
     private final ItemStack stack;
+    private final List<WorldFluidPocketsState.FluidPocket> fluidPockets = new ArrayList<>();
 
     public SeismicScannerScreen(ItemStack stack) {
         super(SeismicScannerItem.TITLE);
@@ -39,6 +40,11 @@ public class SeismicScannerScreen extends Screen {
         super.init();
         this.x = (this.width - this.backgroundWidth) / 2;
         this.y = (this.height - this.backgroundHeight) / 2;
+
+        this.fluidPockets.clear();
+        if(this.stack.contains(ComponentTypeInit.FLUID_POCKETS)) {
+            this.fluidPockets.addAll(this.stack.get(ComponentTypeInit.FLUID_POCKETS));
+        }
     }
 
     @Override
@@ -52,8 +58,7 @@ public class SeismicScannerScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
         context.drawText(this.textRenderer, this.title, this.width / 2 - this.textRenderer.getWidth(this.title) / 2, this.y + 8, 0x404040, false);
 
-        List<WorldFluidPocketsState.FluidPocket> fluidPockets = this.stack.get(ComponentTypeInit.FLUID_POCKETS);
-        if (fluidPockets == null || fluidPockets.isEmpty()) {
+        if (this.fluidPockets.isEmpty()) {
             renderDarkening(context);
             context.drawText(this.textRenderer, Text.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFF, true);
             return;
@@ -63,32 +68,45 @@ public class SeismicScannerScreen extends Screen {
             return;
 
         // Render fluid pockets
-        BlockRenderManager blockRenderManager = this.client.getBlockRenderManager();
-        World world = this.client.world;
         PlayerEntity player = this.client.player;
 
-        if (world == null || player == null)
+        if (player == null)
             return;
 
-        for (WorldFluidPocketsState.FluidPocket fluidPocket : fluidPockets) {
-            FluidState fluidState = fluidPocket.fluidState();
-            BlockState blockState = fluidState.getBlockState();
+
+        MatrixStack matrixStack = context.getMatrices();
+        for (WorldFluidPocketsState.FluidPocket fluidPocket : this.fluidPockets) {
+            BlockState blockState = fluidPocket.fluidState().getBlockState();
             List<BlockPos> positions = fluidPocket.fluidPositions();
 
-            for (BlockPos pos : positions) {
-                int x, y, z;
+            int minX = fluidPocket.minX();
+            int minY = fluidPocket.minY();
+            int minZ = fluidPocket.minZ();
+            int maxX = fluidPocket.maxX();
+            int maxY = fluidPocket.maxY();
+            int maxZ = fluidPocket.maxZ();
 
-                x = (pos.getX() - player.getBlockPos().getX());
-                y = (pos.getZ() - player.getBlockPos().getZ());
-                z = (pos.getY() - player.getBlockPos().getY());
+            int centerX = (minX + maxX) / 2 - minX;
+            int centerY = (minY + maxY) / 2 - minY;
+            int centerZ = (minZ + maxZ) / 2 - minZ;
+
+            matrixStack.push();
+            matrixStack.translate(centerX, centerY, centerZ);
+            matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(135));
+            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45));
+            matrixStack.translate(-centerX, -centerY, -centerZ);
+            for (BlockPos pos : positions) {
+                int x = pos.getX() - fluidPocket.minX();
+                int y = pos.getY() - fluidPocket.minY();
+                int z = -(pos.getZ() - fluidPocket.minZ());
 
                 new BlockStateScreenElement(blockState)
-                        .scale(8)
+                        .scale(12)
                         .localPos(x, y, z)
-                        .rotateAroundCenter(22.5, 45, 0)
-                        .pos(this.x + 128, this.y + 128)
+                        .pos(this.x + 96, this.y - 550)
                         .render(context, mouseX, mouseY, delta);
             }
+            matrixStack.pop();
         }
     }
 
