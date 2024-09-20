@@ -13,9 +13,14 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.*;
 
-public class GuiFluidRenderer {
+public class IndustriaFluidRenderer {
     public static VertexConsumer getFluidBuilder(VertexConsumerProvider provider) {
         return provider.getBuffer(IndustriaRenderLayers.getFluid());
+    }
+
+    public static void renderFluidBox(FluidState fluidState, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
+                                      VertexConsumerProvider provider, MatrixStack matrices, int light, boolean renderBottom, float red, float green, float blue, float alpha, ColorMode colorMode) {
+        renderFluidBox(fluidState.getFluid(), xMin, yMin, zMin, xMax, yMax, zMax, provider, matrices, light, renderBottom, red, green, blue, alpha, colorMode);
     }
 
     public static void renderFluidBox(FluidState fluidState, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
@@ -25,22 +30,64 @@ public class GuiFluidRenderer {
 
     public static void renderFluidBox(Fluid fluid, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
                                       VertexConsumerProvider provider, MatrixStack matrices, int light, boolean renderBottom) {
-        renderFluidBox(FluidVariant.of(fluid), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom);
+        renderFluidBox(FluidVariant.of(fluid), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom, 1, 1, 1, 1, ColorMode.MULTIPLICATION);
+    }
+
+    public static void renderFluidBox(Fluid fluid, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
+                                      VertexConsumerProvider provider, MatrixStack matrices, int light, boolean renderBottom, float red, float green, float blue, float alpha, ColorMode colorMode) {
+        renderFluidBox(FluidVariant.of(fluid), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom, red, green, blue, alpha, colorMode);
     }
 
     public static void renderFluidBox(FluidStack fluidStack, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
                                       VertexConsumerProvider provider, MatrixStack matrices, int light, boolean renderBottom) {
-        renderFluidBox(fluidStack.fluid(), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom);
+        renderFluidBox(fluidStack, xMin, yMin, zMin, xMax, yMax, zMax, provider, matrices, light, renderBottom, 1, 1, 1, 1, ColorMode.MULTIPLICATION);
+    }
+
+    public static void renderFluidBox(FluidStack fluidStack, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
+                                      VertexConsumerProvider provider, MatrixStack matrices, int light, boolean renderBottom, float red, float green, float blue, float alpha, ColorMode colorMode) {
+        renderFluidBox(fluidStack.fluid(), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom, red, green, blue, alpha, colorMode);
     }
 
     public static void renderFluidBox(FluidVariant fluidVariant, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
-                                      VertexConsumer builder, MatrixStack matrices, int light, boolean renderBottom) {
+                                      VertexConsumer builder, MatrixStack matrices, int light, boolean renderBottom, float red, float green, float blue, float alpha, ColorMode colorMode) {
         Sprite[] sprites = FluidVariantRendering.getSprites(fluidVariant);
         Sprite fluidTexture = sprites != null ? sprites[0] : null;
         if (fluidTexture == null)
             return;
 
         int color = FluidVariantRendering.getColor(fluidVariant);
+        float r = (color >> 16 & 0xFF) / 255.0F;
+        float g = (color >> 8 & 0xFF) / 255.0F;
+        float b = (color & 0xFF) / 255.0F;
+        float a = (color >> 24 & 0xFF) / 255.0F;
+
+        switch (colorMode) {
+            case ADDITION:
+                red += r;
+                green += g;
+                blue += b;
+                alpha += a;
+                break;
+            case MULTIPLICATION:
+                red *= r;
+                green *= g;
+                blue *= b;
+                alpha *= a;
+                break;
+            case SUBTRACTION:
+                red -= r;
+                green -= g;
+                blue -= b;
+                alpha -= a;
+                break;
+            case DIVISION:
+                red /= r;
+                green /= g;
+                blue /= b;
+                alpha /= a;
+                break;
+        }
+
         int blockLight = (light >> 4) & 0xF;
         int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
         light = (light & 0xF00000) | (luminosity << 4);
@@ -61,12 +108,12 @@ public class GuiFluidRenderer {
             boolean positive = side.getDirection() == Direction.AxisDirection.POSITIVE;
             if (side.getAxis().isHorizontal()) {
                 if (side.getAxis() == Direction.Axis.X) {
-                    renderStillTiledFace(side, zMin, yMin, zMax, yMax, positive ? xMax : xMin, builder, matrices, light, color, fluidTexture);
+                    renderStillTiledFace(side, zMin, yMin, zMax, yMax, positive ? xMax : xMin, builder, matrices, light, red, green, blue, alpha, fluidTexture);
                 } else {
-                    renderStillTiledFace(side, xMin, yMin, xMax, yMax, positive ? zMax : zMin, builder, matrices, light, color, fluidTexture);
+                    renderStillTiledFace(side, xMin, yMin, xMax, yMax, positive ? zMax : zMin, builder, matrices, light, red, green, blue, alpha, fluidTexture);
                 }
             } else {
-                renderStillTiledFace(side, xMin, zMin, xMax, zMax, positive ? yMax : yMin, builder, matrices, light, color, fluidTexture);
+                renderStillTiledFace(side, xMin, zMin, xMax, zMax, positive ? yMax : yMin, builder, matrices, light, red, green, blue, alpha, fluidTexture);
             }
         }
 
@@ -74,12 +121,12 @@ public class GuiFluidRenderer {
     }
 
     public static void renderStillTiledFace(Direction dir, float left, float down, float right, float up, float depth,
-                                            VertexConsumer builder, MatrixStack matrices, int light, int color, Sprite texture) {
-        renderTiledFace(dir, left, down, right, up, depth, builder, matrices, light, color, texture, 1);
+                                            VertexConsumer builder, MatrixStack matrices, int light, float red, float green, float blue, float alpha, Sprite texture) {
+        renderTiledFace(dir, left, down, right, up, depth, builder, matrices, light, red, green, blue, alpha, texture, 1);
     }
 
     public static void renderTiledFace(Direction dir, float left, float down, float right, float up, float depth,
-                                       VertexConsumer builder, MatrixStack matrices, int light, int color, Sprite texture, float textureScale) {
+                                       VertexConsumer builder, MatrixStack matrices, int light, float red, float green, float blue, float alpha, Sprite texture, float textureScale) {
         boolean positive = dir.getDirection() == Direction.AxisDirection.POSITIVE;
         boolean horizontal = dir.getAxis().isHorizontal();
         boolean x = dir.getAxis() == Direction.Axis.X;
@@ -123,41 +170,43 @@ public class GuiFluidRenderer {
 
                 if (horizontal) {
                     if (x) {
-                        putVertex(builder, matrices, depth, y2, positive ? x2 : x1, color, u1, v1, dir, light);
-                        putVertex(builder, matrices, depth, y1, positive ? x2 : x1, color, u1, v2, dir, light);
-                        putVertex(builder, matrices, depth, y1, positive ? x1 : x2, color, u2, v2, dir, light);
-                        putVertex(builder, matrices, depth, y2, positive ? x1 : x2, color, u2, v1, dir, light);
+                        addVertex(builder, matrices, depth, y2, positive ? x2 : x1, red, green, blue, alpha, u1, v1, dir, light);
+                        addVertex(builder, matrices, depth, y1, positive ? x2 : x1, red, green, blue, alpha, u1, v2, dir, light);
+                        addVertex(builder, matrices, depth, y1, positive ? x1 : x2, red, green, blue, alpha, u2, v2, dir, light);
+                        addVertex(builder, matrices, depth, y2, positive ? x1 : x2, red, green, blue, alpha, u2, v1, dir, light);
                     } else {
-                        putVertex(builder, matrices, positive ? x1 : x2, y2, depth, color, u1, v1, dir, light);
-                        putVertex(builder, matrices, positive ? x1 : x2, y1, depth, color, u1, v2, dir, light);
-                        putVertex(builder, matrices, positive ? x2 : x1, y1, depth, color, u2, v2, dir, light);
-                        putVertex(builder, matrices, positive ? x2 : x1, y2, depth, color, u2, v1, dir, light);
+                        addVertex(builder, matrices, positive ? x1 : x2, y2, depth, red, green, blue, alpha, u1, v1, dir, light);
+                        addVertex(builder, matrices, positive ? x1 : x2, y1, depth, red, green, blue, alpha, u1, v2, dir, light);
+                        addVertex(builder, matrices, positive ? x2 : x1, y1, depth, red, green, blue, alpha, u2, v2, dir, light);
+                        addVertex(builder, matrices, positive ? x2 : x1, y2, depth, red, green, blue, alpha, u2, v1, dir, light);
                     }
                 } else {
-                    putVertex(builder, matrices, x1, depth, positive ? y1 : y2, color, u1, v1, dir, light);
-                    putVertex(builder, matrices, x1, depth, positive ? y2 : y1, color, u1, v2, dir, light);
-                    putVertex(builder, matrices, x2, depth, positive ? y2 : y1, color, u2, v2, dir, light);
-                    putVertex(builder, matrices, x2, depth, positive ? y1 : y2, color, u2, v1, dir, light);
+                    addVertex(builder, matrices, x1, depth, positive ? y1 : y2, red, green, blue, alpha, u1, v1, dir, light);
+                    addVertex(builder, matrices, x1, depth, positive ? y2 : y1, red, green, blue, alpha, u1, v2, dir, light);
+                    addVertex(builder, matrices, x2, depth, positive ? y2 : y1, red, green, blue, alpha, u2, v2, dir, light);
+                    addVertex(builder, matrices, x2, depth, positive ? y1 : y2, red, green, blue, alpha, u2, v1, dir, light);
                 }
             }
         }
     }
 
-    private static void putVertex(VertexConsumer builder, MatrixStack matrices, float x, float y, float z, int color,
+    private static void addVertex(VertexConsumer builder, MatrixStack matrices, float x, float y, float z, float red, float green, float blue, float alpha,
                                   float u, float v, Direction face, int light) {
-
         Vec3i normal = face.getVector();
         MatrixStack.Entry peek = matrices.peek();
-        int a = color >> 24 & 0xff;
-        int r = color >> 16 & 0xff;
-        int g = color >> 8 & 0xff;
-        int b = color & 0xff;
 
         builder.vertex(peek.getPositionMatrix(), x, y, z)
-                .color(r, g, b, a)
+                .color(red, green, blue, alpha)
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
                 .normal(peek, normal.getX(), normal.getY(), normal.getZ());
+    }
+
+    public enum ColorMode {
+        ADDITION,
+        MULTIPLICATION,
+        SUBTRACTION,
+        DIVISION
     }
 }

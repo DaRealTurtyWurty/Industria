@@ -27,6 +27,6 @@ public class BlockStateScreenElement extends BlockModelScreenElement {
             return;
         }
 
-        GuiFluidRenderer.renderFluidBox(this.blockState.getFluidState(), 0, 0, 0, 1, 1, 1, provider, matrixStack, LightmapTextureManager.MAX_LIGHT_COORDINATE, true);
+        IndustriaFluidRenderer.renderFluidBox(this.blockState.getFluidState(), 0, 0, 0, 1, 1, 1, provider, matrixStack, LightmapTextureManager.MAX_LIGHT_COORDINATE, true);
     }
 }
