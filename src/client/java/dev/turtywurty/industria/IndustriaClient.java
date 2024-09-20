@@ -99,6 +99,9 @@ public class IndustriaClient implements ClientModInitializer {
             if (player == null)
                 return;
 
+            if(!FLUID_POCKETS.containsKey(player.getEntityWorld().getRegistryKey()))
+                return;
+
             List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getEntityWorld().getRegistryKey())
                     .stream()
                     .filter(fluidPocket -> fluidPocket.isWithinDistance(player.getBlockPos(), 64))
