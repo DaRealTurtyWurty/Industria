@@ -25,11 +25,14 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
     @Override
     public boolean generate(FeatureContext<FluidPocketConfig> context) {
         BlockPos origin = context.getOrigin();
-        System.out.println("Generating fluid pocket at " + origin);
         WorldAccess world = context.getWorld();
         FluidPocketConfig config = context.getConfig();
         FluidState fluidState = config.fluidState();
         Random random = context.getRandom();
+
+        BlockState originState = world.getBlockState(origin);
+        if(originState.isAir() || !config.replaceable().test(originState, random))
+            return false;
 
         if(random.nextInt(100) < 50)
             return false;
@@ -73,6 +76,8 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
         var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, new ArrayList<>(positions));
         WorldFluidPocketsState.getServerState(serverWorld).addFluidPocket(pocket);
         WorldFluidPocketsState.sync(serverWorld);
+
+        System.out.println("Generated fluid pocket at " + origin);
 
         return true;
     }

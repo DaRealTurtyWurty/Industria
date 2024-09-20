@@ -22,6 +22,7 @@ import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -134,12 +135,12 @@ public class WorldFluidPocketsState extends PersistentState {
 
     public static class FluidPocket {
         private final FluidState fluidState;
-        private final List<BlockPos> fluidPositions;
+        private final List<BlockPos> fluidPositions = new ArrayList<>();
         private int minX, minY, minZ, maxX, maxY, maxZ;
 
-        public FluidPocket(FluidState fluidState, List<BlockPos> fluidPositions) {
+        public FluidPocket(FluidState fluidState, Collection<BlockPos> fluidPositions) {
             this.fluidState = fluidState;
-            this.fluidPositions = fluidPositions;
+            this.fluidPositions.addAll(fluidPositions);
 
             updateMinMax();
         }
