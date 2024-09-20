@@ -38,7 +38,7 @@ import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".oil_pump_jack");
+    public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
     private final List<BlockPos> machinePositions = new ArrayList<>();
 

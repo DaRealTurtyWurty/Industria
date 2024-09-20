@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class CrusherBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".crusher");
+    public static final Text TITLE = Industria.containerTitle("crusher");
     public static final int INPUT_SLOT = 0, OUTPUT_SLOT = 1;
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();

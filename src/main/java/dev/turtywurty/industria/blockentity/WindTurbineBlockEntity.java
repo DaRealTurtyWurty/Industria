@@ -35,7 +35,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.Random;
 
 public class WindTurbineBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".wind_turbine");
+    public static final Text TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
 

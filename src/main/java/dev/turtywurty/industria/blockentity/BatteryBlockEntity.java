@@ -40,7 +40,7 @@ import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class BatteryBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".battery");
+    public static final Text TITLE = Industria.containerTitle("battery");
     public static final Text CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Text.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
     private final BatteryBlock.BatteryLevel batteryLevel;

@@ -45,7 +45,7 @@ import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".thermal_generator");
+    public static final Text TITLE = Industria.containerTitle("thermal_generator");
 
     private static final int CONSUME_RATE = 500;
 

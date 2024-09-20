@@ -31,7 +31,7 @@ import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class SolarPanelBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".solar_panel");
+    public static final Text TITLE = Industria.containerTitle("solar_panel");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
 

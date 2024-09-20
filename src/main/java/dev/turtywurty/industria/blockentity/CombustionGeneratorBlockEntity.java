@@ -40,7 +40,7 @@ import java.util.Map;
 public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
     private static final Map<Item, Integer> FUEL_TIMES = FurnaceBlockEntity.createFuelTimeMap();
 
-    public static final Text TITLE = Text.translatable("container." + Industria.MOD_ID + ".combustion_generator");
+    public static final Text TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
     private final WrappedInventoryStorage<SimpleInventory> inventoryStorage = new WrappedInventoryStorage<>();
