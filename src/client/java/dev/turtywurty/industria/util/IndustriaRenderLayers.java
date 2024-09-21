@@ -18,8 +18,20 @@ public class IndustriaRenderLayers {
                     .overlay(ENABLE_OVERLAY_COLOR)
                     .build(true));
 
+    private static final RenderLayer SEISMIC_SCANNER_HOLOGRAM = RenderLayer.of(createLayerName("seismic_scanner_hologram"),
+            VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.LINES, 1536, false, false,
+            RenderLayer.MultiPhaseParameters.builder()
+                    .program(LIGHTNING_PROGRAM)
+                    .writeMaskState(COLOR_MASK)
+                    .transparency(LIGHTNING_TRANSPARENCY)
+                    .build(false));
+
     public static RenderLayer getFluid() {
         return FLUID;
+    }
+
+    public static RenderLayer getSeismicScannerHologram() {
+        return SEISMIC_SCANNER_HOLOGRAM;
     }
 
     private static String createLayerName(String name) {

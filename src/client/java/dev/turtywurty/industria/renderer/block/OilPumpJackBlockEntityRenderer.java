@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.renderer;
+package dev.turtywurty.industria.renderer.block;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
