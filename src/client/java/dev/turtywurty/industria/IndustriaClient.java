@@ -9,6 +9,7 @@ import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.renderer.block.CrusherBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.IndustriaDynamicItemRenderer;
+import dev.turtywurty.industria.renderer.block.DrillBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.block.OilPumpJackBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.block.WindTurbineBlockEntityRenderer;
 import dev.turtywurty.industria.screen.*;
@@ -60,18 +61,21 @@ public class IndustriaClient implements ClientModInitializer {
         HandledScreens.register(ScreenHandlerTypeInit.OIL_PUMP_JACK, OilPumpJackScreen::new);
 
         // Registering Models
-        EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::createMainLayer);
-        EntityModelLayerRegistry.registerModelLayer(WindTurbineModel.LAYER_LOCATION, WindTurbineModel::createMainLayer);
-        EntityModelLayerRegistry.registerModelLayer(OilPumpJackModel.LAYER_LOCATION, OilPumpJackModel::createMainLayer);
+        EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(WindTurbineModel.LAYER_LOCATION, WindTurbineModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(OilPumpJackModel.LAYER_LOCATION, OilPumpJackModel::getTexturedModelData);
+        // EntityModelLayerRegistry.registerModelLayer(DrillBlockModel.LAYER_LOCATION, DrillBlockModel::createMainLayer);
 
         // Registering Block Entity Renderers
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.OIL_PUMP_JACK, OilPumpJackBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.DRILL, DrillBlockEntityRenderer::new);
 
         // Registering BuiltinModelItemRenderers
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.OIL_PUMP_JACK, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DRILL, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SEISMIC_SCANNER, IndustriaDynamicItemRenderer.INSTANCE);
 
         // Register Fluid Renderers

@@ -53,6 +53,9 @@ public class BlockInit {
     public static final MultiblockBlock MULTIBLOCK_BLOCK = register("multiblock",
             new MultiblockBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
 
+    public static final DrillBlock DRILL = registerWithItem("drill",
+            new DrillBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
+
     public static Block register(String name, AbstractBlock.Settings settings) {
         return register(name, new Block(settings));
     }

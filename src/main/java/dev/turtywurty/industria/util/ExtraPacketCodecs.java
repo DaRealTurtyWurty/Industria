@@ -19,42 +19,103 @@ public class ExtraPacketCodecs {
     private static final Map<IntProviderType<?>, PacketCodec<RegistryByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
     private static final Map<FloatProviderType<?>, PacketCodec<RegistryByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
 
+    /**
+     * Registers a codec for an {@link IntProviderType}.
+     *
+     * @param type  The type to register the codec for.
+     * @param codec The codec to register.
+     * @param <T>   The type of the {@link IntProvider}.
+     */
     public static <T extends IntProvider> void registerIntProviderCodec(IntProviderType<T> type, PacketCodec<RegistryByteBuf, T> codec) {
         INT_PROVIDER_CODECS.put(type, codec);
     }
 
+    /**
+     * Registers a codec for a {@link FloatProviderType}.
+     *
+     * @param type  The type to register the codec for.
+     * @param codec The codec to register.
+     * @param <T>   The type of the {@link FloatProvider}.
+     */
     public static <T extends FloatProvider> void registerFloatProviderCodec(FloatProviderType<T> type, PacketCodec<RegistryByteBuf, T> codec) {
         FLOAT_PROVIDER_CODECS.put(type, codec);
     }
 
+    /**
+     * Gets the codec for an {@link IntProviderType}.
+     *
+     * @param type The type to get the codec for.
+     * @return The codec for the {@link IntProviderType}.
+     * @see IntProviderType
+     */
     public static PacketCodec<RegistryByteBuf, ? extends IntProvider> getIntProviderCodec(IntProviderType<?> type) {
         return INT_PROVIDER_CODECS.get(type);
     }
 
+    /**
+     * Gets the codec for a {@link FloatProviderType}.
+     *
+     * @param type The type to get the codec for.
+     * @return The codec for the {@link FloatProviderType}.
+     * @see FloatProviderType
+     */
     public static PacketCodec<RegistryByteBuf, ? extends FloatProvider> getFloatProviderCodec(FloatProviderType<?> type) {
         return FLOAT_PROVIDER_CODECS.get(type);
     }
 
+    /**
+     * Encodes an {@link IntProvider} into a {@link ByteBuf}.
+     *
+     * @param buf         The {@link ByteBuf} to encode the {@link IntProvider} into.
+     * @param intProvider The {@link IntProvider} to encode.
+     * @param <T>         The type of the {@link IntProvider}.
+     */
     public static <T extends IntProvider> void encode(ByteBuf buf, T intProvider) {
         PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getIntProviderCodec(intProvider.getType());
         codec.encode((RegistryByteBuf) buf, intProvider);
     }
 
+    /**
+     * Decodes an {@link IntProvider} from a {@link ByteBuf}.
+     *
+     * @param buf  The {@link ByteBuf} to decode the {@link IntProvider} from.
+     * @param type The type of the {@link IntProvider}.
+     * @param <T>  The type of the {@link IntProvider}.
+     * @return The decoded {@link IntProvider}.
+     */
     public static <T extends IntProvider> T decode(ByteBuf buf, IntProviderType<T> type) {
         PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getIntProviderCodec(type);
         return codec.decode((RegistryByteBuf) buf);
     }
 
+    /**
+     * Encodes a {@link FloatProvider} into a {@link ByteBuf}.
+     *
+     * @param buf           The {@link ByteBuf} to encode the {@link FloatProvider} into.
+     * @param floatProvider The {@link FloatProvider} to encode.
+     * @param <T>           The type of the {@link FloatProvider}.
+     */
     public static <T extends FloatProvider> void encode(ByteBuf buf, T floatProvider) {
         PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getFloatProviderCodec(floatProvider.getType());
         codec.encode((RegistryByteBuf) buf, floatProvider);
     }
 
+    /**
+     * Decodes a {@link FloatProvider} from a {@link ByteBuf}.
+     *
+     * @param buf  The {@link ByteBuf} to decode the {@link FloatProvider} from.
+     * @param type The type of the {@link FloatProvider}.
+     * @param <T>  The type of the {@link FloatProvider}.
+     * @return The decoded {@link FloatProvider}.
+     */
     public static <T extends FloatProvider> T decode(ByteBuf buf, FloatProviderType<T> type) {
         PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getFloatProviderCodec(type);
         return codec.decode((RegistryByteBuf) buf);
     }
 
+    /**
+     * Registers the default codecs for all {@link IntProviderType}s and {@link FloatProviderType}s.
+     */
     public static void registerDefaults() {
         registerIntProviderCodec(IntProviderType.CONSTANT, PacketCodec.ofStatic(
                 (buf, intProvider) -> buf.writeInt(intProvider.getValue()),
@@ -135,6 +196,15 @@ public class ExtraPacketCodecs {
                 buf -> TrapezoidFloatProvider.create(buf.readFloat(), buf.readFloat(), buf.readFloat())));
     }
 
+    /**
+     * Creates a codec for a weighted list of elements.
+     *
+     * @param elementCodec The codec for the elements.
+     * @param <B>          The type of the {@link ByteBuf}.
+     * @param <E>          The type of the elements.
+     * @return The codec for the weighted list.
+     * @see WeightedListIntProvider
+     */
     public static <B extends ByteBuf, E> PacketCodec<B, DataPool<E>> weightedListCodec(PacketCodec<B, E> elementCodec) {
         return PacketCodec.<B, Weighted.Present<E>, E, Weight>tuple(
                 elementCodec, Weighted.Present::data,

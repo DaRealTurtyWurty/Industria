@@ -19,6 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * A custom ingredient that represents an ingredient with a specific count.
+ *
+ * @param ingredient The ingredient
+ * @param count      The count of the ingredient
+ * @see CustomIngredient
+ */
 public record CountedIngredient(Ingredient ingredient, int count) implements CustomIngredient {
     public static final MapCodec<CountedIngredient> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Ingredient.ALLOW_EMPTY_CODEC.fieldOf("ingredient").forGetter(CountedIngredient::ingredient),

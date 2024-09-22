@@ -24,7 +24,7 @@ public class CrusherModel extends Model {
                 structure.getChild("feet"), structure.getChild("funnel"), structure.getChild("bars"));
     }
 
-    public static TexturedModelData createMainLayer() {
+    public static TexturedModelData getTexturedModelData() {
         var modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
 

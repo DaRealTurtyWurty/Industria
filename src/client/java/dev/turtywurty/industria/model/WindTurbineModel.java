@@ -23,7 +23,7 @@ public class WindTurbineModel extends Model {
         this.parts = new Parts(core, propellers, propeller0, propeller1, propeller2);
     }
 
-    public static TexturedModelData createMainLayer() {
+    public static TexturedModelData getTexturedModelData() {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
         ModelPartData core = modelPartData.addChild("core", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -28.125F, -10.0625F, 2.0F, 2.0F, 3.0F, new Dilation(0.0F))

@@ -48,6 +48,10 @@ public class BlockEntityTypeInit {
             BlockEntityType.Builder.create(OilPumpJackBlockEntity::new, BlockInit.OIL_PUMP_JACK)
                     .build());
 
+    public static final BlockEntityType<DrillBlockEntity> DRILL = register("drill",
+            BlockEntityType.Builder.create(DrillBlockEntity::new, BlockInit.DRILL)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

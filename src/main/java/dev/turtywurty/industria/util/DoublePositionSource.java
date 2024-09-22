@@ -15,6 +15,9 @@ import net.minecraft.world.event.PositionSourceType;
 
 import java.util.Optional;
 
+/**
+ * A {@link PositionSource} that represents a position in the world using three doubles.
+ */
 public record DoublePositionSource(double x, double y, double z) implements PositionSource {
     public static final MapCodec<DoublePositionSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.DOUBLE.fieldOf("x").forGetter(DoublePositionSource::x),

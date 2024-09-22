@@ -163,7 +163,7 @@ public class OilPumpJackModel extends Model {
                 this.attachmentA, this.attachmentB, this.attachmentC, this.attachmentD, this.attachmentE);
     }
 
-    public static TexturedModelData createMainLayer() {
+    public static TexturedModelData getTexturedModelData() {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
         ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
