@@ -2,18 +2,18 @@ package dev.turtywurty.industria.init;
 
 import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.multiblock.MultiblockData;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AttachmentTypeInit {
-    public static final AttachmentType<Map<String, BlockPos>> OIL_PUMP_JACK_ATTACHMENT =
-            AttachmentRegistry.createPersistent(Industria.id("oil_pump_jack_primary_pos"),
-                    Codec.unboundedMap(Codec.STRING, BlockPos.CODEC));
+    public static final AttachmentType<Map<String, MultiblockData>> MULTIBLOCK_ATTACHMENT =
+            AttachmentRegistry.createPersistent(Industria.id("multiblock"),
+                    Codec.unboundedMap(Codec.STRING, MultiblockData.CODEC));
 
     public static final AttachmentType<Map<String, FluidState>> FLUID_MAP_ATTACHMENT =
             AttachmentRegistry.createPersistent(Industria.id("fluid_map"),

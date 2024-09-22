@@ -50,8 +50,8 @@ public class BlockInit {
     public static final OilPumpJackBlock OIL_PUMP_JACK = registerWithItem("oil_pump_jack",
             new OilPumpJackBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
 
-    public static final OilPumpJackMultiblockBlock OIL_PUMP_JACK_MULTIBLOCK = register("oil_pump_jack_multiblock",
-            new OilPumpJackMultiblockBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
+    public static final MultiblockBlock MULTIBLOCK_BLOCK = register("multiblock",
+            new MultiblockBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
 
     public static Block register(String name, AbstractBlock.Settings settings) {
         return register(name, new Block(settings));

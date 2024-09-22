@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.block;
 
-import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
+import dev.turtywurty.industria.multiblock.MultiblockData;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -14,25 +14,25 @@ import net.minecraft.world.World;
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
-public class OilPumpJackMultiblockBlock extends Block {
-    public OilPumpJackMultiblockBlock(Settings settings) {
+public class MultiblockBlock extends Block {
+    public MultiblockBlock(Settings settings) {
         super(settings);
     }
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!world.isClient) {
-            Map<String, BlockPos> map = world.getChunk(pos).getAttached(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT);
+            Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
             if (map == null)
                 return ActionResult.FAIL;
 
-            BlockPos primaryPos = map.get(pos.toShortString());
+            MultiblockData data = map.get(pos.toShortString());
+
+            BlockPos primaryPos = data.primaryPos();
             if (primaryPos == null)
                 return ActionResult.FAIL;
 
-            if (world.getBlockEntity(primaryPos) instanceof OilPumpJackBlockEntity oilPumpJack) {
-                player.openHandledScreen(oilPumpJack);
-            }
+            data.type().onPrimaryBlockUse(world, player, hit, primaryPos);
         }
 
         return ActionResult.success(world.isClient);
@@ -43,17 +43,17 @@ public class OilPumpJackMultiblockBlock extends Block {
         super.onStateReplaced(state, world, pos, newState, moved);
 
         if (!world.isClient && !state.isOf(newState.getBlock())) {
-            Map<String, BlockPos> map = world.getChunk(pos).getAttached(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT);
+            Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
             if (map == null)
                 return;
 
-            BlockPos primaryPos = map.get(pos.toShortString());
+            MultiblockData data = map.get(pos.toShortString());
+
+            BlockPos primaryPos = data.primaryPos();
             if (primaryPos == null)
                 return;
 
-            if (world.getBlockEntity(primaryPos) instanceof OilPumpJackBlockEntity oilPumpJack) {
-                oilPumpJack.breakMachine();
-            }
+            data.type().onMultiblockBreak(world, primaryPos);
         }
     }
 

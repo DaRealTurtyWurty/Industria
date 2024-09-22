@@ -48,7 +48,7 @@ public class OilPumpJackBlock extends Block implements BlockEntityProvider {
 
         if(!world.isClient && !state.isOf(newState.getBlock())) {
             if(world.getBlockEntity(pos) instanceof OilPumpJackBlockEntity oilPumpJack) {
-                oilPumpJack.breakMachine();
+                oilPumpJack.breakMachine(world, pos);
             }
         }
     }
@@ -81,7 +81,7 @@ public class OilPumpJackBlock extends Block implements BlockEntityProvider {
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if(!world.isClient) {
             if(world.getBlockEntity(pos) instanceof OilPumpJackBlockEntity oilPumpJack) {
-                oilPumpJack.buildMachine();
+                oilPumpJack.buildMachine(world, pos, state, placer, itemStack, oilPumpJack::markDirty);
             }
         }
     }

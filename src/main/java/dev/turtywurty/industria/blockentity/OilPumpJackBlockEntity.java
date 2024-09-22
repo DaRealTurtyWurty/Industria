@@ -1,13 +1,11 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.OilPumpJackBlock;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.MultiblockType;
+import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -16,8 +14,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -28,16 +24,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@SuppressWarnings("UnstableApiUsage")
-public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
     private final List<BlockPos> machinePositions = new ArrayList<>();
@@ -51,7 +43,10 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
 
     @Override
     public void tick() {
+        if(this.world == null || this.world.isClient)
+            return;
 
+        // Do stuff
     }
 
     @Override
@@ -73,13 +68,9 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.machinePositions.clear();
 
         if(nbt.contains("MachinePositions", NbtElement.LIST_TYPE)) {
-            NbtList machinePositions = nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE);
-            for (NbtElement machinePosition : machinePositions) {
-                this.machinePositions.add(BlockPos.CODEC.decode(NbtOps.INSTANCE, machinePosition).map(Pair::getFirst).getOrThrow());
-            }
+            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
         }
     }
 
@@ -87,12 +78,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
 
-        var machinePositions = new NbtList();
-        for (BlockPos machinePosition : this.machinePositions) {
-            machinePositions.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, machinePosition).result().orElseThrow());
-        }
-
-        nbt.put("MachinePositions", machinePositions);
+        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
     }
 
     @Nullable
@@ -113,67 +99,18 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
         // NO-OP
     }
 
-    public void breakMachine() {
-        if (this.world == null)
-            return;
-
-        for (BlockPos machinePos : this.machinePositions) {
-            if(!this.world.getBlockState(machinePos).isOf(BlockInit.OIL_PUMP_JACK_MULTIBLOCK))
-                continue;
-
-            this.world.breakBlock(machinePos, false);
-
-            Chunk chunk = this.world.getChunk(machinePos);
-            Map<String, BlockPos> map = chunk.getAttached(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT);
-            if (map == null)
-                return;
-
-            Map<String, BlockPos> copy = new HashMap<>(map);
-            copy.remove(machinePos.toShortString());
-            if(copy.isEmpty()) {
-                chunk.removeAttached(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT);
-            } else {
-                chunk.setAttached(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT, copy);
-            }
-        }
-
-        this.world.breakBlock(this.pos, true);
+    @Override
+    public MultiblockType type() {
+        return MultiblockType.OIL_PUMP_JACK;
     }
 
-    public void buildMachine() {
-        if (this.world == null || this.world.isClient)
-            return;
-
-        long startTime = System.nanoTime();
-        Direction facing = getCachedState().get(OilPumpJackBlock.FACING);
-        List<BlockPos> checkPositions = findValidPositions(facing);
-        long findValidPositionsEndTime = System.nanoTime();
-        if(checkPositions.size() != 123) {
-            this.world.breakBlock(this.pos, true);
-            return;
-        }
-
-        for (BlockPos position : checkPositions) {
-            this.world.setBlockState(position, BlockInit.OIL_PUMP_JACK_MULTIBLOCK.getDefaultState());
-            this.machinePositions.add(position);
-
-            Chunk chunk = this.world.getChunk(position);
-            Map<String, BlockPos> map = chunk.getAttachedOrCreate(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT, HashMap::new);
-            Map<String, BlockPos> copy = new HashMap<>(map);
-            copy.put(position.toShortString(), this.pos);
-            chunk.setAttached(AttachmentTypeInit.OIL_PUMP_JACK_ATTACHMENT, copy);
-        }
-
-        markDirty();
-
-        long endTime = System.nanoTime();
-
-        System.out.println("Time to find valid positions: " + (findValidPositionsEndTime - startTime) + "ns");
-        System.out.println("Time to build machine: " + (endTime - findValidPositionsEndTime) + "ns");
-        System.out.println("Total time: " + (endTime - startTime) + "ns");
+    @Override
+    public List<BlockPos> getMultiblockPositions() {
+        return this.machinePositions;
     }
 
-    private List<BlockPos> findValidPositions(Direction facing) {
+    @Override
+    public List<BlockPos> findPositions(Direction facing) {
         if(this.world == null)
             return List.of();
 
