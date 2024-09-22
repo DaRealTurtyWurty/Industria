@@ -10,7 +10,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 
@@ -29,13 +28,15 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
     @Override
     public void render(WindTurbineBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
-        matrices.translate(0.5f, 0, 0.5f);
+        matrices.translate(0.5f, 1.5f, 0.5f);
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
 
-        Direction facing = entity.getCachedState().get(Properties.HORIZONTAL_FACING);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(facing.asRotation()));
-        if (facing == Direction.NORTH || facing == Direction.SOUTH) {
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
-        }
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
+            case EAST -> 90;
+            case SOUTH -> 180;
+            case WEST -> 270;
+            default -> 0;
+        }));
 
         float outputPercentage = getEnergyPerTickPercent(entity);
         entity.setPropellerRotation(entity.getPropellerRotation() + (outputPercentage * 0.25f));
