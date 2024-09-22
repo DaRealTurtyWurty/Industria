@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
+import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.util.QuadConsumer;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,7 +18,14 @@ public enum MultiblockType {
         }
     }, (world, pos) -> {
         if (world.getBlockEntity(pos) instanceof OilPumpJackBlockEntity oilPumpJack) {
-            oilPumpJack.breakMachine(world, pos);
+            oilPumpJack.breakMultiblock(world, pos);
+        }
+    }),
+    DRILL(0, (world, player, hitResult, pos) -> {
+        // NO-OP
+    }, (world, pos) -> {
+        if (world.getBlockEntity(pos) instanceof DrillBlockEntity drill) {
+            drill.breakMultiblock(world, pos);
         }
     });
 

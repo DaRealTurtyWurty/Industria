@@ -26,7 +26,7 @@ public interface Multiblockable {
 
     List<BlockPos> getMultiblockPositions();
 
-    default void buildMachine(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack, Runnable onSuccessfulBuild) {
+    default void buildMultiblock(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack, Runnable onSuccessfulBuild) {
         if (world == null || world.isClient)
             return;
 
@@ -58,7 +58,7 @@ public interface Multiblockable {
         System.out.println("Total time: " + (endTime - startTime) + "ns");
     }
 
-    default void breakMachine(World world, BlockPos pos) {
+    default void breakMultiblock(World world, BlockPos pos) {
         if (world == null)
             return;
 
