@@ -35,6 +35,7 @@ public class SeismicScannerScreen extends Screen {
         this.stack = stack;
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Override
     protected void init() {
         super.init();
@@ -43,7 +44,7 @@ public class SeismicScannerScreen extends Screen {
 
         this.fluidPockets.clear();
         if(this.stack.contains(ComponentTypeInit.FLUID_POCKETS)) {
-            this.fluidPockets.addAll(this.stack.get(ComponentTypeInit.FLUID_POCKETS));
+            this.fluidPockets.addAll(this.stack.get(ComponentTypeInit.FLUID_POCKETS).pockets());
         }
     }
 

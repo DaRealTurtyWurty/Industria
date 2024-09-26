@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.turtywurty.industria.component.FluidPocketsComponent;
 import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
@@ -86,11 +87,11 @@ public class SeismicScannerRendering {
         if (!stack.contains(ComponentTypeInit.FLUID_POCKETS))
             return null;
 
-        List<WorldFluidPocketsState.FluidPocket> fluidPockets = stack.get(ComponentTypeInit.FLUID_POCKETS);
-        if (fluidPockets == null || fluidPockets.isEmpty())
+        FluidPocketsComponent fluidPockets = stack.get(ComponentTypeInit.FLUID_POCKETS);
+        if (fluidPockets == null)
             return null;
 
-        return fluidPockets.getFirst();
+        return fluidPockets.pockets().getFirst();
     }
 
     // Draws a "cone"-type shape that extends outwards from the center and to the edge of the fluid pocket

@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.item;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.component.FluidPocketsComponent;
 import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
@@ -44,7 +45,7 @@ public class SeismicScannerItem extends Item {
                 return TypedActionResult.fail(user.getStackInHand(hand));
             }
 
-            stack.set(ComponentTypeInit.FLUID_POCKETS, existsBelow);
+            stack.set(ComponentTypeInit.FLUID_POCKETS, new FluidPocketsComponent(existsBelow));
             return TypedActionResult.success(stack);
         }
 
