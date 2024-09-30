@@ -1,10 +1,15 @@
-package dev.turtywurty.industria.renderer;
+package dev.turtywurty.industria.renderer.item;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
+import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
+import dev.turtywurty.industria.entity.DrillHeadEntity;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.registry.DrillHeadRegistry;
+import dev.turtywurty.industria.util.DrillHeadable;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.block.entity.BlockEntity;
@@ -13,6 +18,8 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.EntityModelLoader;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
@@ -24,6 +31,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -33,13 +41,17 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
 
     private final WindTurbineBlockEntity windTurbine = new WindTurbineBlockEntity(BlockPos.ORIGIN, BlockInit.WIND_TURBINE.getDefaultState());
     private final OilPumpJackBlockEntity oilPumpJack = new OilPumpJackBlockEntity(BlockPos.ORIGIN, BlockInit.OIL_PUMP_JACK.getDefaultState());
+    private final DrillBlockEntity drill = new DrillBlockEntity(BlockPos.ORIGIN, BlockInit.DRILL.getDefaultState());
     private BakedModel seismicScanner;
+    private final Map<DrillHeadable, EntityModel<DrillHeadEntity>> drillHeadModels = new HashMap<>();
+    private final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
     private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 
     private final Map<Item, ? extends BlockEntity> blockEntities = Map.of(
             BlockInit.WIND_TURBINE.asItem(), windTurbine,
-            BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack
+            BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack,
+            BlockInit.DRILL.asItem(), drill
     );
 
     @Override
@@ -49,22 +61,37 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
             return;
         }
 
-        matrices.push();
-        matrices.scale(0.5F, 0.5F, 0.5F);
         if (this.blockEntities.containsKey(stack.getItem())) {
             BlockEntity blockEntity = this.blockEntities.get(stack.getItem());
             if (blockEntity != null) {
+                matrices.push();
+                matrices.scale(0.5F, 0.5F, 0.5F);
                 this.blockEntityRenderDispatcher.renderEntity(blockEntity, matrices, vertexConsumers, light, overlay);
+                matrices.pop();
             }
         }
-        matrices.pop();
 
         if (this.seismicScanner == null) {
             this.seismicScanner = MinecraftClient.getInstance().getBakedModelManager().getModel(IndustriaClient.SEISMIC_SCANNER);
         }
 
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-        SeismicScannerRendering.renderSeismicScanner(stack, itemRenderer, this.seismicScanner, mode, matrices, vertexConsumers, light, overlay);
+        EntityModelLoader entityModelLoader = MinecraftClient.getInstance().getEntityModelLoader();
+        if (stack.isOf(ItemInit.SEISMIC_SCANNER)) {
+            SeismicScannerRendering.renderSeismicScanner(stack, itemRenderer, this.seismicScanner, mode, matrices, vertexConsumers, light, overlay);
+        }
+
+        if(stack.getItem() instanceof DrillHeadable drillHeadable) {
+            DrillHeadRegistry.DrillHeadClientData clientData = DrillHeadRegistry.getClientData(drillHeadable);
+            if(clientData != null && clientData.renderDynamicItem()) {
+                EntityModel<DrillHeadEntity> model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(entityModelLoader));
+                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
+                matrices.push();
+                matrices.scale(0.5F, 0.5F, 0.5F);
+                model.render(matrices, vertexConsumers.getBuffer(model.getLayer(textureLocation)), light, overlay);
+                matrices.pop();
+            }
+        }
     }
 
     @Override
@@ -77,6 +104,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
             prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor) {
         return CompletableFuture.runAsync(() -> {
             this.seismicScanner = null;
+            this.drillHeadModels.clear();
+            this.drillHeadTextures.clear();
         }, applyExecutor);
     }
 

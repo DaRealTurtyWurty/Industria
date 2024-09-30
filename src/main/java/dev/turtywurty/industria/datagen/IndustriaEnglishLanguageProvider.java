@@ -1,10 +1,7 @@
 package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.blockentity.*;
-import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.FluidInit;
-import dev.turtywurty.industria.init.ItemGroupInit;
-import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
@@ -50,6 +47,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, OilPumpJackBlockEntity.TITLE, "Oil Pump Jack");
         translationBuilder.add(ItemInit.SEISMIC_SCANNER, "Seismic Scanner");
         addText(translationBuilder, SeismicScannerItem.TITLE, "Seismic Scanner");
+        translationBuilder.add(BlockInit.DRILL, "Drill");
+        translationBuilder.add(EntityTypeInit.DRILL_HEAD, "Drill Head");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

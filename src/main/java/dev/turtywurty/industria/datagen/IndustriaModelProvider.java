@@ -49,6 +49,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
                     displaySettings.setScale(0.275f, 0.275f, 0.275f);
                 }));
 
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.DRILL, BuiltinEntityModelBuilder.defaultBlock()
+                .copyModifyGui(displaySettings -> {
+                    displaySettings.setTranslation(-2.5f, -2.5f, 0);
+                    displaySettings.setScale(0.5f, 0.5f, 0.5f);
+                }));
+
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
     }
 

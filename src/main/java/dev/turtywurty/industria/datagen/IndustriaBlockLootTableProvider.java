@@ -26,5 +26,7 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.CRUSHER);
         addDrop(BlockInit.CABLE);
         addDrop(BlockInit.WIND_TURBINE);
+        addDrop(BlockInit.OIL_PUMP_JACK);
+        addDrop(BlockInit.DRILL);
     }
 }

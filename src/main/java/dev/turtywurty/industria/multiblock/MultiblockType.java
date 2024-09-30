@@ -30,8 +30,10 @@ public enum MultiblockType {
             oilPumpJack.breakMultiblock(world, pos);
         }
     }),
-    DRILL(false, 27, (world, player, hitResult, pos) -> {
-        // NO-OP
+    DRILL(false, 26, (world, player, hitResult, pos) -> {
+        if (world.getBlockEntity(pos) instanceof DrillBlockEntity drill) {
+            player.openHandledScreen(drill);
+        }
     }, (world, pos) -> {
         if (world.getBlockEntity(pos) instanceof DrillBlockEntity drill) {
             drill.breakMultiblock(world, pos);

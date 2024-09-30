@@ -1,9 +1,8 @@
-package dev.turtywurty.industria.renderer;
+package dev.turtywurty.industria.renderer.item;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.turtywurty.industria.component.FluidPocketsComponent;
 import dev.turtywurty.industria.init.ComponentTypeInit;
-import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DoublePositionSource;
 import dev.turtywurty.industria.util.IndustriaFluidRenderer;
@@ -31,56 +30,54 @@ import java.util.List;
 
 public class SeismicScannerRendering {
     public static void renderSeismicScanner(ItemStack stack, ItemRenderer itemRenderer, BakedModel model, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        if (stack.isOf(ItemInit.SEISMIC_SCANNER)) {
-            WorldFluidPocketsState.FluidPocket fluidPocket = null;
-            if(mode.isFirstPerson() || mode == ModelTransformationMode.THIRD_PERSON_LEFT_HAND || mode == ModelTransformationMode.THIRD_PERSON_RIGHT_HAND) {
-                fluidPocket = getFluidPocketFromStack(stack);
-            }
+        WorldFluidPocketsState.FluidPocket fluidPocket = null;
+        if (mode.isFirstPerson() || mode == ModelTransformationMode.THIRD_PERSON_LEFT_HAND || mode == ModelTransformationMode.THIRD_PERSON_RIGHT_HAND) {
+            fluidPocket = getFluidPocketFromStack(stack);
+        }
 
-            matrices.push();
-            matrices.translate(0.5, 0.5, 0.5);
+        matrices.push();
+        matrices.translate(0.5, 0.5, 0.5);
 
-            if (mode == ModelTransformationMode.THIRD_PERSON_LEFT_HAND || mode == ModelTransformationMode.THIRD_PERSON_RIGHT_HAND) {
-                matrices.translate(-0.5, -0.5, -0.5);
-                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-13.0F));
-                matrices.translate(-0.35, 0.5, 0.0);
+        if (mode == ModelTransformationMode.THIRD_PERSON_LEFT_HAND || mode == ModelTransformationMode.THIRD_PERSON_RIGHT_HAND) {
+            matrices.translate(-0.5, -0.5, -0.5);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-13.0F));
+            matrices.translate(-0.35, 0.5, 0.0);
 
-                RenderLayer layer = RenderLayers.getItemLayer(stack, true);
-                VertexConsumer consumer = ItemRenderer.getDirectItemGlintConsumer(vertexConsumers, layer, true, stack.hasGlint());
+            RenderLayer layer = RenderLayers.getItemLayer(stack, true);
+            VertexConsumer consumer = ItemRenderer.getDirectItemGlintConsumer(vertexConsumers, layer, true, stack.hasGlint());
 
-                itemRenderer.renderBakedItemModel(model, stack, light, overlay, matrices, consumer);
+            itemRenderer.renderBakedItemModel(model, stack, light, overlay, matrices, consumer);
 
-                if(fluidPocket != null) {
-                    matrices.push();
-                    matrices.scale(0.5f, 0.5f, 0.5f);
-                    matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
-                    matrices.translate(1.0f, 1.0625f, -0.75f);
-                    renderHologram(fluidPocket, matrices, vertexConsumers, light);
-                    matrices.pop();
-                }
-            } else {
-                itemRenderer.renderItem(stack, mode, false, matrices, vertexConsumers, light, overlay, model);
-
+            if (fluidPocket != null) {
                 matrices.push();
-                Transformation transformation = model.getTransformation().getTransformation(mode);
-                transformation.apply(false, matrices);
                 matrices.scale(0.5f, 0.5f, 0.5f);
                 matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
-                matrices.translate(0, 0.25, 0.75);
-
-                if (mode.isFirstPerson()) {
-                    createScannerSonar1stPerson();
-
-                    if(fluidPocket != null) {
-                        renderHologram(fluidPocket, matrices, vertexConsumers, light);
-                    }
-                }
-
+                matrices.translate(1.0f, 1.0625f, -0.75f);
+                renderHologram(fluidPocket, matrices, vertexConsumers, light);
                 matrices.pop();
+            }
+        } else {
+            itemRenderer.renderItem(stack, mode, false, matrices, vertexConsumers, light, overlay, model);
+
+            matrices.push();
+            Transformation transformation = model.getTransformation().getTransformation(mode);
+            transformation.apply(false, matrices);
+            matrices.scale(0.5f, 0.5f, 0.5f);
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
+            matrices.translate(0, 0.25, 0.75);
+
+            if (mode.isFirstPerson()) {
+                createScannerSonar1stPerson();
+
+                if (fluidPocket != null) {
+                    renderHologram(fluidPocket, matrices, vertexConsumers, light);
+                }
             }
 
             matrices.pop();
         }
+
+        matrices.pop();
     }
 
     private static @Nullable WorldFluidPocketsState.FluidPocket getFluidPocketFromStack(ItemStack stack) {

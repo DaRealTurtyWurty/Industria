@@ -64,6 +64,7 @@ public class Industria implements ModInitializer {
         AttachmentTypeInit.init();
         PositionSourceTypeInit.init();
         ComponentTypeInit.init();
+        EntityTypeInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
