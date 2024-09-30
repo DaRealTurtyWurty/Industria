@@ -3,6 +3,8 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.entity.DrillHeadEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.EntityTypeInit;
@@ -39,11 +41,14 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     public static final Text TITLE = Industria.containerTitle("drill");
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
+    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private DrillHeadEntity drillHead;
     private boolean drilling = false;
 
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.DRILL, pos, state);
+
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable));
     }
 
     @Override
@@ -74,11 +79,8 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         }
 
         this.drilling = nbt.getBoolean("Drilling");
-        if(this.world != null) {
-            int id = nbt.getInt("DrillHead");
-            if(id != -1) {
-                this.drillHead = (DrillHeadEntity) this.world.getEntityById(id);
-            }
+        if(nbt.contains("Inventory", NbtElement.LIST_TYPE)) {
+            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
         }
     }
 
@@ -87,7 +89,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         super.writeNbt(nbt, registryLookup);
         nbt.put("MultiblockPositions", Multiblockable.writeMultiblockToNbt(this));
         nbt.putBoolean("Drilling", this.drilling);
-        nbt.putInt("DrillHead", this.drillHead == null ? -1 : this.drillHead.getId());
+        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
     }
 
     @Override
@@ -146,19 +148,15 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         return new DrillScreenHandler(syncId, playerInventory, this);
     }
 
-    public SimpleInventory getEntityInventory() {
-        var inv = new SimpleInventory(this.drillHead.getDrillItem()) {
-            @Override
-            public boolean isValid(int slot, ItemStack stack) {
-                return slot == 0 && stack.getItem() instanceof DrillHeadable;
-            }
-        };
-
-        inv.addListener(sender -> this.drillHead.setDrillItem(inv.getStack(0)));
-        return inv;
+    public SimpleInventory getDrillHeadInventory() {
+        return this.wrappedInventoryStorage.getInventory(0);
     }
 
     public boolean isDrilling() {
         return this.drilling;
+    }
+
+    public ItemStack getDrillStack() {
+        return getDrillHeadInventory().getStack(0);
     }
 }

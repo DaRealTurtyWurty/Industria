@@ -26,7 +26,7 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
     @Override
     public void setStack(int slot, ItemStack stack) {
         if(isValid(slot, stack)) {
-            setStack(slot, stack);
+            super.setStack(slot, stack);
         }
     }
 

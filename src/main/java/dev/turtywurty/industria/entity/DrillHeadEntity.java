@@ -1,26 +1,20 @@
 package dev.turtywurty.industria.entity;
 
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.util.DrillHeadable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.BuiltinRegistries;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class DrillHeadEntity extends Entity {
     private DrillBlockEntity blockEntity;
     private static final TrackedData<Boolean> IS_DRILLING = DataTracker.registerData(DrillHeadEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<ItemStack> DRILL_ITEM = DataTracker.registerData(DrillHeadEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
-
     public DrillHeadEntity(EntityType<DrillHeadEntity> type, World world) {
         super(type, world);
     }
@@ -33,18 +27,6 @@ public class DrillHeadEntity extends Entity {
         } else {
             remove(RemovalReason.DISCARDED);
         }
-    }
-
-    public boolean setDrillItem(ItemStack stack) {
-        if(!(stack.getItem() instanceof DrillHeadable))
-            return false;
-
-        this.dataTracker.set(DRILL_ITEM, stack);
-        return true;
-    }
-
-    public ItemStack getDrillItem() {
-        return this.dataTracker.get(DRILL_ITEM);
     }
 
     @Override
@@ -73,7 +55,6 @@ public class DrillHeadEntity extends Entity {
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
         builder.add(IS_DRILLING, false);
-        builder.add(DRILL_ITEM, ItemStack.EMPTY);
     }
 
     @Override
@@ -89,11 +70,6 @@ public class DrillHeadEntity extends Entity {
         if (nbt.contains("IsDrilling", NbtElement.BYTE_TYPE)) {
             this.dataTracker.set(IS_DRILLING, nbt.getBoolean("IsDrilling"));
         }
-
-        RegistryWrapper.WrapperLookup registryLookup = BuiltinRegistries.createWrapperLookup();
-        if (nbt.contains("DrillItem", NbtElement.COMPOUND_TYPE)) {
-            this.dataTracker.set(DRILL_ITEM, ItemStack.fromNbtOrEmpty(registryLookup, nbt.getCompound("DrillItem")));
-        }
     }
 
     @Override
@@ -102,9 +78,14 @@ public class DrillHeadEntity extends Entity {
             nbt.put("BlockEntityPos", NbtHelper.fromBlockPos(blockEntity.getPos()));
         }
 
-        RegistryWrapper.WrapperLookup registryLookup = BuiltinRegistries.createWrapperLookup();
-
         nbt.putBoolean("IsDrilling", this.dataTracker.get(IS_DRILLING));
-        nbt.put("DrillItem", this.dataTracker.get(DRILL_ITEM).encodeAllowEmpty(registryLookup));
+    }
+
+    public boolean isDrilling() {
+        return this.dataTracker.get(IS_DRILLING);
+    }
+
+    public DrillBlockEntity getBlockEntity() {
+        return this.blockEntity;
     }
 }

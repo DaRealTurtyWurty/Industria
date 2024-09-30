@@ -26,13 +26,13 @@ public class DrillScreenHandler extends ScreenHandler {
         this.blockEntity = blockEntity;
         this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
 
-        SimpleInventory inventory = blockEntity.getEntityInventory();
+        SimpleInventory inventory = blockEntity.getDrillHeadInventory();
         checkSize(inventory, 1);
         inventory.onOpen(playerInv.player);
 
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
-        addEntityInventory(inventory);
+        addBlockEntityInventory(inventory);
     }
 
     private void addPlayerInventory(PlayerInventory inventory) {
@@ -49,11 +49,16 @@ public class DrillScreenHandler extends ScreenHandler {
         }
     }
 
-    private void addEntityInventory(SimpleInventory inventory) {
+    private void addBlockEntityInventory(SimpleInventory inventory) {
         addSlot(new Slot(inventory, 0, 80, 35) {
             @Override
             public boolean isEnabled() {
-                return DrillScreenHandler.this.blockEntity.isDrilling();
+                return !DrillScreenHandler.this.blockEntity.isDrilling();
+            }
+
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return !DrillScreenHandler.this.blockEntity.isDrilling() && inventory.isValid(0, stack);
             }
         });
     }

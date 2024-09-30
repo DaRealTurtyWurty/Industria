@@ -36,7 +36,7 @@ public class DrillHeadEntityRenderer extends EntityRenderer<DrillHeadEntity> {
 
     @Override
     public void render(DrillHeadEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        ItemStack stack = entity.getDrillItem();
+        ItemStack stack = entity.getBlockEntity().getDrillStack();
         if (stack.isEmpty())
             return;
 
@@ -52,7 +52,7 @@ public class DrillHeadEntityRenderer extends EntityRenderer<DrillHeadEntity> {
 
     @Override
     public Identifier getTexture(DrillHeadEntity entity) {
-        ItemStack stack = entity.getDrillItem();
+        ItemStack stack = entity.getBlockEntity().getDrillStack();
         if (stack.isEmpty())
             return null;
 
