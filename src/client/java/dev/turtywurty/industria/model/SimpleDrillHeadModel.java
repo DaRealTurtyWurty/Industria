@@ -1,19 +1,20 @@
-// Made with Blockbench 4.11.0
-// Exported for Minecraft version 1.17+ for Yarn
-// Paste this class into your mod and generate all required imports
-
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.entity.DrillHeadEntity;
+import dev.turtywurty.industria.blockentity.DrillBlockEntity;
+import dev.turtywurty.industria.init.ComponentTypeInit;
+import dev.turtywurty.industria.item.SimpleDrillHeadItem;
+import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 import net.minecraft.client.model.*;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
 
-public class SimpleDrillHeadModel extends EntityModel<DrillHeadEntity> {
+public class SimpleDrillHeadModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("simple_drill_head"), "main");
 
     private final ModelPart main;
@@ -21,6 +22,7 @@ public class SimpleDrillHeadModel extends EntityModel<DrillHeadEntity> {
     private final ModelPart counterClockwise;
 
     public SimpleDrillHeadModel(ModelPart root) {
+        super(RenderLayer::getEntitySolid);
         this.main = root.getChild("main");
         this.clockwise = this.main.getChild("clockwise");
         this.counterClockwise = this.main.getChild("counterClockwise");
@@ -54,10 +56,6 @@ public class SimpleDrillHeadModel extends EntityModel<DrillHeadEntity> {
     }
 
     @Override
-    public void setAngles(DrillHeadEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-    }
-
-    @Override
     public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
         this.main.render(matrices, vertexConsumer, light, overlay, color);
     }
@@ -70,7 +68,31 @@ public class SimpleDrillHeadModel extends EntityModel<DrillHeadEntity> {
         return this.counterClockwise;
     }
 
-    public static void onEntityRender(DrillHeadEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+    public static void onRender(DrillBlockEntity blockEntity, ItemStack headStack, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Model pModel, VertexConsumer vertexConsumer, int light, int overlay) {
+        SimpleDrillHeadModel model = (SimpleDrillHeadModel) pModel;
+        Object renderData = blockEntity.getRenderData();
+        if(!(renderData instanceof SimpleDrillHeadItem.SimpleDrillRenderData rotationData))
+            return;
 
+        float previousClockwiseYaw = model.getClockwise().yaw;
+        float previousCounterClockwiseYaw = model.getCounterClockwise().yaw;
+
+        if(blockEntity.isDrilling()) {
+            model.getClockwise().yaw = rotationData.clockwiseRotation += 0.1F;
+            model.getCounterClockwise().yaw = rotationData.counterClockwiseRotation -= 0.125F;
+        } else {
+            model.getClockwise().yaw = (float) Math.clamp(rotationData.clockwiseRotation -= 0.1F, 0, Math.PI * 2);
+            model.getCounterClockwise().yaw = (float) Math.clamp(rotationData.counterClockwiseRotation += 0.125F, 0, Math.PI * 2);
+        }
+
+        matrices.push();
+        matrices.scale(0.9F, 0.9F, 0.9F);
+        model.render(matrices, vertexConsumer, light, overlay);
+        matrices.pop();
+
+        model.getClockwise().yaw = previousClockwiseYaw;
+        model.getCounterClockwise().yaw = previousCounterClockwiseYaw;
+
+        blockEntity.update();
     }
 }

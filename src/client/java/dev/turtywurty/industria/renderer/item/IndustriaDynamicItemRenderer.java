@@ -5,7 +5,6 @@ import dev.turtywurty.industria.IndustriaClient;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
-import dev.turtywurty.industria.entity.DrillHeadEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
@@ -14,6 +13,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -43,7 +43,7 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
     private final OilPumpJackBlockEntity oilPumpJack = new OilPumpJackBlockEntity(BlockPos.ORIGIN, BlockInit.OIL_PUMP_JACK.getDefaultState());
     private final DrillBlockEntity drill = new DrillBlockEntity(BlockPos.ORIGIN, BlockInit.DRILL.getDefaultState());
     private BakedModel seismicScanner;
-    private final Map<DrillHeadable, EntityModel<DrillHeadEntity>> drillHeadModels = new HashMap<>();
+    private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
     private final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
     private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
@@ -84,12 +84,12 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
         if(stack.getItem() instanceof DrillHeadable drillHeadable) {
             DrillHeadRegistry.DrillHeadClientData clientData = DrillHeadRegistry.getClientData(drillHeadable);
             if(clientData != null && clientData.renderDynamicItem()) {
-                EntityModel<DrillHeadEntity> model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(entityModelLoader));
-                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
-                matrices.push();
-                matrices.scale(0.5F, 0.5F, 0.5F);
-                model.render(matrices, vertexConsumers.getBuffer(model.getLayer(textureLocation)), light, overlay);
-                matrices.pop();
+//                Model model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply());
+//                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
+//                matrices.push();
+//                matrices.scale(0.5F, 0.5F, 0.5F);
+//                model.render(matrices, vertexConsumers.getBuffer(model.getLayer(textureLocation)), light, overlay);
+//                matrices.pop();
             }
         }
     }

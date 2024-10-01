@@ -11,7 +11,6 @@ import dev.turtywurty.industria.renderer.block.CrusherBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.block.DrillBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.block.OilPumpJackBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.block.WindTurbineBlockEntityRenderer;
-import dev.turtywurty.industria.renderer.entity.DrillHeadEntityRenderer;
 import dev.turtywurty.industria.renderer.item.IndustriaDynamicItemRenderer;
 import dev.turtywurty.industria.screen.*;
 import net.fabricmc.api.ClientModInitializer;
@@ -79,9 +78,6 @@ public class IndustriaClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DRILL, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SEISMIC_SCANNER, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SIMPLE_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
-
-        // Registering Entity Renderers
-        EntityRendererRegistry.register(EntityTypeInit.DRILL_HEAD, DrillHeadEntityRenderer::new);
 
         // Register Fluid Renderers
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
@@ -165,8 +161,8 @@ public class IndustriaClient implements ClientModInitializer {
 
     private static void registerDrillHeads() {
         DrillHeadRegistry.register(ItemInit.SIMPLE_DRILL_HEAD, DrillHeadRegistry.DrillHeadClientData.create(
-                context -> new SimpleDrillHeadModel(context.getModelPart(SimpleDrillHeadModel.LAYER_LOCATION)),
-                SimpleDrillHeadModel::onEntityRender,
-                Industria.id("textures/entity/simple_drill_head.png")));
+                context -> new SimpleDrillHeadModel(context.getLayerModelPart(SimpleDrillHeadModel.LAYER_LOCATION)),
+                SimpleDrillHeadModel::onRender,
+                Industria.id("textures/block/simple_drill_head.png")));
     }
 }

@@ -1,11 +1,14 @@
 package dev.turtywurty.industria.registry;
 
-import dev.turtywurty.industria.entity.DrillHeadEntity;
+import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.util.DrillHeadable;
+import dev.turtywurty.industria.util.DrillRenderData;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLoader;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 
@@ -25,7 +28,7 @@ public class DrillHeadRegistry {
         return DRILL_HEADS.get(drillHeadable);
     }
 
-    public static Stream<Pair<DrillHeadable, Function<EntityModelLoader, EntityModel<DrillHeadEntity>>>> getModelResolvers() {
+    public static Stream<Pair<DrillHeadable, Function<BlockEntityRendererFactory.Context, Model>>> getModelResolvers() {
         return DRILL_HEADS.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue().modelResolver));
     }
 
@@ -36,27 +39,26 @@ public class DrillHeadRegistry {
     public static void init() {
     }
 
-    public record DrillHeadClientData(Function<EntityModelLoader, EntityModel<DrillHeadEntity>> modelResolver,
+    public record DrillHeadClientData(Function<BlockEntityRendererFactory.Context, Model> modelResolver,
                                       boolean renderDynamicItem,
-                                      EntityRenderFunction onRender,
+                                      RenderFunction onRender,
                                       Identifier textureLocation) {
-
-        public static DrillHeadClientData create(Function<EntityModelLoader, EntityModel<DrillHeadEntity>> modelResolver,
+        public static DrillHeadClientData create(Function<BlockEntityRendererFactory.Context, Model> modelResolver,
                                                  boolean renderDynamicItem,
-                                                 EntityRenderFunction onRender,
+                                                 RenderFunction onRender,
                                                  Identifier textureLocation) {
             return new DrillHeadClientData(modelResolver, renderDynamicItem, onRender, textureLocation);
         }
 
-        public static DrillHeadClientData create(Function<EntityModelLoader, EntityModel<DrillHeadEntity>> modelResolver,
-                                                 EntityRenderFunction onRender,
+        public static DrillHeadClientData create(Function<BlockEntityRendererFactory.Context, Model> modelResolver,
+                                                 RenderFunction onRender,
                                                  Identifier textureLocation) {
             return create(modelResolver, true, onRender, textureLocation);
         }
 
         @FunctionalInterface
-        public interface EntityRenderFunction {
-            void render(DrillHeadEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light);
+        public interface RenderFunction {
+            void render(DrillBlockEntity blockEntity, ItemStack headStack, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Model model, VertexConsumer vertexConsumer, int light, int overlay);
         }
     }
 

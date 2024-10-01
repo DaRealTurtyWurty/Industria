@@ -32,7 +32,11 @@ public enum MultiblockType {
     }),
     DRILL(false, 26, (world, player, hitResult, pos) -> {
         if (world.getBlockEntity(pos) instanceof DrillBlockEntity drill) {
-            player.openHandledScreen(drill);
+            if (!player.isSneaking()) {
+                player.openHandledScreen(drill);
+            } else {
+                drill.setDrilling(!drill.isDrilling());
+            }
         }
     }, (world, pos) -> {
         if (world.getBlockEntity(pos) instanceof DrillBlockEntity drill) {

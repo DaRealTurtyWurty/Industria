@@ -48,7 +48,6 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(ItemInit.SEISMIC_SCANNER, "Seismic Scanner");
         addText(translationBuilder, SeismicScannerItem.TITLE, "Seismic Scanner");
         translationBuilder.add(BlockInit.DRILL, "Drill");
-        translationBuilder.add(EntityTypeInit.DRILL_HEAD, "Drill Head");
         addText(translationBuilder, DrillBlockEntity.TITLE, "Drill");
     }
 
