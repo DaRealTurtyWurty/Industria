@@ -3,10 +3,10 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -19,22 +19,28 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.loot.context.LootContextParameterSet;
+import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload>, TickableBlockEntity, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("drill");
@@ -45,14 +51,19 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     private float drillYOffset = 1.0F;
     private boolean retracting = false;
     private int ticks = 0;
+    private OverflowMethod overflowMethod = OverflowMethod.VOID;
+    private final List<ItemStack> overflowStacks = new ArrayList<>(); // Only used if overflowMethod is set to PAUSE
+
     private DrillRenderData renderData; // Only used client side
 
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.DRILL, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable));
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable), Direction.UP);
+        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.DOWN);
+
         getDrillHeadInventory().addListener(inv -> {
-            if(this.world != null && this.world.isClient) {
+            if (this.world != null && this.world.isClient) {
                 ItemStack stack = inv.getStack(0);
                 setRenderData(stack.getItem() instanceof DrillHeadable drillHeadable ? drillHeadable.createRenderData() : null);
             }
@@ -61,80 +72,74 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     @Override
     public void tick() {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
-        if(this.ticks++ == 0)
+        if (this.ticks++ == 0)
             update();
+
+        if(getDrillStack().isEmpty())
+            return;
+
+        if(!this.overflowStacks.isEmpty()) {
+            this.overflowStacks.replaceAll(stack -> getOutputInventory().addStack(stack));
+            this.overflowStacks.removeIf(ItemStack::isEmpty);
+        }
+
+        DrillHeadable drillHeadable = (DrillHeadable) getDrillStack().getItem();
 
         // Do stuff
+        float currentDrillYOffset = this.drillYOffset;
         if (isDrilling()) {
-            BlockPos down = this.pos.up(MathHelper.ceil(this.drillYOffset));
-            BlockState state = this.world.getBlockState(down);
-            float hardness = state.getHardness(this.world, pos);
-            this.drillYOffset -= (hardness == -1 || hardness == 0) ? 0.01F : (1F / (hardness + 5));
-
-            if(!state.getFluidState().isEmpty()) {
-                this.drilling = false;
-                this.retracting = true;
-                update();
-                return;
-            } else if(state.isAir()) {
-                this.drillYOffset -= 0.1F;
-            }
-
-            boolean isThis = false;
-            if(state.isOf(BlockInit.MULTIBLOCK_BLOCK) || state.isOf(BlockInit.DRILL)) {
-                this.drillYOffset -= 0.01F;
-                isThis = true;
-            }
-
-            //System.out.println(this.drillYOffset);
-
-            if(this.world.getBlockState(down).getHardness(this.world, pos) == -1F || this.drillYOffset < this.world.getBottomY() - this.pos.getY()) {
-                this.drilling = false;
-                this.retracting = true;
-                this.drillYOffset += 0.01F;
-            }
-
-            System.out.println(this.drillYOffset - Math.floor(this.drillYOffset));
-            if (!isRetracting() && (this.drillYOffset - Math.floor(this.drillYOffset) > 0.75F) && !isThis && !state.isAir()) {
-                this.world.breakBlock(down, false);
-                this.drillYOffset += 0.01F;
-            }
-
-            update();
+            this.drillYOffset = drillHeadable.updateDrill(this, this.drillYOffset);
         } else if (this.retracting) {
-            this.drillYOffset += 0.05F;
-            if(this.drillYOffset >= 1.0F) {
-                this.retracting = false;
-                this.drillYOffset = 1.0F;
-            }
+            this.drillYOffset = drillHeadable.updateRetracting(this, this.drillYOffset);
+        }
 
+        if(!this.drilling && !this.retracting && this.drillYOffset != 1.0F && this.overflowMethod == OverflowMethod.PAUSE && this.overflowStacks.isEmpty()) {
+            this.drilling = true;
             update();
         }
+
+        if(this.drillYOffset != currentDrillYOffset)
+            update();
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        ItemStack previousStack = getDrillStack();
-
-        if(nbt.contains("MultiblockPositions", NbtElement.LIST_TYPE)) {
+        if (nbt.contains("MultiblockPositions", NbtElement.LIST_TYPE)) {
             Multiblockable.readMultiblockFromNbt(this, nbt.getList("MultiblockPositions", NbtElement.INT_ARRAY_TYPE));
         }
 
-        if(nbt.contains("Drilling", NbtElement.BYTE_TYPE)) {
+        if (nbt.contains("Drilling", NbtElement.BYTE_TYPE)) {
             this.drilling = nbt.getBoolean("Drilling");
         }
 
-        if(nbt.contains("Inventory", NbtElement.LIST_TYPE)) {
+        if (nbt.contains("Inventory", NbtElement.LIST_TYPE)) {
             this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
         }
 
         if (nbt.contains("DrillYOffset", NbtElement.FLOAT_TYPE)) {
             this.drillYOffset = nbt.getFloat("DrillYOffset");
+        }
+
+        if (nbt.contains("OverflowMethod", NbtElement.STRING_TYPE)) {
+            this.overflowMethod = OverflowMethod.getByName(nbt.getString("OverflowMethod"));
+        }
+
+        if (nbt.contains("OverflowStacks", NbtElement.LIST_TYPE)) {
+            this.overflowStacks.clear();
+            for (NbtElement element : nbt.getList("OverflowStacks", NbtElement.COMPOUND_TYPE)) {
+                this.overflowStacks.add(ItemStack.fromNbtOrEmpty(registryLookup, (NbtCompound) element));
+            }
+
+            this.overflowStacks.removeIf(ItemStack::isEmpty);
+        }
+
+        if (this.world != null && this.world.isClient && this.renderData == null && getDrillStack().getItem() instanceof DrillHeadable drillHeadable) {
+            setRenderData(drillHeadable.createRenderData());
         }
     }
 
@@ -143,8 +148,22 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         super.writeNbt(nbt, registryLookup);
         nbt.put("MultiblockPositions", Multiblockable.writeMultiblockToNbt(this));
         nbt.putBoolean("Drilling", this.drilling);
+        nbt.putBoolean("Retracting", this.retracting);
         nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
         nbt.putFloat("DrillYOffset", this.drillYOffset);
+        nbt.putString("OverflowMethod", this.overflowMethod.getSerializedName());
+
+        if (!this.overflowStacks.isEmpty()) {
+            var overflowStacks = new NbtList();
+            for (ItemStack stack : this.overflowStacks) {
+                if(stack.isEmpty())
+                    continue;
+
+                overflowStacks.add(stack.encode(registryLookup));
+            }
+
+            nbt.put("OverflowStacks", overflowStacks);
+        }
     }
 
     @Override
@@ -174,9 +193,9 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     public List<BlockPos> findPositions(@Nullable Direction facing) {
         List<BlockPos> positions = new ArrayList<>();
 
-        for(int x = -1; x <= 1; x++) {
-            for(int y = 0; y <= 2; y++) {
-                for(int z = -1; z <= 1; z++) {
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 2; y++) {
+                for (int z = -1; z <= 1; z++) {
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
@@ -225,8 +244,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     public void setDrilling(boolean drilling) {
         this.drilling = drilling;
-        this.retracting = !this.drilling;
-        update();
+    }
+
+    public void setRetracting(boolean retracting) {
+        this.retracting = retracting;
     }
 
     @Override
@@ -236,9 +257,68 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     }
 
     public void setRenderData(DrillRenderData renderData) {
-        if(this.world == null || !this.world.isClient)
+        if (this.world == null || !this.world.isClient)
             return;
 
         this.renderData = renderData;
+    }
+
+    public SimpleInventory getOutputInventory() {
+        return this.wrappedInventoryStorage.getInventory(1);
+    }
+
+    public void handleBlockBreak(BlockPos pos, BlockState state) {
+        if(this.world == null || this.world.isClient)
+            return;
+
+        List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(new LootContextParameterSet.Builder((ServerWorld) world)
+                .add(LootContextParameters.ORIGIN, pos.toCenterPos())
+                .add(LootContextParameters.BLOCK_STATE, state)
+                .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
+                .addOptional(LootContextParameters.BLOCK_ENTITY, this)));
+        SimpleInventory inventory = getOutputInventory();
+        for (int index = 0; index < drops.size(); index++) {
+            ItemStack drop = drops.get(index);
+            if(drop.isEmpty())
+                continue;
+
+            drops.set(index, inventory.addStack(drop));
+        }
+
+        switch (this.overflowMethod) {
+            case VOID:
+                break;
+            case PAUSE:
+                if (!drops.isEmpty()) {
+                    this.drilling = false;
+                }
+
+                break;
+            case SPILLAGE:
+                for (ItemStack drop : drops) {
+                    if (!drop.isEmpty()) {
+                        ItemScatterer.spawn(world, pos.getX(), pos.getY() + 2, pos.getZ(), drop);
+                    }
+                }
+                break;
+        }
+
+        world.breakBlock(pos, false);
+    }
+
+    public enum OverflowMethod {
+        VOID, PAUSE, SPILLAGE;
+
+        public String getSerializedName() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+
+        public static OverflowMethod getByName(String serializedName) {
+            try {
+                return OverflowMethod.valueOf(serializedName.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException exception) {
+                return OverflowMethod.VOID;
+            }
+        }
     }
 }

@@ -1,18 +1,23 @@
 package dev.turtywurty.industria;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.command.ConfigCommand;
+import dev.turtywurty.industria.config.ServerConfig;
 import dev.turtywurty.industria.fluid.FluidData;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.init.worldgen.FeatureInit;
-import dev.turtywurty.industria.network.BatteryChargeModePayload;
-import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
-import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
+import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
+import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -24,6 +29,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -37,6 +43,7 @@ import team.reborn.energy.api.EnergyStorage;
 public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public static Identifier id(String path) {
         return Identifier.of(MOD_ID, path);
@@ -94,6 +101,8 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SyncFluidPocketsPayload.ID, SyncFluidPocketsPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ChangeDrillingPayload.ID, ChangeDrillingPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(RetractDrillPayload.ID, RetractDrillPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -104,6 +113,25 @@ public class Industria implements ModInitializer {
                         batteryScreenHandler.getBlockEntity().setChargeMode(payload.chargeMode());
                     }
                 }));
+
+        ServerPlayNetworking.registerGlobalReceiver(ChangeDrillingPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+                DrillBlockEntity blockEntity = handler.getBlockEntity();
+                blockEntity.setDrilling(payload.drilling());
+                blockEntity.update();
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(RetractDrillPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+                DrillBlockEntity blockEntity = handler.getBlockEntity();
+                blockEntity.setDrilling(false);
+                blockEntity.setRetracting(true);
+                blockEntity.update();
+            }
+        });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld()));
@@ -117,6 +145,17 @@ public class Industria implements ModInitializer {
             if (serverState.removePosition(pos)) {
                 WorldFluidPocketsState.sync(serverWorld);
             }
+        });
+
+        ServerWorldEvents.LOAD.register((server, world) -> ServerConfig.onServerLoad(server));
+        ServerWorldEvents.UNLOAD.register((server, world) -> ServerConfig.onServerSave(server));
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            dispatcher.register(
+                    CommandManager.literal(Industria.MOD_ID)
+                            .requires(source -> source.hasPermissionLevel(3))
+                            .then(CommandManager.literal("config").then(ConfigCommand.register()))
+            );
         });
 
         // Fluid Properties

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.renderer.item;
 
+import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
@@ -18,7 +19,6 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLoader;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
@@ -78,18 +78,20 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         EntityModelLoader entityModelLoader = MinecraftClient.getInstance().getEntityModelLoader();
         if (stack.isOf(ItemInit.SEISMIC_SCANNER)) {
+            matrices.push();
             SeismicScannerRendering.renderSeismicScanner(stack, itemRenderer, this.seismicScanner, mode, matrices, vertexConsumers, light, overlay);
+            matrices.pop();
         }
 
         if(stack.getItem() instanceof DrillHeadable drillHeadable) {
             DrillHeadRegistry.DrillHeadClientData clientData = DrillHeadRegistry.getClientData(drillHeadable);
             if(clientData != null && clientData.renderDynamicItem()) {
-//                Model model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply());
-//                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
-//                matrices.push();
-//                matrices.scale(0.5F, 0.5F, 0.5F);
-//                model.render(matrices, vertexConsumers.getBuffer(model.getLayer(textureLocation)), light, overlay);
-//                matrices.pop();
+                Model model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(Either.right(entityModelLoader)));
+                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
+                matrices.push();
+                matrices.scale(0.5F, 0.5F, 0.5F);
+                model.render(matrices, vertexConsumers.getBuffer(model.getLayer(textureLocation)), light, overlay);
+                matrices.pop();
             }
         }
     }

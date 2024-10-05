@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.model.DrillFrameModel;
@@ -16,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +68,7 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
                 .color(70, 70, 70, 255)
                 .normal(0, 1, 0);
 
-        Model drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(this.context));
+        Model drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(Either.left(this.context)));
         Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> drillHeadData.textureLocation());
 
         matrices.push();
@@ -86,5 +88,10 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
     @Override
     public boolean rendersOutsideBoundingBox(DrillBlockEntity blockEntity) {
         return blockEntity.isDrilling() || blockEntity.isRetracting() && blockEntity.getDrillYOffset() < -1F;
+    }
+
+    @Override
+    public boolean isInRenderDistance(DrillBlockEntity blockEntity, Vec3d pos) {
+        return blockEntity.getPos().isWithinDistance(pos, 256);
     }
 }

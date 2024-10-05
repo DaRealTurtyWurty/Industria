@@ -21,7 +21,6 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry
 import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -161,7 +160,9 @@ public class IndustriaClient implements ClientModInitializer {
 
     private static void registerDrillHeads() {
         DrillHeadRegistry.register(ItemInit.SIMPLE_DRILL_HEAD, DrillHeadRegistry.DrillHeadClientData.create(
-                context -> new SimpleDrillHeadModel(context.getLayerModelPart(SimpleDrillHeadModel.LAYER_LOCATION)),
+                either -> new SimpleDrillHeadModel(either.map(ctx ->
+                                ctx.getLayerModelPart(SimpleDrillHeadModel.LAYER_LOCATION),
+                        loader -> loader.getModelPart(SimpleDrillHeadModel.LAYER_LOCATION))),
                 SimpleDrillHeadModel::onRender,
                 Industria.id("textures/block/simple_drill_head.png")));
     }

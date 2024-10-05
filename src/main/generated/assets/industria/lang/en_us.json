@@ -23,10 +23,10 @@
   "container.industria.solar_panel": "Solar Panel",
   "container.industria.thermal_generator": "Thermal Generator",
   "container.industria.wind_turbine": "Wind Turbine",
-  "entity.industria.drill_head": "Drill Head",
   "gui.industria.battery.charge_mode_button.tooltip": "Charge/Discharge",
   "item.industria.crude_oil_bucket": "Bucket of Crude Oil",
   "item.industria.seismic_scanner": "Seismic Scanner",
+  "item.industria.simple_drill_head": "Simple Drill Head",
   "item.industria.steel_ingot": "Steel Ingot",
   "itemGroup.industria.main": "Industria",
   "screen.industria.seismic_scanner": "Seismic Scanner"

@@ -133,6 +133,10 @@ public class WorldFluidPocketsState extends PersistentState {
         }
     }
 
+    public boolean isPositionInPocket(BlockPos pos) {
+        return this.fluidPockets.stream().anyMatch(fluidPocket -> fluidPocket.fluidPositions().contains(pos));
+    }
+
     public static class FluidPocket {
         private final FluidState fluidState;
         private final List<BlockPos> fluidPositions = new ArrayList<>();

@@ -26,13 +26,17 @@ public class DrillScreenHandler extends ScreenHandler {
         this.blockEntity = blockEntity;
         this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
 
-        SimpleInventory inventory = blockEntity.getDrillHeadInventory();
-        checkSize(inventory, 1);
-        inventory.onOpen(playerInv.player);
+        SimpleInventory drillHeadInventory = blockEntity.getDrillHeadInventory();
+        checkSize(drillHeadInventory, 1);
+        drillHeadInventory.onOpen(playerInv.player);
+
+        SimpleInventory outputInventory = blockEntity.getOutputInventory();
+        checkSize(outputInventory, 9);
+        outputInventory.onOpen(playerInv.player);
 
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
-        addBlockEntityInventory(inventory);
+        addBlockEntityInventory(drillHeadInventory, outputInventory);
     }
 
     private void addPlayerInventory(PlayerInventory inventory) {
@@ -49,8 +53,8 @@ public class DrillScreenHandler extends ScreenHandler {
         }
     }
 
-    private void addBlockEntityInventory(SimpleInventory inventory) {
-        addSlot(new Slot(inventory, 0, 80, 35) {
+    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory outputInventory) {
+        addSlot(new Slot(drillHeadInventory, 0, 80, 35) {
             @Override
             public boolean isEnabled() {
                 return !DrillScreenHandler.this.blockEntity.isDrilling();
@@ -61,8 +65,15 @@ public class DrillScreenHandler extends ScreenHandler {
                 return !DrillScreenHandler.this.blockEntity.isDrilling() && inventory.isValid(0, stack);
             }
         });
+
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                addSlot(new Slot(outputInventory, column + row * 3, 116 + column * 18, 17 + row * 18));
+            }
+        }
     }
 
+    // TODO: Rewrite this
     @Override
     public ItemStack quickMove(PlayerEntity player, int slot) {
         ItemStack stack = ItemStack.EMPTY;
@@ -93,5 +104,9 @@ public class DrillScreenHandler extends ScreenHandler {
     @Override
     public boolean canUse(PlayerEntity player) {
         return canUse(this.context, player, BlockInit.DRILL);
+    }
+
+    public DrillBlockEntity getBlockEntity() {
+        return this.blockEntity;
     }
 }
