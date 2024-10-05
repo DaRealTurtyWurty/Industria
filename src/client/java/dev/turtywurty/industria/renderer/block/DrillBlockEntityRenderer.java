@@ -5,6 +5,7 @@ import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.model.DrillFrameModel;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.util.DrillHeadable;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -87,4 +88,11 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
     public boolean rendersOutsideBoundingBox(DrillBlockEntity blockEntity) {
         return blockEntity.isDrilling() || blockEntity.isRetracting() && blockEntity.getDrillYOffset() < -1F;
     }
+
+    @Override
+    public int getRenderDistance() {
+        //TODO::COULD BE REPLACED WITH SIMULATION DISTANCE BUT THIS WORKS FINE
+        return 4096;
+    }
+
 }

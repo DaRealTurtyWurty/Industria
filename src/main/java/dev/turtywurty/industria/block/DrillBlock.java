@@ -99,4 +99,5 @@ public class DrillBlock extends Block implements BlockEntityProvider {
     protected BlockRenderType getRenderType(BlockState state) {
         return BlockRenderType.INVISIBLE;
     }
+
 }
