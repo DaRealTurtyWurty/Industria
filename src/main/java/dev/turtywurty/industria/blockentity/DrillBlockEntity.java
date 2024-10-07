@@ -263,6 +263,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         this.renderData = renderData;
     }
 
+    public OverflowMethod getOverflowMethod() {
+        return this.overflowMethod;
+    }
+
     public SimpleInventory getOutputInventory() {
         return this.wrappedInventoryStorage.getInventory(1);
     }
@@ -306,11 +310,25 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         world.breakBlock(pos, false);
     }
 
+    public void setOverflowMethod(OverflowMethod overflowMethod) {
+        this.overflowMethod = overflowMethod;
+    }
+
     public enum OverflowMethod {
         VOID, PAUSE, SPILLAGE;
 
+        public static final OverflowMethod[] VALUES = values();
+
         public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
+        }
+
+        public OverflowMethod next() {
+            return values()[(ordinal() + 1) % values().length];
+        }
+
+        public OverflowMethod previous() {
+            return values()[(ordinal() - 1 + values().length) % values().length];
         }
 
         public static OverflowMethod getByName(String serializedName) {

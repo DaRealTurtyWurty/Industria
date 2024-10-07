@@ -3,6 +3,7 @@ package dev.turtywurty.industria.screen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.network.ChangeDrillingPayload;
 import dev.turtywurty.industria.network.RetractDrillPayload;
+import dev.turtywurty.industria.screen.widget.OverflowModeButton;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
@@ -31,6 +32,8 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
         addDrawableChild(ButtonWidget.builder(Text.empty(), button -> ClientPlayNetworking.send(new RetractDrillPayload()))
                 .dimensions(this.x + 10, this.y + 48, 20, 20)
                 .build());
+
+        addDrawableChild(new OverflowModeButton(this.handler.getBlockEntity(), this.x + 40, this.y + 30, 16, 16));
     }
 
     @Override

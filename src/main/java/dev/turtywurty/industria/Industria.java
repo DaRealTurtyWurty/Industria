@@ -103,6 +103,7 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(SyncFluidPocketsPayload.ID, SyncFluidPocketsPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ChangeDrillingPayload.ID, ChangeDrillingPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(RetractDrillPayload.ID, RetractDrillPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ChangeDrillOverflowModePayload.ID, ChangeDrillOverflowModePayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -129,6 +130,15 @@ public class Industria implements ModInitializer {
                 DrillBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setDrilling(false);
                 blockEntity.setRetracting(true);
+                blockEntity.update();
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(ChangeDrillOverflowModePayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+                DrillBlockEntity blockEntity = handler.getBlockEntity();
+                blockEntity.setOverflowMethod(payload.overflowMethod());
                 blockEntity.update();
             }
         });

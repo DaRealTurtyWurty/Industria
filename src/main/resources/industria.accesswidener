@@ -14,3 +14,4 @@ accessible field net/minecraft/client/render/item/BuiltinModelItemRenderer block
 accessible field net/minecraft/client/render/item/BuiltinModelItemRenderer entityModelLoader Lnet/minecraft/client/render/entity/model/EntityModelLoader;
 accessible method net/minecraft/client/render/item/ItemRenderer renderBakedItemModel (Lnet/minecraft/client/render/model/BakedModel;Lnet/minecraft/item/ItemStack;IILnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;)V
 accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V
+accessible field net/minecraft/client/gui/widget/PressableWidget TEXTURES Lnet/minecraft/client/gui/screen/ButtonTextures;
