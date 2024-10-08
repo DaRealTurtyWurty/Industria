@@ -15,6 +15,8 @@ import dev.turtywurty.industria.renderer.item.IndustriaDynamicItemRenderer;
 import dev.turtywurty.industria.screen.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
@@ -32,6 +34,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.ParticleUtil;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -39,6 +42,7 @@ import net.minecraft.world.World;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class IndustriaClient implements ClientModInitializer {
     private static final Map<RegistryKey<World>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
@@ -91,6 +95,18 @@ public class IndustriaClient implements ClientModInitializer {
         ModelLoadingPlugin.register(IndustriaClient::registerModels);
         registerArmPositions();
         registerDrillHeads();
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(ClientCommandManager.literal("resource_reload").executes(context -> {
+                try {
+                    MinecraftClient.getInstance().reloadResourcesConcurrently().get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return 1;
+            }));
+        });
     }
 
     private static void handlePackets() {

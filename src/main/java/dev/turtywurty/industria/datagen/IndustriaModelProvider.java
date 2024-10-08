@@ -56,7 +56,9 @@ public class IndustriaModelProvider extends FabricModelProvider {
                 }));
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
-        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SIMPLE_DRILL_HEAD, BuiltinEntityModelBuilder.defaultItem());
+        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SIMPLE_DRILL_HEAD,
+                BuiltinEntityModelBuilder.defaultItem().copyModifyGui(displaySettings ->
+                        displaySettings.translate(0.5f, 0.0f, 0.0f)));
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {
