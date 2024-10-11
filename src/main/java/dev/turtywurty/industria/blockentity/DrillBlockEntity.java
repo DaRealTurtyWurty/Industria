@@ -11,8 +11,9 @@ import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
-import dev.turtywurty.industria.util.DrillHeadable;
-import dev.turtywurty.industria.util.DrillRenderData;
+import dev.turtywurty.industria.util.*;
+import dev.turtywurty.industria.util.enums.IndustriaEnum;
+import dev.turtywurty.industria.util.enums.StringRepresentable;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -126,7 +127,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         }
 
         if (nbt.contains("OverflowMethod", NbtElement.STRING_TYPE)) {
-            this.overflowMethod = OverflowMethod.getByName(nbt.getString("OverflowMethod"));
+            this.overflowMethod = StringRepresentable.getEnumByName(OverflowMethod.values(), nbt.getString("OverflowMethod").toLowerCase(Locale.ROOT));
         }
 
         if (nbt.contains("OverflowStacks", NbtElement.LIST_TYPE)) {
@@ -314,29 +315,27 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         this.overflowMethod = overflowMethod;
     }
 
-    public enum OverflowMethod {
+    public enum OverflowMethod implements IndustriaEnum<OverflowMethod> {
         VOID, PAUSE, SPILLAGE;
 
-        public static final OverflowMethod[] VALUES = values();
-
+        @Override
         public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
         }
 
+        @Override
         public OverflowMethod next() {
             return values()[(ordinal() + 1) % values().length];
         }
 
+        @Override
         public OverflowMethod previous() {
             return values()[(ordinal() - 1 + values().length) % values().length];
         }
 
-        public static OverflowMethod getByName(String serializedName) {
-            try {
-                return OverflowMethod.valueOf(serializedName.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException exception) {
-                return OverflowMethod.VOID;
-            }
+        @Override
+        public OverflowMethod[] getValues() {
+            return values();
         }
     }
 }
