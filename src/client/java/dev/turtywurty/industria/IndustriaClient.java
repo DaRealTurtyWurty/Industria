@@ -34,7 +34,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.ParticleUtil;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -42,7 +41,6 @@ import net.minecraft.world.World;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class IndustriaClient implements ClientModInitializer {
     private static final Map<RegistryKey<World>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
@@ -98,11 +96,7 @@ public class IndustriaClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("resource_reload").executes(context -> {
-                try {
-                    MinecraftClient.getInstance().reloadResourcesConcurrently().get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+                MinecraftClient.getInstance().reloadResourcesConcurrently();
 
                 return 1;
             }));

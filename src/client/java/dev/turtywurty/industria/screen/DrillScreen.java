@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.network.ChangeDrillOverflowModePayload;
 import dev.turtywurty.industria.network.ChangeDrillingPayload;
 import dev.turtywurty.industria.network.RetractDrillPayload;
@@ -13,6 +14,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+
+import java.util.HashMap;
 
 public class DrillScreen extends HandledScreen<DrillScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/drill.png");
@@ -40,8 +43,13 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
                     this.handler.getBlockEntity().setOverflowMethod(overflowMethod);
                     ClientPlayNetworking.send(new ChangeDrillOverflowModePayload(overflowMethod));
                 },
+                3,
                 this.x + 40, this.y + 30, 20, 20,
-                this.x + 42, this.y + 32, 16, 16));
+                new HashMap<>() {{
+                    for (DrillBlockEntity.OverflowMethod overflowMethod : DrillBlockEntity.OverflowMethod.values()) {
+                        put(overflowMethod, Industria.id("textures/gui/widget/overflow_" + overflowMethod.getSerializedName() + ".png"));
+                    }
+                }}));
     }
 
     @Override

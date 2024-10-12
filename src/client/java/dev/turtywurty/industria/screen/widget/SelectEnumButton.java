@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -51,7 +52,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int mouseXI = (int) mouseX, mouseYI = (int) mouseY;
         if (isMouseOverSelectionArea((int) mouseX, (int) mouseY) && this.hoveredLastFrame) {
-            int startX = getX() - (this.width * this.columns / 2);
+            int startX = getX() - (this.width * MathHelper.floor(this.columns / 2f));
             int startY = getBottom();
 
             int column = (mouseXI - startX) / this.width;
@@ -78,7 +79,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
         context.drawTexture(this.textureMap.get(this.value), getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16);
 
         if (this.hoveredLastFrame) {
-            int startX = getX() - (this.width * this.columns / 2);
+            int startX = getX() - (this.width * MathHelper.floor(this.columns / 2f));
             int startY = getBottom();
             for (int ordinal = 0; ordinal < this.value.getValues().length; ordinal++) {
                 T value = this.value.getValues()[ordinal];
@@ -88,11 +89,8 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
                 int x = startX + (this.width * column);
                 int y = startY + (this.height * row);
 
-                context.drawTexture(PLAIN_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height);
+                context.drawTexture(value == this.value ? HOVERED_TEXTURE : PLAIN_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height);
                 context.drawTexture(this.textureMap.get(value), x + 2, y + 2, 0, 0, 16, 16, 16, 16);
-                if (value == this.value) {
-                    context.drawTexture(HOVERED_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height);
-                }
 
                 // TODO: Disable-able values
             }
