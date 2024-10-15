@@ -3,6 +3,7 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
+import dev.turtywurty.industria.util.enums.TextEnum;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.registry.RegistryWrapper;
@@ -50,6 +51,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.DRILL, "Drill");
         addText(translationBuilder, DrillBlockEntity.TITLE, "Drill");
         translationBuilder.add(ItemInit.SIMPLE_DRILL_HEAD, "Simple Drill Head");
+        addTextEnum(translationBuilder, DrillBlockEntity.OverflowMethod.SPILLAGE, "Spillage");
+        addTextEnum(translationBuilder, DrillBlockEntity.OverflowMethod.VOID, "Void");
+        addTextEnum(translationBuilder, DrillBlockEntity.OverflowMethod.PAUSE, "Pause");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {
@@ -58,5 +62,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         } else {
             throw new IllegalArgumentException("Text must be translatable! " + text);
         }
+    }
+
+    private static void addTextEnum(TranslationBuilder translationBuilder, TextEnum textEnum, String value) {
+        addText(translationBuilder, textEnum.getAsText(), value);
     }
 }

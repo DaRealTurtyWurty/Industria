@@ -14,12 +14,12 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
 import java.util.HashMap;
 
 public class DrillScreen extends HandledScreen<DrillScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/drill.png");
-
 
     public DrillScreen(DrillScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -45,11 +45,11 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
                 },
                 3,
                 this.x + 40, this.y + 30, 20, 20,
-                new HashMap<>() {{
+                Util.make(new HashMap<>(), map -> {
                     for (DrillBlockEntity.OverflowMethod overflowMethod : DrillBlockEntity.OverflowMethod.values()) {
-                        put(overflowMethod, Industria.id("textures/gui/widget/overflow_" + overflowMethod.getSerializedName() + ".png"));
+                        map.put(overflowMethod, Industria.id("textures/gui/widget/overflow_" + overflowMethod.getSerializedName() + ".png"));
                     }
-                }}));
+                })));
     }
 
     @Override

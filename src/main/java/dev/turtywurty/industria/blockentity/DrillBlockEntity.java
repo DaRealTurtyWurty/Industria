@@ -318,6 +318,8 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     public enum OverflowMethod implements IndustriaEnum<OverflowMethod> {
         VOID, PAUSE, SPILLAGE;
 
+        private final Text text = Text.translatable("industria.overflow_method." + getSerializedName());
+
         @Override
         public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
@@ -336,6 +338,11 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         @Override
         public OverflowMethod[] getValues() {
             return values();
+        }
+
+        @Override
+        public Text getAsText() {
+            return this.text;
         }
     }
 }
