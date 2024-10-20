@@ -47,16 +47,16 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
     }
 
     private void addBlockEntitySlots() {
-        WrappedInventoryStorage<SimpleInventory> wrappedStorage = blockEntity.getWrappedStorage();
-        addSlot(new Slot(wrappedStorage.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0), 0, 42, 17));
-        addSlot(new Slot(wrappedStorage.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1), 0, 70, 17));
-        addSlot(new Slot(wrappedStorage.getInventory(AlloyFurnaceBlockEntity.FUEL_SLOT), 0, 56, 53) {
+        WrappedInventoryStorage<SimpleInventory> inventory = this.blockEntity.getWrappedStorage();
+        addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0), 0, 42, 17));
+        addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1), 0, 70, 17));
+        addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.FUEL_SLOT), 0, 56, 53) {
             @Override
             public boolean canInsert(ItemStack stack) {
                 return this.inventory.isValid(0, stack);
             }
         });
-        addSlot(new OutputSlot(wrappedStorage.getInventory(AlloyFurnaceBlockEntity.OUTPUT_SLOT), 0, 116, 35));
+        addSlot(new OutputSlot(inventory.getInventory(AlloyFurnaceBlockEntity.OUTPUT_SLOT), 0, 116, 35));
     }
 
     private void addPlayerInventory(PlayerInventory inventory) {

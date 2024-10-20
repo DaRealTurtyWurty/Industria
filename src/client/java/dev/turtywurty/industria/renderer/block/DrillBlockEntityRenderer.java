@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.model.DrillFrameModel;
+import dev.turtywurty.industria.model.DrillMotorModel;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.util.DrillHeadable;
 import net.minecraft.client.model.Model;
@@ -30,10 +31,12 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
 
     private final BlockEntityRendererFactory.Context context;
     private final DrillFrameModel model;
+    private final DrillMotorModel motorModel;
 
     public DrillBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         this.context = context;
         this.model = new DrillFrameModel(context.getLayerModelPart(DrillFrameModel.LAYER_LOCATION));
+        this.motorModel = new DrillMotorModel(context.getLayerModelPart(DrillMotorModel.LAYER_LOCATION));
     }
 
     @Override
@@ -50,6 +53,9 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
         }));
 
         this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION)), light, overlay);
+
+        if (!entity.getMotorInventory().isEmpty())
+            this.motorModel.render(matrices, vertexConsumers.getBuffer(this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION)), light, overlay);
 
         ItemStack drillHeadStack = entity.getDrillStack();
         if (drillHeadStack.isEmpty() || !(drillHeadStack.getItem() instanceof DrillHeadable drillHeadable)) {

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria;
 
+import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.model.*;
 import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
@@ -7,10 +8,7 @@ import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.registry.ArmPositionRegistry;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
-import dev.turtywurty.industria.renderer.block.CrusherBlockEntityRenderer;
-import dev.turtywurty.industria.renderer.block.DrillBlockEntityRenderer;
-import dev.turtywurty.industria.renderer.block.OilPumpJackBlockEntityRenderer;
-import dev.turtywurty.industria.renderer.block.WindTurbineBlockEntityRenderer;
+import dev.turtywurty.industria.renderer.block.*;
 import dev.turtywurty.industria.renderer.item.IndustriaDynamicItemRenderer;
 import dev.turtywurty.industria.screen.*;
 import net.fabricmc.api.ClientModInitializer;
@@ -24,6 +22,7 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
@@ -59,6 +58,7 @@ public class IndustriaClient implements ClientModInitializer {
         HandledScreens.register(ScreenHandlerTypeInit.WIND_TURBINE, WindTurbineScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.OIL_PUMP_JACK, OilPumpJackScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.DRILL, DrillScreen::new);
+        HandledScreens.register(ScreenHandlerTypeInit.MOTOR, MotorScreen::new);
 
         // Registering Models
         EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::getTexturedModelData);
@@ -66,12 +66,15 @@ public class IndustriaClient implements ClientModInitializer {
         EntityModelLayerRegistry.registerModelLayer(OilPumpJackModel.LAYER_LOCATION, OilPumpJackModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(DrillFrameModel.LAYER_LOCATION, DrillFrameModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(SimpleDrillHeadModel.LAYER_LOCATION, SimpleDrillHeadModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(MotorModel.LAYER_LOCATION, MotorModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(DrillMotorModel.LAYER_LOCATION, DrillMotorModel::getTexturedModelData);
 
         // Registering Block Entity Renderers
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.OIL_PUMP_JACK, OilPumpJackBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.DRILL, DrillBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.MOTOR, MotorBlockEntityRenderer::new);
 
         // Registering BuiltinModelItemRenderers
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);
@@ -79,6 +82,7 @@ public class IndustriaClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DRILL, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SEISMIC_SCANNER, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SIMPLE_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.MOTOR, IndustriaDynamicItemRenderer.INSTANCE);
 
         // Register Fluid Renderers
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
@@ -147,6 +151,18 @@ public class IndustriaClient implements ClientModInitializer {
                     ParticleUtil.spawnParticlesAround(world, pos, 1, ParticleTypes.DRIPPING_WATER);
                 }
             }
+        });
+
+        WorldRenderEvents.BLOCK_OUTLINE.register((worldRenderContext, blockOutlineContext) -> {
+            World world = worldRenderContext.world();
+            BlockPos blockPos = blockOutlineContext.blockPos();
+
+            BlockState state = blockOutlineContext.blockState();
+            if (state.getBlock() instanceof MultiblockBlock multiblockBlock) {
+
+            }
+
+            return true;
         });
     }
 

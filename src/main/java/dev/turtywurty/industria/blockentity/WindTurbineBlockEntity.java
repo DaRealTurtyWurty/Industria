@@ -40,7 +40,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Tick
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
 
     private float windSpeed = -1F;
-    private float propellerRotation = 0F;
+    private float propellerRotation = 0F; // Client side only
 
     public WindTurbineBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.WIND_TURBINE, pos, state);

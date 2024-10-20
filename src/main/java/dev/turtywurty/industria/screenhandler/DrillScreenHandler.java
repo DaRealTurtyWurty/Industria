@@ -4,6 +4,7 @@ import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -30,13 +31,17 @@ public class DrillScreenHandler extends ScreenHandler {
         checkSize(drillHeadInventory, 1);
         drillHeadInventory.onOpen(playerInv.player);
 
+        SimpleInventory motorInventory = blockEntity.getMotorInventory();
+        checkSize(motorInventory, 1);
+        motorInventory.onOpen(playerInv.player);
+
         SimpleInventory outputInventory = blockEntity.getOutputInventory();
         checkSize(outputInventory, 9);
         outputInventory.onOpen(playerInv.player);
 
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
-        addBlockEntityInventory(drillHeadInventory, outputInventory);
+        addBlockEntityInventory(drillHeadInventory, motorInventory, outputInventory);
     }
 
     private void addPlayerInventory(PlayerInventory inventory) {
@@ -53,7 +58,7 @@ public class DrillScreenHandler extends ScreenHandler {
         }
     }
 
-    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory outputInventory) {
+    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory motorInventory, SimpleInventory outputInventory) {
         addSlot(new Slot(drillHeadInventory, 0, 80, 35) {
             @Override
             public boolean isEnabled() {
@@ -66,9 +71,16 @@ public class DrillScreenHandler extends ScreenHandler {
             }
         });
 
+        addSlot(new Slot(motorInventory, 0, 80, 53) {
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return inventory.isValid(0, stack);
+            }
+        });
+
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 3; column++) {
-                addSlot(new Slot(outputInventory, 1 + column + row * 3, 116 + column * 18, 17 + row * 18));
+                addSlot(new OutputSlot(outputInventory, column + row * 3, 116 + column * 18, 17 + row * 18));
             }
         }
     }

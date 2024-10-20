@@ -14,6 +14,7 @@ import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
+import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -97,6 +98,8 @@ public class Industria implements ModInitializer {
 
         EnergyStorage.SIDED.registerForBlockEntity(WindTurbineBlockEntity::getEnergyProvider, BlockEntityTypeInit.WIND_TURBINE);
 
+        EnergyStorage.SIDED.registerForBlockEntity(MotorBlockEntity::getEnergyProvider, BlockEntityTypeInit.MOTOR);
+
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);
@@ -104,6 +107,7 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(ChangeDrillingPayload.ID, ChangeDrillingPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(RetractDrillPayload.ID, RetractDrillPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ChangeDrillOverflowModePayload.ID, ChangeDrillOverflowModePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -139,6 +143,15 @@ public class Industria implements ModInitializer {
             if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
                 DrillBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setOverflowMethod(payload.overflowMethod());
+                blockEntity.update();
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(SetMotorTargetRPMPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof MotorScreenHandler handler) {
+                MotorBlockEntity blockEntity = handler.getBlockEntity();
+                blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
                 blockEntity.update();
             }
         });

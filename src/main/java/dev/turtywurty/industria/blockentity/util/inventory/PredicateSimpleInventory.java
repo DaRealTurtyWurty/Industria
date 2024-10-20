@@ -23,22 +23,6 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
         return this.predicate.test(stack, slot);
     }
 
-    @Override
-    public void setStack(int slot, ItemStack stack) {
-        if(isValid(slot, stack)) {
-            super.setStack(slot, stack);
-        }
-    }
-
-    @Override
-    public ItemStack addStack(ItemStack stack) {
-        if(isValid(0, stack)) {
-            return super.addStack(stack);
-        }
-
-        return stack;
-    }
-
     public BiPredicate<ItemStack, Integer> getPredicate() {
         return this.predicate;
     }

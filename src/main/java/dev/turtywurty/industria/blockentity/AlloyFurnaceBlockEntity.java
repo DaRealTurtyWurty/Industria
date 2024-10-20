@@ -176,7 +176,13 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
 
             ItemStack output = recipe.craft(this.wrappedInventoryStorage.getRecipeInventory(), this.world.getRegistryManager());
             if(canOutput(output)) {
-                this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).addStack(output);
+                SimpleInventory outputInventory = this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT);
+                ItemStack outputStack = outputInventory.getStack(0);
+                if(outputStack.isEmpty()) {
+                    outputInventory.setStack(0, output);
+                } else {
+                    outputStack.increment(output.getCount());
+                }
             } else {
                 this.bufferedStack = output;
             }

@@ -56,6 +56,9 @@ public class BlockInit {
     public static final DrillBlock DRILL = registerWithItem("drill",
             new DrillBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
 
+    public static final MotorBlock MOTOR = registerWithItem("motor",
+            new MotorBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque()));
+
     public static Block register(String name, AbstractBlock.Settings settings) {
         return register(name, new Block(settings));
     }

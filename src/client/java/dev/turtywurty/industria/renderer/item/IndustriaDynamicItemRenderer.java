@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
+import dev.turtywurty.industria.blockentity.MotorBlockEntity;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
@@ -29,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.profiler.Profiler;
 
 import java.util.HashMap;
@@ -42,6 +44,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
     private final WindTurbineBlockEntity windTurbine = new WindTurbineBlockEntity(BlockPos.ORIGIN, BlockInit.WIND_TURBINE.getDefaultState());
     private final OilPumpJackBlockEntity oilPumpJack = new OilPumpJackBlockEntity(BlockPos.ORIGIN, BlockInit.OIL_PUMP_JACK.getDefaultState());
     private final DrillBlockEntity drill = new DrillBlockEntity(BlockPos.ORIGIN, BlockInit.DRILL.getDefaultState());
+    private final MotorBlockEntity motor = new MotorBlockEntity(BlockPos.ORIGIN, BlockInit.MOTOR.getDefaultState());
+
     private BakedModel seismicScanner;
     private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
     private final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
@@ -51,7 +55,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
     private final Map<Item, ? extends BlockEntity> blockEntities = Map.of(
             BlockInit.WIND_TURBINE.asItem(), windTurbine,
             BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack,
-            BlockInit.DRILL.asItem(), drill
+            BlockInit.DRILL.asItem(), drill,
+            BlockInit.MOTOR.asItem(), motor
     );
 
     @Override
@@ -89,6 +94,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
                 Model model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(Either.right(entityModelLoader)));
                 Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
                 matrices.push();
+                matrices.translate(0.5f, 0.75f, 0.5f);
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
                 matrices.scale(0.5F, 0.5F, 0.5F);
                 model.render(matrices, vertexConsumers.getBuffer(model.getLayer(textureLocation)), light, overlay);
                 matrices.pop();

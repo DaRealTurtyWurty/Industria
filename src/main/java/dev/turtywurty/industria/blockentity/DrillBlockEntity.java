@@ -7,6 +7,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -61,6 +62,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         super(BlockEntityTypeInit.DRILL, pos, state);
 
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable), Direction.UP);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.isOf(BlockInit.MOTOR.asItem())), Direction.NORTH);
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.DOWN);
 
         getDrillHeadInventory().addListener(inv -> {
@@ -227,6 +229,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         return this.wrappedInventoryStorage.getInventory(0);
     }
 
+    public SimpleInventory getMotorInventory() {
+        return this.wrappedInventoryStorage.getInventory(1);
+    }
+
     public boolean isDrilling() {
         return this.drilling;
     }
@@ -269,7 +275,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     }
 
     public SimpleInventory getOutputInventory() {
-        return this.wrappedInventoryStorage.getInventory(1);
+        return this.wrappedInventoryStorage.getInventory(2);
     }
 
     public void handleBlockBreak(BlockPos pos, BlockState state) {

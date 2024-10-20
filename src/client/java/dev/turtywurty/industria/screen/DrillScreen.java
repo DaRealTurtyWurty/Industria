@@ -21,6 +21,8 @@ import java.util.HashMap;
 public class DrillScreen extends HandledScreen<DrillScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/drill.png");
 
+    private SelectEnumButton<DrillBlockEntity.OverflowMethod> overflowButton;
+
     public DrillScreen(DrillScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
     }
@@ -28,16 +30,23 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
     @Override
     protected void init() {
         super.init();
-        addDrawableChild(ButtonWidget.builder(Text.empty(), button ->
-                        ClientPlayNetworking.send(new ChangeDrillingPayload(!this.handler.getBlockEntity().isDrilling())))
+        addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
+                    if (!this.overflowButton.isHoveredLastFrame()) {
+                        ClientPlayNetworking.send(new ChangeDrillingPayload(!this.handler.getBlockEntity().isDrilling()));
+                    }
+                })
                 .dimensions(this.x + 10, this.y + 16, 20, 20)
                 .build());
 
-        addDrawableChild(ButtonWidget.builder(Text.empty(), button -> ClientPlayNetworking.send(new RetractDrillPayload()))
+        addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
+                    if (!this.overflowButton.isHoveredLastFrame()) {
+                        ClientPlayNetworking.send(new RetractDrillPayload());
+                    }
+                })
                 .dimensions(this.x + 10, this.y + 48, 20, 20)
                 .build());
 
-        addDrawableChild(new SelectEnumButton<>(
+        this.overflowButton = addDrawableChild(new SelectEnumButton<>(
                 this.handler.getBlockEntity().getOverflowMethod(),
                 overflowMethod -> {
                     this.handler.getBlockEntity().setOverflowMethod(overflowMethod);

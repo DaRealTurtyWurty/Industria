@@ -67,6 +67,14 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
         setActiveness();
     }
 
+    public T getValue() {
+        return this.value;
+    }
+
+    public boolean isHoveredLastFrame() {
+        return this.hoveredLastFrame;
+    }
+
     @Override
     public void onPress() {
         if (Screen.hasShiftDown())
@@ -121,7 +129,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
             }
 
             // draw hover tooltip
-            if(isMouseOverSelectionArea(mouseX, mouseY + 1)) {
+            if(isMouseOverSelectionArea(mouseX, mouseY)) {
                 int ordinal = getOrdinal(mouseX, mouseY);
 
                 T current = this.value.getValues()[ordinal];
@@ -161,7 +169,11 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     private int getOrdinal(int x, int y) {
         int startX = getSelectionLeft();
         int startY = getBottom();
-        int column = (x - startX) / this.width;
+        int localX = x - startX;
+        if(localX < 0)
+            return -1;
+
+        int column = localX / this.width;
         int row = (y - startY) / this.height;
         return column + (row * this.columns);
     }

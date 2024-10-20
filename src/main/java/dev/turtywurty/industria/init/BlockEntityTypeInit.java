@@ -52,6 +52,10 @@ public class BlockEntityTypeInit {
             BlockEntityType.Builder.create(DrillBlockEntity::new, BlockInit.DRILL)
                     .build());
 
+    public static final BlockEntityType<MotorBlockEntity> MOTOR = register("motor",
+            BlockEntityType.Builder.create(MotorBlockEntity::new, BlockInit.MOTOR)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

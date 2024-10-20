@@ -1,8 +1,8 @@
-// 1.21.1	2024-10-15T11:41:38.1318867	Industria/Recipes
+// 1.21.1	2024-10-18T21:04:52.1380391	Industria/Recipes
 cd63bebd2924ed261f35e83868bd233a8bc40a10 data\industria\recipe\crusher_coal_ore.json
 5c496f97946c880ccf500483695b9e395bef37ea data\industria\recipe\crusher_nether_gold_ore.json
-8c67fd773e05dcc574373da30cdbf31274843922 data\industria\advancement\recipes\misc\crusher_emerald_ore.json
 e2c303fbf676d4e68d3b2f683bf95df1c3b9e957 data\industria\recipe\crusher_gravel.json
+8c67fd773e05dcc574373da30cdbf31274843922 data\industria\advancement\recipes\misc\crusher_emerald_ore.json
 97a248616fc05e4ffdbfaee54f1c742a81d4367e data\industria\recipe\alloy_steel_ingot.json
 5243c84495063891dc3107915299a52320f2a284 data\industria\advancement\recipes\misc\alloy_furnace.json
 ed95a43cffe28f38bcdce34b0d72b9bbc1270b35 data\industria\advancement\recipes\misc\crusher_gravel.json
