@@ -2,16 +2,14 @@ package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
+import dev.turtywurty.industria.block.CableBlock;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-import net.minecraft.data.client.BlockStateModelGenerator;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.data.client.Models;
-import net.minecraft.data.client.TexturedModel;
+import net.minecraft.data.client.*;
 
 public class IndustriaModelProvider extends FabricModelProvider {
     public IndustriaModelProvider(FabricDataOutput output) {
@@ -31,6 +29,55 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.SOLAR_PANEL);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
         blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL_BLOCK);
+
+        BlockStateSupplier cableSupplier = MultipartBlockStateSupplier.create(BlockInit.CABLE)
+                .with(BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/cable_dot")))
+                .with(When.anyOf(When.create().set(CableBlock.NORTH, CableBlock.ConnectorType.CABLE)),
+                        BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/cable")))
+                .with(When.anyOf(When.create().set(CableBlock.EAST, CableBlock.ConnectorType.CABLE)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable"))
+                                .put(VariantSettings.Y, VariantSettings.Rotation.R90))
+                .with(When.anyOf(When.create().set(CableBlock.SOUTH, CableBlock.ConnectorType.CABLE)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable"))
+                                .put(VariantSettings.Y, VariantSettings.Rotation.R180))
+                .with(When.anyOf(When.create().set(CableBlock.WEST, CableBlock.ConnectorType.CABLE)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable"))
+                                .put(VariantSettings.Y, VariantSettings.Rotation.R270))
+                .with(When.anyOf(When.create().set(CableBlock.UP, CableBlock.ConnectorType.CABLE)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable"))
+                                .put(VariantSettings.X, VariantSettings.Rotation.R270))
+                .with(When.anyOf(When.create().set(CableBlock.DOWN, CableBlock.ConnectorType.CABLE)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable"))
+                                .put(VariantSettings.X, VariantSettings.Rotation.R90))
+                .with(When.anyOf(When.create().set(CableBlock.NORTH, CableBlock.ConnectorType.BLOCK)),
+                        BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/cable_connected")))
+                .with(When.anyOf(When.create().set(CableBlock.EAST, CableBlock.ConnectorType.BLOCK)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable_connected"))
+                                .put(VariantSettings.Y, VariantSettings.Rotation.R90))
+                .with(When.anyOf(When.create().set(CableBlock.SOUTH, CableBlock.ConnectorType.BLOCK)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable_connected"))
+                                .put(VariantSettings.Y, VariantSettings.Rotation.R180))
+                .with(When.anyOf(When.create().set(CableBlock.WEST, CableBlock.ConnectorType.BLOCK)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable_connected"))
+                                .put(VariantSettings.Y, VariantSettings.Rotation.R270))
+                .with(When.anyOf(When.create().set(CableBlock.UP, CableBlock.ConnectorType.BLOCK)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable_connected"))
+                                .put(VariantSettings.X, VariantSettings.Rotation.R270))
+                .with(When.anyOf(When.create().set(CableBlock.DOWN, CableBlock.ConnectorType.BLOCK)),
+                        BlockStateVariant.create()
+                                .put(VariantSettings.MODEL, Industria.id("block/cable_connected"))
+                                .put(VariantSettings.X, VariantSettings.Rotation.R90));
+
+        blockStateModelGenerator.blockStateCollector.accept(cableSupplier);
     }
 
     @Override

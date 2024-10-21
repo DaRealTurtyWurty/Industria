@@ -1,0 +1,163 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/cable_dot"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable"
+      },
+      "when": {
+        "OR": [
+          {
+            "north": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable",
+        "y": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "east": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable",
+        "y": 180
+      },
+      "when": {
+        "OR": [
+          {
+            "south": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable",
+        "y": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "west": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable",
+        "x": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "up": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable",
+        "x": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "down": "cable"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable_connected"
+      },
+      "when": {
+        "OR": [
+          {
+            "north": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable_connected",
+        "y": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "east": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable_connected",
+        "y": 180
+      },
+      "when": {
+        "OR": [
+          {
+            "south": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable_connected",
+        "y": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "west": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable_connected",
+        "x": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "up": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/cable_connected",
+        "x": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "down": "block"
+          }
+        ]
+      }
+    }
+  ]
+}

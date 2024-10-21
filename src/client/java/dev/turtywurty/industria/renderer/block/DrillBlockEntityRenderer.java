@@ -70,7 +70,7 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
         }
 
         VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
-        linesVertexConsumer.vertex(matrices.peek(), 0, -2f, 0)
+        linesVertexConsumer.vertex(matrices.peek(), 0, -1.54f, 0)
                 .color(70, 70, 70, 255)
                 .normal(0, 1, 0);
 

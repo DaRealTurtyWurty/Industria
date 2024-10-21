@@ -43,18 +43,18 @@ public class CableBlock extends Block implements Waterloggable, BlockEntityProvi
     public static final EnumProperty<ConnectorType> UP = EnumProperty.of("up", ConnectorType.class);
     public static final EnumProperty<ConnectorType> DOWN = EnumProperty.of("down", ConnectorType.class);
 
-    private static final VoxelShape SHAPE_CABLE_NORTH = VoxelShapes.cuboid(0.4, 0.4, 0, 0.6, 0.6, 0.4);
-    private static final VoxelShape SHAPE_CABLE_SOUTH = VoxelShapes.cuboid(0.4, 0.4, 0.6, 0.6, 0.6, 1);
-    private static final VoxelShape SHAPE_CABLE_WEST = VoxelShapes.cuboid(0, 0.4, 0.4, 0.4, 0.6, 0.6);
-    private static final VoxelShape SHAPE_CABLE_EAST = VoxelShapes.cuboid(0.6, 0.4, 0.4, 1, 0.6, 0.6);
-    private static final VoxelShape SHAPE_CABLE_UP = VoxelShapes.cuboid(0.4, 0.6, 0.4, 0.6, 1, 0.6);
-    private static final VoxelShape SHAPE_CABLE_DOWN = VoxelShapes.cuboid(0.4, 0, 0.4, 0.6, 0.4, 0.6);
-    private static final VoxelShape SHAPE_BLOCK_NORTH = VoxelShapes.cuboid(0.2, 0.2, 0, 0.8, 0.8, 0.1);
-    private static final VoxelShape SHAPE_BLOCK_SOUTH = VoxelShapes.cuboid(0.2, 0.2, 0.9, 0.8, 0.8, 1);
-    private static final VoxelShape SHAPE_BLOCK_WEST = VoxelShapes.cuboid(0, 0.2, 0.2, 0.1, 0.8, 0.8);
-    private static final VoxelShape SHAPE_BLOCK_EAST = VoxelShapes.cuboid(0.9, 0.2, 0.2, 1, 0.8, 0.8);
-    private static final VoxelShape SHAPE_BLOCK_UP = VoxelShapes.cuboid(0.2, 0.9, 0.2, 0.8, 1, 0.8);
-    private static final VoxelShape SHAPE_BLOCK_DOWN = VoxelShapes.cuboid(0.2, 0, 0.2, 0.8, 0.1, 0.8);
+    private static final VoxelShape SHAPE_CABLE_NORTH = VoxelShapes.cuboid(0.375, 0.375, 0, 0.625, 0.625, 0.375);
+    private static final VoxelShape SHAPE_CABLE_SOUTH = VoxelShapes.cuboid(0.375, 0.375, 0.625, 0.625, 0.625, 1);
+    private static final VoxelShape SHAPE_CABLE_WEST = VoxelShapes.cuboid(0, 0.375, 0.375, 0.375, 0.625, 0.625);
+    private static final VoxelShape SHAPE_CABLE_EAST = VoxelShapes.cuboid(0.625, 0.375, 0.375, 1, 0.625, 0.625);
+    private static final VoxelShape SHAPE_CABLE_UP = VoxelShapes.cuboid(0.375, 0.625, 0.375, 0.625, 1, 0.625);
+    private static final VoxelShape SHAPE_CABLE_DOWN = VoxelShapes.cuboid(0.375, 0, 0.375, 0.625, 0.375, 0.625);
+    private static final VoxelShape SHAPE_BLOCK_NORTH = VoxelShapes.cuboid(0.25, 0.25, 0, 0.75, 0.75, 0.125);
+    private static final VoxelShape SHAPE_BLOCK_SOUTH = VoxelShapes.cuboid(0.25, 0.25, 0.875, 0.75, 0.75, 1);
+    private static final VoxelShape SHAPE_BLOCK_WEST = VoxelShapes.cuboid(0, 0.25, 0.25, 0.125, 0.75, 0.75);
+    private static final VoxelShape SHAPE_BLOCK_EAST = VoxelShapes.cuboid(0.875, 0.25, 0.25, 1, 0.75, 0.75);
+    private static final VoxelShape SHAPE_BLOCK_UP = VoxelShapes.cuboid(0.25, 0.875, 0.25, 0.75, 1, 0.75);
+    private static final VoxelShape SHAPE_BLOCK_DOWN = VoxelShapes.cuboid(0.25, 0, 0.25, 0.75, 0.125, 0.75);
     private static VoxelShape[] shapeCache = null;
 
     public CableBlock(Settings settings) {
@@ -207,7 +207,7 @@ public class CableBlock extends Block implements Waterloggable, BlockEntityProvi
 
     @Override
     protected BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE; // TODO: Remove when model is added
+        return BlockRenderType.MODEL;
     }
 
     @Nullable
