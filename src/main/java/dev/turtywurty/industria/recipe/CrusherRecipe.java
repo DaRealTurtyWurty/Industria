@@ -12,13 +12,13 @@ import dev.turtywurty.industria.util.OutputItemStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.IngredientPlacement;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Pair;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
@@ -51,34 +51,28 @@ public record CrusherRecipe(CountedIngredient input, OutputItemStack outputA, Ou
     }
 
     @Override
-    public boolean fits(int width, int height) {
-        return width * height >= 1;
-    }
-
-    @Override
-    public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
-        return this.outputA.createStack(new LocalRandom(ThreadLocalRandom.current().nextLong()));
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends Recipe<RecipeSimpleInventory>> getSerializer() {
         return RecipeSerializerInit.CRUSHER;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<? extends Recipe<RecipeSimpleInventory>> getType() {
         return RecipeTypeInit.CRUSHER;
+    }
+
+    @Override
+    public IngredientPlacement getIngredientPlacement() {
+        return IngredientPlacement.NONE;
+    }
+
+    @Override
+    public RecipeBookCategory getRecipeBookCategory() {
+        return null;
     }
 
     @Override
     public String getGroup() {
         return Industria.id("crusher").toString();
-    }
-
-    @Override
-    public DefaultedList<Ingredient> getIngredients() {
-        return DefaultedList.copyOf(Ingredient.EMPTY,
-                Ingredient.ofStacks(this.input.getMatchingStacks().toArray(new ItemStack[0])));
     }
 
     public static class Type implements RecipeType<CrusherRecipe> {

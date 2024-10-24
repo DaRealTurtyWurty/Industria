@@ -10,6 +10,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -22,12 +23,15 @@ import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.block.WireOrientation;
 import net.minecraft.world.tick.OrderedTick;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
@@ -164,18 +168,18 @@ public class CableBlock extends Block implements Waterloggable, BlockEntityProvi
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickScheduler().scheduleTick(new OrderedTick<>(Fluids.WATER, pos, Fluids.WATER.getTickRate(world), 0L));   // TODO: Figure out what the sub tick order is
+            tickView.getFluidTickScheduler().scheduleTick(new OrderedTick<>(Fluids.WATER, pos, Fluids.WATER.getTickRate(world), 0L));   // TODO: Figure out what the sub tick order is
         }
 
         return calculateState((World) world, pos, state);
     }
 
     @Override
-    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-        super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
-        if(!world.isClient && world.getBlockEntity(pos) instanceof CableBlockEntity cable) {
+    protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
+        super.neighborUpdate(state, world, pos, sourceBlock, wireOrientation, notify);
+        if (!world.isClient && world.getBlockEntity(pos) instanceof CableBlockEntity cable) {
             cable.markDirty();
         }
 
@@ -224,14 +228,17 @@ public class CableBlock extends Block implements Waterloggable, BlockEntityProvi
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if(!world.isClient) {
+        if(player.getActiveItem().getItem() instanceof BlockItem)
+            return ActionResult.PASS;
+
+        if (!world.isClient) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            if(blockEntity instanceof CableBlockEntity cable) {
+            if (blockEntity instanceof CableBlockEntity cable) {
                 player.sendMessage(Text.literal(cable.getEnergy().amount + " / " + cable.getEnergy().getCapacity() + " FE"), true);
             }
         }
 
-        return ActionResult.success(world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     public enum ConnectorType implements StringIdentifiable {

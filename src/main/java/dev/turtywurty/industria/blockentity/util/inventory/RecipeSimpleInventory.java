@@ -17,9 +17,4 @@ public class RecipeSimpleInventory extends SimpleInventory implements RecipeInpu
     public ItemStack getStackInSlot(int slot) {
         return getStack(slot);
     }
-
-    @Override
-    public int getSize() {
-        return size();
-    }
 }

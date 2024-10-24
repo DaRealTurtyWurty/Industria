@@ -50,7 +50,7 @@ public class CrusherBlock extends HorizontalFacingBlock implements BlockEntityPr
             }
         }
 
-        return ActionResult.success(world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     @Override

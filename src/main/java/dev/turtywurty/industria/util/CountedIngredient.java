@@ -11,65 +11,72 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * A custom ingredient that represents an ingredient with a specific count.
  *
- * @param ingredient The ingredient
- * @param count      The count of the ingredient
+ * @param stacks The stacks that make up the ingredient
+ * @param count  The count of the ingredient
  * @see CustomIngredient
  */
-public record CountedIngredient(Ingredient ingredient, int count) implements CustomIngredient {
+public record CountedIngredient(List<ItemStack> stacks, int count) implements CustomIngredient {
+    private static final PacketCodec<RegistryByteBuf, List<ItemStack>> STACKS_CODEC =
+            PacketCodecs.collection(ArrayList::new, ItemStack.PACKET_CODEC);
+
     public static final MapCodec<CountedIngredient> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Ingredient.ALLOW_EMPTY_CODEC.fieldOf("ingredient").forGetter(CountedIngredient::ingredient),
+            ItemStack.OPTIONAL_CODEC.listOf().fieldOf("stack").forGetter(CountedIngredient::stacks),
             Codec.INT.fieldOf("count").forGetter(CountedIngredient::count)
     ).apply(instance, CountedIngredient::new));
 
     public static final PacketCodec<RegistryByteBuf, CountedIngredient> PACKET_CODEC =
             PacketCodec.ofStatic((buf, countedIngredient) -> {
-                Ingredient.PACKET_CODEC.encode(buf, countedIngredient.ingredient());
+                STACKS_CODEC.encode(buf, countedIngredient.stacks());
                 buf.writeVarInt(countedIngredient.count());
-            }, buf -> new CountedIngredient(Ingredient.PACKET_CODEC.decode(buf), buf.readVarInt()));
+            }, buf -> new CountedIngredient(STACKS_CODEC.decode(buf), buf.readVarInt()));
 
     public static final Serializer SERIALIZER = new Serializer();
-    public static final CountedIngredient EMPTY = new CountedIngredient(Ingredient.EMPTY, 0);
+    public static final CountedIngredient EMPTY = new CountedIngredient(
+            Util.make(new ArrayList<>(), itemStacks -> itemStacks.add(ItemStack.EMPTY)), 0);
 
     public static CountedIngredient ofItems(int count, ItemConvertible... items) {
-        return new CountedIngredient(Ingredient.ofItems(items), count);
+        return new CountedIngredient(Util.make(new ArrayList<>(), itemStacks -> {
+            for (ItemConvertible item : items) {
+                itemStacks.add(new ItemStack(item));
+            }
+        }), count);
     }
 
-    public static CountedIngredient ofStacks(int count, ItemStack... items) {
-        return new CountedIngredient(Ingredient.ofStacks(items), count);
-    }
-
-    public static CountedIngredient ofStacks(int count, Stream<ItemStack> items) {
-        return new CountedIngredient(Ingredient.ofStacks(items), count);
-    }
-
-    public static CountedIngredient fromTag(int count, TagKey<Item> tagKey) {
-        return new CountedIngredient(Ingredient.fromTag(tagKey), count);
+    public static CountedIngredient fromTag(int count, RegistryEntryList<Item> tagKey) {
+        return new CountedIngredient(Util.make(new ArrayList<>(), itemStacks ->
+                tagKey.forEach(item -> itemStacks.add(new ItemStack(item)))), count);
     }
 
     @Override
     public boolean test(ItemStack stack) {
-        return this.ingredient.test(stack) && stack.getCount() >= this.count;
+        return this.stacks.stream().anyMatch(itemStack -> ItemStack.areItemsAndComponentsEqual(itemStack, stack));
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
-        return List.of(Arrays.stream(this.ingredient.getMatchingStacks()).map(stack -> {
-            ItemStack copy = stack.copy();
-            copy.setCount(this.count);
-            return copy;
-        }).toArray(ItemStack[]::new));
+    public List<RegistryEntry<Item>> getMatchingItems() {
+        return this.stacks.stream().map(ItemStack::getItem).map(RegistryEntry::of).toList();
     }
+
+//    @Override
+//    public List<ItemStack> getMatchingStacks() {
+//        return List.of(Arrays.stream(this.ingredient.getMatchingStacks()).map(stack -> {
+//            ItemStack copy = stack.copy();
+//            copy.setCount(this.count);
+//            return copy;
+//        }).toArray(ItemStack[]::new));
+//    }
 
     @Override
     public boolean requiresTesting() {
@@ -98,7 +105,7 @@ public record CountedIngredient(Ingredient ingredient, int count) implements Cus
         }
 
         @Override
-        public MapCodec<CountedIngredient> getCodec(boolean allowEmpty) {
+        public MapCodec<CountedIngredient> getCodec() {
             return CODEC;
         }
 

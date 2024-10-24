@@ -4,10 +4,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "fluid.BoatDispenserBehaviorMixin",
-    "fluid.BoatEntityMixin",
+    "fluid.AbstractBoatEntityMixin",
     "fluid.BucketItemMixin",
     "fluid.ConcretePowderBlockMixin",
-    "fluid.CoralParentBlockMixin",
+    "fluid.CoralBlockBlockMixin",
     "fluid.DrownedEntityMixin",
     "fluid.EndermanEntityMixin",
     "fluid.EntityMixin",

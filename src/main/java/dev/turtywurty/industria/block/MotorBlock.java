@@ -94,7 +94,7 @@ public class MotorBlock extends HorizontalFacingBlock implements BlockEntityProv
             }
         }
 
-        return ActionResult.success(world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     @Override

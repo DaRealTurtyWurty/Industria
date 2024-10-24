@@ -1,13 +1,10 @@
 package dev.turtywurty.industria.blockentity;
 
+import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
-import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
+import dev.turtywurty.industria.blockentity.util.inventory.*;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -16,31 +13,30 @@ import dev.turtywurty.industria.screenhandler.AlloyFurnaceScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
-    private static final Map<Item, Integer> FUEL_TIMES = FurnaceBlockEntity.createFuelTimeMap();
-
     public static final Text TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -77,7 +73,7 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
         }
     };
 
-    private Identifier currentRecipeId;
+    private RegistryKey<Recipe<?>> currentRecipeId;
 
     public AlloyFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.ALLOY_FURNACE, pos, state);
@@ -88,12 +84,12 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
     }
 
-    public static boolean isFuel(ItemStack stack) {
-        return FUEL_TIMES.containsKey(stack.getItem());
+    public boolean isFuel(ItemStack stack) {
+        return this.world.getFuelRegistry().isFuel(stack);
     }
 
-    public static int getFuelTime(ItemStack stack) {
-        return FUEL_TIMES.getOrDefault(stack.getItem(), 0);
+    public int getFuelTime(ItemStack stack) {
+        return this.world.getFuelRegistry().getFuelTicks(stack);
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {
@@ -121,8 +117,8 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
         if (this.world == null || this.world.isClient)
             return;
 
-        if(!this.bufferedStack.isEmpty()) {
-            if(canOutput(this.bufferedStack)) {
+        if (!this.bufferedStack.isEmpty()) {
+            if (canOutput(this.bufferedStack)) {
                 this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).addStack(this.bufferedStack);
                 this.bufferedStack = ItemStack.EMPTY;
                 update();
@@ -175,10 +171,10 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
             reset();
 
             ItemStack output = recipe.craft(this.wrappedInventoryStorage.getRecipeInventory(), this.world.getRegistryManager());
-            if(canOutput(output)) {
+            if (canOutput(output)) {
                 SimpleInventory outputInventory = this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT);
                 ItemStack outputStack = outputInventory.getStack(0);
-                if(outputStack.isEmpty()) {
+                if (outputStack.isEmpty()) {
                     outputInventory.setStack(0, output);
                 } else {
                     outputStack.increment(output.getCount());
@@ -207,10 +203,10 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
     }
 
     private Optional<RecipeEntry<AlloyFurnaceRecipe>> getCurrentRecipe() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
             return Optional.empty();
 
-        return this.world.getRecipeManager().getFirstMatch(RecipeTypeInit.ALLOY_FURNACE, getInventory(), this.world);
+        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.ALLOY_FURNACE, getInventory(), this.world);
     }
 
     @Override
@@ -222,11 +218,18 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
         modidData.putInt("MaxProgress", this.maxProgress);
         modidData.putInt("BurnTime", this.burnTime);
         modidData.putInt("MaxBurnTime", this.maxBurnTime);
-        modidData.putString("CurrentRecipe", this.currentRecipeId == null ? "" : this.currentRecipeId.toString());
+
+        if (this.currentRecipeId != null) {
+            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
+                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
+                    .result();
+            result.ifPresent(nbtElement -> modidData.put("CurrentRecipe", nbtElement));
+        }
+
         modidData.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
 
-        if(!this.bufferedStack.isEmpty())
-            modidData.put("BufferedStack", this.bufferedStack.encode(registryLookup));
+        if (!this.bufferedStack.isEmpty())
+            modidData.put("BufferedStack", this.bufferedStack.toNbt(registryLookup));
 
         nbt.put(Industria.MOD_ID, modidData);
     }
@@ -251,9 +254,14 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
         if (modidData.contains("MaxBurnTime", NbtElement.INT_TYPE))
             this.maxBurnTime = modidData.getInt("MaxBurnTime");
 
-        if (modidData.contains("CurrentRecipe", NbtElement.STRING_TYPE)) {
-            String currentRecipe = modidData.getString("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null : Identifier.tryParse(currentRecipe);
+        if (modidData.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
+            NbtCompound currentRecipe = modidData.getCompound("CurrentRecipe");
+            this.currentRecipeId = currentRecipe.isEmpty() ? null :
+                    RegistryKey.createCodec(RegistryKeys.RECIPE)
+                            .decode(NbtOps.INSTANCE, currentRecipe)
+                            .map(Pair::getFirst)
+                            .result()
+                            .orElse(null);
         }
 
         if (modidData.contains("Inventory", NbtElement.LIST_TYPE))

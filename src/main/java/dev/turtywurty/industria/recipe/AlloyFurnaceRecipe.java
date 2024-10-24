@@ -11,12 +11,12 @@ import dev.turtywurty.industria.util.CountedIngredient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.IngredientPlacement;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -47,23 +47,23 @@ public record AlloyFurnaceRecipe(CountedIngredient inputA, CountedIngredient inp
     }
 
     @Override
-    public boolean fits(int width, int height) {
-        return width * height >= 2;
-    }
-
-    @Override
-    public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
-        return this.output.copy();
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends Recipe<RecipeSimpleInventory>> getSerializer() {
         return RecipeSerializerInit.ALLOY_FURNACE;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<? extends Recipe<RecipeSimpleInventory>> getType() {
         return RecipeTypeInit.ALLOY_FURNACE;
+    }
+
+    @Override
+    public IngredientPlacement getIngredientPlacement() {
+        return null;
+    }
+
+    @Override
+    public RecipeBookCategory getRecipeBookCategory() {
+        return null;
     }
 
     @Override
@@ -71,12 +71,12 @@ public record AlloyFurnaceRecipe(CountedIngredient inputA, CountedIngredient inp
         return Industria.id("alloy_furnace").toString();
     }
 
-    @Override
-    public DefaultedList<Ingredient> getIngredients() {
-        return DefaultedList.copyOf(Ingredient.EMPTY,
-                Ingredient.ofStacks(this.inputA.getMatchingStacks().toArray(new ItemStack[0])),
-                Ingredient.ofStacks(this.inputB.getMatchingStacks().toArray(new ItemStack[0])));
-    }
+//    @Override
+//    public DefaultedList<Ingredient> getIngredients() {
+//        return DefaultedList.copyOf(Ingredient.EMPTY,
+//                Ingredient.ofStacks(this.inputA.getMatchingStacks().toArray(new ItemStack[0])),
+//                Ingredient.ofStacks(this.inputB.getMatchingStacks().toArray(new ItemStack[0])));
+//    }
 
     @Override
     public List<CountedIngredient> getCountedIngredients() {
