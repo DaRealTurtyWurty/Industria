@@ -2,21 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "minecraft:iron_block"
-    },
-    "B": {
-      "item": "minecraft:furnace"
-    },
-    "C": {
-      "item": "minecraft:redstone_block"
-    },
-    "D": {
-      "item": "minecraft:coal_block"
-    },
-    "E": {
-      "item": "minecraft:iron_bars"
-    }
+    "A": "minecraft:iron_block",
+    "B": "minecraft:furnace",
+    "C": "minecraft:redstone_block",
+    "D": "minecraft:coal_block",
+    "E": "minecraft:iron_bars"
   },
   "pattern": [
     "ABA",

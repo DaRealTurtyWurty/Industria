@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "minecraft:copper_block"
-    },
-    "B": {
-      "item": "minecraft:iron_block"
-    }
+    "A": "minecraft:copper_block",
+    "B": "minecraft:iron_block"
   },
   "pattern": [
     "AAA",

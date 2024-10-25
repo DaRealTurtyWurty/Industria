@@ -14,23 +14,23 @@ import java.util.function.Function;
 public class ItemInit {
     public static final Item STEEL_INGOT = register("steel_ingot");
 
-    public static final SeismicScannerItem SEISMIC_SCANNER = registerItem("seismic_scanner",
+    public static final SeismicScannerItem SEISMIC_SCANNER = register("seismic_scanner",
             SeismicScannerItem::new, settings -> settings.maxCount(1));
 
-    public static final SimpleDrillHeadItem SIMPLE_DRILL_HEAD = registerItem("simple_drill_head",
+    public static final SimpleDrillHeadItem SIMPLE_DRILL_HEAD = register("simple_drill_head",
             SimpleDrillHeadItem::new, settings -> settings.maxCount(1));
 
-    public static <T extends Item> T register(String name, T item) {
+    private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);
     }
 
     public static Item register(String name) {
-        return Registry.register(Registries.ITEM, Industria.id(name), new Item(new Item.Settings()
+        return registerItem(name, new Item(new Item.Settings()
                 .registryKey(RegistryKey.of(RegistryKeys.ITEM, Industria.id(name)))));
     }
 
-    public static <T extends Item> T registerItem(String name, Function<Item.Settings, T> constructor, Function<Item.Settings, Item.Settings> settingsApplier) {
-        return Registry.register(Registries.ITEM, name, constructor.apply(
+    public static <T extends Item> T register(String name, Function<Item.Settings, T> constructor, Function<Item.Settings, Item.Settings> settingsApplier) {
+        return registerItem(name, constructor.apply(
                 settingsApplier.apply(new Item.Settings().registryKey(
                         RegistryKey.of(RegistryKeys.ITEM, Industria.id(name))))));
     }
