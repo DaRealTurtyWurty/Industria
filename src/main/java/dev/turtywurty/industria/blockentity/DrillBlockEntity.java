@@ -12,7 +12,8 @@ import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
-import dev.turtywurty.industria.util.*;
+import dev.turtywurty.industria.util.DrillHeadable;
+import dev.turtywurty.industria.util.DrillRenderData;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -22,8 +23,8 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -81,10 +82,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         if (this.ticks++ == 0)
             update();
 
-        if(getDrillStack().isEmpty())
+        if (getDrillStack().isEmpty())
             return;
 
-        if(!this.overflowStacks.isEmpty()) {
+        if (!this.overflowStacks.isEmpty()) {
             this.overflowStacks.replaceAll(stack -> getOutputInventory().addStack(stack));
             this.overflowStacks.removeIf(ItemStack::isEmpty);
         }
@@ -99,12 +100,12 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             this.drillYOffset = drillHeadable.updateRetracting(this, this.drillYOffset);
         }
 
-        if(!this.drilling && !this.retracting && this.drillYOffset != 1.0F && this.overflowMethod == OverflowMethod.PAUSE && this.overflowStacks.isEmpty()) {
+        if (!this.drilling && !this.retracting && this.drillYOffset != 1.0F && this.overflowMethod == OverflowMethod.PAUSE && this.overflowStacks.isEmpty()) {
             this.drilling = true;
             update();
         }
 
-        if(this.drillYOffset != currentDrillYOffset)
+        if (this.drillYOffset != currentDrillYOffset)
             update();
     }
 
@@ -159,10 +160,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         if (!this.overflowStacks.isEmpty()) {
             var overflowStacks = new NbtList();
             for (ItemStack stack : this.overflowStacks) {
-                if(stack.isEmpty())
+                if (stack.isEmpty())
                     continue;
 
-                overflowStacks.add(stack.encode(registryLookup));
+                overflowStacks.add(stack.toNbt(registryLookup));
             }
 
             nbt.put("OverflowStacks", overflowStacks);
@@ -279,10 +280,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     }
 
     public void handleBlockBreak(BlockPos pos, BlockState state) {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
-        List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(new LootContextParameterSet.Builder((ServerWorld) world)
+        List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(new LootWorldContext.Builder((ServerWorld) world)
                 .add(LootContextParameters.ORIGIN, pos.toCenterPos())
                 .add(LootContextParameters.BLOCK_STATE, state)
                 .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
@@ -290,7 +291,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         SimpleInventory inventory = getOutputInventory();
         for (int index = 0; index < drops.size(); index++) {
             ItemStack drop = drops.get(index);
-            if(drop.isEmpty())
+            if (drop.isEmpty())
                 continue;
 
             drops.set(index, inventory.addStack(drop));

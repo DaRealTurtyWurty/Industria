@@ -3,23 +3,21 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public class MotorModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("motor"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/motor.png");
 
-    private final ModelPart main;
-    private final ModelPart spinRod;
+    private final MotorParts parts;
 
     public MotorModel(ModelPart root) {
-        super(RenderLayer::getEntitySolid);
+        super(root, RenderLayer::getEntitySolid);
 
-        this.main = root.getChild("main");
-        this.spinRod = this.main.getChild("spinRod");
+        ModelPart main = root.getChild("main");
+        ModelPart spinRod = main.getChild("spinRod");
+        this.parts = new MotorParts(main, spinRod);
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -47,12 +45,9 @@ public class MotorModel extends Model {
         return TexturedModelData.of(modelData, 64, 64);
     }
 
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-        main.render(matrices, vertexConsumer, light, overlay, color);
+    public MotorParts getMotorParts() {
+        return this.parts;
     }
 
-    public ModelPart getSpinRod() {
-        return spinRod;
-    }
+    public record MotorParts(ModelPart main, ModelPart spinRod) {}
 }

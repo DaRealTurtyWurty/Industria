@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.CrusherScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -24,10 +25,10 @@ public class CrusherScreen extends HandledScreen<CrusherScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
         int progress = MathHelper.ceil(this.handler.getProgressPercent() * 24);
-        context.drawTexture(TEXTURE, this.x + 67, this.y + 35, 176, 0, progress, 17);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 67, this.y + 35, 176, 0, progress, 17);
 
         int energy = MathHelper.ceil(this.handler.getEnergyPercent() * 66);
         context.fill(this.x + 144, this.y + 10 + 66 - energy, this.x + 144 + 20, this.y + 10 + 66, 0xFFD4AF37);

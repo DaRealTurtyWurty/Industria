@@ -40,11 +40,11 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
 
         float outputPercentage = getEnergyPerTickPercent(entity);
         entity.setPropellerRotation(entity.getPropellerRotation() + (outputPercentage * 0.25f));
-        model.getParts().propellers().roll = entity.getPropellerRotation();
+        model.getWindTurbineParts().propellers().roll = entity.getPropellerRotation();
 
         VertexConsumer consumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE));
         this.model.render(matrices, consumer, light, overlay);
-        this.model.getParts().propellers().roll = 0.0F;
+        this.model.getWindTurbineParts().propellers().roll = 0.0F;
         matrices.pop();
     }
 

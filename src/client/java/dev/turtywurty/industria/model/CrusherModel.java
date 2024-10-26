@@ -3,9 +3,7 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class CrusherModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION =
@@ -14,7 +12,7 @@ public class CrusherModel extends Model {
     private final CrusherParts parts;
 
     public CrusherModel(ModelPart root) {
-        super(RenderLayer::getEntityCutoutNoCull);
+        super(root, RenderLayer::getEntityCutoutNoCull);
         ModelPart main = root.getChild("main");
         ModelPart structure = main.getChild("structure");
         ModelPart left = main.getChild("left");
@@ -112,12 +110,7 @@ public class CrusherModel extends Model {
         return TexturedModelData.of(modelData, 128, 128);
     }
 
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-        this.parts.structure.render(matrices, vertexConsumer, packedLight, packedOverlay, color);
-    }
-
-    public CrusherParts getParts() {
+    public CrusherParts getCrusherParts() {
         return this.parts;
     }
 

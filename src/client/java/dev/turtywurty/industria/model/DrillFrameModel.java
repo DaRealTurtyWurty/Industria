@@ -3,20 +3,17 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class DrillFrameModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("drill_frame"), "main");
 
-    private final ModelPart main;
     private final ModelPart cableWheel;
 
     public DrillFrameModel(ModelPart root) {
-        super(RenderLayer::getEntityCutout);
-        this.main = root.getChild("main");
-        this.cableWheel = this.main.getChild("cableWheel");
+        super(root, RenderLayer::getEntityCutout);
+        ModelPart main = root.getChild("main");
+        this.cableWheel = main.getChild("cableWheel");
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -138,11 +135,6 @@ public class DrillFrameModel extends Model {
                 ModelTransform.pivot(-0.4642F, -7.8122F, 7.5715F));
 
         return TexturedModelData.of(modelData, 128, 128);
-    }
-
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-        this.main.render(matrices, vertexConsumer, light, overlay, color);
     }
 
     public ModelPart getCableWheel() {

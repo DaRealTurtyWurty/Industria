@@ -11,7 +11,7 @@ public class IndustriaRenderLayers {
     private static final RenderLayer FLUID = RenderLayer.of(createLayerName("fluid"),
             VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 256, false, true,
             RenderLayer.MultiPhaseParameters.builder()
-                    .program(ENTITY_TRANSLUCENT_CULL_PROGRAM)
+                    .program(ITEM_ENTITY_TRANSLUCENT_CULL_PROGRAM)
                     .texture(MIPMAP_BLOCK_ATLAS_TEXTURE)
                     .transparency(TRANSLUCENT_TRANSPARENCY)
                     .lightmap(ENABLE_LIGHTMAP)

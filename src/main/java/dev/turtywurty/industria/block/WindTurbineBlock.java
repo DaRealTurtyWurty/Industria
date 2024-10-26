@@ -82,7 +82,7 @@ public class WindTurbineBlock extends HorizontalFacingBlock implements BlockEnti
             }
         }
 
-        return ActionResult.success(world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     @Override

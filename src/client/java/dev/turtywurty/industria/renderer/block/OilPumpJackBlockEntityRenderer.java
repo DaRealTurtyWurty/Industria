@@ -20,13 +20,13 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
 
     private final BlockEntityRendererFactory.Context context;
     private final OilPumpJackModel model;
-    private final OilPumpJackModel.Parts parts;
+    private final OilPumpJackModel.OilPumpJackParts parts;
 
     public OilPumpJackBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         this.context = context;
 
         this.model = new OilPumpJackModel(context.getLayerModelPart(OilPumpJackModel.LAYER_LOCATION));
-        this.parts = this.model.getParts();
+        this.parts = this.model.getOilPumpJackParts();
     }
 
     @Override

@@ -17,7 +17,7 @@ public class BlockStateScreenElement extends BlockModelScreenElement {
     protected void renderModel(BlockRenderManager blockRenderManager, VertexConsumerProvider.Immediate provider, RenderLayer renderLayer, VertexConsumer vertexConsumer, MatrixStack matrixStack) {
         if(this.blockState.getBlock() instanceof AbstractFireBlock) {
             DiffuseLighting.disableGuiDepthLighting();
-            super.renderModel(blockRenderManager, provider, renderLayer, provider.getBuffer(RenderLayers.getEntityBlockLayer(this.blockState, false)), matrixStack);
+            super.renderModel(blockRenderManager, provider, renderLayer, provider.getBuffer(RenderLayers.getEntityBlockLayer(this.blockState)), matrixStack);
             DiffuseLighting.enableGuiDepthLighting();
             return;
         }

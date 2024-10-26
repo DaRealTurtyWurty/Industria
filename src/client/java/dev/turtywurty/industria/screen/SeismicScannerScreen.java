@@ -5,6 +5,7 @@ import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.BlockStateScreenElement;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -51,7 +52,7 @@ public class SeismicScannerScreen extends Screen {
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
         super.renderBackground(context, mouseX, mouseY, delta);
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override

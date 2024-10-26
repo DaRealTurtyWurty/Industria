@@ -35,7 +35,7 @@ public class MultiblockBlock extends Block {
             data.type().onPrimaryBlockUse(world, player, hit, primaryPos);
         }
 
-        return ActionResult.success(world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     @Override

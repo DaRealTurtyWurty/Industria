@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.AlloyFurnaceScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -24,13 +25,13 @@ public class AlloyFurnaceScreen extends HandledScreen<AlloyFurnaceScreenHandler>
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
         int progress = MathHelper.ceil(this.handler.getProgressPercent() * 24);
-        context.drawTexture(TEXTURE, this.x + 79, this.y + 34, 176, 14, progress, 17);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 79, this.y + 34, 176, 14, progress, 17);
 
         int burnTime = MathHelper.ceil(this.handler.getBurnTimePercent() * 14);
-        context.drawTexture(TEXTURE, this.x + 56, this.y + 36 + 14 - burnTime, 176, 14 - burnTime, 14, burnTime);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 56, this.y + 36 + 14 - burnTime, 176, 14 - burnTime, 14, burnTime);
     }
 
     @Override

@@ -3,26 +3,23 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public class DrillMotorModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("drill_motor"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_motor.png");
 
-    private final ModelPart main;
-    private final ModelPart spinRod;
-    private final ModelPart rodGear;
-    private final ModelPart connectingGear;
+    private final DrillMotorParts parts;
 
     public DrillMotorModel(ModelPart root) {
-        super(RenderLayer::getEntitySolid);
-        this.main = root.getChild("main");
-        this.spinRod = this.main.getChild("spinRod");
-        this.rodGear = this.spinRod.getChild("rodGear");
-        this.connectingGear = this.spinRod.getChild("connectingGear");
+        super(root, RenderLayer::getEntitySolid);
+
+        ModelPart main = root.getChild("main");
+        ModelPart spinRod = main.getChild("spinRod");
+        ModelPart rodGear = spinRod.getChild("rodGear");
+        ModelPart connectingGear = spinRod.getChild("connectingGear");
+        this.parts = new DrillMotorParts(main, spinRod, rodGear, connectingGear);
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -64,16 +61,10 @@ public class DrillMotorModel extends Model {
         return TexturedModelData.of(modelData, 64, 64);
     }
 
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-        main.render(matrices, vertexConsumer, light, overlay, color);
+    public DrillMotorParts getDrillMotorParts() {
+        return this.parts;
     }
 
-    public ModelPart getConnectingGear() {
-        return this.connectingGear;
-    }
-
-    public ModelPart getRodGear() {
-        return this.rodGear;
+    public record DrillMotorParts(ModelPart main, ModelPart spinRod, ModelPart rodGear, ModelPart connectingGear) {
     }
 }

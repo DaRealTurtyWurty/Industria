@@ -3,6 +3,7 @@ package dev.turtywurty.industria.screen.widget;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.util.ScreenUtils;
 import dev.turtywurty.industria.util.enums.EnumValueCacher;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
 import dev.turtywurty.industria.util.enums.TextEnum;
@@ -14,9 +15,13 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValueCacher<T> & TextEnum & StringRepresentable> extends ButtonWidget {
@@ -103,11 +108,11 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+        int color = ColorHelper.getWhite(this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
-        context.drawGuiTexture(TEXTURES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height);
-        context.drawTexture(this.textureMap.get(this.value), getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16);
+        ScreenUtils.drawGuiTexture(context, TEXTURES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height, color);
+        ScreenUtils.drawTexture(context, this.textureMap.get(this.value), getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16, color);
 
         if (this.hoveredLastFrame) {
             int startX = getSelectionLeft();
@@ -120,11 +125,11 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
                 int x = startX + (this.width * column);
                 int y = startY + (this.height * row);
 
-                context.drawTexture(current == this.value ? HOVERED_TEXTURE : PLAIN_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height);
-                context.drawTexture(this.textureMap.get(current), x + 2, y + 2, 0, 0, 16, 16, 16, 16);
+                ScreenUtils.drawTexture(context, current == this.value ? HOVERED_TEXTURE : PLAIN_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height, color);
+                ScreenUtils.drawTexture(context, this.textureMap.get(current), x + 2, y + 2, 0, 0, 16, 16, 16, 16, color);
 
                 if (this.disabledValues.contains(current)) {
-                    context.drawTexture(DISABLED_OVERLAY_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height);
+                    ScreenUtils.drawTexture(context, DISABLED_OVERLAY_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height, color);
                 }
             }
 

@@ -26,16 +26,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -55,7 +59,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
 
     private final ItemStack[] buffer = new ItemStack[2];
     private int progress, maxProgress;
-    private Identifier currentRecipeId;
+    private RegistryKey<Recipe<?>> currentRecipeId;
 
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
@@ -155,7 +159,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
                     return;
 
                 consumeEnergy();
-                this.wrappedInventoryStorage.getInventory(INPUT_SLOT).removeStack(0, recipe.input().count());
+                this.wrappedInventoryStorage.getInventory(INPUT_SLOT).removeStack(0, recipe.input().stackData().count());
 
                 if (!outputA.isEmpty())
                     this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).addStack(outputA);
@@ -233,10 +237,10 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
     }
 
     private Optional<RecipeEntry<CrusherRecipe>> getCurrentRecipe() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
             return Optional.empty();
 
-        return this.world.getRecipeManager().getFirstMatch(RecipeTypeInit.CRUSHER, getInventory(), this.world);
+        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.CRUSHER, getInventory(), this.world);
     }
 
     @Override
@@ -265,7 +269,10 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
         nbt.putInt("Progress", this.progress);
         nbt.putInt("MaxProgress", this.maxProgress);
         if (this.currentRecipeId != null) {
-            nbt.putString("CurrentRecipeId", this.currentRecipeId.toString());
+            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
+                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
+                    .result();
+            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
         }
 
         if(hasItemsInBuffer()) {
@@ -274,7 +281,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
                 if(stack == null || stack.isEmpty())
                     continue;
 
-                bufferArray.add(stack.encode(registryLookup));
+                bufferArray.add(stack.toNbt(registryLookup));
             }
 
             nbt.put("Buffer", bufferArray);
@@ -294,8 +301,15 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
         if (nbt.contains("MaxProgress", NbtElement.INT_TYPE))
             this.maxProgress = nbt.getInt("MaxProgress");
 
-        if (nbt.contains("CurrentRecipeId", NbtElement.STRING_TYPE))
-            this.currentRecipeId = Identifier.tryParse(nbt.getString("CurrentRecipeId"));
+        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
+            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
+            this.currentRecipeId = currentRecipe.isEmpty() ? null :
+                    RegistryKey.createCodec(RegistryKeys.RECIPE)
+                            .decode(NbtOps.INSTANCE, currentRecipe)
+                            .map(com.mojang.datafixers.util.Pair::getFirst)
+                            .result()
+                            .orElse(null);
+        }
 
         if (nbt.contains("Buffer", NbtElement.LIST_TYPE)) {
             NbtList bufferArray = nbt.getList("Buffer", NbtElement.COMPOUND_TYPE);

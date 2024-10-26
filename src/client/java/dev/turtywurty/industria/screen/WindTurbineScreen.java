@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.WindTurbineScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -26,7 +27,7 @@ public class WindTurbineScreen extends HandledScreen<WindTurbineScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
         int energySize = MathHelper.ceil(this.handler.getEnergyPercent() * 66);
         context.fill(this.x + 144, this.y + 10 + 66 - energySize, this.x + 144 + 20, this.y + 10 + 66, 0xFFD4AF37);
@@ -35,7 +36,7 @@ public class WindTurbineScreen extends HandledScreen<WindTurbineScreenHandler> {
             return;
 
         int energyOutputSize = MathHelper.ceil(this.handler.getEnergyPerTickPercent() * 21);
-        context.drawTexture(TEXTURE, this.x + 36, this.y + 33, 176, 0, energyOutputSize, 21);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 36, this.y + 33, 176, 0, energyOutputSize, 21);
     }
 
     @Override

@@ -16,8 +16,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -32,25 +32,25 @@ public class SeismicScannerItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         if (world.isClient)
             return super.use(world, user, hand);
 
         ItemStack stack = user.getStackInHand(hand);
-        if(user.isSneaking()) {
+        if (user.isSneaking()) {
             WorldFluidPocketsState state = WorldFluidPocketsState.getServerState((ServerWorld) world);
             List<WorldFluidPocketsState.FluidPocket> existsBelow = state.existsBelow(user.getBlockPos());
-            if(existsBelow.isEmpty()) {
-                user.sendMessage(Text.literal("There are no fluid fluidPockets here!")); // TODO: Translatable
-                return TypedActionResult.fail(user.getStackInHand(hand));
+            if (existsBelow.isEmpty()) {
+                user.sendMessage(Text.literal("There are no fluid fluidPockets here!"), false); // TODO: Translatable
+                return ActionResult.FAIL;
             }
 
             stack.set(ComponentTypeInit.FLUID_POCKETS, new FluidPocketsComponent(existsBelow));
-            return TypedActionResult.success(stack);
+            return ActionResult.SUCCESS;
         }
 
         ServerPlayNetworking.send((ServerPlayerEntity) user, new OpenSeismicScannerPayload(stack));
-        return TypedActionResult.success(stack);
+        return ActionResult.SUCCESS;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class SeismicScannerItem extends Item {
                 }
             }
 
-            player.sendMessage(text);
+            player.sendMessage(text, false);
         }
     }
 }

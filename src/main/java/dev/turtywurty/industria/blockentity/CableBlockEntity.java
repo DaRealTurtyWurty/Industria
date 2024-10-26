@@ -88,7 +88,10 @@ public class CableBlockEntity extends UpdatableBlockEntity implements TickableBl
             long amount = energy.getAmount() / this.connectedBlocks.size();
             try (Transaction transaction = Transaction.openOuter()) {
                 for (BlockPos pos : this.connectedBlocks) {
-                    var direction = Direction.fromVector(this.pos.getX() - pos.getX(), this.pos.getY() - pos.getY(), this.pos.getZ() - pos.getZ());
+                    var direction = Direction.fromVector(this.pos.getX() - pos.getX(), this.pos.getY() - pos.getY(), this.pos.getZ() - pos.getZ(), null);
+                    if(direction == null)
+                        continue;
+
                     var storage = EnergyStorage.SIDED.find(this.world, pos, direction);
                     if (storage != null && storage.supportsInsertion()) {
                         energy.amount -= storage.insert(amount, transaction);

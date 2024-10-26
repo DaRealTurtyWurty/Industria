@@ -15,7 +15,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @ModifyExpressionValue(method = "updateTurtleHelmet",
+    @ModifyExpressionValue(method = "tick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/entity/player/PlayerEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$updateTurtleHelmet(boolean original) {

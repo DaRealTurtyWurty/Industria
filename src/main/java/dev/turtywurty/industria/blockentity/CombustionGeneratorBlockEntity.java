@@ -14,11 +14,9 @@ import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -35,11 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.util.Map;
-
 public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
-    private static final Map<Item, Integer> FUEL_TIMES = FurnaceBlockEntity.createFuelTimeMap();
-
     public static final Text TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
@@ -55,12 +49,12 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
         this.inventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
-    public static boolean isFuel(ItemStack stack) {
-        return FUEL_TIMES.containsKey(stack.getItem());
+    public boolean isFuel(ItemStack stack) {
+        return this.world.getFuelRegistry().isFuel(stack);
     }
 
-    public static int getFuelTime(ItemStack stack) {
-        return FUEL_TIMES.getOrDefault(stack.getItem(), 0);
+    public int getFuelTime(ItemStack stack) {
+        return this.world.getFuelRegistry().getFuelTicks(stack);
     }
 
     @Override

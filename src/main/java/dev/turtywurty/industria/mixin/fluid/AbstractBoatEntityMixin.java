@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.turtywurty.industria.fluid.FluidData;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.entity.vehicle.AbstractBoatEntity;
 import net.minecraft.entity.vehicle.VehicleEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
@@ -13,9 +13,9 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(BoatEntity.class)
-public abstract class BoatEntityMixin extends VehicleEntity {
-    public BoatEntityMixin(EntityType<?> entityType, World world) {
+@Mixin(AbstractBoatEntity.class)
+public abstract class AbstractBoatEntityMixin extends VehicleEntity {
+    public AbstractBoatEntityMixin(EntityType<?> entityType, World world) {
         super(entityType, world);
     }
 
@@ -23,7 +23,7 @@ public abstract class BoatEntityMixin extends VehicleEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getWaterHeightBelow(boolean original, @Local FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()
@@ -35,7 +35,7 @@ public abstract class BoatEntityMixin extends VehicleEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$checkBoatInWater(boolean original, @Local FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()
@@ -47,7 +47,7 @@ public abstract class BoatEntityMixin extends VehicleEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getUnderWaterLocation(boolean original, @Local FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()
@@ -59,7 +59,7 @@ public abstract class BoatEntityMixin extends VehicleEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$fall(boolean original, double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition) {
-        if(original)
+        if (original)
             return true;
 
         FluidState fluidState = getWorld().getFluidState(getBlockPos().down());
@@ -70,9 +70,9 @@ public abstract class BoatEntityMixin extends VehicleEntity {
 
     @ModifyExpressionValue(method = "canAddPassenger",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/vehicle/BoatEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+                    target = "Lnet/minecraft/entity/vehicle/AbstractBoatEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$canAddPassenger(boolean original) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()

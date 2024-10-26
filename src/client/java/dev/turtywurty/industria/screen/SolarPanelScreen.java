@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.SolarPanelScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -29,7 +30,7 @@ public class SolarPanelScreen extends HandledScreen<SolarPanelScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
         int energySize = MathHelper.ceil(this.handler.getEnergyPercent() * 66);
         context.fill(this.x + 144, this.y + 10 + 66 - energySize, this.x + 144 + 20, this.y + 10 + 66, 0xFFD4AF37);
@@ -38,7 +39,7 @@ public class SolarPanelScreen extends HandledScreen<SolarPanelScreenHandler> {
             return;
 
         int energyOutputSize = MathHelper.ceil(this.handler.getEnergyPerTickPercent() * 21);
-        context.drawTexture(TEXTURE, this.x + 36, this.y + 33 + 21 - energyOutputSize, 176, 21 - energyOutputSize, 21, energyOutputSize);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 36, this.y + 33 + 21 - energyOutputSize, 176, 21 - energyOutputSize, 21, energyOutputSize);
     }
 
     @Override

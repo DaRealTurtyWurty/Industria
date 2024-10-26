@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "count": 1,
-    "ingredient": {
-      "tag": "c:ores/quartz"
-    }
+    "entries": "#c:ores/quartz"
   },
   "output_a": {
     "chance": 1.0,

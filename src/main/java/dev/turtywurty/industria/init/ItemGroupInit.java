@@ -16,7 +16,7 @@ public class ItemGroupInit {
             .entries((displayContext, entries) ->
                     Registries.ITEM.getKeys().stream()
                             .filter(key -> key.getValue().getNamespace().equals(Industria.MOD_ID))
-                            .map(Registries.ITEM::getOrThrow)
+                            .map(Registries.ITEM::getValueOrThrow)
                             .forEach(entries::add))
             .build());
 

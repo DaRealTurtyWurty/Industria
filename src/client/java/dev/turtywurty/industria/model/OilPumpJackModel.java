@@ -3,164 +3,93 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class OilPumpJackModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("oil_pump_jack"), "main");
 
-    private final ModelPart main;
-    private final ModelPart counterWeights;
-    private final ModelPart leftCounterWeight;
-    private final ModelPart bone9;
-    private final ModelPart bone10;
-    private final ModelPart bone11;
-    private final ModelPart bone12;
-    private final ModelPart bone13;
-    private final ModelPart bone14;
-    private final ModelPart rightCounterWeight;
-    private final ModelPart bone15;
-    private final ModelPart bone16;
-    private final ModelPart bone17;
-    private final ModelPart bone18;
-    private final ModelPart bone19;
-    private final ModelPart bone20;
-    private final ModelPart pitmanArm;
-    private final ModelPart pitmanArmLeftPivot;
-    private final ModelPart pitmanArmRightPivot;
-    private final ModelPart staticParts;
-    private final ModelPart supports;
-    private final ModelPart bone28;
-    private final ModelPart bone29;
-    private final ModelPart bone30;
-    private final ModelPart bone31;
-    private final ModelPart bone32;
-    private final ModelPart bone33;
-    private final ModelPart bone34;
-    private final ModelPart motor;
-    private final ModelPart bone42;
-    private final ModelPart bone41;
-    private final ModelPart bone39;
-    private final ModelPart bone40;
-    private final ModelPart bone38;
-    private final ModelPart bone43;
-    private final ModelPart bone44;
-    private final ModelPart bone45;
-    private final ModelPart bone46;
-    private final ModelPart bone47;
-    private final ModelPart frame;
-    private final ModelPart bone25;
-    private final ModelPart bone26;
-    private final ModelPart bone27;
-    private final ModelPart belt;
-    private final ModelPart wheel;
-    private final ModelPart bone21;
-    private final ModelPart bone22;
-    private final ModelPart bone5;
-    private final ModelPart bone36;
-    private final ModelPart bone7;
-    private final ModelPart bone35;
-    private final ModelPart bone23;
-    private final ModelPart bone24;
-    private final ModelPart bone;
-    private final ModelPart bone2;
-    private final ModelPart bone3;
-    private final ModelPart bone4;
-    private final ModelPart bone6;
-    private final ModelPart bone8;
-    private final ModelPart arm;
-    private final ModelPart head;
-    private final ModelPart beam;
-    private final ModelPart bone37;
-    private final ModelPart attachmentA;
-    private final ModelPart attachmentB;
-    private final ModelPart attachmentC;
-    private final ModelPart attachmentD;
-    private final ModelPart attachmentE;
-
-    private final Parts parts;
+    private final OilPumpJackParts parts;
 
     public OilPumpJackModel(ModelPart root) {
-        super(RenderLayer::getEntitySolid);
+        super(root, RenderLayer::getEntitySolid);
 
-        this.main = root.getChild("main");
-        this.counterWeights = main.getChild("counterWeights");
-        this.leftCounterWeight = counterWeights.getChild("leftCounterWeight");
-        this.bone9 = leftCounterWeight.getChild("bone9");
-        this.bone10 = leftCounterWeight.getChild("bone10");
-        this.bone11 = leftCounterWeight.getChild("bone11");
-        this.bone12 = leftCounterWeight.getChild("bone12");
-        this.bone13 = leftCounterWeight.getChild("bone13");
-        this.bone14 = leftCounterWeight.getChild("bone14");
-        this.rightCounterWeight = counterWeights.getChild("rightCounterWeight");
-        this.bone15 = rightCounterWeight.getChild("bone15");
-        this.bone16 = rightCounterWeight.getChild("bone16");
-        this.bone17 = rightCounterWeight.getChild("bone17");
-        this.bone18 = rightCounterWeight.getChild("bone18");
-        this.bone19 = rightCounterWeight.getChild("bone19");
-        this.bone20 = rightCounterWeight.getChild("bone20");
-        this.pitmanArm = counterWeights.getChild("pitmanArm");
-        this.pitmanArmLeftPivot = pitmanArm.getChild("pitmanArmLeftPivot");
-        this.pitmanArmRightPivot = pitmanArm.getChild("pitmanArmRightPivot");
-        this.staticParts = main.getChild("staticParts");
-        this.supports = staticParts.getChild("supports");
-        this.bone28 = supports.getChild("bone28");
-        this.bone29 = supports.getChild("bone29");
-        this.bone30 = supports.getChild("bone30");
-        this.bone31 = supports.getChild("bone31");
-        this.bone32 = supports.getChild("bone32");
-        this.bone33 = supports.getChild("bone33");
-        this.bone34 = supports.getChild("bone34");
-        this.motor = staticParts.getChild("motor");
-        this.bone42 = motor.getChild("bone42");
-        this.bone41 = bone42.getChild("bone41");
-        this.bone39 = bone42.getChild("bone39");
-        this.bone40 = bone42.getChild("bone40");
-        this.bone38 = bone42.getChild("bone38");
-        this.bone43 = motor.getChild("bone43");
-        this.bone44 = bone43.getChild("bone44");
-        this.bone45 = bone43.getChild("bone45");
-        this.bone46 = bone43.getChild("bone46");
-        this.bone47 = bone43.getChild("bone47");
-        this.frame = staticParts.getChild("frame");
-        this.bone25 = frame.getChild("bone25");
-        this.bone26 = frame.getChild("bone26");
-        this.bone27 = frame.getChild("bone27");
-        this.belt = staticParts.getChild("belt");
-        this.wheel = belt.getChild("wheel");
-        this.bone21 = wheel.getChild("bone21");
-        this.bone22 = wheel.getChild("bone22");
-        this.bone5 = wheel.getChild("bone5");
-        this.bone36 = wheel.getChild("bone36");
-        this.bone7 = wheel.getChild("bone7");
-        this.bone35 = wheel.getChild("bone35");
-        this.bone23 = wheel.getChild("bone23");
-        this.bone24 = wheel.getChild("bone24");
-        this.bone = belt.getChild("bone");
-        this.bone2 = belt.getChild("bone2");
-        this.bone3 = belt.getChild("bone3");
-        this.bone4 = belt.getChild("bone4");
-        this.bone6 = belt.getChild("bone6");
-        this.bone8 = belt.getChild("bone8");
-        this.arm = main.getChild("arm");
-        this.head = arm.getChild("head");
-        this.beam = arm.getChild("beam");
-        this.bone37 = beam.getChild("bone37");
-        this.attachmentA = main.getChild("attachmentA");
-        this.attachmentB = main.getChild("attachmentB");
-        this.attachmentC = main.getChild("attachmentC");
-        this.attachmentD = main.getChild("attachmentD");
-        this.attachmentE = main.getChild("attachmentE");
+        ModelPart main = root.getChild("main");
+        ModelPart counterWeights = main.getChild("counterWeights");
+        ModelPart leftCounterWeight = counterWeights.getChild("leftCounterWeight");
+        ModelPart bone9 = leftCounterWeight.getChild("bone9");
+        ModelPart bone10 = leftCounterWeight.getChild("bone10");
+        ModelPart bone11 = leftCounterWeight.getChild("bone11");
+        ModelPart bone12 = leftCounterWeight.getChild("bone12");
+        ModelPart bone13 = leftCounterWeight.getChild("bone13");
+        ModelPart bone14 = leftCounterWeight.getChild("bone14");
+        ModelPart rightCounterWeight = counterWeights.getChild("rightCounterWeight");
+        ModelPart bone15 = rightCounterWeight.getChild("bone15");
+        ModelPart bone16 = rightCounterWeight.getChild("bone16");
+        ModelPart bone17 = rightCounterWeight.getChild("bone17");
+        ModelPart bone18 = rightCounterWeight.getChild("bone18");
+        ModelPart bone19 = rightCounterWeight.getChild("bone19");
+        ModelPart bone20 = rightCounterWeight.getChild("bone20");
+        ModelPart pitmanArm = counterWeights.getChild("pitmanArm");
+        ModelPart pitmanArmLeftPivot = pitmanArm.getChild("pitmanArmLeftPivot");
+        ModelPart pitmanArmRightPivot = pitmanArm.getChild("pitmanArmRightPivot");
+        ModelPart staticParts = main.getChild("staticParts");
+        ModelPart supports = staticParts.getChild("supports");
+        ModelPart bone28 = supports.getChild("bone28");
+        ModelPart bone29 = supports.getChild("bone29");
+        ModelPart bone30 = supports.getChild("bone30");
+        ModelPart bone31 = supports.getChild("bone31");
+        ModelPart bone32 = supports.getChild("bone32");
+        ModelPart bone33 = supports.getChild("bone33");
+        ModelPart bone34 = supports.getChild("bone34");
+        ModelPart motor = staticParts.getChild("motor");
+        ModelPart bone42 = motor.getChild("bone42");
+        ModelPart bone41 = bone42.getChild("bone41");
+        ModelPart bone39 = bone42.getChild("bone39");
+        ModelPart bone40 = bone42.getChild("bone40");
+        ModelPart bone38 = bone42.getChild("bone38");
+        ModelPart bone43 = motor.getChild("bone43");
+        ModelPart bone44 = bone43.getChild("bone44");
+        ModelPart bone45 = bone43.getChild("bone45");
+        ModelPart bone46 = bone43.getChild("bone46");
+        ModelPart bone47 = bone43.getChild("bone47");
+        ModelPart frame = staticParts.getChild("frame");
+        ModelPart bone25 = frame.getChild("bone25");
+        ModelPart bone26 = frame.getChild("bone26");
+        ModelPart bone27 = frame.getChild("bone27");
+        ModelPart belt = staticParts.getChild("belt");
+        ModelPart wheel = belt.getChild("wheel");
+        ModelPart bone21 = wheel.getChild("bone21");
+        ModelPart bone22 = wheel.getChild("bone22");
+        ModelPart bone5 = wheel.getChild("bone5");
+        ModelPart bone36 = wheel.getChild("bone36");
+        ModelPart bone7 = wheel.getChild("bone7");
+        ModelPart bone35 = wheel.getChild("bone35");
+        ModelPart bone23 = wheel.getChild("bone23");
+        ModelPart bone24 = wheel.getChild("bone24");
+        ModelPart bone = belt.getChild("bone");
+        ModelPart bone2 = belt.getChild("bone2");
+        ModelPart bone3 = belt.getChild("bone3");
+        ModelPart bone4 = belt.getChild("bone4");
+        ModelPart bone6 = belt.getChild("bone6");
+        ModelPart bone8 = belt.getChild("bone8");
+        ModelPart arm = main.getChild("arm");
+        ModelPart head = arm.getChild("head");
+        ModelPart beam = arm.getChild("beam");
+        ModelPart bone37 = beam.getChild("bone37");
+        ModelPart attachmentA = main.getChild("attachmentA");
+        ModelPart attachmentB = main.getChild("attachmentB");
+        ModelPart attachmentC = main.getChild("attachmentC");
+        ModelPart attachmentD = main.getChild("attachmentD");
+        ModelPart attachmentE = main.getChild("attachmentE");
 
-        this.attachmentA.hidden = true;
-        this.attachmentB.hidden = true;
-        this.attachmentC.hidden = true;
-        this.attachmentD.hidden = true;
-        this.attachmentE.hidden = true;
+        attachmentA.hidden = true;
+        attachmentB.hidden = true;
+        attachmentC.hidden = true;
+        attachmentD.hidden = true;
+        attachmentE.hidden = true;
 
-        this.parts = new Parts(this.main, this.wheel, this.counterWeights, this.pitmanArm, this.arm,
-                this.attachmentA, this.attachmentB, this.attachmentC, this.attachmentD, this.attachmentE);
+        this.parts = new OilPumpJackParts(main, wheel, counterWeights, pitmanArm, arm,
+                attachmentA, attachmentB, attachmentC, attachmentD, attachmentE);
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -402,16 +331,11 @@ public class OilPumpJackModel extends Model {
         return TexturedModelData.of(modelData, 512, 512);
     }
 
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-        this.main.render(matrices, vertexConsumer, light, overlay, color);
-    }
-
-    public Parts getParts() {
+    public OilPumpJackParts getOilPumpJackParts() {
         return this.parts;
     }
 
-    public record Parts(ModelPart main, ModelPart wheel, ModelPart counterWeights, ModelPart pitmanArm, ModelPart arm,
-                        ModelPart attachmentA, ModelPart attachmentB, ModelPart attachmentC, ModelPart attachmentD, ModelPart attachmentE) {
+    public record OilPumpJackParts(ModelPart main, ModelPart wheel, ModelPart counterWeights, ModelPart pitmanArm, ModelPart arm,
+                                   ModelPart attachmentA, ModelPart attachmentB, ModelPart attachmentC, ModelPart attachmentD, ModelPart attachmentE) {
     }
 }
