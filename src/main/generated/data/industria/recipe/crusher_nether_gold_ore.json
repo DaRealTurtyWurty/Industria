@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "count": 1,
-    "ingredient": {
-      "item": "minecraft:nether_gold_ore"
-    }
+    "entries": "minecraft:nether_gold_ore"
   },
   "output_a": {
     "chance": 1.0,

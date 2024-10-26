@@ -1,14 +1,9 @@
 {
   "type": "industria:crusher",
   "input": {
-    "count": 1,
-    "ingredient": [
-      {
-        "item": "minecraft:diamond_ore"
-      },
-      {
-        "item": "minecraft:deepslate_diamond_ore"
-      }
+    "entries": [
+      "minecraft:diamond_ore",
+      "minecraft:deepslate_diamond_ore"
     ]
   },
   "output_a": {

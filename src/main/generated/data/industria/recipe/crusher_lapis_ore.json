@@ -1,14 +1,9 @@
 {
   "type": "industria:crusher",
   "input": {
-    "count": 1,
-    "ingredient": [
-      {
-        "item": "minecraft:lapis_ore"
-      },
-      {
-        "item": "minecraft:deepslate_lapis_ore"
-      }
+    "entries": [
+      "minecraft:lapis_ore",
+      "minecraft:deepslate_lapis_ore"
     ]
   },
   "output_a": {

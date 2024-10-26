@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -17,7 +18,7 @@ public class OilPumpJackScreen extends HandledScreen<OilPumpJackScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override

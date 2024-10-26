@@ -73,6 +73,7 @@ public class Industria implements ModInitializer {
         PositionSourceTypeInit.init();
         ComponentTypeInit.init();
         EntityTypeInit.init();
+        RecipeBookCategoryInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 

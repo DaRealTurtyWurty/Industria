@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "count": 1,
-    "ingredient": {
-      "item": "minecraft:cobblestone"
-    }
+    "entries": "minecraft:cobblestone"
   },
   "output_a": {
     "chance": 1.0,

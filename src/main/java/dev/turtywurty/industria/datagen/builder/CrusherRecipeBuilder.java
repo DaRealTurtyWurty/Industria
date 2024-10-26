@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.datagen.builder;
 
 import dev.turtywurty.industria.recipe.CrusherRecipe;
-import dev.turtywurty.industria.util.CountedIngredient;
+import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementCriterion;
@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CrusherRecipeBuilder implements CraftingRecipeJsonBuilder {
-    private final CountedIngredient input;
+    private final IndustriaIngredient input;
     private final OutputItemStack outputA, outputB;
     private final int processTime;
 
     private final RecipeCategory category;
     private final Map<String, AdvancementCriterion<?>> criteria = new HashMap<>();
 
-    public CrusherRecipeBuilder(CountedIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, RecipeCategory category) {
+    public CrusherRecipeBuilder(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, RecipeCategory category) {
         this.input = input;
         this.outputA = outputA;
         this.outputB = outputB;

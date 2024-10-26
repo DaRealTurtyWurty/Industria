@@ -8,6 +8,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
+@SuppressWarnings("unchecked")
 public abstract class DefaultScreenElement extends ScreenElement {
     private static final Vec3d CENTER = new Vec3d(0.5, 0.5, 0.5);
 

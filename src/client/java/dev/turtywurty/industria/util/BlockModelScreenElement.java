@@ -30,8 +30,8 @@ public class BlockModelScreenElement extends DefaultScreenElement {
         BlockRenderManager blockRenderManager = client.getBlockRenderManager();
         VertexConsumerProvider.Immediate provider = client.getBufferBuilders().getEntityVertexConsumers();
         RenderLayer renderLayer = this.blockState.getBlock() == Blocks.AIR ?
-                TexturedRenderLayers.getEntityTranslucentCull() :
-                RenderLayers.getEntityBlockLayer(this.blockState, true);
+                TexturedRenderLayers.getItemEntityTranslucentCull() :
+                RenderLayers.getEntityBlockLayer(this.blockState);
         VertexConsumer vertexConsumer = provider.getBuffer(renderLayer);
 
         transformMatrix(matrixStack);

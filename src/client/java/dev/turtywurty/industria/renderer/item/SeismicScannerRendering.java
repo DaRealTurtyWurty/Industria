@@ -13,12 +13,12 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -43,8 +43,8 @@ public class SeismicScannerRendering {
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-13.0F));
             matrices.translate(-0.35, 0.5, 0.0);
 
-            RenderLayer layer = RenderLayers.getItemLayer(stack, true);
-            VertexConsumer consumer = ItemRenderer.getDirectItemGlintConsumer(vertexConsumers, layer, true, stack.hasGlint());
+            RenderLayer layer = RenderLayers.getItemLayer(stack);
+            VertexConsumer consumer = ItemRenderer.getItemGlintConsumer(vertexConsumers, layer, true, stack.hasGlint());
 
             itemRenderer.renderBakedItemModel(model, stack, light, overlay, matrices, consumer);
 

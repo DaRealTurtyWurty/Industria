@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -23,7 +24,7 @@ public class CombustionGeneratorScreen extends HandledScreen<CombustionGenerator
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
         long energy = this.handler.getEnergy();
         long maxEnergy = this.handler.getMaxEnergy();
@@ -34,7 +35,7 @@ public class CombustionGeneratorScreen extends HandledScreen<CombustionGenerator
         int fuelTime = this.handler.getFuelTime();
         float burnTimePercentage = (float) burnTime / fuelTime;
         int burnTimeSize = Math.round(burnTimePercentage * 14);
-        context.drawTexture(TEXTURE, this.x + 82, this.y + 25 + 14 - burnTimeSize, 176, 14 - burnTimeSize, 14, burnTimeSize);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 82, this.y + 25 + 14 - burnTimeSize, 176, 14 - burnTimeSize, 14, burnTimeSize);
     }
 
     @Override

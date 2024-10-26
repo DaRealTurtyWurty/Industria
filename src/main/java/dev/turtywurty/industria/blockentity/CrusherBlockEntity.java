@@ -159,7 +159,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
                     return;
 
                 consumeEnergy();
-                this.wrappedInventoryStorage.getInventory(INPUT_SLOT).removeStack(0, recipe.input().count());
+                this.wrappedInventoryStorage.getInventory(INPUT_SLOT).removeStack(0, recipe.input().stackData().count());
 
                 if (!outputA.isEmpty())
                     this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).addStack(outputA);

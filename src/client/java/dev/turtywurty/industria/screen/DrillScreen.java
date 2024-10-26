@@ -7,6 +7,7 @@ import dev.turtywurty.industria.network.ChangeDrillingPayload;
 import dev.turtywurty.industria.network.RetractDrillPayload;
 import dev.turtywurty.industria.screen.widget.SelectEnumButton;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -63,7 +64,7 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override

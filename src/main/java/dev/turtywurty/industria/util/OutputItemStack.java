@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -16,6 +17,8 @@ import net.minecraft.util.math.intprovider.ConstantIntProvider;
 import net.minecraft.util.math.intprovider.IntProvider;
 import net.minecraft.util.math.intprovider.IntProviderType;
 import net.minecraft.util.math.random.Random;
+
+import java.util.stream.IntStream;
 
 /**
  * Represents an item stack that can be outputted from a machine.
@@ -102,6 +105,15 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
         return this.chance.get(random) < random.nextFloat() ?
                 ItemStack.EMPTY :
                 new ItemStack(this.item, this.count.get(random));
+    }
+
+    public SlotDisplay toDisplay() {
+        return new SlotDisplay.CompositeSlotDisplay(
+                IntStream.range(this.count.getMin(), this.count.getMax() + 1)
+                        .mapToObj(count -> new ItemStack(this.item, count))
+                        .map(SlotDisplay.StackSlotDisplay::new)
+                        .map(SlotDisplay.class::cast)
+                        .toList());
     }
 
     private static void encode(RegistryByteBuf buf, OutputItemStack stack) {

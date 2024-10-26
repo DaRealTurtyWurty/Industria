@@ -1,14 +1,9 @@
 {
   "type": "industria:crusher",
   "input": {
-    "count": 1,
-    "ingredient": [
-      {
-        "item": "minecraft:emerald_ore"
-      },
-      {
-        "item": "minecraft:deepslate_emerald_ore"
-      }
+    "entries": [
+      "minecraft:emerald_ore",
+      "minecraft:deepslate_emerald_ore"
     ]
   },
   "output_a": {

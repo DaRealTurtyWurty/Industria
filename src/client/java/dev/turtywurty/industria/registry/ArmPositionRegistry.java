@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.registry;
 
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.render.entity.state.BipedEntityRenderState;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -30,6 +30,6 @@ public class ArmPositionRegistry {
 
     @FunctionalInterface
     public interface DynamicArmPosition {
-        void apply(LivingEntity entity, ModelPart leftArm, ModelPart rightArm, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch);
+        void apply(BipedEntityRenderState bipedEntityRenderState, ModelPart leftArm, ModelPart rightArm);
     }
 }

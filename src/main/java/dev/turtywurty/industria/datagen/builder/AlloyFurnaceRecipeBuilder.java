@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.datagen.builder;
 
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
-import dev.turtywurty.industria.util.CountedIngredient;
+import dev.turtywurty.industria.util.IndustriaIngredient;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementCriterion;
 import net.minecraft.advancement.AdvancementRequirements;
@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AlloyFurnaceRecipeBuilder implements CraftingRecipeJsonBuilder {
-    private final CountedIngredient inputA, inputB;
+    private final IndustriaIngredient inputA, inputB;
     private final ItemStack output;
     private final int smeltTime;
 
     private final RecipeCategory category;
     private final Map<String, AdvancementCriterion<?>> criteria = new HashMap<>();
 
-    public AlloyFurnaceRecipeBuilder(CountedIngredient inputA, CountedIngredient inputB, ItemStack output, int smeltTime, RecipeCategory category) {
+    public AlloyFurnaceRecipeBuilder(IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime, RecipeCategory category) {
         this.inputA = inputA;
         this.inputB = inputB;
         this.output = output;

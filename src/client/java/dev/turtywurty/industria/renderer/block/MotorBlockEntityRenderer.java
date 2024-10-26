@@ -35,9 +35,9 @@ public class MotorBlockEntityRenderer implements BlockEntityRenderer<MotorBlockE
         float rotationSpeed = entity.getRotationSpeed();
         entity.rodRotation += rotationSpeed * tickDelta;
 
-        this.model.getSpinRod().pitch = entity.rodRotation;
+        this.model.getMotorParts().spinRod().pitch = entity.rodRotation;
         model.render(matrices, vertexConsumers.getBuffer(model.getLayer(MotorModel.TEXTURE_LOCATION)), light, overlay);
-        this.model.getSpinRod().pitch = 0;
+        this.model.getMotorParts().spinRod().pitch = 0;
 
         matrices.pop();
     }

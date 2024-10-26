@@ -172,7 +172,7 @@ public class IndustriaClient implements ClientModInitializer {
 
     private static void registerArmPositions() {
         ArmPositionRegistry.register(stack -> stack.isOf(ItemInit.SEISMIC_SCANNER),
-                (entity, leftArm, rightArm, limbAngle, limbDistance, animationProgress, headYaw, headPitch) -> {
+                (state, leftArm, rightArm) -> {
                     leftArm.hidden = false;
                     rightArm.hidden = false;
 

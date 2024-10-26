@@ -3,24 +3,22 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class WindTurbineModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("wind_turbine"), "main");
 
-    private final Parts parts;
+    private final WindTurbineParts parts;
 
     public WindTurbineModel(ModelPart root) {
-        super(RenderLayer::getEntitySolid);
+        super(root, RenderLayer::getEntitySolid);
         ModelPart core = root.getChild("core");
         ModelPart propellers = root.getChild("propellers");
         ModelPart propeller0 = propellers.getChild("propeller0");
         ModelPart propeller1 = propellers.getChild("propeller1");
         ModelPart propeller2 = propellers.getChild("propeller2");
 
-        this.parts = new Parts(core, propellers, propeller0, propeller1, propeller2);
+        this.parts = new WindTurbineParts(core, propellers, propeller0, propeller1, propeller2);
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -49,17 +47,10 @@ public class WindTurbineModel extends Model {
         return TexturedModelData.of(modelData, 128, 128);
     }
 
-    @Override
-    public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-        this.parts.core().render(matrices, vertexConsumer, light, overlay, color);
-        this.parts.propellers().render(matrices, vertexConsumer, light, overlay, color);
-    }
-
-    public Parts getParts() {
+    public WindTurbineParts getWindTurbineParts() {
         return this.parts;
     }
 
-    public record Parts(ModelPart core, ModelPart propellers,
-                        ModelPart propeller0, ModelPart propeller1, ModelPart propeller2) {
+    public record WindTurbineParts(ModelPart core, ModelPart propellers, ModelPart propeller0, ModelPart propeller1, ModelPart propeller2) {
     }
 }
