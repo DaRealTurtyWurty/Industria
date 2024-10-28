@@ -63,23 +63,51 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             }));
         }
 
-        { // Render frame
-            this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION)), light, overlay);
+        { // Render motor
+            if (!entity.getMotorInventory().isEmpty()) {
+                DrillMotorModel.DrillMotorParts parts = this.motorModel.getDrillMotorParts();
+                float prevRodGear = parts.rodGear().pitch;
+                float connectingGear = parts.connectingGear().pitch;
+
+                if(!entity.isDrilling() && !entity.isRetracting()) {
+                    entity.clientMotorRotation = 0;
+                }
+
+                parts.rodGear().pitch += entity.clientMotorRotation += (entity.isDrilling() ? 0.1f : entity.isRetracting() ? -0.1f : 0);
+                parts.connectingGear().pitch = -entity.clientMotorRotation;
+
+                this.motorModel.render(matrices, vertexConsumers.getBuffer(this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION)), light, overlay);
+
+                parts.rodGear().pitch = prevRodGear;
+                parts.connectingGear().pitch = connectingGear;
+            }
         }
 
-        { // Render motor
-            if (!entity.getMotorInventory().isEmpty())
-                this.motorModel.render(matrices, vertexConsumers.getBuffer(this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION)), light, overlay);
+        { // Render frame
+            float prevCableWheelPitch = this.model.getCableWheel().pitch;
+            float prevCableWheelRodPitch = this.model.getCableWheelRod().pitch;
+
+            this.model.getCableWheel().pitch = entity.clientMotorRotation;
+            this.model.getCableWheelRod().pitch = entity.clientMotorRotation;
+
+            this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION)), light, overlay);
+
+            this.model.getCableWheel().pitch = prevCableWheelPitch;
+            this.model.getCableWheelRod().pitch = prevCableWheelRodPitch;
         }
 
         int worldBottom = world.getBottomY();
         int startY = entity.getPos().getY() + 2;
-        int currentY = (int) entity.getDrillYOffset() - 1 + startY;
+        float currentY = entity.getDrillYOffset() - 1 + startY;
 
-        float progress = 1 - (float) (startY - currentY) / (startY - worldBottom);
+        float progress = 1 - (startY - currentY) / (startY - worldBottom);
 
         { // Render cable wheel
             ModelPart cableMain = this.cableModel.getMain();
+
+            float prevCableMainPitch = cableMain.pitch;
+
+            cableMain.pitch = entity.clientMotorRotation;
 
             float cableScaleFactor = 0.5f - (progress / 2f);
             cableMain.xScale -= cableScaleFactor;
@@ -89,6 +117,8 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             cableMain.xScale += cableScaleFactor;
             cableMain.yScale += cableScaleFactor;
             cableMain.zScale += cableScaleFactor;
+
+            cableMain.pitch = prevCableMainPitch;
         }
 
         ItemStack drillHeadStack = entity.getDrillStack();
@@ -107,8 +137,7 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             MatrixStack.Entry entry = matrices.peek();
             VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
 
-            float cableOffset = ((1 - progress) / 32f);
-            System.out.println(cableOffset);
+            float cableOffset = ((1 - progress) / 16f);
             linesVertexConsumer.vertex(entry, 0, -1.625f + cableOffset, 0.275f + cableOffset)
                     .color(70, 70, 70, 255)
                     .normal(1, 0, 0);

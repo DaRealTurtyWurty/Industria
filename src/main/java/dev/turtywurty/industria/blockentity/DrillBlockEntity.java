@@ -57,7 +57,9 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     private OverflowMethod overflowMethod = OverflowMethod.VOID;
     private final List<ItemStack> overflowStacks = new ArrayList<>(); // Only used if overflowMethod is set to PAUSE
 
-    private DrillRenderData renderData; // Only used client side
+    // Only used client side
+    private DrillRenderData renderData;
+    public float clientMotorRotation;
 
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.DRILL, pos, state);
@@ -90,6 +92,21 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             this.overflowStacks.removeIf(ItemStack::isEmpty);
         }
 
+        {
+            boolean currentDrilling = this.drilling;
+            boolean currentRetracting = this.retracting;
+            if (!hasMotor()) {
+                this.drilling = false;
+                this.retracting = false;
+
+                if (currentDrilling || currentRetracting) {
+                    update();
+                }
+
+                return;
+            }
+        }
+
         DrillHeadable drillHeadable = (DrillHeadable) getDrillStack().getItem();
 
         // Do stuff
@@ -119,6 +136,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
         if (nbt.contains("Drilling", NbtElement.BYTE_TYPE)) {
             this.drilling = nbt.getBoolean("Drilling");
+        }
+
+        if (nbt.contains("Retracting", NbtElement.BYTE_TYPE)) {
+            this.retracting = nbt.getBoolean("Retracting");
         }
 
         if (nbt.contains("Inventory", NbtElement.LIST_TYPE)) {
@@ -242,6 +263,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         return this.retracting;
     }
 
+    public boolean hasMotor() {
+        return !getMotorInventory().isEmpty();
+    }
+
     public ItemStack getDrillStack() {
         return getDrillHeadInventory().getStack(0);
     }
@@ -280,10 +305,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     }
 
     public void handleBlockBreak(BlockPos pos, BlockState state) {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
             return;
 
-        List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(new LootWorldContext.Builder((ServerWorld) world)
+        List<ItemStack> drops = new ArrayList<>(state.getDroppedStacks(new LootWorldContext.Builder(serverWorld)
                 .add(LootContextParameters.ORIGIN, pos.toCenterPos())
                 .add(LootContextParameters.BLOCK_STATE, state)
                 .add(LootContextParameters.TOOL, Items.DIAMOND_PICKAXE.getDefaultStack())
@@ -297,21 +322,27 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             drops.set(index, inventory.addStack(drop));
         }
 
+        drops.removeIf(ItemStack::isEmpty);
+
         switch (this.overflowMethod) {
             case VOID:
                 break;
             case PAUSE:
                 if (!drops.isEmpty()) {
                     this.drilling = false;
+                    this.retracting = false;
+                    this.overflowStacks.addAll(drops);
+                    update();
                 }
 
                 break;
             case SPILLAGE:
                 for (ItemStack drop : drops) {
                     if (!drop.isEmpty()) {
-                        ItemScatterer.spawn(world, pos.getX(), pos.getY() + 2, pos.getZ(), drop);
+                        ItemScatterer.spawn(world, this.pos.getX(), this.pos.getY() + 3.5, this.pos.getZ(), drop);
                     }
                 }
+
                 break;
         }
 

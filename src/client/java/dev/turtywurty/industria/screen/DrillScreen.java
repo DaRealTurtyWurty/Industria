@@ -22,6 +22,8 @@ import java.util.HashMap;
 public class DrillScreen extends HandledScreen<DrillScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/drill.png");
 
+    private ButtonWidget drillButton;
+    private ButtonWidget retractButton;
     private SelectEnumButton<DrillBlockEntity.OverflowMethod> overflowButton;
 
     public DrillScreen(DrillScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -31,7 +33,7 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
     @Override
     protected void init() {
         super.init();
-        addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
+        this.drillButton = addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
                     if (!this.overflowButton.isHoveredLastFrame()) {
                         ClientPlayNetworking.send(new ChangeDrillingPayload(!this.handler.getBlockEntity().isDrilling()));
                     }
@@ -39,7 +41,7 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
                 .dimensions(this.x + 10, this.y + 16, 20, 20)
                 .build());
 
-        addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
+        this.retractButton = addDrawableChild(ButtonWidget.builder(Text.empty(), button -> {
                     if (!this.overflowButton.isHoveredLastFrame()) {
                         ClientPlayNetworking.send(new RetractDrillPayload());
                     }
@@ -60,6 +62,20 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> {
                         map.put(overflowMethod, Industria.id("textures/gui/widget/overflow_" + overflowMethod.getSerializedName() + ".png"));
                     }
                 })));
+    }
+
+    @Override
+    protected void handledScreenTick() {
+        super.handledScreenTick();
+
+        boolean hasMotor = this.handler.getBlockEntity().hasMotor();
+        if(this.drillButton != null) {
+            this.drillButton.active = hasMotor;
+        }
+
+        if(this.retractButton != null) {
+            this.retractButton.active = hasMotor;
+        }
     }
 
     @Override
