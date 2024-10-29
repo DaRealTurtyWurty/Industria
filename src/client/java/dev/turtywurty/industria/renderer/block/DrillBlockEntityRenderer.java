@@ -10,18 +10,18 @@ import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.util.DrillHeadable;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.joml.Matrix4f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,11 +69,11 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
                 float prevRodGear = parts.rodGear().pitch;
                 float connectingGear = parts.connectingGear().pitch;
 
-                if(!entity.isDrilling() && !entity.isRetracting()) {
+                if (!entity.isDrilling() && !entity.isRetracting()) {
                     entity.clientMotorRotation = 0;
                 }
 
-                parts.rodGear().pitch += entity.clientMotorRotation += (entity.isDrilling() ? 0.1f : entity.isRetracting() ? -0.1f : 0);
+                parts.rodGear().pitch += entity.clientMotorRotation += (entity.isDrilling() ? 0.03f : entity.isRetracting() ? -0.03f : 0);
                 parts.connectingGear().pitch = -entity.clientMotorRotation;
 
                 this.motorModel.render(matrices, vertexConsumers.getBuffer(this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION)), light, overlay);
@@ -136,9 +136,23 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
         { // Render drill cable
             MatrixStack.Entry entry = matrices.peek();
             VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            
+            float angleOffset = (float) (entity.isRetracting() ?
+                                -entity.clientMotorRotation < 0 ? -Math.PI/4 : -Math.PI/4 - Math.PI / 2:
+                                -entity.clientMotorRotation < 0 ? -3 * Math.PI/4 + Math.PI / 2 : -3 * Math.PI/4);
 
-            float cableOffset = ((1 - progress) / 16f);
-            linesVertexConsumer.vertex(entry, 0, -1.625f + cableOffset, 0.275f + cableOffset)
+            float angle = (float) (-entity.clientMotorRotation % (Math.PI / 2f)) + angleOffset;
+
+            float wheelRadius = (progress /2f + 0.5f) * 3.5f / 16f;
+
+            float wheelZ = 0.5f;
+            float wheelY = -1.5f + 1.5f / 16f;
+
+            double r = Math.sqrt(2) * wheelRadius;
+            float cableZ = wheelZ + (float) (Math.cos(angle) * r);
+            float cableY = wheelY + (float) (Math.sin(angle) * r);
+
+            linesVertexConsumer.vertex(entry, 0f, cableY, cableZ)
                     .color(70, 70, 70, 255)
                     .normal(1, 0, 0);
 
