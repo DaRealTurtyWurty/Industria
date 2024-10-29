@@ -60,6 +60,7 @@ public class Industria implements ModInitializer {
         LOGGER.info("Loading Industria...");
 
         // Registries
+        IndustriaRegistries.init();
         ItemInit.init();
         BlockInit.init();
         BlockEntityTypeInit.init();
@@ -75,6 +76,7 @@ public class Industria implements ModInitializer {
         ComponentTypeInit.init();
         EntityTypeInit.init();
         RecipeBookCategoryInit.init();
+        MultiblockTypeInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
