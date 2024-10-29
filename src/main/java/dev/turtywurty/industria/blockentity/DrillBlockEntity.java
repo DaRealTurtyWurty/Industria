@@ -21,6 +21,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameters;
@@ -64,9 +65,20 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.DRILL, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable), Direction.UP);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.isOf(BlockInit.MOTOR.asItem())), Direction.NORTH);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable) {
+            @Override
+            public int getMaxCountPerStack() {
+                return 1;
+            }
+        }, Direction.UP);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.isOf(BlockInit.MOTOR.asItem())) {
+            @Override
+            public int getMaxCountPerStack() {
+                return 1;
+            }
+        }, Direction.NORTH);
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.DOWN);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 3, (stack, slot) -> stack.getItem() instanceof BlockItem), Direction.SOUTH);
 
         getDrillHeadInventory().addListener(inv -> {
             if (this.world != null && this.world.isClient) {
@@ -253,6 +265,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     public SimpleInventory getMotorInventory() {
         return this.wrappedInventoryStorage.getInventory(1);
+    }
+
+    public SimpleInventory getPlaceableBlockInventory() {
+        return this.wrappedInventoryStorage.getInventory(3);
     }
 
     public boolean isDrilling() {

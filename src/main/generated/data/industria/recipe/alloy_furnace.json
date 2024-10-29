@@ -2,8 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": "minecraft:copper_block",
-    "B": "minecraft:iron_block"
+    "A": "#c:storage_blocks/copper",
+    "B": "#c:storage_blocks/iron"
   },
   "pattern": [
     "AAA",

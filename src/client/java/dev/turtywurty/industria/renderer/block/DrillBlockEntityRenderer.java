@@ -47,8 +47,6 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
     @Override
     public void render(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         World world = entity.getWorld();
-        if (world == null)
-            return;
 
         matrices.push();
         { // Apply transformations
@@ -69,7 +67,7 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
                 float prevRodGear = parts.rodGear().pitch;
                 float connectingGear = parts.connectingGear().pitch;
 
-                if(!entity.isDrilling() && !entity.isRetracting()) {
+                if (!entity.isDrilling() && !entity.isRetracting()) {
                     entity.clientMotorRotation = 0;
                 }
 
@@ -96,7 +94,7 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             this.model.getCableWheelRod().pitch = prevCableWheelRodPitch;
         }
 
-        int worldBottom = world.getBottomY();
+        int worldBottom = world == null ? 0 : world.getBottomY();
         int startY = entity.getPos().getY() + 2;
         float currentY = entity.getDrillYOffset() - 1 + startY;
 
@@ -110,6 +108,7 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             cableMain.pitch = entity.clientMotorRotation;
 
             float cableScaleFactor = 0.5f - (progress / 2f);
+
             cableMain.xScale -= cableScaleFactor;
             cableMain.yScale -= cableScaleFactor;
             cableMain.zScale -= cableScaleFactor;
@@ -137,8 +136,19 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             MatrixStack.Entry entry = matrices.peek();
             VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
 
-            float cableOffset = ((1 - progress) / 16f);
-            linesVertexConsumer.vertex(entry, 0, -1.625f + cableOffset, 0.275f + cableOffset)
+            float angle = (float) ((-entity.clientMotorRotation % (Math.PI / 2f)) + (float) (Math.PI + Math.PI / 4f));
+            float wheelRadius = (2 - progress) * 7f / 16f;
+
+            float wheelZ = 0.5f;
+            float wheelY = -1.5f + 1.5f / 16f;
+
+            double d1 = 1 / (2 * Math.abs(Math.cos(angle)));
+            double d2 = 1 / (2 * Math.abs(Math.sin(angle)));
+            double r = Math.min(d1, d2) * wheelRadius;
+            float cableZ = wheelZ + (float) (Math.cos(angle) * r);
+            float cableY = wheelY + (float) (Math.sin(angle) * r);
+
+            linesVertexConsumer.vertex(entry, -0.15f, cableY, cableZ)
                     .color(70, 70, 70, 255)
                     .normal(1, 0, 0);
 
@@ -173,6 +183,6 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
 
     @Override
     public boolean isInRenderDistance(DrillBlockEntity blockEntity, Vec3d pos) {
-        return blockEntity.getPos().isWithinDistance(pos, 256);
+        return blockEntity.getPos().isWithinDistance(pos, blockEntity.getWorld() == null ? 64 : blockEntity.getWorld().getHeight());
     }
 }

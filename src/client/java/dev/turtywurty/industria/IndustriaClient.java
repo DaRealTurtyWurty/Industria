@@ -82,8 +82,9 @@ public class IndustriaClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.OIL_PUMP_JACK, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DRILL, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SEISMIC_SCANNER, IndustriaDynamicItemRenderer.INSTANCE);
-        BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SIMPLE_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.MOTOR, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SIMPLE_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.BLOCK_BUILDER_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
 
         // Register Fluid Renderers
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
@@ -187,6 +188,13 @@ public class IndustriaClient implements ClientModInitializer {
 
     private static void registerDrillHeads() {
         DrillHeadRegistry.register(ItemInit.SIMPLE_DRILL_HEAD, DrillHeadRegistry.DrillHeadClientData.create(
+                either -> new SimpleDrillHeadModel(either.map(ctx ->
+                                ctx.getLayerModelPart(SimpleDrillHeadModel.LAYER_LOCATION),
+                        loader -> loader.getModelPart(SimpleDrillHeadModel.LAYER_LOCATION))),
+                SimpleDrillHeadModel::onRender,
+                Industria.id("textures/block/simple_drill_head.png")));
+
+        DrillHeadRegistry.register(ItemInit.BLOCK_BUILDER_DRILL_HEAD, DrillHeadRegistry.DrillHeadClientData.create(
                 either -> new SimpleDrillHeadModel(either.map(ctx ->
                                 ctx.getLayerModelPart(SimpleDrillHeadModel.LAYER_LOCATION),
                         loader -> loader.getModelPart(SimpleDrillHeadModel.LAYER_LOCATION))),

@@ -5,21 +5,19 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.DrillRenderData;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class SimpleDrillHeadItem extends Item implements DrillHeadable {
-    public SimpleDrillHeadItem(Settings settings) {
+public class BlockBuilderDrillHeadItem extends Item implements DrillHeadable {
+    public BlockBuilderDrillHeadItem(Settings settings) {
         super(settings);
-    }
-
-    @Override
-    public DrillRenderData createRenderData() {
-        return new DrillRenderData();
     }
 
     @Override
@@ -32,15 +30,11 @@ public class SimpleDrillHeadItem extends Item implements DrillHeadable {
         float hardness = state.getHardness(world, pos);
         drillYOffset -= ((hardness == -1 || hardness == 0) ? 0.01F : (1F / (hardness + 5)));
 
-        if (!state.getFluidState().isEmpty()) {
-            blockEntity.setDrilling(false);
-            blockEntity.setRetracting(true);
-            return drillYOffset;
-        } else if (state.isAir()) {
+        if (state.isAir()) {
             drillYOffset -= 0.1F;
         }
 
-        if(WorldFluidPocketsState.getServerState((ServerWorld) world).isPositionInPocket(pos)) {
+        if (WorldFluidPocketsState.getServerState((ServerWorld) world).isPositionInPocket(pos)) {
             blockEntity.setDrilling(false);
             blockEntity.setRetracting(true);
             return drillYOffset - 0.1F;
@@ -73,8 +67,33 @@ public class SimpleDrillHeadItem extends Item implements DrillHeadable {
             blockEntity.setDrilling(false);
             blockEntity.setRetracting(false);
             drillYOffset = 1.0F;
+        } else if (!blockEntity.getPlaceableBlockInventory().isEmpty()) {
+            BlockPos pos = blockEntity.getPos().down((int) -drillYOffset + 1);
+            BlockState state = blockEntity.getWorld().getBlockState(pos);
+            if (state.isReplaceable()) {
+                SimpleInventory inventory = blockEntity.getPlaceableBlockInventory();
+
+                for (int i = 0; i < inventory.size(); i++) {
+                    ItemStack stack = inventory.getStack(i);
+                    if (!stack.isEmpty()) {
+                        Block block = Block.getBlockFromItem(stack.getItem());
+                        BlockState blockState = block.getDefaultState();
+                        if (blockState.isAir())
+                            continue;
+
+                        blockEntity.getWorld().setBlockState(pos, blockState);
+                        inventory.removeStack(i, 1);
+                        break;
+                    }
+                }
+            }
         }
 
         return drillYOffset;
+    }
+
+    @Override
+    public DrillRenderData createRenderData() {
+        return new DrillRenderData();
     }
 }

@@ -56,6 +56,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addTextEnum(translationBuilder, DrillBlockEntity.OverflowMethod.PAUSE, "Pause");
         translationBuilder.add(BlockInit.MOTOR, "Motor");
         addText(translationBuilder, MotorBlockEntity.TITLE, "Motor");
+        translationBuilder.add(ItemInit.BLOCK_BUILDER_DRILL_HEAD, "Block Builder Drill Head");
+        translationBuilder.add(BlockInit.DRILL_TUBE, "Drill Tube");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

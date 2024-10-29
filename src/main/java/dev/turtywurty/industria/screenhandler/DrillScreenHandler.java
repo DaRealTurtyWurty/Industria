@@ -39,9 +39,13 @@ public class DrillScreenHandler extends ScreenHandler {
         checkSize(outputInventory, 9);
         outputInventory.onOpen(playerInv.player);
 
+        SimpleInventory placeableBlockInventory = blockEntity.getPlaceableBlockInventory();
+        checkSize(placeableBlockInventory, 3);
+        placeableBlockInventory.onOpen(playerInv.player);
+
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
-        addBlockEntityInventory(drillHeadInventory, motorInventory, outputInventory);
+        addBlockEntityInventory(drillHeadInventory, motorInventory, outputInventory, placeableBlockInventory);
     }
 
     private void addPlayerInventory(PlayerInventory inventory) {
@@ -58,7 +62,7 @@ public class DrillScreenHandler extends ScreenHandler {
         }
     }
 
-    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory motorInventory, SimpleInventory outputInventory) {
+    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory motorInventory, SimpleInventory outputInventory, SimpleInventory placeableBlockInventory) {
         addSlot(new Slot(drillHeadInventory, 0, 80, 35) {
             @Override
             public boolean isEnabled() {
@@ -82,6 +86,16 @@ public class DrillScreenHandler extends ScreenHandler {
             for (int column = 0; column < 3; column++) {
                 addSlot(new OutputSlot(outputInventory, column + row * 3, 116 + column * 18, 17 + row * 18));
             }
+        }
+
+        for (int index = 0; index < 3; index++) {
+            int finalIndex = index;
+            addSlot(new Slot(placeableBlockInventory, finalIndex, 62 + index * 18, 17) {
+                @Override
+                public boolean canInsert(ItemStack stack) {
+                    return inventory.isValid(finalIndex, stack);
+                }
+            });
         }
     }
 

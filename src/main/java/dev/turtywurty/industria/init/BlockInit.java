@@ -63,6 +63,9 @@ public class BlockInit {
     public static final MotorBlock MOTOR = registerWithItemCopy("motor",
             MotorBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static final DrillTubeBlock DRILL_TUBE = registerWithItemCopy("drill_tube",
+            DrillTubeBlock::new, Blocks.LIGHT_GRAY_CONCRETE, AbstractBlock.Settings::nonOpaque);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()
@@ -73,22 +76,6 @@ public class BlockInit {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.copy(toCopy)
                         .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
-    }
-
-    public static <T extends Block> T registerWithItem(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier, Function<Item.Settings, Item> itemConstructor, Function<Item.Settings, Item.Settings> itemSettingsApplier) {
-        T registeredBlock = registerBlock(name, constructor.apply(
-                settingsApplier.apply(AbstractBlock.Settings.create()
-                        .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
-        ItemInit.register(name, itemConstructor, itemSettingsApplier);
-        return registeredBlock;
-    }
-
-    public static <T extends Block> T registerWithItem(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
-        T registeredBlock = registerBlock(name, constructor.apply(
-                settingsApplier.apply(AbstractBlock.Settings.create()
-                        .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
-        ItemInit.register(name, settings -> new BlockItem(registeredBlock, settings), Item.Settings::useBlockPrefixedTranslationKey);
-        return registeredBlock;
     }
 
     public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {

@@ -2,6 +2,7 @@ package dev.turtywurty.industria;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.command.ConfigCommand;
 import dev.turtywurty.industria.config.ServerConfig;
@@ -100,6 +101,10 @@ public class Industria implements ModInitializer {
         EnergyStorage.SIDED.registerForBlockEntity(WindTurbineBlockEntity::getEnergyProvider, BlockEntityTypeInit.WIND_TURBINE);
 
         EnergyStorage.SIDED.registerForBlockEntity(MotorBlockEntity::getEnergyProvider, BlockEntityTypeInit.MOTOR);
+
+        EnergyStorage.SIDED.registerForBlocks(MultiblockBlock::getEnergyProvider, BlockInit.MULTIBLOCK_BLOCK);
+        ItemStorage.SIDED.registerForBlocks(MultiblockBlock::getInventoryProvider, BlockInit.MULTIBLOCK_BLOCK);
+        FluidStorage.SIDED.registerForBlocks(MultiblockBlock::getFluidProvider, BlockInit.MULTIBLOCK_BLOCK);
 
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
