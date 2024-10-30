@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.math.MathHelper;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class DrillScreenHandler extends ScreenHandler {
     private final DrillBlockEntity blockEntity;
@@ -134,5 +136,19 @@ public class DrillScreenHandler extends ScreenHandler {
 
     public DrillBlockEntity getBlockEntity() {
         return this.blockEntity;
+    }
+
+    public float getEnergyPercentage() {
+        SimpleEnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
+        long energy = energyStorage.getAmount();
+        long capacity = energyStorage.getCapacity();
+        if(energy == 0 || capacity == 0) return 0;
+
+        return MathHelper.clamp((float) energy / capacity, 0, 1);
+    }
+
+    public int getTargetRPM() {
+        float targetRotationSpeed = this.blockEntity.getTargetRotationSpeed();
+        return (int) (targetRotationSpeed * 60);
     }
 }

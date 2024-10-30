@@ -161,6 +161,10 @@ public class Industria implements ModInitializer {
                 MotorBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
                 blockEntity.update();
+            } else if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+                DrillBlockEntity blockEntity = handler.getBlockEntity();
+                blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
+                blockEntity.update();
             }
         });
 

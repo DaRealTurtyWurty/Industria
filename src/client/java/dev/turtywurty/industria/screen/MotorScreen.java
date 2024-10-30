@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class MotorScreen extends HandledScreen<MotorScreenHandler> {
+public class MotorScreen extends HandledScreen<MotorScreenHandler> implements MotorRPMHandler {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/motor.png");
 
     private TextFieldWidget targetRPMField;
@@ -31,36 +31,14 @@ public class MotorScreen extends HandledScreen<MotorScreenHandler> {
         super.init();
 
         this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
-
-        this.targetRPMField = new TextFieldWidget(this.textRenderer, this.x + 7, this.y + 7, 50, 20, Text.literal("Target RPM"));
-        this.targetRPMField.setMaxLength(6);
-        this.targetRPMField.setText(String.valueOf(this.handler.getTargetRPM()));
-        this.targetRPMField.setChangedListener(value -> {
-            try {
-                int targetRPM = Integer.parseInt(value);
-                setTargetRPM(targetRPM);
-            } catch (NumberFormatException ignored) {
-                setTargetRPM(0);
-            }
-        });
-
-        addDrawableChild(this.targetRPMField);
+        this.targetRPMField = addDrawableChild(createWidget(this.textRenderer, this.x + 10, this.y + 10, 100, 20));
     }
 
     @Override
     protected void handledScreenTick() {
         super.handledScreenTick();
 
-        int fieldRPM = 0;
-        try {
-            fieldRPM = Integer.parseInt(this.targetRPMField.getText());
-        } catch (NumberFormatException ignored) {
-            this.targetRPMField.setText("0");
-        }
-
-        if (this.handler.getTargetRPM() != fieldRPM) {
-            this.targetRPMField.setText(String.valueOf(this.handler.getTargetRPM()));
-        }
+        listenForUpdates();
     }
 
     @Override
@@ -82,8 +60,19 @@ public class MotorScreen extends HandledScreen<MotorScreenHandler> {
         }
     }
 
-    private void setTargetRPM(int targetRPM) {
+    @Override
+    public void setTargetRPM(int targetRPM) {
         this.handler.getBlockEntity().setTargetRotationSpeed(targetRPM / 60f);
         ClientPlayNetworking.send(new SetMotorTargetRPMPayload(targetRPM));
+    }
+
+    @Override
+    public int getTargetRPM() {
+        return this.handler.getTargetRPM();
+    }
+
+    @Override
+    public TextFieldWidget getTargetRPMField() {
+        return this.targetRPMField;
     }
 }

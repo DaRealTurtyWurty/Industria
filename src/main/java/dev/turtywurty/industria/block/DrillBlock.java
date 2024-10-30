@@ -3,35 +3,31 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockType;
+import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class DrillBlock extends Block implements BlockEntityProvider {
+public class DrillBlock extends MultiblockControllerBlock {
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
 
     public DrillBlock(Settings settings) {
-        super(settings);
+        super(settings, MultiblockTypeInit.DRILL);
 
         setDefaultState(getDefaultState().with(FACING, Direction.NORTH));
     }
@@ -65,24 +61,6 @@ public class DrillBlock extends Block implements BlockEntityProvider {
                 drillBlockEntity.buildMultiblock(world, pos, state, placer, itemStack, drillBlockEntity::markDirty);
             }
         }
-    }
-
-    @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if(!state.isOf(newState.getBlock())) {
-            MultiblockType.DRILL.onMultiblockBreak(world, pos);
-        }
-
-        super.onStateReplaced(state, world, pos, newState, moved);
-    }
-
-    @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if(!world.isClient) {
-            MultiblockType.DRILL.onPrimaryBlockUse(world, player, hit, pos);
-        }
-
-        return ActionResult.SUCCESS;
     }
 
     @Override
