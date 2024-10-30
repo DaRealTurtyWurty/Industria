@@ -1,4 +1,4 @@
-// 1.21.2	2024-10-26T16:05:53.7508132	Industria/Industria Recipe Provider
+// 1.21.3	2024-10-28T21:34:04.899583	Industria/Industria Recipe Provider
 2381354d367016400d1e8f87914ba10ecd30c1d5 data\industria\recipe\crusher_coal_ore.json
 7cda7d51d90cec5ac5df4848ea6bc2407c01bda3 data\industria\recipe\crusher_nether_gold_ore.json
 7acd15fef0ced03a9df937d8cee7e6c675d2a926 data\industria\recipe\crusher_gravel.json
@@ -8,13 +8,13 @@ e442445a073d72332fe18239df86981c6a5c27ef data\industria\recipe\alloy_steel_ingot
 ed95a43cffe28f38bcdce34b0d72b9bbc1270b35 data\industria\advancement\recipes\misc\crusher_gravel.json
 1cb723c12e5a8003351c4ca9c9ddfd48d34bfbf9 data\industria\advancement\recipes\misc\crusher_quartz_ore.json
 d6899b88dbade68f4f43b989d23ad44174d1ee70 data\industria\advancement\recipes\misc\crusher_coal_ore.json
-784334769bf48766e2e232ef64e920fc489df188 data\industria\recipe\alloy_furnace.json
+b2ebeddc8c16c54f192805db81c6b2176f41a7ab data\industria\recipe\alloy_furnace.json
 5499569d671817e62a27c3ce1e054599fe7af357 data\industria\advancement\recipes\misc\crusher_stone.json
 451cb688ac51b66d07c2b255a07e4ffb3e341013 data\industria\advancement\recipes\misc\alloy_steel_ingot.json
 31ec08f2cfde99620da3c2c7941e27c2a685fd6b data\industria\recipe\crusher_cobblestone.json
 3db06057f80d044c86f9f6a0fb3e0ed5ca5465b5 data\industria\advancement\recipes\misc\crusher_sand.json
 f5cdcd48064fd2239895f261913ed5821fc5b020 data\industria\recipe\crusher_lapis_ore.json
-0194204396014a6175f42d0f57cbbd5e3b8392df data\industria\recipe\thermal_generator.json
+49b4303b7dff18abc039b69b46eed3f2e8c8c238 data\industria\recipe\thermal_generator.json
 5945b658f93dde50f72f1b7170a0740c3170b57d data\industria\recipe\crusher_redstone_ore.json
 6135fb55853cc57f83f84c485bb25acbe99328eb data\industria\advancement\recipes\misc\crusher_redstone_ore.json
 248b8921ec83afb21c4540125707920ca5dfae90 data\industria\advancement\recipes\misc\crusher_lapis_ore.json
@@ -27,5 +27,5 @@ c07bec0f92295de980bf44a7634dff63a3f90341 data\industria\recipe\crusher_sand.json
 69c2e60d16f9ea1e214e32b4de5b27a85267bab0 data\industria\advancement\recipes\misc\thermal_generator.json
 6bfd998f2d7e54e92f62b303da294cf13edbc04e data\industria\advancement\recipes\misc\crusher_cobblestone.json
 4e88dd183ee38116c31697e5e512bd9b1a63693b data\industria\recipe\crusher_quartz_ore.json
-b405f68ca1d9f75c0187db8081d6541b40fe8af1 data\industria\recipe\crusher_emerald_ore.json
 035f15a297a65744dc2c62a360515a378a578b0d data\industria\advancement\recipes\misc\crusher_diamond_ore.json
+b405f68ca1d9f75c0187db8081d6541b40fe8af1 data\industria\recipe\crusher_emerald_ore.json

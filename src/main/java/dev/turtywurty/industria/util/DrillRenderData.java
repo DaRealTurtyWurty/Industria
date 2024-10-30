@@ -1,4 +1,5 @@
 package dev.turtywurty.industria.util;
 
-public interface DrillRenderData {
+public class DrillRenderData {
+    public float clockwiseRotation, counterClockwiseRotation;
 }

@@ -2,6 +2,9 @@ package dev.turtywurty.industria.multiblock;
 
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -10,9 +13,11 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +37,7 @@ public interface Multiblockable {
      * @apiNote This method should return the same value every time it is called.
      * @see MultiblockType
      */
-    MultiblockType type();
+    MultiblockType<?> type();
 
     /**
      * Finds the positions of the blocks that make up the multiblock.
@@ -52,6 +57,18 @@ public interface Multiblockable {
      * @apiNote This method should return a mutable list.
      */
     List<BlockPos> getMultiblockPositions();
+
+    default EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        return null;
+    }
+
+    default InventoryStorage getInventoryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        return null;
+    }
+
+    default Storage<FluidVariant> getFluidStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        return null;
+    }
 
     /**
      * Builds the multiblock in the world.

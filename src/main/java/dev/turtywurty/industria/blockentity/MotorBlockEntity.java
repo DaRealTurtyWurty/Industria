@@ -41,11 +41,11 @@ public class MotorBlockEntity extends UpdatableBlockEntity implements TickableBl
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
     }
 
-    private static long calculateEnergyForRotation(float current, float target) {
-        return (long) Math.abs(target) * 60 * 10;
+    public static long calculateEnergyForRotation(float current, float target) {
+        return (long) (Math.abs(target) * 60 * 10);
     }
 
-    private static float calculateRotationSpeed(long energy) {
+    public static float calculateRotationSpeed(long energy) {
         return energy / (60f * 10f);
     }
 

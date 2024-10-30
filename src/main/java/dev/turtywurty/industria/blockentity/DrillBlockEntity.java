@@ -3,11 +3,14 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
+import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -17,10 +20,12 @@ import dev.turtywurty.industria.util.DrillRenderData;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameters;
@@ -39,7 +44,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,12 +59,16 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
+
+    private final List<ItemStack> overflowStacks = new ArrayList<>(); // Only used if overflowMethod is set to PAUSE
     private boolean drilling = false;
     private float drillYOffset = 1.0F;
     private boolean retracting = false;
     private int ticks = 0;
     private OverflowMethod overflowMethod = OverflowMethod.VOID;
-    private final List<ItemStack> overflowStacks = new ArrayList<>(); // Only used if overflowMethod is set to PAUSE
+    private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
+    private boolean isPaused;
 
     // Only used client side
     private DrillRenderData renderData;
@@ -64,9 +77,20 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.DRILL, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable), Direction.UP);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.isOf(BlockInit.MOTOR.asItem())), Direction.NORTH);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable) {
+            @Override
+            public int getMaxCountPerStack() {
+                return 1;
+            }
+        }, Direction.UP);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.isOf(BlockInit.MOTOR.asItem())) {
+            @Override
+            public int getMaxCountPerStack() {
+                return 1;
+            }
+        }, Direction.NORTH);
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.DOWN);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 3, (stack, slot) -> stack.getItem() instanceof BlockItem), Direction.SOUTH);
 
         getDrillHeadInventory().addListener(inv -> {
             if (this.world != null && this.world.isClient) {
@@ -74,6 +98,8 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
                 setRenderData(stack.getItem() instanceof DrillHeadable drillHeadable ? drillHeadable.createRenderData() : null);
             }
         });
+
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0));
     }
 
     @Override
@@ -107,11 +133,44 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             }
         }
 
+        SimpleEnergyStorage energyStorage = getEnergyStorage();
+        float previousRotationSpeed = this.currentRotationSpeed;
+        long previousEnergy = energyStorage.getAmount();
+
+        if ((this.drilling || this.retracting) && energyStorage.getAmount() > 0) {
+            long energyRequired = MotorBlockEntity.calculateEnergyForRotation(this.currentRotationSpeed, this.targetRotationSpeed);
+            if (energyStorage.getAmount() < energyRequired) {
+                this.currentRotationSpeed = MotorBlockEntity.calculateRotationSpeed(energyStorage.getAmount());
+                energyStorage.amount = 0;
+            } else {
+                energyStorage.amount -= energyRequired;
+                this.currentRotationSpeed = this.targetRotationSpeed;
+            }
+        } else {
+            this.currentRotationSpeed = MathHelper.clamp(this.currentRotationSpeed - 0.01F, 0.0F, this.targetRotationSpeed);
+        }
+
+        if (this.currentRotationSpeed > 0.0F) {
+            this.isPaused = false;
+        } else {
+            boolean currentPaused = this.isPaused;
+            this.isPaused = true;
+
+            if (!currentPaused)
+                update();
+        }
+
+        if (this.isPaused)
+            return;
+
+        if (previousRotationSpeed != this.currentRotationSpeed || previousEnergy != energyStorage.getAmount())
+            update();
+
         DrillHeadable drillHeadable = (DrillHeadable) getDrillStack().getItem();
 
         // Do stuff
         float currentDrillYOffset = this.drillYOffset;
-        if (isDrilling()) {
+        if (this.drilling) {
             this.drillYOffset = drillHeadable.updateDrill(this, this.drillYOffset);
         } else if (this.retracting) {
             this.drillYOffset = drillHeadable.updateRetracting(this, this.drillYOffset);
@@ -146,6 +205,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
         }
 
+        if (nbt.contains("Energy", NbtElement.LIST_TYPE)) {
+            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registryLookup);
+        }
+
         if (nbt.contains("DrillYOffset", NbtElement.FLOAT_TYPE)) {
             this.drillYOffset = nbt.getFloat("DrillYOffset");
         }
@@ -163,6 +226,18 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             this.overflowStacks.removeIf(ItemStack::isEmpty);
         }
 
+        if (nbt.contains("Paused", NbtElement.BYTE_TYPE)) {
+            this.isPaused = nbt.getBoolean("Paused");
+        }
+
+        if (nbt.contains("CurrentRotationSpeed", NbtElement.FLOAT_TYPE)) {
+            this.currentRotationSpeed = nbt.getFloat("CurrentRotationSpeed");
+        }
+
+        if (nbt.contains("TargetRotationSpeed", NbtElement.FLOAT_TYPE)) {
+            this.targetRotationSpeed = nbt.getFloat("TargetRotationSpeed");
+        }
+
         if (this.world != null && this.world.isClient && this.renderData == null && getDrillStack().getItem() instanceof DrillHeadable drillHeadable) {
             setRenderData(drillHeadable.createRenderData());
         }
@@ -175,6 +250,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         nbt.putBoolean("Drilling", this.drilling);
         nbt.putBoolean("Retracting", this.retracting);
         nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
+        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
         nbt.putFloat("DrillYOffset", this.drillYOffset);
         nbt.putString("OverflowMethod", this.overflowMethod.getSerializedName());
 
@@ -189,6 +265,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
             nbt.put("OverflowStacks", overflowStacks);
         }
+
+        nbt.putBoolean("Paused", this.isPaused);
+        nbt.putFloat("CurrentRotationSpeed", this.currentRotationSpeed);
+        nbt.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
     }
 
     @Override
@@ -204,13 +284,34 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     }
 
     @Override
-    public MultiblockType type() {
-        return MultiblockType.DRILL;
+    public MultiblockType<?> type() {
+        return MultiblockTypeInit.DRILL;
     }
 
     @Override
     public List<BlockPos> getMultiblockPositions() {
         return this.multiblockPositions;
+    }
+
+    @Override
+    public InventoryStorage getInventoryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        if (offsetFromPrimary.getY() == 2) {
+            return this.wrappedInventoryStorage.getStorage(Direction.SOUTH);
+        } else if (offsetFromPrimary.getY() == 0 && (offsetFromPrimary.getX() != 0 || offsetFromPrimary.getZ() != 0)) {
+            return this.wrappedInventoryStorage.getStorage(Direction.DOWN);
+        } else if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == -1 && offsetFromPrimary.getZ() == 0) {
+            return this.wrappedInventoryStorage.getStorage(Direction.UP);
+        } else if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == 1 && offsetFromPrimary.getZ() == 0) {
+            return this.wrappedInventoryStorage.getStorage(Direction.NORTH);
+        }
+
+        return null;
+    }
+
+    @Override
+    public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        return (offsetFromPrimary.getY() == 0 && (offsetFromPrimary.getX() != 0 || offsetFromPrimary.getZ() != 0)) ?
+                this.wrappedEnergyStorage.getStorage(null) : null;
     }
 
     // 3x3x3 Multiblock
@@ -255,6 +356,14 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         return this.wrappedInventoryStorage.getInventory(1);
     }
 
+    public SimpleInventory getPlaceableBlockInventory() {
+        return this.wrappedInventoryStorage.getInventory(3);
+    }
+
+    public SimpleEnergyStorage getEnergyStorage() {
+        return this.wrappedEnergyStorage.getStorage(null);
+    }
+
     public boolean isDrilling() {
         return this.drilling;
     }
@@ -281,6 +390,18 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     public void setRetracting(boolean retracting) {
         this.retracting = retracting;
+    }
+
+    public void setTargetRotationSpeed(float targetRotationSpeed) {
+        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
+    }
+
+    public float getRotationSpeed() {
+        return this.currentRotationSpeed;
+    }
+
+    public float getTargetRotationSpeed() {
+        return this.targetRotationSpeed;
     }
 
     @Override

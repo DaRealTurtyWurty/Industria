@@ -2,10 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": "minecraft:iron_block",
-    "B": "minecraft:furnace",
-    "C": "minecraft:redstone_block",
-    "D": "minecraft:coal_block",
+    "A": "#c:storage_blocks/iron",
+    "B": "#c:player_workstations/furnaces",
+    "C": "#c:storage_blocks/redstone",
+    "D": "#c:storage_blocks/coal",
     "E": "minecraft:iron_bars"
   },
   "pattern": [

@@ -1,5 +1,6 @@
-// 1.21.2	2024-10-26T16:05:53.7426751	Industria/Model Definitions
+// 1.21.3	2024-10-28T21:34:04.8975846	Industria/Model Definitions
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
+aaf199443ba69a3550247e0f56d957fce4d8621b assets\industria\blockstates\drill_tube.json
 a059391528fc6353143d87e53cc7728de8d2df97 assets\industria\blockstates\cable.json
 9b7b8d1502bef5034a6336cd56ba343481938a31 assets\industria\blockstates\ultimate_battery.json
 790708a98fef9903d9e0d349a1aa94d3b3f35385 assets\industria\models\block\combustion_generator_on.json
@@ -10,6 +11,7 @@ eb22e678507fefb8f396eae283bcc755204d667e assets\industria\models\block\creative_
 a9c6fecdd49a5f68ddafaca13af16f97639066bb assets\industria\models\item\thermal_generator.json
 d931c793c0bacedf202dcac32c581afada77b984 assets\industria\models\block\elite_battery_horizontal.json
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets\industria\blockstates\advanced_battery.json
+26b82c7fd0a8588f513c4bcd892ab50f03b9ee5f assets\industria\models\item\block_builder_drill_head.json
 3bee03e741036bd34a14d6b13134b7051ebb302a assets\industria\models\block\elite_battery.json
 e6a9eff6b8b16b733d3e3b1ab81f6616d7abdeac assets\industria\models\block\basic_battery.json
 bcceaaff57ab461b27a34bc508d002083ea8e065 assets\industria\blockstates\crude_oil.json
@@ -40,6 +42,7 @@ dbb54e82e61495aa0674d7124b92c062ecaaab7a assets\industria\models\block\ultimate_
 ffe7c89704cf4d0e807c7d34d8b5b540d816e52a assets\industria\models\block\ultimate_battery_horizontal.json
 2bb2272be8f645a1664ff1d027f72795896ae49f assets\industria\models\item\basic_battery.json
 ea1705797fd3a9fa12f1370ced2cd5f057703915 assets\industria\models\block\basic_battery_horizontal.json
+98a4c5581442de919f5ea8f8a503f55afd445da3 assets\industria\models\item\drill_tube.json
 7cbd660ceb9846a2c7bcf6112655e61c01973a56 assets\industria\models\block\alloy_furnace_on.json
 214e86ce749d4bfa236717e2b4f6d0cf0a12208e assets\industria\models\item\seismic_scanner.json
 73dd9505b2926684f8e64536ce7d519b2309a856 assets\industria\blockstates\alloy_furnace.json

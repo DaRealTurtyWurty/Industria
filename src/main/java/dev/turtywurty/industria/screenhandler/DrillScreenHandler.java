@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.math.MathHelper;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class DrillScreenHandler extends ScreenHandler {
     private final DrillBlockEntity blockEntity;
@@ -39,9 +41,13 @@ public class DrillScreenHandler extends ScreenHandler {
         checkSize(outputInventory, 9);
         outputInventory.onOpen(playerInv.player);
 
+        SimpleInventory placeableBlockInventory = blockEntity.getPlaceableBlockInventory();
+        checkSize(placeableBlockInventory, 3);
+        placeableBlockInventory.onOpen(playerInv.player);
+
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
-        addBlockEntityInventory(drillHeadInventory, motorInventory, outputInventory);
+        addBlockEntityInventory(drillHeadInventory, motorInventory, outputInventory, placeableBlockInventory);
     }
 
     private void addPlayerInventory(PlayerInventory inventory) {
@@ -58,7 +64,7 @@ public class DrillScreenHandler extends ScreenHandler {
         }
     }
 
-    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory motorInventory, SimpleInventory outputInventory) {
+    private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory motorInventory, SimpleInventory outputInventory, SimpleInventory placeableBlockInventory) {
         addSlot(new Slot(drillHeadInventory, 0, 80, 35) {
             @Override
             public boolean isEnabled() {
@@ -82,6 +88,16 @@ public class DrillScreenHandler extends ScreenHandler {
             for (int column = 0; column < 3; column++) {
                 addSlot(new OutputSlot(outputInventory, column + row * 3, 116 + column * 18, 17 + row * 18));
             }
+        }
+
+        for (int index = 0; index < 3; index++) {
+            int finalIndex = index;
+            addSlot(new Slot(placeableBlockInventory, finalIndex, 62 + index * 18, 17) {
+                @Override
+                public boolean canInsert(ItemStack stack) {
+                    return inventory.isValid(finalIndex, stack);
+                }
+            });
         }
     }
 
@@ -120,5 +136,19 @@ public class DrillScreenHandler extends ScreenHandler {
 
     public DrillBlockEntity getBlockEntity() {
         return this.blockEntity;
+    }
+
+    public float getEnergyPercentage() {
+        SimpleEnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
+        long energy = energyStorage.getAmount();
+        long capacity = energyStorage.getCapacity();
+        if(energy == 0 || capacity == 0) return 0;
+
+        return MathHelper.clamp((float) energy / capacity, 0, 1);
+    }
+
+    public int getTargetRPM() {
+        float targetRotationSpeed = this.blockEntity.getTargetRotationSpeed();
+        return (int) (targetRotationSpeed * 60);
     }
 }

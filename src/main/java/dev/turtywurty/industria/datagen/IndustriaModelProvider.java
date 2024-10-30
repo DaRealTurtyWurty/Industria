@@ -29,6 +29,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.SOLAR_PANEL);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
         blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL_BLOCK);
+        blockStateModelGenerator.registerSimpleState(BlockInit.DRILL_TUBE);
+        blockStateModelGenerator.registerParentedItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
 
         BlockStateSupplier cableSupplier = MultipartBlockStateSupplier.create(BlockInit.CABLE)
                 .with(BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/cable_dot")))
@@ -104,6 +106,13 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SIMPLE_DRILL_HEAD,
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyAll(displaySettings ->
+                                displaySettings.rotate(180, 180, 0))
+                        .copyModifyGui(displaySettings ->
+                                displaySettings.rotate(0, 180, 0)));
+
+        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.BLOCK_BUILDER_DRILL_HEAD,
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyAll(displaySettings ->
                                 displaySettings.rotate(180, 180, 0))

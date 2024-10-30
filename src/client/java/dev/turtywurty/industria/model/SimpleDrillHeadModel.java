@@ -2,7 +2,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.item.SimpleDrillHeadItem;
+import dev.turtywurty.industria.util.DrillRenderData;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -55,7 +55,7 @@ public class SimpleDrillHeadModel extends Model {
     public static void onRender(DrillBlockEntity blockEntity, ItemStack headStack, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Model pModel, VertexConsumer vertexConsumer, int light, int overlay) {
         SimpleDrillHeadModel model = (SimpleDrillHeadModel) pModel;
         Object renderData = blockEntity.getRenderData();
-        if(!(renderData instanceof SimpleDrillHeadItem.SimpleDrillRenderData rotationData))
+        if(!(renderData instanceof DrillRenderData rotationData))
             return;
 
         DrillHeadParts parts = model.getDrillHeadParts();

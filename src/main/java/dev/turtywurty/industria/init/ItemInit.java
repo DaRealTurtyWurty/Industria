@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.item.BlockBuilderDrillHeadItem;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.item.SimpleDrillHeadItem;
 import net.minecraft.item.Item;
@@ -19,6 +20,9 @@ public class ItemInit {
 
     public static final SimpleDrillHeadItem SIMPLE_DRILL_HEAD = register("simple_drill_head",
             SimpleDrillHeadItem::new, settings -> settings.maxCount(1));
+
+    public static final BlockBuilderDrillHeadItem BLOCK_BUILDER_DRILL_HEAD = register("block_builder_drill_head",
+            BlockBuilderDrillHeadItem::new, settings -> settings.maxCount(1));
 
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);

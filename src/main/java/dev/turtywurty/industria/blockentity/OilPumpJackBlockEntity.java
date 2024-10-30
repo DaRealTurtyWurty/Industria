@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -43,7 +44,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
 
     @Override
     public void tick() {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
         // Do stuff
@@ -69,7 +70,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        if(nbt.contains("MachinePositions", NbtElement.LIST_TYPE)) {
+        if (nbt.contains("MachinePositions", NbtElement.LIST_TYPE)) {
             Multiblockable.readMultiblockFromNbt(this, nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
         }
     }
@@ -100,8 +101,8 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
     }
 
     @Override
-    public MultiblockType type() {
-        return MultiblockType.OIL_PUMP_JACK;
+    public MultiblockType<?> type() {
+        return MultiblockTypeInit.OIL_PUMP_JACK;
     }
 
     @Override
@@ -111,7 +112,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
 
     @Override
     public List<BlockPos> findPositions(Direction facing) {
-        if(this.world == null)
+        if (this.world == null)
             return List.of();
 
         List<BlockPos> correctPositions = new ArrayList<>();
@@ -121,18 +122,18 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
         for (int k = 0; k <= 2; k++) {
             for (int i = -4; i <= 3; i++) {
                 for (int j = -1; j <= 1; j++) {
-                    if(i == 0 && j == 0 && k == 0)
+                    if (i == 0 && j == 0 && k == 0)
                         continue;
 
-                    if(i == 3 && j == 0 && k == 2)
+                    if (i == 3 && j == 0 && k == 2)
                         continue;
 
                     // check east and west sides (relative to facing)
-                    if(i == 3 && j != 0 && k == 0) {
+                    if (i == 3 && j != 0 && k == 0) {
                         BlockPos checkPos = this.pos.offset(facing, i)
                                 .offset(j > 0 ? facing.rotateYCounterclockwise() : facing.rotateYClockwise(), 2);
 
-                        if(isValidPosition(this.world, checkPos)) {
+                        if (isValidPosition(this.world, checkPos)) {
                             correctPositions.add(checkPos);
                         } else {
                             incorrectPositions.add(checkPos);
@@ -141,7 +142,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
 
                     mutablePos.set(this.pos.offset(facing, i).offset(facing.rotateYCounterclockwise(), j).offset(Direction.UP, k));
 
-                    if(isValidPosition(this.world, mutablePos)) {
+                    if (isValidPosition(this.world, mutablePos)) {
                         correctPositions.add(mutablePos.toImmutable());
                     } else {
                         incorrectPositions.add(mutablePos.toImmutable());
@@ -152,11 +153,11 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
 
         for (int i = -3; i <= 2; i++) {
             for (int j = -1; j <= 1; j++) {
-                if(i == -3 && j == 0)
+                if (i == -3 && j == 0)
                     continue;
 
                 mutablePos.set(this.pos.offset(facing, i).offset(facing.rotateYCounterclockwise(), j).offset(Direction.UP, 3));
-                if(isValidPosition(this.world, mutablePos)) {
+                if (isValidPosition(this.world, mutablePos)) {
                     correctPositions.add(mutablePos.toImmutable());
                 } else {
                     incorrectPositions.add(mutablePos.toImmutable());
@@ -167,25 +168,25 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
         for (int i = -1; i <= 2; i++) {
             for (int j = 0; j <= 3; j++) {
                 mutablePos.set(this.pos.offset(facing, i).offset(Direction.UP, 4 + j));
-                if(((i == -1 && j < 2) || (i == 2 && j == 0))) {
+                if (((i == -1 && j < 2) || (i == 2 && j == 0))) {
                     // check east and west sides (relative to facing)
                     BlockPos immutablePos = mutablePos.toImmutable();
                     BlockPos eastPos = immutablePos.offset(facing.rotateYClockwise());
                     BlockPos westPos = immutablePos.offset(facing.rotateYCounterclockwise());
-                    if(isValidPosition(this.world, eastPos)) {
+                    if (isValidPosition(this.world, eastPos)) {
                         correctPositions.add(eastPos);
                     } else {
                         incorrectPositions.add(eastPos);
                     }
 
-                    if(isValidPosition(this.world, westPos)) {
+                    if (isValidPosition(this.world, westPos)) {
                         correctPositions.add(westPos);
                     } else {
                         incorrectPositions.add(westPos);
                     }
                 }
 
-                if(isValidPosition(this.world, mutablePos)) {
+                if (isValidPosition(this.world, mutablePos)) {
                     correctPositions.add(mutablePos.toImmutable());
                 } else {
                     incorrectPositions.add(mutablePos.toImmutable());
@@ -197,16 +198,16 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
             for (int j = 0; j <= 4; j++) {
                 mutablePos.set(this.pos.offset(facing, 4 + i).offset(Direction.UP, 4 + j));
 
-                if(i == 0 && j > 1 && j < 4) {
+                if (i == 0 && j > 1 && j < 4) {
                     BlockPos checkPos = mutablePos.offset(facing.getOpposite());
-                    if(isValidPosition(this.world, checkPos)) {
+                    if (isValidPosition(this.world, checkPos)) {
                         correctPositions.add(checkPos);
                     } else {
                         incorrectPositions.add(checkPos);
                     }
                 }
 
-                if(isValidPosition(this.world, mutablePos)) {
+                if (isValidPosition(this.world, mutablePos)) {
                     correctPositions.add(mutablePos.toImmutable());
                 } else {
                     incorrectPositions.add(mutablePos.toImmutable());
