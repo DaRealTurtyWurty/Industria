@@ -1,7 +1,9 @@
 package dev.turtywurty.industria;
 
 import dev.turtywurty.industria.datagen.*;
+import dev.turtywurty.industria.datagen.generator.IndustriaDamageTypeGenerator;
 import dev.turtywurty.industria.datagen.generator.IndustriaWorldGenerator;
+import dev.turtywurty.industria.init.DamageTypeInit;
 import dev.turtywurty.industria.init.worldgen.ConfiguredFeatureInit;
 import dev.turtywurty.industria.init.worldgen.PlacedFeatureInit;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
@@ -21,11 +23,13 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		pack.addProvider(IndustriaItemTagProvider::new);
 		pack.addProvider(IndustriaFluidTagProvider::new);
 		pack.addProvider(IndustriaWorldGenerator::new);
+		pack.addProvider(IndustriaDamageTypeGenerator::new);
 	}
 
 	@Override
 	public void buildRegistry(RegistryBuilder registryBuilder) {
 		registryBuilder.addRegistry(RegistryKeys.CONFIGURED_FEATURE, ConfiguredFeatureInit::bootstrap);
 		registryBuilder.addRegistry(RegistryKeys.PLACED_FEATURE, PlacedFeatureInit::bootstrap);
+		registryBuilder.addRegistry(RegistryKeys.DAMAGE_TYPE, DamageTypeInit::bootstrap);
 	}
 }

@@ -43,6 +43,9 @@ public class ScreenHandlerTypeInit {
     public static final ScreenHandlerType<MotorScreenHandler> MOTOR =
             register("motor", MotorScreenHandler::new, BlockPosPayload.CODEC);
 
+    public static final ScreenHandlerType<UpgradeStationScreenHandler> UPGRADE_STATION =
+            register("upgrade_station", UpgradeStationScreenHandler::new, BlockPosPayload.CODEC);
+
     public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
         return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));
     }

@@ -6,6 +6,10 @@ import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
+import net.minecraft.entity.damage.DamageType;
+import net.minecraft.registry.RegistryEntryLookup;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
@@ -58,6 +62,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, MotorBlockEntity.TITLE, "Motor");
         translationBuilder.add(ItemInit.BLOCK_BUILDER_DRILL_HEAD, "Block Builder Drill Head");
         translationBuilder.add(BlockInit.DRILL_TUBE, "Drill Tube");
+        addDamageType(translationBuilder, registryLookup, DamageTypeInit.DRILL, "%1$s was drilled to death");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {
@@ -70,5 +75,11 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
 
     private static void addTextEnum(TranslationBuilder translationBuilder, TextEnum textEnum, String value) {
         addText(translationBuilder, textEnum.getAsText(), value);
+    }
+
+    private static void addDamageType(TranslationBuilder translationBuilder, RegistryWrapper.WrapperLookup regLookup, RegistryKey<DamageType> key, String value) {
+        RegistryEntryLookup<DamageType> lookup = regLookup.getOrThrow(RegistryKeys.DAMAGE_TYPE);
+        DamageType damageType = lookup.getOrThrow(key).value();
+        translationBuilder.add("death.attack." + damageType.msgId(), value);
     }
 }

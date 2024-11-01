@@ -26,6 +26,7 @@
   "container.industria.solar_panel": "Solar Panel",
   "container.industria.thermal_generator": "Thermal Generator",
   "container.industria.wind_turbine": "Wind Turbine",
+  "death.attack.industria.drill": "%1$s was drilled to death",
   "gui.industria.battery.charge_mode_button.tooltip": "Charge/Discharge",
   "industria.overflow_method.pause": "Pause",
   "industria.overflow_method.spillage": "Spillage",

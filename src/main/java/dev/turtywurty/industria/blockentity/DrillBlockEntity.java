@@ -10,6 +10,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInvent
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.DamageTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
@@ -22,6 +23,7 @@ import dev.turtywurty.industria.util.enums.StringRepresentable;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -31,6 +33,7 @@ import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -42,10 +45,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -69,6 +69,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     private OverflowMethod overflowMethod = OverflowMethod.VOID;
     private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
     private boolean isPaused;
+    private Box drillHeadAABB;
 
     // Only used client side
     private DrillRenderData renderData;
@@ -181,8 +182,16 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             update();
         }
 
-        if (this.drillYOffset != currentDrillYOffset)
+        if (this.drillYOffset != currentDrillYOffset) {
+            this.drillHeadAABB = new Box(this.pos.getX(), this.pos.getY() + 1 + this.drillYOffset, this.pos.getZ(), this.pos.getX() + 1, this.pos.getY() + this.drillYOffset, this.pos.getZ() + 1);
             update();
+        }
+
+        if(this.drilling) {
+            for (LivingEntity entity : this.world.getEntitiesByClass(LivingEntity.class, this.drillHeadAABB, LivingEntity::isAlive)) {
+                entity.damage((ServerWorld) this.world, DamageTypeInit.drillDamageSource(this.world.getDamageSources()), 5.0F);
+            }
+        }
     }
 
     @Override
@@ -238,6 +247,11 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             this.targetRotationSpeed = nbt.getFloat("TargetRotationSpeed");
         }
 
+        if (nbt.contains("DrillHeadAABB", NbtElement.LIST_TYPE)) {
+            NbtList list = nbt.getList("DrillHeadAABB", NbtElement.DOUBLE_TYPE);
+            this.drillHeadAABB = new Box(list.getDouble(0), list.getDouble(1), list.getDouble(2), list.getDouble(3), list.getDouble(4), list.getDouble(5));
+        }
+
         if (this.world != null && this.world.isClient && this.renderData == null && getDrillStack().getItem() instanceof DrillHeadable drillHeadable) {
             setRenderData(drillHeadable.createRenderData());
         }
@@ -269,6 +283,17 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         nbt.putBoolean("Paused", this.isPaused);
         nbt.putFloat("CurrentRotationSpeed", this.currentRotationSpeed);
         nbt.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
+
+        if (this.drillHeadAABB != null) {
+            var list = new NbtList();
+            list.add(NbtDouble.of(this.drillHeadAABB.minX));
+            list.add(NbtDouble.of(this.drillHeadAABB.minY));
+            list.add(NbtDouble.of(this.drillHeadAABB.minZ));
+            list.add(NbtDouble.of(this.drillHeadAABB.maxX));
+            list.add(NbtDouble.of(this.drillHeadAABB.maxY));
+            list.add(NbtDouble.of(this.drillHeadAABB.maxZ));
+            nbt.put("DrillHeadAABB", list);
+        }
     }
 
     @Override
@@ -402,6 +427,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     public float getTargetRotationSpeed() {
         return this.targetRotationSpeed;
+    }
+
+    public Box getDrillHeadAABB() {
+        return this.drillHeadAABB;
     }
 
     @Override

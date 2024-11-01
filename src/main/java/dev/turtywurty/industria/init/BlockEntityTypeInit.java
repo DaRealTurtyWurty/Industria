@@ -57,6 +57,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(MotorBlockEntity::new, BlockInit.MOTOR)
                     .build());
 
+    public static final BlockEntityType<UpgradeStationBlockEntity> UPGRADE_STATION = register("upgrade_station",
+            FabricBlockEntityTypeBuilder.create(UpgradeStationBlockEntity::new, BlockInit.UPGRADE_STATION)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

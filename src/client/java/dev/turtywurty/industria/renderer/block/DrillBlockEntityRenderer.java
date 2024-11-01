@@ -18,10 +18,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.joml.Matrix4f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -135,14 +135,14 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
         { // Render drill cable
             MatrixStack.Entry entry = matrices.peek();
             VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
-            
+
             float angleOffset = (float) (entity.isRetracting() ?
-                                -entity.clientMotorRotation < 0 ? -Math.PI/4 : -Math.PI/4 - Math.PI / 2:
-                                -entity.clientMotorRotation < 0 ? -3 * Math.PI/4 + Math.PI / 2 : -3 * Math.PI/4);
+                    -entity.clientMotorRotation < 0 ? -Math.PI / 4 : -Math.PI / 4 - Math.PI / 2 :
+                    -entity.clientMotorRotation < 0 ? -3 * Math.PI / 4 + Math.PI / 2 : -3 * Math.PI / 4);
 
             float angle = (float) (-entity.clientMotorRotation % (Math.PI / 2f)) + angleOffset;
 
-            float wheelRadius = (progress /2f + 0.5f) * 3.5f / 16f;
+            float wheelRadius = (progress / 2f + 0.5f) * 3.5f / 16f;
 
             float wheelZ = 0.5f;
             float wheelY = -1.5f + 1.5f / 16f;
@@ -177,6 +177,19 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
         }
 
         matrices.pop();
+
+        Box aabb = entity.getDrillHeadAABB();
+        if(this.context.getEntityRenderDispatcher().shouldRenderHitboxes() && aabb != null) {
+            BlockPos pos = entity.getPos();
+            double minX = aabb.minX - pos.getX();
+            double minY = aabb.minY - pos.getY();
+            double minZ = aabb.minZ - pos.getZ();
+            double maxX = aabb.maxX - pos.getX();
+            double maxY = aabb.maxY - pos.getY();
+            double maxZ = aabb.maxZ - pos.getZ();
+
+            VertexRendering.drawBox(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), minX, minY, minZ, maxX, maxY, maxZ, 1, 0, 0, 1);
+        }
     }
 
     @Override
