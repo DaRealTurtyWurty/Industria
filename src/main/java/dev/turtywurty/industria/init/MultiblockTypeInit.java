@@ -18,7 +18,7 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true));
 
     public static final MultiblockType<UpgradeStationBlockEntity> UPGRADE_STATION = register("upgrade_station",
-            new MultiblockType.Builder<UpgradeStationBlockEntity>(13)
+            new MultiblockType.Builder<UpgradeStationBlockEntity>(12)
                     .setHasDirectionProperty(true));
 
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {

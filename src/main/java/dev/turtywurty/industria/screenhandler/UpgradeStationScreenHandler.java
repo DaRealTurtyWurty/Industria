@@ -3,26 +3,69 @@ package dev.turtywurty.industria.screenhandler;
 import dev.turtywurty.industria.blockentity.UpgradeStationBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
-import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
+import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
+import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ArrayPropertyDelegate;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.slot.Slot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UpgradeStationScreenHandler extends ScreenHandler {
+    private final List<UpgradeStationRecipe> recipes = new ArrayList<>();
     private final UpgradeStationBlockEntity blockEntity;
     private final ScreenHandlerContext context;
 
-    public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, BlockPosPayload payload) {
-        this(syncId, inventory, (UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos()));
+    private Runnable contentsChangedListener;
+
+    private final PropertyDelegate properties;
+
+    public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationOpenPayload payload) {
+        this(syncId, inventory, (UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(1), payload.recipes());
     }
 
-    public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationBlockEntity blockEntity) {
+    public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationBlockEntity blockEntity, PropertyDelegate properties, List<UpgradeStationRecipe> recipes) {
         super(ScreenHandlerTypeInit.UPGRADE_STATION, syncId);
 
         this.blockEntity = blockEntity;
         this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
+
+        SimpleInventory inputInventory = blockEntity.getInputInventory();
+        checkSize(inputInventory, 9);
+        inputInventory.onOpen(inventory.player);
+        inputInventory.addListener(this::onContentChanged);
+
+        SimpleInventory outputInventory = blockEntity.getOutputInventory();
+        checkSize(outputInventory, 1);
+        outputInventory.onOpen(inventory.player);
+        outputInventory.addListener(this::onContentChanged);
+
+        addPlayerSlots(inventory, 18, 104);
+        addBlockEntityInventory(inputInventory, outputInventory);
+
+        checkDataCount(properties, 1);
+        addProperties(properties);
+        this.properties = properties;
+
+        this.recipes.addAll(recipes);
+    }
+
+    private void addBlockEntityInventory(SimpleInventory inputInventory, SimpleInventory outputInventory) {
+        for (int column = 0; column < 3; column++) {
+            for (int row = 0; row < 3; row++) {
+                addSlot(new Slot(inputInventory, row + column * 3, 8 + row * 18, 17 + column * 18));
+            }
+        }
+
+        addSlot(new OutputSlot(outputInventory, 0, 148, 35));
     }
 
     @Override
@@ -35,7 +78,55 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
         return canUse(this.context, player, BlockInit.UPGRADE_STATION);
     }
 
+    @Override
+    public void onClosed(PlayerEntity player) {
+        super.onClosed(player);
+
+        this.blockEntity.getInputInventory().onClose(player);
+        this.blockEntity.getOutputInventory().onClose(player);
+    }
+
+    @Override
+    public boolean onButtonClick(PlayerEntity player, int id) {
+        int previousRecipeIndex = this.blockEntity.getSelectedRecipeIndex();
+        this.blockEntity.setSelectedRecipeIndex(id);
+        return this.blockEntity.getSelectedRecipeIndex() != previousRecipeIndex;
+    }
+
     public UpgradeStationBlockEntity getBlockEntity() {
         return this.blockEntity;
+    }
+
+    public int getAvailableRecipeCount() {
+        return this.recipes.size();
+    }
+
+    public List<UpgradeStationRecipe> getAvailableRecipes() {
+        return this.recipes;
+    }
+
+    public void setAvailableRecipes(List<UpgradeStationRecipe> recipes) {
+        this.recipes.clear();
+        this.recipes.addAll(recipes);
+
+        if(this.contentsChangedListener != null) {
+            this.contentsChangedListener.run();
+        }
+    }
+
+    public void setContentsChangedListener(Runnable onInventoryChange) {
+        this.contentsChangedListener = onInventoryChange;
+    }
+
+    public int getProgress() {
+        return this.properties.get(0);
+    }
+
+    public boolean canCraft() {
+        return !this.recipes.isEmpty() && getProgress() <= 0;
+    }
+
+    public int getSelectedRecipeIndex() {
+        return this.blockEntity.getSelectedRecipeIndex();
     }
 }

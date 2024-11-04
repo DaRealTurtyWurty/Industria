@@ -6,19 +6,24 @@ import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
+import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
+import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
+import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -27,22 +32,27 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload>, TickableBlockEntity, Multiblockable {
+public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<UpgradeStationOpenPayload>, TickableBlockEntity, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("upgrade_station");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -53,20 +63,119 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
     private RegistryKey<Recipe<?>> selectedRecipe;
     private final List<RegistryKey<Recipe<?>>> availableRecipes = new ArrayList<>();
     private int selectedRecipeIndex = 0;
+    private ItemStack previousCenterStack = ItemStack.EMPTY;
 
     private int progress = 0;
+    private boolean isFirstRead = true;
+    private ItemStack overflowStack = ItemStack.EMPTY;
+
+    private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
+        @Override
+        public int get(int index) {
+            return switch (index) {
+                case 0 -> UpgradeStationBlockEntity.this.progress;
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index) {
+                case 0 -> UpgradeStationBlockEntity.this.progress = value;
+            }
+        }
+
+        @Override
+        public int size() {
+            return 1;
+        }
+    };
 
     public UpgradeStationBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.UPGRADE_STATION, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 9), Direction.UP);
+        var inputInventory = new SyncingSimpleInventory(this, 9);
+        this.wrappedInventoryStorage.addInventory(inputInventory, Direction.UP);
+        inputInventory.addListener(sender -> {
+            if(this.world == null || !(this.world instanceof ServerWorld serverWorld))
+                return;
+
+            List<RegistryKey<Recipe<?>>> recipesForCenterStack = new ArrayList<>();
+            ItemStack centerStack = sender.getStack(4);
+
+            if (!centerStack.isEmpty() && ItemStack.areItemsAndComponentsEqual(centerStack, this.previousCenterStack))
+                return;
+
+            if(centerStack.isEmpty()) {
+                this.availableRecipes.clear();
+                this.selectedRecipe = null;
+                this.selectedRecipeIndex = 0;
+                this.previousCenterStack = centerStack;
+
+                updateHandlers(serverWorld);
+                return;
+            }
+
+            ServerRecipeManager recipeManager = serverWorld.getRecipeManager();
+            recipeManager.values().stream()
+                    .filter(recipeEntry -> recipeEntry.value() instanceof UpgradeStationRecipe)
+                    .filter(recipeEntry -> ((UpgradeStationRecipe) recipeEntry.value()).doesCenterStackMatch(centerStack))
+                    .map(RecipeEntry::id)
+                    .forEach(recipesForCenterStack::add);
+
+            this.availableRecipes.clear();
+            this.availableRecipes.addAll(recipesForCenterStack);
+            this.selectedRecipe = this.availableRecipes.isEmpty() ? null : this.availableRecipes.getFirst();
+            this.selectedRecipeIndex = 0;
+
+            this.previousCenterStack = centerStack;
+
+            updateHandlers(serverWorld);
+        });
+
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 1_000, 0));
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public UpgradeStationOpenPayload getScreenOpeningData(ServerPlayerEntity player) {
+        return new UpgradeStationOpenPayload(this.pos, getRecipes());
+    }
+
+    private void updateHandlers(ServerWorld serverWorld) {
+        Map<ServerPlayerEntity, UpgradeStationScreenHandler> handlers = new HashMap<>();
+        for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+            if(player.currentScreenHandler instanceof UpgradeStationScreenHandler handler) {
+                handlers.put(player, handler);
+            }
+        }
+
+        if(handlers.isEmpty())
+            return;
+
+        List<UpgradeStationRecipe> recipes = getRecipes();
+        for (Map.Entry<ServerPlayerEntity, UpgradeStationScreenHandler> entry : handlers.entrySet()) {
+            entry.getValue().setAvailableRecipes(recipes);
+
+            ServerPlayNetworking.send(entry.getKey(), new UpgradeStationUpdateRecipesPayload(recipes));
+        }
+    }
+
+    private List<UpgradeStationRecipe> getRecipes() {
+        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+            return Collections.emptyList();
+
+        ServerRecipeManager recipeLookup = serverWorld.getRecipeManager();
+        List<UpgradeStationRecipe> recipes = new ArrayList<>();
+        for (RegistryKey<Recipe<?>> recipe : this.availableRecipes) {
+            Optional<RecipeEntry<?>> opt = recipeLookup.get(recipe);
+            opt.map(RecipeEntry::value)
+                    .filter(UpgradeStationRecipe.class::isInstance)
+                    .map(UpgradeStationRecipe.class::cast)
+                    .ifPresent(recipes::add);
+        }
+
+        return recipes;
     }
 
     @Override
@@ -76,7 +185,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new UpgradeStationScreenHandler(syncId, playerInventory, this);
+        return new UpgradeStationScreenHandler(syncId, playerInventory, this, this.propertyDelegate, getRecipes());
     }
 
     @Override
@@ -96,7 +205,6 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
         }
 
         nbt.put("AvailableRecipes", availableRecipes);
-
         nbt.putInt("SelectedRecipeIndex", this.selectedRecipeIndex);
 
         nbt.putInt("Progress", this.progress);
@@ -136,10 +244,19 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
         if (nbt.contains("Progress", NbtElement.INT_TYPE)) {
             this.progress = nbt.getInt("Progress");
         }
+
+        if(this.isFirstRead) {
+            this.isFirstRead = false;
+            this.previousCenterStack = getInputInventory().getStack(4);
+        }
     }
 
     private static RegistryKey<Recipe<?>> getRecipeKey(NbtElement element) {
-        return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(element.asString()));
+        return getRecipeKey(element.asString());
+    }
+
+    private static RegistryKey<Recipe<?>> getRecipeKey(String string) {
+        return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(string));
     }
 
     @Override
@@ -158,6 +275,79 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
     public void tick() {
         if (this.world == null || this.world.isClient)
             return;
+
+        if (!this.overflowStack.isEmpty()) {
+            SimpleInventory outputInventory = getOutputInventory();
+            if (outputInventory.canInsert(this.overflowStack)) {
+                outputInventory.addStack(this.overflowStack);
+                this.overflowStack = ItemStack.EMPTY;
+            }
+        }
+
+        if (this.selectedRecipe == null) {
+            this.progress = 0;
+            return;
+        }
+
+        UpgradeStationRecipe recipe = getCurrentRecipe();
+        if (recipe == null) {
+            this.progress = 0;
+            return;
+        }
+
+        RecipeSimpleInventory recipeInventory = getRecipeInventory();
+        if (this.progress >= 500) {
+            if (recipe.matches(recipeInventory, this.world)) {
+                ItemStack output = recipe.craft(recipeInventory, this.world.getRegistryManager());
+                SimpleInventory outputInventory = getOutputInventory();
+                if (outputInventory.canInsert(output)) {
+                    outputInventory.addStack(output);
+                    for (int index = 0; index < getInputInventory().size(); index++) {
+                        ItemStack inSlot = recipeInventory.getStack(index);
+                        if (!inSlot.isEmpty()) {
+                            inSlot.decrement(recipe.getIngredient(index).stackData().count());
+                        }
+                    }
+                } else {
+                    this.overflowStack = output;
+                }
+            }
+
+            this.progress = 0;
+            update();
+            return;
+        }
+
+        if (recipe.matches(recipeInventory, this.world)) {
+            SimpleEnergyStorage energyStorage = this.wrappedEnergyStorage.getStorage(null);
+            if (energyStorage.getAmount() < 200) {
+                this.progress = 0;
+                return;
+            }
+
+            energyStorage.amount -= 200;
+            this.progress++;
+        } else {
+            this.progress = 0;
+        }
+
+        update();
+    }
+
+    private UpgradeStationRecipe getCurrentRecipe() {
+        if (this.selectedRecipe == null || this.world == null || !(this.world instanceof ServerWorld serverWorld))
+            return null;
+
+        ServerRecipeManager recipeManager = serverWorld.getRecipeManager();
+        Optional<RecipeEntry<?>> opt = recipeManager.get(this.selectedRecipe);
+        if (opt.isEmpty())
+            return null;
+
+        Recipe<?> recipe = opt.get().value();
+        if (!(recipe instanceof UpgradeStationRecipe upgradeStationRecipe))
+            return null;
+
+        return upgradeStationRecipe;
     }
 
     @Override
@@ -170,15 +360,13 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
         List<BlockPos> positions = new ArrayList<>();
         positions.add(this.pos.up());
 
-        BlockPos.Mutable mutable = this.pos.mutableCopy();
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 2; z++) {
                 if (x == 0 && z == 0) {
                     continue;
                 }
 
-                mutable.set(this.pos.getX() + x, this.pos.getY(), this.pos.getZ() + z);
-                positions.add(mutable.toImmutable());
+                positions.add(this.pos.add(x, 0, z));
             }
         }
 
@@ -188,5 +376,47 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
     @Override
     public List<BlockPos> getMultiblockPositions() {
         return this.multiblockPositions;
+    }
+
+    public SimpleEnergyStorage getEnergyStorage() {
+        return this.wrappedEnergyStorage.getStorage(null);
+    }
+
+    public RecipeSimpleInventory getRecipeInventory() {
+        return this.wrappedInventoryStorage.getRecipeInventory();
+    }
+
+    public SimpleInventory getInputInventory() {
+        return this.wrappedInventoryStorage.getInventory(0);
+    }
+
+    public SimpleInventory getOutputInventory() {
+        return this.wrappedInventoryStorage.getInventory(1);
+    }
+
+    public List<RegistryKey<Recipe<?>>> getAvailableRecipes() {
+        return this.availableRecipes;
+    }
+
+    public int getSelectedRecipeIndex() {
+        return this.selectedRecipeIndex;
+    }
+
+    public void setSelectedRecipeIndex(int index) {
+        if(this.world == null || this.world.isClient || index < 0 || index >= this.availableRecipes.size() || this.selectedRecipeIndex == index)
+            return;
+
+        this.selectedRecipeIndex = index;
+        this.selectedRecipe = this.availableRecipes.get(index);
+        update();
+    }
+
+    public int getProgress() {
+        return this.progress;
+    }
+
+    @Override
+    public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        return this.wrappedEnergyStorage.getStorage(direction);
     }
 }

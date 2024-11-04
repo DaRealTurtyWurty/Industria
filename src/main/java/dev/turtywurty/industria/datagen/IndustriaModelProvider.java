@@ -104,6 +104,14 @@ public class IndustriaModelProvider extends FabricModelProvider {
                     displaySettings.setScale(0.5f, 0.5f, 0.5f);
                 }));
 
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.UPGRADE_STATION, BuiltinEntityModelBuilder.defaultBlock()
+                .copyModifyGui(displaySettings -> {
+                    displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                    displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                }));
+
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.MOTOR, BuiltinEntityModelBuilder.defaultBlock());
+
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SIMPLE_DRILL_HEAD,
                 BuiltinEntityModelBuilder.defaultBlock()
@@ -118,8 +126,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 displaySettings.rotate(180, 180, 0))
                         .copyModifyGui(displaySettings ->
                                 displaySettings.rotate(0, 180, 0)));
-
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.MOTOR, BuiltinEntityModelBuilder.defaultBlock());
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

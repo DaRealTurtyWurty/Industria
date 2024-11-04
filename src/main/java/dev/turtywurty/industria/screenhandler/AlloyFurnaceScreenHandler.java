@@ -39,8 +39,7 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
 
         inventory.onOpen(playerInventory.player);
 
-        addPlayerInventory(playerInventory);
-        addPlayerHotbar(playerInventory);
+        addPlayerSlots(playerInventory, 8, 84);
         addBlockEntitySlots();
 
         addProperties(propertyDelegate);
@@ -57,20 +56,6 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
             }
         });
         addSlot(new OutputSlot(inventory.getInventory(AlloyFurnaceBlockEntity.OUTPUT_SLOT), 0, 116, 35));
-    }
-
-    private void addPlayerInventory(PlayerInventory inventory) {
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
-            }
-        }
-    }
-
-    private void addPlayerHotbar(PlayerInventory inventory) {
-        for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 8 + column * 18, 142));
-        }
     }
 
     @Override

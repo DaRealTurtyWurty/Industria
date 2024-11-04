@@ -37,19 +37,10 @@ public class CrusherScreenHandler extends ScreenHandler {
         wrappedStorage.onOpen(playerInv.player);
         checkDataCount(propertyDelegate, 2);
 
-        addPlayerInventory(playerInv);
-        addPlayerHotbar(playerInv);
+        addPlayerSlots(playerInv, 8, 84);
         addBlockEntityInventory();
 
         addProperties(propertyDelegate);
-    }
-
-    private void addPlayerInventory(PlayerInventory inventory) {
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
-            }
-        }
     }
 
     private void addBlockEntityInventory() {
@@ -57,12 +48,6 @@ public class CrusherScreenHandler extends ScreenHandler {
         addSlot(new Slot(wrappedStorage.getInventory(CrusherBlockEntity.INPUT_SLOT), 0, 44, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 0, 98, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 1, 116, 35));
-    }
-
-    private void addPlayerHotbar(PlayerInventory inventory) {
-        for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 8 + column * 18, 142));
-        }
     }
 
     @Override

@@ -69,6 +69,11 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
     }
 
     @Override
+    public boolean isIgnoredInRecipeBook() {
+        return true;
+    }
+
+    @Override
     public RecipeBookCategory getRecipeBookCategory() {
         return RecipeBookCategoryInit.ALLOY_FURNACE;
     }

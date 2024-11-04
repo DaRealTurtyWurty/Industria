@@ -45,23 +45,8 @@ public class DrillScreenHandler extends ScreenHandler {
         checkSize(placeableBlockInventory, 3);
         placeableBlockInventory.onOpen(playerInv.player);
 
-        addPlayerInventory(playerInv);
-        addPlayerHotbar(playerInv);
+        addPlayerSlots(playerInv, 8, 84);
         addBlockEntityInventory(drillHeadInventory, motorInventory, outputInventory, placeableBlockInventory);
-    }
-
-    private void addPlayerInventory(PlayerInventory inventory) {
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
-            }
-        }
-    }
-
-    private void addPlayerHotbar(PlayerInventory inventory) {
-        for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 8 + column * 18, 142));
-        }
     }
 
     private void addBlockEntityInventory(SimpleInventory drillHeadInventory, SimpleInventory motorInventory, SimpleInventory outputInventory, SimpleInventory placeableBlockInventory) {

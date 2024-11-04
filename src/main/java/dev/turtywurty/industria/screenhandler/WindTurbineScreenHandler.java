@@ -9,7 +9,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -26,22 +25,7 @@ public class WindTurbineScreenHandler extends ScreenHandler {
         this.blockEntity = blockEntity;
         this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
 
-        addPlayerInventory(playerInv);
-        addPlayerHotbar(playerInv);
-    }
-
-    private void addPlayerInventory(PlayerInventory inventory) {
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
-            }
-        }
-    }
-
-    private void addPlayerHotbar(PlayerInventory inventory) {
-        for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 8 + column * 18, 142));
-        }
+        addPlayerSlots(playerInv, 8, 84);
     }
 
     @Override

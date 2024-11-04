@@ -63,6 +63,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(ItemInit.BLOCK_BUILDER_DRILL_HEAD, "Block Builder Drill Head");
         translationBuilder.add(BlockInit.DRILL_TUBE, "Drill Tube");
         addDamageType(translationBuilder, registryLookup, DamageTypeInit.DRILL, "%1$s was drilled to death");
+        translationBuilder.add(BlockInit.UPGRADE_STATION, "Upgrade Station");
+        addText(translationBuilder, UpgradeStationBlockEntity.TITLE, "Upgrade Station");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

@@ -93,11 +93,18 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
     }
 
     public SlotDisplay toDisplay() {
+        if(isEmpty())
+            return SlotDisplay.EmptySlotDisplay.INSTANCE;
+
         return new SlotDisplay.CompositeSlotDisplay(
                 getMatchingStacks().stream()
                         .map(SlotDisplay.StackSlotDisplay::new)
                         .map(SlotDisplay.class::cast)
                         .toList());
+    }
+
+    public boolean isEmpty() {
+        return this == EMPTY;
     }
 
     public record StackData(int count, @NotNull ComponentChanges components) {

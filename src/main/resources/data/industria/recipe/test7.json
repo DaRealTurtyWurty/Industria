@@ -1,0 +1,26 @@
+{
+  "type": "industria:upgrade_station",
+  "key": {
+    "A": {
+      "entries": "minecraft:apple"
+    },
+    "B": {
+      "entries": "minecraft:beetroot",
+      "stack_data": {
+        "count": 2
+      }
+    },
+    "H": {
+      "entries": "industria:simple_drill_head"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "BHB",
+    "ABA"
+  ],
+  "output": {
+    "count": 1,
+    "id": "minecraft:bowl"
+  }
+}

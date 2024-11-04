@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
@@ -20,6 +21,7 @@ import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.recipe.display.RecipeDisplay;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 
@@ -55,9 +57,9 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
                     String rowPattern = pattern[row];
 
                     for (int col = 0; col < maxPatternWidth; col++) {
-                        char key = col < rowPattern.length() ? rowPattern.charAt(col) : ' '; // Use space if out of bounds
+                        char key = col < rowPattern.length() ? rowPattern.charAt(col) : ' ';
                         if (key == ' ')
-                            continue; // Empty space in pattern
+                            continue;
 
                         IndustriaIngredient expectedIngredient = this.key.get(key);
                         ItemStack currentStack = grid[startRow + row][startCol + col];
@@ -74,13 +76,26 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
                 }
 
                 if (matches)
-                    return true; // Found a match
+                    return true;
             }
         }
 
         return false;
     }
 
+    public IndustriaIngredient getIngredient(int slotIndex) {
+        int row = slotIndex / 3;
+        int col = slotIndex % 3;
+
+        if (row >= 0 && row < this.pattern.length) {
+            String rowPattern = this.pattern[row];
+            if (col >= 0 && col < rowPattern.length()) {
+                return this.key.get(rowPattern.charAt(col));
+            }
+        }
+
+        return IndustriaIngredient.EMPTY;
+    }
 
     @Override
     public ItemStack craft(RecipeSimpleInventory input, RegistryWrapper.WrapperLookup registries) {
@@ -99,17 +114,37 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
 
     @Override
     public IngredientPlacement getIngredientPlacement() {
-        return null;
+        return IngredientPlacement.NONE;
+    }
+
+    @Override
+    public boolean isIgnoredInRecipeBook() {
+        return true;
     }
 
     @Override
     public List<RecipeDisplay> getDisplays() {
-        return Recipe.super.getDisplays();
+        List<SlotDisplay> inputs = Arrays.stream(this.pattern)
+                .map(s -> s.chars()
+                        .mapToObj(c -> this.key.getOrDefault((char) c, IndustriaIngredient.EMPTY).toDisplay())
+                        .toList())
+                .map(SlotDisplay.CompositeSlotDisplay::new)
+                .map(SlotDisplay.class::cast)
+                .toList();
+
+        return List.of(new UpgradeStationRecipeDisplay(
+                inputs,
+                new SlotDisplay.StackSlotDisplay(this.output),
+                new SlotDisplay.ItemSlotDisplay(BlockInit.UPGRADE_STATION.asItem())));
     }
 
     @Override
     public RecipeBookCategory getRecipeBookCategory() {
         return RecipeBookCategoryInit.UPGRADE_STATION;
+    }
+
+    public boolean doesCenterStackMatch(ItemStack centerStack) {
+        return this.key.get(this.pattern[1].charAt(1)).testForRecipe(centerStack);
     }
 
     public static class Type implements RecipeType<UpgradeStationRecipe> {
@@ -156,6 +191,39 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         @Override
         public PacketCodec<RegistryByteBuf, UpgradeStationRecipe> packetCodec() {
             return PACKET_CODEC;
+        }
+    }
+
+    public record UpgradeStationRecipeDisplay(List<SlotDisplay> inputs, SlotDisplay output,
+                                              SlotDisplay craftingStation) implements RecipeDisplay {
+        public static final MapCodec<UpgradeStationRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
+                instance -> instance.group(
+                        SlotDisplay.CODEC.listOf().fieldOf("inputs").forGetter(UpgradeStationRecipeDisplay::inputs),
+                        SlotDisplay.CODEC.fieldOf("output").forGetter(UpgradeStationRecipeDisplay::output),
+                        SlotDisplay.CODEC.fieldOf("craftingStation").forGetter(UpgradeStationRecipeDisplay::craftingStation)
+                ).apply(instance, UpgradeStationRecipeDisplay::new));
+
+        public static final PacketCodec<RegistryByteBuf, UpgradeStationRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
+                PacketCodecs.collection(ArrayList::new, SlotDisplay.PACKET_CODEC), UpgradeStationRecipeDisplay::inputs,
+                SlotDisplay.PACKET_CODEC, UpgradeStationRecipeDisplay::output,
+                SlotDisplay.PACKET_CODEC, UpgradeStationRecipeDisplay::craftingStation,
+                UpgradeStationRecipeDisplay::new);
+
+        public static final Serializer<UpgradeStationRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+
+        @Override
+        public SlotDisplay result() {
+            return this.output;
+        }
+
+        @Override
+        public SlotDisplay craftingStation() {
+            return this.craftingStation;
+        }
+
+        @Override
+        public Serializer<? extends RecipeDisplay> serializer() {
+            return SERIALIZER;
         }
     }
 }

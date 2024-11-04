@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.screenhandler.*;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.network.RegistryByteBuf;
@@ -44,7 +45,7 @@ public class ScreenHandlerTypeInit {
             register("motor", MotorScreenHandler::new, BlockPosPayload.CODEC);
 
     public static final ScreenHandlerType<UpgradeStationScreenHandler> UPGRADE_STATION =
-            register("upgrade_station", UpgradeStationScreenHandler::new, BlockPosPayload.CODEC);
+            register("upgrade_station", UpgradeStationScreenHandler::new, UpgradeStationOpenPayload.CODEC);
 
     public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
         return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));

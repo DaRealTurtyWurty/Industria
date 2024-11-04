@@ -65,6 +65,11 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
     }
 
     @Override
+    public boolean isIgnoredInRecipeBook() {
+        return true;
+    }
+
+    @Override
     public RecipeBookCategory getRecipeBookCategory() {
         return RecipeBookCategoryInit.CRUSHER;
     }

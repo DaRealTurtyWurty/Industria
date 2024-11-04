@@ -3,10 +3,7 @@ package dev.turtywurty.industria.renderer.item;
 import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
-import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.blockentity.MotorBlockEntity;
-import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
-import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
+import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
@@ -44,6 +41,7 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
     private final OilPumpJackBlockEntity oilPumpJack = new OilPumpJackBlockEntity(BlockPos.ORIGIN, BlockInit.OIL_PUMP_JACK.getDefaultState());
     private final DrillBlockEntity drill = new DrillBlockEntity(BlockPos.ORIGIN, BlockInit.DRILL.getDefaultState());
     private final MotorBlockEntity motor = new MotorBlockEntity(BlockPos.ORIGIN, BlockInit.MOTOR.getDefaultState());
+    private final UpgradeStationBlockEntity upgradeStation = new UpgradeStationBlockEntity(BlockPos.ORIGIN, BlockInit.UPGRADE_STATION.getDefaultState());
 
     private BakedModel seismicScanner;
     private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
@@ -55,7 +53,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
             BlockInit.WIND_TURBINE.asItem(), windTurbine,
             BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack,
             BlockInit.DRILL.asItem(), drill,
-            BlockInit.MOTOR.asItem(), motor
+            BlockInit.MOTOR.asItem(), motor,
+            BlockInit.UPGRADE_STATION.asItem(), upgradeStation
     );
 
     @Override
