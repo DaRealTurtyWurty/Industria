@@ -419,4 +419,8 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
     public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
         return this.wrappedEnergyStorage.getStorage(direction);
     }
+
+    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
+        return this.wrappedInventoryStorage;
+    }
 }

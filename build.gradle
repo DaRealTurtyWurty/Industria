@@ -28,6 +28,10 @@ loom {
 	}
 
 	accessWidenerPath = file("src/main/resources/${project.archives_base_name}.accesswidener")
+
+	runConfigs.configureEach {
+		ideConfigGenerated = false
+	}
 }
 
 fabricApi {

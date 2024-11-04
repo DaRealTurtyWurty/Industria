@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.UpgradeStationBlockEntity;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
@@ -38,18 +39,12 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
         this.blockEntity = blockEntity;
         this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
 
-        SimpleInventory inputInventory = blockEntity.getInputInventory();
-        checkSize(inputInventory, 9);
-        inputInventory.onOpen(inventory.player);
-        inputInventory.addListener(this::onContentChanged);
-
-        SimpleInventory outputInventory = blockEntity.getOutputInventory();
-        checkSize(outputInventory, 1);
-        outputInventory.onOpen(inventory.player);
-        outputInventory.addListener(this::onContentChanged);
+        WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = blockEntity.getWrappedInventoryStorage();
+        wrappedInventoryStorage.checkSize(10);
+        wrappedInventoryStorage.onOpen(inventory.player);
 
         addPlayerSlots(inventory, 18, 104);
-        addBlockEntityInventory(inputInventory, outputInventory);
+        addBlockEntityInventory(wrappedInventoryStorage);
 
         checkDataCount(properties, 1);
         addProperties(properties);
@@ -58,14 +53,14 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
         this.recipes.addAll(recipes);
     }
 
-    private void addBlockEntityInventory(SimpleInventory inputInventory, SimpleInventory outputInventory) {
+    private void addBlockEntityInventory(WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage) {
         for (int column = 0; column < 3; column++) {
             for (int row = 0; row < 3; row++) {
-                addSlot(new Slot(inputInventory, row + column * 3, 8 + row * 18, 17 + column * 18));
+                addSlot(new Slot(wrappedInventoryStorage.getInventory(0), row + column * 3, 8 + row * 18, 17 + column * 18));
             }
         }
 
-        addSlot(new OutputSlot(outputInventory, 0, 148, 35));
+        addSlot(new OutputSlot(wrappedInventoryStorage.getInventory(1), 0, 148, 35));
     }
 
     @Override
@@ -82,8 +77,7 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
 
-        this.blockEntity.getInputInventory().onClose(player);
-        this.blockEntity.getOutputInventory().onClose(player);
+        this.blockEntity.getWrappedInventoryStorage().onClose(player);
     }
 
     @Override
@@ -109,7 +103,10 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
         this.recipes.clear();
         this.recipes.addAll(recipes);
 
-        if(this.contentsChangedListener != null) {
+        if (this.blockEntity.getWorld().isClient)
+            return;
+
+        if (this.contentsChangedListener != null) {
             this.contentsChangedListener.run();
         }
     }
