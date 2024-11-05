@@ -3,7 +3,8 @@ package dev.turtywurty.industria.blockentity;
 import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
@@ -39,7 +40,9 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class BatteryBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
+import java.util.List;
+
+public class BatteryBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("battery");
     public static final Text CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Text.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
@@ -58,7 +61,14 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Tickable
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var input = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        return List.of(input, energy);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

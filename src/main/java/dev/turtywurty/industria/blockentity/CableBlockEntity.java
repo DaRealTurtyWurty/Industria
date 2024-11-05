@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
@@ -17,10 +18,11 @@ import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class CableBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity {
+public class CableBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity {
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private Set<BlockPos> connectedBlocks = null;
 
@@ -75,7 +77,12 @@ public class CableBlockEntity extends UpdatableBlockEntity implements TickableBl
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        return List.of((SyncableStorage) this.wrappedEnergyStorage.getStorage(null));
+    }
+
+    @Override
+    public void onTick() {
         if(this.world == null || this.world.isClient)
             return;
 

@@ -1,9 +1,11 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
+import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -32,9 +34,10 @@ import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
+import java.util.List;
 import java.util.Random;
 
-public class WindTurbineBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class WindTurbineBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
@@ -45,7 +48,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Tick
     public WindTurbineBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.WIND_TURBINE, pos, state);
 
-        this.energy.addStorage(new SimpleEnergyStorage(100_000, 0, 500));
+        this.energy.addStorage(new SyncingEnergyStorage(this, 100_000, 0, 500));
     }
 
     public static int getEnergyOutput(World world, BlockPos pos, float windSpeed) {
@@ -65,7 +68,12 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Tick
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        return List.of((SyncableStorage) this.energy.getStorage(null));
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

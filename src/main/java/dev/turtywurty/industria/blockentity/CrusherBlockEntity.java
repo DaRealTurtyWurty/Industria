@@ -2,7 +2,8 @@ package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.CrusherBlock;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
@@ -50,7 +51,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class CrusherBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class CrusherBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("crusher");
     public static final int INPUT_SLOT = 0, OUTPUT_SLOT = 1;
 
@@ -95,7 +96,15 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Tickable
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var input = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(INPUT_SLOT);
+        var output = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT);
+        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        return List.of(input, output, energy);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

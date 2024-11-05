@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
@@ -52,7 +53,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<UpgradeStationOpenPayload>, TickableBlockEntity, Multiblockable {
+public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("upgrade_station");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -272,7 +273,15 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var inputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var outputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        var energyStorage = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        return List.of(inputInventory, outputInventory, energyStorage);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 
@@ -329,6 +338,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
             this.progress++;
         } else {
             this.progress = 0;
+            return;
         }
 
         update();

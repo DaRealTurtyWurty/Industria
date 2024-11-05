@@ -1,12 +1,13 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
-import dev.turtywurty.industria.blockentity.util.fluid.SyncedFluidStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
@@ -44,25 +45,35 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
+import java.util.List;
+
+public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
     public static final Text TITLE = Industria.containerTitle("thermal_generator");
 
     private static final int CONSUME_RATE = 500;
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-    private final WrappedFluidStorage<SyncedFluidStorage> fluidStorage = new WrappedFluidStorage<>();
+    private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
     private final WrappedInventoryStorage<SimpleInventory> inventoryStorage = new WrappedInventoryStorage<>();
 
     public ThermalGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.THERMAL_GENERATOR, pos, state);
 
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
-        this.fluidStorage.addTank(new SyncedFluidStorage(this, FluidConstants.BUCKET * 10));
+        this.fluidStorage.addTank(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
         this.inventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
+        var fluid = (SyncingFluidStorage) this.fluidStorage.getStorage(null);
+        var inventory = (SyncingSimpleInventory) this.inventoryStorage.getInventory(0);
+        return List.of(energy, fluid, inventory);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 
@@ -73,7 +84,7 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         if (energyStorage.getAmount() >= energyStorage.getCapacity())
             return;
 
-        SyncedFluidStorage fluidStorage = this.fluidStorage.getStorage(null);
+        SingleFluidStorage fluidStorage = this.fluidStorage.getStorage(null);
         if (fluidStorage.isResourceBlank() || fluidStorage.getAmount() < CONSUME_RATE)
             return;
 
@@ -91,7 +102,7 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         if (storage == null || !storage.supportsExtraction())
             return;
 
-        SyncedFluidStorage fluidStorage = this.fluidStorage.getStorage(null);
+        SingleFluidStorage fluidStorage = this.fluidStorage.getStorage(null);
         if (fluidStorage.getAmount() >= fluidStorage.getCapacity())
             return;
 
@@ -170,7 +181,7 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         return this.energyStorage.getStorage(null);
     }
 
-    public SyncedFluidStorage getFluidStorage() {
+    public SingleFluidStorage getFluidStorage() {
         return this.fluidStorage.getStorage(null);
     }
 

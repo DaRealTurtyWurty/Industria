@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, Multiblockable {
+public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
     private final List<BlockPos> machinePositions = new ArrayList<>();
@@ -43,7 +44,12 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Tick
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        return List.of();
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

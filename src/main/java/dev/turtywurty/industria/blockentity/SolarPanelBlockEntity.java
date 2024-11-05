@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
@@ -30,7 +31,9 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class SolarPanelBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
+import java.util.List;
+
+public class SolarPanelBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("solar_panel");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
@@ -71,7 +74,12 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Ticka
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        return List.of((SyncableStorage) this.energy.getStorage(null));
+    }
+
+    @Override
+    public void onTick() {
         if(this.world == null || this.world.isClient)
             return;
 

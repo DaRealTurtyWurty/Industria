@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
@@ -27,7 +28,9 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class MotorBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+import java.util.List;
+
+public class MotorBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("motor");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -50,7 +53,12 @@ public class MotorBlockEntity extends UpdatableBlockEntity implements TickableBl
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        return List.of((SyncableStorage) this.wrappedEnergyStorage.getStorage(null));
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

@@ -2,7 +2,8 @@ package dev.turtywurty.industria.blockentity;
 
 import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.inventory.*;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
@@ -34,9 +35,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
-public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -113,7 +115,16 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Tic
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var input0 = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var input1 = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        var fuel = (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
+        var output = (OutputSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+        return List.of(input0, input1, fuel, output);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

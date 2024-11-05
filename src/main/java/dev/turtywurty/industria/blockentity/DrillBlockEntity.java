@@ -1,12 +1,14 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
+import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
@@ -54,7 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload>, TickableBlockEntity, Multiblockable {
+public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("drill");
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
@@ -104,7 +106,17 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var drillHeadInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var motorInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        var outputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
+        var placeableBlockInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+        var energyStorage = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        return List.of(drillHeadInventory, motorInventory, outputInventory, placeableBlockInventory, energyStorage);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

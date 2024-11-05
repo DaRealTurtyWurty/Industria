@@ -103,9 +103,6 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
         this.recipes.clear();
         this.recipes.addAll(recipes);
 
-        if (this.blockEntity.getWorld().isClient)
-            return;
-
         if (this.contentsChangedListener != null) {
             this.contentsChangedListener.run();
         }

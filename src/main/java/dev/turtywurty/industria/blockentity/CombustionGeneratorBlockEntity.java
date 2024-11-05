@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
@@ -33,7 +34,9 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity implements TickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
+import java.util.List;
+
+public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, EnergySpreader {
     public static final Text TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
@@ -58,7 +61,14 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     }
 
     @Override
-    public void tick() {
+    public List<SyncableStorage> getSyncableStorages() {
+        var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
+        var inventory = (SyncingSimpleInventory) this.inventoryStorage.getInventory(0);
+        return List.of(energy, inventory);
+    }
+
+    @Override
+    public void onTick() {
         if (this.world == null || this.world.isClient)
             return;
 

@@ -1,10 +1,12 @@
 package dev.turtywurty.industria.blockentity.util.energy;
 
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class SyncingEnergyStorage extends SimpleEnergyStorage {
+public class SyncingEnergyStorage extends SimpleEnergyStorage implements SyncableStorage {
     private final UpdatableBlockEntity blockEntity;
+    private boolean isDirty = false;
 
     public SyncingEnergyStorage(UpdatableBlockEntity blockEntity, long capacity, long maxInput, long maxOutput) {
         super(capacity, maxInput, maxOutput);
@@ -14,7 +16,16 @@ public class SyncingEnergyStorage extends SimpleEnergyStorage {
     @Override
     protected void onFinalCommit() {
         super.onFinalCommit();
-        this.blockEntity.update();
+        this.isDirty = true;
+    }
+
+    @Override
+    public void sync() {
+        if (this.isDirty && this.blockEntity != null && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient) {
+            this.isDirty = false;
+
+            this.blockEntity.update();
+        }
     }
 
     public UpdatableBlockEntity getBlockEntity() {
