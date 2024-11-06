@@ -109,8 +109,6 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         int scrollOffset = this.scrollOffset + 12;
         renderRecipeBackground(context, mouseX, mouseY, recipeStartX, recipeStartY, scrollOffset);
         renderRecipeIcons(context, recipeStartX, recipeStartY, scrollOffset);
-
-        context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0xCC00BB00);
     }
 
     private boolean shouldScroll() {

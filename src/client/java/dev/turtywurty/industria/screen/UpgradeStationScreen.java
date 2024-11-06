@@ -2,35 +2,31 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
-import dev.turtywurty.industria.screen.tooltip.ItemListTooltipComponent;
 import dev.turtywurty.industria.screen.widget.EnergyWidget;
+import dev.turtywurty.industria.screen.widget.IndustriaIngredientPreviewWidget;
 import dev.turtywurty.industria.screen.widget.SelectRecipeWidget;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
-import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/upgrade_station.png");
 
     private SelectRecipeWidget<UpgradeStationRecipe> recipeSelector;
+    private final List<IndustriaIngredientPreviewWidget<UpgradeStationRecipe>> ingredientWidgets = new ArrayList<>();
 
     public UpgradeStationScreen(UpgradeStationScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
         handler.setContentsChangedListener(() -> {
-            if(this.recipeSelector != null) {
+            if (this.recipeSelector != null) {
                 this.recipeSelector.setCanCraft(this.handler.canCraft());
                 if (!this.recipeSelector.canCraft()) {
                     this.recipeSelector.resetScroll();
@@ -62,7 +58,7 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
                 .canCraft(this.handler.canCraft())
                 .selectedRecipeIndex(this.handler.getSelectedRecipeIndex())
                 .onRecipeSelected((widget, index) -> {
-                    if(this.client == null || this.client.interactionManager == null)
+                    if (this.client == null || this.client.interactionManager == null)
                         return;
 
                     this.client.interactionManager.clickButton(this.handler.syncId, index);
@@ -72,6 +68,36 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
                 .columnCount(4)
                 .rowCount(3)
                 .build());
+
+        this.ingredientWidgets.clear();
+        for (int index = 0; index < 9; index++) {
+            if (index == 4 || !this.handler.getSlot(36 + index).getStack().isEmpty())
+                continue;
+
+            final int xPos = this.x + 8 + (index % 3 * 18);
+            final int yPos = this.y + 17 + (index / 3 * 18);
+
+            final int finalIndex = index;
+            this.ingredientWidgets.add(
+                    addDrawable(new IndustriaIngredientPreviewWidget<>(xPos, yPos,
+                            finalIndex,
+                            theRecipe -> theRecipe.getIngredient(finalIndex))));
+        }
+
+        int selectedRecipeIndex = this.recipeSelector.getSelectedRecipeIndex();
+        if (selectedRecipeIndex >= 0 && selectedRecipeIndex < this.handler.getAvailableRecipeCount()) {
+            UpgradeStationRecipe recipe = this.recipeSelector.getSelectedRecipe();
+            for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
+                widget.setRecipe(recipe);
+            }
+        }
+    }
+
+    @Override
+    protected void handledScreenTick() {
+        for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
+            widget.setRecipe(this.recipeSelector.getSelectedRecipe());
+        }
     }
 
     @Override
@@ -80,98 +106,11 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
 
         int progress = MathHelper.ceil((this.handler.getProgress() / 500f) * 147);
         ScreenUtils.drawTexture(context, TEXTURE, this.x + 25, this.y + 82, 0, 186, progress, 17);
-
-        renderSelectedRecipePreview(context);
-    }
-
-    private void renderSelectedRecipePreview(DrawContext context) {
-        int selectedRecipeIndex = this.handler.getSelectedRecipeIndex();
-        List<UpgradeStationRecipe> availableRecipes = this.handler.getAvailableRecipes();
-        if (selectedRecipeIndex >= 0 && selectedRecipeIndex < this.handler.getAvailableRecipeCount()) {
-            UpgradeStationRecipe recipe = availableRecipes.get(selectedRecipeIndex);
-
-            if(this.client == null)
-                return;
-
-            for (int index = 0; index < 9; index++) {
-                if(index == 4 || !this.handler.getSlot(36 + index).getStack().isEmpty())
-                    continue;
-
-                IndustriaIngredient ingredient = recipe.getIngredient(index);
-                if(ingredient.isEmpty())
-                    continue;
-
-                List<ItemStack> matching = ingredient.getMatchingStacks();
-                if(matching.isEmpty())
-                    continue;
-
-                int renderItemIndex = (int) (System.currentTimeMillis() / 1000L % matching.size());
-
-                int xPos = this.x + 8 + index % 3 * 18;
-                int yPos = this.y + 17 + index / 3 * 18;
-
-                ItemStack stack = matching.get(renderItemIndex);
-                context.drawItem(stack, xPos, yPos);
-                context.drawStackOverlay(this.textRenderer, stack, xPos - 1, yPos - 1);
-                context.fill(xPos, yPos, xPos + 16, yPos + 16, 256, 0x88808080);
-            }
-        }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         drawMouseoverTooltip(context, mouseX, mouseY);
-
-        renderSelectedRecipePreviewTooltip(context, mouseX, mouseY);
-    }
-
-    private void renderSelectedRecipePreviewTooltip(DrawContext context, int mouseX, int mouseY) {
-        int selectedRecipeIndex = this.handler.getSelectedRecipeIndex();
-        List<UpgradeStationRecipe> availableRecipes = this.handler.getAvailableRecipes();
-        if (selectedRecipeIndex >= 0 && selectedRecipeIndex < this.handler.getAvailableRecipeCount()) {
-            UpgradeStationRecipe recipe = availableRecipes.get(selectedRecipeIndex);
-
-            if(this.client == null)
-                return;
-
-            for (int index = 0; index < 9; index++) {
-                if(index == 4 || !this.handler.getSlot(36 + index).getStack().isEmpty())
-                    continue;
-
-                IndustriaIngredient ingredient = recipe.getIngredient(index);
-                if(ingredient.isEmpty())
-                    continue;
-
-                List<ItemStack> matching = ingredient.getMatchingStacks();
-                if(matching.isEmpty())
-                    continue;
-
-                int renderItemIndex = (int) (System.currentTimeMillis() / 1000L % matching.size());
-
-                int xPos = 8 + index % 3 * 18;
-                int yPos = 17 + index / 3 * 18;
-
-                ItemStack stack = matching.get(renderItemIndex);
-                if (isPointWithinBounds(xPos, yPos, 16, 16, mouseX, mouseY)) {
-                    if(!Screen.hasShiftDown()) {
-                        context.drawItemTooltip(this.textRenderer, stack, mouseX, mouseY);
-                    } else {
-                        var itemListComponent = new ItemListTooltipComponent(matching, 5);
-                        itemListComponent.onRenderTick(context, mouseX, mouseY);
-
-                        List<TooltipComponent> componentList = Screen.getTooltipFromItem(this.client, stack).stream()
-                                .map(Text::asOrderedText)
-                                .map(TooltipComponent::of)
-                                .collect(Util.toArrayList());
-
-                        stack.getTooltipData().ifPresent((data) -> componentList.add(componentList.isEmpty() ? 0 : 1, TooltipComponent.of(data)));
-                        componentList.addFirst(itemListComponent);
-
-                        context.drawTooltip(this.textRenderer, componentList, mouseX, mouseY, HoveredTooltipPositioner.INSTANCE, null);
-                    }
-                }
-            }
-        }
     }
 }
