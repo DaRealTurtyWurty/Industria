@@ -113,4 +113,13 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
         super.render(context, mouseX, mouseY, delta);
         drawMouseoverTooltip(context, mouseX, mouseY);
     }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if(!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+            return hoveredElement(mouseX, mouseY).filter(element -> element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)).isPresent();
+        }
+
+        return true;
+    }
 }
