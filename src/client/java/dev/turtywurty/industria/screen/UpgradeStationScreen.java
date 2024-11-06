@@ -22,23 +22,15 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
 
     private SelectRecipeWidget<UpgradeStationRecipe> recipeSelector;
     private final List<IndustriaIngredientPreviewWidget<UpgradeStationRecipe>> ingredientWidgets = new ArrayList<>();
+    private boolean isDirty = false;
 
     public UpgradeStationScreen(UpgradeStationScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        handler.setContentsChangedListener(() -> {
-            if (this.recipeSelector != null) {
-                this.recipeSelector.setCanCraft(this.handler.canCraft());
-                if (!this.recipeSelector.canCraft()) {
-                    this.recipeSelector.resetScroll();
-                }
-
-                this.recipeSelector.setRecipes(this.handler.getAvailableRecipes());
-            }
-        });
+        handler.setContentsChangedListener(() -> this.isDirty = true);
 
         this.backgroundWidth = 196;
         this.backgroundHeight = 186;
-        this.playerInventoryTitleY = this.backgroundHeight - 92;
+        this.playerInventoryTitleY = this.backgroundHeight - 94;
     }
 
     @Override
@@ -68,10 +60,15 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
                 .columnCount(4)
                 .rowCount(3)
                 .build());
+        this.recipeSelector.addRecipeListener(recipe -> {
+            for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
+                widget.setRecipe(recipe);
+            }
+        });
 
         this.ingredientWidgets.clear();
         for (int index = 0; index < 9; index++) {
-            if (index == 4 || !this.handler.getSlot(36 + index).getStack().isEmpty())
+            if (index == 4)
                 continue;
 
             final int xPos = this.x + 8 + (index % 3 * 18);
@@ -89,14 +86,29 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
             UpgradeStationRecipe recipe = this.recipeSelector.getSelectedRecipe();
             for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
                 widget.setRecipe(recipe);
+                widget.setShouldRender(!this.handler.getSlot(36 + widget.getSlotIndex()).hasStack());
             }
         }
     }
 
     @Override
     protected void handledScreenTick() {
-        for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
-            widget.setRecipe(this.recipeSelector.getSelectedRecipe());
+        if(this.isDirty) {
+            if (this.recipeSelector != null) {
+                this.recipeSelector.setCanCraft(this.handler.canCraft());
+                if (!this.recipeSelector.canCraft()) {
+                    this.recipeSelector.resetScroll();
+                }
+
+                this.recipeSelector.setRecipes(this.handler.getAvailableRecipes());
+
+                for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
+                    widget.setRecipe(this.recipeSelector.getSelectedRecipe());
+                    widget.setShouldRender(!this.handler.getSlot(36 + widget.getSlotIndex()).hasStack());
+                }
+            }
+
+            this.isDirty = false;
         }
     }
 
@@ -105,7 +117,7 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
         ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
         int progress = MathHelper.ceil((this.handler.getProgress() / 500f) * 147);
-        ScreenUtils.drawTexture(context, TEXTURE, this.x + 25, this.y + 82, 0, 186, progress, 17);
+        ScreenUtils.drawTexture(context, TEXTURE, this.x + 25, this.y + 77, 0, 186, progress, 17);
     }
 
     @Override

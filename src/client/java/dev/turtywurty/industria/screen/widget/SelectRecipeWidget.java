@@ -14,8 +14,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
@@ -31,6 +33,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     private @Nullable T selectedRecipe;
     private final Function<T, ItemStack> outputFunction;
     private final BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected;
+    private final List<Consumer<T>> recipeListeners = new ArrayList<>();
 
     private final int columnCount, rowCount;
 
@@ -64,10 +67,11 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
 
     public void setSelectedRecipe(@Nullable T selectedRecipe) {
         this.selectedRecipe = selectedRecipe;
+        this.recipeListeners.forEach(listener -> listener.accept(this.selectedRecipe));
     }
 
     public void setSelectedRecipeIndex(int selectedRecipeIndex) {
-        this.selectedRecipe = selectedRecipeIndex >= this.recipes.size() ? null : this.recipes.get(MathHelper.clamp(selectedRecipeIndex, 0, this.recipes.isEmpty() ? 0 : this.recipes.size() - 1));
+        setSelectedRecipe(selectedRecipeIndex >= this.recipes.size() ? null : this.recipes.get(MathHelper.clamp(selectedRecipeIndex, 0, this.recipes.isEmpty() ? 0 : this.recipes.size() - 1)));
     }
 
     public int getSelectedRecipeIndex() {
@@ -79,8 +83,13 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     public void setRecipes(List<T> recipes) {
+        List<T> oldRecipes = new ArrayList<>(this.recipes);
         this.recipes.clear();
         this.recipes.addAll(recipes);
+
+        if (this.recipes.size() != oldRecipes.size() || !new HashSet<>(this.recipes).containsAll(oldRecipes)) {
+            setSelectedRecipe(this.recipes.isEmpty() ? null : this.recipes.getFirst());
+        }
     }
 
     public void setCanCraft(boolean canCraft) {
@@ -94,6 +103,14 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     public void resetScroll() {
         this.scrollAmount = 0.0F;
         this.scrollOffset = 0;
+    }
+
+    public void addRecipeListener(Consumer<T> listener) {
+        this.recipeListeners.add(listener);
+    }
+
+    public void removeRecipeListener(Consumer<T> listener) {
+        this.recipeListeners.remove(listener);
     }
 
     @Override

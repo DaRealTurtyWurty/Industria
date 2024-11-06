@@ -54,11 +54,18 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
     }
 
     private void addBlockEntityInventory(WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage) {
+        SimpleInventory inputInventory = wrappedInventoryStorage.getInventory(0);
         for (int column = 0; column < 3; column++) {
             for (int row = 0; row < 3; row++) {
-                addSlot(new Slot(wrappedInventoryStorage.getInventory(0), row + column * 3, 8 + row * 18, 17 + column * 18));
+                addSlot(new Slot(inputInventory, row + column * 3, 8 + row * 18, 17 + column * 18));
             }
         }
+
+        inputInventory.addListener(sender -> {
+            if (this.contentsChangedListener != null) {
+                this.contentsChangedListener.run();
+            }
+        });
 
         addSlot(new OutputSlot(wrappedInventoryStorage.getInventory(1), 0, 148, 35));
     }
@@ -102,10 +109,6 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
     public void setAvailableRecipes(List<UpgradeStationRecipe> recipes) {
         this.recipes.clear();
         this.recipes.addAll(recipes);
-
-        if (this.contentsChangedListener != null) {
-            this.contentsChangedListener.run();
-        }
     }
 
     public void setContentsChangedListener(Runnable onInventoryChange) {
