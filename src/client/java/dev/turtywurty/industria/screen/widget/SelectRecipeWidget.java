@@ -36,13 +36,15 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     private final List<Consumer<T>> recipeListeners = new ArrayList<>();
 
     private final int columnCount, rowCount;
+    private final boolean lockable;
 
     private float scrollAmount;
     private boolean mouseClicked;
     private int scrollOffset;
     private boolean canCraft;
+    private boolean isRecipeLocked;
 
-    public SelectRecipeWidget(int x, int y, int width, int height, List<T> recipes, int selectedRecipeIndex, Function<T, ItemStack> outputFunction, BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected, boolean canCraft, int scrollBarX, int scrollBarY, int scrollBarWidth, int scrollBarHandleHeight, int columnCount, int rowCount) {
+    public SelectRecipeWidget(int x, int y, int width, int height, List<T> recipes, int selectedRecipeIndex, Function<T, ItemStack> outputFunction, BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected, boolean canCraft, int scrollBarX, int scrollBarY, int scrollBarWidth, int scrollBarHandleHeight, int columnCount, int rowCount, boolean lockable) {
         super(x, y, width, height, Text.empty());
 
         setRecipes(recipes);
@@ -59,6 +61,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
 
         this.columnCount = columnCount;
         this.rowCount = rowCount;
+        this.lockable = lockable;
     }
 
     public @Nullable T getSelectedRecipe() {
@@ -82,6 +85,10 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         return this.recipes;
     }
 
+    public boolean isLockable() {
+        return this.lockable;
+    }
+
     public void setRecipes(List<T> recipes) {
         List<T> oldRecipes = new ArrayList<>(this.recipes);
         this.recipes.clear();
@@ -89,6 +96,10 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
 
         if (this.recipes.size() != oldRecipes.size() || !new HashSet<>(this.recipes).containsAll(oldRecipes)) {
             setSelectedRecipe(this.recipes.isEmpty() ? null : this.recipes.getFirst());
+        }
+
+        if (this.selectedRecipe == null || this.recipes.isEmpty()) {
+            this.isRecipeLocked = false;
         }
     }
 
@@ -250,6 +261,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         private int scrollBarHandleHeight = 15;
         private int columnCount = 4;
         private int rowCount = 3;
+        private boolean lockable = false;
 
         public Builder<T> x(int x) {
             this.x = x;
@@ -373,24 +385,29 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
             return this;
         }
 
+        public Builder<T> lockable() {
+            this.lockable = true;
+            return this;
+        }
+
         public SelectRecipeWidget<T> build() {
-            if(this.width <= 0) {
+            if (this.width <= 0) {
                 this.width = (this.scrollBarX <= 0 ? 2 : this.scrollBarX - this.x + this.scrollBarWidth);
             }
 
-            if(this.height <= 0) {
+            if (this.height <= 0) {
                 this.height = 18 * this.rowCount + 2;
             }
 
-            if(this.scrollBarX <= 0) {
+            if (this.scrollBarX <= 0) {
                 this.scrollBarX = this.x + this.width - this.scrollBarWidth;
             }
 
-            if(this.scrollBarY <= 0) {
+            if (this.scrollBarY <= 0) {
                 this.scrollBarY = this.y;
             }
 
-            return new SelectRecipeWidget<>(this.x, this.y, this.width, this.height, this.recipes, this.selectedRecipeIndex, this.outputFunction, this.onRecipeSelected, this.canCraft, this.scrollBarX, this.scrollBarY, this.scrollBarWidth, this.scrollBarHandleHeight, this.columnCount, this.rowCount);
+            return new SelectRecipeWidget<>(this.x, this.y, this.width, this.height, this.recipes, this.selectedRecipeIndex, this.outputFunction, this.onRecipeSelected, this.canCraft, this.scrollBarX, this.scrollBarY, this.scrollBarWidth, this.scrollBarHandleHeight, this.columnCount, this.rowCount, this.lockable);
         }
     }
 }

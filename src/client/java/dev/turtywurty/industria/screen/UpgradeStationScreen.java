@@ -59,7 +59,9 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
                 .outputFunction(UpgradeStationRecipe::output)
                 .columnCount(4)
                 .rowCount(3)
+                .lockable()
                 .build());
+
         this.recipeSelector.addRecipeListener(recipe -> {
             for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
                 widget.setRecipe(recipe);
