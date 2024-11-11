@@ -33,11 +33,9 @@ public class MultiblockBlock extends Block {
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!world.isClient) {
-            Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
-            if (map == null)
+            MultiblockData data = getMultiblockData(world, pos);
+            if (data == null)
                 return ActionResult.FAIL;
-
-            MultiblockData data = map.get(pos.toShortString());
 
             BlockPos primaryPos = data.primaryPos();
             if (primaryPos == null)
@@ -54,11 +52,9 @@ public class MultiblockBlock extends Block {
         super.onStateReplaced(state, world, pos, newState, moved);
 
         if (!world.isClient && !state.isOf(newState.getBlock())) {
-            Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
-            if (map == null)
+            MultiblockData data = getMultiblockData(world, pos);
+            if (data == null)
                 return;
-
-            MultiblockData data = map.get(pos.toShortString());
 
             BlockPos primaryPos = data.primaryPos();
             if (primaryPos == null)
@@ -96,12 +92,7 @@ public class MultiblockBlock extends Block {
         if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
             return null;
 
-        Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
-        if (map == null)
-            return null;
-
-        MultiblockData data = map.get(pos.toShortString());
-        BlockPos primaryPos = data.primaryPos();
+        BlockPos primaryPos = getPrimaryPos(world, pos);
         if (primaryPos == null)
             return null;
 
@@ -119,12 +110,7 @@ public class MultiblockBlock extends Block {
         if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
             return null;
 
-        Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
-        if (map == null)
-            return null;
-
-        MultiblockData data = map.get(pos.toShortString());
-        BlockPos primaryPos = data.primaryPos();
+        BlockPos primaryPos = getPrimaryPos(world, pos);
         if (primaryPos == null)
             return null;
 
@@ -141,12 +127,7 @@ public class MultiblockBlock extends Block {
         if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
             return null;
 
-        Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
-        if (map == null)
-            return null;
-
-        MultiblockData data = map.get(pos.toShortString());
-        BlockPos primaryPos = data.primaryPos();
+        BlockPos primaryPos = getPrimaryPos(world, pos);
         if (primaryPos == null)
             return null;
 
@@ -157,5 +138,18 @@ public class MultiblockBlock extends Block {
         }
 
         return null;
+    }
+
+    public static MultiblockData getMultiblockData(World world, BlockPos pos) {
+        Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
+        if (map == null)
+            return null;
+
+        return map.get(pos.toShortString());
+    }
+
+    public static BlockPos getPrimaryPos(World world, BlockPos pos) {
+        MultiblockData data = getMultiblockData(world, pos);
+        return data != null ? data.primaryPos() : null;
     }
 }
