@@ -2,72 +2,50 @@ package dev.turtywurty.industria.renderer.block;
 
 import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.model.DrillCableModel;
 import dev.turtywurty.industria.model.DrillFrameModel;
 import dev.turtywurty.industria.model.DrillMotorModel;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.util.DrillHeadable;
-import dev.turtywurty.industria.util.WireframeExtractor;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexRendering;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockEntity> {
+public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<DrillBlockEntity> {
     private static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_frame.png");
 
     private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
     private final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
-    private final BlockEntityRendererFactory.Context context;
     private final DrillFrameModel model;
     private final DrillMotorModel motorModel;
     private final DrillCableModel cableModel;
 
     public DrillBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        this.context = context;
+        super(context);
         this.model = new DrillFrameModel(context.getLayerModelPart(DrillFrameModel.LAYER_LOCATION));
         this.motorModel = new DrillMotorModel(context.getLayerModelPart(DrillMotorModel.LAYER_LOCATION));
         this.cableModel = new DrillCableModel(context.getLayerModelPart(DrillCableModel.LAYER_LOCATION));
     }
 
     @Override
-    public void render(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void onRender(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         World world = entity.getWorld();
-
-        matrices.push();
-        { // Apply transformations
-            matrices.translate(0.5f, 1.5f, 0.5f);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
-                case EAST -> 90;
-                case SOUTH -> 180;
-                case WEST -> 270;
-                default -> 0;
-            }));
-        }
 
         { // Render motor
             if (!entity.getMotorInventory().isEmpty()) {
@@ -140,11 +118,6 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
             return;
         }
 
-        if (isPlayerLookingAt(entity.getPos())) {
-            List<ModelPart> modelParts = Collections.singletonList(this.model.getRootPart());
-            WireframeExtractor.renderFromModelParts(modelParts, matrices, vertexConsumers.getBuffer(RenderLayer.getLines()));
-        }
-
         { // Render drill cable
             MatrixStack.Entry entry = matrices.peek();
             VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
@@ -176,10 +149,14 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
                     .color(70, 70, 70, 255)
                     .normal(0, 1, 0);
 
+            matrices.push();
+
             matrices.translate(0, -entity.getDrillYOffset(), 0);
             linesVertexConsumer.vertex(matrices.peek(), 0, 0.5f, 0)
                     .color(70, 70, 70, 255)
                     .normal(0, 1, 0);
+
+            matrices.pop();
         }
 
         { // Render drill head
@@ -188,9 +165,10 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
 
             drillHeadData.onRender().render(entity, drillHeadStack, tickDelta, matrices, vertexConsumers, drillHeadModel, vertexConsumers.getBuffer(drillHeadModel.getLayer(drillHeadTexture)), light, overlay);
         }
+    }
 
-        matrices.pop();
-
+    @Override
+    protected void postRender(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         Box aabb = entity.getDrillHeadAABB();
         if (this.context.getEntityRenderDispatcher().shouldRenderHitboxes() && aabb != null) {
             BlockPos pos = entity.getPos();
@@ -203,26 +181,6 @@ public class DrillBlockEntityRenderer implements BlockEntityRenderer<DrillBlockE
 
             VertexRendering.drawBox(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), minX, minY, minZ, maxX, maxY, maxZ, 1, 0, 0, 1);
         }
-    }
-
-    private static boolean isPlayerLookingAt(BlockPos bePos) {
-        if(!(MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult hitResult))
-            return false;
-
-        BlockPos hitPos = hitResult.getBlockPos();
-        if(Objects.equals(hitPos, bePos))
-            return true;
-
-        World world = MinecraftClient.getInstance().world;
-        if(world == null)
-            return false;
-
-        BlockState state = world.getBlockState(hitPos);
-        if(!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
-            return false;
-
-        BlockPos primaryPos = MultiblockBlock.getPrimaryPos(world, hitPos);
-        return Objects.equals(primaryPos, bePos);
     }
 
     @Override

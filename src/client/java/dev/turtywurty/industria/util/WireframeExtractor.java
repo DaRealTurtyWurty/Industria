@@ -1,17 +1,14 @@
 package dev.turtywurty.industria.util;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Math;
-import org.joml.*;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,65 +29,6 @@ public interface WireframeExtractor {
         }
 
         return new ArrayList<>(lines);
-    }
-
-    static void renderFromModelParts(List<ModelPart> modelParts, MatrixStack matrices, VertexConsumer vertexConsumer) {
-        Vector3f v0 = new Vector3f();
-        Vector3f v1 = new Vector3f();
-        Vector3f v2 = new Vector3f();
-        Vector3f v3 = new Vector3f();
-        Vector4f pos = new Vector4f();
-        Vector3f normal = new Vector3f();
-        for (ModelPart modelPart : modelParts) {
-            visitPart(modelPart, matrices, vertexConsumer, v0, v1, v2, v3, pos, normal);
-        }
-    }
-
-    private static void visitPart(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertexConsumer, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
-        if(!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
-            return;
-
-        matrices.push();
-        modelPart.rotate(matrices);
-
-        {
-            MatrixStack.Entry entry = matrices.peek();
-            Matrix4f pose = entry.getPositionMatrix();
-            Matrix3f poseNormal = entry.getNormalMatrix();
-            Set<Line> lines = new HashSet<>();
-            for (ModelPart.Cuboid cuboid : modelPart.cuboids) {
-                for (ModelPart.Quad quad : cuboid.sides) {
-                    quad.vertices()[0].pos().div(16, v0);
-                    quad.vertices()[1].pos().div(16, v1);
-                    quad.vertices()[2].pos().div(16, v2);
-                    quad.vertices()[3].pos().div(16, v3);
-                    lines.add(Line.from(v0, v1));
-                    lines.add(Line.from(v1, v2));
-                    lines.add(Line.from(v2, v3));
-                    lines.add(Line.from(v3, v0));
-                }
-            }
-
-            for (WireframeExtractor.Line line : lines) {
-                poseNormal.transform(line.normalX(), line.normalY(), line.normalZ(), normal);
-
-                pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
-                vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
-                        .color(0, 0, 0, 102)
-                        .normal(normal.x, normal.y, normal.z);
-
-                pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
-                vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
-                        .color(0, 0, 0, 102)
-                        .normal(normal.x, normal.y, normal.z);
-            }
-        }
-
-        for (ModelPart part : modelPart.children.values()) {
-            visitPart(part, matrices, vertexConsumer, v0, v1, v2, v3, pos, normal);
-        }
-
-        matrices.pop();
     }
 
     private static void extractVerticesFromBakedQuad(Set<Line> lines, BakedQuad quad) {
