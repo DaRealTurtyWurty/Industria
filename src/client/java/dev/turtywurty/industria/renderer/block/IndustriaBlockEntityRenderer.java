@@ -21,6 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -28,11 +29,31 @@ import org.joml.Vector4f;
 
 import java.util.*;
 
+/**
+ * A block entity renderer for Industria block entities.
+ * <p>
+ * This class provides utility methods for rendering wireframes and checking if the player is looking at the block entity.
+ * It also provides a method for rendering the wireframe of the model parts.
+ * <br>
+ * This class also allows for the rendering process to be split up into multiple methods to allow for easier customization.
+ * </p>
+ *
+ * @param <T> The block entity type
+ * @see WireframeExtractor
+ * @see IndustriaBlockEntityRenderer#onRender(BlockEntity, float, MatrixStack, VertexConsumerProvider, int, int)
+ * @see IndustriaBlockEntityRenderer#postRender(BlockEntity, float, MatrixStack, VertexConsumerProvider, int, int)
+ * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(MatrixStack, BlockEntity)
+ */
 public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
     protected static final List<ModelPart> EMPTY_WIREFRAME = Collections.emptyList();
 
     protected final BlockEntityRendererFactory.Context context;
 
+    /**
+     * Creates a new block entity renderer.
+     *
+     * @param context The block entity renderer factory context
+     */
     public IndustriaBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         this.context = context;
     }
@@ -61,25 +82,17 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      */
     protected abstract void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
 
-    /**
-     * Gets the model parts to render when the player is looking at the block entity (cache if possible).
-     *
-     * @return The model parts to render
-     */
-    protected List<ModelPart> getModelParts() {
-        return EMPTY_WIREFRAME;
-    }
 
     @Override
     public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         setupBlockEntityTransformations(matrices, entity);
         onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
-        if(/*isPlayerLookingAt(entity.getPos())*/ true) {
+        if(/*isPlayerLookingAt(entity.getPos())*/ false) {
             List<ModelPart> wireframe = getModelParts();
             if(!wireframe.isEmpty()) {
                 boolean isHighContrast = isHighContrast();
-                renderFromModelParts(wireframe, matrices, vertexConsumers, isHighContrast);
+                renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
             }
         }
 
@@ -92,19 +105,45 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         return MinecraftClient.getInstance().options.getHighContrastBlockOutline().getValue();
     }
 
+    /**
+     * Gets the vertex consumer for the high contrast wireframe.
+     *
+     * @param vertexConsumers The vertex consumer provider
+     * @return The vertex consumer for the high contrast wireframe
+     */
     public static VertexConsumer getHighContrastWireframeVertexConsumer(VertexConsumerProvider vertexConsumers) {
         return vertexConsumers.getBuffer(RenderLayer.getSecondaryBlockOutline());
     }
 
+    /**
+     * Gets the vertex consumer for the wireframe.
+     *
+     * @param vertexConsumers The vertex consumer provider
+     * @return The vertex consumer for the wireframe
+     */
     public static VertexConsumer getWireframeVertexConsumer(VertexConsumerProvider vertexConsumers) {
         return vertexConsumers.getBuffer(RenderLayer.getLines());
     }
 
+    /**
+     * Gets the color of the wireframe.
+     *
+     * @param isHighContrast If the wireframe should be high contrast
+     * @return The color of the wireframe
+     */
     public static int getWireframeColor(boolean isHighContrast) {
         return isHighContrast ? Colors.CYAN : ColorHelper.withAlpha(102, Colors.BLACK);
     }
 
-    protected static void renderFromModelParts(List<ModelPart> modelParts, MatrixStack matrices, VertexConsumerProvider vertexConsumers, boolean isHighContrast) {
+    /**
+     * Renders the wireframe of the model parts.
+     *
+     * @param modelParts      The model parts to render
+     * @param matrices        The matrix stack
+     * @param vertexConsumers The vertex consumer provider
+     * @param isHighContrast  If the wireframe should be high contrast
+     */
+    public static void renderWireframe(List<ModelPart> modelParts, MatrixStack matrices, VertexConsumerProvider vertexConsumers, boolean isHighContrast) {
         var v0 = new Vector3f();
         var v1 = new Vector3f();
         var v2 = new Vector3f();
@@ -121,12 +160,28 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         }
     }
 
+    /**
+     * Visits a model part and renders its wireframe.
+     *
+     * @param modelPart            The model part to visit
+     * @param matrices             The matrix stack
+     * @param isHighContrast       If the wireframe should be high contrast
+     * @param normalConsumer       The normal vertex consumer
+     * @param highContrastConsumer The high contrast vertex consumer
+     * @param color                The color of the wireframe
+     * @param v0                   The first vertex
+     * @param v1                   The second vertex
+     * @param v2                   The third vertex
+     * @param v3                   The fourth vertex
+     * @param pos                  The position of the vertex
+     * @param normal               The normal of the vertex
+     */
     private static void visitPart(ModelPart modelPart, MatrixStack matrices, boolean isHighContrast, VertexConsumer normalConsumer, VertexConsumer highContrastConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
-        if(!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
+        if (!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
             return;
 
         matrices.push();
-        modelPart.rotate(matrices);
+        modelPart.rotate(matrices); // Also applies translation and scale (stupid yarn)
 
         {
             MatrixStack.Entry entry = matrices.peek();
@@ -172,13 +227,70 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         matrices.pop();
     }
 
+    /**
+     * Checks if the player is looking at the block entity.
+     * <p>
+     * This method uses the client crosshair target to determine if the player is looking at the block entity.
+     * It achieves this by checking if the crosshair target is a block hit result and if the block position of the
+     * hit result is equal to the block entity position. If the block position is not equal to the block entity
+     * position, it will check if the block at the hit position is a multiblock block and if the primary position
+     * of the multiblock is equal to the block entity position.
+     * </p>
+     *
+     * @param bePos The block entity position
+     * @return If the player is looking at the block entity or a multiblock block
+     */
+    public static boolean isPlayerLookingAt(BlockPos bePos) {
+        if (!(MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult hitResult))
+            return false;
+
+        if (hitResult.getType() == HitResult.Type.MISS)
+            return false;
+
+        BlockPos hitPos = hitResult.getBlockPos();
+        if (Objects.equals(hitPos, bePos))
+            return true;
+
+        World world = MinecraftClient.getInstance().world;
+        if (world == null)
+            return false;
+
+        BlockState state = world.getBlockState(hitPos);
+        if (state.isAir() || !state.isOf(BlockInit.MULTIBLOCK_BLOCK) || !world.getWorldBorder().contains(hitPos))
+            return false;
+
+        BlockPos primaryPos = MultiblockBlock.getPrimaryPos(world, hitPos);
+        return Objects.equals(primaryPos, bePos);
+    }
+
+    /**
+     * Gets the model parts to render when the player is looking at the block entity (cache if possible).
+     *
+     * @return The model parts to render
+     *
+     * @apiNote This method is experimental since currently it causes a crash if you use it
+     */
+    @ApiStatus.Experimental
+    protected List<ModelPart> getModelParts() {
+        return EMPTY_WIREFRAME;
+    }
+
+    public final void renderForItem(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        setupBlockEntityTransformations(matrices, entity);
+        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+
+        matrices.pop();
+
+        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+    }
+
     protected void setupBlockEntityTransformations(MatrixStack matrices, T entity) {
         matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
 
         BlockState state = entity.getCachedState();
-        if(!state.getProperties().contains(Properties.HORIZONTAL_FACING))
+        if (!state.getProperties().contains(Properties.HORIZONTAL_FACING))
             return;
 
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (state.get(Properties.HORIZONTAL_FACING)) {
@@ -187,28 +299,5 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
             case WEST -> 270;
             default -> 0;
         }));
-    }
-
-    public static boolean isPlayerLookingAt(BlockPos bePos) {
-        if(!(MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult hitResult))
-            return false;
-
-        if (hitResult.getType() == HitResult.Type.MISS)
-            return false;
-
-        BlockPos hitPos = hitResult.getBlockPos();
-        if(Objects.equals(hitPos, bePos))
-            return true;
-
-        World world = MinecraftClient.getInstance().world;
-        if(world == null)
-            return false;
-
-        BlockState state = world.getBlockState(hitPos);
-        if(state.isAir() || !state.isOf(BlockInit.MULTIBLOCK_BLOCK) || !world.getWorldBorder().contains(hitPos))
-            return false;
-
-        BlockPos primaryPos = MultiblockBlock.getPrimaryPos(world, hitPos);
-        return Objects.equals(primaryPos, bePos);
     }
 }

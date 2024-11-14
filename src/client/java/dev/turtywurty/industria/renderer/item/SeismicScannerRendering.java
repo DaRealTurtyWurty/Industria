@@ -5,6 +5,7 @@ import dev.turtywurty.industria.component.FluidPocketsComponent;
 import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DoublePositionSource;
+import dev.turtywurty.industria.util.DrawableVertexConsumer;
 import dev.turtywurty.industria.util.IndustriaFluidRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
@@ -189,7 +190,7 @@ public class SeismicScannerRendering {
         matrices.translate(-centerX / 16f, centerY / 32f, centerZ / 16f);
         matrices.translate(0, height / 16f, 0);
 
-        var buffer = new IndustriaDynamicItemRenderer.DrawableVertexConsumer((VertexConsumerProvider.Immediate) vertexConsumers);
+        var buffer = new DrawableVertexConsumer((VertexConsumerProvider.Immediate) vertexConsumers);
         buffer.draw(); // End the previous buffer (usually the player)
 
         RenderSystem.setShaderColor(1.0F, 2.0F, 5.0F, 0.5F);

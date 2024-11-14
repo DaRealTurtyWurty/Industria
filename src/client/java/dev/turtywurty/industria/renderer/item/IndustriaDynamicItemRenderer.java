@@ -13,8 +13,6 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.EntityModelLoader;
@@ -72,6 +70,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
                 this.blockEntityRenderDispatcher.renderEntity(blockEntity, matrices, vertexConsumers, light, overlay);
                 matrices.pop();
             }
+
+            return;
         }
 
         if (this.seismicScanner == null) {
@@ -115,20 +115,4 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
         }, applyExecutor);
     }
 
-    public static class DrawableVertexConsumer implements VertexConsumerProvider {
-        private final VertexConsumerProvider.Immediate source;
-
-        public DrawableVertexConsumer(VertexConsumerProvider.Immediate source) {
-            this.source = source;
-        }
-
-        @Override
-        public VertexConsumer getBuffer(RenderLayer layer) {
-            return this.source.getBuffer(layer);
-        }
-
-        public void draw() {
-            this.source.draw();
-        }
-    }
 }
