@@ -19,6 +19,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
@@ -82,15 +83,14 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      */
     protected abstract void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
 
-
     @Override
     public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         setupBlockEntityTransformations(matrices, entity);
         onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
-        if(/*isPlayerLookingAt(entity.getPos())*/ false) {
+        if (/*isPlayerLookingAt(entity.getPos())*/ true) { // TODO: Uncomment when https://github.com/FabricMC/fabric/pull/4223 is merged
             List<ModelPart> wireframe = getModelParts();
-            if(!wireframe.isEmpty()) {
+            if (!wireframe.isEmpty()) {
                 boolean isHighContrast = isHighContrast();
                 renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
             }
@@ -151,12 +151,13 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         var pos = new Vector4f();
         var normal = new Vector3f();
 
-        VertexConsumer normalConsumer = getWireframeVertexConsumer(vertexConsumers);
-        VertexConsumer highContrastConsumer = getHighContrastWireframeVertexConsumer(vertexConsumers);
         int color = getWireframeColor(isHighContrast);
+        for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
+            VertexConsumer vertexConsumer = iteration == 0 && isHighContrast ? getHighContrastWireframeVertexConsumer(vertexConsumers) : getWireframeVertexConsumer(vertexConsumers);
 
-        for (ModelPart modelPart : modelParts) {
-            visitPart(modelPart, matrices, isHighContrast, normalConsumer, highContrastConsumer, color, v0, v1, v2, v3, pos, normal);
+            for (ModelPart modelPart : modelParts) {
+                visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
+            }
         }
     }
 
@@ -165,9 +166,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      *
      * @param modelPart            The model part to visit
      * @param matrices             The matrix stack
-     * @param isHighContrast       If the wireframe should be high contrast
-     * @param normalConsumer       The normal vertex consumer
-     * @param highContrastConsumer The high contrast vertex consumer
+     * @param vertexConsumer       The vertex consumer
      * @param color                The color of the wireframe
      * @param v0                   The first vertex
      * @param v1                   The second vertex
@@ -176,7 +175,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      * @param pos                  The position of the vertex
      * @param normal               The normal of the vertex
      */
-    private static void visitPart(ModelPart modelPart, MatrixStack matrices, boolean isHighContrast, VertexConsumer normalConsumer, VertexConsumer highContrastConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
+    private static void visitPart(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
         if (!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
             return;
 
@@ -201,27 +200,23 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
                 }
             }
 
-            for (int index = 0; index < (isHighContrast ? 2 : 1); index++) {
-                VertexConsumer vertexConsumer = index == 0 ? (isHighContrast ? highContrastConsumer : normalConsumer) : normalConsumer;
+            for (WireframeExtractor.Line line : lines) {
+                poseNormal.transform(line.normalX(), line.normalY(), line.normalZ(), normal);
 
-                for (WireframeExtractor.Line line : lines) {
-                    poseNormal.transform(line.normalX(), line.normalY(), line.normalZ(), normal);
+                pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
+                vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
+                        .color(color)
+                        .normal(normal.x, normal.y, normal.z);
 
-                    pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
-                    vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
-                            .color(color)
-                            .normal(normal.x, normal.y, normal.z);
-
-                    pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
-                    vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
-                            .color(color)
-                            .normal(normal.x, normal.y, normal.z);
-                }
+                pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
+                vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
+                        .color(color)
+                        .normal(normal.x, normal.y, normal.z);
             }
         }
 
         for (ModelPart part : modelPart.children.values()) {
-            visitPart(part, matrices, isHighContrast, normalConsumer, highContrastConsumer, color, v0, v1, v2, v3, pos, normal);
+            visitPart(part, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
         }
 
         matrices.pop();
@@ -267,7 +262,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      * Gets the model parts to render when the player is looking at the block entity (cache if possible).
      *
      * @return The model parts to render
-     *
      * @apiNote This method is experimental since currently it causes a crash if you use it
      */
     @ApiStatus.Experimental
@@ -293,7 +287,8 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         if (!state.getProperties().contains(Properties.HORIZONTAL_FACING))
             return;
 
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (state.get(Properties.HORIZONTAL_FACING)) {
+        Direction facing = state.get(Properties.HORIZONTAL_FACING);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (facing) {
             case EAST -> 90;
             case SOUTH -> 180;
             case WEST -> 270;

@@ -24,6 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<DrillBlockEntity> {
@@ -107,16 +108,12 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         }
 
         ItemStack drillHeadStack = entity.getDrillStack();
-        if (drillHeadStack.isEmpty() || !(drillHeadStack.getItem() instanceof DrillHeadable drillHeadable)) {
-            matrices.pop();
+        if (drillHeadStack.isEmpty() || !(drillHeadStack.getItem() instanceof DrillHeadable drillHeadable))
             return;
-        }
 
         DrillHeadRegistry.DrillHeadClientData drillHeadData = DrillHeadRegistry.getClientData(drillHeadable);
-        if (drillHeadData == null) {
-            matrices.pop();
+        if (drillHeadData == null)
             return;
-        }
 
         { // Render drill cable
             MatrixStack.Entry entry = matrices.peek();
@@ -149,14 +146,10 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
                     .color(70, 70, 70, 255)
                     .normal(0, 1, 0);
 
-            matrices.push();
-
             matrices.translate(0, -entity.getDrillYOffset(), 0);
             linesVertexConsumer.vertex(matrices.peek(), 0, 0.5f, 0)
                     .color(70, 70, 70, 255)
                     .normal(0, 1, 0);
-
-            matrices.pop();
         }
 
         { // Render drill head
@@ -191,5 +184,10 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
     @Override
     public boolean isInRenderDistance(DrillBlockEntity blockEntity, Vec3d pos) {
         return blockEntity.getPos().isWithinDistance(pos, blockEntity.getWorld() == null ? 64 : blockEntity.getWorld().getHeight());
+    }
+
+    @Override
+    protected List<ModelPart> getModelParts() {
+        return List.of(this.model.getRootPart());
     }
 }

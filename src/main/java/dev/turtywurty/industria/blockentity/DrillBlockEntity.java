@@ -515,6 +515,10 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         this.overflowMethod = overflowMethod;
     }
 
+    public boolean isPaused() {
+        return this.isPaused;
+    }
+
     public enum OverflowMethod implements IndustriaEnum<OverflowMethod> {
         VOID, PAUSE, SPILLAGE;
 
