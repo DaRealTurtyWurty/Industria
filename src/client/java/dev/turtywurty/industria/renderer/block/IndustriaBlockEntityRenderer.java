@@ -88,7 +88,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         setupBlockEntityTransformations(matrices, entity);
         onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
-        if (/*isPlayerLookingAt(entity.getPos())*/ true) { // TODO: Uncomment when https://github.com/FabricMC/fabric/pull/4223 is merged
+        if (isPlayerLookingAt(entity.getPos())) {
             List<ModelPart> wireframe = getModelParts();
             if (!wireframe.isEmpty()) {
                 boolean isHighContrast = isHighContrast();
