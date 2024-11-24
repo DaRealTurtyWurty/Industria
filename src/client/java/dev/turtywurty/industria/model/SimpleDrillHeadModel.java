@@ -62,7 +62,7 @@ public class SimpleDrillHeadModel extends Model {
         float previousClockwiseYaw = parts.clockwise().yaw;
         float previousCounterClockwiseYaw = parts.counterClockwise().yaw;
 
-        if(blockEntity.isDrilling()) {
+        if(blockEntity.isDrilling() && !blockEntity.isPaused()) {
             parts.clockwise().yaw = rotationData.clockwiseRotation += 0.1F;
             parts.counterClockwise().yaw = rotationData.counterClockwiseRotation -= 0.125F;
         } else {
