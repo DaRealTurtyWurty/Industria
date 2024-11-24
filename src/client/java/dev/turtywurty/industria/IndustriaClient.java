@@ -62,6 +62,7 @@ public class IndustriaClient implements ClientModInitializer {
         HandledScreens.register(ScreenHandlerTypeInit.DRILL, DrillScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.MOTOR, MotorScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.UPGRADE_STATION, UpgradeStationScreen::new);
+        HandledScreens.register(ScreenHandlerTypeInit.ELECTRIC_FURNACE, ElectricFurnaceScreen::new);
 
         // Registering Models
         EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::getTexturedModelData);

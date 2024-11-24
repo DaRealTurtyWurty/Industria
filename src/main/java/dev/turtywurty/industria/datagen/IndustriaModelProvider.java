@@ -31,6 +31,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL_BLOCK);
         blockStateModelGenerator.registerSimpleState(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
+        blockStateModelGenerator.registerCooker(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE);
 
         BlockStateSupplier cableSupplier = MultipartBlockStateSupplier.create(BlockInit.CABLE)
                 .with(BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/cable_dot")))

@@ -32,7 +32,7 @@ public class EnergyWidget implements Drawable, Widget {
         long energy = Math.min(maxEnergy, Math.max(0, currentEnergy));
         float percentage = (float) energy / maxEnergy;
         int fillHeight = (int) (this.height * percentage);
-        context.fill(x, y, x + width, y + fillHeight, color);
+        context.fill(x, y + this.height - fillHeight, x + width, y + this.height, color);
 
         if (isPointWithinBounds(this.x, this.y + this.height - fillHeight, this.width, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);

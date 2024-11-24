@@ -69,6 +69,9 @@ public class BlockInit {
     public static final UpgradeStationBlock UPGRADE_STATION = registerWithItemCopy("upgrade_station",
             UpgradeStationBlock::new, Blocks.ANVIL, AbstractBlock.Settings::nonOpaque);
 
+    public static final ElectricFurnaceBlock ELECTRIC_FURNACE = registerWithItemCopy("electric_furnace",
+            ElectricFurnaceBlock::new, Blocks.FURNACE, settings -> settings);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

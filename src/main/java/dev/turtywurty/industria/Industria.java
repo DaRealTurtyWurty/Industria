@@ -108,6 +108,9 @@ public class Industria implements ModInitializer {
         ItemStorage.SIDED.registerForBlocks(MultiblockBlock::getInventoryProvider, BlockInit.MULTIBLOCK_BLOCK);
         FluidStorage.SIDED.registerForBlocks(MultiblockBlock::getFluidProvider, BlockInit.MULTIBLOCK_BLOCK);
 
+        EnergyStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
+        ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
+
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);
