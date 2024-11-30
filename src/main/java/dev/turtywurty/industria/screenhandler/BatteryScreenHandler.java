@@ -16,6 +16,8 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
+
+import java.util.List;
 import java.util.Arrays;
 
 public class BatteryScreenHandler extends ScreenHandler {
@@ -57,8 +59,7 @@ public class BatteryScreenHandler extends ScreenHandler {
 
     @Override
     public boolean canUse(PlayerEntity player) {
-        return canUse(player, BlockInit.BASIC_BATTERY, BlockInit.ADVANCED_BATTERY,
-                BlockInit.ELITE_BATTERY, BlockInit.ULTIMATE_BATTERY, BlockInit.CREATIVE_BATTERY);
+        return canUse(player, BlockInit.BATTERIES.toArray(new Block[0]));
     }
 
     private boolean canUse(PlayerEntity player, Block... blocks) {

@@ -14,6 +14,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
+import dev.turtywurty.industria.util.enums.ElectricityTypes;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -46,13 +47,13 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
     public static final Text TITLE = Industria.containerTitle("battery");
     public static final Text CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Text.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
-    private final BatteryBlock.BatteryLevel batteryLevel;
+    private final ElectricityTypes batteryLevel;
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private ChargeMode chargeMode = ChargeMode.DISCHARGE;
 
-    public BatteryBlockEntity(BlockPos pos, BlockState state, BatteryBlock.BatteryLevel batteryLevel) {
+    public BatteryBlockEntity(BlockPos pos, BlockState state, ElectricityTypes batteryLevel) {
         super(BlockEntityTypeInit.BATTERY, pos, state);
         this.batteryLevel = batteryLevel;
 
@@ -185,7 +186,7 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
         return itemEnergyStorage != null;
     }
 
-    public BatteryBlock.BatteryLevel getBatteryLevel() {
+    public ElectricityTypes getBatteryLevel() {
         return batteryLevel;
     }
 

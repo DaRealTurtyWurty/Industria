@@ -4,6 +4,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.list.TagList;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.minecraft.block.Block;
 import net.minecraft.registry.RegistryWrapper;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,10 +17,6 @@ public class IndustriaBlockTagProvider extends FabricTagProvider.BlockTagProvide
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
         getOrCreateTagBuilder(TagList.Blocks.BATTERY_BLOCKS)
-                .add(BlockInit.BASIC_BATTERY)
-                .add(BlockInit.ADVANCED_BATTERY)
-                .add(BlockInit.ELITE_BATTERY)
-                .add(BlockInit.ULTIMATE_BATTERY)
-                .add(BlockInit.CREATIVE_BATTERY);
+                .add((Block) BlockInit.BATTERIES);
     }
 }

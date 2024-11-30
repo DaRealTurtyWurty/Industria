@@ -3,6 +3,7 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.industria.blockentity.BatteryBlockEntity;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.util.enums.ElectricityTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -25,9 +26,9 @@ import org.jetbrains.annotations.Nullable;
 public class BatteryBlock extends Block implements BlockEntityProvider {
     private static final EnumProperty<Direction.Axis> AXIS = Properties.AXIS;
 
-    private final BatteryLevel level;
+    private final ElectricityTypes level;
 
-    public BatteryBlock(Settings settings, BatteryLevel level) {
+    public BatteryBlock(Settings settings, ElectricityTypes level) {
         super(settings);
         this.level = level;
 
@@ -93,31 +94,8 @@ public class BatteryBlock extends Block implements BlockEntityProvider {
         return getDefaultState().with(AXIS, ctx.getSide().getAxis());
     }
 
-    public BatteryLevel getLevel() {
+    public ElectricityTypes getLevel() {
         return this.level;
     }
 
-    public enum BatteryLevel {
-        BASIC(100_000, 1_000),
-        ADVANCED(1_000_000, 10_000),
-        ELITE(10_000_000, 100_000),
-        ULTIMATE(100_000_000, 1_000_000),
-        CREATIVE(Long.MAX_VALUE, Long.MAX_VALUE);
-
-        private final long capacity;
-        private final long maxTransfer;
-
-        BatteryLevel(long capacity, long maxTransfer) {
-            this.capacity = capacity;
-            this.maxTransfer = maxTransfer;
-        }
-
-        public long getCapacity() {
-            return this.capacity;
-        }
-
-        public long getMaxTransfer() {
-            return this.maxTransfer;
-        }
-    }
 }

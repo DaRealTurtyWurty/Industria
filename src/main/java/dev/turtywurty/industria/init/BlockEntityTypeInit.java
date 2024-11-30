@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.blockentity.*;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;
@@ -21,8 +22,7 @@ public class BlockEntityTypeInit {
     public static final BlockEntityType<BatteryBlockEntity> BATTERY = register("battery",
             FabricBlockEntityTypeBuilder.create(
                             (pos, state) -> new BatteryBlockEntity(pos, state, ((BatteryBlock) state.getBlock()).getLevel()),
-                            BlockInit.BASIC_BATTERY, BlockInit.ADVANCED_BATTERY, BlockInit.ELITE_BATTERY,
-                            BlockInit.ULTIMATE_BATTERY, BlockInit.CREATIVE_BATTERY)
+                            BlockInit.BATTERIES.toArray(new Block[0]))
                     .build());
 
     public static final BlockEntityType<CombustionGeneratorBlockEntity> COMBUSTION_GENERATOR = register("combustion_generator",
