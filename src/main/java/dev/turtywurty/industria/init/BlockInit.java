@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
+import dev.turtywurty.industria.util.enums.ElectricityTypes;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -12,29 +13,28 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 
+
+import java.util.List;
+import java.util.ArrayList;
 import java.util.function.Function;
 
 public class BlockInit {
+
+    public static final List<BatteryBlock> BATTERIES = new ArrayList();
+
     public static final AlloyFurnaceBlock ALLOY_FURNACE = registerWithItemCopy("alloy_furnace",
             AlloyFurnaceBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
 
     public static final ThermalGeneratorBlock THERMAL_GENERATOR = registerWithItemCopy("thermal_generator",
             ThermalGeneratorBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
 
-    public static final BatteryBlock BASIC_BATTERY = registerWithItemCopy("basic_battery",
-            settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.BASIC), Blocks.IRON_BLOCK, settings -> settings);
 
-    public static final BatteryBlock ADVANCED_BATTERY = registerWithItemCopy("advanced_battery",
-            settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.ADVANCED), Blocks.IRON_BLOCK, settings -> settings);
-
-    public static final BatteryBlock ELITE_BATTERY = registerWithItemCopy("elite_battery",
-            settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.ELITE), Blocks.IRON_BLOCK, settings -> settings);
-
-    public static final BatteryBlock ULTIMATE_BATTERY = registerWithItemCopy("ultimate_battery",
-            settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.ULTIMATE), Blocks.IRON_BLOCK, settings -> settings);
-
-    public static final BatteryBlock CREATIVE_BATTERY = registerWithItemCopy("creative_battery",
-            settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.CREATIVE), Blocks.IRON_BLOCK, settings -> settings);
+    public static void registerBatteries(){
+        for(ElectricityTypes types : ElectricityTypes.values()){
+            BATTERIES.add(registerWithItemCopy(types.getId()+"_battery",
+                    settings -> new BatteryBlock(settings, types), Blocks.IRON_BLOCK, settings -> settings));
+        }
+    }
 
     public static final CombustionGeneratorBlock COMBUSTION_GENERATOR = registerWithItemCopy("combustion_generator",
             CombustionGeneratorBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
@@ -97,5 +97,6 @@ public class BlockInit {
     }
 
     public static void init() {
+        registerBatteries();
     }
 }

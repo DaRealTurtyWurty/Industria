@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.datagen;
 
+import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
@@ -30,11 +31,10 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(ItemInit.STEEL_INGOT, "Steel Ingot");
         translationBuilder.add(BlockInit.THERMAL_GENERATOR, "Thermal Generator");
         addText(translationBuilder, ThermalGeneratorBlockEntity.TITLE, "Thermal Generator");
-        translationBuilder.add(BlockInit.BASIC_BATTERY, "Basic Battery");
-        translationBuilder.add(BlockInit.ADVANCED_BATTERY, "Advanced Battery");
-        translationBuilder.add(BlockInit.ELITE_BATTERY, "Elite Battery");
-        translationBuilder.add(BlockInit.ULTIMATE_BATTERY, "Ultimate Battery");
-        translationBuilder.add(BlockInit.CREATIVE_BATTERY, "Creative Battery");
+        for(BatteryBlock block : BlockInit.BATTERIES){
+            translationBuilder.add(block, block.getLevel().getName()+" Battery");
+        }
+
         addText(translationBuilder, BatteryBlockEntity.TITLE, "Battery");
         addText(translationBuilder, BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT, "Charge/Discharge");
         translationBuilder.add(BlockInit.COMBUSTION_GENERATOR, "Combustion Generator");

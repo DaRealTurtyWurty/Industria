@@ -20,11 +20,9 @@ public class IndustriaModelProvider extends FabricModelProvider {
     public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
         blockStateModelGenerator.registerCooker(BlockInit.ALLOY_FURNACE, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerCooker(BlockInit.THERMAL_GENERATOR, TexturedModel.ORIENTABLE);
-        createBattery(blockStateModelGenerator, BlockInit.BASIC_BATTERY);
-        createBattery(blockStateModelGenerator, BlockInit.ADVANCED_BATTERY);
-        createBattery(blockStateModelGenerator, BlockInit.ELITE_BATTERY);
-        createBattery(blockStateModelGenerator, BlockInit.ULTIMATE_BATTERY);
-        createBattery(blockStateModelGenerator, BlockInit.CREATIVE_BATTERY);
+        for(BatteryBlock block : BlockInit.BATTERIES) {
+            createBattery(blockStateModelGenerator, block);
+        }
         blockStateModelGenerator.registerCooker(BlockInit.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.SOLAR_PANEL);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
