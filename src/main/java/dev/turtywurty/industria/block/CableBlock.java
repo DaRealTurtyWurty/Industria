@@ -40,6 +40,7 @@ import java.util.Locale;
 
 public class CableBlock extends Block implements Waterloggable, BlockEntityProvider {
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+
     public static final EnumProperty<ConnectorType> NORTH = EnumProperty.of("north", ConnectorType.class);
     public static final EnumProperty<ConnectorType> SOUTH = EnumProperty.of("south", ConnectorType.class);
     public static final EnumProperty<ConnectorType> WEST = EnumProperty.of("west", ConnectorType.class);
@@ -53,12 +54,14 @@ public class CableBlock extends Block implements Waterloggable, BlockEntityProvi
     private static final VoxelShape SHAPE_CABLE_EAST = VoxelShapes.cuboid(0.625, 0.375, 0.375, 1, 0.625, 0.625);
     private static final VoxelShape SHAPE_CABLE_UP = VoxelShapes.cuboid(0.375, 0.625, 0.375, 0.625, 1, 0.625);
     private static final VoxelShape SHAPE_CABLE_DOWN = VoxelShapes.cuboid(0.375, 0, 0.375, 0.625, 0.375, 0.625);
+
     private static final VoxelShape SHAPE_BLOCK_NORTH = VoxelShapes.cuboid(0.25, 0.25, 0, 0.75, 0.75, 0.125);
     private static final VoxelShape SHAPE_BLOCK_SOUTH = VoxelShapes.cuboid(0.25, 0.25, 0.875, 0.75, 0.75, 1);
     private static final VoxelShape SHAPE_BLOCK_WEST = VoxelShapes.cuboid(0, 0.25, 0.25, 0.125, 0.75, 0.75);
     private static final VoxelShape SHAPE_BLOCK_EAST = VoxelShapes.cuboid(0.875, 0.25, 0.25, 1, 0.75, 0.75);
     private static final VoxelShape SHAPE_BLOCK_UP = VoxelShapes.cuboid(0.25, 0.875, 0.25, 0.75, 1, 0.75);
     private static final VoxelShape SHAPE_BLOCK_DOWN = VoxelShapes.cuboid(0.25, 0, 0.25, 0.75, 0.125, 0.75);
+
     private static VoxelShape[] shapeCache = null;
 
     public CableBlock(Settings settings) {

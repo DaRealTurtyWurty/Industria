@@ -67,6 +67,11 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, UpgradeStationBlockEntity.TITLE, "Upgrade Station");
         translationBuilder.add(BlockInit.ELECTRIC_FURNACE, "Electric Furnace");
         addText(translationBuilder, ElectricFurnaceBlockEntity.TITLE, "Electric Furnace");
+        translationBuilder.add(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER, "Fractional Distillation Controller");
+        addText(translationBuilder, FractionalDistillationControllerBlockEntity.TITLE, "Fractional Distillation Controller");
+        translationBuilder.add(BlockInit.FRACTIONAL_DISTILLATION_TOWER, "Fractional Distillation Tower");
+        translationBuilder.add(BlockInit.INDUCTION_HEATER, "Induction Heater");
+        addText(translationBuilder, InductionHeaterBlockEntity.TITLE, "Induction Heater");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

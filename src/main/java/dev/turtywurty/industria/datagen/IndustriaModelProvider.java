@@ -32,6 +32,11 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleState(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
         blockStateModelGenerator.registerCooker(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE);
+        blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER);
+        blockStateModelGenerator.registerParentedItemModel(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER, Industria.id("block/fractional_distillation_controller"));
+        blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
+        blockStateModelGenerator.registerParentedItemModel(BlockInit.FRACTIONAL_DISTILLATION_TOWER, Industria.id("block/fractional_distillation_tower"));
+        blockStateModelGenerator.registerSimpleState(BlockInit.INDUCTION_HEATER);
 
         BlockStateSupplier cableSupplier = MultipartBlockStateSupplier.create(BlockInit.CABLE)
                 .with(BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/cable_dot")))

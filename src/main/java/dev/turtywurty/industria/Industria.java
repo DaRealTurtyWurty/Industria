@@ -111,6 +111,12 @@ public class Industria implements ModInitializer {
         EnergyStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
         ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
 
+        FluidStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getFluidProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
+        FluidStorage.SIDED.registerForBlockEntity(FractionalDistillationTowerBlockEntity::getFluidProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER);
+
+        FluidStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getFluidProvider, BlockEntityTypeInit.INDUCTION_HEATER);
+        EnergyStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getEnergyProvider, BlockEntityTypeInit.INDUCTION_HEATER);
+
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);

@@ -72,6 +72,15 @@ public class BlockInit {
     public static final ElectricFurnaceBlock ELECTRIC_FURNACE = registerWithItemCopy("electric_furnace",
             ElectricFurnaceBlock::new, Blocks.FURNACE, settings -> settings);
 
+    public static final FractionalDistillationControllerBlock FRACTIONAL_DISTILLATION_CONTROLLER = registerWithItemCopy("fractional_distillation_controller",
+            FractionalDistillationControllerBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
+    public static final FractionalDistillationTowerBlock FRACTIONAL_DISTILLATION_TOWER = registerWithItemCopy("fractional_distillation_tower",
+            FractionalDistillationTowerBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
+    public static final InductionHeaterBlock INDUCTION_HEATER = registerWithItemCopy("induction_heater",
+            InductionHeaterBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

@@ -264,10 +264,30 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.wrappedInventoryStorage.getStorage(direction);
+        Direction facing = getCachedState().get(ElectricFurnaceBlock.FACING);
+        Direction relative = getRelativeDirection(direction, facing);
+        return this.wrappedInventoryStorage.getStorage(relative);
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
-        return this.wrappedEnergyStorage.getStorage(direction);
+        Direction facing = getCachedState().get(ElectricFurnaceBlock.FACING);
+        Direction relative = getRelativeDirection(direction, facing);
+        return this.wrappedEnergyStorage.getStorage(relative);
+    }
+
+    private static Direction getRelativeDirection(@Nullable Direction direction, @Nullable Direction facing) {
+        if(direction == null)
+            return null;
+        else if(facing == null)
+            return direction;
+        else if(direction.getAxis().isVertical())
+            return direction;
+
+        Direction relative = direction;
+        for (int i = 0; i < facing.ordinal(); i++) {
+            relative = relative.rotateYClockwise();
+        }
+
+        return relative;
     }
 }

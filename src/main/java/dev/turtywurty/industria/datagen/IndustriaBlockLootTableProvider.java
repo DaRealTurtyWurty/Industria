@@ -32,5 +32,8 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.DRILL_TUBE);
         addDrop(BlockInit.UPGRADE_STATION);
         addDrop(BlockInit.ELECTRIC_FURNACE);
+        addDrop(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER);
+        addDrop(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
+        addDrop(BlockInit.INDUCTION_HEATER);
     }
 }

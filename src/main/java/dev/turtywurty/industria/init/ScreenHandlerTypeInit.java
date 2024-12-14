@@ -50,6 +50,12 @@ public class ScreenHandlerTypeInit {
     public static final ScreenHandlerType<ElectricFurnaceScreenHandler> ELECTRIC_FURNACE =
             register("electric_furnace", ElectricFurnaceScreenHandler::new, BlockPosPayload.CODEC);
 
+    public static final ScreenHandlerType<FractionalDistillationControllerScreenHandler> FRACTIONAL_DISTILLATION_CONTROLLER =
+            register("fractional_distillation_controller", FractionalDistillationControllerScreenHandler::new, BlockPosPayload.CODEC);
+
+    public static final ScreenHandlerType<InductionHeaterScreenHandler> INDUCTION_HEATER =
+            register("induction_heater", InductionHeaterScreenHandler::new, BlockPosPayload.CODEC);
+
     public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
         return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));
     }

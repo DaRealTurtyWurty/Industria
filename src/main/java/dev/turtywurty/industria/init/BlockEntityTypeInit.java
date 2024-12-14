@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
+import dev.turtywurty.industria.block.InductionHeaterBlock;
 import dev.turtywurty.industria.blockentity.*;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntity;
@@ -63,6 +64,18 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE = register("electric_furnace",
             FabricBlockEntityTypeBuilder.create(ElectricFurnaceBlockEntity::new, BlockInit.ELECTRIC_FURNACE)
+                    .build());
+
+    public static final BlockEntityType<FractionalDistillationControllerBlockEntity> FRACTIONAL_DISTILLATION_CONTROLLER = register("fractional_distillation_controller",
+            FabricBlockEntityTypeBuilder.create(FractionalDistillationControllerBlockEntity::new, BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER)
+                    .build());
+
+    public static final BlockEntityType<FractionalDistillationTowerBlockEntity> FRACTIONAL_DISTILLATION_TOWER = register("fractional_distillation_tower",
+            FabricBlockEntityTypeBuilder.create(FractionalDistillationTowerBlockEntity::new, BlockInit.FRACTIONAL_DISTILLATION_TOWER)
+                    .build());
+
+    public static final BlockEntityType<InductionHeaterBlockEntity> INDUCTION_HEATER = register("induction_heater",
+            FabricBlockEntityTypeBuilder.create(InductionHeaterBlockEntity::new, BlockInit.INDUCTION_HEATER)
                     .build());
 
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
