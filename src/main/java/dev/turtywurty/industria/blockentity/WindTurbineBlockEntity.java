@@ -32,6 +32,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
@@ -81,7 +82,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
             this.windSpeed = new Random(((ServerWorld)this.world).getSeed() + this.pos.asLong()).nextFloat();
         }
 
-        SimpleEnergyStorage storage = getEnergyStorage();
+        SimpleEnergyStorage storage = (SimpleEnergyStorage) getEnergyStorage();
         if (storage == null)
             return;
 
@@ -138,7 +139,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         return nbt;
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
+    public EnergyStorage getEnergyStorage() {
         return this.energy.getStorage(null);
     }
 
@@ -146,7 +147,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         return this.windSpeed;
     }
 
-    public SimpleEnergyStorage getEnergyProvider(Direction direction) {
+    public EnergyStorage getEnergyProvider(Direction direction) {
         return this.energy.getStorage(direction);
     }
 

@@ -29,7 +29,7 @@ public class FractionalDistillationTowerBlockEntity extends UpdatableBlockEntity
 
     public FractionalDistillationTowerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER, pos, state);
-        this.tank.addTank(new SyncingFluidStorage(this, FluidConstants.BUCKET * 5));
+        this.tank.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 5));
     }
 
     @Override

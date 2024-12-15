@@ -2,12 +2,12 @@
   "multipart": [
     {
       "apply": {
-        "model": "industria:block/cable_dot"
+        "model": "industria:block/fluid_pipe_dot"
       }
     },
     {
       "apply": {
-        "model": "industria:block/cable"
+        "model": "industria:block/fluid_pipe"
       },
       "when": {
         "OR": [
@@ -19,7 +19,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/fluid_pipe",
         "y": 90
       },
       "when": {
@@ -32,7 +32,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/fluid_pipe",
         "y": 180
       },
       "when": {
@@ -45,7 +45,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/fluid_pipe",
         "y": 270
       },
       "when": {
@@ -58,7 +58,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/fluid_pipe",
         "x": 270
       },
       "when": {
@@ -71,7 +71,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/fluid_pipe",
         "x": 90
       },
       "when": {
@@ -84,7 +84,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected"
+        "model": "industria:block/fluid_pipe_connected"
       },
       "when": {
         "OR": [
@@ -96,7 +96,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/fluid_pipe_connected",
         "y": 90
       },
       "when": {
@@ -109,7 +109,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/fluid_pipe_connected",
         "y": 180
       },
       "when": {
@@ -122,7 +122,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/fluid_pipe_connected",
         "y": 270
       },
       "when": {
@@ -135,7 +135,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/fluid_pipe_connected",
         "x": 270
       },
       "when": {
@@ -148,7 +148,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/fluid_pipe_connected",
         "x": 90
       },
       "when": {

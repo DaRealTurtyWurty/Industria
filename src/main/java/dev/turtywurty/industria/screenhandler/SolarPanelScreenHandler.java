@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.util.math.MathHelper;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 public class SolarPanelScreenHandler extends ScreenHandler {
     private final SolarPanelBlockEntity blockEntity;
@@ -51,7 +51,7 @@ public class SolarPanelScreenHandler extends ScreenHandler {
     }
 
     public float getEnergyPercent() {
-        SimpleEnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
+        EnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long maxEnergy = energyStorage.getCapacity();
         if (maxEnergy == 0 || energy == 0)

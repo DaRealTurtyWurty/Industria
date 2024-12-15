@@ -19,7 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.HashMap;
 
@@ -105,7 +105,7 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> implements Mo
 
         int energy = MathHelper.ceil(this.handler.getEnergyPercentage() * 66);
         if (isPointWithinBounds(10, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {
-            SimpleEnergyStorage energyStorage = this.handler.getBlockEntity().getEnergyStorage();
+            EnergyStorage energyStorage = this.handler.getBlockEntity().getEnergyStorage();
             context.drawTooltip(this.textRenderer, Text.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"), mouseX, mouseY);
         }
     }

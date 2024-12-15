@@ -146,7 +146,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
             }
         }
 
-        SimpleEnergyStorage energyStorage = getEnergyStorage();
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
         float previousRotationSpeed = this.currentRotationSpeed;
         long previousEnergy = energyStorage.getAmount();
 
@@ -397,7 +397,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
         return this.wrappedInventoryStorage.getInventory(3);
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
+    public EnergyStorage getEnergyStorage() {
         return this.wrappedEnergyStorage.getStorage(null);
     }
 

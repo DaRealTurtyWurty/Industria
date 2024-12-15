@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.util.math.MathHelper;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 public class MotorScreenHandler extends ScreenHandler {
     private final MotorBlockEntity blockEntity;
@@ -38,7 +38,7 @@ public class MotorScreenHandler extends ScreenHandler {
     }
 
     public float getEnergyPercentage() {
-        SimpleEnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
+        EnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long capacity = energyStorage.getCapacity();
         if(energy == 0 || capacity == 0) return 0;

@@ -83,7 +83,7 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Synca
         if(this.world == null || this.world.isClient)
             return;
 
-        SimpleEnergyStorage energyStorage = getEnergyStorage();
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
         long currentEnergy = energyStorage.getAmount();
         if(currentEnergy < energyStorage.getCapacity()) {
             int outputSignal = getEnergyOutput();
@@ -136,7 +136,7 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Synca
         return nbt;
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
+    public EnergyStorage getEnergyStorage() {
         return this.energy.getStorage(null);
     }
 

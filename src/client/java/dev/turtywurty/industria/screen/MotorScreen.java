@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 public class MotorScreen extends HandledScreen<MotorScreenHandler> implements MotorRPMHandler {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/motor.png");
@@ -55,7 +55,7 @@ public class MotorScreen extends HandledScreen<MotorScreenHandler> implements Mo
 
         int energy = MathHelper.ceil(this.handler.getEnergyPercentage() * 66);
         if (isPointWithinBounds(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {
-            SimpleEnergyStorage energyStorage = this.handler.getBlockEntity().getEnergyStorage();
+            EnergyStorage energyStorage = this.handler.getBlockEntity().getEnergyStorage();
             context.drawTooltip(this.textRenderer, Text.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"), mouseX, mouseY);
         }
     }

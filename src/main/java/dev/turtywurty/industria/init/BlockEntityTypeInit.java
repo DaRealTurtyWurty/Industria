@@ -2,7 +2,6 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
-import dev.turtywurty.industria.block.InductionHeaterBlock;
 import dev.turtywurty.industria.blockentity.*;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntity;
@@ -36,10 +35,6 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<CrusherBlockEntity> CRUSHER = register("crusher",
             FabricBlockEntityTypeBuilder.create(CrusherBlockEntity::new, BlockInit.CRUSHER)
-                    .build());
-
-    public static final BlockEntityType<CableBlockEntity> CABLE = register("cable",
-            FabricBlockEntityTypeBuilder.create(CableBlockEntity::new, BlockInit.CABLE)
                     .build());
 
     public static final BlockEntityType<WindTurbineBlockEntity> WIND_TURBINE = register("wind_turbine",
@@ -76,6 +71,14 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<InductionHeaterBlockEntity> INDUCTION_HEATER = register("induction_heater",
             FabricBlockEntityTypeBuilder.create(InductionHeaterBlockEntity::new, BlockInit.INDUCTION_HEATER)
+                    .build());
+
+    public static final BlockEntityType<CableBlockEntity> CABLE = register("cable",
+            FabricBlockEntityTypeBuilder.create(CableBlockEntity::new, BlockInit.CABLE)
+                    .build());
+
+    public static final BlockEntityType<FluidPipeBlockEntity> FLUID_PIPE = register("fluid_pipe",
+            FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, BlockInit.FLUID_PIPE)
                     .build());
 
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {

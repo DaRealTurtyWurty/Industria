@@ -14,7 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.util.math.MathHelper;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Arrays;
 
@@ -66,7 +66,7 @@ public class BatteryScreenHandler extends ScreenHandler {
     }
 
     public float getEnergyPercent() {
-        SimpleEnergyStorage storage = this.blockEntity.getEnergy();
+        EnergyStorage storage = this.blockEntity.getEnergy();
         long energy = storage.getAmount();
         long capacity = storage.getCapacity();
         if(energy == 0 || capacity == 0)

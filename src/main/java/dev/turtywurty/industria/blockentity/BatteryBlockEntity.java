@@ -72,7 +72,7 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
         if (this.world == null || this.world.isClient)
             return;
 
-        SimpleEnergyStorage energyStorage = this.wrappedEnergyStorage.getStorage(null);
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         if (energyStorage == null)
             return;
 
@@ -160,7 +160,7 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
         return nbt;
     }
 
-    public SimpleEnergyStorage getEnergyProvider(Direction direction) {
+    public EnergyStorage getEnergyProvider(Direction direction) {
         return this.wrappedEnergyStorage.getStorage(direction);
     }
 
@@ -172,7 +172,7 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
         return this.wrappedInventoryStorage;
     }
 
-    public SimpleEnergyStorage getEnergy() {
+    public EnergyStorage getEnergy() {
         return this.wrappedEnergyStorage.getStorage(null);
     }
 

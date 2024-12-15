@@ -48,7 +48,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
     public InductionHeaterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.INDUCTION_HEATER, pos, state);
 
-        this.waterStorage.addTank(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
+        this.waterStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0));
     }
 

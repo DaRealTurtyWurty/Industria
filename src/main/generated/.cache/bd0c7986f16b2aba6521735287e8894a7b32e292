@@ -1,4 +1,4 @@
-// 1.21.3	2024-12-13T21:21:28.498116	Industria/Block Loot Tables
+// 1.21.3	2024-12-15T19:12:08.7255712	Industria/Block Loot Tables
 89d53edf9cd8238e07492d6039aed70151a45fef data\industria\loot_table\blocks\oil_pump_jack.json
 aaf5c3ededb283d2aa702d287a71208994edb492 data\industria\loot_table\blocks\induction_heater.json
 7a48c110dadb7232446030860b9858bb58d34347 data\industria\loot_table\blocks\advanced_battery.json
@@ -20,3 +20,4 @@ cc60f5fbdec257dadaed2232412cea24883b13cf data\industria\loot_table\blocks\elite_
 e7246f2efb1ce8e655f62ce76ee901cc6912b9b5 data\industria\loot_table\blocks\thermal_generator.json
 6aa546ede64806a479934ea000ddfe3841c5aba7 data\industria\loot_table\blocks\fractional_distillation_controller.json
 efb8cab44e91cc22824315098a7d6c332ad9a32c data\industria\loot_table\blocks\upgrade_station.json
+52411856107110c9ea5dc586b08a2e9a85d97e6e data\industria\loot_table\blocks\fluid_pipe.json

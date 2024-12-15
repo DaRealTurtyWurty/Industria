@@ -98,7 +98,8 @@ public class Industria implements ModInitializer {
         EnergyStorage.SIDED.registerForBlockEntity(CrusherBlockEntity::getEnergyProvider, BlockEntityTypeInit.CRUSHER);
         ItemStorage.SIDED.registerForBlockEntity(CrusherBlockEntity::getInventoryProvider, BlockEntityTypeInit.CRUSHER);
 
-        EnergyStorage.SIDED.registerForBlockEntity(CableBlockEntity::getEnergyProvider, BlockEntityTypeInit.CABLE);
+        EnergyStorage.SIDED.registerForBlockEntity(CableBlockEntity::getStorageProvider, BlockEntityTypeInit.CABLE);
+        FluidStorage.SIDED.registerForBlockEntity(FluidPipeBlockEntity::getStorageProvider, BlockEntityTypeInit.FLUID_PIPE);
 
         EnergyStorage.SIDED.registerForBlockEntity(WindTurbineBlockEntity::getEnergyProvider, BlockEntityTypeInit.WIND_TURBINE);
 

@@ -26,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public class MotorBlockEntity extends UpdatableBlockEntity implements SyncableTi
         if (this.world == null || this.world.isClient)
             return;
 
-        SimpleEnergyStorage energyStorage = getEnergyStorage();
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
         float previousRotationSpeed = this.currentRotationSpeed;
 
         if (energyStorage.getAmount() > 0) {
@@ -130,12 +131,12 @@ public class MotorBlockEntity extends UpdatableBlockEntity implements SyncableTi
         return nbt;
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
-        return this.wrappedEnergyStorage.getStorage(null);
+    public EnergyStorage getEnergyStorage() {
+        return getEnergyProvider(null);
     }
 
-    public SimpleEnergyStorage getEnergyProvider(Direction ignored) {
-        return getEnergyStorage();
+    public EnergyStorage getEnergyProvider(Direction ignored) {
+        return this.wrappedEnergyStorage.getStorage(null);
     }
 
     public void setTargetRotationSpeed(float targetRotationSpeed) {

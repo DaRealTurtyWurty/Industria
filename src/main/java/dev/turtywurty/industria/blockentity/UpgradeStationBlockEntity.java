@@ -328,7 +328,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
         }
 
         if (recipe.matches(recipeInventory, this.world)) {
-            SimpleEnergyStorage energyStorage = this.wrappedEnergyStorage.getStorage(null);
+            SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
             if (energyStorage.getAmount() < 200) {
                 this.progress = 0;
                 return;
@@ -388,7 +388,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
         return this.multiblockPositions;
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
+    public EnergyStorage getEnergyStorage() {
         return this.wrappedEnergyStorage.getStorage(null);
     }
 

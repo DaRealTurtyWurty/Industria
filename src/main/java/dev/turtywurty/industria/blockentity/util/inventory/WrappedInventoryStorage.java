@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
-import dev.turtywurty.industria.util.NBTSerializable;
+import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
@@ -20,14 +20,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class WrappedInventoryStorage<T extends SimpleInventory> implements NBTSerializable<NbtList> {
+public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedStorage<InventoryStorage> {
     private final List<T> inventories = new ArrayList<>();
-    private final List<InventoryStorage> storages = new ArrayList<>();
-    private final Map<Direction, InventoryStorage> sidedStorageMap = new HashMap<>();
     private final CombinedStorage<ItemVariant, InventoryStorage> combinedStorage = new CombinedStorage<>(this.storages);
 
     public void addInventory(@NotNull T inventory) {
@@ -37,28 +33,15 @@ public class WrappedInventoryStorage<T extends SimpleInventory> implements NBTSe
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
         var storage = InventoryStorage.of(inventory, side);
-        this.storages.add(storage);
-        this.sidedStorageMap.put(side, storage);
+        addStorage(storage, side);
     }
 
     public List<T> getInventories() {
         return inventories;
     }
 
-    public List<InventoryStorage> getStorages() {
-        return storages;
-    }
-
-    public Map<Direction, InventoryStorage> getSidedStorageMap() {
-        return sidedStorageMap;
-    }
-
     public CombinedStorage<ItemVariant, InventoryStorage> getCombinedStorage() {
         return combinedStorage;
-    }
-
-    public @Nullable InventoryStorage getStorage(Direction side) {
-        return this.sidedStorageMap.get(side);
     }
 
     public @Nullable T getInventory(int index) {

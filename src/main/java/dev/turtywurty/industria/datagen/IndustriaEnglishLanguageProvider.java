@@ -72,6 +72,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.FRACTIONAL_DISTILLATION_TOWER, "Fractional Distillation Tower");
         translationBuilder.add(BlockInit.INDUCTION_HEATER, "Induction Heater");
         addText(translationBuilder, InductionHeaterBlockEntity.TITLE, "Induction Heater");
+        translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

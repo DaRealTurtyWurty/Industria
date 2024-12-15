@@ -72,7 +72,7 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
         if (this.world == null || this.world.isClient)
             return;
 
-        SimpleEnergyStorage energyStorage = this.wrappedEnergyStorage.getStorage(null);
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         if (energyStorage.amount < 10)
             return;
 

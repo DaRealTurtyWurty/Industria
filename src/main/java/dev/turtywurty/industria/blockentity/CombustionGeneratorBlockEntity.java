@@ -72,7 +72,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
         if (this.world == null || this.world.isClient)
             return;
 
-        SimpleEnergyStorage energyStorage = this.energyStorage.getStorage(null);
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.energyStorage.getStorage(null);
 
         spread(this.world, this.pos, energyStorage);
 
@@ -150,7 +150,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
         return nbt;
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
+    public EnergyStorage getEnergyStorage() {
         return this.energyStorage.getStorage(null);
     }
 

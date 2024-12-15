@@ -45,9 +45,6 @@ public class BlockInit {
     public static final CrusherBlock CRUSHER = registerWithItemCopy("crusher",
             CrusherBlock::new, Blocks.FURNACE, settings -> settings.luminance(value -> 0).nonOpaque());
 
-    public static final CableBlock CABLE = registerWithItemCopy("cable",
-            CableBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
-
     public static final WindTurbineBlock WIND_TURBINE = registerWithItemCopy("wind_turbine",
             WindTurbineBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
@@ -80,6 +77,12 @@ public class BlockInit {
 
     public static final InductionHeaterBlock INDUCTION_HEATER = registerWithItemCopy("induction_heater",
             InductionHeaterBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
+    public static final CableBlock CABLE = registerWithItemCopy("cable",
+            CableBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final FluidPipeBlock FLUID_PIPE = registerWithItemCopy("fluid_pipe",
+            FluidPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(

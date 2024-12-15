@@ -46,6 +46,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -227,7 +228,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
 
     // TODO: Create getEnergy method instead of hardcoding 10
     private void consumeEnergy() {
-        this.wrappedEnergyStorage.getStorage(null).amount -= 10;
+        ((SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null)).amount -= 10;
     }
 
     private void reset() {

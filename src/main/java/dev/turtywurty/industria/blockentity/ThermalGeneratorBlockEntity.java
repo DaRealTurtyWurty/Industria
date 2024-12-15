@@ -60,7 +60,7 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         super(BlockEntityTypeInit.THERMAL_GENERATOR, pos, state);
 
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
-        this.fluidStorage.addTank(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
+        this.fluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
         this.inventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
@@ -78,9 +78,10 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
             return;
 
         extractLavaFromInventory();
-        spread(this.world, this.pos, this.energyStorage.getStorage(null));
 
-        SimpleEnergyStorage energyStorage = this.energyStorage.getStorage(null);
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.energyStorage.getStorage(null);
+        spread(this.world, this.pos, energyStorage);
+
         if (energyStorage.getAmount() >= energyStorage.getCapacity())
             return;
 
@@ -177,7 +178,7 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         return nbt;
     }
 
-    public SimpleEnergyStorage getEnergyStorage() {
+    public EnergyStorage getEnergyStorage() {
         return this.energyStorage.getStorage(null);
     }
 

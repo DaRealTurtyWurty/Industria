@@ -39,7 +39,7 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
 
     public FractionalDistillationControllerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER, pos, state);
-        this.fluidStorage.addTank(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
+        this.fluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
     }
 
     @Override
@@ -52,7 +52,7 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
         if (this.world == null || this.world.isClient)
             return;
 
-        Industria.LOGGER.info("Controller at {} has {} towers.", this.pos, getTowerCount());
+        //Industria.LOGGER.debug("Controller at {} has {} towers.", this.pos, getTowerCount());
 
         SingleFluidStorage tank = getFluidTank();
         if(tank.isResourceBlank() || tank.amount == 0)
