@@ -65,8 +65,6 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
             return;
 
         SyncingFluidStorage waterTank = getWaterTank();
-        insertTestWater(waterTank);
-
         if (waterTank.amount < FluidConstants.BUCKET) {
             if(this.temperature > 0) {
                 this.temperature = 0;
@@ -84,7 +82,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
         }
 
         this.temperature = MathHelper.clamp(this.temperature + 0.1F, 0, ((float) waterTank.amount / (FluidConstants.BUCKET * 10)) * 500);
-        waterTank.amount -= FluidConstants.BOTTLE;
+        waterTank.amount -= FluidConstants.INGOT;
         energyStorage.amount = Math.max(0, energyStorage.amount - 100);
         update();
     }
@@ -108,7 +106,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new InductionHeaterScreenHandler(syncId, playerInventory, this);
+        return new InductionHeaterScreenHandler(syncId, this);
     }
 
     @Override
@@ -147,7 +145,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
-        return this.waterStorage.getStorage(null);
+        return this.waterStorage.getStorage(side);
     }
 
     public SyncingFluidStorage getWaterTank() {
@@ -155,7 +153,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {
-        return this.energyStorage.getStorage(null);
+        return this.energyStorage.getStorage(side);
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
