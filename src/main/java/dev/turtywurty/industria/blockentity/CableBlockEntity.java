@@ -11,6 +11,8 @@ import net.minecraft.util.math.Direction;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
+import java.util.Map;
+
 public class CableBlockEntity extends PipeBlockEntity<EnergyStorage, WrappedEnergyStorage> {
     public CableBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.CABLE, pos, state);
@@ -45,13 +47,12 @@ public class CableBlockEntity extends PipeBlockEntity<EnergyStorage, WrappedEner
         long amount = simpleEnergyStorage.getAmount() / this.connectedBlocks.size();
         try (Transaction transaction = Transaction.openOuter()) {
             for (BlockPos pos : this.connectedBlocks) {
-                var direction = Direction.fromVector(this.pos.getX() - pos.getX(), this.pos.getY() - pos.getY(), this.pos.getZ() - pos.getZ(), null);
-                if(direction == null)
-                    continue;
-
-                var storage = EnergyStorage.SIDED.find(this.world, pos, direction);
-                if (storage != null && storage.supportsInsertion()) {
-                    simpleEnergyStorage.amount -= storage.insert(amount, transaction);
+                Map<Direction, BlockPos> connectingCables = findConnectingPipes(this.world, pos);
+                for (Map.Entry<Direction, BlockPos> entry : connectingCables.entrySet()) {
+                    EnergyStorage storage = EnergyStorage.SIDED.find(this.world, pos, entry.getKey());
+                    if (storage != null && storage.supportsInsertion()) {
+                        simpleEnergyStorage.amount -= storage.insert(amount, transaction);
+                    }
                 }
             }
 

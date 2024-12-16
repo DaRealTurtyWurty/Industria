@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
+import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -13,10 +14,9 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class PipeBlockEntity<S, W extends WrappedStorage<S>> extends UpdatableBlockEntity implements SyncableTickableBlockEntity {
@@ -25,6 +25,20 @@ public abstract class PipeBlockEntity<S, W extends WrappedStorage<S>> extends Up
 
     public PipeBlockEntity(BlockEntityType<? extends PipeBlockEntity<S, W>> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    protected static Map<Direction, BlockPos> findConnectingPipes(World world, BlockPos pos) {
+        Map<Direction, BlockPos> connecting = new HashMap<>();
+
+        for (Direction direction : Direction.values()) {
+            BlockPos offset = pos.offset(direction);
+            BlockState state = world.getBlockState(offset);
+            if (state.getBlock() instanceof PipeBlock && state.get(PipeBlock.DIRECTION_PROPERTY_MAP.get(direction.getOpposite())) == PipeBlock.ConnectorType.BLOCK) {
+                connecting.put(direction, offset);
+            }
+        }
+
+        return connecting;
     }
 
     @Override

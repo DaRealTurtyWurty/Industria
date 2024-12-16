@@ -4,6 +4,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -14,12 +15,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
+import java.util.Map;
 import java.util.stream.StreamSupport;
 
 public class FluidPipeBlockEntity extends PipeBlockEntity<Storage<FluidVariant>, WrappedFluidStorage<Storage<FluidVariant>>> {
     public FluidPipeBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.FLUID_PIPE, pos, state);
-        this.wrappedStorage.addStorage(new SyncingFluidStorage(this, 1_000));
+        this.wrappedStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET));
     }
 
     @Override
@@ -58,13 +60,12 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<Storage<FluidVariant>,
         long amount = singleFluidStorage.getAmount() / this.connectedBlocks.size();
         try (Transaction transaction = Transaction.openOuter()) {
             for (BlockPos pos : this.connectedBlocks) {
-                var direction = Direction.fromVector(this.pos.getX() - pos.getX(), this.pos.getY() - pos.getY(), this.pos.getZ() - pos.getZ(), null);
-                if (direction == null)
-                    continue;
-
-                var storage = FluidStorage.SIDED.find(this.world, pos, direction);
-                if (storage != null && storage.supportsInsertion()) {
-                    singleFluidStorage.amount -= storage.insert(singleFluidStorage.variant, amount, transaction);
+                Map<Direction, BlockPos> connectingPipes = findConnectingPipes(this.world, pos);
+                for (Map.Entry<Direction, BlockPos> entry : connectingPipes.entrySet()) {
+                    Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.world, pos, entry.getKey());
+                    if (storage != null && storage.supportsInsertion()) {
+                        singleFluidStorage.amount -= storage.insert(singleFluidStorage.variant, amount, transaction);
+                    }
                 }
             }
 

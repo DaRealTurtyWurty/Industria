@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.Map;
 
 public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block implements Waterloggable, BlockEntityProvider {
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
@@ -45,6 +46,15 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
     public static final EnumProperty<ConnectorType> EAST = EnumProperty.of("east", ConnectorType.class);
     public static final EnumProperty<ConnectorType> UP = EnumProperty.of("up", ConnectorType.class);
     public static final EnumProperty<ConnectorType> DOWN = EnumProperty.of("down", ConnectorType.class);
+
+    public static final Map<Direction, EnumProperty<ConnectorType>> DIRECTION_PROPERTY_MAP = Map.of(
+            Direction.NORTH, NORTH,
+            Direction.SOUTH, SOUTH,
+            Direction.WEST, WEST,
+            Direction.EAST, EAST,
+            Direction.UP, UP,
+            Direction.DOWN, DOWN
+    );
 
     protected final VoxelShape[] pipeShapes = new VoxelShape[Direction.values().length];
     protected final VoxelShape[] blockConnectorShapes = new VoxelShape[Direction.values().length];
