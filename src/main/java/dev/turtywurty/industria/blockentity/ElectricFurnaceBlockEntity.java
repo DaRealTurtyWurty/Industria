@@ -13,6 +13,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ElectricFurnaceScreenHandler;
+import dev.turtywurty.industria.util.MathUtils;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -265,29 +266,13 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
 
     public InventoryStorage getInventoryProvider(Direction direction) {
         Direction facing = getCachedState().get(ElectricFurnaceBlock.FACING);
-        Direction relative = getRelativeDirection(direction, facing);
+        Direction relative = MathUtils.getRelativeDirection(direction, facing);
         return this.wrappedInventoryStorage.getStorage(relative);
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
         Direction facing = getCachedState().get(ElectricFurnaceBlock.FACING);
-        Direction relative = getRelativeDirection(direction, facing);
+        Direction relative = MathUtils.getRelativeDirection(direction, facing);
         return this.wrappedEnergyStorage.getStorage(relative);
-    }
-
-    private static Direction getRelativeDirection(@Nullable Direction direction, @Nullable Direction facing) {
-        if(direction == null)
-            return null;
-        else if(facing == null)
-            return direction;
-        else if(direction.getAxis().isVertical())
-            return direction;
-
-        Direction relative = direction;
-        for (int i = 0; i < facing.ordinal(); i++) {
-            relative = relative.rotateYClockwise();
-        }
-
-        return relative;
     }
 }
