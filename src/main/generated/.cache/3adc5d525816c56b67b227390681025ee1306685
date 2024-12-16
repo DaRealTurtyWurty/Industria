@@ -1,4 +1,4 @@
-// 1.21.3	2024-12-15T19:12:08.720046	Industria/Model Definitions
+// 1.21.3	2024-12-16T14:14:18.2969254	Industria/Model Definitions
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
 aaf199443ba69a3550247e0f56d957fce4d8621b assets\industria\blockstates\drill_tube.json
 130f774f5fd43d4949090a834277399ca26127ea assets\industria\blockstates\cable.json
@@ -33,12 +33,13 @@ ffe7c89704cf4d0e807c7d34d8b5b540d816e52a assets\industria\models\block\ultimate_
 73dd9505b2926684f8e64536ce7d519b2309a856 assets\industria\blockstates\alloy_furnace.json
 f74b81b85693d71a3b942a029c32eaf61c45112b assets\industria\blockstates\fractional_distillation_controller.json
 9b7b8d1502bef5034a6336cd56ba343481938a31 assets\industria\blockstates\ultimate_battery.json
+75af54cdef61553c63a4199e3f423a85e0556069 assets\industria\blockstates\fluid_pump.json
 1defd749f836e31d31cc408d049a2da72a85b0a5 assets\industria\models\block\thermal_generator_on.json
 3e3eef7fef754a6d590e5972a1d9b1f51396f5fc assets\industria\blockstates\fractional_distillation_tower.json
 a9c6fecdd49a5f68ddafaca13af16f97639066bb assets\industria\models\item\thermal_generator.json
 d931c793c0bacedf202dcac32c581afada77b984 assets\industria\models\block\elite_battery_horizontal.json
-a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets\industria\blockstates\advanced_battery.json
 cfb7d7f711acc1885f9c65f053706d46fe5f9e9b assets\industria\models\block\electric_furnace.json
+a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets\industria\blockstates\advanced_battery.json
 e6a9eff6b8b16b733d3e3b1ab81f6616d7abdeac assets\industria\models\block\basic_battery.json
 97290a9e7e9da6f407650a35dd7152368f36faf7 assets\industria\models\item\elite_battery.json
 6c30c83f1dca2dbc73183fed44842a0d701ce5b6 assets\industria\models\item\combustion_generator.json
@@ -48,6 +49,7 @@ e6a9eff6b8b16b733d3e3b1ab81f6616d7abdeac assets\industria\models\block\basic_bat
 774f60635f214be91bb49ea6e8e0c86a0bd7b280 assets\industria\models\item\induction_heater.json
 26b82c7fd0a8588f513c4bcd892ab50f03b9ee5f assets\industria\models\item\simple_drill_head.json
 4f8f92ccdf8767eae3b4d506f75b227aeee4d951 assets\industria\models\item\motor.json
+29840729361dc30a7d0cbf3fb1b3addc1539cb48 assets\industria\models\item\fluid_pump.json
 bdf249a8523ce59bf5beae8dcc4e72753ce451ac assets\industria\models\item\ultimate_battery.json
 5f993cde91925a9c3b2f69a2a8bc589cb391d28c assets\industria\blockstates\thermal_generator.json
 ca96af717d23d4cd9d4c59b56111f6dba492df16 assets\industria\blockstates\elite_battery.json

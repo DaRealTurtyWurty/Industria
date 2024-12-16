@@ -81,6 +81,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, BlockInit.FLUID_PIPE)
                     .build());
 
+    public static final BlockEntityType<FluidPumpBlockEntity> FLUID_PUMP = register("fluid_pump",
+            FabricBlockEntityTypeBuilder.create(FluidPumpBlockEntity::new, BlockInit.FLUID_PUMP)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

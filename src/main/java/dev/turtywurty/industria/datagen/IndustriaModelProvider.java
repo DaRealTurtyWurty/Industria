@@ -38,6 +38,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.FRACTIONAL_DISTILLATION_TOWER, Industria.id("block/fractional_distillation_tower"));
         blockStateModelGenerator.registerSimpleState(BlockInit.INDUCTION_HEATER);
+        blockStateModelGenerator.registerSimpleState(BlockInit.FLUID_PUMP);
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");

@@ -1,4 +1,4 @@
-// 1.21.3	2024-12-15T19:12:08.7255712	Industria/Block Loot Tables
+// 1.21.3	2024-12-16T14:14:18.3009345	Industria/Block Loot Tables
 89d53edf9cd8238e07492d6039aed70151a45fef data\industria\loot_table\blocks\oil_pump_jack.json
 aaf5c3ededb283d2aa702d287a71208994edb492 data\industria\loot_table\blocks\induction_heater.json
 7a48c110dadb7232446030860b9858bb58d34347 data\industria\loot_table\blocks\advanced_battery.json
@@ -12,6 +12,7 @@ f2f457982bb33bb0a947562ec673f0dcba5f33a0 data\industria\loot_table\blocks\solar_
 78efa11f38a2b2c7f1cdac9918c2d3d2a207586b data\industria\loot_table\blocks\fractional_distillation_tower.json
 7b5e96c71a51aab66ea0c2f2ec97fa7e37594329 data\industria\loot_table\blocks\ultimate_battery.json
 c5ccc84f2f21f1aed8ba3d99eb0d15b944a76b67 data\industria\loot_table\blocks\cable.json
+c15302723aebafdac63f0dbec84bc1d2d27a9bb2 data\industria\loot_table\blocks\fluid_pump.json
 ce80c3ff04346e0d5a92b4fc2da9731c1fe59010 data\industria\loot_table\blocks\combustion_generator.json
 c97fa77af3c4ee1634ae70fb443427749d77d3ed data\industria\loot_table\blocks\alloy_furnace.json
 cc60f5fbdec257dadaed2232412cea24883b13cf data\industria\loot_table\blocks\elite_battery.json
