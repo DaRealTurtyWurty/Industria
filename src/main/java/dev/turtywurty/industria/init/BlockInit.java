@@ -87,6 +87,9 @@ public class BlockInit {
     public static final FluidPumpBlock FLUID_PUMP = registerWithItemCopy("fluid_pump",
             FluidPumpBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static final HeatPipeBlock HEAT_PIPE = registerWithItemCopy("heat_pipe",
+            HeatPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

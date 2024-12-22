@@ -85,6 +85,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(FluidPumpBlockEntity::new, BlockInit.FLUID_PUMP)
                     .build());
 
+    public static final BlockEntityType<HeatPipeBlockEntity> HEAT_PIPE = register("heat_pipe",
+            FabricBlockEntityTypeBuilder.create(HeatPipeBlockEntity::new, BlockInit.HEAT_PIPE)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

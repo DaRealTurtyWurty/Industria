@@ -1,18 +1,18 @@
-package dev.turtywurty.industria.blockentity.util.energy;
+package dev.turtywurty.industria.blockentity.util.heat;
 
+import dev.turtywurty.heatapi.api.HeatStorage;
+import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
-import team.reborn.energy.api.EnergyStorage;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-public class WrappedEnergyStorage extends WrappedStorage<EnergyStorage> {
+public class WrappedHeatStorage<T extends HeatStorage> extends WrappedStorage<T> {
     @Override
     public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
         var list = new NbtList();
-        for (EnergyStorage storage : this.storages) {
+        for (HeatStorage storage : this.storages) {
             var nbt = new NbtCompound();
             nbt.putLong("Amount", storage.getAmount());
             list.add(nbt);
@@ -25,12 +25,12 @@ public class WrappedEnergyStorage extends WrappedStorage<EnergyStorage> {
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
             NbtCompound compound = nbt.getCompound(index);
-            EnergyStorage storage = this.storages.get(index);
+            HeatStorage storage = this.storages.get(index);
             long amount = compound.getLong("Amount");
-            if (storage instanceof SimpleEnergyStorage simpleEnergyStorage) {
-                simpleEnergyStorage.amount = amount;
+            if (storage instanceof SimpleHeatStorage simpleHeatStorage) {
+                simpleHeatStorage.amount = amount;
             } else {
-                try (Transaction transaction = Transaction.openOuter()) {
+                try(Transaction transaction = Transaction.openOuter()) {
                     long current = storage.getAmount();
                     if (current < amount) {
                         storage.insert(amount - current, transaction);

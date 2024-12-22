@@ -15,6 +15,10 @@ repositories {
 		url = "https://api.modrinth.com/maven"
 	}
 	maven { url "https://maven.terraformersmc.com/releases/" }
+
+	maven {
+		url "https://api.repsy.io/mvn/turtywurty/public"
+	}
 }
 
 loom {
@@ -45,6 +49,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	include modApi("teamreborn:energy:${project.tech_reborn_energy_version}")
+	include modApi("dev.turtywurty:heatapi:${project.heat_api_version}")
 
 	modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
