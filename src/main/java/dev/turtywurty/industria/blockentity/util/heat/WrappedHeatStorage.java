@@ -28,7 +28,7 @@ public class WrappedHeatStorage<T extends HeatStorage> extends WrappedStorage<T>
             HeatStorage storage = this.storages.get(index);
             long amount = compound.getLong("Amount");
             if (storage instanceof SimpleHeatStorage simpleHeatStorage) {
-                simpleHeatStorage.amount = amount;
+                simpleHeatStorage.setAmount(amount);
             } else {
                 try(Transaction transaction = Transaction.openOuter()) {
                     long current = storage.getAmount();

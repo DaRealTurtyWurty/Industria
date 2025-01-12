@@ -37,5 +37,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.INDUCTION_HEATER);
         addDrop(BlockInit.FLUID_PIPE);
         addDrop(BlockInit.FLUID_PUMP);
+        addDrop(BlockInit.HEAT_PIPE);
     }
 }

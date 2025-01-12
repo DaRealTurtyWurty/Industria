@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.blockentity.util.heat.FluidHeatStorage;
 import dev.turtywurty.industria.command.ConfigCommand;
 import dev.turtywurty.industria.config.ServerConfig;
 import dev.turtywurty.industria.fluid.FluidData;
@@ -113,13 +114,17 @@ public class Industria implements ModInitializer {
         ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
 
         FluidStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getFluidProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
+        FluidHeatStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getFluidHeatProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
         FluidStorage.SIDED.registerForBlockEntity(FractionalDistillationTowerBlockEntity::getFluidProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER);
 
         FluidStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getFluidProvider, BlockEntityTypeInit.INDUCTION_HEATER);
         EnergyStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getEnergyProvider, BlockEntityTypeInit.INDUCTION_HEATER);
+        FluidHeatStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getFluidHeatProvider, BlockEntityTypeInit.INDUCTION_HEATER);
 
         FluidStorage.SIDED.registerForBlockEntity(FluidPumpBlockEntity::getFluidProvider, BlockEntityTypeInit.FLUID_PUMP);
         EnergyStorage.SIDED.registerForBlockEntity(FluidPumpBlockEntity::getEnergyProvider, BlockEntityTypeInit.FLUID_PUMP);
+
+        FluidHeatStorage.SIDED.registerForBlockEntity(HeatPipeBlockEntity::getStorageProvider, BlockEntityTypeInit.HEAT_PIPE);
 
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);

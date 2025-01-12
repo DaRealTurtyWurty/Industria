@@ -2,10 +2,14 @@ package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.heat.FluidHeatStorage;
+import dev.turtywurty.industria.blockentity.util.heat.SyncingFluidHeatStorage;
+import dev.turtywurty.industria.blockentity.util.heat.SyncingNoLimitHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedFluidHeatStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -20,6 +24,9 @@ import java.util.stream.StreamSupport;
 public class HeatPipeBlockEntity extends PipeBlockEntity<FluidHeatStorage, WrappedFluidHeatStorage> {
     public HeatPipeBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.HEAT_PIPE, pos, state);
+        this.wrappedStorage.addStorage(new SyncingFluidHeatStorage<>(
+                new SyncingNoLimitHeatStorage(this, true, false),
+                new SyncingFluidStorage(this, FluidConstants.BUCKET)));
     }
 
     @Override
@@ -52,7 +59,7 @@ public class HeatPipeBlockEntity extends PipeBlockEntity<FluidHeatStorage, Wrapp
 
     @Override
     protected void distribute(FluidHeatStorage thisStorage) {
-        if (!(thisStorage.fluidStorage() instanceof SingleFluidStorage fluidStorage) || !(thisStorage.heatStorage() instanceof SimpleHeatStorage heatStorage))
+         if (!(thisStorage.fluidStorage() instanceof SingleFluidStorage fluidStorage) || !(thisStorage.heatStorage() instanceof SimpleHeatStorage heatStorage))
             return;
 
         long amount = fluidStorage.amount / this.connectedBlocks.size();
@@ -68,7 +75,7 @@ public class HeatPipeBlockEntity extends PipeBlockEntity<FluidHeatStorage, Wrapp
                         amount += (amount - fluidInsert > 0) ? amount - fluidInsert / this.connectedBlocks.size() : 0;
 
                         long heatInsert = storage.heatStorage().insert(heat, transaction);
-                        heatStorage.amount -= heatInsert;
+                        heatStorage.setAmount(heatStorage.getAmount() - heatInsert);
                         heat += (heat - heatInsert > 0) ? heat - heatInsert / this.connectedBlocks.size() : 0;
                     }
                 }

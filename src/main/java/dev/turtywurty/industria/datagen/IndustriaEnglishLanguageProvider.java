@@ -75,6 +75,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");
         translationBuilder.add(BlockInit.FLUID_PUMP, "Fluid Pump");
         addText(translationBuilder, FluidPumpBlockEntity.TITLE, "Fluid Pump");
+        translationBuilder.add(BlockInit.HEAT_PIPE, "Heat Pipe");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

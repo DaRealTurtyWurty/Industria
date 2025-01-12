@@ -43,7 +43,7 @@ public class InductionHeaterScreen extends HandledScreen<InductionHeaterScreenHa
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
-        context.drawText(this.textRenderer, String.valueOf(this.handler.getBlockEntity().getTemperature()), this.x + 80, this.y + 30, 0xFFFFFF, false);
+        context.drawText(this.textRenderer, String.valueOf(this.handler.getBlockEntity().getHeatStorage().getAmount()), this.x + 80, this.y + 30, 0xFFFFFF, false);
 
         SyncingFluidStorage tank = this.handler.getBlockEntity().getWaterTank();
         Fluid fluid = tank.variant.getFluid();

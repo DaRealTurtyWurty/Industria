@@ -42,6 +42,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
+        registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
     }
 
     private static void registerPipe(BlockStateModelGenerator blockStateModelGenerator, Block block, String name) {

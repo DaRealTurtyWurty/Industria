@@ -11,17 +11,32 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public record FluidHeatStorage(HeatStorage heatStorage, SingleVariantStorage<FluidVariant> fluidStorage) implements NBTSerializable<NbtCompound> {
+public class FluidHeatStorage implements NBTSerializable<NbtCompound> {
     public static final BlockApiLookup<FluidHeatStorage, @Nullable Direction> SIDED =
-            BlockApiLookup.get(Industria.id("sided_heat"), FluidHeatStorage.class, Direction.class);
+            BlockApiLookup.get(Industria.id("sided_fluid_heat"), FluidHeatStorage.class, Direction.class);
 
-    public FluidHeatStorage {
+    protected final HeatStorage heatStorage;
+    protected final SingleVariantStorage<FluidVariant> fluidStorage;
+
+    public FluidHeatStorage(@NotNull HeatStorage heatStorage, @NotNull SingleVariantStorage<FluidVariant> fluidStorage) {
         Objects.requireNonNull(heatStorage);
         Objects.requireNonNull(fluidStorage);
+
+        this.heatStorage = heatStorage;
+        this.fluidStorage = fluidStorage;
+    }
+
+    public HeatStorage heatStorage() {
+        return this.heatStorage;
+    }
+
+    public SingleVariantStorage<FluidVariant> fluidStorage() {
+        return this.fluidStorage;
     }
 
     @Override
@@ -43,7 +58,7 @@ public record FluidHeatStorage(HeatStorage heatStorage, SingleVariantStorage<Flu
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         var heatNbt = nbt.getCompound("HeatStorage");
         if(heatStorage instanceof SimpleHeatStorage simpleHeatStorage) {
-            simpleHeatStorage.amount = heatNbt.getLong("Heat");
+            simpleHeatStorage.setAmount(heatNbt.getLong("Heat"));
         } else {
             long amount = heatNbt.getLong("Heat");
 

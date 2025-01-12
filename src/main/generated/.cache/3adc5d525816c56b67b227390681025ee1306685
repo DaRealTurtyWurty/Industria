@@ -1,4 +1,4 @@
-// 1.21.3	2024-12-16T14:14:18.2969254	Industria/Model Definitions
+// 1.21.3	2025-01-03T19:50:12.5280032	Industria/Model Definitions
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
 aaf199443ba69a3550247e0f56d957fce4d8621b assets\industria\blockstates\drill_tube.json
 130f774f5fd43d4949090a834277399ca26127ea assets\industria\blockstates\cable.json
@@ -45,6 +45,7 @@ e6a9eff6b8b16b733d3e3b1ab81f6616d7abdeac assets\industria\models\block\basic_bat
 6c30c83f1dca2dbc73183fed44842a0d701ce5b6 assets\industria\models\item\combustion_generator.json
 0ddf2cb26938e3b140c85bc129c8bf7db4351f2a assets\industria\models\block\thermal_generator.json
 7d2f0c626990d3673f6cb9f1c9d3cc22a8a8b2e6 assets\industria\blockstates\solar_panel.json
+c0f424b6a6464568e783075de9d3c69216107843 assets\industria\models\item\heat_pipe.json
 67fab225d0aa9a4524017c337511b3018ddffaaa assets\industria\models\item\advanced_battery.json
 774f60635f214be91bb49ea6e8e0c86a0bd7b280 assets\industria\models\item\induction_heater.json
 26b82c7fd0a8588f513c4bcd892ab50f03b9ee5f assets\industria\models\item\simple_drill_head.json
@@ -59,5 +60,6 @@ a8641a7f87692e1298f0a630c757d2dd2e386cb0 assets\industria\models\item\drill.json
 063f729ab93b6ae515fb22bb2e50dc30c950f18d assets\industria\blockstates\creative_battery.json
 0bfd27186c9f953f6866c7c724db2836d16a63d3 assets\industria\models\item\upgrade_station.json
 ea1705797fd3a9fa12f1370ced2cd5f057703915 assets\industria\models\block\basic_battery_horizontal.json
+cebf523e141b3dab16b6fe39f8aacf64fd5c5d90 assets\industria\blockstates\heat_pipe.json
 7cbd660ceb9846a2c7bcf6112655e61c01973a56 assets\industria\models\block\alloy_furnace_on.json
 373e92d94d6a0861e070942a462d6991d46a943a assets\industria\models\item\fractional_distillation_tower.json

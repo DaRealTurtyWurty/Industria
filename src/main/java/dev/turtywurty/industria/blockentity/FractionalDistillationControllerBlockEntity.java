@@ -6,6 +6,10 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
+import dev.turtywurty.industria.blockentity.util.heat.FluidHeatStorage;
+import dev.turtywurty.industria.blockentity.util.heat.SyncingFluidHeatStorage;
+import dev.turtywurty.industria.blockentity.util.heat.SyncingNoLimitHeatStorage;
+import dev.turtywurty.industria.blockentity.util.heat.WrappedFluidHeatStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FractionalDistillationControllerScreenHandler;
@@ -16,6 +20,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -35,16 +40,21 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
     public static final Text TITLE = Industria.containerTitle("fractional_distillation_controller");
 
     private final List<BlockPos> towers = new ArrayList<>();
+
     private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
+    private final WrappedFluidHeatStorage heatStorage = new WrappedFluidHeatStorage();
 
     public FractionalDistillationControllerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER, pos, state);
         this.fluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
+        this.heatStorage.addStorage(new SyncingFluidHeatStorage<>(
+                new SyncingNoLimitHeatStorage(this, true, false),
+                new SyncingFluidStorage(this, FluidConstants.BUCKET)));
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        return List.of((SyncableStorage) getFluidTank());
+        return List.of((SyncableStorage) getFluidTank(), (SyncableStorage) getFluidHeatStorage());
     }
 
     @Override
@@ -55,7 +65,7 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
         //Industria.LOGGER.debug("Controller at {} has {} towers.", this.pos, getTowerCount());
 
         SingleFluidStorage tank = getFluidTank();
-        if(tank.isResourceBlank() || tank.amount == 0)
+        if (tank.isResourceBlank() || tank.amount == 0)
             return;
 
 
@@ -85,6 +95,11 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
         for (int i = 1; i <= numberOfTowers; i++) {
             this.towers.add(new BlockPos(this.pos.getX(), this.pos.getY() + i, this.pos.getZ()));
         }
+
+        if (nbt.contains("HeatWaterStorage", NbtElement.LIST_TYPE))
+            this.heatStorage.readNbt(nbt.getList("HeatWaterStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("FluidStorage", NbtElement.LIST_TYPE))
+            this.fluidStorage.readNbt(nbt.getList("FluidStorage", NbtElement.COMPOUND_TYPE), registries);
     }
 
     @Override
@@ -92,6 +107,8 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
         super.writeNbt(nbt, registries);
 
         nbt.putInt("NumberOfTowers", this.towers.size());
+        nbt.put("HeatWaterStorage", this.heatStorage.writeNbt(registries));
+        nbt.put("FluidStorage", this.fluidStorage.writeNbt(registries));
     }
 
     @Override
@@ -134,5 +151,13 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
 
     public @NotNull SingleFluidStorage getFluidProvider(Direction side) {
         return this.fluidStorage.getStorage(0);
+    }
+
+    public FluidHeatStorage getFluidHeatStorage() {
+        return this.heatStorage.getStorage(0);
+    }
+
+    public FluidHeatStorage getFluidHeatProvider(Direction side) {
+        return this.heatStorage.getStorage(0);
     }
 }
