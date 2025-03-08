@@ -1,25 +1,14 @@
 package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.screen.widget.EnergyWidget;
 import dev.turtywurty.industria.screenhandler.InductionHeaterScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.texture.Sprite;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.world.World;
 
 public class InductionHeaterScreen extends HandledScreen<InductionHeaterScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/induction_heater.png");
@@ -43,46 +32,12 @@ public class InductionHeaterScreen extends HandledScreen<InductionHeaterScreenHa
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
 
-        context.drawText(this.textRenderer, String.valueOf(this.handler.getBlockEntity().getTemperature()), this.x + 80, this.y + 30, 0xFFFFFF, false);
 
-        SyncingFluidStorage tank = this.handler.getBlockEntity().getWaterTank();
-        Fluid fluid = tank.variant.getFluid();
-        long fluidAmount = tank.getAmount();
-        long fluidCapacity = tank.getCapacity();
-        int fluidBarHeight = Math.round((float) fluidAmount / fluidCapacity * 60);
-
-        FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-        if(fluidRenderHandler == null || fluidAmount <= 0)
-            return;
-
-        BlockPos pos = this.handler.getBlockEntity().getPos();
-        FluidState fluidState = fluid.getDefaultState();
-        World world = this.handler.getBlockEntity().getWorld();
-
-        Sprite stillTexture = fluidRenderHandler.getFluidSprites(world, pos, fluidState)[0];
-        int tintColor = fluidRenderHandler.getFluidColor(world, pos, fluidState);
-
-        float red = (tintColor >> 16 & 0xFF) / 255.0F;
-        float green = (tintColor >> 8 & 0xFF) / 255.0F;
-        float blue = (tintColor & 0xFF) / 255.0F;
-        context.drawSpriteStretched(RenderLayer::getGuiTextured, stillTexture, this.x + 146, this.y + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         drawMouseoverTooltip(context, mouseX, mouseY);
-
-        if (isPointWithinBounds(146, 8, 16, 60, mouseX, mouseY)) {
-            SyncingFluidStorage tank = this.handler.getBlockEntity().getWaterTank();
-            Fluid fluid = tank.variant.getFluid();
-            long fluidAmount = tank.getAmount();
-            long fluidCapacity = tank.getCapacity();
-
-            if (fluid != null && fluidAmount > 0) {
-                context.drawTooltip(this.textRenderer, Text.translatable(fluid.getDefaultState().getBlockState().getBlock().getTranslationKey()), mouseX, mouseY);
-                context.drawTooltip(this.textRenderer, Text.literal(((int) (((float) fluidAmount / FluidConstants.BUCKET) * 1000)) + " / " + ((int) (((float) fluidCapacity / FluidConstants.BUCKET) * 1000)) + " mB"), mouseX, mouseY + 10);
-            }
-        }
     }
 }

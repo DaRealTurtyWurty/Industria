@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.ItemInit;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.registry.RegistryWrapper;
@@ -37,5 +38,22 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.INDUCTION_HEATER);
         addDrop(BlockInit.FLUID_PIPE);
         addDrop(BlockInit.FLUID_PUMP);
+
+        oreDrops(BlockInit.BAUXITE_ORE, ItemInit.RAW_BAUXITE);
+        oreDrops(BlockInit.TIN_ORE, ItemInit.RAW_TIN);
+        oreDrops(BlockInit.ZINC_ORE, ItemInit.RAW_ZINC);
+        oreDrops(BlockInit.DEEPSLATE_BAUXITE_ORE, ItemInit.RAW_BAUXITE);
+        oreDrops(BlockInit.DEEPSLATE_TIN_ORE, ItemInit.RAW_TIN);
+        oreDrops(BlockInit.DEEPSLATE_ZINC_ORE, ItemInit.RAW_ZINC);
+
+        addDrop(BlockInit.ALUMINIUM_BLOCK);
+        addDrop(BlockInit.TIN_BLOCK);
+        addDrop(BlockInit.ZINC_BLOCK);
+
+        addDrop(BlockInit.RAW_BAUXITE_BLOCK);
+        addDrop(BlockInit.RAW_TIN_BLOCK);
+        addDrop(BlockInit.RAW_ZINC_BLOCK);
+
+        addDrop(BlockInit.MIXER);
     }
 }

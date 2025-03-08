@@ -27,6 +27,7 @@ public class BlockStateScreenElement extends BlockModelScreenElement {
             return;
         }
 
-        IndustriaFluidRenderer.renderFluidBox(this.blockState.getFluidState(), 0, 0, 0, 1, 1, 1, provider, matrixStack, LightmapTextureManager.MAX_LIGHT_COORDINATE, true);
+        // TODO: Yeet probably
+        SeismicScannerFluidRendering.renderFluidBox(this.blockState.getFluidState(), 0, 0, 0, 1, 1, 1, provider, matrixStack, LightmapTextureManager.MAX_LIGHT_COORDINATE, true);
     }
 }

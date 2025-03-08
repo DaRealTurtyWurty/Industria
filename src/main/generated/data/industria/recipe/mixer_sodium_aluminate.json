@@ -1,0 +1,34 @@
+{
+  "type": "industria:mixer",
+  "input_fluid": {
+    "amount": 1000,
+    "variant": {
+      "fluid": "minecraft:water"
+    }
+  },
+  "inputs": [
+    {
+      "data": {
+        "count": 4
+      },
+      "ingredients": "industria:raw_bauxite"
+    },
+    {
+      "ingredients": "industria:sodium_hydroxide"
+    }
+  ],
+  "max_temp": 180,
+  "min_temp": 170,
+  "output": {
+    "chance": 1.0,
+    "count": 4,
+    "item": "industria:sodium_aluminate"
+  },
+  "output_fluid": {
+    "amount": 0,
+    "variant": {
+      "fluid": "minecraft:empty"
+    }
+  },
+  "process_time": 200
+}

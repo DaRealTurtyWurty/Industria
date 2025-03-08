@@ -15,7 +15,6 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.InductionHeaterScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -30,7 +29,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -53,9 +51,8 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        SyncingFluidStorage waterTank = getWaterTank();
         SyncingEnergyStorage energyStorage = getEnergyStorage();
-        return List.of(waterTank, energyStorage);
+        return List.of(energyStorage);
     }
 
     @Override
@@ -63,28 +60,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
         if (this.world == null || this.world.isClient)
             return;
 
-        SimpleHeatStorage heatStorage = getHeatStorage();
-        SyncingFluidStorage waterTank = getWaterTank();
-        if (waterTank.amount < FluidConstants.BUCKET) {
-            if (heatStorage. > 0) {
-                this.temperature = 0;
-                update();
-            }
 
-            return;
-        }
-
-        SyncingEnergyStorage energyStorage = getEnergyStorage();
-        if (energyStorage.amount <= 0) {
-            this.temperature = MathHelper.clamp(this.temperature - 1F, 0, 500);
-            update();
-            return;
-        }
-
-        this.temperature = MathHelper.clamp(this.temperature + 0.1F, 0, ((float) waterTank.amount / (FluidConstants.BUCKET * 10)) * 500);
-        waterTank.amount -= FluidConstants.INGOT;
-        energyStorage.amount = Math.max(0, energyStorage.amount - 100);
-        update();
     }
 
     @Override
@@ -120,8 +96,6 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
 
         nbt.put("WaterStorage", this.heatWaterStorage.writeNbt(registries));
         nbt.put("EnergyStorage", this.energyStorage.writeNbt(registries));
-
-        nbt.putFloat("Temperature", this.temperature);
     }
 
     @Override
@@ -133,16 +107,6 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
 
         if (nbt.contains("EnergyStorage", NbtElement.LIST_TYPE))
             this.energyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registries);
-
-        this.temperature = nbt.getFloat("Temperature");
-    }
-
-    public SingleFluidStorage getFluidProvider(Direction side) {
-        return this.heatWaterStorage.getStorage(side);
-    }
-
-    public SyncingFluidStorage getWaterTank() {
-        return (SyncingFluidStorage) getFluidProvider(null);
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {
@@ -151,9 +115,5 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
 
     public SyncingEnergyStorage getEnergyStorage() {
         return (SyncingEnergyStorage) getEnergyProvider(null);
-    }
-
-    public float getTemperature() {
-        return this.temperature;
     }
 }

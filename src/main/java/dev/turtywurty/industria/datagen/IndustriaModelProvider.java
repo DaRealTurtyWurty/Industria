@@ -42,6 +42,21 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
+
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.BAUXITE_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ZINC_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_BAUXITE_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_TIN_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_ZINC_ORE);
+
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ALUMINIUM_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ZINC_BLOCK);
+
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_BAUXITE_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_TIN_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_ZINC_BLOCK);
     }
 
     private static void registerPipe(BlockStateModelGenerator blockStateModelGenerator, Block block, String name) {
@@ -101,6 +116,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
+        itemModelGenerator.register(FluidInit.CRUDE_OIL_BUCKET, Models.GENERATED);
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
@@ -142,6 +158,18 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 displaySettings.rotate(180, 180, 0))
                         .copyModifyGui(displaySettings ->
                                 displaySettings.rotate(0, 180, 0)));
+
+        itemModelGenerator.register(ItemInit.ALUMINIUM_INGOT, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.TIN_INGOT, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.ZINC_INGOT, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.ALUMINIUM_NUGGET, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.TIN_NUGGET, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.ZINC_NUGGET, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_BAUXITE, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_TIN, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_ZINC, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.SODIUM_HYDROXIDE, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.SODIUM_ALUMINATE, Models.GENERATED);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

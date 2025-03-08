@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
 import dev.turtywurty.industria.recipe.CrusherRecipe;
+import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
@@ -18,6 +19,9 @@ public class RecipeSerializerInit {
 
     public static final RecipeSerializer<UpgradeStationRecipe> UPGRADE_STATION =
             register("upgrade_station", UpgradeStationRecipe.Serializer.INSTANCE);
+
+    public static final RecipeSerializer<MixerRecipe> MIXER =
+            register("mixer", MixerRecipe.Serializer.INSTANCE);
 
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
         return Registry.register(Registries.RECIPE_SERIALIZER, Industria.id(name), serializer);

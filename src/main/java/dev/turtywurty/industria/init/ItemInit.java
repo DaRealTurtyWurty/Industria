@@ -24,6 +24,21 @@ public class ItemInit {
     public static final BlockBuilderDrillHeadItem BLOCK_BUILDER_DRILL_HEAD = register("block_builder_drill_head",
             BlockBuilderDrillHeadItem::new, settings -> settings.maxCount(1));
 
+    public static final Item ALUMINIUM_INGOT = register("aluminium_ingot");
+    public static final Item TIN_INGOT = register("tin_ingot");
+    public static final Item ZINC_INGOT = register("zinc_ingot");
+
+    public static final Item ALUMINIUM_NUGGET = register("aluminium_nugget");
+    public static final Item TIN_NUGGET = register("tin_nugget");
+    public static final Item ZINC_NUGGET = register("zinc_nugget");
+
+    public static final Item RAW_BAUXITE = register("raw_bauxite");
+    public static final Item RAW_TIN = register("raw_tin");
+    public static final Item RAW_ZINC = register("raw_zinc");
+
+    public static final Item SODIUM_HYDROXIDE = register("sodium_hydroxide");
+    public static final Item SODIUM_ALUMINATE = register("sodium_aluminate");
+
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);
     }

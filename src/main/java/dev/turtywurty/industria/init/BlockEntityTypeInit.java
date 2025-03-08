@@ -89,6 +89,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(HeatPipeBlockEntity::new, BlockInit.HEAT_PIPE)
                     .build());
 
+    public static final BlockEntityType<MixerBlockEntity> MIXER = register("mixer",
+            FabricBlockEntityTypeBuilder.create(MixerBlockEntity::new, BlockInit.MIXER)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

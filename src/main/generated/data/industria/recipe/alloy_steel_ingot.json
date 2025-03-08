@@ -1,13 +1,13 @@
 {
   "type": "industria:alloy_furnace",
   "inputA": {
-    "entries": "#c:ingots/iron"
+    "ingredients": "#c:ingots/iron"
   },
   "inputB": {
-    "entries": "#minecraft:coals",
-    "stack_data": {
+    "data": {
       "count": 4
-    }
+    },
+    "ingredients": "#minecraft:coals"
   },
   "output": {
     "count": 1,

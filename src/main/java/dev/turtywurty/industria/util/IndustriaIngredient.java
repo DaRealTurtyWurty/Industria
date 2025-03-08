@@ -21,8 +21,8 @@ import java.util.function.Predicate;
 public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData stackData) {
     public static final Codec<IndustriaIngredient> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(
             instance -> instance.group(
-                    Ingredient.ENTRIES_CODEC.fieldOf("entries").forGetter(IndustriaIngredient::entries),
-                    StackData.CODEC.optionalFieldOf("stack_data", StackData.EMPTY).forGetter(IndustriaIngredient::stackData)
+                    Ingredient.ENTRIES_CODEC.fieldOf("ingredients").forGetter(IndustriaIngredient::entries),
+                    StackData.CODEC.optionalFieldOf("data", StackData.EMPTY).forGetter(IndustriaIngredient::stackData)
             ).apply(instance, IndustriaIngredient::new)
     ));
 
@@ -56,7 +56,7 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
 
     public boolean test(ItemStack stack, boolean matchCount, boolean matchComponents) {
         return this.entries.stream().anyMatch(item ->
-                stack.getItem() == item &&
+                stack.getItem() == item.value() &&
                         (!matchCount || stack.getCount() == this.stackData.count()) &&
                         (!matchComponents || this.stackData.components().equals(stack.getComponentChanges())));
     }

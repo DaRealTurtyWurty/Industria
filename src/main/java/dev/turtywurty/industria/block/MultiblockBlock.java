@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.property.Properties;
@@ -18,7 +19,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -85,7 +90,6 @@ public class MultiblockBlock extends Block {
             case EAST -> new Vec3i(-dz, dy, dx);
             default -> new Vec3i(dx, dy, dz);
         };
-
     }
 
     public static EnergyStorage getEnergyProvider(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Object context) {
@@ -140,7 +144,7 @@ public class MultiblockBlock extends Block {
         return null;
     }
 
-    public static MultiblockData getMultiblockData(World world, BlockPos pos) {
+    public static MultiblockData getMultiblockData(WorldView world, BlockPos pos) {
         Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
         if (map == null)
             return null;
@@ -148,8 +152,27 @@ public class MultiblockBlock extends Block {
         return map.get(pos.toShortString());
     }
 
-    public static BlockPos getPrimaryPos(World world, BlockPos pos) {
+    public static BlockPos getPrimaryPos(WorldView world, BlockPos pos) {
         MultiblockData data = getMultiblockData(world, pos);
         return data != null ? data.primaryPos() : null;
+    }
+
+    @Override
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return VoxelShapes.empty(); // TODO: Fix this, simply just doesn't work
+//        if (!(world instanceof WorldView worldView)) {
+//            return VoxelShapes.empty();
+//        }
+//
+//        MultiblockData data = getMultiblockData(worldView, pos);
+//        if (data == null || data.primaryPos() == null)
+//            return VoxelShapes.empty();
+//
+//        BlockState primaryState = world.getBlockState(data.primaryPos());
+//        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING) : Direction.NORTH;
+//        Vec3i offset = getOffsetFromPrimary(pos, pos, direction);
+//
+//        VoxelShape shape = data.type().getShape(direction);
+//        return shape != null ? shape.offset(offset.getX() * 16, offset.getY() * 16, offset.getZ() * 16) : VoxelShapes.empty();
     }
 }

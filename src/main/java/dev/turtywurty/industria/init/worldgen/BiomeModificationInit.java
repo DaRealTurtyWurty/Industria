@@ -10,5 +10,17 @@ public class BiomeModificationInit {
         BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.DESERT),
                 GenerationStep.Feature.FLUID_SPRINGS,
                 PlacedFeatureInit.CRUDE_OIL_POCKET);
+
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
+                GenerationStep.Feature.UNDERGROUND_ORES,
+                PlacedFeatureInit.BAUXITE_ORE);
+
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
+                GenerationStep.Feature.UNDERGROUND_ORES,
+                PlacedFeatureInit.TIN_ORE);
+
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
+                GenerationStep.Feature.UNDERGROUND_ORES,
+                PlacedFeatureInit.ZINC_ORE);
     }
 }

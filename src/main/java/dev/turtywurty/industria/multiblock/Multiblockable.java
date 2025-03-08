@@ -81,6 +81,7 @@ public interface Multiblockable {
      * @param onSuccessfulBuild The action to perform when the multiblock is successfully built.
      * @apiNote This method should only be called on the server side.
      */
+    // TODO: Validate that the positions are valid before building the multiblock
     default void buildMultiblock(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack, Runnable onSuccessfulBuild) {
         if (world == null || world.isClient)
             return;

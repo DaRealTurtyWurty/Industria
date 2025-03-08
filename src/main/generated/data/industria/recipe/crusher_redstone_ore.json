@@ -1,7 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "entries": [
+    "ingredients": [
       "minecraft:redstone_ore",
       "minecraft:deepslate_redstone_ore"
     ]

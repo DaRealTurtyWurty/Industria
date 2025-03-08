@@ -221,7 +221,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
             }
         }
 
-        return correctPositions.size() == 123 ? correctPositions : incorrectPositions;
+        return incorrectPositions.isEmpty() ? correctPositions : incorrectPositions;
     }
 
     private static boolean isValidPosition(World world, BlockPos position) {

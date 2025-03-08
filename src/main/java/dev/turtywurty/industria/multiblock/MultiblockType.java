@@ -6,9 +6,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -25,6 +29,7 @@ public class MultiblockType<T extends BlockEntity> {
     private final BiConsumer<World, BlockPos> onMultiblockBreak;
     private final boolean hasDirectionProperty; // Default: true
     private final int numBlocks;
+    private final Map<Direction, VoxelShape> shapes;
 
     /**
      * @param hasDirectionProperty Whether the multiblock has a direction property
@@ -32,11 +37,12 @@ public class MultiblockType<T extends BlockEntity> {
      * @param onPrimaryBlockUse    The action to perform when the primary block is used
      * @param onMultiblockBreak    The action to perform when the multiblock is broken
      */
-    private MultiblockType(boolean hasDirectionProperty, int numBlocks, QuadConsumer<World, PlayerEntity, BlockHitResult, BlockPos> onPrimaryBlockUse, BiConsumer<World, BlockPos> onMultiblockBreak) {
+    private MultiblockType(boolean hasDirectionProperty, int numBlocks, QuadConsumer<World, PlayerEntity, BlockHitResult, BlockPos> onPrimaryBlockUse, BiConsumer<World, BlockPos> onMultiblockBreak, Map<Direction, VoxelShape> shapes) {
         this.hasDirectionProperty = hasDirectionProperty;
         this.numBlocks = numBlocks;
         this.onPrimaryBlockUse = onPrimaryBlockUse;
         this.onMultiblockBreak = onMultiblockBreak;
+        this.shapes = shapes;
     }
 
     public void onPrimaryBlockUse(World world, PlayerEntity player, BlockHitResult hitResult, BlockPos pos) {
@@ -66,6 +72,10 @@ public class MultiblockType<T extends BlockEntity> {
         return this.numBlocks;
     }
 
+    public VoxelShape getShape(Direction direction) {
+        return this.shapes.get(direction);
+    }
+
     public static class Builder<T extends BlockEntity> {
         private final int numBlocks;
         private boolean hasDirectionProperty = true;
@@ -80,6 +90,8 @@ public class MultiblockType<T extends BlockEntity> {
                 blockEntity.breakMultiblock(world, pos);
             }
         };
+
+        private final Map<Direction, VoxelShape> shapes = new HashMap<>();
 
         public Builder(int numBlocks) {
             this.numBlocks = numBlocks;
@@ -100,8 +112,21 @@ public class MultiblockType<T extends BlockEntity> {
             return this;
         }
 
+        public Builder<T> shape(Direction direction, VoxelShape shape) {
+            this.shapes.put(direction, shape);
+            return this;
+        }
+
+        public Builder<T> shapes(VoxelShape shape) {
+            for (Direction direction : Direction.values()) {
+                shape(direction, shape);
+            }
+
+            return this;
+        }
+
         public MultiblockType<T> build() {
-            return new MultiblockType<>(this.hasDirectionProperty, this.numBlocks, this.onPrimaryBlockUse, this.onMultiblockBreak);
+            return new MultiblockType<>(this.hasDirectionProperty, this.numBlocks, this.onPrimaryBlockUse, this.onMultiblockBreak, this.shapes);
         }
     }
 }

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "industria:raw_bauxite_block"
+  ],
+  "result": {
+    "count": 9,
+    "id": "industria:raw_bauxite"
+  }
+}

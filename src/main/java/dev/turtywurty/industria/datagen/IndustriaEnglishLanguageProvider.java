@@ -75,6 +75,40 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");
         translationBuilder.add(BlockInit.FLUID_PUMP, "Fluid Pump");
         addText(translationBuilder, FluidPumpBlockEntity.TITLE, "Fluid Pump");
+
+        translationBuilder.add(BlockInit.BAUXITE_ORE, "Bauxite Ore");
+        translationBuilder.add(BlockInit.TIN_ORE, "Tin Ore");
+        translationBuilder.add(BlockInit.ZINC_ORE, "Zinc Ore");
+        translationBuilder.add(BlockInit.DEEPSLATE_BAUXITE_ORE, "Deepslate Bauxite Ore");
+        translationBuilder.add(BlockInit.DEEPSLATE_TIN_ORE, "Deepslate Tin Ore");
+        translationBuilder.add(BlockInit.DEEPSLATE_ZINC_ORE, "Deepslate Zinc Ore");
+
+        translationBuilder.add(BlockInit.ALUMINIUM_BLOCK, "Aluminium Block");
+        translationBuilder.add(BlockInit.TIN_BLOCK, "Tin Block");
+        translationBuilder.add(BlockInit.ZINC_BLOCK, "Zinc Block");
+
+        translationBuilder.add(BlockInit.RAW_BAUXITE_BLOCK, "Raw Bauxite Block");
+        translationBuilder.add(BlockInit.RAW_TIN_BLOCK, "Raw Tin Block");
+        translationBuilder.add(BlockInit.RAW_ZINC_BLOCK, "Raw Zinc Block");
+
+        translationBuilder.add(ItemInit.RAW_BAUXITE, "Raw Bauxite");
+        translationBuilder.add(ItemInit.RAW_TIN, "Raw Tin");
+        translationBuilder.add(ItemInit.RAW_ZINC, "Raw Zinc");
+
+        translationBuilder.add(ItemInit.ALUMINIUM_INGOT, "Aluminium Ingot");
+        translationBuilder.add(ItemInit.TIN_INGOT, "Tin Ingot");
+        translationBuilder.add(ItemInit.ZINC_INGOT, "Zinc Ingot");
+
+        translationBuilder.add(ItemInit.ALUMINIUM_NUGGET, "Aluminium Nugget");
+        translationBuilder.add(ItemInit.TIN_NUGGET, "Tin Nugget");
+        translationBuilder.add(ItemInit.ZINC_NUGGET, "Zinc Nugget");
+
+        translationBuilder.add(ItemInit.SODIUM_HYDROXIDE, "Sodium Hydroxide");
+
+        translationBuilder.add(BlockInit.MIXER, "Mixer");
+        addText(translationBuilder, MixerBlockEntity.TITLE, "Mixer");
+
+        translationBuilder.add(ItemInit.SODIUM_ALUMINATE, "Sodium Aluminate");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

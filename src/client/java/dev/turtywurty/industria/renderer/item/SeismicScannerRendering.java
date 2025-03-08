@@ -4,9 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.turtywurty.industria.component.FluidPocketsComponent;
 import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
+import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.DoublePositionSource;
 import dev.turtywurty.industria.util.DrawableVertexConsumer;
-import dev.turtywurty.industria.util.IndustriaFluidRenderer;
+import dev.turtywurty.industria.util.SeismicScannerFluidRendering;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
@@ -203,11 +204,11 @@ public class SeismicScannerRendering {
             matrices.translate(relativeX / 16f, relativeY / 16f, relativeZ / 16f);
             matrices.scale(0.0625F, 0.0625F, 0.0625F);
 
-            IndustriaFluidRenderer.renderFluidBox(fluidState,
+            SeismicScannerFluidRendering.renderFluidBox(fluidState,
                     0.0F, 0.0F, 0.0F,
                     1.0F, 1.0F, 1.0F,
                     buffer, matrices, light, true,
-                    1.0f, 1.0f, 1.0f, 1.0f, IndustriaFluidRenderer.ColorMode.MULTIPLICATION);
+                    1.0f, 1.0f, 1.0f, 1.0f, ColorMode.MULTIPLICATION);
 
             matrices.pop();
         }

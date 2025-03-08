@@ -1,7 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "entries": "minecraft:gravel"
+    "ingredients": "minecraft:gravel"
   },
   "output_a": {
     "chance": 1.0,

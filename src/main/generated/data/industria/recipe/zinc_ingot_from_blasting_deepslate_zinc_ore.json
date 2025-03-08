@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "group": "zinc_ingot",
+  "ingredient": "industria:deepslate_zinc_ore",
+  "result": {
+    "id": "industria:zinc_ingot"
+  }
+}

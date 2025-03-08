@@ -1,8 +1,10 @@
 package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.datagen.builder.AlloyFurnaceRecipeBuilder;
 import dev.turtywurty.industria.datagen.builder.CrusherRecipeBuilder;
+import dev.turtywurty.industria.datagen.builder.MixerRecipeBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.util.IndustriaIngredient;
@@ -10,10 +12,13 @@ import dev.turtywurty.industria.util.OutputItemStack;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.Blocks;
 import net.minecraft.data.server.recipe.RecipeExporter;
 import net.minecraft.data.server.recipe.RecipeGenerator;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
@@ -26,6 +31,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class IndustriaRecipeProvider extends FabricRecipeProvider {
@@ -181,6 +187,39 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .criterion(hasTag(ConventionalItemTags.IRON_INGOTS), conditionsFromTag(ConventionalItemTags.IRON_INGOTS))
                         .criterion(hasTag(ConventionalItemTags.REDSTONE_DUSTS), conditionsFromTag(ConventionalItemTags.REDSTONE_DUSTS))
                         .offerTo(exporter);
+
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ALUMINIUM_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.TIN_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.TIN_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.ZINC_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ZINC_BLOCK);
+
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_NUGGET, RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, "aluminium_nugget_to_ingot", null, "aluminium_ingot_to_nugget", null);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.TIN_NUGGET, RecipeCategory.MISC, ItemInit.TIN_INGOT, "tin_nugget_to_ingot", null, "tin_ingot_to_nugget", null);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.ZINC_NUGGET, RecipeCategory.MISC, ItemInit.ZINC_INGOT, "zinc_nugget_to_ingot", null, "zinc_ingot_to_nugget", null);
+
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.RAW_BAUXITE, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_BAUXITE_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.RAW_TIN, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_TIN_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.RAW_ZINC, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_ZINC_BLOCK);
+
+                List<ItemConvertible> aluminiumOres = List.of(BlockInit.BAUXITE_ORE, BlockInit.DEEPSLATE_BAUXITE_ORE, ItemInit.RAW_BAUXITE);
+                List<ItemConvertible> tinOres = List.of(BlockInit.TIN_ORE, BlockInit.DEEPSLATE_TIN_ORE, ItemInit.RAW_TIN);
+                List<ItemConvertible> zincOres = List.of(BlockInit.ZINC_ORE, BlockInit.DEEPSLATE_ZINC_ORE, ItemInit.RAW_ZINC);
+
+                offerSmelting(aluminiumOres, RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 200, "aluminium_ingot");
+                offerSmelting(tinOres, RecipeCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 200, "tin_ingot");
+                offerSmelting(zincOres, RecipeCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 200, "zinc_ingot");
+
+                offerBlasting(aluminiumOres, RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 100, "aluminium_ingot");
+                offerBlasting(tinOres, RecipeCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 100, "tin_ingot");
+                offerBlasting(zincOres, RecipeCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 100, "zinc_ingot");
+
+                offerMixer(exporter, RecipeCategory.MISC, List.of(
+                        new IndustriaIngredient(4, ItemInit.RAW_BAUXITE),
+                        new IndustriaIngredient(1, ItemInit.SODIUM_HYDROXIDE)),
+                        new FluidStack(FluidVariant.of(Fluids.WATER), 1000),
+                        170, 180,
+                        new OutputItemStack(ItemInit.SODIUM_ALUMINATE, 4, 1),
+                        FluidStack.EMPTY,
+                        200, "sodium_aluminate");
             }
         };
     }
@@ -195,6 +234,10 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
 
     private static void offerCrusher(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, String name) {
         new CrusherRecipeBuilder(input, outputA, outputB, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crusher_" + name)));
+    }
+
+    private static void offerMixer(RecipeExporter exporter, RecipeCategory category, List<IndustriaIngredient> inputs, FluidStack inputFluid, int minTemperature, int maxTemperature, OutputItemStack output, FluidStack outputFluid, int processTime, String name) {
+        new MixerRecipeBuilder(inputs, inputFluid, minTemperature, maxTemperature, output, outputFluid, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("mixer_" + name)));
     }
 
     private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {

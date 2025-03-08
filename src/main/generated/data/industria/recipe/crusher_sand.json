@@ -1,7 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "entries": "minecraft:sand"
+    "ingredients": "minecraft:sand"
   },
   "output_a": {
     "chance": 0.35,

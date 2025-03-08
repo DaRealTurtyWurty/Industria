@@ -81,7 +81,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      * @param light           The light level
      * @param overlay         The overlay
      */
-    protected abstract void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
+    protected void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {}
 
     @Override
     public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {

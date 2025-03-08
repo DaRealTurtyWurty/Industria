@@ -13,7 +13,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.*;
 
-public class IndustriaFluidRenderer {
+public class SeismicScannerFluidRendering {
     public static VertexConsumer getFluidBuilder(VertexConsumerProvider provider) {
         return provider.getBuffer(IndustriaRenderLayers.getFluid());
     }
@@ -45,7 +45,7 @@ public class IndustriaFluidRenderer {
 
     public static void renderFluidBox(FluidStack fluidStack, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
                                       VertexConsumerProvider provider, MatrixStack matrices, int light, boolean renderBottom, float red, float green, float blue, float alpha, ColorMode colorMode) {
-        renderFluidBox(fluidStack.fluid(), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom, red, green, blue, alpha, colorMode);
+        renderFluidBox(fluidStack.variant(), xMin, yMin, zMin, xMax, yMax, zMax, getFluidBuilder(provider), matrices, light, renderBottom, red, green, blue, alpha, colorMode);
     }
 
     public static void renderFluidBox(FluidVariant fluidVariant, float xMin, float yMin, float zMin, float xMax, float yMax, float zMax,
@@ -56,37 +56,12 @@ public class IndustriaFluidRenderer {
             return;
 
         int color = FluidVariantRendering.getColor(fluidVariant);
-        float r = (color >> 16 & 0xFF) / 255.0F;
-        float g = (color >> 8 & 0xFF) / 255.0F;
-        float b = (color & 0xFF) / 255.0F;
-        float a = (color >> 24 & 0xFF) / 255.0F;
+        color = ColorMode.modifyColor(color, red, green, blue, alpha, colorMode);
 
-        switch (colorMode) {
-            case ADDITION:
-                red += r;
-                green += g;
-                blue += b;
-                alpha += a;
-                break;
-            case MULTIPLICATION:
-                red *= r;
-                green *= g;
-                blue *= b;
-                alpha *= a;
-                break;
-            case SUBTRACTION:
-                red -= r;
-                green -= g;
-                blue -= b;
-                alpha -= a;
-                break;
-            case DIVISION:
-                red /= r;
-                green /= g;
-                blue /= b;
-                alpha /= a;
-                break;
-        }
+        red = (color >> 16 & 0xFF) / 255.0F;
+        green = (color >> 8 & 0xFF) / 255.0F;
+        blue = (color & 0xFF) / 255.0F;
+        alpha = (color >> 24 & 0xFF) / 255.0F;
 
         int blockLight = (light >> 4) & 0xF;
         int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
@@ -201,12 +176,5 @@ public class IndustriaFluidRenderer {
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
                 .normal(peek, normal.getX(), normal.getY(), normal.getZ());
-    }
-
-    public enum ColorMode {
-        ADDITION,
-        MULTIPLICATION,
-        SUBTRACTION,
-        DIVISION
     }
 }
