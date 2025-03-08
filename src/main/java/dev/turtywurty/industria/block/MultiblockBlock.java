@@ -4,6 +4,7 @@ import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.MultiblockData;
 import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.util.CachedVoxelShapes;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -31,6 +32,19 @@ import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MultiblockBlock extends Block {
+    public static final CachedVoxelShapes SHAPE_CACHE = new CachedVoxelShapes((world, pos) -> {
+        MultiblockData data = getMultiblockData(world, pos);
+        if (data == null || data.primaryPos() == null)
+            return VoxelShapes.empty();
+
+        BlockState primaryState = world.getBlockState(data.primaryPos());
+        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING) : Direction.NORTH;
+        Vec3i offset = getOffsetFromPrimary(data.primaryPos(), pos, null);
+
+        VoxelShape shape = data.type().getShape(direction);
+        return shape != null ? shape.offset(-offset.getX(), -offset.getY(), -offset.getZ()) : VoxelShapes.empty();
+    });
+
     public MultiblockBlock(Settings settings) {
         super(settings);
     }
@@ -159,20 +173,10 @@ public class MultiblockBlock extends Block {
 
     @Override
     protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return VoxelShapes.empty(); // TODO: Fix this, simply just doesn't work
-//        if (!(world instanceof WorldView worldView)) {
-//            return VoxelShapes.empty();
-//        }
-//
-//        MultiblockData data = getMultiblockData(worldView, pos);
-//        if (data == null || data.primaryPos() == null)
-//            return VoxelShapes.empty();
-//
-//        BlockState primaryState = world.getBlockState(data.primaryPos());
-//        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING) : Direction.NORTH;
-//        Vec3i offset = getOffsetFromPrimary(pos, pos, direction);
-//
-//        VoxelShape shape = data.type().getShape(direction);
-//        return shape != null ? shape.offset(offset.getX() * 16, offset.getY() * 16, offset.getZ() * 16) : VoxelShapes.empty();
+        if (!(world instanceof WorldView worldView)) {
+            return VoxelShapes.empty();
+        }
+
+        return SHAPE_CACHE.getShape(worldView, pos);
     }
 }

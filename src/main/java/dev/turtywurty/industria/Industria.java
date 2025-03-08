@@ -19,6 +19,7 @@ import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -209,6 +210,8 @@ public class Industria implements ModInitializer {
                             .then(CommandManager.literal("config").then(ConfigCommand.register()))
             );
         });
+
+        ServerTickEvents.START_WORLD_TICK.register(world -> MultiblockBlock.SHAPE_CACHE.clear());
 
         // Fluid Properties
         var crudeOilAttributes = new FluidVariantAttributeHandler() {
