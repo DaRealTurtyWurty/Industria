@@ -62,8 +62,35 @@ public class MixerScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
-        return ItemStack.EMPTY;
+    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+        ItemStack stack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(slotIndex);
+        if(!slot.hasStack()) {
+            return stack;
+        }
+
+        ItemStack stackInSlot = slot.getStack();
+        stack = stackInSlot.copy();
+
+        if(slotIndex < 9) {
+            if(!insertItem(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
+                if(!insertItem(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+        } else {
+            if(!insertItem(stackInSlot, 0, 9, false)) {
+                return ItemStack.EMPTY;
+            }
+        }
+
+        if (stackInSlot.isEmpty()) {
+            slot.setStack(ItemStack.EMPTY);
+        } else {
+            slot.markDirty();
+        }
+
+        return stack;
     }
 
     @Override
