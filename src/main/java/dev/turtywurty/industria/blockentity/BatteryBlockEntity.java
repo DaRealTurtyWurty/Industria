@@ -3,6 +3,8 @@ package dev.turtywurty.industria.blockentity;
 import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -15,10 +17,10 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import io.netty.buffer.ByteBuf;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -42,7 +44,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
 
-public class BatteryBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class BatteryBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("battery");
     public static final Text CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Text.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
@@ -197,6 +199,16 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
         this.chargeMode = mode;
         System.out.println("Charge mode set to: " + mode);
         update();
+    }
+
+    @Override
+    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
+        return this.wrappedInventoryStorage;
+    }
+
+    @Override
+    public Block getBlock() {
+        return getCachedState().getBlock();
     }
 
     public enum ChargeMode {

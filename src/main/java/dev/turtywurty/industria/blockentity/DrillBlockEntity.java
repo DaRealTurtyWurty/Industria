@@ -1,6 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -22,8 +24,8 @@ import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.DrillRenderData;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -56,7 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable {
+public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("drill");
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
@@ -517,6 +519,16 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements ExtendedSc
 
     public boolean isPaused() {
         return this.isPaused;
+    }
+
+    @Override
+    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
+        return this.wrappedInventoryStorage;
+    }
+
+    @Override
+    public Block getBlock() {
+        return getCachedState().getBlock();
     }
 
     public enum OverflowMethod implements IndustriaEnum<OverflowMethod> {

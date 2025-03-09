@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.FluidPumpBlock;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -13,7 +13,6 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FluidPumpScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -32,6 +31,7 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -43,10 +43,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FluidPumpBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class FluidPumpBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("fluid_pump");
 
-    private static final Direction[] CHECK_DIRECTIONS = { Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN };
+    private static final Direction[] CHECK_DIRECTIONS = {Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -64,18 +64,18 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
         SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(Direction.SOUTH);
-        if(!isEmpty(fluidStorage)) { // TODO: Fix this
-            Direction relativeSouth = MathUtils.getRelativeDirection(Direction.SOUTH, getCachedState().get(FluidPumpBlock.FACING));
+        if (!isEmpty(fluidStorage)) { // TODO: Fix this
+            Direction relativeSouth = MathUtils.getRelativeDirection(Direction.SOUTH, getCachedState().get(Properties.HORIZONTAL_FACING));
             BlockPos southPos = this.pos.offset(relativeSouth);
             Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.world, southPos, relativeSouth.getOpposite());
-            if(storage != null) {
-                try(Transaction transaction = Transaction.openOuter()) {
+            if (storage != null) {
+                try (Transaction transaction = Transaction.openOuter()) {
                     long inserted = storage.insert(fluidStorage.variant, fluidStorage.amount, transaction);
-                    if(inserted > 0) {
+                    if (inserted > 0) {
                         fluidStorage.amount -= inserted;
                         update();
                     }
@@ -86,25 +86,25 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
         }
 
         // check surrounding blocks for fluid
-        if(this.world.getTime() % 10 == 0) {
+        if (this.world.getTime() % 10 == 0) {
             SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.UP);
-            if(energyStorage.getAmount() <= 10)
+            if (energyStorage.getAmount() <= 10)
                 return;
 
-            Direction direction = getCachedState().get(FluidPumpBlock.FACING);
+            Direction direction = getCachedState().get(Properties.HORIZONTAL_FACING);
             Map<Direction, FluidState> fluidStateMap = new HashMap<>();
             for (Direction checkDirection : CHECK_DIRECTIONS) {
                 Direction relative = MathUtils.getRelativeDirection(checkDirection, direction);
                 BlockPos checkPos = this.pos.offset(relative);
                 FluidState fluidState = this.world.getFluidState(checkPos);
-                if(fluidState.isEmpty())
+                if (fluidState.isEmpty())
                     break;
 
                 fluidStateMap.put(relative, fluidState);
             }
 
             long storedFluidAmount = fluidStorage.amount;
-            if(storedFluidAmount >= fluidStorage.getCapacity())
+            if (storedFluidAmount >= fluidStorage.getCapacity())
                 return;
 
             if (!fluidStateMap.isEmpty()) {
@@ -140,11 +140,11 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
         for (FluidState state : fluidStateMap.values()) {
             int count = 0;
             for (FluidState value : fluidStateMap.values()) {
-                if(value.getFluid() == state.getFluid())
+                if (value.getFluid() == state.getFluid())
                     count++;
             }
 
-            if(count > mostCommonCount) {
+            if (count > mostCommonCount) {
                 mostCommon = state;
                 mostCommonCount = count;
             }
@@ -182,7 +182,7 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        if(nbt.contains("FluidTank", NbtElement.LIST_TYPE))
+        if (nbt.contains("FluidTank", NbtElement.LIST_TYPE))
             this.wrappedFluidStorage.readNbt(nbt.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
         if (nbt.contains("Energy", NbtElement.LIST_TYPE))
             this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registries);

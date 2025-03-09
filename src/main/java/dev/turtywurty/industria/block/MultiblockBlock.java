@@ -49,45 +49,6 @@ public class MultiblockBlock extends Block {
         super(settings);
     }
 
-    @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient) {
-            MultiblockData data = getMultiblockData(world, pos);
-            if (data == null)
-                return ActionResult.FAIL;
-
-            BlockPos primaryPos = data.primaryPos();
-            if (primaryPos == null)
-                return ActionResult.FAIL;
-
-            data.type().onPrimaryBlockUse(world, player, hit, primaryPos);
-        }
-
-        return ActionResult.SUCCESS;
-    }
-
-    @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
-
-        if (!world.isClient && !state.isOf(newState.getBlock())) {
-            MultiblockData data = getMultiblockData(world, pos);
-            if (data == null)
-                return;
-
-            BlockPos primaryPos = data.primaryPos();
-            if (primaryPos == null)
-                return;
-
-            data.type().onMultiblockBreak(world, primaryPos);
-        }
-    }
-
-    @Override
-    protected BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
-    }
-
     private static Vec3i getOffsetFromPrimary(BlockPos primaryPos, BlockPos pos, @Nullable Direction multiblockRotation) {
         int dx = pos.getX() - primaryPos.getX();
         int dy = pos.getY() - primaryPos.getY();
@@ -169,6 +130,45 @@ public class MultiblockBlock extends Block {
     public static BlockPos getPrimaryPos(WorldView world, BlockPos pos) {
         MultiblockData data = getMultiblockData(world, pos);
         return data != null ? data.primaryPos() : null;
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (!world.isClient) {
+            MultiblockData data = getMultiblockData(world, pos);
+            if (data == null)
+                return ActionResult.FAIL;
+
+            BlockPos primaryPos = data.primaryPos();
+            if (primaryPos == null)
+                return ActionResult.FAIL;
+
+            data.type().onPrimaryBlockUse(world, player, hit, primaryPos);
+        }
+
+        return ActionResult.SUCCESS;
+    }
+
+    @Override
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        super.onStateReplaced(state, world, pos, newState, moved);
+
+        if (!world.isClient && !state.isOf(newState.getBlock())) {
+            MultiblockData data = getMultiblockData(world, pos);
+            if (data == null)
+                return;
+
+            BlockPos primaryPos = data.primaryPos();
+            if (primaryPos == null)
+                return;
+
+            data.type().onMultiblockBreak(world, primaryPos);
+        }
+    }
+
+    @Override
+    protected BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.INVISIBLE;
     }
 
     @Override

@@ -39,5 +39,6 @@ public class MultiblockTypeInit {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

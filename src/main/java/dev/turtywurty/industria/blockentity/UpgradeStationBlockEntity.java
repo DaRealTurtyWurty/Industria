@@ -1,6 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -19,7 +21,7 @@ import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -53,7 +55,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements ExtendedScreenHandlerFactory<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable {
+public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("upgrade_station");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -430,7 +432,13 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements E
         return this.wrappedEnergyStorage.getStorage(direction);
     }
 
+    @Override
     public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
         return this.wrappedInventoryStorage;
+    }
+
+    @Override
+    public Block getBlock() {
+        return getCachedState().getBlock();
     }
 }

@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.ElectricFurnaceBlock;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -16,7 +17,6 @@ import dev.turtywurty.industria.screenhandler.ElectricFurnaceScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -36,10 +36,12 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -48,7 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload>, RecipeExperienceBlockEntity {
+public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, RecipeExperienceBlockEntity, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("electric_furnace");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -127,8 +129,8 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
             return;
 
         boolean running = this.progress > 0;
-        if (getCachedState().get(ElectricFurnaceBlock.LIT) != running)
-            this.world.setBlockState(this.pos, getCachedState().with(ElectricFurnaceBlock.LIT, running), Block.NOTIFY_ALL);
+        if (getCachedState().get(Properties.LIT) != running)
+            this.world.setBlockState(this.pos, getCachedState().with(Properties.LIT, running), Block.NOTIFY_ALL);
     }
 
     private boolean canAcceptOutput(RecipeEntry<SmeltingRecipe> recipeEntry, SingleStackRecipeInput recipeInput) {
@@ -260,19 +262,33 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
         return this.maxProgress;
     }
 
+    @Override
     public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
         return this.wrappedInventoryStorage;
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {
-        Direction facing = getCachedState().get(ElectricFurnaceBlock.FACING);
+        Direction facing = getCachedState().get(Properties.FACING);
         Direction relative = MathUtils.getRelativeDirection(direction, facing);
         return this.wrappedInventoryStorage.getStorage(relative);
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
-        Direction facing = getCachedState().get(ElectricFurnaceBlock.FACING);
+        Direction facing = getCachedState().get(Properties.FACING);
         Direction relative = MathUtils.getRelativeDirection(direction, facing);
         return this.wrappedEnergyStorage.getStorage(relative);
+    }
+
+    @Override
+    public Block getBlock() {
+        return getCachedState().getBlock();
+    }
+
+    @Override
+    public void dropContents(World world, BlockPos pos) {
+        BlockEntityContentsDropper.super.dropContents(world, pos);
+        if(world instanceof ServerWorld serverWorld) {
+            getRecipesUsedAndDropExperience(serverWorld, Vec3d.ofCenter(pos));
+        }
     }
 }

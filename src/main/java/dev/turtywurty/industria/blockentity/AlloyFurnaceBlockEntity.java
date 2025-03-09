@@ -2,6 +2,8 @@ package dev.turtywurty.industria.blockentity;
 
 import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -11,8 +13,8 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
 import dev.turtywurty.industria.screenhandler.AlloyFurnaceScreenHandler;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -30,6 +32,7 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -38,7 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -140,6 +143,12 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
 
         if (this.burnTime > 0) {
             this.burnTime--;
+            if(this.burnTime <= 0) {
+                this.world.setBlockState(this.pos, getCachedState().with(Properties.LIT, false));
+            } else {
+                this.world.setBlockState(this.pos, getCachedState().with(Properties.LIT, true));
+            }
+
             update();
         }
 
@@ -282,7 +291,13 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
             this.bufferedStack = ItemStack.fromNbtOrEmpty(registryLookup, modidData.getCompound("BufferedStack"));
     }
 
-    public WrappedInventoryStorage<SimpleInventory> getWrappedStorage() {
+    @Override
+    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
         return wrappedInventoryStorage;
+    }
+
+    @Override
+    public Block getBlock() {
+        return getCachedState().getBlock();
     }
 }

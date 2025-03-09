@@ -112,6 +112,21 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
         };
     }
 
+    protected static VoxelShape combineShape(VoxelShape shape, ConnectorType connectorType, VoxelShape cableShape, VoxelShape blockShape) {
+        if (connectorType == ConnectorType.PIPE) {
+            return VoxelShapes.combine(shape, cableShape, BooleanBiFunction.OR);
+        } else if (connectorType == ConnectorType.BLOCK) {
+            return VoxelShapes.combine(shape, VoxelShapes.combine(blockShape, cableShape, BooleanBiFunction.OR), BooleanBiFunction.OR);
+        } else {
+            return shape;
+        }
+    }
+
+    protected static int calculateShapeIndex(ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
+        int size = ConnectorType.VALUES.length;
+        return ((((south.ordinal() * size + north.ordinal()) * size + west.ordinal()) * size + east.ordinal()) * size + up.ordinal()) * size + down.ordinal();
+    }
+
     protected abstract BlockApiLookup<?, Direction> getStorageLookup();
 
     protected void createShapeCache() {
@@ -268,21 +283,6 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
                 .with(EAST, east)
                 .with(UP, up)
                 .with(DOWN, down);
-    }
-
-    protected static VoxelShape combineShape(VoxelShape shape, ConnectorType connectorType, VoxelShape cableShape, VoxelShape blockShape) {
-        if (connectorType == ConnectorType.PIPE) {
-            return VoxelShapes.combine(shape, cableShape, BooleanBiFunction.OR);
-        } else if (connectorType == ConnectorType.BLOCK) {
-            return VoxelShapes.combine(shape, VoxelShapes.combine(blockShape, cableShape, BooleanBiFunction.OR), BooleanBiFunction.OR);
-        } else {
-            return shape;
-        }
-    }
-
-    protected static int calculateShapeIndex(ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
-        int size = ConnectorType.VALUES.length;
-        return ((((south.ordinal() * size + north.ordinal()) * size + west.ordinal()) * size + east.ordinal()) * size + up.ordinal()) * size + down.ordinal();
     }
 
     public enum ConnectorType implements StringIdentifiable {

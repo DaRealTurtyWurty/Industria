@@ -1,19 +1,15 @@
 package dev.turtywurty.industria.block;
 
-import com.mojang.serialization.MapCodec;
+import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
@@ -21,7 +17,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,16 +25,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WindTurbineBlock extends HorizontalFacingBlock implements BlockEntityProvider {
+public class WindTurbineBlock extends IndustriaBlock {
     public static final IntProperty PART = IntProperty.of("part", 0, 3);
 
     private static final Map<Direction, List<VoxelShape>> SHAPES = new HashMap<>();
-    private static final MapCodec<WindTurbineBlock> CODEC = createCodec(WindTurbineBlock::new);
 
     public WindTurbineBlock(Settings settings) {
-        super(settings);
-
-        setDefaultState(getDefaultState().with(FACING, Direction.NORTH).with(PART, 0));
+        super(settings, new BlockProperties()
+                .hasHorizontalFacing()
+                .addStateProperty(PART, 0)
+                .hasBlockEntityRenderer()
+                .shapeFactory((state, world, pos, context) ->
+                        SHAPES.get(state.get(Properties.HORIZONTAL_FACING)).get(state.get(PART)))
+                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.WIND_TURBINE)
+                        .blockEntityFactory((pos, state) ->
+                                state.get(PART) == 0 ? BlockEntityTypeInit.WIND_TURBINE.instantiate(pos, state) : null)
+                        .shouldTick()
+                        .blockEntityTickerFactory((world, state, type) ->
+                                state.get(PART) == 0 ? TickableBlockEntity.createTicker(world) : null)));
 
         VoxelShape shape = createShape();
         Map<Direction, VoxelShape> directionalShapes = runShapeCalculation(shape);
@@ -53,41 +56,19 @@ public class WindTurbineBlock extends HorizontalFacingBlock implements BlockEnti
     }
 
     @Override
-    protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
-        return CODEC;
-    }
-
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return state.get(PART) == 0 ? BlockEntityTypeInit.WIND_TURBINE.instantiate(pos, state) : null;
-    }
-
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return state.get(PART) == 0 ? TickableBlockEntity.createTicker(world) : null;
-    }
-
-    @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if(!world.isClient) {
+        if (!world.isClient) {
             BlockPos blockEntityPos = pos;
-            if(state.get(PART) != 0) {
+            if (state.get(PART) != 0) {
                 blockEntityPos = pos.down(state.get(PART));
             }
 
-            if(world.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
+            if (world.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
                 player.openHandledScreen(windTurbine);
             }
         }
 
         return ActionResult.SUCCESS;
-    }
-
-    @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return SHAPES.get(state.get(FACING)).get(state.get(PART));
     }
 
     private static Map<Direction, VoxelShape> runShapeCalculation(VoxelShape shape) {
@@ -114,7 +95,7 @@ public class WindTurbineBlock extends HorizontalFacingBlock implements BlockEnti
         return buffer[0];
     }
 
-    public static VoxelShape createShape() {
+    private static VoxelShape createShape() {
         VoxelShape shape = VoxelShapes.empty();
         shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(0.0625, 0, 0.0625, 0.9375, 0.125, 0.9375), BooleanBiFunction.OR);
         shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(0.125, 0.125, 0.125, 0.875, 0.8125, 0.875), BooleanBiFunction.OR);
@@ -128,15 +109,9 @@ public class WindTurbineBlock extends HorizontalFacingBlock implements BlockEnti
         return shape.simplify();
     }
 
-    @Nullable
-    @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
-    }
-
     @Override
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        if(state.get(PART) != 0)
+        if (state.get(PART) != 0)
             return;
 
         for (int i = 1; i <= 3; i++) {
@@ -150,27 +125,16 @@ public class WindTurbineBlock extends HorizontalFacingBlock implements BlockEnti
         super.onStateReplaced(state, world, pos, newState, moved);
 
         BlockPos blockPos = pos;
-        if(state.get(PART) != 0) {
+        if (state.get(PART) != 0) {
             blockPos = pos.down(state.get(PART));
         }
 
         for (int i = 0; i <= 3; i++) {
             BlockPos blockPos1 = blockPos.up(i);
             BlockState atPosState = world.getBlockState(blockPos1);
-            if(atPosState.isOf(this)) {
+            if (atPosState.isOf(this)) {
                 world.breakBlock(blockPos1, false);
             }
         }
-    }
-
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
-        builder.add(FACING, PART);
-    }
-
-    @Override
-    protected BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
     }
 }

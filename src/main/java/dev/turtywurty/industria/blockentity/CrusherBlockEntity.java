@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.CrusherBlock;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -15,8 +16,8 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrusherRecipe;
 import dev.turtywurty.industria.screenhandler.CrusherScreenHandler;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -43,6 +44,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
@@ -52,17 +54,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class CrusherBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class CrusherBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("crusher");
     public static final int INPUT_SLOT = 0, OUTPUT_SLOT = 1;
-
+    private static final Box PICKUP_AREA = new Box(0, 0, 0, 1, 0.7, 1);
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private final ItemStack[] buffer = new ItemStack[2];
     private int progress, maxProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
-
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -86,6 +86,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
             return 2;
         }
     };
+    private RegistryKey<Recipe<?>> currentRecipeId;
 
     public CrusherBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.CRUSHER, pos, state);
@@ -113,7 +114,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
 
         for (int index = 0; index < this.buffer.length; index++) {
             ItemStack stack = this.buffer[index];
-            if(stack == null) {
+            if (stack == null) {
                 this.buffer[index] = ItemStack.EMPTY;
                 continue;
             }
@@ -124,7 +125,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
             }
         }
 
-        if(hasItemsInBuffer()) {
+        if (hasItemsInBuffer()) {
             update();
             return;
         }
@@ -151,7 +152,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
             return;
         } else {
             outputs = recipeEntry.get().value().assemble(getInventory(), this.world.random);
-            if(!canOutput(outputs.getLeft()) || !canOutput(outputs.getRight())) {
+            if (!canOutput(outputs.getLeft()) || !canOutput(outputs.getRight())) {
                 this.currentRecipeId = null;
                 this.maxProgress = 0;
                 this.progress = 0;
@@ -165,7 +166,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
             if (hasEnergy()) {
                 ItemStack outputA = outputs.getLeft();
                 ItemStack outputB = outputs.getRight();
-                if(!canOutput(outputA) || !canOutput(outputB))
+                if (!canOutput(outputA) || !canOutput(outputB))
                     return;
 
                 consumeEnergy();
@@ -190,7 +191,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
 
     private void listenForItemEntities() {
         List<ItemEntity> entities = this.world.getEntitiesByClass(ItemEntity.class,
-                CrusherBlock.PICKUP_AREA.offset(this.pos),
+                PICKUP_AREA.offset(this.pos),
                 entity -> {
                     ItemStack stack = entity.getStack().copy();
                     stack.setCount(1);
@@ -211,7 +212,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
     }
 
     private boolean canOutput(ItemStack stack) {
-        if(stack.isEmpty())
+        if (stack.isEmpty())
             return true;
 
         return this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).canInsert(stack);
@@ -242,8 +243,14 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
         return this.wrappedInventoryStorage.getRecipeInventory();
     }
 
+    @Override
     public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
         return this.wrappedInventoryStorage;
+    }
+
+    @Override
+    public Block getBlock() {
+        return getCachedState().getBlock();
     }
 
     private Optional<RecipeEntry<CrusherRecipe>> getCurrentRecipe() {
@@ -285,10 +292,10 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
             result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
         }
 
-        if(hasItemsInBuffer()) {
+        if (hasItemsInBuffer()) {
             var bufferArray = new NbtList();
             for (ItemStack stack : this.buffer) {
-                if(stack == null || stack.isEmpty())
+                if (stack == null || stack.isEmpty())
                     continue;
 
                 bufferArray.add(stack.toNbt(registryLookup));

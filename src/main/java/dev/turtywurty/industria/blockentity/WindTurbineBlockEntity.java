@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -10,7 +11,6 @@ import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.WindTurbineScreenHandler;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -38,7 +38,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.List;
 import java.util.Random;
 
-public class WindTurbineBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, ExtendedScreenHandlerFactory<BlockPosPayload> {
+public class WindTurbineBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
@@ -53,7 +53,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
     }
 
     public static int getEnergyOutput(World world, BlockPos pos, float windSpeed) {
-        if(world == null || pos == null || !world.isSkyVisible(pos) || pos.getY() < world.getSeaLevel())
+        if(world == null || pos == null || !world.isSkyVisibleAllowingSea(pos) || pos.getY() < world.getSeaLevel())
             return 0;
 
         RegistryEntry<Biome> biome = world.getBiome(pos);
@@ -79,7 +79,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
             return;
 
         if(this.windSpeed == -1F) {
-            this.windSpeed = new Random(((ServerWorld)this.world).getSeed() + this.pos.asLong()).nextFloat();
+            this.windSpeed = new Random(((ServerWorld)this.world).getSeed() + this.pos.up(4).asLong()).nextFloat();
         }
 
         SimpleEnergyStorage storage = (SimpleEnergyStorage) getEnergyStorage();
@@ -152,7 +152,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
     }
 
     public int getEnergyOutput() {
-        return getEnergyOutput(this.world, this.pos, this.windSpeed);
+        return getEnergyOutput(this.world, this.pos.up(4), this.windSpeed);
     }
 
     public float getPropellerRotation() {

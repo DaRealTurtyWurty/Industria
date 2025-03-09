@@ -33,7 +33,7 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
         this.blockEntity = blockEntity;
         this.propertyDelegate = propertyDelegate;
 
-        WrappedInventoryStorage<SimpleInventory> inventory = blockEntity.getWrappedStorage();
+        WrappedInventoryStorage<SimpleInventory> inventory = blockEntity.getWrappedInventoryStorage();
         inventory.checkSize(4);
         checkDataCount(this.propertyDelegate, 4);
 
@@ -46,7 +46,7 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
     }
 
     private void addBlockEntitySlots() {
-        WrappedInventoryStorage<SimpleInventory> inventory = this.blockEntity.getWrappedStorage();
+        WrappedInventoryStorage<SimpleInventory> inventory = this.blockEntity.getWrappedInventoryStorage();
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0), 0, 42, 17));
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1), 0, 70, 17));
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.FUEL_SLOT), 0, 56, 53) {
@@ -61,7 +61,7 @@ public class AlloyFurnaceScreenHandler extends ScreenHandler {
     @Override
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
-        this.blockEntity.getWrappedStorage().onClose(player);
+        this.blockEntity.getWrappedInventoryStorage().onClose(player);
     }
 
     @Override
