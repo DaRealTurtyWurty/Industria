@@ -42,6 +42,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
+        registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.BAUXITE_ORE);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_ORE);
@@ -158,6 +159,20 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 displaySettings.rotate(180, 180, 0))
                         .copyModifyGui(displaySettings ->
                                 displaySettings.rotate(0, 180, 0)));
+
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.MIXER,
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
+
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.DIGESTER,
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
 
         itemModelGenerator.register(ItemInit.ALUMINIUM_INGOT, Models.GENERATED);
         itemModelGenerator.register(ItemInit.TIN_INGOT, Models.GENERATED);

@@ -81,6 +81,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, BlockInit.FLUID_PIPE)
                     .build());
 
+    public static final BlockEntityType<SlurryPipeBlockEntity> SLURRY_PIPE = register("slurry_pipe",
+            FabricBlockEntityTypeBuilder.create(SlurryPipeBlockEntity::new, BlockInit.SLURRY_PIPE)
+                    .build());
+
     public static final BlockEntityType<FluidPumpBlockEntity> FLUID_PUMP = register("fluid_pump",
             FabricBlockEntityTypeBuilder.create(FluidPumpBlockEntity::new, BlockInit.FLUID_PUMP)
                     .build());
@@ -91,6 +95,10 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<MixerBlockEntity> MIXER = register("mixer",
             FabricBlockEntityTypeBuilder.create(MixerBlockEntity::new, BlockInit.MIXER)
+                    .build());
+
+    public static final BlockEntityType<DigesterBlockEntity> DIGESTER = register("digester",
+            FabricBlockEntityTypeBuilder.create(DigesterBlockEntity::new, BlockInit.DIGESTER)
                     .build());
 
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {

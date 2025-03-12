@@ -1,0 +1,163 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_dot"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe"
+      },
+      "when": {
+        "OR": [
+          {
+            "north": "pipe"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe",
+        "y": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "east": "pipe"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe",
+        "y": 180
+      },
+      "when": {
+        "OR": [
+          {
+            "south": "pipe"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe",
+        "y": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "west": "pipe"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe",
+        "x": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "up": "pipe"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe",
+        "x": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "down": "pipe"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_connected"
+      },
+      "when": {
+        "OR": [
+          {
+            "north": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_connected",
+        "y": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "east": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_connected",
+        "y": 180
+      },
+      "when": {
+        "OR": [
+          {
+            "south": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_connected",
+        "y": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "west": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_connected",
+        "x": 270
+      },
+      "when": {
+        "OR": [
+          {
+            "up": "block"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/slurry_pipe_connected",
+        "x": 90
+      },
+      "when": {
+        "OR": [
+          {
+            "down": "block"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -56,6 +59,30 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
 
             try (Transaction transaction = Transaction.openOuter()) {
                 return storage.extract(fluidStackSupplier.get().variant(), FluidConstants.BUCKET, transaction) > 0;
+            }
+        };
+    }
+
+    public static BiPredicate<ItemStack, Integer> createEmptySlurryPredicate(Supplier<SlurryVariant> slurryVariantSupplier) {
+        return (stack, integer) -> {
+            Storage<SlurryVariant> storage = ContainerItemContext.withConstant(stack).find(SlurryStorage.ITEM);
+            if (storage == null || !storage.supportsInsertion())
+                return false;
+
+            try (Transaction transaction = Transaction.openOuter()) {
+                return storage.insert(slurryVariantSupplier.get(), FluidConstants.BUCKET, transaction) > 0;
+            }
+        };
+    }
+
+    public static BiPredicate<ItemStack, Integer> createSlurryPredicate(Supplier<SlurryStack> slurryStackSupplier) {
+        return (stack, index) -> {
+            Storage<SlurryVariant> storage = ContainerItemContext.withConstant(stack).find(SlurryStorage.ITEM);
+            if (storage == null || !storage.supportsExtraction())
+                return false;
+
+            try (Transaction transaction = Transaction.openOuter()) {
+                return storage.extract(slurryStackSupplier.get().variant(), FluidConstants.BUCKET, transaction) > 0;
             }
         };
     }

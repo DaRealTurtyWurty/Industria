@@ -2,6 +2,7 @@ package dev.turtywurty.industria;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.command.ConfigCommand;
@@ -78,6 +79,7 @@ public class Industria implements ModInitializer {
         EntityTypeInit.init();
         RecipeBookCategoryInit.init();
         MultiblockTypeInit.init();
+        SlurryInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
@@ -109,6 +111,7 @@ public class Industria implements ModInitializer {
         EnergyStorage.SIDED.registerForBlocks(MultiblockBlock::getEnergyProvider, BlockInit.MULTIBLOCK_BLOCK);
         ItemStorage.SIDED.registerForBlocks(MultiblockBlock::getInventoryProvider, BlockInit.MULTIBLOCK_BLOCK);
         FluidStorage.SIDED.registerForBlocks(MultiblockBlock::getFluidProvider, BlockInit.MULTIBLOCK_BLOCK);
+        SlurryStorage.SIDED.registerForBlocks(MultiblockBlock::getSlurryProvider, BlockInit.MULTIBLOCK_BLOCK);
 
         EnergyStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
         ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);

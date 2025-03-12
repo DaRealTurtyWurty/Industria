@@ -1,17 +1,22 @@
 package dev.turtywurty.industria.datagen;
 
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.AlloyFurnaceRecipeBuilder;
 import dev.turtywurty.industria.datagen.builder.CrusherRecipeBuilder;
+import dev.turtywurty.industria.datagen.builder.DigesterRecipeBuilder;
 import dev.turtywurty.industria.datagen.builder.MixerRecipeBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.init.SlurryInit;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.Blocks;
 import net.minecraft.data.server.recipe.RecipeExporter;
@@ -30,6 +35,7 @@ import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -213,13 +219,17 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 offerBlasting(zincOres, RecipeCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 100, "zinc_ingot");
 
                 offerMixer(exporter, RecipeCategory.MISC, List.of(
-                        new IndustriaIngredient(4, ItemInit.RAW_BAUXITE),
-                        new IndustriaIngredient(1, ItemInit.SODIUM_HYDROXIDE)),
-                        new FluidStack(FluidVariant.of(Fluids.WATER), 1000),
+                                new IndustriaIngredient(4, ItemInit.RAW_BAUXITE),
+                                new IndustriaIngredient(1, ItemInit.SODIUM_HYDROXIDE)),
+                        new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET),
                         170, 180,
-                        new OutputItemStack(ItemInit.SODIUM_ALUMINATE, 4, 1),
-                        FluidStack.EMPTY,
-                        200, "sodium_aluminate");
+                        OutputItemStack.EMPTY,
+                        new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BOTTLE),
+                        200, "bauxite_to_bauxite_slurry");
+
+                offerDigester(exporter, new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BUCKET),
+                        new FluidStack(FluidVariant.of(Fluids.LAVA), FluidConstants.BOTTLE), // TODO: Replace with output of dirty sodium aluminate
+                        200, "bauxite_to_dirty_sodium_aluminate");
             }
         };
     }
@@ -236,8 +246,12 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
         new CrusherRecipeBuilder(input, outputA, outputB, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crusher_" + name)));
     }
 
-    private static void offerMixer(RecipeExporter exporter, RecipeCategory category, List<IndustriaIngredient> inputs, FluidStack inputFluid, int minTemperature, int maxTemperature, OutputItemStack output, FluidStack outputFluid, int processTime, String name) {
-        new MixerRecipeBuilder(inputs, inputFluid, minTemperature, maxTemperature, output, outputFluid, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("mixer_" + name)));
+    private static void offerMixer(RecipeExporter exporter, RecipeCategory category, List<IndustriaIngredient> inputs, @Nullable FluidStack inputFluid, int minTemperature, int maxTemperature, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, String name) {
+        new MixerRecipeBuilder(inputs, inputFluid, minTemperature, maxTemperature, output, outputSlurry, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("mixer_" + name)));
+    }
+
+    private static void offerDigester(RecipeExporter exporter, SlurryStack inputSlurry, FluidStack outputFluid, int processTime, String name) {
+        new DigesterRecipeBuilder(inputSlurry, outputFluid, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("digester_" + name)));
     }
 
     private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {

@@ -73,6 +73,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.INDUCTION_HEATER, "Induction Heater");
         addText(translationBuilder, InductionHeaterBlockEntity.TITLE, "Induction Heater");
         translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");
+        translationBuilder.add(BlockInit.SLURRY_PIPE, "Slurry Pipe");
         translationBuilder.add(BlockInit.FLUID_PUMP, "Fluid Pump");
         addText(translationBuilder, FluidPumpBlockEntity.TITLE, "Fluid Pump");
 
@@ -109,6 +110,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, MixerBlockEntity.TITLE, "Mixer");
 
         translationBuilder.add(ItemInit.SODIUM_ALUMINATE, "Sodium Aluminate");
+
+        translationBuilder.add(BlockInit.DIGESTER, "Digester");
+        addText(translationBuilder, DigesterBlockEntity.TITLE, "Digester");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

@@ -1,7 +1,7 @@
 {
   "type": "industria:mixer",
   "input_fluid": {
-    "amount": 1000,
+    "amount": 81000,
     "variant": {
       "fluid": "minecraft:water"
     }
@@ -21,13 +21,13 @@
   "min_temp": 170,
   "output": {
     "chance": 1.0,
-    "count": 4,
-    "item": "industria:sodium_aluminate"
+    "count": 0,
+    "item": "minecraft:air"
   },
-  "output_fluid": {
-    "amount": 0,
+  "output_slurry": {
+    "amount": 27000,
     "variant": {
-      "fluid": "minecraft:empty"
+      "slurry": "industria:bauxite_slurry"
     }
   },
   "process_time": 200

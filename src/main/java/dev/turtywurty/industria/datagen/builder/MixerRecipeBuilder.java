@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.datagen.builder;
 
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
@@ -24,7 +25,7 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
     private final FluidStack inputFluid;
     private final int minTemperature, maxTemperature;
     private final OutputItemStack output;
-    private final FluidStack outputFluid;
+    private final SlurryStack outputSlurry;
     private final int processTime;
 
     private final RecipeCategory category;
@@ -32,7 +33,7 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
 
     public MixerRecipeBuilder(Collection<IndustriaIngredient> inputs, @Nullable FluidStack inputFluid,
                               int minTemperature, int maxTemperature,
-                              OutputItemStack output, @Nullable FluidStack outputFluid,
+                              OutputItemStack output, @Nullable SlurryStack outputSlurry,
                               int processTime,
                               RecipeCategory category) {
         this.inputs.addAll(inputs);
@@ -42,7 +43,7 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
         this.maxTemperature = maxTemperature;
 
         this.output = output;
-        this.outputFluid = outputFluid;
+        this.outputSlurry = outputSlurry;
 
         this.processTime = processTime;
 
@@ -50,13 +51,13 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
     }
 
     @Override
-    public CraftingRecipeJsonBuilder criterion(String name, AdvancementCriterion<?> criterion) {
+    public MixerRecipeBuilder criterion(String name, AdvancementCriterion<?> criterion) {
         this.criteria.put(name, criterion);
         return this;
     }
 
     @Override
-    public CraftingRecipeJsonBuilder group(@Nullable String group) {
+    public MixerRecipeBuilder group(@Nullable String group) {
         return this;
     }
 
@@ -74,7 +75,7 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
         this.criteria.forEach(builder::criterion);
 
         exporter.accept(recipeKey,
-                new MixerRecipe(this.inputs, this.inputFluid, this.minTemperature, this.maxTemperature, this.output, this.outputFluid, this.processTime),
+                new MixerRecipe(this.inputs, this.inputFluid, this.minTemperature, this.maxTemperature, this.output, this.outputSlurry, this.processTime),
                 builder.build(recipeKey.getValue().withPrefixedPath("recipes/" + this.category.getName() + "/")));
     }
 }

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.block;
 
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.MultiblockData;
@@ -114,6 +115,23 @@ public class MultiblockBlock extends Block {
         if (world.getBlockEntity(primaryPos) instanceof Multiblockable multiblockable) {
             Direction primaryFacing = primaryState.get(Properties.HORIZONTAL_FACING);
             return multiblockable.getFluidStorage(getOffsetFromPrimary(primaryPos, pos, primaryFacing), context instanceof Direction direction ? direction : null);
+        }
+
+        return null;
+    }
+
+    public static Storage<SlurryVariant> getSlurryProvider(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Object context) {
+        if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
+            return null;
+
+        BlockPos primaryPos = getPrimaryPos(world, pos);
+        if (primaryPos == null)
+            return null;
+
+        BlockState primaryState = world.getBlockState(primaryPos);
+        if (world.getBlockEntity(primaryPos) instanceof Multiblockable multiblockable) {
+            Direction primaryFacing = primaryState.get(Properties.HORIZONTAL_FACING);
+            return multiblockable.getSlurryStorage(getOffsetFromPrimary(primaryPos, pos, primaryFacing), context instanceof Direction direction ? direction : null);
         }
 
         return null;

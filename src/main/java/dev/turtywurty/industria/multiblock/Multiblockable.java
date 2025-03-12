@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -30,6 +31,10 @@ import java.util.Map;
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Multiblockable {
+    static boolean isCenterColumn(Vec3i offset) {
+        return offset.getX() == 0 && offset.getZ() == 0;
+    }
+
     /**
      * Gets the type of multiblock this controller is.
      *
@@ -67,6 +72,10 @@ public interface Multiblockable {
     }
 
     default Storage<FluidVariant> getFluidStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        return null;
+    }
+
+    default Storage<SlurryVariant> getSlurryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
         return null;
     }
 

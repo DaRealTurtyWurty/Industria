@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:mixer_sodium_aluminate"
+        "recipe": "industria:mixer_bauxite_to_bauxite_slurry"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -15,7 +15,7 @@
   ],
   "rewards": {
     "recipes": [
-      "industria:mixer_sodium_aluminate"
+      "industria:mixer_bauxite_to_bauxite_slurry"
     ]
   }
 }

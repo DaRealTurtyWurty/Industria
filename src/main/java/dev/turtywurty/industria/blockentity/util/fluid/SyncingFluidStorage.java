@@ -54,10 +54,10 @@ public class SyncingFluidStorage extends SingleFluidStorage implements SyncableS
     }
 
     public boolean canInsert(FluidStack fluidStack) {
-        return super.canInsert(fluidStack.variant()) && this.variant == fluidStack.variant() && fluidStack.amount() <= this.capacity - this.amount;
+        return (this.variant == fluidStack.variant() || this.variant.isBlank()) && fluidStack.amount() <= this.capacity - this.amount;
     }
 
     public boolean canExtract(FluidStack fluidStack) {
-        return super.canExtract(fluidStack.variant()) && this.variant == fluidStack.variant() && fluidStack.amount() <= this.amount;
+        return this.variant == fluidStack.variant() && fluidStack.amount() <= this.amount;
     }
 }

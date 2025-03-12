@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFluid, int minTemp, int maxTemp,
-                          OutputItemStack output, FluidStack outputFluid,
+                          OutputItemStack output, SlurryStack outputSlurry,
                           int processTime) implements Recipe<MixerRecipeInput> {
     @Override
     public boolean matches(MixerRecipeInput input, World world) {
@@ -129,7 +130,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                 this.minTemp,
                 this.maxTemp,
                 this.output.toDisplay(),
-                this.outputFluid,
+                this.outputSlurry,
                 this.processTime
         ));
     }
@@ -170,7 +171,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                 Codec.INT.fieldOf("min_temp").forGetter(MixerRecipe::minTemp),
                 Codec.INT.fieldOf("max_temp").forGetter(MixerRecipe::maxTemp),
                 OutputItemStack.CODEC.fieldOf("output").forGetter(MixerRecipe::output),
-                FluidStack.CODEC.fieldOf("output_fluid").forGetter(MixerRecipe::outputFluid),
+                SlurryStack.CODEC.fieldOf("output_slurry").forGetter(MixerRecipe::outputSlurry),
                 Codec.INT.fieldOf("process_time").forGetter(MixerRecipe::processTime)
         ).apply(instance, MixerRecipe::new));
 
@@ -180,7 +181,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                         PacketCodecs.INTEGER, MixerRecipe::minTemp,
                         PacketCodecs.INTEGER, MixerRecipe::maxTemp,
                         OutputItemStack.PACKET_CODEC, MixerRecipe::output,
-                        FluidStack.PACKET_CODEC, MixerRecipe::outputFluid,
+                        SlurryStack.PACKET_CODEC, MixerRecipe::outputSlurry,
                         PacketCodecs.INTEGER, MixerRecipe::processTime,
                         MixerRecipe::new);
 
@@ -197,7 +198,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
 
     public record MixerRecipeDisplay(List<SlotDisplay> inputs, SlotDisplay craftingStation,
                                      FluidStack fluid, int minTemp, int maxTemp,
-                                     SlotDisplay output, FluidStack outputFluid,
+                                     SlotDisplay output, SlurryStack outputSlurry,
                                      int processTime) implements RecipeDisplay {
         public static final MapCodec<MixerRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
                 instance -> instance.group(
@@ -207,7 +208,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                         Codec.INT.fieldOf("min_temp").forGetter(MixerRecipeDisplay::minTemp),
                         Codec.INT.fieldOf("max_temp").forGetter(MixerRecipeDisplay::maxTemp),
                         SlotDisplay.CODEC.fieldOf("output").forGetter(MixerRecipeDisplay::output),
-                        FluidStack.CODEC.fieldOf("output_fluid").forGetter(MixerRecipeDisplay::outputFluid),
+                        SlurryStack.CODEC.fieldOf("output_slurry").forGetter(MixerRecipeDisplay::outputSlurry),
                         Codec.INT.fieldOf("process_time").forGetter(MixerRecipeDisplay::processTime)
                 ).apply(instance, MixerRecipeDisplay::new)
         );
@@ -219,7 +220,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                 PacketCodecs.INTEGER, MixerRecipeDisplay::minTemp,
                 PacketCodecs.INTEGER, MixerRecipeDisplay::maxTemp,
                 SlotDisplay.PACKET_CODEC, MixerRecipeDisplay::output,
-                FluidStack.PACKET_CODEC, MixerRecipeDisplay::outputFluid,
+                SlurryStack.PACKET_CODEC, MixerRecipeDisplay::outputSlurry,
                 PacketCodecs.INTEGER, MixerRecipeDisplay::processTime,
                 MixerRecipeDisplay::new
         );
@@ -229,11 +230,6 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
         @Override
         public SlotDisplay result() {
             return this.output;
-        }
-
-        @Override
-        public SlotDisplay craftingStation() {
-            return this.craftingStation;
         }
 
         @Override

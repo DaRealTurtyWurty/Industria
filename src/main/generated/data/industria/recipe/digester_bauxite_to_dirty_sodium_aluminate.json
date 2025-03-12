@@ -1,0 +1,16 @@
+{
+  "type": "industria:digester",
+  "input_slurry": {
+    "amount": 81000,
+    "variant": {
+      "slurry": "industria:bauxite_slurry"
+    }
+  },
+  "output_fluid": {
+    "amount": 27000,
+    "variant": {
+      "fluid": "minecraft:lava"
+    }
+  },
+  "process_time": 200
+}

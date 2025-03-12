@@ -40,6 +40,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
     private final DrillBlockEntity drill = new DrillBlockEntity(BlockPos.ORIGIN, BlockInit.DRILL.getDefaultState());
     private final MotorBlockEntity motor = new MotorBlockEntity(BlockPos.ORIGIN, BlockInit.MOTOR.getDefaultState());
     private final UpgradeStationBlockEntity upgradeStation = new UpgradeStationBlockEntity(BlockPos.ORIGIN, BlockInit.UPGRADE_STATION.getDefaultState());
+    private final MixerBlockEntity mixer = new MixerBlockEntity(BlockPos.ORIGIN, BlockInit.MIXER.getDefaultState());
+    private final DigesterBlockEntity digester = new DigesterBlockEntity(BlockPos.ORIGIN, BlockInit.DIGESTER.getDefaultState());
 
     private BakedModel seismicScanner;
     private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
@@ -52,7 +54,9 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
             BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack,
             BlockInit.DRILL.asItem(), drill,
             BlockInit.MOTOR.asItem(), motor,
-            BlockInit.UPGRADE_STATION.asItem(), upgradeStation
+            BlockInit.UPGRADE_STATION.asItem(), upgradeStation,
+            BlockInit.MIXER.asItem(), mixer,
+            BlockInit.DIGESTER.asItem(), digester
     );
 
     @Override

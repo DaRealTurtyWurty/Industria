@@ -50,6 +50,7 @@ dependencies {
 
 	include modApi("teamreborn:energy:${project.tech_reborn_energy_version}")
 	include modApi("dev.turtywurty:heatapi:${project.heat_api_version}")
+	include modApi("dev.turtywurty:slurryapi:${project.slurry_api_version}")
 
 	modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }

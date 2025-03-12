@@ -1,5 +1,7 @@
 package dev.turtywurty.industria;
 
+import dev.turtywurty.fabricslurryapi.client.handler.SimpleSlurryRenderHandler;
+import dev.turtywurty.fabricslurryapi.client.handler.SlurryRenderHandlerRegistry;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.model.*;
@@ -68,6 +70,7 @@ public class IndustriaClient implements ClientModInitializer {
         HandledScreens.register(ScreenHandlerTypeInit.INDUCTION_HEATER, InductionHeaterScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.FLUID_PUMP, FluidPumpScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.MIXER, MixerScreen::new);
+        HandledScreens.register(ScreenHandlerTypeInit.DIGESTER, DigesterScreen::new);
 
         // Registering Models
         EntityModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::getTexturedModelData);
@@ -80,6 +83,7 @@ public class IndustriaClient implements ClientModInitializer {
         EntityModelLayerRegistry.registerModelLayer(DrillCableModel.LAYER_LOCATION, DrillCableModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(UpgradeStationModel.LAYER_LOCATION, UpgradeStationModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(MixerModel.LAYER_LOCATION, MixerModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(DigesterModel.LAYER_LOCATION, DigesterModel::getTexturedModelData);
 
         // Registering Block Entity Renderers
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
@@ -89,6 +93,7 @@ public class IndustriaClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MOTOR, MotorBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.UPGRADE_STATION, UpgradeStationBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MIXER, MixerBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.DIGESTER, DigesterBlockEntityRenderer::new);
 
         // Registering BuiltinModelItemRenderers
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);
@@ -99,10 +104,15 @@ public class IndustriaClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.SIMPLE_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.BLOCK_BUILDER_DRILL_HEAD, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.UPGRADE_STATION, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.MIXER, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DIGESTER, IndustriaDynamicItemRenderer.INSTANCE);
 
         // Register Fluid Renderers
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
                 new SimpleFluidRenderHandler(Industria.id("block/crude_oil_still"), Industria.id("block/crude_oil_flow")));
+
+        // Register Slurry Renderers
+        SlurryRenderHandlerRegistry.register(SlurryInit.BAUXITE_SLURRY, new SimpleSlurryRenderHandler(Industria.id("block/bauxite_slurry"), -1));
 
         // Add to render layer map
         BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING);

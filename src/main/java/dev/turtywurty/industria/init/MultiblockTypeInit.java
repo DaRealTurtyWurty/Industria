@@ -1,11 +1,9 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.DigesterBlock;
 import dev.turtywurty.industria.block.MixerBlock;
-import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.blockentity.MixerBlockEntity;
-import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
-import dev.turtywurty.industria.blockentity.UpgradeStationBlockEntity;
+import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.registry.Registry;
@@ -29,6 +27,18 @@ public class MultiblockTypeInit {
                     .shapes(MixerBlock.VOXEL_SHAPE)
                     .setOnMultiblockBreak((world, pos) -> {
                         if (world.getBlockEntity(pos) instanceof MixerBlockEntity blockEntity) {
+                            blockEntity.breakMultiblock(world, pos);
+
+                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
+                        }
+                    }));
+
+    public static final MultiblockType<DigesterBlockEntity> DIGESTER = register("digester",
+            new MultiblockType.Builder<DigesterBlockEntity>(44)
+                    .setHasDirectionProperty(true)
+                    .shapes(DigesterBlock.VOXEL_SHAPE)
+                    .setOnMultiblockBreak((world, pos) -> {
+                        if (world.getBlockEntity(pos) instanceof DigesterBlockEntity blockEntity) {
                             blockEntity.breakMultiblock(world, pos);
 
                             blockEntity.getWrappedInventoryStorage().dropContents(world, pos);

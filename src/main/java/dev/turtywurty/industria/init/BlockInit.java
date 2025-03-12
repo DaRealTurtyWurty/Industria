@@ -1,7 +1,6 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.MixerBlock;
 import dev.turtywurty.industria.block.*;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -72,43 +71,69 @@ public class BlockInit {
 
     public static final FractionalDistillationControllerBlock FRACTIONAL_DISTILLATION_CONTROLLER = registerWithItemCopy("fractional_distillation_controller",
             FractionalDistillationControllerBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
     public static final InductionHeaterBlock INDUCTION_HEATER = registerWithItemCopy("induction_heater",
-            InductionHeaterBlock::new, Blocks.IRON_BLOCK, settings -> settings);    public static final FractionalDistillationTowerBlock FRACTIONAL_DISTILLATION_TOWER = registerWithItemCopy("fractional_distillation_tower",
+            InductionHeaterBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
+    public static final FractionalDistillationTowerBlock FRACTIONAL_DISTILLATION_TOWER = registerWithItemCopy("fractional_distillation_tower",
             FractionalDistillationTowerBlock::new, Blocks.IRON_BLOCK, settings -> settings);
+
     public static final CableBlock CABLE = registerWithItemCopy("cable",
             CableBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static final FluidPipeBlock FLUID_PIPE = registerWithItemCopy("fluid_pipe",
             FluidPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final SlurryPipeBlock SLURRY_PIPE = registerWithItemCopy("slurry_pipe",
+            SlurryPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static final FluidPumpBlock FLUID_PUMP = registerWithItemCopy("fluid_pump",
             FluidPumpBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static final HeatPipeBlock HEAT_PIPE = registerWithItemCopy("heat_pipe",
             HeatPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static final Block BAUXITE_ORE = registerWithItemCopy("bauxite_ore",
             Block::new, Blocks.IRON_ORE, settings -> settings);
+
     public static final Block TIN_ORE = registerWithItemCopy("tin_ore",
             Block::new, Blocks.IRON_ORE, settings -> settings);
+
     public static final Block ZINC_ORE = registerWithItemCopy("zinc_ore",
             Block::new, Blocks.IRON_ORE, settings -> settings);
+
     public static final Block DEEPSLATE_BAUXITE_ORE = registerWithItemCopy("deepslate_bauxite_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE, settings -> settings);
+
     public static final Block DEEPSLATE_TIN_ORE = registerWithItemCopy("deepslate_tin_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE, settings -> settings);
+
     public static final Block DEEPSLATE_ZINC_ORE = registerWithItemCopy("deepslate_zinc_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE, settings -> settings);
+
     public static final Block ALUMINIUM_BLOCK = registerWithItemCopy("aluminium_block",
             Block::new, Blocks.IRON_BLOCK, settings -> settings);
+
     public static final Block TIN_BLOCK = registerWithItemCopy("tin_block",
             Block::new, Blocks.IRON_BLOCK, settings -> settings);
+
     public static final Block ZINC_BLOCK = registerWithItemCopy("zinc_block",
             Block::new, Blocks.IRON_BLOCK, settings -> settings);
+
     public static final Block RAW_BAUXITE_BLOCK = registerWithItemCopy("raw_bauxite_block",
             Block::new, Blocks.RAW_IRON_BLOCK, settings -> settings);
+
     public static final Block RAW_TIN_BLOCK = registerWithItemCopy("raw_tin_block",
             Block::new, Blocks.RAW_IRON_BLOCK, settings -> settings);
+
     public static final Block RAW_ZINC_BLOCK = registerWithItemCopy("raw_zinc_block",
             Block::new, Blocks.RAW_IRON_BLOCK, settings -> settings);
+
     public static final MixerBlock MIXER = registerWithItemCopy("mixer",
             MixerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final DigesterBlock DIGESTER = registerWithItemCopy("digester",
+            DigesterBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
@@ -136,6 +161,4 @@ public class BlockInit {
 
     public static void init() {
     }
-
-
 }

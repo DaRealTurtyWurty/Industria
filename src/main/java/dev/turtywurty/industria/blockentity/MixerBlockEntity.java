@@ -1,6 +1,9 @@
 package dev.turtywurty.industria.blockentity;
 
 import com.mojang.datafixers.util.Pair;
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.fabricslurryapi.api.storage.SingleSlurryStorage;
+import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
@@ -16,6 +19,9 @@ import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
+import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
+import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
@@ -33,6 +39,8 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -78,7 +86,7 @@ import java.util.Optional;
 //                .fluidInputThroughBucket(getBucketInputInventory(), getInputFluidTank())
 //                .fluidOutputThroughBucket(getBucketOutputInventory(), getOutputFluidTank())
 //                .tryClearItemBuffer(this.outputItemStack, getOutputInventory())
-//                .tryClearFluidBuffer(this.outputFluidStack, getOutputFluidTank())
+//                .tryClearFluidBuffer(this.outputSlurryStack, getOutputFluidTank())
 //                .checkForRecipe(RecipeTypeInit.MIXER)
 //                .onComplete(new OnCompleteBuilder()
 //                        .checkEnergy(10)
@@ -99,13 +107,14 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
+    private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private int temperature = 175;
     private int progress, maxProgress;
     private RegistryKey<Recipe<?>> currentRecipeId;
     private ItemStack outputItemStack = ItemStack.EMPTY;
-    private FluidStack outputFluidStack = FluidStack.EMPTY;
+    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
@@ -147,13 +156,13 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
                     return new FluidStack(inputFluidTank.variant, inputFluidTank.amount);
                 })), Direction.NORTH);
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createEmptyFluidPredicate(() -> getOutputFluidTank().variant)), Direction.SOUTH);
+                PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().variant)), Direction.SOUTH);
 
-        SyncingFluidStorage inputFluidStorage = new SyncingFluidStorage(this, FluidConstants.BUCKET * 10);
-        SyncingFluidStorage outputFluidStorage = new SyncingFluidStorage(this, FluidConstants.BUCKET * 10);
+        this.wrappedFluidStorage.addStorage(
+                new SyncingFluidStorage(this, FluidConstants.BUCKET * 10), Direction.EAST);
 
-        this.wrappedFluidStorage.addStorage(inputFluidStorage, Direction.EAST);
-        this.wrappedFluidStorage.addStorage(outputFluidStorage, Direction.WEST);
+        this.wrappedSlurryStorage.addStorage(
+                new SyncingSlurryStorage(this, FluidConstants.BUCKET * 10), Direction.WEST);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
     }
@@ -166,33 +175,35 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
 
         SyncingFluidStorage inputFluidTank = getInputFluidTank();
-        SyncingFluidStorage outputFluidTank = getOutputFluidTank();
+        SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
 
         SyncingEnergyStorage energy = getEnergyStorage();
 
-        return List.of(inputInventory, outputInventory, bucketInputInventory, bucketOutputInventory, inputFluidTank, outputFluidTank, energy);
+        return List.of(inputInventory, outputInventory, bucketInputInventory, bucketOutputInventory, inputFluidTank, outputSlurryTank, energy);
     }
 
-    private static FluidVariant findFirstFluidVariant(Storage<FluidVariant> storage, FluidVariant checkFirst) {
-        if (storage instanceof SingleFluidStorage singleFluidStorage) {
-            return singleFluidStorage.variant;
+    // TODO: Move to util class
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <V, T extends TransferVariant<V>> Optional<T> findFirstVariant(Storage<T> storage, T checkFirst) {
+        if (storage instanceof SingleVariantStorage singleFluidStorage) {
+            return Optional.ofNullable((T) singleFluidStorage.variant);
         }
 
         if (!checkFirst.isBlank()) {
             try (Transaction transaction = Transaction.openOuter()) {
                 if (storage.extract(checkFirst, FluidConstants.BUCKET, transaction) > 0) {
-                    return checkFirst;
+                    return Optional.of(checkFirst);
                 }
 
-                return FluidVariant.blank();
+                return Optional.empty();
             }
         }
 
-        for (StorageView<FluidVariant> storageView : storage.nonEmptyViews()) {
-            return storageView.getResource();
+        for (StorageView<T> storageView : storage.nonEmptyViews()) {
+            return Optional.ofNullable(storageView.getResource());
         }
 
-        return FluidVariant.blank();
+        return Optional.empty();
     }
 
     @Override
@@ -206,8 +217,8 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                FluidVariant variant = findFirstFluidVariant(storage, inputFluidTank.variant);
-                if (!variant.isBlank()) {
+                Optional<FluidVariant> optVariant = findFirstVariant(storage, inputFluidTank.variant);
+                optVariant.filter(TransferVariant::isBlank).ifPresent(variant -> {
                     try (Transaction transaction = Transaction.openOuter()) {
                         long extracted = storage.extract(variant, FluidConstants.BUCKET, transaction);
                         if (extracted > 0) {
@@ -217,21 +228,21 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
                         transaction.commit();
                     }
-                }
+                });
             }
         }
 
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
         if (!bucketOutputInventory.isEmpty()) {
             ItemStack bucket = bucketOutputInventory.getStack(0);
-            Storage<FluidVariant> storage = FluidStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
+            Storage<SlurryVariant> storage = SlurryStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsInsertion()) {
-                SyncingFluidStorage outputFluidTank = getOutputFluidTank();
-                if (outputFluidTank.amount > 0) {
+                SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
+                if (outputSlurryTank.amount > 0) {
                     try (Transaction transaction = Transaction.openOuter()) {
-                        long inserted = storage.insert(outputFluidTank.variant, FluidConstants.BUCKET, transaction);
+                        long inserted = storage.insert(outputSlurryTank.variant, FluidConstants.BUCKET, transaction);
                         if (inserted > 0) {
-                            outputFluidTank.amount -= inserted;
+                            outputSlurryTank.amount -= inserted;
                         }
 
                         transaction.commit();
@@ -250,12 +261,12 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
             return;
         }
 
-        if (!this.outputFluidStack.isEmpty()) {
-            SyncingFluidStorage outputFluidTank = getOutputFluidTank();
-            if (outputFluidTank.canInsert(this.outputFluidStack.variant())) {
-                long inserted = Math.min(outputFluidTank.getCapacity() - outputFluidTank.amount, this.outputFluidStack.amount());
-                outputFluidTank.amount += inserted;
-                this.outputFluidStack = this.outputFluidStack.withAmount(this.outputFluidStack.amount() - inserted);
+        if (!this.outputSlurryStack.isEmpty()) {
+            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
+            if (outputSlurryTank.canInsert(this.outputSlurryStack.variant())) {
+                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
+                outputSlurryTank.amount += inserted;
+                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
                 update();
             }
 
@@ -294,7 +305,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
                 inputFluidTank.amount -= recipe.inputFluid().amount();
 
                 SyncingSimpleInventory outputInventory = getOutputInventory();
-                SyncingFluidStorage outputFluidTank = getOutputFluidTank();
+                SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
 
                 this.progress = 0;
                 this.maxProgress = 0;
@@ -306,14 +317,15 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
                     this.outputItemStack = output;
                 }
 
-                FluidStack outputFluid = recipe.outputFluid();
-                if (outputFluidTank.canInsert(outputFluid.variant())) {
-                    long inserted = Math.min(outputFluidTank.getCapacity() - outputFluidTank.amount, outputFluid.amount());
-                    outputFluidTank.amount += inserted;
-                    outputFluid = outputFluid.withAmount(outputFluid.amount() - inserted);
+                SlurryStack outputSlurry = recipe.outputSlurry();
+                if (outputSlurryTank.canInsert(outputSlurry.variant())) {
+                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, outputSlurry.amount());
+                    outputSlurryTank.amount += inserted;
+                    outputSlurryTank.variant = outputSlurry.variant();
+                    outputSlurry = outputSlurry.withAmount(outputSlurry.amount() - inserted);
                 }
 
-                this.outputFluidStack = outputFluid;
+                this.outputSlurryStack = outputSlurry;
 
                 update();
             }
@@ -343,10 +355,17 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
         modidData.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
         modidData.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
+        modidData.put("SlurryTank", this.wrappedSlurryStorage.writeNbt(registries));
         modidData.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
 
         if (!this.outputItemStack.isEmpty()) {
             modidData.put("OutputStack", this.outputItemStack.toNbt(registries));
+        }
+
+        if (!this.outputSlurryStack.isEmpty()) {
+            modidData.put("OutputSlurry", SlurryStack.CODEC.codec()
+                    .encodeStart(NbtOps.INSTANCE, this.outputSlurryStack)
+                    .getOrThrow());
         }
 
         modidData.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
@@ -390,11 +409,21 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
         if (modidData.contains("FluidTank", NbtElement.LIST_TYPE))
             this.wrappedFluidStorage.readNbt(modidData.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
 
+        if (modidData.contains("SlurryTank", NbtElement.LIST_TYPE))
+            this.wrappedSlurryStorage.readNbt(modidData.getList("SlurryTank", NbtElement.COMPOUND_TYPE), registries);
+
         if (modidData.contains("Energy", NbtElement.LIST_TYPE))
             this.wrappedEnergyStorage.readNbt(modidData.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
 
         if (modidData.contains("OutputStack", NbtElement.COMPOUND_TYPE)) {
             this.outputItemStack = ItemStack.fromNbtOrEmpty(registries, modidData.getCompound("OutputStack"));
+        }
+
+        if (modidData.contains("OutputSlurry", NbtElement.COMPOUND_TYPE)) {
+            this.outputSlurryStack = SlurryStack.CODEC.codec()
+                    .decode(NbtOps.INSTANCE, modidData.getCompound("OutputSlurry"))
+                    .map(Pair::getFirst)
+                    .getOrThrow();
         }
 
         if (modidData.contains("MachinePositions", NbtElement.LIST_TYPE)) {
@@ -461,18 +490,19 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
         return new MixerScreenHandler(syncId, playerInventory, this, this.properties);
     }
 
-    private static boolean isCenterColumn(Vec3i offset) {
-        return offset.getX() == 0 && offset.getZ() == 0;
-    }
-
     @Override
     public Storage<FluidVariant> getFluidStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        if (offsetFromPrimary.getY() == 2 && isCenterColumn(offsetFromPrimary) && direction == Direction.UP) {
+        if (offsetFromPrimary.getY() == 2 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP) {
             return getInputFluidTank();
         }
 
-        if (offsetFromPrimary.getY() == 0 && !isCenterColumn(offsetFromPrimary) && direction == Direction.DOWN) {
-            return this.wrappedFluidStorage.getStorage(Direction.WEST);
+        return null;
+    }
+
+    @Override
+    public Storage<SlurryVariant> getSlurryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+        if (offsetFromPrimary.getY() == 0 && !Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.DOWN) {
+            return getOutputSlurryTank();
         }
 
         return null;
@@ -494,7 +524,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
     @Override
     public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        if (((offsetFromPrimary.getY() == 2 && direction == Direction.UP) || (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN)) && isCenterColumn(offsetFromPrimary)) {
+        if (((offsetFromPrimary.getY() == 2 && direction == Direction.UP) || (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN)) && Multiblockable.isCenterColumn(offsetFromPrimary)) {
             return getEnergyStorage();
         }
 
@@ -521,8 +551,8 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
         return (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(Direction.EAST);
     }
 
-    public SyncingFluidStorage getOutputFluidTank() {
-        return (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(Direction.WEST);
+    public SyncingSlurryStorage getOutputSlurryTank() {
+        return (SyncingSlurryStorage) this.wrappedSlurryStorage.getStorage(Direction.WEST);
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
