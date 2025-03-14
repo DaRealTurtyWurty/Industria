@@ -94,6 +94,7 @@ public class IndustriaClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.UPGRADE_STATION, UpgradeStationBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MIXER, MixerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.DIGESTER, DigesterBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
 
         // Registering BuiltinModelItemRenderers
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);

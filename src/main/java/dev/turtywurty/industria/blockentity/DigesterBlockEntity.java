@@ -12,7 +12,10 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
-import dev.turtywurty.industria.blockentity.util.fluid.*;
+import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
@@ -23,8 +26,10 @@ import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
@@ -65,9 +70,7 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 // TODO: Make this work with temperature and pressure
 public class DigesterBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
@@ -120,9 +123,9 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createEmptyFluidPredicate(() -> getOutputFluidStorage().variant)));
 
-        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 5_000, 0), Direction.UP);
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 5_000, 0));
 
-        this.wrappedSlurryStorage.addStorage(new InputSlurryStorage(this, FluidConstants.BUCKET * 5), Direction.NORTH);
+        this.wrappedSlurryStorage.addStorage(new InputSlurryStorage(this, FluidConstants.BUCKET * 5), Direction.UP);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.SOUTH);
     }
 
@@ -146,11 +149,11 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
-        return (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.UP);
+        return (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
     }
 
     public InputSlurryStorage getInputSlurryStorage() {
-        return (InputSlurryStorage) this.wrappedSlurryStorage.getStorage(Direction.NORTH);
+        return (InputSlurryStorage) this.wrappedSlurryStorage.getStorage(Direction.UP);
     }
 
     public OutputFluidStorage getOutputFluidStorage() {
@@ -158,27 +161,18 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
     }
 
     @Override
-    public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        if(offsetFromPrimary.getZ() == -1 && direction == Direction.NORTH)
-            return getEnergyStorage();
+    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
+        Map<Direction, List<TransferType<?, ?>>> transferTypes = new EnumMap<>(Direction.class);
+        if (offsetFromPrimary.getY() == 4 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP)
+            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.SLURRY);
 
-        return null;
-    }
+        if (offsetFromPrimary.getZ() == -1 && direction == Direction.NORTH)
+            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.ENERGY);
 
-    @Override
-    public Storage<FluidVariant> getFluidStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        if(offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == 1 && direction == Direction.SOUTH)
-            return getOutputFluidStorage();
+        if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == 1 && direction == Direction.SOUTH)
+            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.FLUID);
 
-        return null;
-    }
-
-    @Override
-    public Storage<SlurryVariant> getSlurryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        if(offsetFromPrimary.getY() == 4 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP)
-            return getInputSlurryStorage();
-
-        return null;
+        return Multiblockable.toIOPortMap(transferTypes);
     }
 
     @Override
@@ -419,5 +413,17 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
     @Override
     public Block getBlock() {
         return getCachedState().getBlock();
+    }
+
+    public @Nullable EnergyStorage getEnergyProvider(@Nullable Direction direction) {
+        return this.wrappedEnergyStorage.getStorage(direction);
+    }
+
+    public @Nullable SingleSlurryStorage getSlurryProvider(@Nullable Direction direction) {
+        return this.wrappedSlurryStorage.getStorage(direction);
+    }
+
+    public @Nullable SingleFluidStorage getFluidProvider(@Nullable Direction direction) {
+        return this.wrappedFluidStorage.getStorage(direction);
     }
 }

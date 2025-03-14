@@ -1,11 +1,9 @@
 package dev.turtywurty.industria.multiblock;
 
-import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -18,11 +16,8 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.api.EnergyStorage;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents an object that acts as a multiblock controller.
@@ -33,6 +28,12 @@ import java.util.Map;
 public interface Multiblockable {
     static boolean isCenterColumn(Vec3i offset) {
         return offset.getX() == 0 && offset.getZ() == 0;
+    }
+
+    static Map<Direction, MultiblockIOPort> toIOPortMap(Map<Direction, List<TransferType<?,?>>> transferTypes) {
+        Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
+        transferTypes.forEach((dir, types) -> ports.put(dir, new MultiblockIOPort(dir, types)));
+        return ports;
     }
 
     /**
@@ -63,22 +64,6 @@ public interface Multiblockable {
      */
     List<BlockPos> getMultiblockPositions();
 
-    default EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        return null;
-    }
-
-    default InventoryStorage getInventoryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        return null;
-    }
-
-    default Storage<FluidVariant> getFluidStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        return null;
-    }
-
-    default Storage<SlurryVariant> getSlurryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        return null;
-    }
-
     /**
      * Builds the multiblock in the world.
      *
@@ -105,7 +90,17 @@ public interface Multiblockable {
         }
 
         for (BlockPos position : checkPositions) {
-            world.setBlockState(position, BlockInit.MULTIBLOCK_BLOCK.getDefaultState());
+            Vec3i offset = MultiblockBlock.getOffsetFromPrimary(pos, position, facing);
+            Block toSet = BlockInit.MULTIBLOCK_BLOCK;
+            for(Direction direction : Direction.values()) {
+                Map<Direction, MultiblockIOPort> ports = getPorts(offset, direction);
+                if (ports.isEmpty())
+                    continue;
+
+                toSet = BlockInit.MULTIBLOCK_IO;
+            }
+
+            world.setBlockState(position, toSet.getDefaultState());
             getMultiblockPositions().add(position);
 
             Chunk chunk = world.getChunk(position);
@@ -135,7 +130,8 @@ public interface Multiblockable {
             return;
 
         for (BlockPos machinePos : getMultiblockPositions()) {
-            if (!world.getBlockState(machinePos).isOf(BlockInit.MULTIBLOCK_BLOCK))
+            BlockState blockState = world.getBlockState(machinePos);
+            if (!blockState.isOf(BlockInit.MULTIBLOCK_BLOCK) && !blockState.isOf(BlockInit.MULTIBLOCK_IO))
                 continue;
 
             world.breakBlock(machinePos, false);
@@ -184,5 +180,16 @@ public interface Multiblockable {
             int[] machinePosition = nbt.getIntArray(i);
             machinePositions.add(new BlockPos(machinePosition[0], machinePosition[1], machinePosition[2]));
         }
+    }
+
+    /**
+     * Gets the ports of the multiblock.
+     *
+     * @param offsetFromPrimary The offset from the primary block of the multiblock.
+     * @param direction         The direction the ports are in.
+     * @return A map of ports that are in the specified direction.
+     */
+    default Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
+        return Collections.emptyMap();
     }
 }

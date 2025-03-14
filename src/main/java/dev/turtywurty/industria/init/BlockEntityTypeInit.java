@@ -101,6 +101,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(DigesterBlockEntity::new, BlockInit.DIGESTER)
                     .build());
 
+    public static final BlockEntityType<MultiblockIOBlockEntity> MULTIBLOCK_IO = register("multiblock_io",
+            FabricBlockEntityTypeBuilder.create(MultiblockIOBlockEntity::new, BlockInit.MULTIBLOCK_IO)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

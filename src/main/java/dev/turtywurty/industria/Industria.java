@@ -12,6 +12,7 @@ import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.init.worldgen.FeatureInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
@@ -103,15 +104,11 @@ public class Industria implements ModInitializer {
 
         EnergyStorage.SIDED.registerForBlockEntity(CableBlockEntity::getStorageProvider, BlockEntityTypeInit.CABLE);
         FluidStorage.SIDED.registerForBlockEntity(FluidPipeBlockEntity::getStorageProvider, BlockEntityTypeInit.FLUID_PIPE);
+        SlurryStorage.SIDED.registerForBlockEntity(SlurryPipeBlockEntity::getStorageProvider, BlockEntityTypeInit.SLURRY_PIPE);
 
         EnergyStorage.SIDED.registerForBlockEntity(WindTurbineBlockEntity::getEnergyProvider, BlockEntityTypeInit.WIND_TURBINE);
 
         EnergyStorage.SIDED.registerForBlockEntity(MotorBlockEntity::getEnergyProvider, BlockEntityTypeInit.MOTOR);
-
-        EnergyStorage.SIDED.registerForBlocks(MultiblockBlock::getEnergyProvider, BlockInit.MULTIBLOCK_BLOCK);
-        ItemStorage.SIDED.registerForBlocks(MultiblockBlock::getInventoryProvider, BlockInit.MULTIBLOCK_BLOCK);
-        FluidStorage.SIDED.registerForBlocks(MultiblockBlock::getFluidProvider, BlockInit.MULTIBLOCK_BLOCK);
-        SlurryStorage.SIDED.registerForBlocks(MultiblockBlock::getSlurryProvider, BlockInit.MULTIBLOCK_BLOCK);
 
         EnergyStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
         ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
@@ -127,6 +124,15 @@ public class Industria implements ModInitializer {
         ItemStorage.SIDED.registerForBlockEntity(MixerBlockEntity::getInventoryProvider, BlockEntityTypeInit.MIXER);
         FluidStorage.SIDED.registerForBlockEntity(MixerBlockEntity::getFluidProvider, BlockEntityTypeInit.MIXER);
         EnergyStorage.SIDED.registerForBlockEntity(MixerBlockEntity::getEnergyProvider, BlockEntityTypeInit.MIXER);
+        SlurryStorage.SIDED.registerForBlockEntity(MixerBlockEntity::getSlurryProvider, BlockEntityTypeInit.MIXER);
+
+        EnergyStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getEnergyProvider, BlockEntityTypeInit.DIGESTER);
+        SlurryStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getSlurryProvider, BlockEntityTypeInit.DIGESTER);
+        FluidStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getFluidProvider, BlockEntityTypeInit.DIGESTER);
+
+        for (TransferType<?, ?> transferType : TransferType.getValues()) {
+            transferType.registerForMultiblockIo();
+        }
 
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);

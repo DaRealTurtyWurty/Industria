@@ -16,15 +16,16 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.DamageTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
+import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.DrillRenderData;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -54,9 +55,7 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("drill");
@@ -333,24 +332,23 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
     }
 
     @Override
-    public InventoryStorage getInventoryStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
+    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
+        Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
         if (offsetFromPrimary.getY() == 2) {
-            return this.wrappedInventoryStorage.getStorage(Direction.SOUTH);
+            ports.put(Direction.SOUTH, new MultiblockIOPort(Direction.SOUTH, TransferType.ITEM));
         } else if (offsetFromPrimary.getY() == 0 && (offsetFromPrimary.getX() != 0 || offsetFromPrimary.getZ() != 0)) {
-            return this.wrappedInventoryStorage.getStorage(Direction.DOWN);
+            ports.put(Direction.DOWN, new MultiblockIOPort(Direction.DOWN, TransferType.ITEM));
         } else if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == -1 && offsetFromPrimary.getZ() == 0) {
-            return this.wrappedInventoryStorage.getStorage(Direction.UP);
+            ports.put(Direction.UP, new MultiblockIOPort(Direction.UP, TransferType.ITEM));
         } else if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == 1 && offsetFromPrimary.getZ() == 0) {
-            return this.wrappedInventoryStorage.getStorage(Direction.NORTH);
+            ports.put(Direction.NORTH, new MultiblockIOPort(Direction.NORTH, TransferType.ITEM));
         }
 
-        return null;
-    }
+        if(offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == 0 && offsetFromPrimary.getZ() == 0) {
+            ports.put(Direction.UP, new MultiblockIOPort(Direction.UP, TransferType.ENERGY));
+        }
 
-    @Override
-    public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        return (offsetFromPrimary.getY() == 0 && (offsetFromPrimary.getX() != 0 || offsetFromPrimary.getZ() != 0)) ?
-                this.wrappedEnergyStorage.getStorage(null) : null;
+        return ports;
     }
 
     // 3x3x3 Multiblock

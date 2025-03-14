@@ -1,19 +1,12 @@
 package dev.turtywurty.industria.block;
 
-import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
-import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.MultiblockData;
-import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.util.CachedVoxelShapes;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
@@ -27,7 +20,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Map;
 
@@ -39,7 +31,10 @@ public class MultiblockBlock extends Block {
             return VoxelShapes.empty();
 
         BlockState primaryState = world.getBlockState(data.primaryPos());
-        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING) : Direction.NORTH;
+        Direction direction = data.type().hasDirectionProperty() ? primaryState.getNullable(Properties.HORIZONTAL_FACING) : Direction.NORTH;
+        if(direction == null)
+            direction = Direction.NORTH;
+
         Vec3i offset = getOffsetFromPrimary(data.primaryPos(), pos, null);
 
         VoxelShape shape = data.type().getShape(direction);
@@ -50,7 +45,7 @@ public class MultiblockBlock extends Block {
         super(settings);
     }
 
-    private static Vec3i getOffsetFromPrimary(BlockPos primaryPos, BlockPos pos, @Nullable Direction multiblockRotation) {
+    public static Vec3i getOffsetFromPrimary(BlockPos primaryPos, BlockPos pos, @Nullable Direction multiblockRotation) {
         int dx = pos.getX() - primaryPos.getX();
         int dy = pos.getY() - primaryPos.getY();
         int dz = pos.getZ() - primaryPos.getZ();
@@ -66,75 +61,6 @@ public class MultiblockBlock extends Block {
             case EAST -> new Vec3i(-dz, dy, dx);
             default -> new Vec3i(dx, dy, dz);
         };
-    }
-
-    public static EnergyStorage getEnergyProvider(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Object context) {
-        if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
-            return null;
-
-        BlockPos primaryPos = getPrimaryPos(world, pos);
-        if (primaryPos == null)
-            return null;
-
-        BlockState primaryState = world.getBlockState(primaryPos);
-        if (world.getBlockEntity(primaryPos) instanceof Multiblockable multiblockable) {
-            Direction primaryFacing = primaryState.get(Properties.HORIZONTAL_FACING);
-
-            return multiblockable.getEnergyStorage(getOffsetFromPrimary(primaryPos, pos, primaryFacing), context instanceof Direction direction ? direction : null);
-        }
-
-        return null;
-    }
-
-    public static InventoryStorage getInventoryProvider(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Object context) {
-        if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
-            return null;
-
-        BlockPos primaryPos = getPrimaryPos(world, pos);
-        if (primaryPos == null)
-            return null;
-
-        BlockState primaryState = world.getBlockState(primaryPos);
-        if (world.getBlockEntity(primaryPos) instanceof Multiblockable multiblockable) {
-            Direction primaryFacing = primaryState.get(Properties.HORIZONTAL_FACING);
-            return multiblockable.getInventoryStorage(getOffsetFromPrimary(primaryPos, pos, primaryFacing), context instanceof Direction direction ? direction : null);
-        }
-
-        return null;
-    }
-
-    public static Storage<FluidVariant> getFluidProvider(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Object context) {
-        if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
-            return null;
-
-        BlockPos primaryPos = getPrimaryPos(world, pos);
-        if (primaryPos == null)
-            return null;
-
-        BlockState primaryState = world.getBlockState(primaryPos);
-        if (world.getBlockEntity(primaryPos) instanceof Multiblockable multiblockable) {
-            Direction primaryFacing = primaryState.get(Properties.HORIZONTAL_FACING);
-            return multiblockable.getFluidStorage(getOffsetFromPrimary(primaryPos, pos, primaryFacing), context instanceof Direction direction ? direction : null);
-        }
-
-        return null;
-    }
-
-    public static Storage<SlurryVariant> getSlurryProvider(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Object context) {
-        if (!state.isOf(BlockInit.MULTIBLOCK_BLOCK))
-            return null;
-
-        BlockPos primaryPos = getPrimaryPos(world, pos);
-        if (primaryPos == null)
-            return null;
-
-        BlockState primaryState = world.getBlockState(primaryPos);
-        if (world.getBlockEntity(primaryPos) instanceof Multiblockable multiblockable) {
-            Direction primaryFacing = primaryState.get(Properties.HORIZONTAL_FACING);
-            return multiblockable.getSlurryStorage(getOffsetFromPrimary(primaryPos, pos, primaryFacing), context instanceof Direction direction ? direction : null);
-        }
-
-        return null;
     }
 
     public static MultiblockData getMultiblockData(WorldView world, BlockPos pos) {

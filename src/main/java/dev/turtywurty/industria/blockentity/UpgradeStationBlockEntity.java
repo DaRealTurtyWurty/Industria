@@ -14,8 +14,10 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
+import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
@@ -428,8 +430,11 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
     }
 
     @Override
-    public EnergyStorage getEnergyStorage(Vec3i offsetFromPrimary, @Nullable Direction direction) {
-        return this.wrappedEnergyStorage.getStorage(direction);
+    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
+        Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
+        ports.put(direction, new MultiblockIOPort(direction, TransferType.ENERGY));
+
+        return ports;
     }
 
     @Override
