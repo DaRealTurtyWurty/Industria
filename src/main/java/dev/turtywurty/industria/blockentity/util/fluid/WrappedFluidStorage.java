@@ -37,10 +37,10 @@ public class WrappedFluidStorage<T extends Storage<FluidVariant>> extends Wrappe
     public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
         var list = new NbtList();
         for (T tank : this.storages) {
-            for (StorageView<FluidVariant> view : tank.nonEmptyViews()) {
+            if (tank instanceof SingleFluidStorage singleFluidStorage) {
                 var nbt = new NbtCompound();
-                nbt.putLong("Amount", view.getAmount());
-                nbt.put("Fluid", FluidVariant.CODEC.encode(view.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
+                nbt.putLong("Amount", singleFluidStorage.getAmount());
+                nbt.put("Fluid", FluidVariant.CODEC.encode(singleFluidStorage.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
                 list.add(nbt);
             }
         }

@@ -4,10 +4,7 @@ import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
-import dev.turtywurty.industria.datagen.builder.AlloyFurnaceRecipeBuilder;
-import dev.turtywurty.industria.datagen.builder.CrusherRecipeBuilder;
-import dev.turtywurty.industria.datagen.builder.DigesterRecipeBuilder;
-import dev.turtywurty.industria.datagen.builder.MixerRecipeBuilder;
+import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.init.SlurryInit;
@@ -230,6 +227,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 offerDigester(exporter, new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BUCKET),
                         new FluidStack(FluidVariant.of(Fluids.LAVA), FluidConstants.BOTTLE), // TODO: Replace with output of dirty sodium aluminate
                         200, "bauxite_to_dirty_sodium_aluminate");
+
+                offerClarifier(exporter, new FluidStack(FluidVariant.of(Fluids.LAVA), FluidConstants.BOTTLE),
+                        new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE),
+                        new OutputItemStack(Items.COBBLESTONE, 1, 1),
+                        200, "dirty_sodium_aluminate_to_sodium_aluminate");
             }
         };
     }
@@ -252,6 +254,10 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
 
     private static void offerDigester(RecipeExporter exporter, SlurryStack inputSlurry, FluidStack outputFluid, int processTime, String name) {
         new DigesterRecipeBuilder(inputSlurry, outputFluid, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("digester_" + name)));
+    }
+
+    private static void offerClarifier(RecipeExporter exporter, FluidStack inputFluid, FluidStack outputFluid, OutputItemStack outputItem, int processTime, String name) {
+        new ClarifierRecipeBuilder(inputFluid, outputFluid, outputItem, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("clarifier_" + name)));
     }
 
     private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {

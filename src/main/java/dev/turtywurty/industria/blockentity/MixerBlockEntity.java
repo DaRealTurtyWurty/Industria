@@ -344,59 +344,52 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.writeNbt(nbt, registries);
 
-        var modidData = new NbtCompound();
-        modidData.putInt("Progress", this.progress);
-        modidData.putInt("MaxProgress", this.maxProgress);
-        modidData.putInt("Temperature", this.temperature);
+        nbt.putInt("Progress", this.progress);
+        nbt.putInt("MaxProgress", this.maxProgress);
+        nbt.putInt("Temperature", this.temperature);
         if (this.currentRecipeId != null) {
             Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
                     .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
                     .result();
-            result.ifPresent(nbtElement -> modidData.put("CurrentRecipe", nbtElement));
+            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
         }
 
-        modidData.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        modidData.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        modidData.put("SlurryTank", this.wrappedSlurryStorage.writeNbt(registries));
-        modidData.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
+        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
+        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
+        nbt.put("SlurryTank", this.wrappedSlurryStorage.writeNbt(registries));
+        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
 
         if (!this.outputItemStack.isEmpty()) {
-            modidData.put("OutputStack", this.outputItemStack.toNbt(registries));
+            nbt.put("OutputStack", this.outputItemStack.toNbt(registries));
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-            modidData.put("OutputSlurry", SlurryStack.CODEC.codec()
+            nbt.put("OutputSlurry", SlurryStack.CODEC.codec()
                     .encodeStart(NbtOps.INSTANCE, this.outputSlurryStack)
                     .getOrThrow());
         }
 
-        modidData.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
-
-        nbt.put(Industria.MOD_ID, modidData);
+        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if (!nbt.contains(Industria.MOD_ID, NbtElement.COMPOUND_TYPE))
-            return;
-
-        NbtCompound modidData = nbt.getCompound(Industria.MOD_ID);
-        if (modidData.contains("Progress", NbtElement.INT_TYPE)) {
-            this.progress = modidData.getInt("Progress");
+        if (nbt.contains("Progress", NbtElement.INT_TYPE)) {
+            this.progress = nbt.getInt("Progress");
         }
 
-        if (modidData.contains("MaxProgress", NbtElement.INT_TYPE)) {
-            this.maxProgress = modidData.getInt("MaxProgress");
+        if (nbt.contains("MaxProgress", NbtElement.INT_TYPE)) {
+            this.maxProgress = nbt.getInt("MaxProgress");
         }
 
-        if (modidData.contains("Temperature", NbtElement.INT_TYPE)) {
-            this.temperature = modidData.getInt("Temperature");
+        if (nbt.contains("Temperature", NbtElement.INT_TYPE)) {
+            this.temperature = nbt.getInt("Temperature");
         }
 
-        if (modidData.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = modidData.getCompound("CurrentRecipe");
+        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
+            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
             this.currentRecipeId = currentRecipe.isEmpty() ? null :
                     RegistryKey.createCodec(RegistryKeys.RECIPE)
                             .decode(NbtOps.INSTANCE, currentRecipe)
@@ -405,31 +398,31 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
                             .orElse(null);
         }
 
-        if (modidData.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(modidData.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory", NbtElement.LIST_TYPE))
+            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
 
-        if (modidData.contains("FluidTank", NbtElement.LIST_TYPE))
-            this.wrappedFluidStorage.readNbt(modidData.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("FluidTank", NbtElement.LIST_TYPE))
+            this.wrappedFluidStorage.readNbt(nbt.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
 
-        if (modidData.contains("SlurryTank", NbtElement.LIST_TYPE))
-            this.wrappedSlurryStorage.readNbt(modidData.getList("SlurryTank", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("SlurryTank", NbtElement.LIST_TYPE))
+            this.wrappedSlurryStorage.readNbt(nbt.getList("SlurryTank", NbtElement.COMPOUND_TYPE), registries);
 
-        if (modidData.contains("Energy", NbtElement.LIST_TYPE))
-            this.wrappedEnergyStorage.readNbt(modidData.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Energy", NbtElement.LIST_TYPE))
+            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
 
-        if (modidData.contains("OutputStack", NbtElement.COMPOUND_TYPE)) {
-            this.outputItemStack = ItemStack.fromNbtOrEmpty(registries, modidData.getCompound("OutputStack"));
+        if (nbt.contains("OutputStack", NbtElement.COMPOUND_TYPE)) {
+            this.outputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("OutputStack"));
         }
 
-        if (modidData.contains("OutputSlurry", NbtElement.COMPOUND_TYPE)) {
+        if (nbt.contains("OutputSlurry", NbtElement.COMPOUND_TYPE)) {
             this.outputSlurryStack = SlurryStack.CODEC.codec()
-                    .decode(NbtOps.INSTANCE, modidData.getCompound("OutputSlurry"))
+                    .decode(NbtOps.INSTANCE, nbt.getCompound("OutputSlurry"))
                     .map(Pair::getFirst)
                     .getOrThrow();
         }
 
-        if (modidData.contains("MachinePositions", NbtElement.LIST_TYPE)) {
-            Multiblockable.readMultiblockFromNbt(this, modidData.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
+        if (nbt.contains("MachinePositions", NbtElement.LIST_TYPE)) {
+            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
         }
     }
 

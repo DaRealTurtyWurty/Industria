@@ -1,0 +1,21 @@
+{
+  "type": "industria:clarifier",
+  "input_fluid": {
+    "amount": 27000,
+    "variant": {
+      "fluid": "minecraft:lava"
+    }
+  },
+  "output_fluid": {
+    "amount": 27000,
+    "variant": {
+      "fluid": "minecraft:water"
+    }
+  },
+  "output_item": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "minecraft:cobblestone"
+  },
+  "process_time": 200
+}

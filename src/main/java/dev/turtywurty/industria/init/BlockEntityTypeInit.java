@@ -105,6 +105,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(MultiblockIOBlockEntity::new, BlockInit.MULTIBLOCK_IO)
                     .build());
 
+    public static final BlockEntityType<ClarifierBlockEntity> CLARIFIER = register("clarifier",
+            FabricBlockEntityTypeBuilder.create(ClarifierBlockEntity::new, BlockInit.CLARIFIER)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

@@ -23,6 +23,9 @@ public class RecipeSerializerInit {
     public static final RecipeSerializer<DigesterRecipe> DIGESTER =
             register("digester", DigesterRecipe.Serializer.INSTANCE);
 
+    public static final RecipeSerializer<ClarifierRecipe> CLARIFIER =
+            register("clarifier", ClarifierRecipe.Serializer.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
         return Registry.register(Registries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }

@@ -113,6 +113,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
 
         translationBuilder.add(BlockInit.DIGESTER, "Digester");
         addText(translationBuilder, DigesterBlockEntity.TITLE, "Digester");
+
+        translationBuilder.add(BlockInit.CLARIFIER, "Clarifier");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

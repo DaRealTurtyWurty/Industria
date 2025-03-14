@@ -84,6 +84,7 @@ public class IndustriaClient implements ClientModInitializer {
         EntityModelLayerRegistry.registerModelLayer(UpgradeStationModel.LAYER_LOCATION, UpgradeStationModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(MixerModel.LAYER_LOCATION, MixerModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(DigesterModel.LAYER_LOCATION, DigesterModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(ClarifierModel.LAYER_LOCATION, ClarifierModel::getTexturedModelData);
 
         // Registering Block Entity Renderers
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
@@ -95,6 +96,7 @@ public class IndustriaClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MIXER, MixerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.DIGESTER, DigesterBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.CLARIFIER, ClarifierBlockEntityRenderer::new);
 
         // Registering BuiltinModelItemRenderers
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.WIND_TURBINE, IndustriaDynamicItemRenderer.INSTANCE);
@@ -107,6 +109,7 @@ public class IndustriaClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.UPGRADE_STATION, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.MIXER, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DIGESTER, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.CLARIFIER, IndustriaDynamicItemRenderer.INSTANCE);
 
         // Register Fluid Renderers
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,

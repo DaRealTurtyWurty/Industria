@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.ClarifierBlock;
 import dev.turtywurty.industria.block.DigesterBlock;
 import dev.turtywurty.industria.block.MixerBlock;
 import dev.turtywurty.industria.blockentity.*;
@@ -14,7 +15,7 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true));
 
     public static final MultiblockType<DrillBlockEntity> DRILL = register("drill",
-            new MultiblockType.Builder<DrillBlockEntity>(26)
+            new MultiblockType.Builder<DrillBlockEntity>(26) // 3x3x3
                     .setHasDirectionProperty(true));
 
     public static final MultiblockType<UpgradeStationBlockEntity> UPGRADE_STATION = register("upgrade_station",
@@ -22,7 +23,7 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true));
 
     public static final MultiblockType<MixerBlockEntity> MIXER = register("mixer",
-            new MultiblockType.Builder<MixerBlockEntity>(26)
+            new MultiblockType.Builder<MixerBlockEntity>(26) // 3x3x3
                     .setHasDirectionProperty(true)
                     .shapes(MixerBlock.VOXEL_SHAPE)
                     .setOnMultiblockBreak((world, pos) -> {
@@ -34,11 +35,23 @@ public class MultiblockTypeInit {
                     }));
 
     public static final MultiblockType<DigesterBlockEntity> DIGESTER = register("digester",
-            new MultiblockType.Builder<DigesterBlockEntity>(44)
+            new MultiblockType.Builder<DigesterBlockEntity>(44) // 3x3x4
                     .setHasDirectionProperty(true)
                     .shapes(DigesterBlock.VOXEL_SHAPE)
                     .setOnMultiblockBreak((world, pos) -> {
                         if (world.getBlockEntity(pos) instanceof DigesterBlockEntity blockEntity) {
+                            blockEntity.breakMultiblock(world, pos);
+
+                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
+                        }
+                    }));
+
+    public static final MultiblockType<ClarifierBlockEntity> CLARIFIER = register("clarifier",
+            new MultiblockType.Builder<ClarifierBlockEntity>(17) // 3x3x2
+                    .setHasDirectionProperty(true)
+                    .shapes(ClarifierBlock.VOXEL_SHAPE)
+                    .setOnMultiblockBreak((world, pos) -> {
+                        if (world.getBlockEntity(pos) instanceof ClarifierBlockEntity blockEntity) {
                             blockEntity.breakMultiblock(world, pos);
 
                             blockEntity.getWrappedInventoryStorage().dropContents(world, pos);

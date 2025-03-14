@@ -138,6 +138,9 @@ public class BlockInit {
     public static final MultiblockIOBlock MULTIBLOCK_IO = registerWithItemCopy("multiblock_io",
             MultiblockIOBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static final ClarifierBlock CLARIFIER = registerWithItemCopy("clarifier",
+            ClarifierBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

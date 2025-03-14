@@ -37,10 +37,10 @@ public class WrappedSlurryStorage<T extends Storage<SlurryVariant>> extends Wrap
     public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
         var list = new NbtList();
         for (T tank : this.storages) {
-            for (StorageView<SlurryVariant> view : tank.nonEmptyViews()) {
+            if(tank instanceof SingleSlurryStorage singleSlurryStorage) {
                 var nbt = new NbtCompound();
-                nbt.putLong("Amount", view.getAmount());
-                nbt.put("Slurry", SlurryVariant.CODEC.encode(view.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
+                nbt.putLong("Amount", singleSlurryStorage.getAmount());
+                nbt.put("Slurry", SlurryVariant.CODEC.encode(singleSlurryStorage.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
                 list.add(nbt);
             }
         }

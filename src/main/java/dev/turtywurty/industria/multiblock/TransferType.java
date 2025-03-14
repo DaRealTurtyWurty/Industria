@@ -8,7 +8,6 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.ToLongFunction;
 
 public class TransferType<S, V> {
     private static final List<TransferType<?, ?>> VALUES = new ArrayList<>();
@@ -40,35 +38,32 @@ public class TransferType<S, V> {
             new TransferType<>(ItemStorage.SIDED, ItemStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> MixerBlockEntity.findFirstVariant(storage, null)
                             .orElse(ItemVariant.blank()),
-                    value -> 64,
                     ItemVariant::isBlank);
 
     public static final TransferType<Storage<FluidVariant>, FluidVariant> FLUID =
             new TransferType<>(FluidStorage.SIDED, FluidStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> MixerBlockEntity.findFirstVariant(storage, null)
                             .orElse(FluidVariant.blank()),
-                    value -> FluidConstants.BUCKET,
                     FluidVariant::isBlank);
 
     public static final TransferType<EnergyStorage, Long> ENERGY =
             new TransferType<>(EnergyStorage.SIDED, EnergyStorage.ITEM,
                     (storage, value, maxAmount, transaction) -> storage.insert(maxAmount, transaction),
                     (storage, value, maxAmount, transaction) -> storage.extract(maxAmount, transaction),
-                    EnergyStorage::getAmount, EnergyStorage::getCapacity,
+                    EnergyStorage::getAmount,
                     value -> value <= 0);
 
     public static final TransferType<HeatStorage, Long> HEAT =
             new TransferType<>(HeatStorage.SIDED, HeatStorage.ITEM,
                     (storage, value, maxAmount, transaction) -> storage.insert(maxAmount, transaction),
                     (storage, value, maxAmount, transaction) -> storage.extract(maxAmount, transaction),
-                    HeatStorage::getAmount, HeatStorage::getCapacity,
+                    HeatStorage::getAmount,
                     value -> value <= 0);
 
     public static final TransferType<Storage<SlurryVariant>, SlurryVariant> SLURRY =
             new TransferType<>(SlurryStorage.SIDED, SlurryStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> MixerBlockEntity.findFirstVariant(storage, null)
                             .orElse(SlurryVariant.blank()),
-                    value -> FluidConstants.BUCKET,
                     SlurryVariant::isBlank);
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
@@ -83,7 +78,6 @@ public class TransferType<S, V> {
     private final InsertExtractFunction<S, V> insertFunction;
     private final InsertExtractFunction<S, V> extractFunction;
     private final Function<S, V> valueGetter;
-    private final ToLongFunction<S> amountGetter;
     private final Predicate<V> isBlank;
 
     public TransferType(@NotNull BlockApiLookup<S, @Nullable Direction> blockLookup,
@@ -91,14 +85,12 @@ public class TransferType<S, V> {
                         @NotNull InsertExtractFunction<S, V> insertFunction,
                         @NotNull InsertExtractFunction<S, V> extractFunction,
                         @NotNull Function<S, V> valueGetter,
-                        @NotNull ToLongFunction<S> amountGetter,
                         @NotNull Predicate<V> isBlank) {
         Objects.requireNonNull(blockLookup, "blockLookup must not be null");
         Objects.requireNonNull(itemLookup, "itemLookup must not be null");
         Objects.requireNonNull(insertFunction, "insertFunction must not be null");
         Objects.requireNonNull(extractFunction, "extractFunction must not be null");
         Objects.requireNonNull(valueGetter, "valueGetter must not be null");
-        Objects.requireNonNull(amountGetter, "amountGetter must not be null");
         Objects.requireNonNull(isBlank, "isBlank must not be null");
 
         this.blockLookup = blockLookup;
@@ -108,7 +100,6 @@ public class TransferType<S, V> {
         this.extractFunction = extractFunction;
 
         this.valueGetter = valueGetter;
-        this.amountGetter = amountGetter;
         this.isBlank = isBlank;
 
         VALUES.add(this);
@@ -143,8 +134,13 @@ public class TransferType<S, V> {
             if (isBlank.test(value))
                 return;
 
-            long maxAmount = amountGetter.applyAsLong(primaryStorage);
-            if (maxAmount <= 0)
+            long maxAmount;
+            try(Transaction transaction1 = transaction.openNested()) {
+                maxAmount = extract(primaryStorage, value, Long.MAX_VALUE, transaction1);
+                transaction1.abort();
+            }
+
+            if(maxAmount <= 0)
                 return;
 
             long inserted = insert(secondaryStorage, value, maxAmount, transaction);

@@ -92,7 +92,53 @@ public class InWorldFluidRenderingComponent {
         matrices.pop();
     }
 
-    private static void drawTiledTopQuad(VertexConsumer vertexConsumer,
+    public void renderTopFaceOnly(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
+        if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0)
+            return;
+
+        FluidVariant fluidVariant = fluidTank.getResource();
+        long amount = fluidTank.amount;
+        long capacity = fluidTank.getCapacity();
+        float fillPercentage = (float) amount / capacity;
+        fillPercentage = MathHelper.clamp(fillPercentage, 0.0F, 1.0F);
+
+        if(this.shouldDebugAmount) {
+            fillPercentage = (float) (Math.sin(world.getTime() / 64.0) * 0.5 + 0.5);
+        }
+
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
+        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+
+        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        if(stillSprite == null)
+            return;
+
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
+
+        float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        light = (light & 0xF00000) | (luminosity << 4);
+
+        if (fillPercentage < 1.0F) {
+            drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
+        }
+
+        matrices.pop();
+    }
+
+    public static void drawTiledTopQuad(VertexConsumer vertexConsumer,
                                          MatrixStack.Entry entry,
                                          float x1, float y, float z1,
                                          float x2, float z2,
