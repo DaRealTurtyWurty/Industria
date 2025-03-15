@@ -1,9 +1,9 @@
-// 1.21.3	2025-03-14T20:37:04.0573488	Industria/World Generator
+// 1.21.3	2025-03-15T15:41:37.7719127	Industria/World Generator
 eddd59f9d52ffa87a3daba4258d09c8c1ec4c83e data\industria\worldgen\placed_feature\crude_oil_pocket.json
 d7c7d07ac61e0fef5bfa2976ca2ad358972150ed data\industria\worldgen\placed_feature\tin_ore.json
 b836c07be0b3c81f502168f86f7ead513389062a data\industria\worldgen\configured_feature\bauxite_ore.json
 9c6fc45c21803275a0d8d159fecada1c21bf7760 data\industria\worldgen\placed_feature\bauxite_ore.json
 b8461671398d792375e495f98db9180bdb5814da data\industria\worldgen\configured_feature\crude_oil_pocket.json
-d8ce9db1791a862d4165404d9624328a94bb186b data\industria\worldgen\configured_feature\tin_ore.json
 3767328c867f6301d8f562258daa3db888431cf0 data\industria\worldgen\configured_feature\zinc_ore.json
+d8ce9db1791a862d4165404d9624328a94bb186b data\industria\worldgen\configured_feature\tin_ore.json
 b83ace984b16ebff7dab2aa2291d86e63d922864 data\industria\worldgen\placed_feature\zinc_ore.json

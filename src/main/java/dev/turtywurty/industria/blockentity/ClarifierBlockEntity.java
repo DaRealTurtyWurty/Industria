@@ -1,7 +1,9 @@
 package dev.turtywurty.industria.blockentity;
 
 import com.mojang.datafixers.util.Pair;
+import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -16,13 +18,17 @@ import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ClarifierRecipe;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
+import dev.turtywurty.industria.screenhandler.ClarifierScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -36,7 +42,11 @@ import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.PropertyDelegate;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -44,7 +54,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ClarifierBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable {
+public class ClarifierBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable, BlockEntityWithGui<BlockPosPayload> {
+    public static final Text TITLE = Industria.containerTitle("clarifier");
+
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
 
@@ -56,6 +68,31 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
 
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private FluidStack outputFluidStack = FluidStack.EMPTY;
+
+    private final PropertyDelegate properties = new PropertyDelegate() {
+        @Override
+        public int get(int index) {
+            return switch (index) {
+                case 0 -> progress;
+                case 1 -> maxProgress;
+                default -> throw new IllegalArgumentException("Unknown property index: " + index);
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index) {
+                case 0 -> progress = value;
+                case 1 -> maxProgress = value;
+                default -> throw new IllegalArgumentException("Unknown property index: " + index);
+            }
+        }
+
+        @Override
+        public int size() {
+            return 2;
+        }
+    };
 
     public ClarifierBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.CLARIFIER, pos, state);
@@ -105,6 +142,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
             if (outputFluidTank.canInsert(this.outputFluidStack)) {
                 long inserted = Math.min(outputFluidTank.getCapacity() - outputFluidTank.amount, this.outputFluidStack.amount());
                 outputFluidTank.amount += inserted;
+                outputFluidTank.variant = outputFluidStack.variant();
                 this.outputFluidStack = this.outputFluidStack.withAmount(this.outputFluidStack.amount() - inserted);
                 update();
             }
@@ -309,5 +347,20 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
     @Override
     public List<BlockPos> getMultiblockPositions() {
         return this.multiblockPositions;
+    }
+
+    @Override
+    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
+        return new BlockPosPayload(this.pos);
+    }
+
+    @Override
+    public Text getDisplayName() {
+        return TITLE;
+    }
+
+    @Override
+    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+        return new ClarifierScreenHandler(syncId, playerInventory, this, this.properties);
     }
 }

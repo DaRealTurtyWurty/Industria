@@ -22,6 +22,10 @@ public class InWorldFluidRenderingComponent {
         this.shouldDebugAmount = shouldDebugAmount;
     }
 
+    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2) {
+        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    }
+
     public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
         if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0)
             return;
@@ -92,19 +96,13 @@ public class InWorldFluidRenderingComponent {
         matrices.pop();
     }
 
-    public void renderTopFaceOnly(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
-        if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0)
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
+        renderTopFaceOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    }
+
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
+        if (fluidVariant == null)
             return;
-
-        FluidVariant fluidVariant = fluidTank.getResource();
-        long amount = fluidTank.amount;
-        long capacity = fluidTank.getCapacity();
-        float fillPercentage = (float) amount / capacity;
-        fillPercentage = MathHelper.clamp(fillPercentage, 0.0F, 1.0F);
-
-        if(this.shouldDebugAmount) {
-            fillPercentage = (float) (Math.sin(world.getTime() / 64.0) * 0.5 + 0.5);
-        }
 
         int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
         fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
@@ -115,8 +113,6 @@ public class InWorldFluidRenderingComponent {
 
         RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
-
-        float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
 
         matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
@@ -131,9 +127,7 @@ public class InWorldFluidRenderingComponent {
         int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
         light = (light & 0xF00000) | (luminosity << 4);
 
-        if (fillPercentage < 1.0F) {
-            drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
-        }
+        drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
 
         matrices.pop();
     }
