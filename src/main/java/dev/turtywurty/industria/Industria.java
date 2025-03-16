@@ -2,7 +2,9 @@ package dev.turtywurty.industria;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
+import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.command.ConfigCommand;
@@ -15,6 +17,9 @@ import dev.turtywurty.industria.init.worldgen.FeatureInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
+import dev.turtywurty.industria.persistent.WorldPipeNetworks;
+import dev.turtywurty.industria.pipe.PipeNetwork;
+import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
@@ -32,6 +37,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.command.CommandManager;
@@ -102,10 +108,6 @@ public class Industria implements ModInitializer {
         EnergyStorage.SIDED.registerForBlockEntity(CrusherBlockEntity::getEnergyProvider, BlockEntityTypeInit.CRUSHER);
         ItemStorage.SIDED.registerForBlockEntity(CrusherBlockEntity::getInventoryProvider, BlockEntityTypeInit.CRUSHER);
 
-        EnergyStorage.SIDED.registerForBlockEntity(CableBlockEntity::getStorageProvider, BlockEntityTypeInit.CABLE);
-        FluidStorage.SIDED.registerForBlockEntity(FluidPipeBlockEntity::getStorageProvider, BlockEntityTypeInit.FLUID_PIPE);
-        SlurryStorage.SIDED.registerForBlockEntity(SlurryPipeBlockEntity::getStorageProvider, BlockEntityTypeInit.SLURRY_PIPE);
-
         EnergyStorage.SIDED.registerForBlockEntity(WindTurbineBlockEntity::getEnergyProvider, BlockEntityTypeInit.WIND_TURBINE);
 
         EnergyStorage.SIDED.registerForBlockEntity(MotorBlockEntity::getEnergyProvider, BlockEntityTypeInit.MOTOR);
@@ -136,6 +138,26 @@ public class Industria implements ModInitializer {
         for (TransferType<?, ?> transferType : TransferType.getValues()) {
             transferType.registerForMultiblockIo();
         }
+
+        FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
+            PipeNetwork<Storage<FluidVariant>> network = PipeNetworkManager.FLUID.getNetwork(world, pos);
+            return network == null ? null : network.getStorage();
+        }, BlockInit.FLUID_PIPE);
+
+        SlurryStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
+            PipeNetwork<Storage<SlurryVariant>> network = PipeNetworkManager.SLURRY.getNetwork(world, pos);
+            return network == null ? null : network.getStorage();
+        }, BlockInit.SLURRY_PIPE);
+
+        HeatStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
+            PipeNetwork<HeatStorage> network = PipeNetworkManager.HEAT.getNetwork(world, pos);
+            return network == null ? null : network.getStorage();
+        }, BlockInit.HEAT_PIPE);
+
+        EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
+            PipeNetwork<EnergyStorage> network = PipeNetworkManager.ENERGY.getNetwork(world, pos);
+            return network == null ? null : network.getStorage();
+        }, BlockInit.CABLE);
 
         // Payloads
         PayloadTypeRegistry.playC2S().register(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
@@ -212,7 +234,11 @@ public class Industria implements ModInitializer {
             }
         });
 
-        ServerWorldEvents.LOAD.register((server, world) -> ServerConfig.onServerLoad(server));
+        ServerWorldEvents.LOAD.register((server, world) -> {
+            ServerConfig.onServerLoad(server);
+            WorldPipeNetworks.getOrCreate(world);
+        });
+
         ServerWorldEvents.UNLOAD.register((server, world) -> ServerConfig.onServerSave(server));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -223,7 +249,14 @@ public class Industria implements ModInitializer {
             );
         });
 
-        ServerTickEvents.START_WORLD_TICK.register(world -> MultiblockBlock.SHAPE_CACHE.clear());
+        ServerTickEvents.START_WORLD_TICK.register(world -> {
+            MultiblockBlock.SHAPE_CACHE.clear();
+
+            PipeNetworkManager.ENERGY.tick(world);
+            PipeNetworkManager.HEAT.tick(world);
+            PipeNetworkManager.FLUID.tick(world);
+            PipeNetworkManager.SLURRY.tick(world);
+        });
 
         // Fluid Properties
         var crudeOilAttributes = new FluidVariantAttributeHandler() {

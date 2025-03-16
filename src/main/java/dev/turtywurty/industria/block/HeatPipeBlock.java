@@ -1,36 +1,23 @@
 package dev.turtywurty.industria.block;
 
+import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.heatapi.api.unit.HeatUnit;
-import dev.turtywurty.industria.blockentity.HeatPipeBlockEntity;
-import dev.turtywurty.industria.blockentity.util.heat.FluidHeatStorage;
-import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.math.Direction;
+import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.pipe.PipeNetworkManager;
 
-public class HeatPipeBlock extends PipeBlock<HeatPipeBlockEntity> {
+public class HeatPipeBlock extends PipeBlock<HeatStorage> {
     public HeatPipeBlock(Settings settings) {
-        super(settings, HeatPipeBlockEntity.class, 6);
+        super(settings, 6, TransferType.HEAT, PipeNetworkManager.HEAT);
     }
 
     @Override
-    protected BlockApiLookup<?, Direction> getStorageLookup() {
-        return FluidHeatStorage.SIDED;
+    protected long getAmount(HeatStorage storage) {
+        return storage.getAmount();
     }
 
     @Override
-    protected BlockEntityType<HeatPipeBlockEntity> getBlockEntityType() {
-        return BlockEntityTypeInit.HEAT_PIPE;
-    }
-
-    @Override
-    protected long getAmount(HeatPipeBlockEntity blockEntity) {
-        return blockEntity.getHeatStorage().getAmount();
-    }
-
-    @Override
-    protected long getCapacity(HeatPipeBlockEntity blockEntity) {
-        return blockEntity.getHeatStorage().getCapacity();
+    protected long getCapacity(HeatStorage storage) {
+        return storage.getCapacity();
     }
 
     @Override

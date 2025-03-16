@@ -69,6 +69,8 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private FluidStack outputFluidStack = FluidStack.EMPTY;
 
+    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
+
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -159,6 +161,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
                 this.progress = 0;
+                this.nextOutputItemStack = ItemStack.EMPTY;
                 update();
             }
 
@@ -170,6 +173,8 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
             this.currentRecipeId = null;
             this.maxProgress = 0;
             this.progress = 0;
+            this.nextOutputItemStack = ItemStack.EMPTY;
+
             update();
             return;
         }
@@ -183,9 +188,11 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
             this.currentRecipeId = null;
             this.maxProgress = 0;
             this.progress = 0;
+            this.nextOutputItemStack = ItemStack.EMPTY;
             update();
         } else {
             this.progress++;
+            this.nextOutputItemStack = recipe.craft(recipeInput, this.world.getRegistryManager());
             update();
         }
     }
@@ -215,6 +222,18 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
 
     public SingleFluidStorage getFluidProvider(Direction side) {
         return this.wrappedFluidStorage.getStorage(side);
+    }
+
+    public ItemStack getNextOutputItemStack() {
+        return this.nextOutputItemStack;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public int getMaxProgress() {
+        return maxProgress;
     }
 
     @Override
@@ -256,6 +275,10 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                     .encodeStart(NbtOps.INSTANCE, this.outputFluidStack)
                     .getOrThrow());
         }
+
+        if(!this.nextOutputItemStack.isEmpty()) {
+            nbt.put("NextOutputStack", this.nextOutputItemStack.toNbt(registries));
+        }
     }
 
     @Override
@@ -296,6 +319,10 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                     .decode(NbtOps.INSTANCE, nbt.getCompound("OutputFluid"))
                     .map(Pair::getFirst)
                     .getOrThrow();
+        }
+
+        if(nbt.contains("NextOutputStack", NbtElement.COMPOUND_TYPE)) {
+            this.nextOutputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("NextOutputStack"));
         }
     }
 

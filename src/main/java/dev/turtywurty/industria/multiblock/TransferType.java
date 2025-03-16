@@ -117,15 +117,16 @@ public class TransferType<S, V> {
         this.blockLookup.registerForBlockEntity((blockEntity, direction) -> blockEntity.getProvider(this, direction), BlockEntityTypeInit.MULTIBLOCK_IO);
     }
 
-    public void distribute(World world, BlockPos pos, BlockEntity controller, Direction side) {
-        S primaryStorage = lookup(world, pos, controller.getCachedState(), controller, side);
+    public void pushTo(World world, BlockPos primaryPos, BlockPos secondaryPos, Direction side) {
+        BlockEntity primaryBlockEntity = world.getBlockEntity(primaryPos);
+        BlockState primaryState = primaryBlockEntity != null ? primaryBlockEntity.getCachedState() : world.getBlockState(primaryPos);
+        S primaryStorage = lookup(world, primaryPos, primaryState, primaryBlockEntity, side);
         if (primaryStorage == null)
             return;
 
-        BlockPos secondaryPos = pos.offset(side);
         BlockState secondaryState = world.getBlockState(secondaryPos);
         BlockEntity secondaryBlockEntity = world.getBlockEntity(secondaryPos);
-        S secondaryStorage = lookup(world, secondaryPos, secondaryState, secondaryBlockEntity, side.getOpposite());
+        S secondaryStorage = lookup(world, secondaryPos, secondaryState, secondaryBlockEntity, side);
         if (secondaryStorage == null)
             return;
 
@@ -169,6 +170,33 @@ public class TransferType<S, V> {
 
     public long extract(S storage, V value, long maxAmount, TransactionContext transaction) {
         return this.extractFunction.function(storage, value, maxAmount, transaction);
+    }
+
+    public void transferFraction(S storage, S storage1, double fraction) {
+        V value = valueGetter.apply(storage);
+        if (isBlank.test(value))
+            return;
+
+        long inStorage;
+        try(Transaction transaction = Transaction.openOuter()) {
+            inStorage = extract(storage, value, Long.MAX_VALUE, transaction);
+        }
+
+        long amount = (long) (fraction * inStorage);
+        if (amount <= 0)
+            return;
+
+        try (Transaction transaction = Transaction.openOuter()) {
+            long extracted = extract(storage, value, amount, transaction);
+            if (extracted > 0) {
+                insert(storage1, value, extracted, transaction);
+                transaction.commit();
+            }
+        }
+    }
+
+    public void transferAll(S storage, S storage1) {
+        transferFraction(storage, storage1, 1);
     }
 
     @FunctionalInterface

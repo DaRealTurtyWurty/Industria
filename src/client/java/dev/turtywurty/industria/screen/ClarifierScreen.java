@@ -16,6 +16,7 @@ public class ClarifierScreen extends HandledScreen<ClarifierScreenHandler> {
     public ClarifierScreen(ClarifierScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
         this.backgroundHeight = 176;
+        this.playerInventoryTitleY = this.backgroundHeight - 94;
     }
 
     @Override

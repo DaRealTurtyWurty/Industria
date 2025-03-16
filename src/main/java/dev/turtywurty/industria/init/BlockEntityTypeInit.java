@@ -73,24 +73,8 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(InductionHeaterBlockEntity::new, BlockInit.INDUCTION_HEATER)
                     .build());
 
-    public static final BlockEntityType<CableBlockEntity> CABLE = register("cable",
-            FabricBlockEntityTypeBuilder.create(CableBlockEntity::new, BlockInit.CABLE)
-                    .build());
-
-    public static final BlockEntityType<FluidPipeBlockEntity> FLUID_PIPE = register("fluid_pipe",
-            FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, BlockInit.FLUID_PIPE)
-                    .build());
-
-    public static final BlockEntityType<SlurryPipeBlockEntity> SLURRY_PIPE = register("slurry_pipe",
-            FabricBlockEntityTypeBuilder.create(SlurryPipeBlockEntity::new, BlockInit.SLURRY_PIPE)
-                    .build());
-
     public static final BlockEntityType<FluidPumpBlockEntity> FLUID_PUMP = register("fluid_pump",
             FabricBlockEntityTypeBuilder.create(FluidPumpBlockEntity::new, BlockInit.FLUID_PUMP)
-                    .build());
-
-    public static final BlockEntityType<HeatPipeBlockEntity> HEAT_PIPE = register("heat_pipe",
-            FabricBlockEntityTypeBuilder.create(HeatPipeBlockEntity::new, BlockInit.HEAT_PIPE)
                     .build());
 
     public static final BlockEntityType<MixerBlockEntity> MIXER = register("mixer",

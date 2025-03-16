@@ -74,7 +74,7 @@ public class WorldFluidPocketsState extends PersistentState {
 
     public static WorldFluidPocketsState getServerState(ServerWorld world) {
         PersistentStateManager persistentStateManager = world.getPersistentStateManager();
-        return persistentStateManager.getOrCreate(TYPE, Industria.MOD_ID);
+        return persistentStateManager.getOrCreate(TYPE, Industria.MOD_ID + ".fluid_pockets");
     }
 
     public void addFluidPocket(FluidPocket fluidPocket) {

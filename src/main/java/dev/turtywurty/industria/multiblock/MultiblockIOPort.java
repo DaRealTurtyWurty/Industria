@@ -21,9 +21,9 @@ public class MultiblockIOPort {
         this.transferTypes = List.of(transferTypes);
     }
 
-    public void tick(World world, BlockPos pos, BlockEntity controller) {
+    public void tick(World world, BlockPos pos, BlockPos controller) {
         for (TransferType<?, ?> transferType : this.transferTypes) {
-            transferType.distribute(world, pos, controller, this.side);
+            transferType.pushTo(world, controller, pos.offset(this.side), this.side);
         }
     }
 

@@ -41,7 +41,7 @@ public class ClarifierScreenHandler extends ScreenHandler {
         SimpleInventory inventory = wrappedInventoryStorage.getInventory(0);
         addSlot(new OutputSlot(inventory, 0, 134,60));
 
-        addPlayerSlots(playerInv, 8, 84);
+        addPlayerSlots(playerInv, 8, 92);
 
         this.properties = properties;
         addProperties(this.properties);

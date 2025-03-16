@@ -1,38 +1,34 @@
 package dev.turtywurty.industria.block;
 
-import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
-import dev.turtywurty.industria.blockentity.SlurryPipeBlockEntity;
-import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.math.Direction;
 
-import java.util.stream.StreamSupport;
-
-public class SlurryPipeBlock extends PipeBlock<SlurryPipeBlockEntity> {
+public class SlurryPipeBlock extends PipeBlock<Storage<SlurryVariant>> {
     public SlurryPipeBlock(Settings settings) {
-        super(settings, SlurryPipeBlockEntity.class, 6);
+        super(settings, 6, TransferType.SLURRY, PipeNetworkManager.SLURRY);
     }
 
     @Override
-    protected BlockApiLookup<?, Direction> getStorageLookup() {
-        return SlurryStorage.SIDED;
+    protected long getAmount(Storage<SlurryVariant> storage) {
+        long amount = 0;
+        for (StorageView<SlurryVariant> storageView : storage) {
+            amount += storageView.getAmount();
+        }
+
+        return amount;
     }
 
     @Override
-    protected BlockEntityType<SlurryPipeBlockEntity> getBlockEntityType() {
-        return BlockEntityTypeInit.SLURRY_PIPE;
-    }
+    protected long getCapacity(Storage<SlurryVariant> storage) {
+        long capacity = 0;
+        for (StorageView<SlurryVariant> storageView : storage) {
+            capacity += storageView.getCapacity();
+        }
 
-    @Override
-    protected long getAmount(SlurryPipeBlockEntity blockEntity) {
-        return StreamSupport.stream(blockEntity.getStorageProvider(null).spliterator(), false).mapToLong(StorageView::getAmount).sum();
-    }
-
-    @Override
-    protected long getCapacity(SlurryPipeBlockEntity blockEntity) {
-        return StreamSupport.stream(blockEntity.getStorageProvider(null).spliterator(), false).mapToLong(StorageView::getCapacity).sum();
+        return capacity;
     }
 
     @Override

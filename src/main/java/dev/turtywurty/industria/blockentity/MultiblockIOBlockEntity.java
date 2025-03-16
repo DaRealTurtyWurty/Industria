@@ -56,7 +56,7 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
             if(port == null)
                 continue;
 
-            port.tick(this.world, this.pos, this.primary);
+            port.tick(this.world, this.pos, this.primary.getPos());
         }
     }
 

@@ -1,12 +1,12 @@
 package dev.turtywurty.industria.block;
 
-import dev.turtywurty.industria.blockentity.PipeBlockEntity;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
-import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
+import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.pipe.PipeNetwork;
+import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.Waterloggable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 import java.util.Map;
 
-public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block implements Waterloggable, BlockEntityProvider {
+public abstract class PipeBlock<S> extends Block implements Waterloggable {
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     public static final EnumProperty<ConnectorType> NORTH = EnumProperty.of("north", ConnectorType.class);
@@ -61,9 +61,10 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
 
     protected final VoxelShape[] shapeCache = new VoxelShape[ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length];
 
-    private final Class<B> blockEntityClass;
+    private final TransferType<S, ?> transferType;
+    private final PipeNetworkManager<S> networkManager;
 
-    public PipeBlock(Settings settings, Class<B> blockEntityClass, int diameter) {
+    public PipeBlock(Settings settings, int diameter, TransferType<S, ?> transferType, PipeNetworkManager<S> networkManager) {
         super(settings);
         setDefaultState(getDefaultState()
                 .with(NORTH, ConnectorType.NONE)
@@ -74,7 +75,8 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
                 .with(DOWN, ConnectorType.NONE)
                 .with(WATERLOGGED, false));
 
-        this.blockEntityClass = blockEntityClass;
+        this.transferType = transferType;
+        this.networkManager = networkManager;
 
         for (Direction direction : Direction.values()) {
             pipeShapes[direction.ordinal()] = createCableShape(direction, diameter);
@@ -82,6 +84,10 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
         }
 
         createShapeCache();
+    }
+
+    public TransferType<S, ?> getTransferType() {
+        return this.transferType;
     }
 
     private static VoxelShape createCableShape(Direction direction, int diameter) {
@@ -126,8 +132,6 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
         int size = ConnectorType.VALUES.length;
         return ((((south.ordinal() * size + north.ordinal()) * size + west.ordinal()) * size + east.ordinal()) * size + up.ordinal()) * size + down.ordinal();
     }
-
-    protected abstract BlockApiLookup<?, Direction> getStorageLookup();
 
     protected void createShapeCache() {
         for (ConnectorType up : ConnectorType.VALUES) {
@@ -176,7 +180,7 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
         if (state.isAir())
             return false;
 
-        return getStorageLookup().find(world, pos, facing.getOpposite()) != null;
+        return this.transferType.lookup(world, pos, facing.getOpposite()) != null;
     }
 
     @Override
@@ -203,14 +207,11 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
     @Override
     protected void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, @Nullable WireOrientation wireOrientation, boolean notify) {
         super.neighborUpdate(state, world, pos, sourceBlock, wireOrientation, notify);
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (!world.isClient && blockEntityClass.isInstance(blockEntity)) {
-            blockEntity.markDirty();
-        }
-
         BlockState blockState = calculateState(world, pos, state);
         if (blockState != state) {
             world.setBlockState(pos, blockState);
+
+            this.networkManager.placePipe(world, pos);
         }
     }
 
@@ -225,8 +226,19 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
+        this.networkManager.placePipe(world, pos);
+
         BlockState state = getDefaultState().with(WATERLOGGED, world.getFluidState(pos).getFluid() == Fluids.WATER);
         return calculateState(world, pos, state);
+    }
+
+    @Override
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if(!state.isOf(newState.getBlock())) {
+            this.networkManager.removePipe(world, pos);
+        }
+
+        super.onStateReplaced(state, world, pos, newState, moved);
     }
 
     @Override
@@ -234,35 +246,26 @@ public abstract class PipeBlock<B extends PipeBlockEntity<?, ?>> extends Block i
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return TickableBlockEntity.createTicker(world);
-    }
+    protected abstract long getAmount(S storage);
 
-    protected abstract BlockEntityType<B> getBlockEntityType();
-
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return getBlockEntityType().instantiate(pos, state);
-    }
-
-    protected abstract long getAmount(B blockEntity);
-
-    protected abstract long getCapacity(B blockEntity);
+    protected abstract long getCapacity(S storage);
 
     protected abstract String getUnit();
 
-    @SuppressWarnings("unchecked")
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (player.getMainHandStack().getItem() instanceof BlockItem)
             return ActionResult.PASS;
 
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (!world.isClient && blockEntityClass.isInstance(blockEntity)) {
-            player.sendMessage(Text.literal(getAmount((B) blockEntity) + " / " + getCapacity((B) blockEntity) + " " + getUnit()), true);
+        PipeNetwork<S> network = this.networkManager.getNetwork(world, pos);
+        if (network == null) {
+            this.networkManager.traverseCreateNetwork(world, pos);
+            return ActionResult.PASS;
+        }
+
+        if (!world.isClient) {
+            player.sendMessage(Text.literal(getAmount(network.getStorage()) + " / " + getCapacity(network.getStorage()) + " " + getUnit()), true);
+            return ActionResult.SUCCESS_SERVER;
         }
 
         return ActionResult.SUCCESS;

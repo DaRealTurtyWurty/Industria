@@ -7,7 +7,7 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
-import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -53,7 +53,7 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
 
     public FluidPumpBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.FLUID_PUMP, pos, state);
-        this.wrappedFluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10), Direction.SOUTH);
+        this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.SOUTH);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0), Direction.UP);
     }
 

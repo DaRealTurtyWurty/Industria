@@ -195,8 +195,44 @@ public class InWorldFluidRenderingComponent {
         }
     }
 
+    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
+        drawTiledXYQuadOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    }
+
+    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, int color, ColorMode colorMode) {
+        if (fluidVariant == null)
+            return;
+
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
+        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+
+        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        if(stillSprite == null)
+            return;
+
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        light = (light & 0xF00000) | (luminosity << 4);
+
+        drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, -1.0F);
+
+        matrices.pop();
+    }
+
     // For front and back (XY plane)
-    private static void drawTiledXYQuad(VertexConsumer vertexConsumer,
+    public static void drawTiledXYQuad(VertexConsumer vertexConsumer,
                                         MatrixStack.Entry entry,
                                         float x1, float y1, float z1,
                                         float x2, float y2, float z2,
@@ -270,7 +306,7 @@ public class InWorldFluidRenderingComponent {
     }
 
     // For left and right (YZ plane)
-    private static void drawTiledYZQuad(VertexConsumer vertexConsumer,
+    public static void drawTiledYZQuad(VertexConsumer vertexConsumer,
                                         MatrixStack.Entry entry,
                                         float x, float y1, float z1,
                                         float y2, float z2,
