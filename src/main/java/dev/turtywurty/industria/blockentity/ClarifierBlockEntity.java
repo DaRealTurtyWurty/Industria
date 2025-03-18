@@ -161,6 +161,11 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
                 this.progress = 0;
+
+                update();
+            }
+
+            if(!this.nextOutputItemStack.isEmpty()) {
                 this.nextOutputItemStack = ItemStack.EMPTY;
                 update();
             }
@@ -276,9 +281,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                     .getOrThrow());
         }
 
-        if(!this.nextOutputItemStack.isEmpty()) {
-            nbt.put("NextOutputStack", this.nextOutputItemStack.toNbt(registries));
-        }
+        nbt.put("NextOutputStack", this.nextOutputItemStack.toNbtAllowEmpty(registries));
     }
 
     @Override
@@ -321,9 +324,8 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                     .getOrThrow();
         }
 
-        if(nbt.contains("NextOutputStack", NbtElement.COMPOUND_TYPE)) {
+        if(nbt.contains("NextOutputStack", NbtElement.COMPOUND_TYPE))
             this.nextOutputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("NextOutputStack"));
-        }
     }
 
     @Override
