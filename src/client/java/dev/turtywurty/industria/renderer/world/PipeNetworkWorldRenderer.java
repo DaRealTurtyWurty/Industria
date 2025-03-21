@@ -18,6 +18,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.joml.Matrix4f;
@@ -76,19 +77,14 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
                 for (BlockPos pipe : network.getPipes()) {
                     Vec3d vertex = pipe.toCenterPos();
 
-                    float tickDelta = context.tickCounter().getTickDelta(false);
-                    Vec3d pos = vertex.subtract(cameraEntity.getCameraPosVec(tickDelta));
+                    Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+                    Vec3d pos = vertex.subtract(cameraPos);
 
                     VertexConsumer vertexConsumer = consumers.getBuffer(RenderLayer.getLines());
                     VertexRendering.drawBox(
                             matrices,
                             vertexConsumer,
-                            pos.x - 0.25,
-                            pos.y - 0.25,
-                            pos.z - 0.25,
-                            pos.x + 0.25,
-                            pos.y + 0.25,
-                            pos.z + 0.25,
+                            new Box(pos, pos).expand(0.25),
                             color[0],
                             color[1],
                             color[2],
@@ -100,28 +96,28 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
                         return;
 
                     Block block = world.getBlockState(pipe).getBlock();
-                    if(block instanceof PipeBlock<?, ?, ?> pipeBlock) {
-                        double amount = transferType.getAmount(world, pipe).doubleValue();
-                        if(transferType == TransferType.HEAT) {
-                            amount += 23;
-                        }
-
-                        String amountStr = String.format("%.2f", amount).replace(".00", "");
-
-                        Text text = Text.literal(amountStr + pipeBlock.getUnit());
-
-                        matrices.push();
-                        matrices.translate(pos.x, pos.y + 0.5, pos.z);
-                        matrices.multiply(client.getEntityRenderDispatcher().getRotation());
-                        matrices.scale(0.025F, -0.025F, 0.025F);
-                        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-
-                        TextRenderer textRenderer = client.textRenderer;
-                        float xOffset = (float)(-textRenderer.getWidth(text)) / 2.0F;
-
-                        textRenderer.draw(text, xOffset, 0, Colors.WHITE,false, matrix4f, consumers, TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
-                        matrices.pop();
+                    if (!(block instanceof PipeBlock<?, ?, ?> pipeBlock))
+                        continue;
+                    double amount = transferType.getAmount(world, pipe).doubleValue();
+                    if(transferType == TransferType.HEAT) {
+                        amount += 23;
                     }
+
+                    String amountStr = String.format("%.2f", amount).replace(".00", "");
+
+                    Text text = Text.literal(amountStr + pipeBlock.getUnit());
+
+                    matrices.push();
+                    matrices.translate(pos.x, pos.y + 0.5, pos.z);
+                    matrices.multiply(client.getEntityRenderDispatcher().getRotation());
+                    matrices.scale(0.025F, -0.025F, 0.025F);
+                    Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+
+                    TextRenderer textRenderer = client.textRenderer;
+                    float xOffset = (float)(-textRenderer.getWidth(text)) / 2.0F;
+
+                    textRenderer.draw(text, xOffset, 0, Colors.WHITE, false, matrix4f, consumers, TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                    matrices.pop();
                 }
             }
         }
