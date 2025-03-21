@@ -1,4 +1,4 @@
-// 1.21.3	2025-03-19T21:37:12.3889481	Industria/Block Loot Tables
+// 1.21.3	2025-03-21T19:44:17.3517884	Industria/Block Loot Tables
 89d53edf9cd8238e07492d6039aed70151a45fef data\industria\loot_table\blocks\oil_pump_jack.json
 aaf5c3ededb283d2aa702d287a71208994edb492 data\industria\loot_table\blocks\induction_heater.json
 2b2fd99d09dc27698eb668772b8965aac7d7b052 data\industria\loot_table\blocks\tin_block.json
@@ -16,8 +16,8 @@ c15302723aebafdac63f0dbec84bc1d2d27a9bb2 data\industria\loot_table\blocks\fluid_
 cc60f5fbdec257dadaed2232412cea24883b13cf data\industria\loot_table\blocks\elite_battery.json
 2b5d41947a13660840688d4c7c1867ba48a5fa3b data\industria\loot_table\blocks\raw_bauxite_block.json
 6aa546ede64806a479934ea000ddfe3841c5aba7 data\industria\loot_table\blocks\fractional_distillation_controller.json
-673e198d2791bd486f383c4b52b111e647459a18 data\industria\loot_table\blocks\digester.json
 9b6a1179c9ecd9f52120730cf37c79ac75eee063 data\industria\loot_table\blocks\raw_tin_block.json
+673e198d2791bd486f383c4b52b111e647459a18 data\industria\loot_table\blocks\digester.json
 8ac284b78eaf4a782ebc9136f88af14efbbee661 data\industria\loot_table\blocks\drill.json
 7673f06484cbf4b8ca978b98580ae652bffd5260 data\industria\loot_table\blocks\mixer.json
 985cc9a3c528d936c1e5e6fa48197d1e47af5677 data\industria\loot_table\blocks\motor.json

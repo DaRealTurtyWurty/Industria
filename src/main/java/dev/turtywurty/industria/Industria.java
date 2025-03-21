@@ -8,6 +8,7 @@ import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.command.ConfigCommand;
+import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.config.ServerConfig;
 import dev.turtywurty.industria.fluid.FluidData;
 import dev.turtywurty.industria.init.*;
@@ -256,6 +257,12 @@ public class Industria implements ModInitializer {
                             .requires(source -> source.hasPermissionLevel(3))
                             .then(CommandManager.literal("config").then(ConfigCommand.register()))
             );
+
+            dispatcher.register(
+                    CommandManager.literal(Industria.MOD_ID)
+                            .requires(source -> source.hasPermissionLevel(3))
+                            .then(CommandManager.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
+            );
         });
 
         ServerTickEvents.START_WORLD_TICK.register(world -> {
@@ -267,18 +274,25 @@ public class Industria implements ModInitializer {
         });
 
         // Fluid Properties
-        var crudeOilAttributes = new FluidVariantAttributeHandler() {
+        var commonFluidAttributes = new FluidVariantAttributeHandler() {
             @Override
             public int getViscosity(FluidVariant variant, @Nullable World world) {
                 return 7500;
             }
         };
 
-        FluidVariantAttributes.register(FluidInit.CRUDE_OIL, crudeOilAttributes);
-        FluidVariantAttributes.register(FluidInit.CRUDE_OIL_FLOWING, crudeOilAttributes);
+        FluidVariantAttributes.register(FluidInit.CRUDE_OIL.still(), commonFluidAttributes);
+        FluidVariantAttributes.register(FluidInit.CRUDE_OIL.flowing(), commonFluidAttributes);
 
+        FluidVariantAttributes.register(FluidInit.DIRTY_SODIUM_ALUMINATE.still(), commonFluidAttributes);
+        FluidVariantAttributes.register(FluidInit.DIRTY_SODIUM_ALUMINATE.flowing(), commonFluidAttributes);
+
+        FluidVariantAttributes.register(FluidInit.SODIUM_ALUMINATE.still(), commonFluidAttributes);
+        FluidVariantAttributes.register(FluidInit.SODIUM_ALUMINATE.flowing(), commonFluidAttributes);
+
+        // TODO: Change particles
         // Fluid Data
-        var crudeOilData = new FluidData.Builder(TagList.Fluids.CRUDE_OIL)
+        var commonFluidData = new FluidData.Builder(TagList.Fluids.CRUDE_OIL)
                 .preventsBlockSpreading()
                 .canSwim()
                 .fluidMovementSpeed((entity, speed) -> 0.01F)
@@ -291,8 +305,14 @@ public class Industria implements ModInitializer {
                 .splashParticle(ParticleTypes.HEART)
                 .build();
 
-        FluidData.registerFluidData(FluidInit.CRUDE_OIL, crudeOilData);
-        FluidData.registerFluidData(FluidInit.CRUDE_OIL_FLOWING, crudeOilData);
+        FluidData.registerFluidData(FluidInit.CRUDE_OIL.still(), commonFluidData);
+        FluidData.registerFluidData(FluidInit.CRUDE_OIL.flowing(), commonFluidData);
+
+        FluidData.registerFluidData(FluidInit.DIRTY_SODIUM_ALUMINATE.still(), commonFluidData);
+        FluidData.registerFluidData(FluidInit.DIRTY_SODIUM_ALUMINATE.flowing(), commonFluidData);
+
+        FluidData.registerFluidData(FluidInit.SODIUM_ALUMINATE.still(), commonFluidData);
+        FluidData.registerFluidData(FluidInit.SODIUM_ALUMINATE.flowing(), commonFluidData);
 
         LOGGER.info("Industria has finished loading!");
     }

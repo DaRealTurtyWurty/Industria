@@ -6,6 +6,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.init.SlurryInit;
 import dev.turtywurty.industria.util.IndustriaIngredient;
@@ -225,12 +226,12 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         200, "bauxite_to_bauxite_slurry");
 
                 offerDigester(exporter, new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BUCKET),
-                        new FluidStack(FluidVariant.of(Fluids.LAVA), FluidConstants.BOTTLE), // TODO: Replace with output of dirty sodium aluminate
+                        new FluidStack(FluidVariant.of(FluidInit.DIRTY_SODIUM_ALUMINATE.still()), FluidConstants.BOTTLE),
                         200, "bauxite_to_dirty_sodium_aluminate");
 
-                offerClarifier(exporter, new FluidStack(FluidVariant.of(Fluids.LAVA), FluidConstants.BOTTLE),
-                        new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE),
-                        new OutputItemStack(Items.COBBLESTONE, 1, 1),
+                offerClarifier(exporter, new FluidStack(FluidVariant.of(FluidInit.DIRTY_SODIUM_ALUMINATE.still()), FluidConstants.BOTTLE),
+                        new FluidStack(FluidVariant.of(FluidInit.SODIUM_ALUMINATE.still()), FluidConstants.BOTTLE),
+                        new OutputItemStack(ItemInit.RED_MUD, UniformIntProvider.create(1, 3), 1),
                         200, "dirty_sodium_aluminate_to_sodium_aluminate");
             }
         };

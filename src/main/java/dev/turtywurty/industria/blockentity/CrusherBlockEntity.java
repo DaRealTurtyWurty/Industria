@@ -48,7 +48,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
-import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -94,14 +93,15 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 2), Direction.DOWN);
 
-        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10000, 1000, 0));
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
         var input = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(INPUT_SLOT);
         var output = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT);
-        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        SyncingEnergyStorage energy = getEnergy();
+
         return List.of(input, output, energy);
     }
 
@@ -222,14 +222,16 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
         return this.wrappedInventoryStorage.getInventory(INPUT_SLOT).canInsert(stack);
     }
 
-    // TODO: Create getEnergy method instead of hardcoding 10
     private boolean hasEnergy() {
-        return getEnergy().getAmount() >= 10;
+        return getEnergy().getAmount() >= getEnergyCost();
     }
 
-    // TODO: Create getEnergy method instead of hardcoding 10
     private void consumeEnergy() {
-        ((SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null)).amount -= 10;
+        getEnergy().amount -= getEnergyCost();
+    }
+
+    public static long getEnergyCost() {
+        return 10;
     }
 
     private void reset() {
@@ -363,8 +365,8 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
         return this.wrappedEnergyStorage.getStorage(direction);
     }
 
-    public EnergyStorage getEnergy() {
-        return this.wrappedEnergyStorage.getStorage(Direction.SOUTH);
+    public SyncingEnergyStorage getEnergy() {
+        return (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.SOUTH);
     }
 
     public int getProgress() {

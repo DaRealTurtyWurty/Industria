@@ -3,19 +3,23 @@
   "input_fluid": {
     "amount": 27000,
     "variant": {
-      "fluid": "minecraft:lava"
+      "fluid": "industria:dirty_sodium_aluminate"
     }
   },
   "output_fluid": {
     "amount": 27000,
     "variant": {
-      "fluid": "minecraft:water"
+      "fluid": "industria:sodium_aluminate"
     }
   },
   "output_item": {
     "chance": 1.0,
-    "count": 1,
-    "item": "minecraft:cobblestone"
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 3,
+      "min_inclusive": 1
+    },
+    "item": "industria:red_mud"
   },
   "process_time": 200
 }

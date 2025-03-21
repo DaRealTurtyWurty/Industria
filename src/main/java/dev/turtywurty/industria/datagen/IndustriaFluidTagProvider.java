@@ -16,7 +16,15 @@ public class IndustriaFluidTagProvider extends FabricTagProvider.FluidTagProvide
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
         getOrCreateTagBuilder(TagList.Fluids.CRUDE_OIL)
-                .add(FluidInit.CRUDE_OIL)
-                .add(FluidInit.CRUDE_OIL_FLOWING);
+                .add(FluidInit.CRUDE_OIL.still())
+                .add(FluidInit.CRUDE_OIL.flowing());
+
+        getOrCreateTagBuilder(TagList.Fluids.DIRTY_SODIUM_ALUMINATE)
+                .add(FluidInit.DIRTY_SODIUM_ALUMINATE.still())
+                .add(FluidInit.DIRTY_SODIUM_ALUMINATE.flowing());
+
+        getOrCreateTagBuilder(TagList.Fluids.SODIUM_ALUMINATE)
+                .add(FluidInit.SODIUM_ALUMINATE.still())
+                .add(FluidInit.SODIUM_ALUMINATE.flowing());
     }
 }

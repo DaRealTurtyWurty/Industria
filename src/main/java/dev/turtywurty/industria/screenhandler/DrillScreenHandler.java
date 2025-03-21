@@ -88,30 +88,38 @@ public class DrillScreenHandler extends ScreenHandler {
 
     // TODO: Rewrite this
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
-        ItemStack stack = ItemStack.EMPTY;
-        Slot slotObject = this.slots.get(slot);
+    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+        ItemStack newStack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(slotIndex);
 
-        if (slotObject.hasStack()) {
-            ItemStack stackInSlot = slotObject.getStack();
-            stack = stackInSlot.copy();
+        if (slot.hasStack()) {
+            ItemStack originalStack = slot.getStack();
+            newStack = originalStack.copy();
 
-            if (slot < 1) {
-                if (!insertItem(stackInSlot, 1, this.slots.size(), true)) {
+            int blockEntitySlotCount = 14; // Total block entity slots
+            int playerHotbarStart = blockEntitySlotCount + 27;
+            int playerHotbarEnd = playerHotbarStart + 9;
+
+            if (slotIndex < blockEntitySlotCount) {
+                // Move from Block Entity to Player Inventory
+                if (!insertItem(originalStack, blockEntitySlotCount, playerHotbarEnd, true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!insertItem(stackInSlot, 0, 1, false)) {
-                return ItemStack.EMPTY;
+            } else {
+                // Move from Player Inventory to Block Entity
+                if (!insertItem(originalStack, 0, blockEntitySlotCount, false)) {
+                    return ItemStack.EMPTY;
+                }
             }
 
-            if (stackInSlot.isEmpty()) {
-                slotObject.setStack(ItemStack.EMPTY);
+            if (originalStack.isEmpty()) {
+                slot.setStack(ItemStack.EMPTY);
             } else {
-                slotObject.markDirty();
+                slot.markDirty();
             }
         }
 
-        return stack;
+        return newStack;
     }
 
     @Override

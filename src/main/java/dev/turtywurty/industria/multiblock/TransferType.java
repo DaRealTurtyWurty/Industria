@@ -3,8 +3,8 @@ package dev.turtywurty.industria.multiblock;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.heatapi.api.HeatStorage;
-import dev.turtywurty.industria.blockentity.MixerBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.util.TransferUtils;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -31,22 +31,23 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@SuppressWarnings({"WrapperTypeMayBePrimitive", "unchecked"})
 public class TransferType<S, V, A extends Number> {
     private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
     public static final TransferType<Storage<ItemVariant>, ItemVariant, Long> ITEM =
             new TransferType<>("item", ItemStorage.SIDED, ItemStorage.ITEM, Storage::insert, Storage::extract,
-                    storage -> MixerBlockEntity.findFirstVariant(storage, null)
+                    storage -> TransferUtils.findFirstVariant(storage, null)
                             .orElse(ItemVariant.blank()),
                     Long.MAX_VALUE,
+                    aDouble -> (long) Math.ceil(aDouble),
                     ItemVariant::isBlank);
 
     public static final TransferType<Storage<FluidVariant>, FluidVariant, Long> FLUID =
             new TransferType<>("fluid", FluidStorage.SIDED, FluidStorage.ITEM, Storage::insert, Storage::extract,
-                    storage -> MixerBlockEntity.findFirstVariant(storage, null)
+                    storage -> TransferUtils.findFirstVariant(storage, null)
                             .orElse(FluidVariant.blank()),
                     Long.MAX_VALUE,
+                    aDouble -> (long) Math.ceil(aDouble),
                     FluidVariant::isBlank);
 
     public static final TransferType<EnergyStorage, Long, Long> ENERGY =
@@ -55,6 +56,7 @@ public class TransferType<S, V, A extends Number> {
                     (storage, value, maxAmount, transaction) -> storage.extract(maxAmount, transaction),
                     EnergyStorage::getAmount,
                     Long.MAX_VALUE,
+                    aDouble -> (long) Math.ceil(aDouble),
                     value -> value <= 0);
 
     public static final TransferType<HeatStorage, Double, Double> HEAT =
@@ -63,13 +65,15 @@ public class TransferType<S, V, A extends Number> {
                     (storage, value, maxAmount, transaction) -> storage.extract(value, transaction),
                     HeatStorage::getAmount,
                     Double.MAX_VALUE,
+                    Function.identity(),
                     value -> value <= 0);
 
     public static final TransferType<Storage<SlurryVariant>, SlurryVariant, Long> SLURRY =
             new TransferType<>("slurry", SlurryStorage.SIDED, SlurryStorage.ITEM, Storage::insert, Storage::extract,
-                    storage -> MixerBlockEntity.findFirstVariant(storage, null)
+                    storage -> TransferUtils.findFirstVariant(storage, null)
                             .orElse(SlurryVariant.blank()),
                     Long.MAX_VALUE,
+                    aDouble -> (long) Math.ceil(aDouble),
                     SlurryVariant::isBlank);
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
@@ -86,6 +90,8 @@ public class TransferType<S, V, A extends Number> {
     private final InsertExtractFunction<S, V, A> extractFunction;
     private final Function<S, V> valueGetter;
     private final A maxAmount;
+    private final Function<Double, A> amountConverter;
+    private final A zeroAmount;
     private final Predicate<V> isBlank;
 
     public TransferType(@NotNull String name,
@@ -95,6 +101,7 @@ public class TransferType<S, V, A extends Number> {
                         @NotNull InsertExtractFunction<S, V, A> extractFunction,
                         @NotNull Function<S, V> valueGetter,
                         @NotNull A maxAmount,
+                        @NotNull Function<Double, A> amountConverter,
                         @NotNull Predicate<V> isBlank) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(blockLookup, "blockLookup must not be null");
@@ -103,6 +110,7 @@ public class TransferType<S, V, A extends Number> {
         Objects.requireNonNull(extractFunction, "extractFunction must not be null");
         Objects.requireNonNull(valueGetter, "valueGetter must not be null");
         Objects.requireNonNull(maxAmount, "maxAmount must not be null");
+        Objects.requireNonNull(amountConverter, "amountConverter must not be null");
         Objects.requireNonNull(isBlank, "isBlank must not be null");
 
         this.name = name;
@@ -115,6 +123,8 @@ public class TransferType<S, V, A extends Number> {
 
         this.valueGetter = valueGetter;
         this.maxAmount = maxAmount;
+        this.amountConverter = amountConverter;
+        this.zeroAmount = amountConverter.apply(0D);
         this.isBlank = isBlank;
 
         VALUES.add(this);
@@ -201,12 +211,12 @@ public class TransferType<S, V, A extends Number> {
             inStorage = extract(storage, value, this.maxAmount, transaction);
         }
 
-        Double amount = (fraction * inStorage.doubleValue());
+        double amount = (fraction * inStorage.doubleValue());
         if (amount <= 0)
             return;
 
         try (Transaction transaction = Transaction.openOuter()) {
-            A extracted = extract(storage, value, (A) amount, transaction);
+            A extracted = extract(storage, value, this.amountConverter.apply(amount), transaction);
             if (extracted.doubleValue() > 0) {
                 insert(storage1, value, extracted, transaction);
                 transaction.commit();
@@ -223,11 +233,11 @@ public class TransferType<S, V, A extends Number> {
             S storage = lookup(world, pos, null);
             V value = this.valueGetter.apply(storage);
             if(this.isBlank.test(value))
-                return (A) (Number) 0;
+                return this.zeroAmount;
 
             return extract(storage, value, this.maxAmount, transaction);
         } catch (RuntimeException e) {
-            return (A) (Number) 0;
+            return this.zeroAmount;
         }
     }
 

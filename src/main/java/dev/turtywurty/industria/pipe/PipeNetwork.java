@@ -90,10 +90,9 @@ public abstract class PipeNetwork<S> implements NBTSerializable<NbtCompound> {
         this.pipes.remove(pos);
     }
 
-    public void inheritPipesFrom(PipeNetwork<S> oldNetwork, Set<BlockPos> pipesToInherit) {
+    public void movePipesFrom(PipeNetwork<S> oldNetwork, Set<BlockPos> pipesToInherit) {
         for (BlockPos pipe : pipesToInherit) {
             addPipe(pipe);
-            oldNetwork.removePipe(pipe);
         }
     }
 

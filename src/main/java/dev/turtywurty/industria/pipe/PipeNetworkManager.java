@@ -189,14 +189,12 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     protected void onRemovePipe(ServerWorld world, BlockPos pos) {
         PipeNetworksData<S, N> pipeNetworksData = getPipeNetworksData(world);
         UUID networkId = pipeNetworksData.removePipe(pos);
-        if (networkId == null) {
+        if (networkId == null)
             return;
-        }
 
         N network = pipeNetworksData.getNetwork(networkId);
-        if (network == null) {
+        if (network == null)
             return;
-        }
 
         network.removePipe(pos);
         if (network.getPipes().isEmpty()) {
@@ -220,15 +218,14 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             }
         }
 
-        if (connectedComponents.size() == 1) {
+        if (connectedComponents.size() == 1)
             return;
-        }
 
         pipeNetworksData.removeNetwork(network);
         int totalPipes = network.getPipes().size();
         for (Set<BlockPos> connectedComponent : connectedComponents) {
             N newNetwork = this.networkSupplier.create(UUID.randomUUID());
-            newNetwork.inheritPipesFrom(network, connectedComponent);
+            newNetwork.movePipesFrom(network, connectedComponent);
             updateConnectedBlocks(world, newNetwork);
 
             if (network.hasCentralStorage()) {
@@ -254,6 +251,8 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
                 pipeNetworksData.addPipe(pipe, newNetwork.getId());
             }
         }
+
+        WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
     private void mergeNetworks(ServerWorld world, Map.Entry<BlockPos, N> targetEntry, Map.Entry<BlockPos, N> sourceEntry) {
@@ -265,7 +264,7 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             return;
         }
 
-        target.inheritPipesFrom(source, source.getPipes());
+        target.movePipesFrom(source, source.getPipes());
         target.addConnectedBlocks(world, source);
         for (BlockPos pipe : source.getPipes()) {
             pipeNetworksData.addPipe(pipe, target.getId());

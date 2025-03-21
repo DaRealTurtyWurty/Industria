@@ -203,7 +203,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         if (blockState != state) {
             world.setBlockState(pos, blockState);
 
-            if (!world.isClient()) {
+            if (!world.isClient() && state.isAir()) {
                 this.networkManager.placePipe((ServerWorld) world, pos);
             }
         }

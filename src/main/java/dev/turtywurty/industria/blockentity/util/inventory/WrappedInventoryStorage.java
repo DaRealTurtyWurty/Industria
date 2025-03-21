@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Add overload for getInventory that takes a Direction
 public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedStorage<InventoryStorage> {
     private final List<T> inventories = new ArrayList<>();
     private final CombinedStorage<ItemVariant, InventoryStorage> combinedStorage = new CombinedStorage<>(this.storages);
@@ -47,6 +46,10 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     public @Nullable T getInventory(int index) {
         return this.inventories.get(index);
+    }
+
+    public @Nullable T getInventory(Direction side) {
+        return this.inventories.get(this.storages.indexOf(getStorage(side)));
     }
 
     public @NotNull List<ItemStack> getStacks() {

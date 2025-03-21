@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.fluid;
 
-import dev.turtywurty.industria.init.FluidInit;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -17,15 +16,28 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 
-public abstract class CrudeOilFluid extends FlowableFluid {
+import java.util.function.Supplier;
+
+public abstract class IndustriaFluid extends FlowableFluid {
+    private final Supplier<Fluid> stillSupplier, flowingSupplier;
+    private final Supplier<Item> bucketSupplier;
+    private final Supplier<Block> blockSupplier;
+
+    public IndustriaFluid(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+        this.stillSupplier = stillSupplier;
+        this.flowingSupplier = flowingSupplier;
+        this.bucketSupplier = bucketSupplier;
+        this.blockSupplier = blockSupplier;
+    }
+
     @Override
     public Fluid getFlowing() {
-        return FluidInit.CRUDE_OIL_FLOWING;
+        return this.flowingSupplier.get();
     }
 
     @Override
     public Fluid getStill() {
-        return FluidInit.CRUDE_OIL;
+        return this.stillSupplier.get();
     }
 
     @Override
@@ -56,7 +68,7 @@ public abstract class CrudeOilFluid extends FlowableFluid {
 
     @Override
     public Item getBucketItem() {
-        return FluidInit.CRUDE_OIL_BUCKET;
+        return this.bucketSupplier.get();
     }
 
     @Override
@@ -76,7 +88,7 @@ public abstract class CrudeOilFluid extends FlowableFluid {
 
     @Override
     protected BlockState toBlockState(FluidState state) {
-        return FluidInit.CRUDE_OIL_BLOCK.getDefaultState().with(Properties.LEVEL_15, getBlockStateLevel(state));
+        return this.blockSupplier.get().getDefaultState().with(Properties.LEVEL_15, getBlockStateLevel(state));
     }
 
     @Override
@@ -85,7 +97,11 @@ public abstract class CrudeOilFluid extends FlowableFluid {
         builder.add(LEVEL);
     }
 
-    public static class Flowing extends CrudeOilFluid {
+    public static class Flowing extends IndustriaFluid {
+        public Flowing(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+            super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
+        }
+
         @Override
         public boolean isStill(FluidState state) {
             return false;
@@ -97,7 +113,11 @@ public abstract class CrudeOilFluid extends FlowableFluid {
         }
     }
 
-    public static class Still extends CrudeOilFluid {
+    public static class Still extends IndustriaFluid {
+        public Still(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+            super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
+        }
+
         @Override
         public boolean isStill(FluidState state) {
             return true;

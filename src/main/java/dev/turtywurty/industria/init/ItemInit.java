@@ -39,6 +39,8 @@ public class ItemInit {
     public static final Item SODIUM_HYDROXIDE = register("sodium_hydroxide");
     public static final Item SODIUM_ALUMINATE = register("sodium_aluminate");
 
+    public static final Item RED_MUD = register("red_mud");
+
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);
     }

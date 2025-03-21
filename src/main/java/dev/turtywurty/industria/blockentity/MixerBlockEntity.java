@@ -35,6 +35,7 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
 import dev.turtywurty.industria.screenhandler.MixerScreenHandler;
+import dev.turtywurty.industria.util.TransferUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -42,9 +43,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -78,7 +77,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-// TODO: Leaving this here as an example, just in case I decide to make this system in the future
+// Leaving this here as an example, just in case I decide to make this system in the future
 // public TickBuilder createTickBuilder() {
 //        return TickBuilder.builder()
 //                .progress(this.progress)
@@ -184,30 +183,6 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
         return List.of(inputInventory, outputInventory, bucketInputInventory, bucketOutputInventory, inputFluidTank, outputSlurryTank, energy);
     }
 
-    // TODO: Move to util class
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static <V, T extends TransferVariant<V>> Optional<T> findFirstVariant(Storage<T> storage, @Nullable T checkFirst) {
-        if (storage instanceof SingleVariantStorage singleFluidStorage) {
-            return Optional.ofNullable((T) singleFluidStorage.variant);
-        }
-
-        if (checkFirst != null && !checkFirst.isBlank()) {
-            try (Transaction transaction = Transaction.openOuter()) {
-                if (storage.extract(checkFirst, FluidConstants.BUCKET, transaction) > 0) {
-                    return Optional.of(checkFirst);
-                }
-
-                return Optional.empty();
-            }
-        }
-
-        for (StorageView<T> storageView : storage.nonEmptyViews()) {
-            return Optional.ofNullable(storageView.getResource());
-        }
-
-        return Optional.empty();
-    }
-
     @Override
     public void onTick() {
         if (this.world == null || this.world.isClient)
@@ -219,7 +194,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                Optional<FluidVariant> optVariant = findFirstVariant(storage, inputFluidTank.variant);
+                Optional<FluidVariant> optVariant = TransferUtils.findFirstVariant(storage, inputFluidTank.variant);
                 optVariant.filter(TransferVariant::isBlank).ifPresent(variant -> {
                     try (Transaction transaction = Transaction.openOuter()) {
                         long extracted = storage.extract(variant, FluidConstants.BUCKET, transaction);

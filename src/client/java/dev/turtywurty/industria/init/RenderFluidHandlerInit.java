@@ -6,7 +6,13 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
 
 public class RenderFluidHandlerInit {
     public static void init() {
-        FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING,
+        FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.CRUDE_OIL.still(), FluidInit.CRUDE_OIL.flowing(),
                 new SimpleFluidRenderHandler(Industria.id("block/crude_oil_still"), Industria.id("block/crude_oil_flow")));
+
+        FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.DIRTY_SODIUM_ALUMINATE.still(), FluidInit.DIRTY_SODIUM_ALUMINATE.flowing(),
+                new SimpleFluidRenderHandler(Industria.id("block/dirty_sodium_aluminate_still"), Industria.id("block/dirty_sodium_aluminate_flow")));
+
+        FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.SODIUM_ALUMINATE.still(), FluidInit.SODIUM_ALUMINATE.flowing(),
+                new SimpleFluidRenderHandler(Industria.id("block/sodium_aluminate_still"), Industria.id("block/sodium_aluminate_flow")));
     }
 }

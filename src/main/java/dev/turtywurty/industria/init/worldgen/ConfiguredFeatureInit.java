@@ -34,7 +34,7 @@ public class ConfiguredFeatureInit {
         RegistryEntryLookup<PlacedFeature> registryLookup = context.getRegistryLookup(RegistryKeys.PLACED_FEATURE);
 
         register(context, CRUDE_OIL_POCKET, FeatureInit.FLUID_POCKET,
-                new FluidPocketConfig(FluidInit.CRUDE_OIL.getDefaultState(),
+                new FluidPocketConfig(FluidInit.CRUDE_OIL.still().getDefaultState(),
                         UniformIntProvider.create(4, 6),
                         UniformIntProvider.create(2, 4),
                         stoneOreReplaceables));

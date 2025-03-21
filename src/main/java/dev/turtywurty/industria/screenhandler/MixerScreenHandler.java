@@ -6,6 +6,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -46,7 +47,7 @@ public class MixerScreenHandler extends ScreenHandler {
             }
         }
 
-        addSlot(new Slot(blockEntity.getOutputInventory(), 0, 143, 35));
+        addSlot(new OutputSlot(blockEntity.getOutputInventory(), 0, 143, 35));
 
         SyncingSimpleInventory bucketInputInventory = blockEntity.getBucketInputInventory();
         SyncingSimpleInventory bucketOutputInventory = blockEntity.getBucketOutputInventory();

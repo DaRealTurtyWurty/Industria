@@ -5,6 +5,9 @@ import net.minecraft.client.render.RenderLayer;
 
 public class RenderLayerMapInit {
     public static void init() {
-        BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), FluidInit.CRUDE_OIL, FluidInit.CRUDE_OIL_FLOWING);
+        BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(),
+                FluidInit.CRUDE_OIL.still(), FluidInit.CRUDE_OIL.flowing(),
+                FluidInit.DIRTY_SODIUM_ALUMINATE.still(), FluidInit.DIRTY_SODIUM_ALUMINATE.flowing(),
+                FluidInit.SODIUM_ALUMINATE.still(), FluidInit.SODIUM_ALUMINATE.flowing());
     }
 }

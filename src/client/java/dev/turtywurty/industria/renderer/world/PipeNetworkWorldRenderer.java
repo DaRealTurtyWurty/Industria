@@ -18,7 +18,6 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.joml.Matrix4f;
@@ -78,20 +77,18 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
                     Vec3d vertex = pipe.toCenterPos();
 
                     float tickDelta = context.tickCounter().getTickDelta(false);
-                    double x = vertex.x - MathHelper.lerp(tickDelta, cameraEntity.prevX, cameraEntity.getX());
-                    double y = vertex.y - MathHelper.lerp(tickDelta, cameraEntity.prevY, cameraEntity.getY()) - cameraEntity.getEyeHeight(cameraEntity.getPose());
-                    double z = vertex.z - MathHelper.lerp(tickDelta, cameraEntity.prevZ, cameraEntity.getZ());
+                    Vec3d pos = vertex.subtract(cameraEntity.getCameraPosVec(tickDelta));
 
                     VertexConsumer vertexConsumer = consumers.getBuffer(RenderLayer.getLines());
                     VertexRendering.drawBox(
                             matrices,
                             vertexConsumer,
-                            x - 0.25,
-                            y - 0.25,
-                            z - 0.25,
-                            x + 0.25,
-                            y + 0.25,
-                            z + 0.25,
+                            pos.x - 0.25,
+                            pos.y - 0.25,
+                            pos.z - 0.25,
+                            pos.x + 0.25,
+                            pos.y + 0.25,
+                            pos.z + 0.25,
                             color[0],
                             color[1],
                             color[2],
@@ -114,7 +111,7 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
                         Text text = Text.literal(amountStr + pipeBlock.getUnit());
 
                         matrices.push();
-                        matrices.translate(x, y + 0.5, z);
+                        matrices.translate(pos.x, pos.y + 0.5, pos.z);
                         matrices.multiply(client.getEntityRenderDispatcher().getRotation());
                         matrices.scale(0.025F, -0.025F, 0.025F);
                         Matrix4f matrix4f = matrices.peek().getPositionMatrix();

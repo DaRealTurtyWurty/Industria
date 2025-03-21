@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-// TODO: Store a FluidStack as a variable so we don't have to reconstruct constantly
+// TODO: Store a FluidStack as a variable so we don't have to reconstruct constantly (not sure how to do this)
 public class SyncingFluidStorage extends SingleFluidStorage implements SyncableStorage {
     private final BlockEntity blockEntity;
     private final long capacity;

@@ -56,7 +56,7 @@ public class ClientPacketsInit {
 
             ClientPlayerEntity player = context.player();
             if(payload.index() == payload.chunks() - 1) {
-                RegistryKey<World> worldKey = player.getEntityWorld().getRegistryKey(); // TODO: Use this
+                RegistryKey<World> worldKey = player.getEntityWorld().getRegistryKey();
                 String nbtString = chunkList.values().stream().reduce((a, b) -> a + b).orElse("");
 
                 try {

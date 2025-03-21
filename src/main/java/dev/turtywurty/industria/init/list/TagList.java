@@ -20,5 +20,7 @@ public class TagList {
 
     public static class Fluids {
         public static final TagKey<Fluid> CRUDE_OIL = TagKey.of(RegistryKeys.FLUID, Industria.id("crude_oil"));
+        public static final TagKey<Fluid> DIRTY_SODIUM_ALUMINATE = TagKey.of(RegistryKeys.FLUID, Industria.id("dirty_sodium_aluminate"));
+        public static final TagKey<Fluid> SODIUM_ALUMINATE = TagKey.of(RegistryKeys.FLUID, Industria.id("sodium_aluminate"));
     }
 }

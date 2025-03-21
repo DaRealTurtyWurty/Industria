@@ -68,7 +68,7 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
             return;
 
         SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(Direction.SOUTH);
-        if (!isEmpty(fluidStorage)) { // TODO: Fix this
+        if (!isEmpty(fluidStorage)) {
             Direction relativeSouth = MathUtils.getRelativeDirection(Direction.SOUTH, getCachedState().get(Properties.HORIZONTAL_FACING));
             BlockPos southPos = this.pos.offset(relativeSouth);
             Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.world, southPos, relativeSouth.getOpposite());

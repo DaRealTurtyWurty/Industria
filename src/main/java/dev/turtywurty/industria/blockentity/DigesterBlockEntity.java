@@ -34,6 +34,7 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
 import dev.turtywurty.industria.screenhandler.DigesterScreenHandler;
+import dev.turtywurty.industria.util.TransferUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -186,7 +187,7 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
             Storage<SlurryVariant> storage = SlurryStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsExtraction()) {
                 SyncingSlurryStorage inputSlurryTank = getInputSlurryStorage();
-                Optional<SlurryVariant> optVariant = MixerBlockEntity.findFirstVariant(storage, inputSlurryTank.variant);
+                Optional<SlurryVariant> optVariant = TransferUtils.findFirstVariant(storage, inputSlurryTank.variant);
                 optVariant.filter(TransferVariant::isBlank).ifPresent(variant -> {
                     try (Transaction transaction = Transaction.openOuter()) {
                         long extracted = storage.extract(variant, FluidConstants.BUCKET, transaction);

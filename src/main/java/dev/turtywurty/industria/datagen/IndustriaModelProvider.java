@@ -29,7 +29,9 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerCooker(BlockInit.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.SOLAR_PANEL);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
-        blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL_BLOCK);
+        blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL.block());
+        blockStateModelGenerator.registerSimpleState(FluidInit.DIRTY_SODIUM_ALUMINATE.block());
+        blockStateModelGenerator.registerSimpleState(FluidInit.SODIUM_ALUMINATE.block());
         blockStateModelGenerator.registerSimpleState(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
         blockStateModelGenerator.registerCooker(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE);
@@ -118,7 +120,9 @@ public class IndustriaModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
-        itemModelGenerator.register(FluidInit.CRUDE_OIL_BUCKET, Models.GENERATED);
+        itemModelGenerator.register(FluidInit.CRUDE_OIL.bucket(), Models.GENERATED);
+        itemModelGenerator.register(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), Models.GENERATED);
+        itemModelGenerator.register(FluidInit.SODIUM_ALUMINATE.bucket(), Models.GENERATED);
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
@@ -193,6 +197,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ItemInit.RAW_ZINC, Models.GENERATED);
         itemModelGenerator.register(ItemInit.SODIUM_HYDROXIDE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.SODIUM_ALUMINATE, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.RED_MUD, Models.GENERATED);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

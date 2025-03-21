@@ -9,7 +9,7 @@
   "output_fluid": {
     "amount": 27000,
     "variant": {
-      "fluid": "minecraft:lava"
+      "fluid": "industria:dirty_sodium_aluminate"
     }
   },
   "process_time": 200

@@ -45,8 +45,6 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, CrusherBlockEntity.TITLE, "Crusher");
         translationBuilder.add(BlockInit.WIND_TURBINE, "Wind Turbine");
         addText(translationBuilder, WindTurbineBlockEntity.TITLE, "Wind Turbine");
-        translationBuilder.add(FluidInit.CRUDE_OIL_BLOCK, "Crude Oil");
-        translationBuilder.add(FluidInit.CRUDE_OIL_BUCKET, "Bucket of Crude Oil");
         translationBuilder.add(BlockInit.OIL_PUMP_JACK, "Oil Pump Jack");
         addText(translationBuilder, OilPumpJackBlockEntity.TITLE, "Oil Pump Jack");
         translationBuilder.add(ItemInit.SEISMIC_SCANNER, "Seismic Scanner");
@@ -119,6 +117,15 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
 
         translationBuilder.add(BlockInit.CLARIFIER, "Clarifier");
         addText(translationBuilder, ClarifierBlockEntity.TITLE, "Clarifier");
+
+        translationBuilder.add(ItemInit.RED_MUD, "Red Mud");
+
+        translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
+        translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");
+        translationBuilder.add(FluidInit.DIRTY_SODIUM_ALUMINATE.block(), "Dirty Sodium Aluminate");
+        translationBuilder.add(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), "Bucket of Dirty Sodium Aluminate");
+        translationBuilder.add(FluidInit.SODIUM_ALUMINATE.block(), "Sodium Aluminate");
+        translationBuilder.add(FluidInit.SODIUM_ALUMINATE.bucket(), "Bucket of Sodium Aluminate");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

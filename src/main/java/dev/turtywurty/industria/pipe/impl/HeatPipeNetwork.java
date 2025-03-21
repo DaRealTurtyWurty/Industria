@@ -143,7 +143,7 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     }
 
     @Override
-    public void inheritPipesFrom(PipeNetwork<HeatStorage> oldNetwork, Set<BlockPos> pipesToInherit) {
+    public void movePipesFrom(PipeNetwork<HeatStorage> oldNetwork, Set<BlockPos> pipesToInherit) {
         if (oldNetwork instanceof HeatPipeNetwork heatOldNetwork) {
             Map<BlockPos, HeatStorage> storagesToInherit = new HashMap<>();
             for (BlockPos pipe : pipesToInherit) {
@@ -153,10 +153,10 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
                 }
             }
 
-            super.inheritPipesFrom(oldNetwork, pipesToInherit);
+            super.movePipesFrom(oldNetwork, pipesToInherit);
             this.pipeStorages.putAll(storagesToInherit);
         } else {
-            super.inheritPipesFrom(oldNetwork, pipesToInherit);
+            super.movePipesFrom(oldNetwork, pipesToInherit);
         }
     }
 
