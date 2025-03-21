@@ -1,4 +1,4 @@
-// 1.21.3	2025-03-15T15:41:37.7759125	Industria/Industria Recipe Provider
+// 1.21.3	2025-03-19T21:37:12.3864438	Industria/Industria Recipe Provider
 2b9f866a766702035a7c2b65e31bce35477f24b4 data\industria\recipe\zinc_ingot_from_blasting_deepslate_zinc_ore.json
 a7207aa458dece23c60cf2b0cda7d3ab7feec636 data\industria\recipe\aluminium_ingot_from_smelting_bauxite_ore.json
 6dbe8aee542d5592f843dc9f75f23da99a203ac2 data\industria\advancement\recipes\misc\mixer_bauxite_to_bauxite_slurry.json
@@ -71,8 +71,8 @@ b55ce3811bafdd6732a1caf7a87ed2ddb14cd2d6 data\industria\advancement\recipes\misc
 3bddd29ecc1aaaec9c6d0bca91d7997e672a63b8 data\industria\recipe\clarifier_dirty_sodium_aluminate_to_sodium_aluminate.json
 e96c75e0e8deabb4cd59ac496266839beebbb345 data\industria\advancement\recipes\misc\aluminium_ingot_from_smelting_deepslate_bauxite_ore.json
 3c1056584680508fed895e8871ea5264bf068a5f data\industria\advancement\recipes\misc\cable.json
-3316c93c6e6064f4ff7f19799ac9a13d352155cc data\industria\advancement\recipes\misc\aluminium_ingot_to_nugget.json
 1166bd130c5a11c9e76389d12755fe3b21ace070 data\industria\advancement\recipes\misc\tin_nugget_to_ingot.json
+3316c93c6e6064f4ff7f19799ac9a13d352155cc data\industria\advancement\recipes\misc\aluminium_ingot_to_nugget.json
 98ae391979f53e417da3e92f20fd2016d7743499 data\industria\recipe\raw_tin_block.json
 e9471e606249c956c6cd080f15c9833070f3a5b2 data\industria\recipe\raw_bauxite_block.json
 46d1fc0a33eb220b2476a99f210a862dc794c704 data\industria\recipe\raw_zinc.json

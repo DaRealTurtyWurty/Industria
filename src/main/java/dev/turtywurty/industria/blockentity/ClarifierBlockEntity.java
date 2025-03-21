@@ -243,7 +243,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
 
     @Override
     public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?>>> transferTypes = new EnumMap<>(Direction.class);
+        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
         if(Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 1 && direction == Direction.UP)
             transferTypes.put(Direction.UP, List.of(TransferType.FLUID));
         else if(offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == -1 && offsetFromPrimary.getX() == 0 && direction == Direction.NORTH)

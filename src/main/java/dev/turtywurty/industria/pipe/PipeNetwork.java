@@ -10,18 +10,17 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class PipeNetwork<S> implements NBTSerializable<NbtCompound> {
     protected UUID id;
-    protected final Set<BlockPos> pipes = new HashSet<>();
-    protected final Set<BlockPos> connectedBlocks = new HashSet<>();
-    protected final TransferType<S, ?> transferType;
+    protected final Set<BlockPos> pipes = ConcurrentHashMap.newKeySet();
+    protected final Set<BlockPos> connectedBlocks = ConcurrentHashMap.newKeySet();
+    protected final TransferType<S, ?, ?> transferType;
     protected final S storage;
 
-    public PipeNetwork(UUID id, TransferType<S, ?> transferType) {
+    public PipeNetwork(UUID id, TransferType<S, ?, ?> transferType) {
         this.id = id;
         this.transferType = transferType;
         this.storage = createStorage();
@@ -29,26 +28,26 @@ public abstract class PipeNetwork<S> implements NBTSerializable<NbtCompound> {
 
     @Override
     public NbtCompound writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        NbtCompound nbt = new NbtCompound();
+        var nbt = new NbtCompound();
         nbt.putUuid("id", this.id);
 
-        var pipes = new NbtList();
+        var pipesNbtList = new NbtList();
         for (BlockPos pipe : this.pipes) {
-            NbtCompound pipeNbt = new NbtCompound();
+            var pipeNbt = new NbtCompound();
             pipeNbt.putLong("pos", pipe.asLong());
-            pipes.add(pipeNbt);
+            pipesNbtList.add(pipeNbt);
         }
 
-        nbt.put("pipes", pipes);
+        nbt.put("pipes", pipesNbtList);
 
-        var connectedBlocks = new NbtList();
+        var connectedBlocksNbtList = new NbtList();
         for (BlockPos connectedBlock : this.connectedBlocks) {
-            NbtCompound connectedBlockNbt = new NbtCompound();
+            var connectedBlockNbt = new NbtCompound();
             connectedBlockNbt.putLong("pos", connectedBlock.asLong());
-            connectedBlocks.add(connectedBlockNbt);
+            connectedBlocksNbtList.add(connectedBlockNbt);
         }
 
-        nbt.put("connectedBlocks", connectedBlocks);
+        nbt.put("connectedBlocks", connectedBlocksNbtList);
 
         return nbt;
     }
@@ -83,13 +82,80 @@ public abstract class PipeNetwork<S> implements NBTSerializable<NbtCompound> {
         return this.pipes;
     }
 
-    public Set<BlockPos> getConnectedBlocks() {
-        return this.connectedBlocks;
+    public void addPipe(BlockPos pos) {
+        this.pipes.add(pos);
+    }
+
+    public void removePipe(BlockPos pos) {
+        this.pipes.remove(pos);
+    }
+
+    public void inheritPipesFrom(PipeNetwork<S> oldNetwork, Set<BlockPos> pipesToInherit) {
+        for (BlockPos pipe : pipesToInherit) {
+            addPipe(pipe);
+            oldNetwork.removePipe(pipe);
+        }
+    }
+
+    public boolean hasCentralStorage() {
+        return true;
+    }
+
+    protected void onConnectedBlocksChanged(World world) {
+        // NO-OP
+    }
+
+    public void clearConnectedBlocks(World world) {
+        this.connectedBlocks.clear();
+        onConnectedBlocksChanged(world);
+    }
+
+    public void addConnectedBlock(World world, BlockPos pos) {
+        this.connectedBlocks.add(pos);
+        onConnectedBlocksChanged(world);
+    }
+
+    public void removeConnectedBlock(World world, BlockPos pos) {
+        this.connectedBlocks.remove(pos);
+        onConnectedBlocksChanged(world);
+    }
+
+    public void addConnectedBlocks(World world, Collection<BlockPos> connectedBlocks) {
+        this.connectedBlocks.addAll(connectedBlocks);
+        onConnectedBlocksChanged(world);
+    }
+
+    public void addConnectedBlocks(World world, PipeNetwork<?> network) {
+        this.connectedBlocks.addAll(network.connectedBlocks);
+        onConnectedBlocksChanged(world);
+    }
+
+    public void addConnectedBlocks(World world, BlockPos... connectedBlocks) {
+        this.connectedBlocks.addAll(Arrays.asList(connectedBlocks));
+        onConnectedBlocksChanged(world);
+    }
+
+    public void removeConnectedBlocks(World world, Collection<BlockPos> connectedBlocks) {
+        this.connectedBlocks.removeAll(connectedBlocks);
+        onConnectedBlocksChanged(world);
+    }
+
+    public void removeConnectedBlocks(World world, BlockPos... connectedBlocks) {
+        for (BlockPos blockPos : connectedBlocks) {
+            this.connectedBlocks.remove(blockPos);
+        }
+
+        onConnectedBlocksChanged(world);
+    }
+
+    public void removeConnectedBlocks(World world, PipeNetwork<?> network) {
+        this.connectedBlocks.removeAll(network.connectedBlocks);
+        onConnectedBlocksChanged(world);
     }
 
     protected abstract S createStorage();
 
-    public S getStorage() {
+    public S getStorage(World world, BlockPos pos) {
         return this.storage;
     }
 
@@ -102,5 +168,10 @@ public abstract class PipeNetwork<S> implements NBTSerializable<NbtCompound> {
                 }
             }
         }
+    }
+
+    @FunctionalInterface
+    public interface Factory<S, N extends PipeNetwork<S>> {
+        N create(UUID id);
     }
 }

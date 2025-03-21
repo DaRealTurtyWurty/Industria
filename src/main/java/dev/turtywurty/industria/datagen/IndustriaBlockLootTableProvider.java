@@ -25,7 +25,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.COMBUSTION_GENERATOR);
         addDrop(BlockInit.SOLAR_PANEL);
         addDrop(BlockInit.CRUSHER);
-        addDrop(BlockInit.CABLE);
         addDrop(BlockInit.WIND_TURBINE);
         addDrop(BlockInit.OIL_PUMP_JACK);
         addDrop(BlockInit.DRILL);
@@ -36,9 +35,12 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER);
         addDrop(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
         addDrop(BlockInit.INDUCTION_HEATER);
+        addDrop(BlockInit.FLUID_PUMP);
+
+        addDrop(BlockInit.CABLE);
         addDrop(BlockInit.FLUID_PIPE);
         addDrop(BlockInit.SLURRY_PIPE);
-        addDrop(BlockInit.FLUID_PUMP);
+        addDrop(BlockInit.HEAT_PIPE);
 
         oreDrops(BlockInit.BAUXITE_ORE, ItemInit.RAW_BAUXITE);
         oreDrops(BlockInit.TIN_ORE, ItemInit.RAW_TIN);

@@ -9,25 +9,25 @@ import java.util.List;
 
 public class MultiblockIOPort {
     private final Direction side;
-    private final List<TransferType<?, ?>> transferTypes;
+    private final List<TransferType<?, ?, ?>> transferTypes;
 
-    public MultiblockIOPort(Direction side, List<TransferType<?, ?>> transferTypes) {
+    public MultiblockIOPort(Direction side, List<TransferType<?, ?, ?>> transferTypes) {
         this.side = side;
         this.transferTypes = transferTypes;
     }
 
-    public MultiblockIOPort(Direction side, TransferType<?, ?>... transferTypes) {
+    public MultiblockIOPort(Direction side, TransferType<?, ?, ?>... transferTypes) {
         this.side = side;
         this.transferTypes = List.of(transferTypes);
     }
 
     public void tick(World world, BlockPos pos, BlockPos controller) {
-        for (TransferType<?, ?> transferType : this.transferTypes) {
+        for (TransferType<?, ?, ?> transferType : this.transferTypes) {
             transferType.pushTo(world, controller, pos.offset(this.side), this.side);
         }
     }
 
-    public <T> T getProvider(TransferType<T, ?> transferType, World world, BlockPos pos, BlockEntity controller) {
+    public <T> T getProvider(TransferType<T, ?, ?> transferType, World world, BlockPos pos, BlockEntity controller) {
         return transferType.lookup(world, pos, controller.getCachedState(), controller, this.side);
     }
 
@@ -35,7 +35,7 @@ public class MultiblockIOPort {
         return this.side;
     }
 
-    public List<TransferType<?, ?>> getTransferTypes() {
+    public List<TransferType<?, ?, ?>> getTransferTypes() {
         return this.transferTypes;
     }
 }

@@ -30,7 +30,7 @@ public interface Multiblockable {
         return offset.getX() == 0 && offset.getZ() == 0;
     }
 
-    static Map<Direction, MultiblockIOPort> toIOPortMap(Map<Direction, List<TransferType<?,?>>> transferTypes) {
+    static Map<Direction, MultiblockIOPort> toIOPortMap(Map<Direction, List<TransferType<?, ?, ?>>> transferTypes) {
         Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
         transferTypes.forEach((dir, types) -> ports.put(dir, new MultiblockIOPort(dir, types)));
         return ports;

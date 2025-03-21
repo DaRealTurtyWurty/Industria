@@ -31,67 +31,81 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TransferType<S, V> {
-    private static final List<TransferType<?, ?>> VALUES = new ArrayList<>();
+@SuppressWarnings({"WrapperTypeMayBePrimitive", "unchecked"})
+public class TransferType<S, V, A extends Number> {
+    private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
-    public static final TransferType<Storage<ItemVariant>, ItemVariant> ITEM =
-            new TransferType<>(ItemStorage.SIDED, ItemStorage.ITEM, Storage::insert, Storage::extract,
+    public static final TransferType<Storage<ItemVariant>, ItemVariant, Long> ITEM =
+            new TransferType<>("item", ItemStorage.SIDED, ItemStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> MixerBlockEntity.findFirstVariant(storage, null)
                             .orElse(ItemVariant.blank()),
+                    Long.MAX_VALUE,
                     ItemVariant::isBlank);
 
-    public static final TransferType<Storage<FluidVariant>, FluidVariant> FLUID =
-            new TransferType<>(FluidStorage.SIDED, FluidStorage.ITEM, Storage::insert, Storage::extract,
+    public static final TransferType<Storage<FluidVariant>, FluidVariant, Long> FLUID =
+            new TransferType<>("fluid", FluidStorage.SIDED, FluidStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> MixerBlockEntity.findFirstVariant(storage, null)
                             .orElse(FluidVariant.blank()),
+                    Long.MAX_VALUE,
                     FluidVariant::isBlank);
 
-    public static final TransferType<EnergyStorage, Long> ENERGY =
-            new TransferType<>(EnergyStorage.SIDED, EnergyStorage.ITEM,
+    public static final TransferType<EnergyStorage, Long, Long> ENERGY =
+            new TransferType<>("energy", EnergyStorage.SIDED, EnergyStorage.ITEM,
                     (storage, value, maxAmount, transaction) -> storage.insert(maxAmount, transaction),
                     (storage, value, maxAmount, transaction) -> storage.extract(maxAmount, transaction),
                     EnergyStorage::getAmount,
+                    Long.MAX_VALUE,
                     value -> value <= 0);
 
-    public static final TransferType<HeatStorage, Long> HEAT =
-            new TransferType<>(HeatStorage.SIDED, HeatStorage.ITEM,
-                    (storage, value, maxAmount, transaction) -> storage.insert(maxAmount, transaction),
-                    (storage, value, maxAmount, transaction) -> storage.extract(maxAmount, transaction),
+    public static final TransferType<HeatStorage, Double, Double> HEAT =
+            new TransferType<>("heat", HeatStorage.SIDED, HeatStorage.ITEM,
+                    (storage, value, maxAmount, transaction) -> storage.insert(value, transaction),
+                    (storage, value, maxAmount, transaction) -> storage.extract(value, transaction),
                     HeatStorage::getAmount,
+                    Double.MAX_VALUE,
                     value -> value <= 0);
 
-    public static final TransferType<Storage<SlurryVariant>, SlurryVariant> SLURRY =
-            new TransferType<>(SlurryStorage.SIDED, SlurryStorage.ITEM, Storage::insert, Storage::extract,
+    public static final TransferType<Storage<SlurryVariant>, SlurryVariant, Long> SLURRY =
+            new TransferType<>("slurry", SlurryStorage.SIDED, SlurryStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> MixerBlockEntity.findFirstVariant(storage, null)
                             .orElse(SlurryVariant.blank()),
+                    Long.MAX_VALUE,
                     SlurryVariant::isBlank);
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
     //public static final TransferType<?> GAS = new TransferType<>(null, null);
 
-    public static List<TransferType<?, ?>> getValues() {
+    public static List<TransferType<?, ?, ?>> getValues() {
         return List.copyOf(VALUES);
     }
 
+    private final String name;
     private final BlockApiLookup<S, @Nullable Direction> blockLookup;
     private final ItemApiLookup<S, ContainerItemContext> itemLookup;
-    private final InsertExtractFunction<S, V> insertFunction;
-    private final InsertExtractFunction<S, V> extractFunction;
+    private final InsertExtractFunction<S, V, A> insertFunction;
+    private final InsertExtractFunction<S, V, A> extractFunction;
     private final Function<S, V> valueGetter;
+    private final A maxAmount;
     private final Predicate<V> isBlank;
 
-    public TransferType(@NotNull BlockApiLookup<S, @Nullable Direction> blockLookup,
+    public TransferType(@NotNull String name,
+                        @NotNull BlockApiLookup<S, @Nullable Direction> blockLookup,
                         @NotNull ItemApiLookup<S, ContainerItemContext> itemLookup,
-                        @NotNull InsertExtractFunction<S, V> insertFunction,
-                        @NotNull InsertExtractFunction<S, V> extractFunction,
+                        @NotNull InsertExtractFunction<S, V, A> insertFunction,
+                        @NotNull InsertExtractFunction<S, V, A> extractFunction,
                         @NotNull Function<S, V> valueGetter,
+                        @NotNull A maxAmount,
                         @NotNull Predicate<V> isBlank) {
+        Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(blockLookup, "blockLookup must not be null");
         Objects.requireNonNull(itemLookup, "itemLookup must not be null");
         Objects.requireNonNull(insertFunction, "insertFunction must not be null");
         Objects.requireNonNull(extractFunction, "extractFunction must not be null");
         Objects.requireNonNull(valueGetter, "valueGetter must not be null");
+        Objects.requireNonNull(maxAmount, "maxAmount must not be null");
         Objects.requireNonNull(isBlank, "isBlank must not be null");
+
+        this.name = name;
 
         this.blockLookup = blockLookup;
         this.itemLookup = itemLookup;
@@ -100,6 +114,7 @@ public class TransferType<S, V> {
         this.extractFunction = extractFunction;
 
         this.valueGetter = valueGetter;
+        this.maxAmount = maxAmount;
         this.isBlank = isBlank;
 
         VALUES.add(this);
@@ -111,6 +126,10 @@ public class TransferType<S, V> {
 
     public ItemApiLookup<S, ContainerItemContext> getItemLookup() {
         return this.itemLookup;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public void registerForMultiblockIo() {
@@ -135,17 +154,17 @@ public class TransferType<S, V> {
             if (isBlank.test(value))
                 return;
 
-            long maxAmount;
-            try(Transaction transaction1 = transaction.openNested()) {
-                maxAmount = extract(primaryStorage, value, Long.MAX_VALUE, transaction1);
+            A maxAmount;
+            try (Transaction transaction1 = transaction.openNested()) {
+                maxAmount = extract(primaryStorage, value, this.maxAmount, transaction1);
                 transaction1.abort();
             }
 
-            if(maxAmount <= 0)
+            if (maxAmount.doubleValue() <= 0)
                 return;
 
-            long inserted = insert(secondaryStorage, value, maxAmount, transaction);
-            if (inserted > 0) {
+            A inserted = insert(secondaryStorage, value, maxAmount, transaction);
+            if (inserted.doubleValue() > 0) {
                 extract(primaryStorage, value, inserted, transaction);
                 transaction.commit();
             }
@@ -164,11 +183,11 @@ public class TransferType<S, V> {
         return this.itemLookup.find(stack, context);
     }
 
-    public long insert(S storage, V value, long maxAmount, TransactionContext transaction) {
+    public A insert(S storage, V value, A maxAmount, TransactionContext transaction) {
         return this.insertFunction.function(storage, value, maxAmount, transaction);
     }
 
-    public long extract(S storage, V value, long maxAmount, TransactionContext transaction) {
+    public A extract(S storage, V value, A maxAmount, TransactionContext transaction) {
         return this.extractFunction.function(storage, value, maxAmount, transaction);
     }
 
@@ -177,18 +196,18 @@ public class TransferType<S, V> {
         if (isBlank.test(value))
             return;
 
-        long inStorage;
-        try(Transaction transaction = Transaction.openOuter()) {
-            inStorage = extract(storage, value, Long.MAX_VALUE, transaction);
+        A inStorage;
+        try (Transaction transaction = Transaction.openOuter()) {
+            inStorage = extract(storage, value, this.maxAmount, transaction);
         }
 
-        long amount = (long) (fraction * inStorage);
+        Double amount = (fraction * inStorage.doubleValue());
         if (amount <= 0)
             return;
 
         try (Transaction transaction = Transaction.openOuter()) {
-            long extracted = extract(storage, value, amount, transaction);
-            if (extracted > 0) {
+            A extracted = extract(storage, value, (A) amount, transaction);
+            if (extracted.doubleValue() > 0) {
                 insert(storage1, value, extracted, transaction);
                 transaction.commit();
             }
@@ -199,8 +218,21 @@ public class TransferType<S, V> {
         transferFraction(storage, storage1, 1);
     }
 
+    public A getAmount(World world, BlockPos pos) {
+        try(Transaction transaction = Transaction.openOuter()) {
+            S storage = lookup(world, pos, null);
+            V value = this.valueGetter.apply(storage);
+            if(this.isBlank.test(value))
+                return (A) (Number) 0;
+
+            return extract(storage, value, this.maxAmount, transaction);
+        } catch (RuntimeException e) {
+            return (A) (Number) 0;
+        }
+    }
+
     @FunctionalInterface
-    public interface InsertExtractFunction<S, V> {
-        long function(S storage, V value, long maxAmount, TransactionContext transaction);
+    public interface InsertExtractFunction<S, V, A extends Number> {
+        A function(S storage, V value, A maxAmount, TransactionContext transaction);
     }
 }

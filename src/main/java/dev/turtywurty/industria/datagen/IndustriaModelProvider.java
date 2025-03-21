@@ -43,6 +43,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
+        registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.BAUXITE_ORE);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_ORE);

@@ -20,6 +20,7 @@ import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import dev.turtywurty.industria.pipe.impl.HeatPipeNetwork;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
@@ -116,9 +117,12 @@ public class Industria implements ModInitializer {
         ItemStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
 
         FluidStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getFluidProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
+        HeatStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getHeatProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
         FluidStorage.SIDED.registerForBlockEntity(FractionalDistillationTowerBlockEntity::getFluidProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER);
 
         EnergyStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getEnergyProvider, BlockEntityTypeInit.INDUCTION_HEATER);
+        HeatStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getHeatProvider, BlockEntityTypeInit.INDUCTION_HEATER);
+        FluidStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getFluidProvider, BlockEntityTypeInit.INDUCTION_HEATER);
 
         FluidStorage.SIDED.registerForBlockEntity(FluidPumpBlockEntity::getFluidProvider, BlockEntityTypeInit.FLUID_PUMP);
         EnergyStorage.SIDED.registerForBlockEntity(FluidPumpBlockEntity::getEnergyProvider, BlockEntityTypeInit.FLUID_PUMP);
@@ -135,28 +139,29 @@ public class Industria implements ModInitializer {
         FluidStorage.SIDED.registerForBlockEntity(ClarifierBlockEntity::getFluidProvider, BlockEntityTypeInit.CLARIFIER);
         ItemStorage.SIDED.registerForBlockEntity(ClarifierBlockEntity::getInventoryProvider, BlockEntityTypeInit.CLARIFIER);
 
-        for (TransferType<?, ?> transferType : TransferType.getValues()) {
+        for (TransferType<?, ?, ?> transferType : TransferType.getValues()) {
             transferType.registerForMultiblockIo();
         }
 
         FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             PipeNetwork<Storage<FluidVariant>> network = PipeNetworkManager.FLUID.getNetwork(world, pos);
-            return network == null ? null : network.getStorage();
+            return network == null ? null : network.getStorage(world, pos);
         }, BlockInit.FLUID_PIPE);
 
         SlurryStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             PipeNetwork<Storage<SlurryVariant>> network = PipeNetworkManager.SLURRY.getNetwork(world, pos);
-            return network == null ? null : network.getStorage();
+            return network == null ? null : network.getStorage(world, pos);
         }, BlockInit.SLURRY_PIPE);
 
         HeatStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            PipeNetwork<HeatStorage> network = PipeNetworkManager.HEAT.getNetwork(world, pos);
-            return network == null ? null : network.getStorage();
+            HeatPipeNetwork network = PipeNetworkManager.HEAT.getNetwork(world, pos);
+
+            return network == null ? null : network.getStorage(world, pos);
         }, BlockInit.HEAT_PIPE);
 
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             PipeNetwork<EnergyStorage> network = PipeNetworkManager.ENERGY.getNetwork(world, pos);
-            return network == null ? null : network.getStorage();
+            return network == null ? null : network.getStorage(world, pos);
         }, BlockInit.CABLE);
 
         // Payloads
@@ -168,6 +173,8 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(ChangeDrillOverflowModePayload.ID, ChangeDrillOverflowModePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(UpgradeStationUpdateRecipesPayload.ID, UpgradeStationUpdateRecipesPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(RequestSyncPipeNetworksPayload.ID, RequestSyncPipeNetworksPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SyncPipeNetworksPayload.ID, SyncPipeNetworksPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -220,9 +227,11 @@ public class Industria implements ModInitializer {
             }
         });
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld()));
-        });
+        ServerPlayNetworking.registerGlobalReceiver(RequestSyncPipeNetworksPayload.ID,
+                (payload, context) -> PipeNetworkManager.sync(context.player()));
+
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+                sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld())));
 
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (!(world instanceof ServerWorld serverWorld))
@@ -252,10 +261,9 @@ public class Industria implements ModInitializer {
         ServerTickEvents.START_WORLD_TICK.register(world -> {
             MultiblockBlock.SHAPE_CACHE.clear();
 
-            PipeNetworkManager.ENERGY.tick(world);
-            PipeNetworkManager.HEAT.tick(world);
-            PipeNetworkManager.FLUID.tick(world);
-            PipeNetworkManager.SLURRY.tick(world);
+            for (PipeNetworkManager<?, ?> manager : PipeNetworkManager.getManagers()) {
+                manager.tick(world);
+            }
         });
 
         // Fluid Properties

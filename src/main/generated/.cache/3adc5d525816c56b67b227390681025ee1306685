@@ -1,4 +1,4 @@
-// 1.21.3	2025-03-15T15:41:37.7729124	Industria/Model Definitions
+// 1.21.3	2025-03-19T21:37:12.3844433	Industria/Model Definitions
 20b26fc8f36b94e66001b5d7ca9a16d7fb31ba5f assets\industria\models\block\aluminium_block.json
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
 b05eb9bedb55e18908a84749f63ddee6f6c23a0e assets\industria\models\block\deepslate_tin_ore.json
@@ -19,8 +19,8 @@ d5ea5a951c9bded3ab545d7cf5738298501b6206 assets\industria\models\item\deepslate_
 147ddc6ad1878b33ac2fc126a2ff283772262fea assets\industria\models\item\steel_ingot.json
 3d68d49a048a4de62b40efcf9bf325e286c23037 assets\industria\models\block\combustion_generator.json
 3375fe14267f8d6239f8fd0e41bfd3d4547394e4 assets\industria\blockstates\fluid_pipe.json
-0bfd27186c9f953f6866c7c724db2836d16a63d3 assets\industria\models\item\clarifier.json
 f1642bc14e91589f3bb1b01e12472c2c3d353929 assets\industria\models\item\deepslate_tin_ore.json
+0bfd27186c9f953f6866c7c724db2836d16a63d3 assets\industria\models\item\clarifier.json
 647a26fceff7182de9b729b476f155c88afe0111 assets\industria\models\block\tin_ore.json
 0bfd27186c9f953f6866c7c724db2836d16a63d3 assets\industria\models\item\mixer.json
 c740a57f8fca80eae583de01b7e5c6b739677f10 assets\industria\models\item\raw_zinc.json
@@ -39,15 +39,16 @@ e6a9eff6b8b16b733d3e3b1ab81f6616d7abdeac assets\industria\models\block\basic_bat
 fbbc1cba4e808eeec210770b4a6cb98d678648b8 assets\industria\blockstates\deepslate_bauxite_ore.json
 67fab225d0aa9a4524017c337511b3018ddffaaa assets\industria\models\item\advanced_battery.json
 774f60635f214be91bb49ea6e8e0c86a0bd7b280 assets\industria\models\item\induction_heater.json
-cdcf3ea48e425b25044c2e7a18c028914d4eebe9 assets\industria\models\item\aluminium_nugget.json
 26b82c7fd0a8588f513c4bcd892ab50f03b9ee5f assets\industria\models\item\simple_drill_head.json
-1690d1810a3275172d08f9326ebc7c5a92c060fa assets\industria\blockstates\slurry_pipe.json
+cdcf3ea48e425b25044c2e7a18c028914d4eebe9 assets\industria\models\item\aluminium_nugget.json
 33c016177749a024ec2148798b43fe1724f7013c assets\industria\models\block\bauxite_ore.json
+1690d1810a3275172d08f9326ebc7c5a92c060fa assets\industria\blockstates\slurry_pipe.json
 29840729361dc30a7d0cbf3fb1b3addc1539cb48 assets\industria\models\item\fluid_pump.json
 ca96af717d23d4cd9d4c59b56111f6dba492df16 assets\industria\blockstates\elite_battery.json
 a8641a7f87692e1298f0a630c757d2dd2e386cb0 assets\industria\models\item\drill.json
 24fed3aa4b1f28d6e6147c510b3a72ac99188409 assets\industria\models\item\alloy_furnace.json
 ea1705797fd3a9fa12f1370ced2cd5f057703915 assets\industria\models\block\basic_battery_horizontal.json
+cebf523e141b3dab16b6fe39f8aacf64fd5c5d90 assets\industria\blockstates\heat_pipe.json
 7cbd660ceb9846a2c7bcf6112655e61c01973a56 assets\industria\models\block\alloy_furnace_on.json
 64e2f51a6b7f286e19a001749cd7376de0c1c73e assets\industria\models\item\tin_nugget.json
 b2915fcdbe02b2b1545a03cbd39a8eca4b6a13f6 assets\industria\models\item\tin_ingot.json
@@ -101,6 +102,7 @@ a53b6473440980d44081fb256c435a2c05540843 assets\industria\models\item\aluminium_
 7d2f0c626990d3673f6cb9f1c9d3cc22a8a8b2e6 assets\industria\blockstates\solar_panel.json
 c4ff8c3ee27cdb2f2a165441e970e68558731950 assets\industria\blockstates\raw_zinc_block.json
 dd5c98f00d66531da837c23348b454851985c281 assets\industria\models\item\zinc_nugget.json
+c0f424b6a6464568e783075de9d3c69216107843 assets\industria\models\item\heat_pipe.json
 a3bd3dbf68de074a683c8c488add640c8509a0b4 assets\industria\models\item\bauxite_ore.json
 4f8f92ccdf8767eae3b4d506f75b227aeee4d951 assets\industria\models\item\motor.json
 601d4e3f8122f2dc775936e3b9c77305dbc7466f assets\industria\blockstates\tin_block.json

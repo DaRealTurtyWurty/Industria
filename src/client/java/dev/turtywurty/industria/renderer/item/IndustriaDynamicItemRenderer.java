@@ -2,10 +2,10 @@ package dev.turtywurty.industria.renderer.item;
 
 import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.IndustriaClient;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.init.ModelInit;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.util.DrillHeadable;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -81,7 +81,7 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
         }
 
         if (this.seismicScanner == null) {
-            this.seismicScanner = MinecraftClient.getInstance().getBakedModelManager().getModel(IndustriaClient.SEISMIC_SCANNER);
+            this.seismicScanner = MinecraftClient.getInstance().getBakedModelManager().getModel(ModelInit.SEISMIC_SCANNER_MODEL_ID);
         }
 
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();

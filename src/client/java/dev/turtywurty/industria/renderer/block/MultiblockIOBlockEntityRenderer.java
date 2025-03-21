@@ -34,7 +34,7 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
 
             for (MultiblockIOPort port : ports.values()) {
                 double size = 0.5;
-                for (TransferType<?, ?> transferType : port.getTransferTypes()) {
+                for (TransferType<?, ?, ?> transferType : port.getTransferTypes()) {
                     float[] color = getColor(transferType);
 
                     VertexRendering.drawBox(
@@ -80,7 +80,7 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
         matrices.pop();
     }
 
-    private static float[] getColor(TransferType<?, ?> type) {
+    private static float[] getColor(TransferType<?, ?, ?> type) {
         if(type == TransferType.ITEM) {
             return new float[]{0.0F, 0.0F, 0.0F};
         } else if (type == TransferType.ENERGY) {

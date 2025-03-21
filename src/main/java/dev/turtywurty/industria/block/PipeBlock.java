@@ -12,6 +12,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -34,10 +35,10 @@ import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.DecimalFormat;
 import java.util.Locale;
-import java.util.Map;
 
-public abstract class PipeBlock<S> extends Block implements Waterloggable {
+public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> extends Block implements Waterloggable {
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     public static final EnumProperty<ConnectorType> NORTH = EnumProperty.of("north", ConnectorType.class);
@@ -47,24 +48,15 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
     public static final EnumProperty<ConnectorType> UP = EnumProperty.of("up", ConnectorType.class);
     public static final EnumProperty<ConnectorType> DOWN = EnumProperty.of("down", ConnectorType.class);
 
-    public static final Map<Direction, EnumProperty<ConnectorType>> DIRECTION_PROPERTY_MAP = Map.of(
-            Direction.NORTH, NORTH,
-            Direction.SOUTH, SOUTH,
-            Direction.WEST, WEST,
-            Direction.EAST, EAST,
-            Direction.UP, UP,
-            Direction.DOWN, DOWN
-    );
-
     protected final VoxelShape[] pipeShapes = new VoxelShape[Direction.values().length];
     protected final VoxelShape[] blockConnectorShapes = new VoxelShape[Direction.values().length];
 
     protected final VoxelShape[] shapeCache = new VoxelShape[ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length];
 
-    private final TransferType<S, ?> transferType;
-    private final PipeNetworkManager<S> networkManager;
+    private final TransferType<S, ?, A> transferType;
+    private final PipeNetworkManager<S, N> networkManager;
 
-    public PipeBlock(Settings settings, int diameter, TransferType<S, ?> transferType, PipeNetworkManager<S> networkManager) {
+    public PipeBlock(Settings settings, int diameter, TransferType<S, ?, A> transferType, PipeNetworkManager<S, N> networkManager) {
         super(settings);
         setDefaultState(getDefaultState()
                 .with(NORTH, ConnectorType.NONE)
@@ -86,7 +78,7 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
         createShapeCache();
     }
 
-    public TransferType<S, ?> getTransferType() {
+    public TransferType<S, ?, A> getTransferType() {
         return this.transferType;
     }
 
@@ -211,7 +203,9 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
         if (blockState != state) {
             world.setBlockState(pos, blockState);
 
-            this.networkManager.placePipe(world, pos);
+            if (!world.isClient()) {
+                this.networkManager.placePipe((ServerWorld) world, pos);
+            }
         }
     }
 
@@ -226,7 +220,9 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
-        this.networkManager.placePipe(world, pos);
+        if(!world.isClient()) {
+            this.networkManager.placePipe((ServerWorld) world, pos);
+        }
 
         BlockState state = getDefaultState().with(WATERLOGGED, world.getFluidState(pos).getFluid() == Fluids.WATER);
         return calculateState(world, pos, state);
@@ -234,8 +230,8 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
 
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if(!state.isOf(newState.getBlock())) {
-            this.networkManager.removePipe(world, pos);
+        if(!state.isOf(newState.getBlock()) && !world.isClient()) {
+            this.networkManager.removePipe((ServerWorld) world, pos);
         }
 
         super.onStateReplaced(state, world, pos, newState, moved);
@@ -246,11 +242,11 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
-    protected abstract long getAmount(S storage);
+    public abstract A getAmount(S storage);
 
-    protected abstract long getCapacity(S storage);
+    public abstract A getCapacity(S storage);
 
-    protected abstract String getUnit();
+    public abstract String getUnit();
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
@@ -259,12 +255,33 @@ public abstract class PipeBlock<S> extends Block implements Waterloggable {
 
         PipeNetwork<S> network = this.networkManager.getNetwork(world, pos);
         if (network == null) {
-            this.networkManager.traverseCreateNetwork(world, pos);
+            if(!world.isClient()) {
+                this.networkManager.traverseCreateNetwork((ServerWorld) world, pos);
+            }
+
             return ActionResult.PASS;
         }
 
         if (!world.isClient) {
-            player.sendMessage(Text.literal(getAmount(network.getStorage()) + " / " + getCapacity(network.getStorage()) + " " + getUnit()), true);
+            A amount = getAmount(network.getStorage(world, pos));
+            A capacity = getCapacity(network.getStorage(world, pos));
+
+            DecimalFormat df = new DecimalFormat("#.##");
+            DecimalFormat scientific = new DecimalFormat("#.##E0");
+
+            String amountStr = df.format(amount).replace(".00", "");
+            String capacityStr = df.format(capacity).replace(".00", "");
+
+            // replace with scientific notation if the number is too large
+            if (amountStr.length() > 6) {
+                amountStr = scientific.format(amount);
+            }
+
+            if (capacityStr.length() > 6) {
+                capacityStr = scientific.format(capacity);
+            }
+
+            player.sendMessage(Text.literal(amountStr + " " + getUnit() + " / " + capacityStr + " " + getUnit()), true);
             return ActionResult.SUCCESS_SERVER;
         }
 

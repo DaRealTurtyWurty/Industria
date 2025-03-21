@@ -162,7 +162,7 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
 
     @Override
     public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?>>> transferTypes = new EnumMap<>(Direction.class);
+        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
         if (offsetFromPrimary.getY() == 4 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP)
             transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.SLURRY);
 

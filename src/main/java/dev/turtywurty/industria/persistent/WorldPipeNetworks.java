@@ -7,41 +7,48 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.World;
 
 public class WorldPipeNetworks extends PersistentState {
-    private static final Type<WorldPipeNetworks> TYPE = new Type<>(
-            WorldPipeNetworks::new,
-            WorldPipeNetworks::readNbt,
-            null
-    );
+    private static Type<WorldPipeNetworks> getType(ServerWorld serverWorld) {
+        return new Type<>(
+                () -> new WorldPipeNetworks(serverWorld),
+                (nbtCompound, wrapperLookup) -> readNbt(serverWorld, nbtCompound, wrapperLookup),
+                null
+        );
+    }
+
+    private final ServerWorld serverWorld;
+
+    public WorldPipeNetworks(ServerWorld serverWorld) {
+        this.serverWorld = serverWorld;
+    }
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        nbt.put("Energy", PipeNetworkManager.ENERGY.writeNbt(registries));
-        nbt.put("Fluid", PipeNetworkManager.FLUID.writeNbt(registries));
-        nbt.put("Heat", PipeNetworkManager.HEAT.writeNbt(registries));
-        nbt.put("Slurry", PipeNetworkManager.SLURRY.writeNbt(registries));
-
+        PipeNetworkManager.writeAllNbt(this.serverWorld, nbt, registries);
         return nbt;
     }
 
-    public static WorldPipeNetworks readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        var state = new WorldPipeNetworks();
-
-        PipeNetworkManager.ENERGY.readNbt(nbt.getCompound("Energy"), registries);
-        PipeNetworkManager.FLUID.readNbt(nbt.getCompound("Fluid"), registries);
-        PipeNetworkManager.HEAT.readNbt(nbt.getCompound("Heat"), registries);
-        PipeNetworkManager.SLURRY.readNbt(nbt.getCompound("Slurry"), registries);
-
+    public static WorldPipeNetworks readNbt(ServerWorld serverWorld, NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
+        var state = new WorldPipeNetworks(serverWorld);
+        PipeNetworkManager.readAllNbt(serverWorld, nbt, registries);
         return state;
     }
 
     public static WorldPipeNetworks getOrCreate(ServerWorld serverWorld) {
-        if(serverWorld.getRegistryKey() != World.OVERWORLD) // TODO: Remove when networks are dimension-sensitive
-            return new WorldPipeNetworks();
-
         PersistentStateManager persistentStateManager = serverWorld.getPersistentStateManager();
-        return persistentStateManager.getOrCreate(TYPE, Industria.MOD_ID + ".pipe_networks");
+        return persistentStateManager.getOrCreate(getType(serverWorld), Industria.MOD_ID + ".pipe_networks");
+    }
+
+    @Override
+    public void setDirty(boolean dirty) {
+        super.setDirty(dirty);
+
+        if(!isDirty())
+            return;
+
+//        for (ServerPlayerEntity player : this.serverWorld.getPlayers()) {
+//            PipeNetworkManager.sync(player);
+//        }
     }
 }

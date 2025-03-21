@@ -67,7 +67,7 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
         return this.multiblock.getPorts(offsetFromPrimary, direction);
     }
 
-    public <T> T getProvider(TransferType<T,?> transferType, @Nullable Direction direction) {
+    public <T> T getProvider(TransferType<T, ?, ?> transferType, @Nullable Direction direction) {
         if(this.multiblock == null)
             return null;
 

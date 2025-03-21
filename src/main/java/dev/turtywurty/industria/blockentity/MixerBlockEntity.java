@@ -487,7 +487,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
     @Override
     public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?>>> transferTypes = new EnumMap<>(Direction.class);
+        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
         if (offsetFromPrimary.getY() == 2 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP) {
             transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.FLUID);
         }

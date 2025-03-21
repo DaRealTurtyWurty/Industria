@@ -1,9 +1,10 @@
-// 1.21.3	2025-03-15T15:41:37.7834308	Industria/Block Loot Tables
+// 1.21.3	2025-03-19T21:37:12.3889481	Industria/Block Loot Tables
 89d53edf9cd8238e07492d6039aed70151a45fef data\industria\loot_table\blocks\oil_pump_jack.json
 aaf5c3ededb283d2aa702d287a71208994edb492 data\industria\loot_table\blocks\induction_heater.json
 2b2fd99d09dc27698eb668772b8965aac7d7b052 data\industria\loot_table\blocks\tin_block.json
 7a48c110dadb7232446030860b9858bb58d34347 data\industria\loot_table\blocks\advanced_battery.json
 cc7c4d57fc68fafd985f63160e97a154e167bfef data\industria\loot_table\blocks\creative_battery.json
+2c4821ddb3b2140ec19d004ea23f6447f8202022 data\industria\loot_table\blocks\heat_pipe.json
 91fcc45d7a2d02a3dfb8dca0a46acef494bf7af9 data\industria\loot_table\blocks\clarifier.json
 dee0e039a515f976adcd7118bd1ad17fa7089a7f data\industria\loot_table\blocks\basic_battery.json
 3d19605824390ef380687e8af2a902b5f11dbe18 data\industria\loot_table\blocks\zinc_block.json

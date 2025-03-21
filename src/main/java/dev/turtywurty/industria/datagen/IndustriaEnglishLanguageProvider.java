@@ -43,7 +43,6 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, SolarPanelBlockEntity.TITLE, "Solar Panel");
         translationBuilder.add(BlockInit.CRUSHER, "Crusher");
         addText(translationBuilder, CrusherBlockEntity.TITLE, "Crusher");
-        translationBuilder.add(BlockInit.CABLE, "Cable");
         translationBuilder.add(BlockInit.WIND_TURBINE, "Wind Turbine");
         addText(translationBuilder, WindTurbineBlockEntity.TITLE, "Wind Turbine");
         translationBuilder.add(FluidInit.CRUDE_OIL_BLOCK, "Crude Oil");
@@ -72,8 +71,12 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.FRACTIONAL_DISTILLATION_TOWER, "Fractional Distillation Tower");
         translationBuilder.add(BlockInit.INDUCTION_HEATER, "Induction Heater");
         addText(translationBuilder, InductionHeaterBlockEntity.TITLE, "Induction Heater");
+
+        translationBuilder.add(BlockInit.CABLE, "Cable");
         translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");
         translationBuilder.add(BlockInit.SLURRY_PIPE, "Slurry Pipe");
+        translationBuilder.add(BlockInit.HEAT_PIPE, "Heat Pipe");
+
         translationBuilder.add(BlockInit.FLUID_PUMP, "Fluid Pump");
         addText(translationBuilder, FluidPumpBlockEntity.TITLE, "Fluid Pump");
 
