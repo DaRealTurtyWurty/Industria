@@ -140,6 +140,9 @@ public class Industria implements ModInitializer {
         FluidStorage.SIDED.registerForBlockEntity(ClarifierBlockEntity::getFluidProvider, BlockEntityTypeInit.CLARIFIER);
         ItemStorage.SIDED.registerForBlockEntity(ClarifierBlockEntity::getInventoryProvider, BlockEntityTypeInit.CLARIFIER);
 
+        ItemStorage.SIDED.registerForBlockEntity(CrystallizerBlockEntity::getInventoryProvider, BlockEntityTypeInit.CRYSTALLIZER);
+        FluidStorage.SIDED.registerForBlockEntity(CrystallizerBlockEntity::getFluidProvider, BlockEntityTypeInit.CRYSTALLIZER);
+
         for (TransferType<?, ?, ?> transferType : TransferType.getValues()) {
             transferType.registerForMultiblockIo();
         }

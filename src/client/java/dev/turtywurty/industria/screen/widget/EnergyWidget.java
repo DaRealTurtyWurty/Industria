@@ -10,6 +10,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.function.Consumer;
 
+// TODO: Redo rendering of energy widget to make it look better
 public class EnergyWidget implements Drawable, Widget {
     private final EnergyStorage energyStorage;
     private final int width, height;

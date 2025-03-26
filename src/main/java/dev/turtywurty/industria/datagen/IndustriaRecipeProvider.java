@@ -222,17 +222,24 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET),
                         170, 180,
                         OutputItemStack.EMPTY,
-                        new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BOTTLE),
+                        new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BUCKET),
                         200, "bauxite_to_bauxite_slurry");
 
                 offerDigester(exporter, new SlurryStack(SlurryVariant.of(SlurryInit.BAUXITE_SLURRY), FluidConstants.BUCKET),
                         new FluidStack(FluidVariant.of(FluidInit.DIRTY_SODIUM_ALUMINATE.still()), FluidConstants.BOTTLE),
                         200, "bauxite_to_dirty_sodium_aluminate");
 
-                offerClarifier(exporter, new FluidStack(FluidVariant.of(FluidInit.DIRTY_SODIUM_ALUMINATE.still()), FluidConstants.BOTTLE),
+                offerClarifier(exporter, new FluidStack(FluidVariant.of(FluidInit.DIRTY_SODIUM_ALUMINATE.still()), FluidConstants.BUCKET),
                         new FluidStack(FluidVariant.of(FluidInit.SODIUM_ALUMINATE.still()), FluidConstants.BOTTLE),
                         new OutputItemStack(ItemInit.RED_MUD, UniformIntProvider.create(1, 3), 1),
-                        200, "dirty_sodium_aluminate_to_sodium_aluminate");
+                        500, "dirty_sodium_aluminate_to_sodium_aluminate");
+
+                offerCrystallizerRecipe(exporter, new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET * 5),
+                        new FluidStack(FluidVariant.of(FluidInit.SODIUM_ALUMINATE.still()), FluidConstants.BUCKET),
+                        new IndustriaIngredient(1, ItemInit.ALUMINIUM_HYDROXIDE),
+                        new OutputItemStack(ItemInit.ALUMINIUM_HYDROXIDE, 8, 1),
+                        new OutputItemStack(ItemInit.SODIUM_CARBONATE, UniformIntProvider.create(8, 16), 0.75F),
+                        false, 5, 1000, "aluminium_hydroxide");
             }
         };
     }
@@ -259,6 +266,10 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
 
     private static void offerClarifier(RecipeExporter exporter, FluidStack inputFluid, FluidStack outputFluid, OutputItemStack outputItem, int processTime, String name) {
         new ClarifierRecipeBuilder(inputFluid, outputFluid, outputItem, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("clarifier_" + name)));
+    }
+
+    private static void offerCrystallizerRecipe(RecipeExporter exporter, FluidStack waterFluid, FluidStack crystalFluid, IndustriaIngredient catalyst, OutputItemStack output, OutputItemStack byproduct, boolean requiresCatalyst, int catalystUses, int processTime, String name) {
+        new CrystallizerRecipeBuilder(waterFluid, crystalFluid, catalyst, output, byproduct, requiresCatalyst, catalystUses, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crystallizer_" + name)));
     }
 
     private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {

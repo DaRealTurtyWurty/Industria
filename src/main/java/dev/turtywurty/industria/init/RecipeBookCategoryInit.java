@@ -12,6 +12,7 @@ public class RecipeBookCategoryInit {
     public static final RecipeBookCategory MIXER = register("mixer");
     public static final RecipeBookCategory DIGESTER = register("digester");
     public static final RecipeBookCategory CLARIFIER = register("clarifier");
+    public static final RecipeBookCategory CRYSTALLIZER = register("crystallizer");
 
     public static RecipeBookCategory register(String name) {
         return Registry.register(Registries.RECIPE_BOOK_CATEGORY, Industria.id(name), new RecipeBookCategory());

@@ -1,7 +1,7 @@
 {
   "type": "industria:clarifier",
   "input_fluid": {
-    "amount": 27000,
+    "amount": 81000,
     "variant": {
       "fluid": "industria:dirty_sodium_aluminate"
     }
@@ -21,5 +21,5 @@
     },
     "item": "industria:red_mud"
   },
-  "process_time": 200
+  "process_time": 500
 }

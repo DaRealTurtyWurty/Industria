@@ -26,6 +26,9 @@ public class RecipeTypeInit {
     public static final RecipeType<ClarifierRecipe> CLARIFIER =
             register("clarifier", ClarifierRecipe.Type.INSTANCE);
 
+    public static final RecipeType<CrystallizerRecipe> CRYSTALLIZER =
+            register("crystallizer", CrystallizerRecipe.Type.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeType<T> register(String name, RecipeType<T> type) {
         return Registry.register(Registries.RECIPE_TYPE, Industria.id(name), type);
     }

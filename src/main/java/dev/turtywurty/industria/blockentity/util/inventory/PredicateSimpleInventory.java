@@ -17,7 +17,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public class PredicateSimpleInventory extends SyncingSimpleInventory {
-
     private final BiPredicate<ItemStack, Integer> predicate;
 
     public PredicateSimpleInventory(UpdatableBlockEntity blockEntity, int size, BiPredicate<ItemStack, Integer> predicate) {

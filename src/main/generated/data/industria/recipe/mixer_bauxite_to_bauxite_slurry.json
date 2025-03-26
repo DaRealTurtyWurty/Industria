@@ -25,7 +25,7 @@
     "item": "minecraft:air"
   },
   "output_slurry": {
-    "amount": 27000,
+    "amount": 81000,
     "variant": {
       "slurry": "industria:bauxite_slurry"
     }

@@ -1,9 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.ClarifierBlock;
-import dev.turtywurty.industria.block.DigesterBlock;
-import dev.turtywurty.industria.block.MixerBlock;
+import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import net.minecraft.block.entity.BlockEntity;
@@ -52,6 +50,18 @@ public class MultiblockTypeInit {
                     .shapes(ClarifierBlock.VOXEL_SHAPE)
                     .setOnMultiblockBreak((world, pos) -> {
                         if (world.getBlockEntity(pos) instanceof ClarifierBlockEntity blockEntity) {
+                            blockEntity.breakMultiblock(world, pos);
+
+                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
+                        }
+                    }));
+
+    public static final MultiblockType<CrystallizerBlockEntity> CRYSTALLIZER = register("crystallizer",
+            new MultiblockType.Builder<CrystallizerBlockEntity>(35) // 3x3x4
+                    .setHasDirectionProperty(true)
+                    .shapes(CrystallizerBlock.VOXEL_SHAPE)
+                    .setOnMultiblockBreak((world, pos) -> {
+                        if (world.getBlockEntity(pos) instanceof CrystallizerBlockEntity blockEntity) {
                             blockEntity.breakMultiblock(world, pos);
 
                             blockEntity.getWrappedInventoryStorage().dropContents(world, pos);

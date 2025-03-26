@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+// TODO: Splitting output between storages doesn't work
 public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     private static final List<PipeNetworkManager<?, ?>> MANAGERS = new ArrayList<>();
 

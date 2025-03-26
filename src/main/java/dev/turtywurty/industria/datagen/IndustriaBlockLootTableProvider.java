@@ -60,5 +60,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.MIXER);
         addDrop(BlockInit.DIGESTER);
         addDrop(BlockInit.CLARIFIER);
+        addDrop(BlockInit.CRYSTALLIZER);
     }
 }

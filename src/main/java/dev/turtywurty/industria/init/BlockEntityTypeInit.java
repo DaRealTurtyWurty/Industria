@@ -93,6 +93,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(ClarifierBlockEntity::new, BlockInit.CLARIFIER)
                     .build());
 
+    public static final BlockEntityType<CrystallizerBlockEntity> CRYSTALLIZER = register("crystallizer",
+            FabricBlockEntityTypeBuilder.create(CrystallizerBlockEntity::new, BlockInit.CRYSTALLIZER)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

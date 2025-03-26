@@ -186,6 +186,13 @@ public class IndustriaModelProvider extends FabricModelProvider {
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.CRYSTALLIZER,
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
+
         itemModelGenerator.register(ItemInit.ALUMINIUM_INGOT, Models.GENERATED);
         itemModelGenerator.register(ItemInit.TIN_INGOT, Models.GENERATED);
         itemModelGenerator.register(ItemInit.ZINC_INGOT, Models.GENERATED);
@@ -198,6 +205,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ItemInit.SODIUM_HYDROXIDE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.SODIUM_ALUMINATE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.RED_MUD, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.ALUMINIUM_HYDROXIDE, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.SODIUM_CARBONATE, Models.GENERATED);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

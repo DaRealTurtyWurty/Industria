@@ -1,0 +1,35 @@
+{
+  "type": "industria:crystallizer",
+  "by_product": {
+    "chance": 0.75,
+    "count": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 16,
+      "min_inclusive": 8
+    },
+    "item": "industria:sodium_carbonate"
+  },
+  "catalyst": {
+    "ingredients": "industria:aluminium_hydroxide"
+  },
+  "catalyst_uses": 5,
+  "crystal_fluid": {
+    "amount": 81000,
+    "variant": {
+      "fluid": "industria:sodium_aluminate"
+    }
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 8,
+    "item": "industria:aluminium_hydroxide"
+  },
+  "process_time": 1000,
+  "requires_catalyst": false,
+  "water_fluid": {
+    "amount": 405000,
+    "variant": {
+      "fluid": "minecraft:water"
+    }
+  }
+}
