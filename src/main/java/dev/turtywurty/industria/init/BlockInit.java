@@ -144,6 +144,12 @@ public class BlockInit {
     public static final CrystallizerBlock CRYSTALLIZER = registerWithItemCopy("crystallizer",
             CrystallizerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static final RotaryKilnControllerBlock ROTARY_KILN_CONTROLLER = registerWithItemCopy("rotary_kiln_controller",
+            RotaryKilnControllerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final RotaryKilnBlock ROTARY_KILN = registerWithItemCopy("rotary_kiln",
+            RotaryKilnBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

@@ -68,6 +68,28 @@ public class MultiblockTypeInit {
                         }
                     }));
 
+    public static final MultiblockType<RotaryKilnControllerBlockEntity> ROTARY_KILN_CONTROLLER = register("rotary_kiln_controller",
+            new MultiblockType.Builder<RotaryKilnControllerBlockEntity>(24) // 5x5x1
+                    .setHasDirectionProperty(true)
+                    .shapes(RotaryKilnControllerBlock.VOXEL_SHAPE)
+                    .setOnMultiblockBreak((world, pos) -> {
+                        if (world.getBlockEntity(pos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
+                            blockEntity.breakMultiblock(world, pos);
+
+                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
+                        }
+                    }));
+
+    public static final MultiblockType<RotaryKilnBlockEntity> ROTARY_KILN = register("rotary_kiln",
+            new MultiblockType.Builder<RotaryKilnBlockEntity>(24) // 5x5x1
+                    .setHasDirectionProperty(true)
+                    .shapes(RotaryKilnBlock.VOXEL_SHAPE)
+                    .setOnMultiblockBreak((world, pos) -> {
+                        if (world.getBlockEntity(pos) instanceof RotaryKilnBlockEntity blockEntity) {
+                            blockEntity.breakMultiblock(world, pos);
+                        }
+                    }));
+
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }

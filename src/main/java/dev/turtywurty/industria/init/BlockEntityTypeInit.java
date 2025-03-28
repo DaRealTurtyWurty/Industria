@@ -97,6 +97,14 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(CrystallizerBlockEntity::new, BlockInit.CRYSTALLIZER)
                     .build());
 
+    public static final BlockEntityType<RotaryKilnControllerBlockEntity> ROTARY_KILN_CONTROLLER = register("rotary_kiln_controller",
+            FabricBlockEntityTypeBuilder.create(RotaryKilnControllerBlockEntity::new, BlockInit.ROTARY_KILN_CONTROLLER)
+                    .build());
+
+    public static final BlockEntityType<RotaryKilnBlockEntity> ROTARY_KILN = register("rotary_kiln",
+            FabricBlockEntityTypeBuilder.create(RotaryKilnBlockEntity::new, BlockInit.ROTARY_KILN)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }
