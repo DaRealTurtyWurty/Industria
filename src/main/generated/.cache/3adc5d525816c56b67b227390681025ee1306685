@@ -1,4 +1,4 @@
-// 1.21.3	2025-03-22T21:36:31.405742	Industria/Model Definitions
+// 1.21.3	2025-03-30T21:45:28.625895	Industria/Model Definitions
 20b26fc8f36b94e66001b5d7ca9a16d7fb31ba5f assets\industria\models\block\aluminium_block.json
 057d0a553f133a37e50eb4c7640a9e634e3516b2 assets\industria\models\block\alloy_furnace.json
 b05eb9bedb55e18908a84749f63ddee6f6c23a0e assets\industria\models\block\deepslate_tin_ore.json
@@ -99,8 +99,8 @@ aa842e8b0082d1b60964cc76dcb7b071fb0fbf77 assets\industria\blockstates\zinc_ore.j
 8593ee8e9968f8712f5c6bb30f823680e1efd8af assets\industria\models\item\raw_tin.json
 a9c6fecdd49a5f68ddafaca13af16f97639066bb assets\industria\models\item\thermal_generator.json
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets\industria\blockstates\advanced_battery.json
-70c94f8f6e7f17c0dbf42ec28abdc7601a8b6c09 assets\industria\models\item\raw_bauxite_block.json
 cfb7d7f711acc1885f9c65f053706d46fe5f9e9b assets\industria\models\block\electric_furnace.json
+70c94f8f6e7f17c0dbf42ec28abdc7601a8b6c09 assets\industria\models\item\raw_bauxite_block.json
 0bfd27186c9f953f6866c7c724db2836d16a63d3 assets\industria\models\item\crystallizer.json
 a53b6473440980d44081fb256c435a2c05540843 assets\industria\models\item\aluminium_ingot.json
 97290a9e7e9da6f407650a35dd7152368f36faf7 assets\industria\models\item\elite_battery.json

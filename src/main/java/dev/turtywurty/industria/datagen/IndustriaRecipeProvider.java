@@ -240,6 +240,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new OutputItemStack(ItemInit.ALUMINIUM_HYDROXIDE, 8, 1),
                         new OutputItemStack(ItemInit.SODIUM_CARBONATE, UniformIntProvider.create(8, 16), 0.75F),
                         false, 5, 1000, "aluminium_hydroxide");
+
+                offerRotaryKilnRecipe(exporter, RecipeCategory.MISC,
+                        new IndustriaIngredient(1, ItemInit.ALUMINIUM_HYDROXIDE),
+                        new OutputItemStack(ItemInit.ALUMINA, 1, 1),
+                        1200);
             }
         };
     }
@@ -270,6 +275,10 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
 
     private static void offerCrystallizerRecipe(RecipeExporter exporter, FluidStack waterFluid, FluidStack crystalFluid, IndustriaIngredient catalyst, OutputItemStack output, OutputItemStack byproduct, boolean requiresCatalyst, int catalystUses, int processTime, String name) {
         new CrystallizerRecipeBuilder(waterFluid, crystalFluid, catalyst, output, byproduct, requiresCatalyst, catalystUses, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crystallizer_" + name)));
+    }
+
+    private static void offerRotaryKilnRecipe(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient input, OutputItemStack output, int requiredTemperature) {
+        new RotaryKilnRecipeBuilder(input, output, requiredTemperature).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("rotary_kiln_" + RecipeGenerator.getRecipeName(output.item()))));
     }
 
     private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {

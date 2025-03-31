@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedStorage<InventoryStorage> {
     private final List<T> inventories = new ArrayList<>();
@@ -33,6 +34,32 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
         var storage = InventoryStorage.of(inventory, side);
+        addStorage(storage, side);
+    }
+
+    public void addInventory(@NotNull T inventory, Supplier<Boolean> canInsert, Supplier<Boolean> canExtract) {
+        addInventory(inventory, null, canInsert, canExtract);
+    }
+
+    public void addInsertOnlyInventory(@NotNull T inventory, Direction side) {
+        addInsertOnlyInventory(inventory, side, () -> true);
+    }
+
+    public void addInsertOnlyInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canInsert) {
+        addInventory(inventory, side, canInsert, () -> false);
+    }
+
+    public void addExtractOnlyInventory(@NotNull T inventory, Direction side) {
+        addInventory(inventory, side, () -> false, () -> true);
+    }
+
+    public void addExtractOnlyInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canExtract) {
+        addInventory(inventory, side, () -> false, canExtract);
+    }
+
+    public void addInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canInsert, Supplier<Boolean> canExtract) {
+        this.inventories.add(inventory);
+        var storage = PredicateInventoryStorage.of(InventoryStorage.of(inventory, side), canInsert, canExtract);
         addStorage(storage, side);
     }
 

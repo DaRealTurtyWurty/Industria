@@ -44,6 +44,7 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
     private final DigesterBlockEntity digester = new DigesterBlockEntity(BlockPos.ORIGIN, BlockInit.DIGESTER.getDefaultState());
     private final ClarifierBlockEntity clarifier = new ClarifierBlockEntity(BlockPos.ORIGIN, BlockInit.CLARIFIER.getDefaultState());
     private final CrystallizerBlockEntity crystallizer = new CrystallizerBlockEntity(BlockPos.ORIGIN, BlockInit.CRYSTALLIZER.getDefaultState());
+    private final RotaryKilnControllerBlockEntity rotaryKiln = new RotaryKilnControllerBlockEntity(BlockPos.ORIGIN, BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState());
 
     private BakedModel seismicScanner;
     private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
@@ -60,7 +61,8 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
             BlockInit.MIXER.asItem(), mixer,
             BlockInit.DIGESTER.asItem(), digester,
             BlockInit.CLARIFIER.asItem(), clarifier,
-            BlockInit.CRYSTALLIZER.asItem(), crystallizer
+            BlockInit.CRYSTALLIZER.asItem(), crystallizer,
+            BlockInit.ROTARY_KILN_CONTROLLER.asItem(), rotaryKiln
     );
 
     @Override

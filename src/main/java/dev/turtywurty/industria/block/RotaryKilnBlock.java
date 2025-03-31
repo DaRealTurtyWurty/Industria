@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class RotaryKilnBlock extends IndustriaBlock {
     public static final VoxelShape VOXEL_SHAPE = VoxelShapes.fullCube();
-    public static final IntProperty SEGMENT_INDEX = IntProperty.of("segment_index", 1, 16);
+    public static final IntProperty SEGMENT_INDEX = IntProperty.of("segment_index", 1, 15);
 
     public RotaryKilnBlock(Settings settings) {
         super(settings, new BlockProperties()
@@ -28,19 +28,28 @@ public class RotaryKilnBlock extends IndustriaBlock {
                 .useRotatedShapes(VOXEL_SHAPE)
                 .hasBlockEntityRenderer()
                 .addStateProperty(SEGMENT_INDEX, 1)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.ROTARY_KILN_CONTROLLER)
-                        .multiblockProperties(MultiblockTypeInit.ROTARY_KILN_CONTROLLER).build()));
+                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.ROTARY_KILN)
+                        .multiblockProperties(MultiblockTypeInit.ROTARY_KILN).build()));
     }
 
     @Override
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         super.onPlaced(world, pos, state, placer, itemStack);
+
+        if (world.isClient)
+            return;
+
         BlockPos controllerPos = pos.offset(state.get(Properties.HORIZONTAL_FACING).getOpposite());
         BlockState controllerState = world.getBlockState(controllerPos);
         if (controllerState.isOf(BlockInit.ROTARY_KILN_CONTROLLER)) {
             addKilnSegment(world, pos, controllerPos);
         } else if (controllerState.isOf(this)) {
-            world.setBlockState(controllerPos, controllerState.with(SEGMENT_INDEX, controllerState.get(SEGMENT_INDEX) + 1));
+            if(controllerState.get(SEGMENT_INDEX) >= 15) {
+                world.setBlockState(pos, BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState().with(Properties.HORIZONTAL_FACING, controllerState.get(Properties.HORIZONTAL_FACING)));
+                return;
+            }
+
+            world.setBlockState(pos, controllerState.with(SEGMENT_INDEX, controllerState.get(SEGMENT_INDEX) + 1));
             BlockPos actualControllerPos = controllerPos.offset(controllerState.get(Properties.HORIZONTAL_FACING).getOpposite(), controllerState.get(SEGMENT_INDEX));
             addKilnSegment(world, pos, actualControllerPos);
         }
@@ -51,5 +60,27 @@ public class RotaryKilnBlock extends IndustriaBlock {
         if (blockEntity instanceof RotaryKilnControllerBlockEntity controllerBlockEntity) {
             controllerBlockEntity.addKilnSegment(pos);
         }
+    }
+
+    @Override
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.isOf(newState.getBlock()) && !world.isClient) {
+            BlockPos controllerPos = pos.offset(state.get(Properties.HORIZONTAL_FACING).getOpposite());
+            BlockState controllerState = world.getBlockState(controllerPos);
+
+            BlockEntity blockEntity = null;
+            if (controllerState.isOf(BlockInit.ROTARY_KILN_CONTROLLER)) {
+                blockEntity = world.getBlockEntity(controllerPos);
+            } else if (controllerState.isOf(this)) {
+                BlockPos actualControllerPos = controllerPos.offset(controllerState.get(Properties.HORIZONTAL_FACING).getOpposite(), controllerState.get(SEGMENT_INDEX));
+                blockEntity = world.getBlockEntity(actualControllerPos);
+            }
+
+            if (blockEntity instanceof RotaryKilnControllerBlockEntity controllerBlockEntity) {
+                controllerBlockEntity.removeKilnSegment(pos);
+            }
+        }
+
+        super.onStateReplaced(state, world, pos, newState, moved);
     }
 }

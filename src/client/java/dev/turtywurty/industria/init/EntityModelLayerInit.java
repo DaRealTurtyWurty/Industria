@@ -18,5 +18,6 @@ public class EntityModelLayerInit {
         EntityModelLayerRegistry.registerModelLayer(DigesterModel.LAYER_LOCATION, DigesterModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ClarifierModel.LAYER_LOCATION, ClarifierModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(CrystallizerModel.LAYER_LOCATION, CrystallizerModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(RotaryKilnModel.LAYER_LOCATION, RotaryKilnModel::getTexturedModelData);
     }
 }

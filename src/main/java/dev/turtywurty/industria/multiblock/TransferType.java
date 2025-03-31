@@ -40,7 +40,8 @@ public class TransferType<S, V, A extends Number> {
                             .orElse(ItemVariant.blank()),
                     Long.MAX_VALUE,
                     aDouble -> (long) Math.ceil(aDouble),
-                    ItemVariant::isBlank);
+                    ItemVariant::isBlank,
+                    Storage::supportsInsertion, Storage::supportsExtraction);
 
     public static final TransferType<Storage<FluidVariant>, FluidVariant, Long> FLUID =
             new TransferType<>("fluid", FluidStorage.SIDED, FluidStorage.ITEM, Storage::insert, Storage::extract,
@@ -48,7 +49,8 @@ public class TransferType<S, V, A extends Number> {
                             .orElse(FluidVariant.blank()),
                     Long.MAX_VALUE,
                     aDouble -> (long) Math.ceil(aDouble),
-                    FluidVariant::isBlank);
+                    FluidVariant::isBlank,
+                    Storage::supportsInsertion, Storage::supportsExtraction);
 
     public static final TransferType<EnergyStorage, Long, Long> ENERGY =
             new TransferType<>("energy", EnergyStorage.SIDED, EnergyStorage.ITEM,
@@ -57,7 +59,8 @@ public class TransferType<S, V, A extends Number> {
                     EnergyStorage::getAmount,
                     Long.MAX_VALUE,
                     aDouble -> (long) Math.ceil(aDouble),
-                    value -> value <= 0);
+                    value -> value <= 0,
+                    EnergyStorage::supportsInsertion, EnergyStorage::supportsExtraction);
 
     public static final TransferType<HeatStorage, Double, Double> HEAT =
             new TransferType<>("heat", HeatStorage.SIDED, HeatStorage.ITEM,
@@ -66,7 +69,8 @@ public class TransferType<S, V, A extends Number> {
                     HeatStorage::getAmount,
                     Double.MAX_VALUE,
                     Function.identity(),
-                    value -> value <= 0);
+                    value -> value <= 0,
+                    HeatStorage::supportsInsertion, HeatStorage::supportsExtraction);
 
     public static final TransferType<Storage<SlurryVariant>, SlurryVariant, Long> SLURRY =
             new TransferType<>("slurry", SlurryStorage.SIDED, SlurryStorage.ITEM, Storage::insert, Storage::extract,
@@ -74,7 +78,8 @@ public class TransferType<S, V, A extends Number> {
                             .orElse(SlurryVariant.blank()),
                     Long.MAX_VALUE,
                     aDouble -> (long) Math.ceil(aDouble),
-                    SlurryVariant::isBlank);
+                    SlurryVariant::isBlank,
+                    Storage::supportsInsertion, Storage::supportsExtraction);
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
     //public static final TransferType<?> GAS = new TransferType<>(null, null);
@@ -93,6 +98,8 @@ public class TransferType<S, V, A extends Number> {
     private final Function<Double, A> amountConverter;
     private final A zeroAmount;
     private final Predicate<V> isBlank;
+    private final Predicate<S> supportsInsert;
+    private final Predicate<S> supportsExtract;
 
     public TransferType(@NotNull String name,
                         @NotNull BlockApiLookup<S, @Nullable Direction> blockLookup,
@@ -102,7 +109,9 @@ public class TransferType<S, V, A extends Number> {
                         @NotNull Function<S, V> valueGetter,
                         @NotNull A maxAmount,
                         @NotNull Function<Double, A> amountConverter,
-                        @NotNull Predicate<V> isBlank) {
+                        @NotNull Predicate<V> isBlank,
+                        @NotNull Predicate<S> supportsInsert,
+                        @NotNull Predicate<S> supportsExtract) {
         Objects.requireNonNull(name, "name must not be null");
         Objects.requireNonNull(blockLookup, "blockLookup must not be null");
         Objects.requireNonNull(itemLookup, "itemLookup must not be null");
@@ -112,6 +121,8 @@ public class TransferType<S, V, A extends Number> {
         Objects.requireNonNull(maxAmount, "maxAmount must not be null");
         Objects.requireNonNull(amountConverter, "amountConverter must not be null");
         Objects.requireNonNull(isBlank, "isBlank must not be null");
+        Objects.requireNonNull(supportsInsert, "supportsInsert must not be null");
+        Objects.requireNonNull(supportsExtract, "supportsExtract must not be null");
 
         this.name = name;
 
@@ -126,6 +137,9 @@ public class TransferType<S, V, A extends Number> {
         this.amountConverter = amountConverter;
         this.zeroAmount = amountConverter.apply(0D);
         this.isBlank = isBlank;
+
+        this.supportsInsert = supportsInsert;
+        this.supportsExtract = supportsExtract;
 
         VALUES.add(this);
     }
@@ -150,13 +164,13 @@ public class TransferType<S, V, A extends Number> {
         BlockEntity primaryBlockEntity = world.getBlockEntity(primaryPos);
         BlockState primaryState = primaryBlockEntity != null ? primaryBlockEntity.getCachedState() : world.getBlockState(primaryPos);
         S primaryStorage = lookup(world, primaryPos, primaryState, primaryBlockEntity, side);
-        if (primaryStorage == null)
+        if (primaryStorage == null || !supportsExtract.test(primaryStorage))
             return;
 
         BlockState secondaryState = world.getBlockState(secondaryPos);
         BlockEntity secondaryBlockEntity = world.getBlockEntity(secondaryPos);
         S secondaryStorage = lookup(world, secondaryPos, secondaryState, secondaryBlockEntity, side);
-        if (secondaryStorage == null)
+        if (secondaryStorage == null || !supportsInsert.test(secondaryStorage))
             return;
 
         try (Transaction transaction = Transaction.openOuter()) {

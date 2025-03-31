@@ -1,0 +1,12 @@
+{
+  "type": "industria:rotary_kiln",
+  "input": {
+    "ingredients": "industria:aluminium_hydroxide"
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:alumina"
+  },
+  "required_temperature": 1200
+}

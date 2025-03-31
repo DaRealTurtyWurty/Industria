@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.reborn.energy.api.EnergyStorage;
 
+// TODO: Use ServerRecipeManager.createCachedMatchGetter
 public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -142,6 +143,8 @@ public class Industria implements ModInitializer {
 
         ItemStorage.SIDED.registerForBlockEntity(CrystallizerBlockEntity::getInventoryProvider, BlockEntityTypeInit.CRYSTALLIZER);
         FluidStorage.SIDED.registerForBlockEntity(CrystallizerBlockEntity::getFluidProvider, BlockEntityTypeInit.CRYSTALLIZER);
+
+        ItemStorage.SIDED.registerForBlockEntity(RotaryKilnControllerBlockEntity::getInventoryProvider, BlockEntityTypeInit.ROTARY_KILN_CONTROLLER);
 
         for (TransferType<?, ?, ?> transferType : TransferType.getValues()) {
             transferType.registerForMultiblockIo();

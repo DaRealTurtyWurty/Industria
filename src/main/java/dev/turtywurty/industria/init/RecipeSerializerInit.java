@@ -29,6 +29,9 @@ public class RecipeSerializerInit {
     public static final RecipeSerializer<CrystallizerRecipe> CRYSTALLIZER =
             register("crystallizer", CrystallizerRecipe.Serializer.INSTANCE);
 
+    public static final RecipeSerializer<RotaryKilnRecipe> ROTARY_KILN =
+            register("rotary_kiln", RotaryKilnRecipe.Serializer.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
         return Registry.register(Registries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }

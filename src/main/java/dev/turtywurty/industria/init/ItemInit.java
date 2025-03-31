@@ -40,8 +40,9 @@ public class ItemInit {
     public static final Item SODIUM_ALUMINATE = register("sodium_aluminate");
 
     public static final Item RED_MUD = register("red_mud");
-    public static final Item ALUMINIUM_HYDROXIDE = register("aluminium_hydroxide");
+    public static final Item ALUMINIUM_HYDROXIDE = register("aluminium_hydroxide"); // TODO: Maybe alumina hydrate?
     public static final Item SODIUM_CARBONATE = register("sodium_carbonate");
+    public static final Item ALUMINA = register("alumina");
 
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);

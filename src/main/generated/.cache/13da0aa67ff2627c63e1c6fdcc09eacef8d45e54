@@ -1,4 +1,4 @@
-// 1.21.3	2025-03-22T21:36:31.4117602	Industria/Industria Recipe Provider
+// 1.21.3	2025-03-30T21:45:28.629405	Industria/Industria Recipe Provider
 2b9f866a766702035a7c2b65e31bce35477f24b4 data\industria\recipe\zinc_ingot_from_blasting_deepslate_zinc_ore.json
 a7207aa458dece23c60cf2b0cda7d3ab7feec636 data\industria\recipe\aluminium_ingot_from_smelting_bauxite_ore.json
 6dbe8aee542d5592f843dc9f75f23da99a203ac2 data\industria\advancement\recipes\misc\mixer_bauxite_to_bauxite_slurry.json
@@ -18,6 +18,7 @@ e7032816a10886bd3c6b9a73ff92aeeaa221a8e2 data\industria\recipe\zinc_ingot_from_s
 1053e52e519d96c1de58e5ca668d250b0bcfba47 data\industria\recipe\tin_ingot_from_smelting_deepslate_tin_ore.json
 98dfcbc6b5b5b85e9de0aeac04b2ceb09c6ed4b4 data\industria\advancement\recipes\misc\zinc_ingot_from_smelting_zinc_ore.json
 a608c5ace036e0a4fc183e235f33289a1e3eb7b0 data\industria\recipe\mixer_bauxite_to_bauxite_slurry.json
+c4a4b7b5ad1934262109a02b37c35daf99e62ac6 data\industria\recipe\rotary_kiln_alumina.json
 edf2ec5e54a9668d850ff37debe10674de448bcd data\industria\recipe\crusher_diamond_ore.json
 1dd607e7e9bf2910d737b1285f65b9c18e094727 data\industria\recipe\tin_ingot_from_smelting_raw_tin.json
 88184817189fc7ccbf81c88f1201719257e71c83 data\industria\recipe\crystallizer_aluminium_hydroxide.json

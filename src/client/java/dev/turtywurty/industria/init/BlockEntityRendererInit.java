@@ -16,5 +16,6 @@ public class BlockEntityRendererInit {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CLARIFIER, ClarifierBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRYSTALLIZER, CrystallizerBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, RotaryKilnBlockEntityRenderer::new);
     }
 }

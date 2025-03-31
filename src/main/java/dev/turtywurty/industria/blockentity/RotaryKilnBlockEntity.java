@@ -73,11 +73,11 @@ public class RotaryKilnBlockEntity extends UpdatableBlockEntity implements Multi
                 forward = Direction.SOUTH;
             }
             case EAST -> {
-                right = Direction.NORTH;
+                right = Direction.SOUTH;
                 forward = Direction.EAST;
             }
             case WEST -> {
-                right = Direction.SOUTH;
+                right = Direction.NORTH;
                 forward = Direction.WEST;
             }
             default -> throw new IllegalStateException("Unexpected facing direction: " + facing);
@@ -87,6 +87,9 @@ public class RotaryKilnBlockEntity extends UpdatableBlockEntity implements Multi
         for (int w = -widthRange; w <= widthRange; w++) {
             for (int h = 0; h <= heightRange; h++) {
                 for (int d = 0; d <= depthRange; d++) {
+                    if(w == 0 && h == 0 && d == 0)
+                        continue;
+
                     BlockPos pos = this.pos
                             .offset(right, w)
                             .offset(Direction.UP, h)
@@ -118,9 +121,6 @@ public class RotaryKilnBlockEntity extends UpdatableBlockEntity implements Multi
         BlockState offsetState = world.getBlockState(offsetPos);
         if(offsetState.isOf(BlockInit.ROTARY_KILN)) {
             world.setBlockState(offsetPos, BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState().with(Properties.HORIZONTAL_FACING, facing));
-            if(world.getBlockEntity(offsetPos) instanceof RotaryKilnControllerBlockEntity controllerBlockEntity) {
-                controllerBlockEntity.setCreatedByReplacement();
-            }
         }
     }
 }
