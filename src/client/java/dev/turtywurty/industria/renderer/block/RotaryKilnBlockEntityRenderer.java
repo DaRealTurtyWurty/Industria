@@ -27,13 +27,15 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION));
         this.model.renderSegment(0, matrices, vertexConsumer, light, overlay);
 
-        if(entity.getKilnSegments().isEmpty())
+        if (entity.getKilnSegments().isEmpty())
             return;
 
         this.model.renderSegment(1, matrices, vertexConsumer, light, overlay);
 
         Direction facing = entity.getCachedState().get(Properties.HORIZONTAL_FACING);
+        Direction left = facing.rotateYCounterclockwise();
         Vec3i facingVector = facing.getVector();
+        Vec3i leftVector = left.getVector();
 
         float rotation = (entity.getWorld().getTime() % 360) * 0.1F;
         for (int index = 2; index < Math.min(entity.getKilnSegments().size(), 15) + 1; index++) {
@@ -45,10 +47,28 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             Map<Integer, RotaryKilnControllerBlockEntity.InputRecipeEntry> recipes = entity.getRecipes();
             if (index - 2 < recipes.size()) {
                 RotaryKilnControllerBlockEntity.InputRecipeEntry recipe = recipes.get(index - 2);
+                if (recipe == null)
+                    continue;
+
+                float progress = recipe.getProgress() / 100F;
+
+                float baseXOffset = facingVector.getX() * (index - 1);
+                if(facingVector.getX() != 0) {
+                    baseXOffset += facingVector.getX() * progress;
+                }
+
+                float baseYOffset = 0.375f - leftVector.getY() * (index - 1);
+
+                float baseZOffset = facingVector.getZ() * (index - 1);
+                if(facingVector.getZ() != 0) {
+                    baseZOffset += facingVector.getZ() * progress;
+                }
+
                 matrices.push();
-                matrices.translate(facingVector.getX() * index, 0, facingVector.getZ() * index);
-                matrices.translate(0, recipe.getProgress() / 100F, 0);
+                matrices.translate(baseXOffset, baseYOffset, baseZOffset);
                 matrices.scale(0.5F, 0.5F, 0.5F);
+                matrices.multiply(facing.getRotationQuaternion());
+
                 this.context.getItemRenderer().renderItem(recipe.inputStack(), ModelTransformationMode.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
                 matrices.pop();
             }

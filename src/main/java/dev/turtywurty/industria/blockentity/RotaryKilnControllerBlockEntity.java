@@ -2,6 +2,7 @@ package dev.turtywurty.industria.blockentity;
 
 import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
+import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.RotaryKilnBlock;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
@@ -42,6 +43,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -128,13 +130,16 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
             if (recipe.getProgress() >= 100) { // TODO: Replace with a field in the recipe
                 if (index == this.kilnSegments.size() - 1) {
-                    BlockPos endPos = this.kilnSegments.get(index);
                     ItemStack outputStack = kilnRecipe.output().createStack(this.world.random);
-                    if (!tryOutputToStorage(endPos, outputStack)) {
-                        BlockPos spawnPos = this.pos.offset(getCachedState().get(Properties.HORIZONTAL_FACING));
+
+                    BlockPos endPos = this.kilnSegments.get(index);
+                    Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
+                    BlockPos spawnPos = endPos.offset(facing);
+                    if (!tryOutputToStorage(spawnPos, facing, outputStack)) {
                         ItemScatterer.spawn(this.world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), outputStack);
-                        this.recipes.put(index, null);
                     }
+
+                    this.recipes.put(index, null);
 
                     update();
                     continue;
@@ -177,10 +182,8 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         }
     }
 
-    private boolean tryOutputToStorage(BlockPos endPos, ItemStack outputStack) {
-        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
-        BlockPos outputPos = endPos.offset(facing.getOpposite());
-        Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(this.world, outputPos, facing);
+    private boolean tryOutputToStorage(BlockPos spawnPos, Direction facing, ItemStack outputStack) {
+        Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(this.world, spawnPos, facing.getOpposite());
         if (itemStorage == null || !itemStorage.supportsInsertion())
             return false;
 
@@ -271,10 +274,21 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
             var recipeNbt = new NbtCompound();
             recipeNbt.putInt("Index", index);
 
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, inputRecipeEntry.registryKey())
-                    .result();
-            result.ifPresent(nbtElement -> recipeNbt.put("RegistryKey", nbtElement));
+            RegistryKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey();
+            if (registryKey != null) {
+                Identifier identifier = registryKey.getValue();
+                if(identifier == null) {
+                    Industria.LOGGER.error("Failed to encode recipe registry key for Rotary Kiln at {}. This specific case should never happen though. Recipe was {}.", this.pos, registryKey);
+                    continue;
+                }
+
+                Identifier.CODEC.encodeStart(NbtOps.INSTANCE, identifier)
+                        .resultOrPartial(Industria.LOGGER::error)
+                        .ifPresent(nbtElement -> recipeNbt.put("RegistryKey", nbtElement));
+            } else {
+                Industria.LOGGER.error("Failed to encode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
+                continue;
+            }
 
             recipeNbt.put("InputStack", inputRecipeEntry.inputStack().toNbtAllowEmpty(registries));
             recipeNbt.putInt("Progress", inputRecipeEntry.getProgress());
@@ -311,7 +325,9 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         }
 
         if (nbt.contains("Recipes", NbtElement.LIST_TYPE)) {
-            this.recipes.clear();
+            for (int i = 0; i < 16; i++) {
+                this.recipes.put(i, null);
+            }
 
             NbtList recipes = nbt.getList("Recipes", NbtElement.COMPOUND_TYPE);
             for (int i = 0; i < recipes.size(); i++) {
@@ -320,11 +336,15 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 if (index < 0 || index > this.kilnSegments.size() - 1)
                     continue;
 
-                RegistryKey<Recipe<?>> registryKey = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                        .decode(NbtOps.INSTANCE, recipeNbt.getCompound("RegistryKey"))
-                        .map(Pair::getFirst)
-                        .result()
-                        .orElse(null);
+                RegistryKey<Recipe<?>> registryKey = RegistryKey.of(RegistryKeys.RECIPE,
+                        Identifier.CODEC.decode(NbtOps.INSTANCE, recipeNbt.get("RegistryKey"))
+                                .map(Pair::getFirst)
+                                .resultOrPartial(Industria.LOGGER::error)
+                                .orElse(null));
+                if (registryKey == null && Thread.currentThread().getName().toLowerCase(Locale.ROOT).contains("server")) {
+                    Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
+                    continue;
+                }
 
                 ItemStack inputStack = ItemStack.fromNbtOrEmpty(registries, recipeNbt.getCompound("InputStack"));
 
