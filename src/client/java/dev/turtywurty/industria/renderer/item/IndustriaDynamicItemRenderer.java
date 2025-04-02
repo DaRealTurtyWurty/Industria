@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 
@@ -52,18 +53,23 @@ public class IndustriaDynamicItemRenderer implements BuiltinItemRendererRegistry
 
     private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 
-    private final Map<Item, ? extends BlockEntity> blockEntities = Map.of(
-            BlockInit.WIND_TURBINE.asItem(), windTurbine,
-            BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack,
-            BlockInit.DRILL.asItem(), drill,
-            BlockInit.MOTOR.asItem(), motor,
-            BlockInit.UPGRADE_STATION.asItem(), upgradeStation,
-            BlockInit.MIXER.asItem(), mixer,
-            BlockInit.DIGESTER.asItem(), digester,
-            BlockInit.CLARIFIER.asItem(), clarifier,
-            BlockInit.CRYSTALLIZER.asItem(), crystallizer,
-            BlockInit.ROTARY_KILN_CONTROLLER.asItem(), rotaryKiln
-    );
+    private final Map<Item, BlockEntity> blockEntities = Util.make(new HashMap<>(), map -> {
+        map.put(BlockInit.WIND_TURBINE.asItem(), windTurbine);
+        map.put(BlockInit.OIL_PUMP_JACK.asItem(), oilPumpJack);
+        map.put(BlockInit.DRILL.asItem(), drill);
+        map.put(BlockInit.MOTOR.asItem(), motor);
+        map.put(BlockInit.UPGRADE_STATION.asItem(), upgradeStation);
+        map.put(BlockInit.MIXER.asItem(), mixer);
+        map.put(BlockInit.DIGESTER.asItem(), digester);
+        map.put(BlockInit.CLARIFIER.asItem(), clarifier);
+        map.put(BlockInit.CRYSTALLIZER.asItem(), crystallizer);
+
+        for (int i = 0; i < 7; i++) {
+            rotaryKiln.addKilnSegment(new BlockPos(0, 0, i));
+        }
+
+        map.put(ItemInit.ROTARY_KILN, rotaryKiln);
+    });
 
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {

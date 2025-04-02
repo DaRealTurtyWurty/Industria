@@ -17,6 +17,6 @@ public class DynamicItemRendererInit {
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.DIGESTER, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.CLARIFIER, IndustriaDynamicItemRenderer.INSTANCE);
         BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.CRYSTALLIZER, IndustriaDynamicItemRenderer.INSTANCE);
-        BuiltinItemRendererRegistry.INSTANCE.register(BlockInit.ROTARY_KILN_CONTROLLER, IndustriaDynamicItemRenderer.INSTANCE);
+        BuiltinItemRendererRegistry.INSTANCE.register(ItemInit.ROTARY_KILN, IndustriaDynamicItemRenderer.INSTANCE);
     }
 }

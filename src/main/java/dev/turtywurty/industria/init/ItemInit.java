@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.item.BlockBuilderDrillHeadItem;
+import dev.turtywurty.industria.item.RotaryKilnBlockItem;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.item.SimpleDrillHeadItem;
 import net.minecraft.item.Item;
@@ -44,6 +45,8 @@ public class ItemInit {
     public static final Item SODIUM_CARBONATE = register("sodium_carbonate");
     public static final Item ALUMINA = register("alumina");
 
+    public static final RotaryKilnBlockItem ROTARY_KILN = register("rotary_kiln", RotaryKilnBlockItem::new);
+
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);
     }
@@ -57,6 +60,10 @@ public class ItemInit {
         return registerItem(name, constructor.apply(
                 settingsApplier.apply(new Item.Settings().registryKey(
                         RegistryKey.of(RegistryKeys.ITEM, Industria.id(name))))));
+    }
+
+    public static <T extends Item> T register(String name, Function<Item.Settings, T> constructor) {
+        return register(name, constructor, settings -> settings);
     }
 
     public static void init() {}

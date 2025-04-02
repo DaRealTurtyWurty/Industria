@@ -71,7 +71,7 @@ public class MultiblockTypeInit {
     public static final MultiblockType<RotaryKilnControllerBlockEntity> ROTARY_KILN_CONTROLLER = register("rotary_kiln_controller",
             new MultiblockType.Builder<RotaryKilnControllerBlockEntity>(24) // 5x5x1
                     .setHasDirectionProperty(true)
-                    .shapes(RotaryKilnControllerBlock.VOXEL_SHAPE)
+                    .shapeFactory(RotaryKilnControllerBlock::getVoxelShape)
                     .setOnMultiblockBreak((world, pos) -> {
                         if (world.getBlockEntity(pos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
                             blockEntity.breakMultiblock(world, pos);
@@ -83,7 +83,7 @@ public class MultiblockTypeInit {
     public static final MultiblockType<RotaryKilnBlockEntity> ROTARY_KILN = register("rotary_kiln",
             new MultiblockType.Builder<RotaryKilnBlockEntity>(24) // 5x5x1
                     .setHasDirectionProperty(true)
-                    .shapes(RotaryKilnBlock.VOXEL_SHAPE)
+                    .shapeFactory(RotaryKilnBlock::getVoxelShape)
                     .setOnMultiblockBreak((world, pos) -> {
                         if (world.getBlockEntity(pos) instanceof RotaryKilnBlockEntity blockEntity) {
                             blockEntity.breakMultiblock(world, pos);

@@ -102,6 +102,19 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
     }
 
+    public boolean isProcessing() {
+        boolean recipesEmpty = true;
+        for (int index = 0; index < this.recipes.size(); index++) {
+            InputRecipeEntry recipe = this.recipes.get(index);
+            if (recipe != null) {
+                recipesEmpty = false;
+                break;
+            }
+        }
+
+        return this.kilnSegments.size() >= 8 && !recipesEmpty;
+    }
+
     @Override
     public void onTick() {
         if (this.world == null || this.world.isClient)
@@ -128,7 +141,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
             if (kilnRecipe == null)
                 continue;
 
-            if (recipe.getProgress() >= 100) { // TODO: Replace with a field in the recipe
+            if (recipe.getProgress() % 100 == 0) { // TODO: Replace with a field in the recipe
                 if (index == this.kilnSegments.size() - 1) {
                     ItemStack outputStack = kilnRecipe.output().createStack(this.world.random);
 
@@ -148,15 +161,14 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 // Check to see if the recipe to the right is null or not. if it is, more this one over and reset the progress
                 int nextIndex = index + 1;
                 if (nextIndex > this.recipes.size() - 1 || this.recipes.get(nextIndex) == null) {
-                    recipe.resetProgress();
                     this.recipes.put(nextIndex, recipe);
                     this.recipes.put(index, null);
                     update();
                 }
-            } else {
-                recipe.incrementProgress();
-                update();
             }
+
+            recipe.incrementProgress();
+            update();
         }
     }
 
@@ -402,6 +414,9 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 return;
 
             InputRecipeEntry inputRecipeEntry = this.recipes.get(segmentIndex);
+            if(inputRecipeEntry == null)
+                return;
+
             if (this.world != null && !this.world.isClient) {
                 ItemScatterer.spawn(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), inputRecipeEntry.inputStack());
             }
@@ -484,10 +499,6 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
         public void incrementProgress() {
             this.progress++;
-        }
-
-        public void resetProgress() {
-            this.progress = 0;
         }
 
         @Override

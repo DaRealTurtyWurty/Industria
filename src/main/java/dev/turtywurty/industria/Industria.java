@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import team.reborn.energy.api.EnergyStorage;
 
 // TODO: Use ServerRecipeManager.createCachedMatchGetter
+// TODO: Test all the mixins to see what i broke lol
 public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);

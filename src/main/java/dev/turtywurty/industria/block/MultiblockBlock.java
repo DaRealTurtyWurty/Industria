@@ -37,7 +37,7 @@ public class MultiblockBlock extends Block {
 
         Vec3i offset = getOffsetFromPrimary(data.primaryPos(), pos, null);
 
-        VoxelShape shape = data.type().getShape(direction);
+        VoxelShape shape = data.type().getShape(world, data.primaryPos(), direction);
         return shape != null ? shape.offset(-offset.getX(), -offset.getY(), -offset.getZ()) : VoxelShapes.empty();
     });
 

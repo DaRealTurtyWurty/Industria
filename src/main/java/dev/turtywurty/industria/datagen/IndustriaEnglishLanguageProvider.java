@@ -121,8 +121,10 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.CRYSTALLIZER, "Crystallizer");
         addText(translationBuilder, CrystallizerBlockEntity.TITLE, "Crystallizer");
 
-        translationBuilder.add(ItemInit.RED_MUD, "Red Mud");
+        translationBuilder.add(BlockInit.ROTARY_KILN_CONTROLLER, "Rotary Kiln Controller");
+        translationBuilder.add(BlockInit.ROTARY_KILN, "Rotary Kiln");
 
+        translationBuilder.add(ItemInit.RED_MUD, "Red Mud");
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");
         translationBuilder.add(FluidInit.DIRTY_SODIUM_ALUMINATE.block(), "Dirty Sodium Aluminate");
@@ -131,6 +133,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(FluidInit.SODIUM_ALUMINATE.bucket(), "Bucket of Sodium Aluminate");
         translationBuilder.add(ItemInit.ALUMINIUM_HYDROXIDE, "Aluminium Hydroxide");
         translationBuilder.add(ItemInit.SODIUM_CARBONATE, "Sodium Carbonate");
+        translationBuilder.add(ItemInit.ALUMINA, "Alumina");
+        translationBuilder.add(ItemInit.ROTARY_KILN, "Rotary Kiln");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

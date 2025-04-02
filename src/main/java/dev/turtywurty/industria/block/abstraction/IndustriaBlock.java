@@ -58,6 +58,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     private final boolean rightClickToOpenGui;
     private final boolean dropContentsOnBreak;
     private final BiPredicate<WorldView, BlockPos> canExistAt;
+    private final Map<Direction, VoxelShape> cachedDirectionalShapes;
     // public ToIntFunction<BlockState> tempLuminance;
 
     @SuppressWarnings("unchecked")
@@ -71,6 +72,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         this.renderType = properties.renderType;
         this.shapeFactory = properties.shapeFactory;
         this.canExistAt = properties.canExistAt;
+        this.cachedDirectionalShapes = properties.cachedDirectionalShapes;
 
         if(properties.blockEntityProperties != null) {
             this.blockEntityTypeSupplier = (Supplier<BlockEntityType<?>>) (Object) properties.blockEntityProperties.blockEntityTypeSupplier;
@@ -421,11 +423,11 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
 
         public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
             for (final Direction direction : Direction.values()) {
-                shapeCache.put(direction, calculateShapes(direction, shape));
+                shapeCache.put(direction, calculateShape(direction, shape));
             }
         }
 
-        private static VoxelShape calculateShapes(Direction to, VoxelShape shape) {
+        public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
             final VoxelShape[] buffer = {shape, VoxelShapes.empty()};
 
             final int times = (to.getHorizontal() - Direction.NORTH.getHorizontal() + 4) % 4;
