@@ -20,11 +20,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedStorage<InventoryStorage> {
     private final List<T> inventories = new ArrayList<>();
+    private final Map<Direction, T> sidedInventories = new HashMap<>();
     private final CombinedStorage<ItemVariant, InventoryStorage> combinedStorage = new CombinedStorage<>(this.storages);
 
     public void addInventory(@NotNull T inventory) {
@@ -33,6 +36,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
+        this.sidedInventories.put(side, inventory);
         var storage = InventoryStorage.of(inventory, side);
         addStorage(storage, side);
     }
@@ -115,6 +119,10 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     public RecipeSimpleInventory getRecipeInventory() {
         return new RecipeSimpleInventory(getStacks().toArray(new ItemStack[0]));
+    }
+
+    public Map<Direction, T> getSidedInventories() {
+        return this.sidedInventories;
     }
 
     @Override

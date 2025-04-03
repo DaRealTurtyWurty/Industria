@@ -5,63 +5,38 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
+import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class AlloyFurnaceScreenHandler extends ScreenHandler {
-    private final ScreenHandlerContext context;
-    private final AlloyFurnaceBlockEntity blockEntity;
-    private final PropertyDelegate propertyDelegate;
-
+public class AlloyFurnaceScreenHandler extends IndustriaScreenHandler<AlloyFurnaceBlockEntity> {
     public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory, (AlloyFurnaceBlockEntity) playerInventory.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(4));
+        super(ScreenHandlerTypeInit.ALLOY_FURNACE, 4, syncId, playerInventory, payload, AlloyFurnaceBlockEntity.class);
     }
 
-    public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, AlloyFurnaceBlockEntity blockEntity, PropertyDelegate propertyDelegate) {
-        super(ScreenHandlerTypeInit.ALLOY_FURNACE, syncId);
-
-        this.context = ScreenHandlerContext.create(playerInventory.player.getWorld(), blockEntity.getPos());
-        this.blockEntity = blockEntity;
-        this.propertyDelegate = propertyDelegate;
-
-        WrappedInventoryStorage<SimpleInventory> inventory = blockEntity.getWrappedInventoryStorage();
-        inventory.checkSize(4);
-        checkDataCount(this.propertyDelegate, 4);
-
-        inventory.onOpen(playerInventory.player);
-
-        addPlayerSlots(playerInventory, 8, 84);
-        addBlockEntitySlots();
-
-        addProperties(propertyDelegate);
+    public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, AlloyFurnaceBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
+        super(ScreenHandlerTypeInit.ALLOY_FURNACE, syncId, playerInventory, blockEntity, wrappedInventoryStorage, propertyDelegate);
     }
 
-    private void addBlockEntitySlots() {
-        WrappedInventoryStorage<SimpleInventory> inventory = this.blockEntity.getWrappedInventoryStorage();
+    @Override
+    protected void addBlockEntitySlots() {
+        WrappedInventoryStorage<?> inventory = this.wrappedInventoryStorage;
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0), 0, 42, 17));
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1), 0, 70, 17));
-        addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.FUEL_SLOT), 0, 56, 53) {
-            @Override
-            public boolean canInsert(ItemStack stack) {
-                return this.inventory.isValid(0, stack);
-            }
-        });
+        addSlot(new PredicateSlot(inventory.getInventory(AlloyFurnaceBlockEntity.FUEL_SLOT), 0, 56, 53));
         addSlot(new OutputSlot(inventory.getInventory(AlloyFurnaceBlockEntity.OUTPUT_SLOT), 0, 116, 35));
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        this.blockEntity.getWrappedInventoryStorage().onClose(player);
+    protected int getInventorySize() {
+        return 4;
     }
 
     @Override

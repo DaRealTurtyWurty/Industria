@@ -114,7 +114,7 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
+        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, getWrappedInventoryStorage(), this.propertyDelegate);
     }
 
     @Override
