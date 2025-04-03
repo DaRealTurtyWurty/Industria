@@ -45,9 +45,9 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -61,11 +61,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
-    private final Map<Integer, InputRecipeEntry> recipes = Util.make(new HashMap<>(), map -> {
-        for (int i = 0; i < 16; i++) {
-            map.put(i, null);
-        }
-    });
+    private final List<InputRecipeEntry> recipes = new ArrayList<>();
 
     private int ticks = 0;
 
@@ -104,8 +100,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
     public boolean isProcessing() {
         boolean recipesEmpty = true;
-        for (int index = 0; index < this.recipes.size(); index++) {
-            InputRecipeEntry recipe = this.recipes.get(index);
+        for (InputRecipeEntry recipe : this.recipes) {
             if (recipe != null) {
                 recipesEmpty = false;
                 break;
@@ -128,8 +123,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
         handleInputStack();
 
-        for (int index = this.recipes.size() - 1; index >= 0; index--) {
-            InputRecipeEntry recipe = this.recipes.get(index);
+        for (InputRecipeEntry recipe : this.recipes.stream().sorted(Comparator.comparingInt(InputRecipeEntry::getProgress)).toList()) {
             if (recipe == null)
                 continue;
 
@@ -141,30 +135,20 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
             if (kilnRecipe == null)
                 continue;
 
-            if (recipe.getProgress() % 100 == 0) { // TODO: Replace with a field in the recipe
-                if (index == this.kilnSegments.size() - 1) {
-                    ItemStack outputStack = kilnRecipe.output().createStack(this.world.random);
+            if (recipe.getProgress() >= this.kilnSegments.size() * 100) {
+                ItemStack outputStack = kilnRecipe.output().createStack(this.world.random);
 
-                    BlockPos endPos = this.kilnSegments.get(index);
-                    Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
-                    BlockPos spawnPos = endPos.offset(facing);
-                    if (!tryOutputToStorage(spawnPos, facing, outputStack)) {
-                        ItemScatterer.spawn(this.world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), outputStack);
-                    }
-
-                    this.recipes.put(index, null);
-
-                    update();
-                    continue;
+                BlockPos endPos = this.kilnSegments.getLast();
+                Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
+                BlockPos spawnPos = endPos.offset(facing);
+                if (!tryOutputToStorage(spawnPos, facing, outputStack)) {
+                    ItemScatterer.spawn(this.world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), outputStack);
                 }
 
-                // Check to see if the recipe to the right is null or not. if it is, more this one over and reset the progress
-                int nextIndex = index + 1;
-                if (nextIndex > this.recipes.size() - 1 || this.recipes.get(nextIndex) == null) {
-                    this.recipes.put(nextIndex, recipe);
-                    this.recipes.put(index, null);
-                    update();
-                }
+                this.recipes.remove(recipe);
+
+                update();
+                continue;
             }
 
             recipe.incrementProgress();
@@ -186,9 +170,8 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         if (recipe == null)
             return;
 
-        InputRecipeEntry inputRecipeEntry = this.recipes.get(0);
-        if (inputRecipeEntry == null) {
-            this.recipes.put(0, new InputRecipeEntry(recipeEntry.get().id(), inputStack));
+        if (this.recipes.stream().noneMatch(r -> r.progress <= 100)) {
+            this.recipes.add(new InputRecipeEntry(recipeEntry.get().id(), inputStack));
             inventory.removeStack(0, recipe.input().stackData().count());
             update();
         }
@@ -277,19 +260,17 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
         nbt.put("KilnSegments", kilnSegments);
 
-        var recipes = new NbtList();
-        for (int index = 0; index < this.recipes.size(); index++) {
-            InputRecipeEntry inputRecipeEntry = this.recipes.get(index);
+        var recipesNbt = new NbtList();
+        for (InputRecipeEntry inputRecipeEntry : this.recipes) {
             if (inputRecipeEntry == null)
                 continue;
 
             var recipeNbt = new NbtCompound();
-            recipeNbt.putInt("Index", index);
 
             RegistryKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey();
             if (registryKey != null) {
                 Identifier identifier = registryKey.getValue();
-                if(identifier == null) {
+                if (identifier == null) {
                     Industria.LOGGER.error("Failed to encode recipe registry key for Rotary Kiln at {}. This specific case should never happen though. Recipe was {}.", this.pos, registryKey);
                     continue;
                 }
@@ -304,10 +285,10 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
             recipeNbt.put("InputStack", inputRecipeEntry.inputStack().toNbtAllowEmpty(registries));
             recipeNbt.putInt("Progress", inputRecipeEntry.getProgress());
-            recipes.add(recipeNbt);
+            recipesNbt.add(recipeNbt);
         }
 
-        nbt.put("Recipes", recipes);
+        nbt.put("Recipes", recipesNbt);
     }
 
     @Override
@@ -337,16 +318,11 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         }
 
         if (nbt.contains("Recipes", NbtElement.LIST_TYPE)) {
-            for (int i = 0; i < 16; i++) {
-                this.recipes.put(i, null);
-            }
+            this.recipes.clear();
 
-            NbtList recipes = nbt.getList("Recipes", NbtElement.COMPOUND_TYPE);
-            for (int i = 0; i < recipes.size(); i++) {
-                NbtCompound recipeNbt = recipes.getCompound(i);
-                int index = recipeNbt.getInt("Index");
-                if (index < 0 || index > this.kilnSegments.size() - 1)
-                    continue;
+            NbtList recipesNbt = nbt.getList("Recipes", NbtElement.COMPOUND_TYPE);
+            for (int i = 0; i < recipesNbt.size(); i++) {
+                NbtCompound recipeNbt = recipesNbt.getCompound(i);
 
                 RegistryKey<Recipe<?>> registryKey = RegistryKey.of(RegistryKeys.RECIPE,
                         Identifier.CODEC.decode(NbtOps.INSTANCE, recipeNbt.get("RegistryKey"))
@@ -361,7 +337,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 ItemStack inputStack = ItemStack.fromNbtOrEmpty(registries, recipeNbt.getCompound("InputStack"));
 
                 int progress = recipeNbt.getInt("Progress");
-                this.recipes.put(index, new InputRecipeEntry(registryKey, inputStack, progress));
+                this.recipes.add(new InputRecipeEntry(registryKey, inputStack, progress));
             }
         }
     }
@@ -413,7 +389,10 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
             if (segmentIndex > this.recipes.size() - 1)
                 return;
 
-            InputRecipeEntry inputRecipeEntry = this.recipes.get(segmentIndex);
+            InputRecipeEntry inputRecipeEntry = this.recipes.stream()
+                    .filter(recipe -> MathHelper.floor(recipe.getProgress() / 100f) == segmentIndex)
+                    .findFirst()
+                    .orElse(null);
             if(inputRecipeEntry == null)
                 return;
 
@@ -421,7 +400,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 ItemScatterer.spawn(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), inputRecipeEntry.inputStack());
             }
 
-            this.recipes.put(segmentIndex, null);
+            this.recipes.remove(inputRecipeEntry);
         }
     }
 
@@ -466,7 +445,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         return this.kilnSegments;
     }
 
-    public Map<Integer, InputRecipeEntry> getRecipes() {
+    public List<InputRecipeEntry> getRecipes() {
         return this.recipes;
     }
 
