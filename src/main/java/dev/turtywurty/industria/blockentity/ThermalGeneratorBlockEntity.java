@@ -54,23 +54,23 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
 
     private static final int CONSUME_RATE = 500;
 
-    private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-    private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
-    private final WrappedInventoryStorage<SimpleInventory> inventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
+    private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
+    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
 
     public ThermalGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.THERMAL_GENERATOR, pos, state);
 
-        this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
-        this.fluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
-        this.inventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
+        this.wrappedFluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
+        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
-        var fluid = (SyncingFluidStorage) this.fluidStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.inventoryStorage.getInventory(0);
+        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        var fluid = (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(null);
+        var inventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
         return List.of(energy, fluid, inventory);
     }
 
@@ -81,13 +81,13 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
 
         extractLavaFromInventory();
 
-        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.energyStorage.getStorage(null);
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         spread(this.world, this.pos, energyStorage);
 
         if (energyStorage.getAmount() >= energyStorage.getCapacity())
             return;
 
-        SingleFluidStorage fluidStorage = this.fluidStorage.getStorage(null);
+        SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(null);
         if (fluidStorage.isResourceBlank() || fluidStorage.getAmount() < CONSUME_RATE)
             return;
 
@@ -101,11 +101,11 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
     }
 
     private void extractLavaFromInventory() {
-        Storage<FluidVariant> storage = ContainerItemContext.ofSingleSlot(this.inventoryStorage.getStorage(null).getSlot(0)).find(FluidStorage.ITEM);
+        Storage<FluidVariant> storage = ContainerItemContext.ofSingleSlot(this.wrappedInventoryStorage.getStorage(null).getSlot(0)).find(FluidStorage.ITEM);
         if (storage == null || !storage.supportsExtraction())
             return;
 
-        SingleFluidStorage fluidStorage = this.fluidStorage.getStorage(null);
+        SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(null);
         if (fluidStorage.getAmount() >= fluidStorage.getCapacity())
             return;
 
@@ -146,25 +146,25 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ThermalGeneratorScreenHandler(syncId, playerInventory, this);
+        return new ThermalGeneratorScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
 
-        nbt.put("EnergyStorage", this.energyStorage.writeNbt(registryLookup));
-        nbt.put("FluidStorage", this.fluidStorage.writeNbt(registryLookup));
-        nbt.put("Inventory", this.inventoryStorage.writeNbt(registryLookup));
+        nbt.put("EnergyStorage", this.wrappedEnergyStorage.writeNbt(registryLookup));
+        nbt.put("FluidStorage", this.wrappedFluidStorage.writeNbt(registryLookup));
+        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        this.energyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.fluidStorage.readNbt(nbt.getList("FluidStorage", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.inventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.wrappedEnergyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.wrappedFluidStorage.readNbt(nbt.getList("FluidStorage", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
     }
 
     @Nullable
@@ -180,17 +180,17 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         return nbt;
     }
 
-    public EnergyStorage getEnergyStorage() {
-        return this.energyStorage.getStorage(null);
+    public EnergyStorage getWrappedEnergyStorage() {
+        return this.wrappedEnergyStorage.getStorage(null);
     }
 
-    public SingleFluidStorage getFluidStorage() {
-        return this.fluidStorage.getStorage(null);
+    public SingleFluidStorage getWrappedFluidStorage() {
+        return this.wrappedFluidStorage.getStorage(null);
     }
 
     @Override
     public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return this.inventoryStorage;
+        return this.wrappedInventoryStorage;
     }
 
     @Override
@@ -199,14 +199,14 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
-        return this.energyStorage.getStorage(direction);
+        return this.wrappedEnergyStorage.getStorage(direction);
     }
 
     public SingleFluidStorage getFluidProvider(Direction direction) {
-        return this.fluidStorage.getStorage(direction);
+        return this.wrappedFluidStorage.getStorage(direction);
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.inventoryStorage.getStorage(direction);
+        return this.wrappedInventoryStorage.getStorage(direction);
     }
 }

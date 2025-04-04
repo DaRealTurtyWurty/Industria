@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.UpgradeStationBlockEntity;
+import dev.turtywurty.industria.blockentity.util.inventory.ClientWrappedInventoryStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
@@ -20,31 +21,37 @@ import net.minecraft.screen.slot.Slot;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Figure out a way to still let this use IndustriaScreenHandler
 public class UpgradeStationScreenHandler extends ScreenHandler {
     private final List<UpgradeStationRecipe> recipes = new ArrayList<>();
+    private final WrappedInventoryStorage<?> wrappedInventoryStorage;
     private final UpgradeStationBlockEntity blockEntity;
     private final ScreenHandlerContext context;
+    private final PropertyDelegate properties;
 
     private Runnable contentsChangedListener;
 
-    private final PropertyDelegate properties;
-
     public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationOpenPayload payload) {
-        this(syncId, inventory, (UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(1), payload.recipes());
+        this(syncId,
+                inventory,
+                (UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos()),
+                ClientWrappedInventoryStorage.copyOf(((UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos())).getWrappedInventoryStorage()),
+                new ArrayPropertyDelegate(1),
+                payload.recipes());
     }
 
-    public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationBlockEntity blockEntity, PropertyDelegate properties, List<UpgradeStationRecipe> recipes) {
+    public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties, List<UpgradeStationRecipe> recipes) {
         super(ScreenHandlerTypeInit.UPGRADE_STATION, syncId);
 
         this.blockEntity = blockEntity;
         this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
+        this.wrappedInventoryStorage = wrappedInventoryStorage;
 
-        WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = blockEntity.getWrappedInventoryStorage();
         wrappedInventoryStorage.checkSize(10);
         wrappedInventoryStorage.onOpen(inventory.player);
 
         addPlayerSlots(inventory, 18, 104);
-        addBlockEntityInventory(wrappedInventoryStorage);
+        addBlockEntitySlots();
 
         checkDataCount(properties, 1);
         addProperties(properties);
@@ -53,8 +60,11 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
         this.recipes.addAll(recipes);
     }
 
-    private void addBlockEntityInventory(WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage) {
-        SimpleInventory inputInventory = wrappedInventoryStorage.getInventory(0);
+    private void addBlockEntitySlots() {
+        SimpleInventory inputInventory = this.wrappedInventoryStorage.getInventory(0);
+        if (inputInventory == null)
+            throw new IllegalStateException("Input inventory is null");
+
         for (int column = 0; column < 3; column++) {
             for (int row = 0; row < 3; row++) {
                 addSlot(new Slot(inputInventory, row + column * 3, 8 + row * 18, 17 + column * 18));
@@ -83,8 +93,7 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
     @Override
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
-
-        this.blockEntity.getWrappedInventoryStorage().onClose(player);
+        this.wrappedInventoryStorage.onClose(player);
     }
 
     @Override

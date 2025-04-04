@@ -16,17 +16,18 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class AlloyFurnaceScreenHandler extends IndustriaScreenHandler<AlloyFurnaceBlockEntity> {
+public class AlloyFurnaceScreenHandler extends IndustriaScreenHandler<AlloyFurnaceBlockEntity, BlockPosPayload> {
     public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.ALLOY_FURNACE, 4, syncId, playerInventory, payload, AlloyFurnaceBlockEntity.class);
     }
 
-    public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, AlloyFurnaceBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
+    public AlloyFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, AlloyFurnaceBlockEntity blockEntity,
+                                     WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
         super(ScreenHandlerTypeInit.ALLOY_FURNACE, syncId, playerInventory, blockEntity, wrappedInventoryStorage, propertyDelegate);
     }
 
     @Override
-    protected void addBlockEntitySlots() {
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
         WrappedInventoryStorage<?> inventory = this.wrappedInventoryStorage;
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0), 0, 42, 17));
         addSlot(new Slot(inventory.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1), 0, 70, 17));

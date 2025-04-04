@@ -5,52 +5,41 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class ClarifierScreenHandler extends ScreenHandler {
-    private final ScreenHandlerContext context;
-    private final ClarifierBlockEntity blockEntity;
-    private final PropertyDelegate properties;
-
+public class ClarifierScreenHandler extends IndustriaScreenHandler<ClarifierBlockEntity, BlockPosPayload> {
     public ClarifierScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (ClarifierBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(2));
+        super(ScreenHandlerTypeInit.CLARIFIER, 2, syncId, playerInv, payload, ClarifierBlockEntity.class);
     }
 
-    public ClarifierScreenHandler(int syncId, PlayerInventory playerInv, ClarifierBlockEntity blockEntity, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.CLARIFIER, syncId);
-
-        this.blockEntity = blockEntity;
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
-
-        checkDataCount(properties, 2);
-
-        WrappedInventoryStorage<?> wrappedInventoryStorage = blockEntity.getWrappedInventoryStorage();
-        wrappedInventoryStorage.checkSize(1);
-        wrappedInventoryStorage.onOpen(playerInv.player);
-
-        SimpleInventory inventory = wrappedInventoryStorage.getInventory(0);
-        addSlot(new OutputSlot(inventory, 0, 134,60));
+    public ClarifierScreenHandler(int syncId, PlayerInventory playerInv, ClarifierBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
+        super(ScreenHandlerTypeInit.CLARIFIER, syncId, playerInv, blockEntity, wrappedInventoryStorage, properties);
 
         addPlayerSlots(playerInv, 8, 92);
-
-        this.properties = properties;
-        addProperties(this.properties);
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        this.blockEntity.getWrappedInventoryStorage().onClose(player);
+    protected int getInventorySize() {
+        return 1;
+    }
+
+    @Override
+    protected int getPlayerInventoryY() {
+        return 92;
+    }
+
+    @Override
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
+        SimpleInventory inventory = this.wrappedInventoryStorage.getInventory(0);
+        addSlot(new OutputSlot(inventory, 0, 134,60));
     }
 
     @Override
@@ -89,11 +78,11 @@ public class ClarifierScreenHandler extends ScreenHandler {
     }
 
     public int getProgress() {
-        return this.properties.get(0);
+        return this.propertyDelegate.get(0);
     }
 
     public int getMaxProgress() {
-        return this.properties.get(1);
+        return this.propertyDelegate.get(1);
     }
 
     public float getProgressPercent() {
@@ -107,9 +96,5 @@ public class ClarifierScreenHandler extends ScreenHandler {
 
     public int getProgressScaled() {
         return MathHelper.ceil(getProgressPercent() * 24);
-    }
-
-    public ClarifierBlockEntity getBlockEntity() {
-        return this.blockEntity;
     }
 }

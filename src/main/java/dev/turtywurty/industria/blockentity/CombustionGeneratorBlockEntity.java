@@ -42,7 +42,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     public static final Text TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-    private final WrappedInventoryStorage<SimpleInventory> inventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
 
     private int burnTime = 0;
     private int fuelTime = 0;
@@ -51,7 +51,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
         super(BlockEntityTypeInit.COMBUSTION_GENERATOR, pos, state);
 
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
-        this.inventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
+        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
     public boolean isFuel(ItemStack stack) {
@@ -65,7 +65,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     @Override
     public List<SyncableStorage> getSyncableStorages() {
         var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.inventoryStorage.getInventory(0);
+        var inventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
         return List.of(energy, inventory);
     }
 
@@ -86,7 +86,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
             energyStorage.amount += 20;
             update();
         } else {
-            SimpleInventory inventory = this.inventoryStorage.getInventory(0);
+            SimpleInventory inventory = this.wrappedInventoryStorage.getInventory(0);
             ItemStack stack = inventory.getStack(0);
             if (isFuel(stack)) {
                 this.fuelTime = getFuelTime(stack);
@@ -114,7 +114,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new CombustionGeneratorScreenHandler(syncId, playerInventory, this);
+        return new CombustionGeneratorScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
         super.writeNbt(nbt, registryLookup);
 
         nbt.put("EnergyStorage", this.energyStorage.writeNbt(registryLookup));
-        nbt.put("Inventory", this.inventoryStorage.writeNbt(registryLookup));
+        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
 
         nbt.putInt("BurnTime", this.burnTime);
         nbt.putInt("FuelTime", this.fuelTime);
@@ -133,7 +133,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
         super.readNbt(nbt, registryLookup);
 
         this.energyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.inventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
 
         this.burnTime = nbt.getInt("BurnTime");
         this.fuelTime = nbt.getInt("FuelTime");
@@ -158,7 +158,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
 
     @Override
     public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return this.inventoryStorage;
+        return this.wrappedInventoryStorage;
     }
 
     @Override
@@ -171,7 +171,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.inventoryStorage.getStorage(direction);
+        return this.wrappedInventoryStorage.getStorage(direction);
     }
 
     public int getBurnTime() {

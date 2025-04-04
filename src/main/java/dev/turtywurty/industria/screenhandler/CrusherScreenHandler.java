@@ -5,46 +5,32 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class CrusherScreenHandler extends ScreenHandler {
-    private final CrusherBlockEntity blockEntity;
-    private final ScreenHandlerContext context;
-    private final PropertyDelegate propertyDelegate;
-
+public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEntity, BlockPosPayload> {
     public CrusherScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (CrusherBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(2));
+        super(ScreenHandlerTypeInit.CRUSHER, 2, syncId, playerInv, payload, CrusherBlockEntity.class);
     }
 
-    public CrusherScreenHandler(int syncId, PlayerInventory playerInv, CrusherBlockEntity blockEntity, PropertyDelegate propertyDelegate) {
-        super(ScreenHandlerTypeInit.CRUSHER, syncId);
-        this.blockEntity = blockEntity;
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
-        this.propertyDelegate = propertyDelegate;
-
-        WrappedInventoryStorage<SimpleInventory> wrappedStorage = blockEntity.getWrappedInventoryStorage();
-        wrappedStorage.checkSize(3);
-        wrappedStorage.onOpen(playerInv.player);
-        checkDataCount(propertyDelegate, 2);
-
-        addPlayerSlots(playerInv, 8, 84);
-        addBlockEntityInventory();
-
-        addProperties(propertyDelegate);
+    public CrusherScreenHandler(int syncId, PlayerInventory playerInv, CrusherBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
+        super(ScreenHandlerTypeInit.CRUSHER, syncId, playerInv, blockEntity, wrappedInventoryStorage, propertyDelegate);
     }
 
-    private void addBlockEntityInventory() {
-        WrappedInventoryStorage<SimpleInventory> wrappedStorage = this.blockEntity.getWrappedInventoryStorage();
+    @Override
+    protected int getInventorySize() {
+        return 3;
+    }
+
+    @Override
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
+        WrappedInventoryStorage<?> wrappedStorage = this.wrappedInventoryStorage;
         addSlot(new Slot(wrappedStorage.getInventory(CrusherBlockEntity.INPUT_SLOT), 0, 44, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 0, 98, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 1, 116, 35));
@@ -81,12 +67,6 @@ public class CrusherScreenHandler extends ScreenHandler {
         return canUse(this.context, player, BlockInit.CRUSHER);
     }
 
-    @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        this.blockEntity.getWrappedInventoryStorage().onClose(player);
-    }
-
     public int getProgress() {
         return this.propertyDelegate.get(0);
     }
@@ -121,9 +101,5 @@ public class CrusherScreenHandler extends ScreenHandler {
         }
 
         return MathHelper.clamp(energy / (float) maxEnergy, 0.0f, 1.0f);
-    }
-
-    public CrusherBlockEntity getBlockEntity() {
-        return this.blockEntity;
     }
 }

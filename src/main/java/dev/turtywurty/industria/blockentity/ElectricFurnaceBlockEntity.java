@@ -231,7 +231,7 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ElectricFurnaceScreenHandler(syncId, playerInventory, this);
+        return new ElectricFurnaceScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
     }
 
     @Override

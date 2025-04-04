@@ -1,65 +1,58 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class MixerScreenHandler extends ScreenHandler {
-    private final MixerBlockEntity blockEntity;
-    private final ScreenHandlerContext context;
-    private final PropertyDelegate properties;
-
+public class MixerScreenHandler extends IndustriaScreenHandler<MixerBlockEntity, BlockPosPayload> {
     public MixerScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory,
-                (MixerBlockEntity) playerInventory.player.getWorld().getBlockEntity(payload.pos()),
-                new ArrayPropertyDelegate(2));
+        super(ScreenHandlerTypeInit.MIXER, 2, syncId, playerInventory, payload, MixerBlockEntity.class);
     }
 
-    public MixerScreenHandler(int syncId, PlayerInventory playerInventory, MixerBlockEntity blockEntity, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.MIXER, syncId);
+    public MixerScreenHandler(int syncId, PlayerInventory playerInventory, MixerBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
+        super(ScreenHandlerTypeInit.MIXER, syncId, playerInventory, blockEntity, wrappedInventoryStorage, propertyDelegate);
+    }
 
-        this.blockEntity = blockEntity;
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
-
-        WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = blockEntity.getWrappedInventoryStorage();
-        wrappedInventoryStorage.checkSize(9);
-        wrappedInventoryStorage.onOpen(playerInventory.player);
-
-        SyncingSimpleInventory inputInventory = blockEntity.getInputInventory();
+    @Override
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
+        SimpleInventory inputInventory = this.wrappedInventoryStorage.getInventory(0);
         for (int row = 0; row < 2; row++) {
             for (int column = 0; column < 3; column++) {
                 addSlot(new Slot(inputInventory, column + (row * 3), 58 + column * 18, 26 + row * 18));
             }
         }
 
-        addSlot(new OutputSlot(blockEntity.getOutputInventory(), 0, 143, 35));
+        addSlot(new OutputSlot(this.wrappedInventoryStorage.getInventory(1), 0, 143, 35));
 
-        SyncingSimpleInventory bucketInputInventory = blockEntity.getBucketInputInventory();
-        SyncingSimpleInventory bucketOutputInventory = blockEntity.getBucketOutputInventory();
-        addSlot(new PredicateSlot(bucketInputInventory, 0, 36, 83, stack -> bucketInputInventory.isValid(0, stack)));
-        addSlot(new PredicateSlot(bucketOutputInventory, 0, 170, 83, stack -> bucketOutputInventory.isValid(0, stack)));
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(2), 0, 36, 83));
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(3), 0, 170, 83));
+    }
 
-        addPlayerSlots(playerInventory, 20, 112);
+    @Override
+    protected int getInventorySize() {
+        return 9;
+    }
 
-        checkDataCount(properties, 2);
-        addProperties(properties);
+    @Override
+    protected int getPlayerInventoryX() {
+        return 20;
+    }
 
-        this.properties = properties;
+    @Override
+    protected int getPlayerInventoryY() {
+        return 112;
     }
 
     @Override
@@ -95,27 +88,16 @@ public class MixerScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-
-        this.blockEntity.getWrappedInventoryStorage().onClose(player);
-    }
-
-    @Override
     public boolean canUse(PlayerEntity player) {
         return canUse(this.context, player, BlockInit.MIXER);
     }
 
-    public MixerBlockEntity getBlockEntity() {
-        return this.blockEntity;
-    }
-
     public int getProgress() {
-        return this.properties.get(0);
+        return this.propertyDelegate.get(0);
     }
 
     public int getMaxProgress() {
-        return this.properties.get(1);
+        return this.propertyDelegate.get(1);
     }
 
     public float getProgressPercent() {

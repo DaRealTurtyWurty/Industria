@@ -5,52 +5,41 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class CrystallizerScreenHandler extends ScreenHandler {
-    private final CrystallizerBlockEntity blockEntity;
-    private final ScreenHandlerContext context;
-    private final PropertyDelegate properties;
-
+public class CrystallizerScreenHandler extends IndustriaScreenHandler<CrystallizerBlockEntity, BlockPosPayload> {
     public CrystallizerScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (CrystallizerBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(4));
+        super(ScreenHandlerTypeInit.CRYSTALLIZER, 4, syncId, playerInv, payload, CrystallizerBlockEntity.class);
     }
 
-    public CrystallizerScreenHandler(int syncId, PlayerInventory playerInv, CrystallizerBlockEntity blockEntity, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.CRYSTALLIZER, syncId);
-        this.blockEntity = blockEntity;
-        checkDataCount(properties, 4);
-
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
-
-        WrappedInventoryStorage<?> inventoryStorage = blockEntity.getWrappedInventoryStorage();
-        inventoryStorage.checkSize(3);
-        inventoryStorage.onOpen(playerInv.player);
-
-        addSlot(new PredicateSlot(blockEntity.getCatalystInventory(), 0, 54, 12, $ -> !blockEntity.isRunning()));
-        addSlot(new OutputSlot(blockEntity.getOutputInventory(), 0, 148, 27));
-        addSlot(new OutputSlot(blockEntity.getByproductInventory(), 0, 148, 51));
-
-        addPlayerSlots(playerInv, 8, 92);
-
-        this.properties = properties;
-        addProperties(this.properties);
+    public CrystallizerScreenHandler(int syncId, PlayerInventory playerInv, CrystallizerBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
+        super(ScreenHandlerTypeInit.CRYSTALLIZER, syncId, playerInv, blockEntity, wrappedInventoryStorage, properties);
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        blockEntity.getWrappedInventoryStorage().onClose(player);
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
+        WrappedInventoryStorage<?> wrappedStorage = this.wrappedInventoryStorage;
+        addSlot(new PredicateSlot(wrappedStorage.getInventory(0), 0, 54, 12, $ -> !blockEntity.isRunning()));
+        addSlot(new OutputSlot(wrappedStorage.getInventory(1), 0, 148, 27));
+        addSlot(new OutputSlot(wrappedStorage.getInventory(2), 0, 148, 51));
+    }
+
+    @Override
+    protected int getPlayerInventoryY() {
+        return 92;
+    }
+
+    @Override
+    protected int getInventorySize() {
+        return 4;
     }
 
     @Override
@@ -85,11 +74,11 @@ public class CrystallizerScreenHandler extends ScreenHandler {
     }
 
     public int getProgress() {
-        return properties.get(0);
+        return this.propertyDelegate.get(0);
     }
 
     public int getMaxProgress() {
-        return properties.get(1);
+        return this.propertyDelegate.get(1);
     }
 
     public float getProgressPercent() {
@@ -107,11 +96,11 @@ public class CrystallizerScreenHandler extends ScreenHandler {
     }
 
     public int getCatalystUses() {
-        return properties.get(2);
+        return this.propertyDelegate.get(2);
     }
 
     public int getMaxCatalystUses() {
-        return properties.get(3);
+        return this.propertyDelegate.get(3);
     }
 
     public float getCatalystUsesPercent() {
@@ -122,9 +111,5 @@ public class CrystallizerScreenHandler extends ScreenHandler {
         }
 
         return MathHelper.clamp(uses / maxUses, 0.0f, 1.0f);
-    }
-
-    public CrystallizerBlockEntity getBlockEntity() {
-        return this.blockEntity;
     }
 }

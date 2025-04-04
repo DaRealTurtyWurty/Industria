@@ -1,61 +1,42 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.DigesterBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
-public class DigesterScreenHandler extends ScreenHandler {
-    private final ScreenHandlerContext context;
-    private final DigesterBlockEntity blockEntity;
-    private final PropertyDelegate properties;
-
+public class DigesterScreenHandler extends IndustriaScreenHandler<DigesterBlockEntity, BlockPosPayload> {
     public DigesterScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory, (DigesterBlockEntity) playerInventory.player.getWorld().getBlockEntity(payload.pos()), new ArrayPropertyDelegate(2));
+        super(ScreenHandlerTypeInit.DIGESTER, 2, syncId, playerInventory, payload, DigesterBlockEntity.class);
     }
 
-    public DigesterScreenHandler(int syncId, PlayerInventory playerInventory, DigesterBlockEntity blockEntity, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.DIGESTER, syncId);
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
-        this.blockEntity = blockEntity;
-
-        checkDataCount(properties, 2);
-
-        WrappedInventoryStorage<?> wrappedInventoryStorage = blockEntity.getWrappedInventoryStorage();
-        wrappedInventoryStorage.checkSize(2);
-        wrappedInventoryStorage.onOpen(playerInventory.player);
-
-        PredicateSimpleInventory inputFluidInventory = blockEntity.getInputSlurryInventory();
-        PredicateSimpleInventory outputFluidInventory = blockEntity.getOutputFluidInventory();
-        addSlot(new PredicateSlot(inputFluidInventory, 0, 26, 60));
-        addSlot(new PredicateSlot(outputFluidInventory, 0, 134, 60));
-
-        addPlayerSlots(playerInventory, 8, 92);
-
-        addProperties(properties);
-        this.properties = properties;
-    }
-
-    public DigesterBlockEntity getBlockEntity() {
-        return this.blockEntity;
+    public DigesterScreenHandler(int syncId, PlayerInventory playerInventory, DigesterBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
+        super(ScreenHandlerTypeInit.DIGESTER, syncId, playerInventory, blockEntity, wrappedInventoryStorage, properties);
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        this.blockEntity.getWrappedInventoryStorage().onClose(player);
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(0), 0, 26, 60));
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(1), 0, 134, 60));
+    }
+
+    @Override
+    protected int getInventorySize() {
+        return 2;
+    }
+
+    @Override
+    protected int getPlayerInventoryY() {
+        return 92;
     }
 
     @Override
@@ -94,11 +75,11 @@ public class DigesterScreenHandler extends ScreenHandler {
     }
 
     public int getProgress() {
-        return this.properties.get(0);
+        return this.propertyDelegate.get(0);
     }
 
     public int getMaxProgress() {
-        return this.properties.get(1);
+        return this.propertyDelegate.get(1);
     }
 
     public float getProgressPercent() {

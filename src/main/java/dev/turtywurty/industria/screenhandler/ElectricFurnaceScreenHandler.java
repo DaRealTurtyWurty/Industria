@@ -5,45 +5,36 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.EnergyStorage;
 
-public class ElectricFurnaceScreenHandler extends ScreenHandler {
-    private final ElectricFurnaceBlockEntity blockEntity;
-    private final ScreenHandlerContext context;
-
+// TODO: Use property delegate?
+public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<ElectricFurnaceBlockEntity, BlockPosPayload> {
     public ElectricFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory, (ElectricFurnaceBlockEntity) playerInventory.player.getWorld().getBlockEntity(payload.pos()));
+        super(ScreenHandlerTypeInit.ELECTRIC_FURNACE, syncId, playerInventory, payload, ElectricFurnaceBlockEntity.class);
     }
 
-    public ElectricFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, ElectricFurnaceBlockEntity blockEntity) {
-        super(ScreenHandlerTypeInit.ELECTRIC_FURNACE, syncId);
+    public ElectricFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, ElectricFurnaceBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage) {
+        super(ScreenHandlerTypeInit.ELECTRIC_FURNACE, syncId, playerInventory, blockEntity, wrappedInventoryStorage);
+    }
 
-        this.blockEntity = blockEntity;
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
-
-        WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = blockEntity.getWrappedInventoryStorage();
-        wrappedInventoryStorage.checkSize(2);
-        wrappedInventoryStorage.onOpen(playerInventory.player);
-
-        addPlayerSlots(playerInventory, 8, 84);
+    @Override
+    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
         addSlot(new Slot(wrappedInventoryStorage.getInventory(0), 0, 49, 33));
         addSlot(new ExperienceOutputSlot(playerInventory.player, blockEntity, wrappedInventoryStorage.getInventory(1), 0, 108, 33));
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        blockEntity.getWrappedInventoryStorage().onClose(player);
+    protected int getInventorySize() {
+        return 2;
     }
 
     @Override
@@ -54,10 +45,6 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler {
     @Override
     public boolean canUse(PlayerEntity player) {
         return canUse(this.context, player, BlockInit.ELECTRIC_FURNACE);
-    }
-
-    public ElectricFurnaceBlockEntity getBlockEntity() {
-        return this.blockEntity;
     }
 
     public int getProgress() {
@@ -82,6 +69,7 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler {
         return MathHelper.clamp((float) progress / maxProgress, 0, 1);
     }
 
+    // TODO: Abstract out and make its own class
     public static class ExperienceOutputSlot extends OutputSlot {
         private final PlayerEntity player;
         private final ElectricFurnaceBlockEntity blockEntity;

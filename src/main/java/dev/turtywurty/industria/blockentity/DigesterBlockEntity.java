@@ -299,7 +299,7 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new DigesterScreenHandler(syncId, playerInventory, this, this.properties);
+        return new DigesterScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
     }
 
     @Override

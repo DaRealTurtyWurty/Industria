@@ -390,6 +390,6 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ClarifierScreenHandler(syncId, playerInventory, this, this.properties);
+        return new ClarifierScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
     }
 }

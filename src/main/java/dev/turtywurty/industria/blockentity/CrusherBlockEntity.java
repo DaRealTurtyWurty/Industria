@@ -275,7 +275,7 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new CrusherScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
+        return new CrusherScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.propertyDelegate);
     }
 
     private boolean hasItemsInBuffer() {

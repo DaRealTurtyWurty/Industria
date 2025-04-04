@@ -12,7 +12,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 
-import java.util.Map;
+import java.util.List;
 
 public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
     private final RotaryKilnModel model;
@@ -36,6 +36,8 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         Direction left = facing.rotateYCounterclockwise();
         Vec3i facingVector = facing.getVector();
         Vec3i leftVector = left.getVector();
+        if(true)
+            return;
 
         float rotation = (entity.getWorld().getTime() % 360) * 0.1F;
         for (int index = 2; index < Math.min(entity.getKilnSegments().size(), 15) + 1; index++) {
@@ -44,7 +46,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             this.model.renderSegment(index, matrices, vertexConsumer, light, overlay);
             rotatingSegment.roll = 0;
 
-            Map<Integer, RotaryKilnControllerBlockEntity.InputRecipeEntry> recipes = entity.getRecipes();
+            List<RotaryKilnControllerBlockEntity.InputRecipeEntry> recipes = entity.getRecipes();
             if (index - 2 < recipes.size()) {
                 RotaryKilnControllerBlockEntity.InputRecipeEntry recipe = recipes.get(index - 2);
                 if (recipe == null)

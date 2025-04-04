@@ -102,7 +102,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
         var inputInventory = new SyncingSimpleInventory(this, 9);
         this.wrappedInventoryStorage.addInventory(inputInventory, Direction.UP);
         inputInventory.addListener(sender -> {
-            if(this.world == null || !(this.world instanceof ServerWorld serverWorld))
+            if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
                 return;
 
             List<RegistryKey<Recipe<?>>> recipesForCenterStack = new ArrayList<>();
@@ -111,7 +111,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
             if (!centerStack.isEmpty() && ItemStack.areItemsAndComponentsEqual(centerStack, this.previousCenterStack))
                 return;
 
-            if(centerStack.isEmpty()) {
+            if (centerStack.isEmpty()) {
                 this.availableRecipes.clear();
                 this.selectedRecipe = null;
                 this.selectedRecipeIndex = 0;
@@ -150,12 +150,12 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
     private void updateHandlers(ServerWorld serverWorld) {
         Map<ServerPlayerEntity, UpgradeStationScreenHandler> handlers = new HashMap<>();
         for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-            if(player.currentScreenHandler instanceof UpgradeStationScreenHandler handler) {
+            if (player.currentScreenHandler instanceof UpgradeStationScreenHandler handler) {
                 handlers.put(player, handler);
             }
         }
 
-        if(handlers.isEmpty())
+        if (handlers.isEmpty())
             return;
 
         List<UpgradeStationRecipe> recipes = getRecipes();
@@ -190,7 +190,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new UpgradeStationScreenHandler(syncId, playerInventory, this, this.propertyDelegate, getRecipes());
+        return new UpgradeStationScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.propertyDelegate, getRecipes());
     }
 
     @Override
@@ -250,7 +250,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
             this.progress = nbt.getInt("Progress");
         }
 
-        if(this.isFirstRead) {
+        if (this.isFirstRead) {
             this.isFirstRead = false;
             this.previousCenterStack = getInputInventory().getStack(4);
         }
@@ -417,7 +417,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
     }
 
     public void setSelectedRecipeIndex(int index) {
-        if(this.world == null || this.world.isClient || index < 0 || index >= this.availableRecipes.size() || this.selectedRecipeIndex == index)
+        if (this.world == null || this.world.isClient || index < 0 || index >= this.availableRecipes.size() || this.selectedRecipeIndex == index)
             return;
 
         this.selectedRecipeIndex = index;

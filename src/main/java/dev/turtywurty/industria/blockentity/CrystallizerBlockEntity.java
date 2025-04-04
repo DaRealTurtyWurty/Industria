@@ -422,7 +422,7 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new CrystallizerScreenHandler(syncId, playerInventory, this, this.properties);
+        return new CrystallizerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {

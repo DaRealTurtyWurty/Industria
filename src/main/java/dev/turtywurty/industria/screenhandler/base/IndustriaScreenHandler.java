@@ -3,7 +3,7 @@ package dev.turtywurty.industria.screenhandler.base;
 import dev.turtywurty.industria.blockentity.util.inventory.ClientWrappedInventoryStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorageHolder;
-import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.network.HasPositionPayload;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -14,21 +14,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInventoryStorageHolder> extends ScreenHandler {
+public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInventoryStorageHolder, P extends HasPositionPayload> extends ScreenHandler {
     protected final T blockEntity;
     protected final WrappedInventoryStorage<?> wrappedInventoryStorage;
     protected final ScreenHandlerContext context;
     protected final PropertyDelegate propertyDelegate;
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, BlockPosPayload payload, Class<T> blockEntityClass) {
+    public IndustriaScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, P payload, Class<T> blockEntityClass) {
         this(type, 0, syncId, playerInventory, payload, new CachedBlockEntityFetcher<>(blockEntityClass));
     }
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int propertiesSize, int syncId, PlayerInventory playerInventory, BlockPosPayload payload, Class<T> blockEntityClass) {
+    public IndustriaScreenHandler(ScreenHandlerType<?> type, int propertiesSize, int syncId, PlayerInventory playerInventory, P payload, Class<T> blockEntityClass) {
         this(type, propertiesSize, syncId, playerInventory, payload, new CachedBlockEntityFetcher<>(blockEntityClass));
     }
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int propertiesSize, int syncId, PlayerInventory playerInventory, BlockPosPayload payload, CachedBlockEntityFetcher<T> cachedFetcher) {
+    public IndustriaScreenHandler(ScreenHandlerType<?> type, int propertiesSize, int syncId, PlayerInventory playerInventory, P payload, CachedBlockEntityFetcher<T> cachedFetcher) {
         this(type, syncId, playerInventory,
                 cachedFetcher.apply(playerInventory, payload.pos()),
                 ClientWrappedInventoryStorage.copyOf(cachedFetcher.apply(playerInventory, payload.pos()).getWrappedInventoryStorage()),
@@ -56,7 +56,7 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
         this.wrappedInventoryStorage.onOpen(playerInventory.player);
 
         addPlayerSlots(playerInventory, getPlayerInventoryX(), getPlayerInventoryY());
-        addBlockEntitySlots();
+        addBlockEntitySlots(playerInventory);
     }
 
     @Override
@@ -65,6 +65,9 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
         this.wrappedInventoryStorage.onClose(player);
     }
 
+    public T getBlockEntity() {
+        return this.blockEntity;
+    }
 
     protected int getPlayerInventoryX() {
         return 8;
@@ -74,7 +77,7 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
     }
 
     protected abstract int getInventorySize();
-    protected abstract void addBlockEntitySlots();
+    protected abstract void addBlockEntitySlots(PlayerInventory playerInventory);
 
     public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedInventoryStorageHolder> implements BiFunction<PlayerInventory, BlockPos, T> {
         private final Class<T> blockEntityClass;

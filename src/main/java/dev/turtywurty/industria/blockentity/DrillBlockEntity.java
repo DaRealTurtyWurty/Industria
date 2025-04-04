@@ -382,7 +382,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new DrillScreenHandler(syncId, playerInventory, this);
+        return new DrillScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
     }
 
     public SimpleInventory getDrillHeadInventory() {

@@ -130,7 +130,7 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new BatteryScreenHandler(syncId, playerInventory, this);
+        return new BatteryScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
     }
 
     @Override

@@ -457,7 +457,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new MixerScreenHandler(syncId, playerInventory, this, this.properties);
+        return new MixerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
     }
 
     @Override
