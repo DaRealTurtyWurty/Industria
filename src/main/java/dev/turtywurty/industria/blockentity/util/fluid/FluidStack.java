@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -38,5 +39,16 @@ public record FluidStack(FluidVariant variant, long amount) {
 
     public FluidStack withAmount(long amount) {
         return amount <= 0 ? EMPTY : new FluidStack(this.variant, amount);
+    }
+
+    public boolean testForRecipe(FluidStack other) {
+        return this.variant.equals(other.variant()) && this.amount >= other.amount();
+    }
+
+    public boolean testForRecipe(SingleFluidStorage fluidStorage) {
+        if (fluidStorage == null)
+            return false;
+
+        return this.variant.equals(fluidStorage.variant) && this.amount <= fluidStorage.amount;
     }
 }

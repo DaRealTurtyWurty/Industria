@@ -41,19 +41,22 @@ public class ItemInit {
     public static final Item SODIUM_ALUMINATE = register("sodium_aluminate");
 
     public static final Item RED_MUD = register("red_mud");
-    public static final Item ALUMINIUM_HYDROXIDE = register("aluminium_hydroxide"); // TODO: Maybe alumina hydrate?
+    public static final Item ALUMINIUM_HYDROXIDE = register("aluminium_hydroxide");
     public static final Item SODIUM_CARBONATE = register("sodium_carbonate");
     public static final Item ALUMINA = register("alumina");
+    public static final Item CRYOLITE = register("cryolite");
+    public static final Item CARBON_ROD = registerWithSettings("carbon_rod", settings -> settings.maxDamage(50));
 
     public static final RotaryKilnBlockItem ROTARY_KILN = register("rotary_kiln", RotaryKilnBlockItem::new);
-
-    private static <T extends Item> T registerItem(String name, T item) {
-        return Registry.register(Registries.ITEM, Industria.id(name), item);
-    }
 
     public static Item register(String name) {
         return registerItem(name, new Item(new Item.Settings()
                 .registryKey(RegistryKey.of(RegistryKeys.ITEM, Industria.id(name)))));
+    }
+
+    public static Item registerWithSettings(String name, Function<Item.Settings, Item.Settings> settingsApplier) {
+        return registerItem(name, new Item(settingsApplier.apply(new Item.Settings()
+                .registryKey(RegistryKey.of(RegistryKeys.ITEM, Industria.id(name))))));
     }
 
     public static <T extends Item> T register(String name, Function<Item.Settings, T> constructor, Function<Item.Settings, Item.Settings> settingsApplier) {
@@ -67,4 +70,8 @@ public class ItemInit {
     }
 
     public static void init() {}
+
+    private static <T extends Item> T registerItem(String name, T item) {
+        return Registry.register(Registries.ITEM, Industria.id(name), item);
+    }
 }

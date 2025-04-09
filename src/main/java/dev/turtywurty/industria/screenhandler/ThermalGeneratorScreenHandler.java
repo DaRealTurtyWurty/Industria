@@ -10,8 +10,6 @@ import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
 
 public class ThermalGeneratorScreenHandler extends IndustriaScreenHandler<ThermalGeneratorBlockEntity, BlockPosPayload> {
     public ThermalGeneratorScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
@@ -31,33 +29,6 @@ public class ThermalGeneratorScreenHandler extends IndustriaScreenHandler<Therma
     protected void addBlockEntitySlots(PlayerInventory playerInventory) {
         addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(0), 0, 80, 35,
                 itemStack -> this.blockEntity.isValid(itemStack, 0)));
-    }
-
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
-        ItemStack stack = ItemStack.EMPTY;
-        Slot slotObject = this.slots.get(slot);
-
-        if (slotObject.hasStack()) {
-            ItemStack stackInSlot = slotObject.getStack();
-            stack = stackInSlot.copy();
-
-            if (slot < 0) {
-                if (!insertItem(stackInSlot, 0, this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (!insertItem(stackInSlot, 0, 0, false)) {
-                return ItemStack.EMPTY;
-            }
-
-            if (stackInSlot.isEmpty()) {
-                slotObject.setStack(ItemStack.EMPTY);
-            } else {
-                slotObject.markDirty();
-            }
-        }
-
-        return stack;
     }
 
     @Override

@@ -54,6 +54,12 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
         return test(stack, countLessThanOrEquals(stack.getCount()));
     }
 
+    public boolean testForRecipeIgnoreComponents(ItemStack stack) {
+        return this.entries.stream().anyMatch(item ->
+                stack.getItem() == item.value() &&
+                        this.stackData.count() >= stack.getCount());
+    }
+
     public boolean test(ItemStack stack, boolean matchCount, boolean matchComponents) {
         return this.entries.stream().anyMatch(item ->
                 stack.getItem() == item.value() &&

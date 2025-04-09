@@ -11,19 +11,22 @@ import team.reborn.energy.api.EnergyStorage;
 import java.util.function.Consumer;
 
 // TODO: Redo rendering of energy widget to make it look better
+// TODO: Add orientation options (horizontal, vertical, etc.)
 public class EnergyWidget implements Drawable, Widget {
     private final EnergyStorage energyStorage;
     private final int width, height;
     private int x, y;
     private int color;
+    private final Orientation orientation;
 
-    public EnergyWidget(EnergyStorage energyStorage, int x, int y, int width, int height, int color) {
+    public EnergyWidget(EnergyStorage energyStorage, int x, int y, int width, int height, int color, Orientation orientation) {
         this.energyStorage = energyStorage;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.color = color;
+        this.orientation = orientation;
     }
 
     @Override
@@ -32,10 +35,24 @@ public class EnergyWidget implements Drawable, Widget {
         long maxEnergy = this.energyStorage.getCapacity();
         long energy = Math.min(maxEnergy, Math.max(0, currentEnergy));
         float percentage = (float) energy / maxEnergy;
-        int fillHeight = (int) (this.height * percentage);
-        context.fill(x, y + this.height - fillHeight, x + width, y + this.height, color);
 
-        if (isPointWithinBounds(this.x, this.y + this.height - fillHeight, this.width, fillHeight, mouseX, mouseY)) {
+        int fillX, fillY, fillWidth, fillHeight;
+
+        if (orientation == Orientation.VERTICAL) {
+            fillHeight = (int) (this.height * percentage);
+            fillX = x;
+            fillY = y + this.height - fillHeight;
+            fillWidth = this.width;
+        } else { // HORIZONTAL
+            fillWidth = (int) (this.width * percentage);
+            fillX = x;
+            fillY = y;
+            fillHeight = this.height;
+        }
+
+        context.fill(fillX, fillY, fillX + fillWidth, fillY + fillHeight, color);
+
+        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
@@ -100,6 +117,7 @@ public class EnergyWidget implements Drawable, Widget {
         private int x, y;
         private int width, height;
         private int color;
+        private Orientation orientation = Orientation.VERTICAL;
 
         public Builder(EnergyStorage energyStorage) {
             this.energyStorage = energyStorage;
@@ -150,8 +168,18 @@ public class EnergyWidget implements Drawable, Widget {
             return this;
         }
 
-        public EnergyWidget build() {
-            return new EnergyWidget(energyStorage, x, y, width, height, color);
+        public Builder orientation(Orientation orientation) {
+            this.orientation = orientation;
+            return this;
         }
+
+        public EnergyWidget build() {
+            return new EnergyWidget(energyStorage, x, y, width, height, color, orientation);
+        }
+    }
+
+    public enum Orientation {
+        VERTICAL,
+        HORIZONTAL
     }
 }

@@ -20,3 +20,7 @@ accessible method net/minecraft/client/render/block/entity/BlockEntityRenderDisp
 mutable field net/minecraft/block/Block stateManager Lnet/minecraft/state/StateManager;
 accessible field net/minecraft/block/AbstractBlock$Settings luminance Ljava/util/function/ToIntFunction;
 accessible field net/minecraft/state/State propertyMap Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
+accessible method net/minecraft/client/gui/DrawContext drawSpriteTiled (Ljava/util/function/Function;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
+accessible method net/minecraft/client/gui/DrawContext drawSpriteNineSliced (Ljava/util/function/Function;Lnet/minecraft/client/texture/Sprite;Lnet/minecraft/client/texture/Scaling$NineSlice;IIIII)V
+accessible method net/minecraft/client/gui/DrawContext drawInnerSprite (Ljava/util/function/Function;Lnet/minecraft/client/texture/Scaling$NineSlice;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
+accessible method net/minecraft/client/gui/DrawContext drawTexturedQuad (Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIIIFFFFI)V

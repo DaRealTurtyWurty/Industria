@@ -9,9 +9,7 @@ import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
 public class DigesterScreenHandler extends IndustriaScreenHandler<DigesterBlockEntity, BlockPosPayload> {
@@ -37,36 +35,6 @@ public class DigesterScreenHandler extends IndustriaScreenHandler<DigesterBlockE
     @Override
     protected int getPlayerInventoryY() {
         return 92;
-    }
-
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
-        ItemStack stack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasStack()) {
-            return stack;
-        }
-
-        ItemStack stackInSlot = slot.getStack();
-        stack = stackInSlot.copy();
-
-        if (slotIndex < 2) {
-            if (!insertItem(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
-                if (!insertItem(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-        } else if (!insertItem(stackInSlot, 0, 2, false)) {
-            return ItemStack.EMPTY;
-        }
-
-        if (stackInSlot.isEmpty()) {
-            slot.setStack(ItemStack.EMPTY);
-        } else {
-            slot.markDirty();
-        }
-
-        return stack;
     }
 
     @Override

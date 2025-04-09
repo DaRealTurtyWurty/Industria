@@ -38,11 +38,6 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
     public boolean canUse(PlayerEntity player) {
         return canUse(this.context, player, BlockInit.ELECTRIC_FURNACE);
     }

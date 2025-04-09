@@ -135,7 +135,7 @@ public class BlockInit {
     public static final DigesterBlock DIGESTER = registerWithItemCopy("digester",
             DigesterBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
-    public static final MultiblockIOBlock MULTIBLOCK_IO = registerWithItemCopy("multiblock_io",
+    public static final MultiblockIOBlock MULTIBLOCK_IO = registerWithCopy("multiblock_io",
             MultiblockIOBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static final ClarifierBlock CLARIFIER = registerWithItemCopy("clarifier",
@@ -149,6 +149,9 @@ public class BlockInit {
 
     public static final RotaryKilnBlock ROTARY_KILN = registerWithCopy("rotary_kiln",
             RotaryKilnBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final ElectrolyzerBlock ELECTROLYZER = registerWithItemCopy("electrolyzer",
+            ElectrolyzerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(

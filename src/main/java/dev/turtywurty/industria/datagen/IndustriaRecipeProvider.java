@@ -3,12 +3,10 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.*;
-import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.FluidInit;
-import dev.turtywurty.industria.init.ItemInit;
-import dev.turtywurty.industria.init.SlurryInit;
+import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -19,16 +17,14 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.Blocks;
 import net.minecraft.data.server.recipe.RecipeExporter;
 import net.minecraft.data.server.recipe.RecipeGenerator;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.*;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
@@ -241,10 +237,20 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new OutputItemStack(ItemInit.SODIUM_CARBONATE, UniformIntProvider.create(8, 16), 0.75F),
                         false, 5, 1000, "aluminium_hydroxide");
 
-                offerRotaryKilnRecipe(exporter, RecipeCategory.MISC,
+                offerRotaryKilnRecipe(exporter,
                         new IndustriaIngredient(1, ItemInit.ALUMINIUM_HYDROXIDE),
                         new OutputItemStack(ItemInit.ALUMINA, 1, 1),
                         1200);
+
+                offerElectrolyzerRecipe(exporter,
+                        new IndustriaIngredient(3, ItemInit.ALUMINA),
+                        new IndustriaIngredient(1, ItemInit.CARBON_ROD),
+                        new IndustriaIngredient(1, Items.COAL),
+                        new IndustriaIngredient(9, ItemInit.CRYOLITE),
+                        new FluidStack(FluidVariant.of(FluidInit.MOLTEN_CRYOLITE.still()), FluidConstants.BUCKET),
+                        new FluidStack(FluidVariant.of(FluidInit.MOLTEN_ALUMINIUM.still()), FluidConstants.BUCKET * 2),
+                        new GasStack(GasInit.CARBON_DIOXIDE, FluidConstants.INGOT),
+                        2_000, 10_000, 1_000);
             }
         };
     }
@@ -277,8 +283,22 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
         new CrystallizerRecipeBuilder(waterFluid, crystalFluid, catalyst, output, byproduct, requiresCatalyst, catalystUses, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crystallizer_" + name)));
     }
 
-    private static void offerRotaryKilnRecipe(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient input, OutputItemStack output, int requiredTemperature) {
+    private static void offerRotaryKilnRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, int requiredTemperature) {
         new RotaryKilnRecipeBuilder(input, output, requiredTemperature).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("rotary_kiln_" + RecipeGenerator.getRecipeName(output.item()))));
+    }
+
+    private static void offerElectrolyzerRecipe(RecipeExporter exporter,
+                                                IndustriaIngredient input,
+                                                IndustriaIngredient anode, IndustriaIngredient cathode,
+                                                IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
+                                                FluidStack outputFluid, GasStack outputGas,
+                                                int processTime, int energyCost, int temperature) {
+        new ElectrolyzerRecipeBuilder(input, anode, cathode, electrolyteItem, electrolyteFluid, outputFluid, outputGas, processTime, energyCost, temperature)
+                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("electrolyzer_" + getRecipeName(outputFluid.variant().getFluid()))));
+    }
+
+    private static String getRecipeName(Fluid fluid) {
+        return Registries.FLUID.getId(fluid).getPath();
     }
 
     private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {

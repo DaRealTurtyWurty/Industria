@@ -105,6 +105,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(RotaryKilnBlockEntity::new, BlockInit.ROTARY_KILN)
                     .build());
 
+    public static final BlockEntityType<ElectrolyzerBlockEntity> ELECTROLYZER = register("electrolyzer",
+            FabricBlockEntityTypeBuilder.create(ElectrolyzerBlockEntity::new, BlockInit.ELECTROLYZER)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

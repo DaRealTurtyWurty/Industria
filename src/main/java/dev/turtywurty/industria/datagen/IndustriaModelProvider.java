@@ -32,6 +32,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL.block());
         blockStateModelGenerator.registerSimpleState(FluidInit.DIRTY_SODIUM_ALUMINATE.block());
         blockStateModelGenerator.registerSimpleState(FluidInit.SODIUM_ALUMINATE.block());
+        blockStateModelGenerator.registerSimpleState(FluidInit.MOLTEN_ALUMINIUM.block());
+        blockStateModelGenerator.registerSimpleState(FluidInit.MOLTEN_CRYOLITE.block());
         blockStateModelGenerator.registerSimpleState(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
         blockStateModelGenerator.registerCooker(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE);
@@ -123,6 +125,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.register(FluidInit.CRUDE_OIL.bucket(), Models.GENERATED);
         itemModelGenerator.register(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), Models.GENERATED);
         itemModelGenerator.register(FluidInit.SODIUM_ALUMINATE.bucket(), Models.GENERATED);
+        itemModelGenerator.register(FluidInit.MOLTEN_ALUMINIUM.bucket(), Models.GENERATED);
+        itemModelGenerator.register(FluidInit.MOLTEN_CRYOLITE.bucket(), Models.GENERATED);
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
@@ -200,6 +204,13 @@ public class IndustriaModelProvider extends FabricModelProvider {
                             displaySettings.setScale(0.1375f, 0.1375f, 0.1375f);
                         }));
 
+        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.ELECTROLYZER,
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
+
         itemModelGenerator.register(ItemInit.ALUMINIUM_INGOT, Models.GENERATED);
         itemModelGenerator.register(ItemInit.TIN_INGOT, Models.GENERATED);
         itemModelGenerator.register(ItemInit.ZINC_INGOT, Models.GENERATED);
@@ -215,6 +226,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ItemInit.ALUMINIUM_HYDROXIDE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.SODIUM_CARBONATE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.ALUMINA, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.CRYOLITE, Models.GENERATED);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

@@ -2,6 +2,8 @@ package dev.turtywurty.industria.multiblock;
 
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
+import dev.turtywurty.gasapi.api.GasVariant;
+import dev.turtywurty.gasapi.api.storage.GasStorage;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.util.TransferUtils;
@@ -81,8 +83,16 @@ public class TransferType<S, V, A extends Number> {
                     SlurryVariant::isBlank,
                     Storage::supportsInsertion, Storage::supportsExtraction);
 
+    public static final TransferType<Storage<GasVariant>, GasVariant, Long> GAS =
+            new TransferType<>("gas", GasStorage.SIDED, GasStorage.ITEM, Storage::insert, Storage::extract,
+                    storage -> TransferUtils.findFirstVariant(storage, null)
+                            .orElse(GasVariant.blank()),
+                    Long.MAX_VALUE,
+                    aDouble -> (long) Math.ceil(aDouble),
+                    GasVariant::isBlank,
+                    Storage::supportsInsertion, Storage::supportsExtraction);
+
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
-    //public static final TransferType<?> GAS = new TransferType<>(null, null);
 
     public static List<TransferType<?, ?, ?>> getValues() {
         return List.copyOf(VALUES);

@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -20,14 +21,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedStorage<InventoryStorage> {
     private final List<T> inventories = new ArrayList<>();
-    private final Map<Direction, T> sidedInventories = new HashMap<>();
+    private final List<Pair<Direction, T>> sidedInventories = new ArrayList<>();
     private final CombinedStorage<ItemVariant, InventoryStorage> combinedStorage = new CombinedStorage<>(this.storages);
 
     public void addInventory(@NotNull T inventory) {
@@ -36,7 +35,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
-        this.sidedInventories.put(side, inventory);
+        this.sidedInventories.add(new Pair<>(side, inventory));
         var storage = InventoryStorage.of(inventory, side);
         addStorage(storage, side);
     }
@@ -63,6 +62,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     public void addInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canInsert, Supplier<Boolean> canExtract) {
         this.inventories.add(inventory);
+        this.sidedInventories.add(new Pair<>(side, inventory));
         var storage = PredicateInventoryStorage.of(InventoryStorage.of(inventory, side), canInsert, canExtract);
         addStorage(storage, side);
     }
@@ -121,7 +121,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
         return new RecipeSimpleInventory(getStacks().toArray(new ItemStack[0]));
     }
 
-    public Map<Direction, T> getSidedInventories() {
+    public List<Pair<Direction, T>> getSidedInventories() {
         return this.sidedInventories;
     }
 
@@ -143,6 +143,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
             SimpleInventory inventory = this.inventories.get(index);
             Inventories.readNbt(inventoryNbt, inventory.getHeldStacks(), registryLookup);
+
         }
     }
 }

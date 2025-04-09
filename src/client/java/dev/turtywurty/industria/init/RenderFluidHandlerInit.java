@@ -14,5 +14,11 @@ public class RenderFluidHandlerInit {
 
         FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.SODIUM_ALUMINATE.still(), FluidInit.SODIUM_ALUMINATE.flowing(),
                 new SimpleFluidRenderHandler(Industria.id("block/sodium_aluminate_still"), Industria.id("block/sodium_aluminate_flow")));
+
+        FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.MOLTEN_ALUMINIUM.still(), FluidInit.MOLTEN_ALUMINIUM.flowing(),
+                new SimpleFluidRenderHandler(Industria.id("block/molten_aluminium_still"), Industria.id("block/molten_aluminium_flow")));
+
+        FluidRenderHandlerRegistry.INSTANCE.register(FluidInit.MOLTEN_CRYOLITE.still(), FluidInit.MOLTEN_CRYOLITE.flowing(),
+                new SimpleFluidRenderHandler(Industria.id("block/molten_cryolite_still"), Industria.id("block/molten_cryolite_flow")));
     }
 }

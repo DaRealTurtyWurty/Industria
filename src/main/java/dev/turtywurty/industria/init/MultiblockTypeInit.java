@@ -90,6 +90,17 @@ public class MultiblockTypeInit {
                         }
                     }));
 
+    public static final MultiblockType<ElectrolyzerBlockEntity> ELECTROLYZER = register("electrolyzer",
+            new MultiblockType.Builder<ElectrolyzerBlockEntity>(11) // 3x2x2
+                    .setHasDirectionProperty(true)
+                    .shapes(ElectrolyzerBlock.VOXEL_SHAPE)
+                    .setOnMultiblockBreak((world, pos) -> {
+                        if (world.getBlockEntity(pos) instanceof ElectrolyzerBlockEntity blockEntity) {
+                            blockEntity.breakMultiblock(world, pos);
+                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
+                        }
+                    }));
+
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }

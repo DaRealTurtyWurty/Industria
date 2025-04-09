@@ -24,5 +24,6 @@ public class ScreenInit {
         HandledScreens.register(ScreenHandlerTypeInit.DIGESTER, DigesterScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.CLARIFIER, ClarifierScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.CRYSTALLIZER, CrystallizerScreen::new);
+        HandledScreens.register(ScreenHandlerTypeInit.ELECTROLYZER, ElectrolyzerScreen::new);
     }
 }

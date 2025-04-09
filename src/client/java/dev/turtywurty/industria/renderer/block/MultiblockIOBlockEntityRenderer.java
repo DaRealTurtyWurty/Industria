@@ -91,6 +91,8 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
             return new float[]{139/255F, 69/255F, 19/255F};
         } else if (type == TransferType.HEAT) {
             return new float[]{1.0F, 127/255F, 80/255F};
+        } else if (type == TransferType.GAS) {
+            return new float[]{58/255F, 159/255F, 2/255F};
         }
 
         throw new IllegalStateException("Unexpected value: " + type);

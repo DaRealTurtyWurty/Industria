@@ -1,0 +1,42 @@
+{
+  "type": "industria:electrolyzer",
+  "anode": {
+    "ingredients": "industria:carbon_rod"
+  },
+  "cathode": {
+    "ingredients": "minecraft:coal"
+  },
+  "electrolyte_fluid": {
+    "amount": 81000,
+    "variant": {
+      "fluid": "industria:molten_cryolite"
+    }
+  },
+  "electrolyte_item": {
+    "data": {
+      "count": 9
+    },
+    "ingredients": "industria:cryolite"
+  },
+  "energy_cost": 10000,
+  "input": {
+    "data": {
+      "count": 3
+    },
+    "ingredients": "industria:alumina"
+  },
+  "output_fluid": {
+    "amount": 162000,
+    "variant": {
+      "fluid": "industria:molten_aluminium"
+    }
+  },
+  "output_gas": {
+    "amount": 9000,
+    "variant": {
+      "gas": "industria:carbon_dioxide"
+    }
+  },
+  "process_time": 2000,
+  "temperature": 1000
+}

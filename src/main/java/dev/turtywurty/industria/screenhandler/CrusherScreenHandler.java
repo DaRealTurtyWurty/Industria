@@ -9,7 +9,6 @@ import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
@@ -34,32 +33,6 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
         addSlot(new Slot(wrappedStorage.getInventory(CrusherBlockEntity.INPUT_SLOT), 0, 44, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 0, 98, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 1, 116, 35));
-    }
-
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
-        ItemStack itemStack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(slotIndex);
-
-        if(slot.hasStack()) {
-            ItemStack slotStack = slot.getStack().copy();
-
-            if(slotIndex < 3) {
-                if(!insertItem(slotStack, 3, this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (!insertItem(slotStack, 0, 3, false)) {
-                return ItemStack.EMPTY;
-            }
-
-            if(slotStack.isEmpty()) {
-                slot.setStack(ItemStack.EMPTY);
-            } else {
-                slot.markDirty();
-            }
-        }
-
-        return itemStack;
     }
 
     @Override

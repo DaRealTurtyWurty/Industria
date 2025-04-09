@@ -124,6 +124,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.ROTARY_KILN_CONTROLLER, "Rotary Kiln Controller");
         translationBuilder.add(BlockInit.ROTARY_KILN, "Rotary Kiln");
 
+        translationBuilder.add(BlockInit.ELECTROLYZER, "Electrolyzer");
+        addText(translationBuilder, ElectrolyzerBlockEntity.TITLE, "Electrolyzer");
+
         translationBuilder.add(ItemInit.RED_MUD, "Red Mud");
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");
@@ -131,10 +134,16 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), "Bucket of Dirty Sodium Aluminate");
         translationBuilder.add(FluidInit.SODIUM_ALUMINATE.block(), "Sodium Aluminate");
         translationBuilder.add(FluidInit.SODIUM_ALUMINATE.bucket(), "Bucket of Sodium Aluminate");
+        translationBuilder.add(FluidInit.MOLTEN_ALUMINIUM.block(), "Molten Aluminium");
+        translationBuilder.add(FluidInit.MOLTEN_ALUMINIUM.bucket(), "Bucket of Molten Aluminium");
+        translationBuilder.add(FluidInit.MOLTEN_CRYOLITE.block(), "Molten Cryolite");
+        translationBuilder.add(FluidInit.MOLTEN_CRYOLITE.bucket(), "Bucket of Molten Cryolite");
         translationBuilder.add(ItemInit.ALUMINIUM_HYDROXIDE, "Aluminium Hydroxide");
         translationBuilder.add(ItemInit.SODIUM_CARBONATE, "Sodium Carbonate");
         translationBuilder.add(ItemInit.ALUMINA, "Alumina");
         translationBuilder.add(ItemInit.ROTARY_KILN, "Rotary Kiln");
+        translationBuilder.add(ItemInit.CRYOLITE, "Cryolite");
+        translationBuilder.add(ItemInit.CARBON_ROD, "Carbon Rod");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

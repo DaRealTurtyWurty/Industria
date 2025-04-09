@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -59,42 +58,6 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
         for (int index = 0; index < 3; index++) {
             addSlot(new PredicateSlot(placeableBlockInventory, index, 62 + index * 18, 17));
         }
-    }
-
-    // TODO: Rewrite this
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
-        ItemStack newStack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(slotIndex);
-
-        if (slot.hasStack()) {
-            ItemStack originalStack = slot.getStack();
-            newStack = originalStack.copy();
-
-            int blockEntitySlotCount = 14; // Total block entity slots
-            int playerHotbarStart = blockEntitySlotCount + 27;
-            int playerHotbarEnd = playerHotbarStart + 9;
-
-            if (slotIndex < blockEntitySlotCount) {
-                // Move from Block Entity to Player Inventory
-                if (!insertItem(originalStack, blockEntitySlotCount, playerHotbarEnd, true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else {
-                // Move from Player Inventory to Block Entity
-                if (!insertItem(originalStack, 0, blockEntitySlotCount, false)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-
-            if (originalStack.isEmpty()) {
-                slot.setStack(ItemStack.EMPTY);
-            } else {
-                slot.markDirty();
-            }
-        }
-
-        return newStack;
     }
 
     @Override

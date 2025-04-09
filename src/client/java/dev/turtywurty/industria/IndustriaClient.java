@@ -13,6 +13,7 @@ public class IndustriaClient implements ClientModInitializer {
         DynamicItemRendererInit.init();
         RenderFluidHandlerInit.init();
         SlurryRenderHandlerInit.init();
+        GasRenderHandlerInit.init();
         RenderLayerMapInit.init();
         ClientPacketsInit.init();
         ClientEventsInit.init();

@@ -1,4 +1,4 @@
-// 1.21.3	2025-04-02T20:34:09.2895772	Industria/Industria Recipe Provider
+// 1.21.3	2025-04-07T18:01:01.0605294	Industria/Industria Recipe Provider
 2b9f866a766702035a7c2b65e31bce35477f24b4 data\industria\recipe\zinc_ingot_from_blasting_deepslate_zinc_ore.json
 a7207aa458dece23c60cf2b0cda7d3ab7feec636 data\industria\recipe\aluminium_ingot_from_smelting_bauxite_ore.json
 6dbe8aee542d5592f843dc9f75f23da99a203ac2 data\industria\advancement\recipes\misc\mixer_bauxite_to_bauxite_slurry.json
@@ -46,6 +46,7 @@ c781dcf34660a7cbf2a5f49341c1c22b24a08cd7 data\industria\recipe\zinc_ingot.json
 953a1fdd36b122e78759c45bf5f53dcbfbec6c92 data\industria\advancement\recipes\misc\raw_bauxite.json
 6135fb55853cc57f83f84c485bb25acbe99328eb data\industria\advancement\recipes\misc\crusher_redstone_ore.json
 53808e887bc72a1969debd939b511d3cc3ebb05b data\industria\recipe\tin_ingot.json
+145295307b864049b32ccb61f9d04e5def93ecaa data\industria\recipe\electrolyzer_molten_aluminium.json
 8cfddb15930e4d624b00f51d40334a6c90c81d04 data\industria\advancement\recipes\misc\crusher_nether_gold_ore.json
 e218d66a0bd865cafafe0a3698a670f4d6b40971 data\industria\recipe\crusher_sand.json
 3e421634061cd774f9ef66a21e58cd4e1b2109bd data\industria\recipe\tin_ingot_from_blasting_tin_ore.json
@@ -76,8 +77,8 @@ e96c75e0e8deabb4cd59ac496266839beebbb345 data\industria\advancement\recipes\misc
 3316c93c6e6064f4ff7f19799ac9a13d352155cc data\industria\advancement\recipes\misc\aluminium_ingot_to_nugget.json
 1166bd130c5a11c9e76389d12755fe3b21ace070 data\industria\advancement\recipes\misc\tin_nugget_to_ingot.json
 98ae391979f53e417da3e92f20fd2016d7743499 data\industria\recipe\raw_tin_block.json
-e9471e606249c956c6cd080f15c9833070f3a5b2 data\industria\recipe\raw_bauxite_block.json
 46d1fc0a33eb220b2476a99f210a862dc794c704 data\industria\recipe\raw_zinc.json
+e9471e606249c956c6cd080f15c9833070f3a5b2 data\industria\recipe\raw_bauxite_block.json
 c1e63c73cf9e0f0747064a0c278680e0687e6fea data\industria\recipe\crusher_coal_ore.json
 3d255ecefcefcd2a92915ca2b4acd6abd5e5b570 data\industria\recipe\aluminium_ingot_from_blasting_bauxite_ore.json
 c9cbc7d15fb189452df5c0ff60d65d653f0dce97 data\industria\advancement\recipes\misc\zinc_ingot_from_smelting_raw_zinc.json

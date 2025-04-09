@@ -12,6 +12,7 @@ import net.minecraft.registry.tag.TagKey;
 public class TagList {
     public static class Items {
         public static final TagKey<Item> STEEL_INGOTS = TagRegistration.ITEM_TAG.registerC("ingots/steel");
+        public static final TagKey<Item> ELECTROLYSIS_RODS = TagKey.of(RegistryKeys.ITEM, Industria.id("electrolysis_rods"));
     }
 
     public static class Blocks {

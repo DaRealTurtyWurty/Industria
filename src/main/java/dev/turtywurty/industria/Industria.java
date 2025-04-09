@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
+import dev.turtywurty.gasapi.api.GasVariantAttributes;
+import dev.turtywurty.gasapi.api.storage.GasStorage;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.*;
@@ -55,6 +57,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 // TODO: Use ServerRecipeManager.createCachedMatchGetter
 // TODO: Test all the mixins to see what i broke lol
+// TODO: Add maintainence modes to machines to let you replace certain components
 public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -91,6 +94,7 @@ public class Industria implements ModInitializer {
         RecipeBookCategoryInit.init();
         MultiblockTypeInit.init();
         SlurryInit.init();
+        GasInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
@@ -146,6 +150,12 @@ public class Industria implements ModInitializer {
         FluidStorage.SIDED.registerForBlockEntity(CrystallizerBlockEntity::getFluidProvider, BlockEntityTypeInit.CRYSTALLIZER);
 
         ItemStorage.SIDED.registerForBlockEntity(RotaryKilnControllerBlockEntity::getInventoryProvider, BlockEntityTypeInit.ROTARY_KILN_CONTROLLER);
+
+        ItemStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTROLYZER);
+        FluidStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getFluidProvider, BlockEntityTypeInit.ELECTROLYZER);
+        EnergyStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTROLYZER);
+        GasStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getGasProvider, BlockEntityTypeInit.ELECTROLYZER);
+        HeatStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getHeatProvider, BlockEntityTypeInit.ELECTROLYZER);
 
         for (TransferType<?, ?, ?> transferType : TransferType.getValues()) {
             transferType.registerForMultiblockIo();
@@ -320,6 +330,21 @@ public class Industria implements ModInitializer {
 
         FluidData.registerFluidData(FluidInit.SODIUM_ALUMINATE.still(), commonFluidData);
         FluidData.registerFluidData(FluidInit.SODIUM_ALUMINATE.flowing(), commonFluidData);
+
+        FluidData.registerFluidData(FluidInit.MOLTEN_ALUMINIUM.still(), commonFluidData);
+        FluidData.registerFluidData(FluidInit.MOLTEN_ALUMINIUM.flowing(), commonFluidData);
+
+        FluidData.registerFluidData(FluidInit.MOLTEN_CRYOLITE.still(), commonFluidData);
+        FluidData.registerFluidData(FluidInit.MOLTEN_CRYOLITE.flowing(), commonFluidData);
+
+        Text oxygenText = Text.translatable("gas." + Industria.MOD_ID + ".oxygen");
+        GasVariantAttributes.register(GasInit.OXYGEN, gasVariant -> oxygenText);
+        Text hydrogenText = Text.translatable("gas." + Industria.MOD_ID + ".hydrogen");
+        GasVariantAttributes.register(GasInit.HYDROGEN, gasVariant -> hydrogenText);
+        Text carbonDioxideText = Text.translatable("gas." + Industria.MOD_ID + ".carbon_dioxide");
+        GasVariantAttributes.register(GasInit.CARBON_DIOXIDE, gasVariant -> carbonDioxideText);
+        Text methaneText = Text.translatable("gas." + Industria.MOD_ID + ".methane");
+        GasVariantAttributes.register(GasInit.METHANE, gasVariant -> methaneText);
 
         LOGGER.info("Industria has finished loading!");
     }

@@ -242,6 +242,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
             SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
             if (outputSlurryTank.canInsert(this.outputSlurryStack)) {
                 long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
+                outputSlurryTank.variant = this.outputSlurryStack.variant();
                 outputSlurryTank.amount += inserted;
                 this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
                 update();

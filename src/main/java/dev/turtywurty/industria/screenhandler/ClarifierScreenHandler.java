@@ -10,9 +10,7 @@ import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
 
 public class ClarifierScreenHandler extends IndustriaScreenHandler<ClarifierBlockEntity, BlockPosPayload> {
@@ -22,8 +20,6 @@ public class ClarifierScreenHandler extends IndustriaScreenHandler<ClarifierBloc
 
     public ClarifierScreenHandler(int syncId, PlayerInventory playerInv, ClarifierBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
         super(ScreenHandlerTypeInit.CLARIFIER, syncId, playerInv, blockEntity, wrappedInventoryStorage, properties);
-
-        addPlayerSlots(playerInv, 8, 92);
     }
 
     @Override
@@ -40,36 +36,6 @@ public class ClarifierScreenHandler extends IndustriaScreenHandler<ClarifierBloc
     protected void addBlockEntitySlots(PlayerInventory playerInventory) {
         SimpleInventory inventory = this.wrappedInventoryStorage.getInventory(0);
         addSlot(new OutputSlot(inventory, 0, 134,60));
-    }
-
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
-        ItemStack stack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasStack()) {
-            return stack;
-        }
-
-        ItemStack stackInSlot = slot.getStack();
-        stack = stackInSlot.copy();
-
-        if (slotIndex == 0) {
-            if (!insertItem(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
-                if (!insertItem(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-        } else if (!insertItem(stackInSlot, 0, 0, false)) {
-            return ItemStack.EMPTY;
-        }
-
-        if (stackInSlot.isEmpty()) {
-            slot.setStack(ItemStack.EMPTY);
-        } else {
-            slot.markDirty();
-        }
-
-        return stack;
     }
 
     @Override

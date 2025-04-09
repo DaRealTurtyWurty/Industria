@@ -10,8 +10,6 @@ import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.MathHelper;
@@ -38,35 +36,6 @@ public class AlloyFurnaceScreenHandler extends IndustriaScreenHandler<AlloyFurna
     @Override
     protected int getInventorySize() {
         return 4;
-    }
-
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
-        ItemStack stack = ItemStack.EMPTY;
-        Slot slotObject = this.slots.get(slot);
-
-        SimpleInventory inputInventory = this.blockEntity.getInventory();
-
-        if (slotObject.hasStack()) {
-            ItemStack stackInSlot = slotObject.getStack();
-            stack = stackInSlot.copy();
-
-            if (slot < inputInventory.size()) {
-                if (!insertItem(stackInSlot, inputInventory.size(), this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (!insertItem(stackInSlot, 0, inputInventory.size(), false)) {
-                return ItemStack.EMPTY;
-            }
-
-            if (stackInSlot.isEmpty()) {
-                slotObject.setStack(ItemStack.EMPTY);
-            } else {
-                slotObject.markDirty();
-            }
-        }
-
-        return stack;
     }
 
     @Override

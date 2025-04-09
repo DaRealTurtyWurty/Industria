@@ -4,13 +4,17 @@ import dev.turtywurty.industria.blockentity.util.inventory.ClientWrappedInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorageHolder;
 import dev.turtywurty.industria.network.HasPositionPayload;
+import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.*;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -53,10 +57,43 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
         this.blockEntity = blockEntity;
         this.wrappedInventoryStorage = wrappedInventoryStorage;
         this.wrappedInventoryStorage.checkSize(getInventorySize());
-        this.wrappedInventoryStorage.onOpen(playerInventory.player);
 
-        addPlayerSlots(playerInventory, getPlayerInventoryX(), getPlayerInventoryY());
         addBlockEntitySlots(playerInventory);
+        addPlayerSlots(playerInventory, getPlayerInventoryX(), getPlayerInventoryY());
+
+        this.wrappedInventoryStorage.onOpen(playerInventory.player);
+    }
+
+    @Override
+    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+        ItemStack stack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(slotIndex);
+        if (!slot.hasStack()) {
+            return stack;
+        }
+
+        ItemStack stackInSlot = slot.getStack();
+        stack = stackInSlot.copy();
+
+        if (slotIndex < getInventorySize()) {
+            if (!insertItem(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
+                if (!insertItem(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+        } else {
+            if (!insertItem(stackInSlot, 0, getInventorySize(), false)) {
+                return ItemStack.EMPTY;
+            }
+        }
+
+        if (stackInSlot.isEmpty()) {
+            slot.setStack(ItemStack.EMPTY);
+        } else {
+            slot.markDirty();
+        }
+
+        return stack;
     }
 
     @Override
@@ -65,18 +102,37 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
         this.wrappedInventoryStorage.onClose(player);
     }
 
+    @Override
+    public boolean canUse(PlayerEntity player) {
+        boolean validBlock = false;
+        for (Block block : getValidBlocks()) {
+            if (canUse(this.context, player, block)) {
+                validBlock = true;
+                break;
+            }
+        }
+
+        return validBlock;
+    }
+
     public T getBlockEntity() {
         return this.blockEntity;
+    }
+
+    protected List<Block> getValidBlocks() {
+        return List.of();
     }
 
     protected int getPlayerInventoryX() {
         return 8;
     }
+
     protected int getPlayerInventoryY() {
         return 84;
     }
 
     protected abstract int getInventorySize();
+
     protected abstract void addBlockEntitySlots(PlayerInventory playerInventory);
 
     public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedInventoryStorageHolder> implements BiFunction<PlayerInventory, BlockPos, T> {

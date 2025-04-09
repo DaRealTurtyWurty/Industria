@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.screen.widget;
 
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -19,6 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -59,7 +61,7 @@ public class FluidWidget implements Drawable, Widget {
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
         float blue = (tintColor & 0xFF) / 255.0F;
-        context.drawSpriteStretched(RenderLayer::getGuiTextured, stillTexture, this.x, this.y + this.height - fluidBarHeight, this.width, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+        ScreenUtils.renderTiledSprite(context, RenderLayer::getGuiTextured, stillTexture, this.x, this.y + this.height - fluidBarHeight, this.width, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
 
         if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
@@ -74,8 +76,10 @@ public class FluidWidget implements Drawable, Widget {
 
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
         if (fluid != null && fluidAmount > 0) {
-            context.drawTooltip(textRenderer, Text.translatable(fluid.getDefaultState().getBlockState().getBlock().getTranslationKey()), mouseX, mouseY);
-            context.drawTooltip(textRenderer, Text.literal(((int) (((float) fluidAmount / FluidConstants.BUCKET) * 1000)) + " / " + ((int) (((float) fluidCapacity / FluidConstants.BUCKET) * 1000)) + " mB"), mouseX, mouseY + 10);
+            List<Text> texts = List.of(
+                    Text.translatable(fluid.getDefaultState().getBlockState().getBlock().getTranslationKey()),
+                    Text.literal(((int) (((float) fluidAmount / FluidConstants.BUCKET) * 1000)) + " / " + ((int) (((float) fluidCapacity / FluidConstants.BUCKET) * 1000)) + " mB"));
+            context.drawTooltip(textRenderer, texts, mouseX, mouseY);
         }
     }
 
