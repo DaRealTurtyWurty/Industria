@@ -77,6 +77,6 @@ public abstract class AbstractBoatEntityMixin extends VehicleEntity {
 
         return FluidData.FLUID_DATA.values().stream()
                 .filter(FluidData::canBoatsWork)
-                .noneMatch(data -> isSubmergedIn(data.fluidTag()));
+                .anyMatch(data -> isSubmergedIn(data.fluidTag()));
     }
 }

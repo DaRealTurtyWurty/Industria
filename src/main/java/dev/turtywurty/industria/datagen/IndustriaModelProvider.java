@@ -7,6 +7,7 @@ import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.block.Block;
@@ -19,6 +20,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
+        for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
+            woodSet.generateBlockStateAndModels(blockStateModelGenerator);
+        }
+
         blockStateModelGenerator.registerCooker(BlockInit.ALLOY_FURNACE, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerCooker(BlockInit.THERMAL_GENERATOR, TexturedModel.ORIENTABLE);
         createBattery(blockStateModelGenerator, BlockInit.BASIC_BATTERY);
@@ -121,6 +126,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
+        for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
+            woodSet.generateItemModels(itemModelGenerator);
+        }
+
         itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
         itemModelGenerator.register(FluidInit.CRUDE_OIL.bucket(), Models.GENERATED);
         itemModelGenerator.register(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), Models.GENERATED);

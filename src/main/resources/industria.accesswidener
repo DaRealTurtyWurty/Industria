@@ -24,3 +24,4 @@ accessible method net/minecraft/client/gui/DrawContext drawSpriteTiled (Ljava/ut
 accessible method net/minecraft/client/gui/DrawContext drawSpriteNineSliced (Ljava/util/function/Function;Lnet/minecraft/client/texture/Sprite;Lnet/minecraft/client/texture/Scaling$NineSlice;IIIII)V
 accessible method net/minecraft/client/gui/DrawContext drawInnerSprite (Ljava/util/function/Function;Lnet/minecraft/client/texture/Scaling$NineSlice;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
 accessible method net/minecraft/client/gui/DrawContext drawTexturedQuad (Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
+accessible field net/minecraft/data/server/loottable/BlockLootTableGenerator SAPLING_DROP_CHANCE [F

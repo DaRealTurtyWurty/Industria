@@ -21,5 +21,7 @@ public class IndustriaClient implements ClientModInitializer {
         ArmPositionInit.init();
         DrillHeadInit.init();
         DebugRenderingRegistry.init();
+        EntityRendererInit.init();
+        ColorProviderInit.init();
     }
 }

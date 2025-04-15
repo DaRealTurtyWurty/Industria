@@ -9,6 +9,7 @@ import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
+import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
@@ -45,6 +46,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
             @Override
             public void generate() {
                 RegistryEntryLookup<Item> itemLookup = wrapperLookup.getOrThrow(RegistryKeys.ITEM);
+
+                for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
+                    woodSet.generateRecipes(this, exporter, itemLookup);
+                }
+
                 createShaped(RecipeCategory.MISC, BlockInit.ALLOY_FURNACE)
                         .pattern("AAA")
                         .pattern("ABA")
@@ -297,11 +303,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("electrolyzer_" + getRecipeName(outputFluid.variant().getFluid()))));
     }
 
-    private static String getRecipeName(Fluid fluid) {
+    public static String getRecipeName(Fluid fluid) {
         return Registries.FLUID.getId(fluid).getPath();
     }
 
-    private static @NotNull String hasTag(@NotNull TagKey<Item> tag) {
+    public static @NotNull String hasTag(@NotNull TagKey<Item> tag) {
         return "has_" + tag.id().toString();
     }
 

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_rubber_planks": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:rubber_planks"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "industria:rubber_boat"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_rubber_planks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:rubber_boat"
+    ]
+  }
+}

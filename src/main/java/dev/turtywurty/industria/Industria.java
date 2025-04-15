@@ -17,6 +17,7 @@ import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.init.worldgen.FeatureInit;
+import dev.turtywurty.industria.init.worldgen.TrunkPlacerTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
@@ -95,6 +96,8 @@ public class Industria implements ModInitializer {
         MultiblockTypeInit.init();
         SlurryInit.init();
         GasInit.init();
+        WoodSetInit.init();
+        TrunkPlacerTypeInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 

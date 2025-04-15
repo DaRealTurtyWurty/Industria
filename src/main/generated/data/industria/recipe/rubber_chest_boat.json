@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#industria:rubber_logs",
+    "#c:chests/wooden"
+  ],
+  "result": {
+    "count": 1,
+    "id": "industria:rubber_chest_boat"
+  }
+}

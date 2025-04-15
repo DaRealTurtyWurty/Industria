@@ -153,16 +153,28 @@ public class BlockInit {
     public static final ElectrolyzerBlock ELECTROLYZER = registerWithItemCopy("electrolyzer",
             ElectrolyzerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor) {
+        return register(name, constructor, settings -> settings);
+    }
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()
                         .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
     }
 
+    public static <T extends Block> T registerWithCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy) {
+        return registerWithCopy(name, constructor, toCopy, settings -> settings);
+    }
+
     public static <T extends Block> T registerWithCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.copy(toCopy)
                         .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
+    }
+
+    public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy) {
+        return registerWithItemCopy(name, constructor, toCopy, settings -> settings);
     }
 
     public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {

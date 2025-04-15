@@ -3,6 +3,7 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
+import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
@@ -24,6 +25,10 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder translationBuilder) {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
+
+        for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
+            woodSet.generateEnglishLanguage(translationBuilder);
+        }
 
         translationBuilder.add(BlockInit.ALLOY_FURNACE, "Alloy Furnace");
         addText(translationBuilder, AlloyFurnaceBlockEntity.TITLE, "Alloy Furnace");

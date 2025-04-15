@@ -22,6 +22,7 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		pack.addProvider(IndustriaBlockTagProvider::new);
 		pack.addProvider(IndustriaItemTagProvider::new);
 		pack.addProvider(IndustriaFluidTagProvider::new);
+		pack.addProvider(IndustriaEntityTypeTagProvider::new);
 		pack.addProvider(IndustriaWorldGenerator::new);
 		pack.addProvider(IndustriaDamageTypeGenerator::new);
 	}

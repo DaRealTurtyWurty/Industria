@@ -2,6 +2,7 @@ package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.list.TagList;
+import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.registry.RegistryWrapper;
@@ -15,6 +16,10 @@ public class IndustriaBlockTagProvider extends FabricTagProvider.BlockTagProvide
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
+        for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
+            woodSet.generateBlockTags(this);
+        }
+
         getOrCreateTagBuilder(TagList.Blocks.BATTERY_BLOCKS)
                 .add(BlockInit.BASIC_BATTERY)
                 .add(BlockInit.ADVANCED_BATTERY)

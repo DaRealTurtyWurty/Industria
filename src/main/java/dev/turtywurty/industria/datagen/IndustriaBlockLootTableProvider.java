@@ -2,6 +2,7 @@ package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.registry.RegistryWrapper;
@@ -15,6 +16,10 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
 
     @Override
     public void generate() {
+        for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
+            woodSet.generateBlockLootTables(this);
+        }
+
         addDrop(BlockInit.ALLOY_FURNACE);
         addDrop(BlockInit.THERMAL_GENERATOR);
         addDrop(BlockInit.BASIC_BATTERY);

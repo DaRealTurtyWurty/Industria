@@ -22,5 +22,10 @@ public class BiomeModificationInit {
         BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                 GenerationStep.Feature.UNDERGROUND_ORES,
                 PlacedFeatureInit.ZINC_ORE);
+
+        BiomeModifications.addFeature(
+                BiomeSelectors.foundInOverworld().and(BiomeSelectors.includeByKey(BiomeKeys.JUNGLE)),
+                GenerationStep.Feature.VEGETAL_DECORATION,
+                PlacedFeatureInit.RUBBER_TREE);
     }
 }
