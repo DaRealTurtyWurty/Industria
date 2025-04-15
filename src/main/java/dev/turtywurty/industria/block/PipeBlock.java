@@ -50,8 +50,8 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
 
     protected final VoxelShape[] pipeShapes = new VoxelShape[Direction.values().length];
     protected final VoxelShape[] blockConnectorShapes = new VoxelShape[Direction.values().length];
-
-    protected final VoxelShape[] shapeCache = new VoxelShape[ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length];
+    
+    protected final VoxelShape[] shapeCache = new VoxelShape[(int) Math.pow(ConnectorType.VALUES.length, 6)];
 
     private final TransferType<S, ?, A> transferType;
     private final PipeNetworkManager<S, N> networkManager;
