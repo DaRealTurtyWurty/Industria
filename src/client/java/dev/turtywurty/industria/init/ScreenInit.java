@@ -25,5 +25,6 @@ public class ScreenInit {
         HandledScreens.register(ScreenHandlerTypeInit.CLARIFIER, ClarifierScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.CRYSTALLIZER, CrystallizerScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.ELECTROLYZER, ElectrolyzerScreen::new);
+        HandledScreens.register(ScreenHandlerTypeInit.FLUID_TANK, FluidTankScreen::new);
     }
 }

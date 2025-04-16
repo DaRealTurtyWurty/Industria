@@ -11,6 +11,8 @@ public class RenderLayerMapInit {
                 FluidInit.DIRTY_SODIUM_ALUMINATE.still(), FluidInit.DIRTY_SODIUM_ALUMINATE.flowing(),
                 FluidInit.SODIUM_ALUMINATE.still(), FluidInit.SODIUM_ALUMINATE.flowing());
 
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BlockInit.FLUID_TANK);
+
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(),
                     woodSet.door,

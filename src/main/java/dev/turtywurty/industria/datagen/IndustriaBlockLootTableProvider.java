@@ -68,5 +68,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.CRYSTALLIZER);
         addDrop(BlockInit.ROTARY_KILN_CONTROLLER, ItemInit.ROTARY_KILN);
         addDrop(BlockInit.ROTARY_KILN, ItemInit.ROTARY_KILN);
+        addDrop(BlockInit.FLUID_TANK);
     }
 }

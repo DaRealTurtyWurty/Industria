@@ -18,5 +18,6 @@ public class BlockEntityRendererInit {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRYSTALLIZER, CrystallizerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, RotaryKilnBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.ELECTROLYZER, ElectrolyzerBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.FLUID_TANK, FluidTankBlockEntityRenderer::new);
     }
 }

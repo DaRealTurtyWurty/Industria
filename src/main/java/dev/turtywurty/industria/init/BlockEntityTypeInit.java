@@ -109,6 +109,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(ElectrolyzerBlockEntity::new, BlockInit.ELECTROLYZER)
                     .build());
 
+    public static final BlockEntityType<FluidTankBlockEntity> FLUID_TANK = register("fluid_tank",
+            FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, BlockInit.FLUID_TANK)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

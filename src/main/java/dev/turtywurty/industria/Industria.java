@@ -27,7 +27,9 @@ import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.pipe.impl.HeatPipeNetwork;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
+import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
+import dev.turtywurty.industria.screenhandler.base.TickableScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -160,6 +162,8 @@ public class Industria implements ModInitializer {
         GasStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getGasProvider, BlockEntityTypeInit.ELECTROLYZER);
         HeatStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getHeatProvider, BlockEntityTypeInit.ELECTROLYZER);
 
+        FluidStorage.SIDED.registerForBlockEntity(FluidTankBlockEntity::getFluidProvider, BlockEntityTypeInit.FLUID_TANK);
+
         for (TransferType<?, ?, ?> transferType : TransferType.getValues()) {
             transferType.registerForMultiblockIo();
         }
@@ -196,6 +200,7 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(UpgradeStationUpdateRecipesPayload.ID, UpgradeStationUpdateRecipesPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(RequestSyncPipeNetworksPayload.ID, RequestSyncPipeNetworksPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SyncPipeNetworksPayload.ID, SyncPipeNetworksPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -251,6 +256,13 @@ public class Industria implements ModInitializer {
         ServerPlayNetworking.registerGlobalReceiver(RequestSyncPipeNetworksPayload.ID,
                 (payload, context) -> PipeNetworkManager.sync(context.player()));
 
+        ServerPlayNetworking.registerGlobalReceiver(FluidTankChangeExtractModePayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof FluidTankScreenHandler handler) {
+                handler.getBlockEntity().setExtractMode(payload.extractMode());
+            }
+        });
+
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld())));
 
@@ -290,6 +302,14 @@ public class Industria implements ModInitializer {
 
             for (PipeNetworkManager<?, ?> manager : PipeNetworkManager.getManagers()) {
                 manager.tick(world);
+            }
+        });
+
+        ServerTickEvents.END_WORLD_TICK.register(world -> {
+            for (ServerPlayerEntity player : world.getPlayers()) {
+                if (player.currentScreenHandler instanceof TickableScreenHandler tickable) {
+                    tickable.tick(player);
+                }
             }
         });
 

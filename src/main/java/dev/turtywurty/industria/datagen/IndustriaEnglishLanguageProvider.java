@@ -132,6 +132,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.ELECTROLYZER, "Electrolyzer");
         addText(translationBuilder, ElectrolyzerBlockEntity.TITLE, "Electrolyzer");
 
+        translationBuilder.add(BlockInit.FLUID_TANK, "Fluid Tank");
+        addText(translationBuilder, FluidTankBlockEntity.TITLE, "Fluid Tank");
+
         translationBuilder.add(ItemInit.RED_MUD, "Red Mud");
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");

@@ -153,9 +153,8 @@ public class BlockInit {
     public static final ElectrolyzerBlock ELECTROLYZER = registerWithItemCopy("electrolyzer",
             ElectrolyzerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
-    public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor) {
-        return register(name, constructor, settings -> settings);
-    }
+    public static final FluidTankBlock FLUID_TANK = registerWithItemCopy("fluid_tank",
+            FluidTankBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
