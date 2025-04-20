@@ -6,20 +6,15 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.PersistentStateType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,53 +23,32 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class WorldFluidPocketsState extends PersistentState {
-    private static final Type<WorldFluidPocketsState> TYPE = new Type<>(
+    public static final Codec<WorldFluidPocketsState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            FluidPocket.CODEC.listOf().fieldOf("FluidPockets").forGetter(state -> state.fluidPockets)
+    ).apply(instance, pockets -> {
+        var state = new WorldFluidPocketsState();
+        state.fluidPockets.addAll(pockets);
+        return state;
+    }));
+
+    private static final PersistentStateType<WorldFluidPocketsState> TYPE = new PersistentStateType<>(
+            Industria.MOD_ID + ".fluid_pockets",
             WorldFluidPocketsState::new,
-            WorldFluidPocketsState::fromNbt,
+            CODEC,
             null
     );
 
     private final List<FluidPocket> fluidPockets = new CopyOnWriteArrayList<>();
 
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        var fluidPocketList = new NbtList();
-        for (FluidPocket fluidPocket : this.fluidPockets) {
-            if(fluidPocket.isEmpty())
-                continue;
+    public WorldFluidPocketsState() {}
 
-            fluidPocketList.add(FluidPocket.CODEC.encodeStart(NbtOps.INSTANCE, fluidPocket)
-                    .resultOrPartial(Industria.LOGGER::error)
-                    .orElse(new NbtCompound()));
-        }
-
-        nbt.put("FluidPockets", fluidPocketList);
-        return nbt;
-    }
-
-    public static WorldFluidPocketsState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        var state = new WorldFluidPocketsState();
-
-        if(!nbt.contains("FluidPockets", NbtElement.LIST_TYPE))
-            return state;
-
-        NbtList fluidPockets = nbt.getList("FluidPockets", NbtElement.COMPOUND_TYPE);
-        for (NbtElement fluidPocketElement : fluidPockets) {
-            FluidPocket fluidPocket = FluidPocket.CODEC.parse(NbtOps.INSTANCE, fluidPocketElement)
-                    .resultOrPartial(Industria.LOGGER::error)
-                    .orElseGet(() -> new FluidPocket(Fluids.EMPTY.getDefaultState(), new ArrayList<>()));
-            if(fluidPocket.isEmpty())
-                continue;
-
-            state.fluidPockets.add(fluidPocket);
-        }
-
-        return state;
+    public WorldFluidPocketsState(List<FluidPocket> fluidPockets) {
+        this.fluidPockets.addAll(fluidPockets);
     }
 
     public static WorldFluidPocketsState getServerState(ServerWorld world) {
         PersistentStateManager persistentStateManager = world.getPersistentStateManager();
-        return persistentStateManager.getOrCreate(TYPE, Industria.MOD_ID + ".fluid_pockets");
+        return persistentStateManager.getOrCreate(TYPE);
     }
 
     public void addFluidPocket(FluidPocket fluidPocket) {

@@ -24,7 +24,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -182,10 +181,10 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        if (nbt.contains("FluidTank", NbtElement.LIST_TYPE))
-            this.wrappedFluidStorage.readNbt(nbt.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
-        if (nbt.contains("Energy", NbtElement.LIST_TYPE))
-            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("FluidTank"))
+            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
+        if (nbt.contains("Energy"))
+            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
     }
 
     @Override

@@ -3,11 +3,11 @@ package dev.turtywurty.industria.multiblock;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.util.NbtUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -161,7 +161,7 @@ public interface Multiblockable {
     static NbtList writeMultiblockToNbt(Multiblockable multiblockable) {
         var machinePositions = new NbtList();
         for (BlockPos machinePosition : multiblockable.getMultiblockPositions()) {
-            machinePositions.add(NbtHelper.fromBlockPos(machinePosition));
+            machinePositions.add(NbtUtils.toNbt(machinePosition));
         }
 
         return machinePositions;
@@ -177,8 +177,7 @@ public interface Multiblockable {
         List<BlockPos> machinePositions = multiblockable.getMultiblockPositions();
         machinePositions.clear();
         for (int i = 0; i < nbt.size(); i++) {
-            int[] machinePosition = nbt.getIntArray(i);
-            machinePositions.add(new BlockPos(machinePosition[0], machinePosition[1], machinePosition[2]));
+            NbtUtils.fromNbt(nbt.getCompoundOrEmpty(i)).ifPresent(machinePositions::add);
         }
     }
 

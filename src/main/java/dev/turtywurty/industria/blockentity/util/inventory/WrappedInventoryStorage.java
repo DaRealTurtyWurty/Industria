@@ -139,7 +139,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
     @Override
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
-            var inventoryNbt = nbt.getCompound(index);
+            var inventoryNbt = nbt.getCompoundOrEmpty(index);
 
             SimpleInventory inventory = this.inventories.get(index);
             Inventories.readNbt(inventoryNbt, inventory.getHeldStacks(), registryLookup);

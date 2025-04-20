@@ -9,7 +9,7 @@ public class MathUtils {
             return direction;
 
         Direction relative = direction;
-        int rotations = (facing.getHorizontal() - Direction.NORTH.getHorizontal() + 4) % 4;
+        int rotations = (facing.getHorizontalQuarterTurns() - Direction.NORTH.getHorizontalQuarterTurns() + 4) % 4;
         for (int i = 0; i < rotations; i++) {
             relative = relative.rotateYClockwise();
         }

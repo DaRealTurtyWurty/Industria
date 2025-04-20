@@ -314,34 +314,30 @@ public class CrusherBlockEntity extends UpdatableBlockEntity implements Syncable
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        if (nbt.contains("Progress", NbtElement.INT_TYPE))
-            this.progress = nbt.getInt("Progress");
+        if (nbt.contains("Progress"))
+            this.progress = nbt.getInt("Progress", 0);
 
-        if (nbt.contains("MaxProgress", NbtElement.INT_TYPE))
-            this.maxProgress = nbt.getInt("MaxProgress");
+        if (nbt.contains("MaxProgress"))
+            this.maxProgress = nbt.getInt("MaxProgress", 0);
 
-        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null :
-                    RegistryKey.createCodec(RegistryKeys.RECIPE)
-                            .decode(NbtOps.INSTANCE, currentRecipe)
-                            .map(com.mojang.datafixers.util.Pair::getFirst)
-                            .result()
-                            .orElse(null);
+        if (nbt.contains("CurrentRecipe")) {
+            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                    .orElse(null);
         }
 
-        if (nbt.contains("Buffer", NbtElement.LIST_TYPE)) {
-            NbtList bufferArray = nbt.getList("Buffer", NbtElement.COMPOUND_TYPE);
+        if (nbt.contains("Buffer")) {
+            NbtList bufferArray = nbt.getListOrEmpty("Buffer");
             for (int i = 0; i < bufferArray.size(); i++) {
-                this.buffer[i] = ItemStack.fromNbt(registryLookup, bufferArray.getCompound(i)).orElse(ItemStack.EMPTY);
+                this.buffer[i] = ItemStack.fromNbt(registryLookup, bufferArray.getCompoundOrEmpty(i))
+                        .orElse(ItemStack.EMPTY);
             }
         }
 
-        if (nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
+        if (nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
 
-        if (nbt.contains("Energy", NbtElement.LIST_TYPE))
-            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registryLookup);
+        if (nbt.contains("Energy"))
+            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
     }
 
     @Nullable

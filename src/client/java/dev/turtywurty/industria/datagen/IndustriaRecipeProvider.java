@@ -16,8 +16,8 @@ import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.Blocks;
-import net.minecraft.data.server.recipe.RecipeExporter;
-import net.minecraft.data.server.recipe.RecipeGenerator;
+import net.minecraft.data.recipe.RecipeExporter;
+import net.minecraft.data.recipe.RecipeGenerator;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
@@ -48,7 +48,7 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 RegistryEntryLookup<Item> itemLookup = wrapperLookup.getOrThrow(RegistryKeys.ITEM);
 
                 for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-                    woodSet.generateRecipes(this, exporter, itemLookup);
+                    WoodSetDatagen.generateRecipes(woodSet, this, exporter, itemLookup);
                 }
 
                 createShaped(RecipeCategory.MISC, BlockInit.ALLOY_FURNACE)

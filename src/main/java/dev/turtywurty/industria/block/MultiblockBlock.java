@@ -8,6 +8,7 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -31,7 +32,7 @@ public class MultiblockBlock extends Block {
             return VoxelShapes.empty();
 
         BlockState primaryState = world.getBlockState(data.primaryPos());
-        Direction direction = data.type().hasDirectionProperty() ? primaryState.getNullable(Properties.HORIZONTAL_FACING) : Direction.NORTH;
+        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING, null) : Direction.NORTH;
         if(direction == null)
             direction = Direction.NORTH;
 
@@ -94,9 +95,10 @@ public class MultiblockBlock extends Block {
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        super.onStateReplaced(state, world, pos, moved);
 
+        BlockState newState = world.getBlockState(pos);
         if (!world.isClient && !state.isOf(newState.getBlock())) {
             MultiblockData data = getMultiblockData(world, pos);
             if (data == null)

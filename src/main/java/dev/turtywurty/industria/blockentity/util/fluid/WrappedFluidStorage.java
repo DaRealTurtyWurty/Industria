@@ -51,13 +51,13 @@ public class WrappedFluidStorage<T extends Storage<FluidVariant>> extends Wrappe
     @Override
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
-            var compound = nbt.getCompound(index);
+            var compound = nbt.getCompoundOrEmpty(index);
             T storage = this.storages.get(index);
             if (storage == null)
                 continue;
 
             if(storage instanceof SingleFluidStorage singleFluidStorage) {
-                singleFluidStorage.amount = compound.getLong("Amount");
+                singleFluidStorage.amount = compound.getLong("Amount", 0L);
                 singleFluidStorage.variant = FluidVariant.CODEC.decode(NbtOps.INSTANCE, compound.get("Fluid"))
                         .map(Pair::getFirst)
                         .getOrThrow();

@@ -7,6 +7,8 @@ import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentHolder;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
@@ -19,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +57,12 @@ public class SeismicScannerItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (selected && entity instanceof PlayerEntity player && world instanceof ServerWorld serverWorld) {
-            WorldFluidPocketsState state = WorldFluidPocketsState.getServerState(serverWorld);
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
+        boolean selected = entity instanceof EquipmentHolder holder &&
+                (holder.getEquippedStack(EquipmentSlot.MAINHAND) == stack ||
+                        holder.getEquippedStack(EquipmentSlot.OFFHAND) == stack);
+        if (selected && entity instanceof PlayerEntity player) {
+            WorldFluidPocketsState state = WorldFluidPocketsState.getServerState(world);
             List<Text> fluidBelow = new ArrayList<>();
             for (WorldFluidPocketsState.FluidPocket fluidPocket : state.existsBelow(player.getBlockPos())) {
                 Optional<RegistryKey<Fluid>> regKey = fluidPocket.fluidState().getRegistryEntry().getKey();

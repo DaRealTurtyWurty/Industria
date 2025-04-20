@@ -7,7 +7,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.entity.model.EntityModelLoader;
+import net.minecraft.client.render.entity.model.LoadedEntityModels;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -29,7 +29,7 @@ public class DrillHeadRegistry {
         return DRILL_HEADS.get(drillHeadable);
     }
 
-    public static Stream<Pair<DrillHeadable, Function<Either<BlockEntityRendererFactory.Context, EntityModelLoader>, Model>>> getModelResolvers() {
+    public static Stream<Pair<DrillHeadable, Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model>>> getModelResolvers() {
         return DRILL_HEADS.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue().modelResolver));
     }
 
@@ -40,18 +40,18 @@ public class DrillHeadRegistry {
     public static void init() {
     }
 
-    public record DrillHeadClientData(Function<Either<BlockEntityRendererFactory.Context, EntityModelLoader>, Model> modelResolver,
+    public record DrillHeadClientData(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model> modelResolver,
                                       boolean renderDynamicItem,
                                       RenderFunction onRender,
                                       Identifier textureLocation) {
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, EntityModelLoader>, Model> modelResolver,
+        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model> modelResolver,
                                                  boolean renderDynamicItem,
                                                  RenderFunction onRender,
                                                  Identifier textureLocation) {
             return new DrillHeadClientData(modelResolver, renderDynamicItem, onRender, textureLocation);
         }
 
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, EntityModelLoader>, Model> modelResolver,
+        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model> modelResolver,
                                                  RenderFunction onRender,
                                                  Identifier textureLocation) {
             return create(modelResolver, true, onRender, textureLocation);

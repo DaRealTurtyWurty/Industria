@@ -15,7 +15,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -114,7 +113,7 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Synca
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.energy.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.energy.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
     }
 
     @Override

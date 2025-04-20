@@ -32,7 +32,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -162,9 +161,9 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        this.wrappedEnergyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.wrappedFluidStorage.readNbt(nbt.getList("FluidStorage", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
+        this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registryLookup);
+        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
     }
 
     @Nullable

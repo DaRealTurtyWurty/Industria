@@ -8,10 +8,13 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.util.WoodRegistrySet;
+import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.block.Block;
-import net.minecraft.data.client.*;
+import net.minecraft.client.data.BlockStateModelGenerator;
+import net.minecraft.client.data.ItemModelGenerator;
+import net.minecraft.client.data.Models;
+import net.minecraft.client.data.TexturedModel;
 
 public class IndustriaModelProvider extends FabricModelProvider {
     public IndustriaModelProvider(FabricDataOutput output) {
@@ -21,7 +24,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     @Override
     public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            woodSet.generateBlockStateAndModels(blockStateModelGenerator);
+            WoodSetDatagen.generateBlockStateAndModels(woodSet, blockStateModelGenerator);
         }
 
         blockStateModelGenerator.registerCooker(BlockInit.ALLOY_FURNACE, TexturedModel.ORIENTABLE);
@@ -128,7 +131,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            woodSet.generateItemModels(itemModelGenerator);
+            WoodSetDatagen.generateItemModels(woodSet, itemModelGenerator);
         }
 
         itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
@@ -240,6 +243,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {
-        blockStateModelGenerator.registerLog(block).log(block);
+        blockStateModelGenerator.createLogTexturePool(block).log(block);
     }
 }

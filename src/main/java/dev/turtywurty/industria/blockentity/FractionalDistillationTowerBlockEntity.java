@@ -69,8 +69,8 @@ public class FractionalDistillationTowerBlockEntity extends UpdatableBlockEntity
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        this.controllerPos = nbt.contains("ControllerPos") ? BlockPos.fromLong(nbt.getLong("ControllerPos")) : null;
-        this.ticks = nbt.getInt("Ticks");
+        this.controllerPos = nbt.contains("ControllerPos") ? BlockPos.fromLong(nbt.getLong("ControllerPos", 0L)) : null;
+        this.ticks = nbt.getInt("Ticks", 0);
     }
 
     @Override

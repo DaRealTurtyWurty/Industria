@@ -18,7 +18,7 @@ public class IndustriaItemTagProvider extends FabricTagProvider.ItemTagProvider 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            woodSet.generateItemTags(this);
+            WoodSetDatagen.generateItemTags(woodSet, this);
         }
 
         getOrCreateTagBuilder(TagList.Items.STEEL_INGOTS)

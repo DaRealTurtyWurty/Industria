@@ -258,24 +258,24 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        if (!nbt.contains(Industria.MOD_ID, NbtElement.COMPOUND_TYPE))
+        if (!nbt.contains(Industria.MOD_ID))
             return;
 
-        NbtCompound modidData = nbt.getCompound(Industria.MOD_ID);
-        if (modidData.contains("Progress", NbtElement.INT_TYPE))
-            this.progress = modidData.getInt("Progress");
+        NbtCompound modidData = nbt.getCompoundOrEmpty(Industria.MOD_ID);
+        if (modidData.contains("Progress"))
+            this.progress = modidData.getInt("Progress", 0);
 
-        if (modidData.contains("MaxProgress", NbtElement.INT_TYPE))
-            this.maxProgress = modidData.getInt("MaxProgress");
+        if (modidData.contains("MaxProgress"))
+            this.maxProgress = modidData.getInt("MaxProgress", 0);
 
-        if (modidData.contains("BurnTime", NbtElement.INT_TYPE))
-            this.burnTime = modidData.getInt("BurnTime");
+        if (modidData.contains("BurnTime"))
+            this.burnTime = modidData.getInt("BurnTime", 0);
 
-        if (modidData.contains("MaxBurnTime", NbtElement.INT_TYPE))
-            this.maxBurnTime = modidData.getInt("MaxBurnTime");
+        if (modidData.contains("MaxBurnTime"))
+            this.maxBurnTime = modidData.getInt("MaxBurnTime", 0);
 
-        if (modidData.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = modidData.getCompound("CurrentRecipe");
+        if (modidData.contains("CurrentRecipe")) {
+            NbtCompound currentRecipe = modidData.getCompoundOrEmpty("CurrentRecipe");
             this.currentRecipeId = currentRecipe.isEmpty() ? null :
                     RegistryKey.createCodec(RegistryKeys.RECIPE)
                             .decode(NbtOps.INSTANCE, currentRecipe)
@@ -284,11 +284,12 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
                             .orElse(null);
         }
 
-        if (modidData.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(modidData.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
+        if (modidData.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(modidData.getListOrEmpty("Inventory"), registryLookup);
 
-        if (modidData.contains("BufferedStack", NbtElement.COMPOUND_TYPE))
-            this.bufferedStack = ItemStack.fromNbtOrEmpty(registryLookup, modidData.getCompound("BufferedStack"));
+        if (modidData.contains("BufferedStack"))
+            this.bufferedStack = ItemStack.fromNbt(registryLookup, modidData.getCompoundOrEmpty("BufferedStack"))
+                    .orElse(ItemStack.EMPTY);
     }
 
     @Override

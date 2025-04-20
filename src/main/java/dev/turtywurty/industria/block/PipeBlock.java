@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import net.minecraft.block.Block;
@@ -54,9 +55,8 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     protected final VoxelShape[] shapeCache = new VoxelShape[ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length];
 
     private final TransferType<S, ?, A> transferType;
-    private final PipeNetworkManager<S, N> networkManager;
 
-    public PipeBlock(Settings settings, int diameter, TransferType<S, ?, A> transferType, PipeNetworkManager<S, N> networkManager) {
+    public PipeBlock(Settings settings, int diameter, TransferType<S, ?, A> transferType) {
         super(settings);
         setDefaultState(getDefaultState()
                 .with(NORTH, ConnectorType.NONE)
@@ -68,7 +68,6 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
                 .with(WATERLOGGED, false));
 
         this.transferType = transferType;
-        this.networkManager = networkManager;
 
         for (Direction direction : Direction.values()) {
             pipeShapes[direction.ordinal()] = createCableShape(direction, diameter);
@@ -76,6 +75,10 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         }
 
         createShapeCache();
+    }
+
+    public PipeNetworkManager<S, N> getNetworkManager(ServerWorld world) {
+        return WorldPipeNetworks.getOrCreate(world).getNetwork(getTransferType());
     }
 
     public TransferType<S, ?, A> getTransferType() {
@@ -203,8 +206,8 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         if (blockState != state) {
             world.setBlockState(pos, blockState);
 
-            if (!world.isClient() && state.isAir()) {
-                this.networkManager.placePipe((ServerWorld) world, pos);
+            if (!world.isClient() && state.isAir() && world instanceof ServerWorld serverWorld) {
+                getNetworkManager(serverWorld).placePipe(serverWorld, pos);
             }
         }
     }
@@ -220,8 +223,8 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
-        if(!world.isClient()) {
-            this.networkManager.placePipe((ServerWorld) world, pos);
+        if(!world.isClient() && world instanceof ServerWorld serverWorld) {
+            getNetworkManager(serverWorld).placePipe(serverWorld, pos);
         }
 
         BlockState state = getDefaultState().with(WATERLOGGED, world.getFluidState(pos).getFluid() == Fluids.WATER);
@@ -229,12 +232,13 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        BlockState newState = world.getBlockState(pos);
         if(!state.isOf(newState.getBlock()) && !world.isClient()) {
-            this.networkManager.removePipe((ServerWorld) world, pos);
+            getNetworkManager(world).removePipe(world, pos);
         }
 
-        super.onStateReplaced(state, world, pos, newState, moved);
+        super.onStateReplaced(state, world, pos, moved);
     }
 
     @Override
@@ -253,16 +257,16 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         if (player.getMainHandStack().getItem() instanceof BlockItem)
             return ActionResult.PASS;
 
-        PipeNetwork<S> network = this.networkManager.getNetwork(world, pos);
-        if (network == null) {
-            if(!world.isClient()) {
-                this.networkManager.traverseCreateNetwork((ServerWorld) world, pos);
+        if(world instanceof ServerWorld serverWorld) {
+            PipeNetworkManager<S, N> networkManager = getNetworkManager(serverWorld);
+            PipeNetwork<S> network = networkManager.getNetwork(world, pos);
+            if (network == null) {
+                networkManager.traverseCreateNetwork(serverWorld, pos);
+                network = networkManager.getNetwork(world, pos);
+                if(network == null)
+                    return ActionResult.PASS;
             }
 
-            return ActionResult.PASS;
-        }
-
-        if (!world.isClient) {
             A amount = getAmount(network.getStorage(world, pos));
             A capacity = getCapacity(network.getStorage(world, pos));
 

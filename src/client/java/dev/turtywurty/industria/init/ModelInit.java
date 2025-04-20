@@ -9,7 +9,7 @@ public class ModelInit {
 
     public static void init() {
         ModelLoadingPlugin.register(context -> {
-            context.addModels(SEISMIC_SCANNER_MODEL_ID);
+            context.addModel(SEISMIC_SCANNER_MODEL_ID);
         });
     }
 }

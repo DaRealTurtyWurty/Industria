@@ -8,7 +8,6 @@ import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -42,7 +41,7 @@ public class RotaryKilnBlockEntity extends UpdatableBlockEntity implements Multi
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        Multiblockable.readMultiblockFromNbt(this, nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
+        Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
     }
 
     @Override

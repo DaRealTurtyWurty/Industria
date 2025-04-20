@@ -23,9 +23,9 @@ public class WrappedHeatStorage<T extends HeatStorage> extends WrappedStorage<T>
     @Override
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
-            NbtCompound compound = nbt.getCompound(index);
+            NbtCompound compound = nbt.getCompoundOrEmpty(index);
             HeatStorage storage = this.storages.get(index);
-            double amount = compound.getDouble("Amount");
+            double amount = compound.getDouble("Amount", 0);
             if (storage instanceof SimpleHeatStorage simpleHeatStorage) {
                 simpleHeatStorage.setAmount(amount);
             } else {

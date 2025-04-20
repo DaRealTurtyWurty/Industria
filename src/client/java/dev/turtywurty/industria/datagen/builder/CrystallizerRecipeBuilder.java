@@ -4,7 +4,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.recipe.RecipeExporter;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.RegistryKey;
 

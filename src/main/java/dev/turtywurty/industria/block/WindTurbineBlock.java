@@ -8,6 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
@@ -83,7 +84,7 @@ public class WindTurbineBlock extends IndustriaBlock {
     private static VoxelShape calculateShapes(Direction to, VoxelShape shape) {
         final VoxelShape[] buffer = {shape, VoxelShapes.empty()};
 
-        final int times = (to.getHorizontal() - Direction.NORTH.getHorizontal() + 4) % 4;
+        final int times = (to.getHorizontalQuarterTurns() - Direction.NORTH.getHorizontalQuarterTurns() + 4) % 4;
         for (int i = 0; i < times; i++) {
             buffer[0].forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
                     buffer[1] = VoxelShapes.union(buffer[1],
@@ -121,8 +122,8 @@ public class WindTurbineBlock extends IndustriaBlock {
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        super.onStateReplaced(state, world, pos, moved);
 
         BlockPos blockPos = pos;
         if (state.get(PART) != 0) {

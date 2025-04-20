@@ -6,6 +6,7 @@ import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.ParticleUtil;
 import net.minecraft.registry.tag.BlockTags;
@@ -169,5 +170,18 @@ public class RubberLeavesBlock extends Block implements Waterloggable {
                 }
             }
         }
+    }
+
+    private void spawnLeafParticle(World world, BlockPos pos, Random random, BlockState state, BlockPos posBelow) {
+        if (!(random.nextFloat() >= 0.01F)) {
+            if (!isFaceFullSquare(state.getCollisionShape(world, posBelow), Direction.UP)) {
+                this.spawnLeafParticle(world, pos, random);
+            }
+        }
+    }
+
+    protected void spawnLeafParticle(World world, BlockPos pos, Random random) {
+        var entityEffectParticleEffect = EntityEffectParticleEffect.create(ParticleTypes.TINTED_LEAVES, world.getBlockColor(pos));
+        ParticleUtil.spawnParticle(world, pos, random, entityEffectParticleEffect);
     }
 }

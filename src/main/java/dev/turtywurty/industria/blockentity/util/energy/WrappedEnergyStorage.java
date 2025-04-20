@@ -24,9 +24,9 @@ public class WrappedEnergyStorage extends WrappedStorage<EnergyStorage> {
     @Override
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
-            NbtCompound compound = nbt.getCompound(index);
+            NbtCompound compound = nbt.getCompoundOrEmpty(index);
             EnergyStorage storage = this.storages.get(index);
-            long amount = compound.getLong("Amount");
+            long amount = compound.getLong("Amount", 0L);
             if (storage instanceof SimpleEnergyStorage simpleEnergyStorage) {
                 simpleEnergyStorage.amount = amount;
             } else {

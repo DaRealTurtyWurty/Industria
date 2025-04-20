@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity.util.gas;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
@@ -51,16 +50,15 @@ public class WrappedGasStorage<T extends Storage<GasVariant>> extends WrappedSto
     @Override
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
-            var compound = nbt.getCompound(index);
+            var compound = nbt.getCompoundOrEmpty(index);
             T storage = this.storages.get(index);
             if (storage == null)
                 continue;
 
             if(storage instanceof SingleGasStorage singleGasStorage) {
-                singleGasStorage.amount = compound.getLong("Amount");
-                singleGasStorage.variant = GasVariant.CODEC.decode(NbtOps.INSTANCE, compound.get("Gas"))
-                        .map(Pair::getFirst)
-                        .getOrThrow();
+                singleGasStorage.amount = compound.getLong("Amount", 0L);
+                singleGasStorage.variant = compound.get("Gas", GasVariant.CODEC)
+                        .orElse(GasVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read gas storage of type: " + storage.getClass().getName());
             }

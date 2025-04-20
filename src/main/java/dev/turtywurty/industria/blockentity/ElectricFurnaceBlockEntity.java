@@ -25,7 +25,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -152,17 +151,17 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        if (nbt.contains("Progress", NbtElement.SHORT_TYPE))
-            this.progress = nbt.getShort("Progress");
+        if (nbt.contains("Progress"))
+            this.progress = nbt.getShort("Progress", (short) 0);
 
-        if (nbt.contains("MaxProgress", NbtElement.SHORT_TYPE))
-            this.maxProgress = nbt.getShort("MaxProgress");
+        if (nbt.contains("MaxProgress"))
+            this.maxProgress = nbt.getShort("MaxProgress", (short) 0);
 
-        if (nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        if (nbt.contains("Energy", NbtElement.LIST_TYPE))
-            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Energy"))
+            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
 
         RecipeExperienceBlockEntity.readRecipesUsed(nbt, "RecipesUsed", this.recipesUsed);
     }

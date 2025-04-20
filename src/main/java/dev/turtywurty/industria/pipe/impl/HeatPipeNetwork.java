@@ -1,12 +1,14 @@
 package dev.turtywurty.industria.pipe.impl;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.heatapi.api.base.NoLimitHeatStorage;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -14,6 +16,41 @@ import net.minecraft.world.World;
 import java.util.*;
 
 public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
+    public static final MapCodec<HeatPipeNetwork> CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                    Uuids.CODEC.fieldOf("id").forGetter(HeatPipeNetwork::getId),
+                    BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(HeatPipeNetwork::getPipes),
+                    BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(HeatPipeNetwork::getConnectedBlocks),
+                    TransferType.CODEC.fieldOf("transferType").forGetter(HeatPipeNetwork::getTransferType),
+                    Codec.unboundedMap(BlockPos.CODEC, Codec.DOUBLE)
+                            .fieldOf("storageAmounts")
+                            .forGetter(network -> {
+                                Map<BlockPos, Double> storageAmounts = new HashMap<>();
+                                for (Map.Entry<BlockPos, HeatStorage> entry : network.pipeStorages.entrySet()) {
+                                    storageAmounts.put(entry.getKey(), entry.getValue().getAmount());
+                                }
+
+                                return storageAmounts;
+                            }),
+                    Codec.unboundedMap(BlockPos.CODEC, Codec.unboundedMap(BlockPos.CODEC, Codec.INT))
+                            .fieldOf("pipeToSourceDistance")
+                            .forGetter(network -> network.pipeToSourceDistance)
+            ).apply(instance, (id, pipes, connectedBlocks, transferType, storageAmounts, pipeToSourceDistance) -> {
+                var network = new HeatPipeNetwork(id);
+                network.pipes.addAll(pipes);
+                network.connectedBlocks.addAll(connectedBlocks);
+
+                for (Map.Entry<BlockPos, Double> entry : storageAmounts.entrySet()) {
+                    BlockPos pos = entry.getKey();
+                    double amount = entry.getValue();
+                    ((SimpleHeatStorage) network.getStorage(null, pos)).setAmount(amount);
+                }
+
+                network.pipeToSourceDistance.putAll(pipeToSourceDistance);
+
+                return network;
+            }));
+
     private final Map<BlockPos, Map<BlockPos, Integer>> pipeToSourceDistance = new HashMap<>();
     private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
 
@@ -27,36 +64,8 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     }
 
     @Override
-    public NbtCompound writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = new NbtCompound();
-        nbt.put("networkData", super.writeNbt(registryLookup));
-
-        var storages = new NbtCompound();
-        for (Map.Entry<BlockPos, HeatStorage> storageEntry : this.pipeStorages.entrySet()) {
-            BlockPos pos = storageEntry.getKey();
-            HeatStorage storage = storageEntry.getValue();
-            storages.putDouble(String.valueOf(pos.asLong()), storage.getAmount());
-        }
-
-        nbt.put("pipeStorages", storages);
-
-        return nbt;
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt.getCompound("networkData"), registryLookup);
-
-        var storages = nbt.getCompound("pipeStorages");
-        for (String key : storages.getKeys()) {
-            BlockPos pos = BlockPos.fromLong(Long.parseLong(key));
-
-            long amount = storages.getLong(key);
-            SimpleHeatStorage heatStorage = createStorage();
-            heatStorage.setAmount(amount);
-
-            this.pipeStorages.put(pos, heatStorage);
-        }
+    public MapCodec<? extends PipeNetwork<?>> getCodec() {
+        return CODEC;
     }
 
     @Override

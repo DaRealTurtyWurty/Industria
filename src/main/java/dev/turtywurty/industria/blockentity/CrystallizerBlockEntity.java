@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
@@ -286,45 +285,43 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
 
         nbt.putInt("CatalystUsesLeft", this.catalystUsesLeft);
         nbt.putInt("MaxCatalystUses", this.maxCatalystUses);
-        nbt.put("NextOutputStack", this.nextOutputItemStack.toNbtAllowEmpty(registries));
+        nbt.put("NextOutputStack", this.nextOutputItemStack.toNbt(registries));
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if (nbt.contains("FluidTank", NbtElement.LIST_TYPE))
-            this.wrappedFluidStorage.readNbt(nbt.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("FluidTank"))
+            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
 
-        if (nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        this.progress = nbt.getInt("Progress");
-        this.maxProgress = nbt.getInt("MaxProgress");
+        this.progress = nbt.getInt("Progress", 0);
+        this.maxProgress = nbt.getInt("MaxProgress", 0);
 
-        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null :
-                    RegistryKey.createCodec(RegistryKeys.RECIPE)
-                            .decode(NbtOps.INSTANCE, currentRecipe)
-                            .map(Pair::getFirst)
-                            .result()
-                            .orElse(null);
+        if (nbt.contains("CurrentRecipe")) {
+            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                    .orElse(null);
         }
 
-        if (nbt.contains("OutputStack", NbtElement.COMPOUND_TYPE)) {
-            this.outputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("OutputStack"));
+        if (nbt.contains("OutputStack")) {
+            this.outputItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("OutputStack"))
+                    .orElse(ItemStack.EMPTY);
         }
 
-        if (nbt.contains("ByproductStack", NbtElement.COMPOUND_TYPE)) {
-            this.byproductItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("ByproductStack"));
+        if (nbt.contains("ByproductStack")) {
+            this.byproductItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("ByproductStack"))
+                    .orElse(ItemStack.EMPTY);
         }
 
-        this.catalystUsesLeft = nbt.getInt("CatalystUsesLeft");
-        this.maxCatalystUses = nbt.getInt("MaxCatalystUses");
+        this.catalystUsesLeft = nbt.getInt("CatalystUsesLeft", 0);
+        this.maxCatalystUses = nbt.getInt("MaxCatalystUses", 0);
 
-        if(nbt.contains("NextOutputStack", NbtElement.COMPOUND_TYPE)) {
-            this.nextOutputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("NextOutputStack"));
+        if(nbt.contains("NextOutputStack")) {
+            this.nextOutputItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("NextOutputStack"))
+                    .orElse(ItemStack.EMPTY);
         }
     }
 

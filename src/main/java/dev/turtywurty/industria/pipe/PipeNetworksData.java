@@ -1,28 +1,55 @@
 package dev.turtywurty.industria.pipe;
 
-import dev.turtywurty.industria.util.NBTSerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PipeNetworksData<S, N extends PipeNetwork<S>> implements NBTSerializable<NbtCompound> {
+public class PipeNetworksData<S, N extends PipeNetwork<S>> {
+    public static final Codec<PipeNetworksData<?, PipeNetwork<?>>> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    RegistryKey.createCodec(RegistryKeys.WORLD).fieldOf("dimension").forGetter(PipeNetworksData::getDimension),
+                    PipeNetwork.SET_CODEC.fieldOf("networks").forGetter(PipeNetworksData::getNetworks),
+                    Codec.unboundedMap(BlockPos.CODEC, Uuids.CODEC).fieldOf("pipes").forGetter(PipeNetworksData::getPipes)
+            ).apply(instance, (dimension, networks, pipeToNetworkId) -> {
+                PipeNetworksData<?, ?> networkData = createPipeNetworksData(dimension, networks, pipeToNetworkId);
+                // noinspection unchecked
+                return (PipeNetworksData<?, PipeNetwork<?>>) networkData;
+            }));
+    public static final PacketCodec<RegistryByteBuf, PipeNetworksData<?, PipeNetwork<?>>> PACKET_CODEC =
+            PacketCodec.tuple(
+                    RegistryKey.createPacketCodec(RegistryKeys.WORLD), PipeNetworksData::getDimension,
+                    PipeNetwork.SET_PACKET_CODEC, PipeNetworksData::getNetworks,
+                    PacketCodecs.map(HashMap::new, BlockPos.PACKET_CODEC, Uuids.PACKET_CODEC), PipeNetworksData::getPipes,
+                    (dimension, networks, pipeToNetworkIds) -> {
+                        PipeNetworksData<?, ?> networkData = createPipeNetworksData(dimension, networks, pipeToNetworkIds);
+                        // noinspection unchecked
+                        return (PipeNetworksData<?, PipeNetwork<?>>) networkData;
+                    });
+
     private final RegistryKey<World> dimension;
     private final Set<N> networks = ConcurrentHashMap.newKeySet();
     private final Map<BlockPos, UUID> pipeToNetworkId = new ConcurrentHashMap<>();
 
-    private final PipeNetwork.Factory<S, N> networkSupplier;
+    @SuppressWarnings("unchecked")
+    public static <S, N extends PipeNetwork<S>> PipeNetworksData<S, N> createPipeNetworksData(RegistryKey<World> dimension, Set<PipeNetwork<?>> networks, Map<BlockPos, UUID> pipeToNetworkId) {
+        PipeNetworksData<S, N> data = new PipeNetworksData<>(dimension);
+        data.networks.addAll((Collection<? extends N>) networks);
+        data.pipeToNetworkId.putAll(pipeToNetworkId);
+        return data;
+    }
 
-    public PipeNetworksData(RegistryKey<World> dimension, PipeNetwork.Factory<S, N> networkSupplier) {
+    public PipeNetworksData(RegistryKey<World> dimension) {
         this.dimension = dimension;
-        this.networkSupplier = networkSupplier;
     }
 
     public void addNetwork(N network) {
@@ -39,6 +66,10 @@ public class PipeNetworksData<S, N extends PipeNetwork<S>> implements NBTSeriali
 
     public UUID removePipe(BlockPos pos) {
         return this.pipeToNetworkId.remove(pos);
+    }
+
+    public boolean containsPipe(BlockPos pos) {
+        return this.pipeToNetworkId.containsKey(pos);
     }
 
     public N getNetwork(UUID id) {
@@ -61,58 +92,12 @@ public class PipeNetworksData<S, N extends PipeNetwork<S>> implements NBTSeriali
         return this.dimension;
     }
 
+    public Map<BlockPos, UUID> getPipes() {
+        return this.pipeToNetworkId;
+    }
+
     public void clear() {
         this.networks.clear();
         this.pipeToNetworkId.clear();
-    }
-
-    @Override
-    public NbtCompound writeNbt(RegistryWrapper.WrapperLookup registries) {
-        var manager = new NbtCompound();
-
-        var networksNbt = new NbtCompound();
-        for (PipeNetwork<S> network : this.networks) {
-            networksNbt.put(network.getId().toString(), network.writeNbt(registries));
-        }
-
-        manager.put("Networks", networksNbt);
-
-        var pipeToNetworkNbtList = new NbtList();
-        for (Map.Entry<BlockPos, UUID> entry : this.pipeToNetworkId.entrySet()) {
-            var pipe = new NbtCompound();
-            pipe.putLong("Pos", entry.getKey().asLong());
-            pipe.putString("Network", entry.getValue().toString());
-            pipeToNetworkNbtList.add(pipe);
-        }
-
-        manager.put("PipeToNetwork", pipeToNetworkNbtList);
-
-        return manager;
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        this.networks.clear();
-        this.pipeToNetworkId.clear();
-
-        NbtCompound networks = nbt.getCompound("Networks");
-        for (String key : networks.getKeys()) {
-            UUID id = UUID.fromString(key);
-            N network = this.networkSupplier.create(id);
-            network.readNbt(networks.getCompound(key), registries);
-            this.networks.add(network);
-        }
-
-        NbtList pipeToNetwork = nbt.getList("PipeToNetwork", NbtCompound.COMPOUND_TYPE);
-        for (int i = 0; i < pipeToNetwork.size(); i++) {
-            NbtCompound pipe = pipeToNetwork.getCompound(i);
-            BlockPos pos = BlockPos.fromLong(pipe.getLong("Pos"));
-            UUID network = UUID.fromString(pipe.getString("Network"));
-            this.pipeToNetworkId.put(pos, network);
-        }
-    }
-
-    public boolean containsPipe(BlockPos pos) {
-        return this.pipeToNetworkId.containsKey(pos);
     }
 }

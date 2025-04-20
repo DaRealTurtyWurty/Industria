@@ -28,12 +28,12 @@ public abstract class MoltenFluid extends IndustriaFluid {
                 double x = pos.getX() + random.nextDouble();
                 double y = pos.getY() + 1;
                 double z = pos.getZ() + random.nextDouble();
-                world.addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, state.getBlockState()), x, y, z, 0.0, 0.0, 0.0);
-                world.playSound(x, y, z, SoundEvents.BLOCK_LAVA_POP, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.addParticleClient(new BlockStateParticleEffect(ParticleTypes.BLOCK, state.getBlockState()), x, y, z, 0.0, 0.0, 0.0);
+                world.playSoundClient(x, y, z, SoundEvents.BLOCK_LAVA_POP, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
 
             if (random.nextInt(100) == 0) {
-                world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_LAVA_AMBIENT, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.playSoundClient(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_LAVA_AMBIENT, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
         }
     }

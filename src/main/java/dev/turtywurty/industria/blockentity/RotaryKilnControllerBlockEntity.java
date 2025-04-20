@@ -22,6 +22,7 @@ import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
+import dev.turtywurty.industria.util.NbtUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -255,7 +256,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
         var kilnSegments = new NbtList();
         for (BlockPos pos : this.kilnSegments) {
-            kilnSegments.add(NbtHelper.fromBlockPos(pos));
+            kilnSegments.add(NbtUtils.toNbt(pos));
         }
 
         nbt.put("KilnSegments", kilnSegments);
@@ -283,7 +284,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 continue;
             }
 
-            recipeNbt.put("InputStack", inputRecipeEntry.inputStack().toNbtAllowEmpty(registries));
+            recipeNbt.put("InputStack", inputRecipeEntry.inputStack().toNbt(registries));
             recipeNbt.putInt("Progress", inputRecipeEntry.getProgress());
             recipesNbt.add(recipeNbt);
         }
@@ -295,34 +296,30 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if (nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        if (nbt.contains("Heat", NbtElement.LIST_TYPE))
-            this.wrappedHeatStorage.readNbt(nbt.getList("Heat", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Heat"))
+            this.wrappedHeatStorage.readNbt(nbt.getListOrEmpty("Heat"), registries);
 
-        if (nbt.contains("MachinePositions", NbtElement.LIST_TYPE))
-            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
+        if (nbt.contains("MachinePositions"))
+            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
 
-        if (nbt.contains("KilnSegments", NbtElement.LIST_TYPE)) {
+        if (nbt.contains("KilnSegments")) {
             this.kilnSegments.clear();
 
-            NbtList kilnSegments = nbt.getList("KilnSegments", NbtElement.INT_ARRAY_TYPE);
-            for (int i = 0; i < kilnSegments.size(); i++) {
-                int[] ints = kilnSegments.getIntArray(i);
-                if (ints.length != 3)
-                    continue;
-
-                this.kilnSegments.add(i, new BlockPos(ints[0], ints[1], ints[2]));
+            NbtList kilnSegments = nbt.getListOrEmpty("KilnSegments");
+            for (NbtElement kilnSegment : kilnSegments) {
+                kilnSegment.asCompound().flatMap(NbtUtils::fromNbt).ifPresent(this.kilnSegments::add);
             }
         }
 
-        if (nbt.contains("Recipes", NbtElement.LIST_TYPE)) {
+        if (nbt.contains("Recipes")) {
             this.recipes.clear();
 
-            NbtList recipesNbt = nbt.getList("Recipes", NbtElement.COMPOUND_TYPE);
+            NbtList recipesNbt = nbt.getListOrEmpty("Recipes");
             for (int i = 0; i < recipesNbt.size(); i++) {
-                NbtCompound recipeNbt = recipesNbt.getCompound(i);
+                NbtCompound recipeNbt = recipesNbt.getCompoundOrEmpty(i);
 
                 RegistryKey<Recipe<?>> registryKey = RegistryKey.of(RegistryKeys.RECIPE,
                         Identifier.CODEC.decode(NbtOps.INSTANCE, recipeNbt.get("RegistryKey"))
@@ -334,9 +331,10 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                     continue;
                 }
 
-                ItemStack inputStack = ItemStack.fromNbtOrEmpty(registries, recipeNbt.getCompound("InputStack"));
+                ItemStack inputStack = ItemStack.fromNbt(registries, recipeNbt.getCompoundOrEmpty("InputStack"))
+                        .orElse(ItemStack.EMPTY);
 
-                int progress = recipeNbt.getInt("Progress");
+                int progress = recipeNbt.getInt("Progress", 0);
                 this.recipes.add(new InputRecipeEntry(registryKey, inputStack, progress));
             }
         }

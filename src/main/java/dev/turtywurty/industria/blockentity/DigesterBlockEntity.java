@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SingleSlurryStorage;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
@@ -326,35 +325,30 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if(nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if(nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        if(nbt.contains("Energy", NbtElement.LIST_TYPE))
-            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
+        if(nbt.contains("Energy"))
+            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
 
-        if(nbt.contains("SlurryTank", NbtElement.LIST_TYPE))
-            this.wrappedSlurryStorage.readNbt(nbt.getList("SlurryTank", NbtElement.COMPOUND_TYPE), registries);
+        if(nbt.contains("SlurryTank"))
+            this.wrappedSlurryStorage.readNbt(nbt.getListOrEmpty("SlurryTank"), registries);
 
-        if(nbt.contains("FluidTank", NbtElement.LIST_TYPE))
-            this.wrappedFluidStorage.readNbt(nbt.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
+        if(nbt.contains("FluidTank"))
+            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
 
-        if(nbt.contains("MultiblockPositions", NbtElement.LIST_TYPE))
-            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MultiblockPositions", NbtElement.INT_ARRAY_TYPE));
+        if(nbt.contains("MultiblockPositions"))
+            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
 
-        if(nbt.contains("Progress", NbtElement.INT_TYPE))
-            this.progress = nbt.getInt("Progress");
+        if(nbt.contains("Progress"))
+            this.progress = nbt.getInt("Progress", 0);
 
-        if(nbt.contains("MaxProgress", NbtElement.INT_TYPE))
-            this.maxProgress = nbt.getInt("MaxProgress");
+        if(nbt.contains("MaxProgress"))
+            this.maxProgress = nbt.getInt("MaxProgress", 0);
 
-        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null :
-                    RegistryKey.createCodec(RegistryKeys.RECIPE)
-                            .decode(NbtOps.INSTANCE, currentRecipe)
-                            .map(Pair::getFirst)
-                            .result()
-                            .orElse(null);
+        if (nbt.contains("CurrentRecipe")) {
+            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                    .orElse(null);
         }
     }
 

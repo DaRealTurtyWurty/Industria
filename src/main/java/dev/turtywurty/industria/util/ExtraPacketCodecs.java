@@ -6,8 +6,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
-import net.minecraft.util.collection.DataPool;
-import net.minecraft.util.collection.Weight;
+import net.minecraft.util.collection.Pool;
 import net.minecraft.util.collection.Weighted;
 import net.minecraft.util.math.floatprovider.*;
 import net.minecraft.util.math.intprovider.*;
@@ -606,13 +605,13 @@ public class ExtraPacketCodecs {
         registerIntProviderCodec(IntProviderType.WEIGHTED_LIST, PacketCodec.ofStatic(
                 (buf, value) -> {
                     PacketCodec<RegistryByteBuf, ? extends IntProvider> codec = getIntProviderCodec(value.getType());
-                    DataPool<IntProvider> entries = value.weightedList;
-                    PacketCodec<RegistryByteBuf, DataPool<IntProvider>> entriesCodec = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec);
+                    Pool<IntProvider> entries = value.entries;
+                    PacketCodec<RegistryByteBuf, Pool<IntProvider>> entriesCodec = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec);
                     entriesCodec.encode(buf, entries);
                 },
                 buf -> {
                     PacketCodec<RegistryByteBuf, ? extends IntProvider> codec = getIntProviderCodec(IntProviderType.CONSTANT);
-                    DataPool<IntProvider> entries = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec).decode(buf);
+                    Pool<IntProvider> entries = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec).decode(buf);
                     return new WeightedListIntProvider(entries);
                 }));
 
@@ -663,11 +662,11 @@ public class ExtraPacketCodecs {
      * @return The codec for the weighted list.
      * @see WeightedListIntProvider
      */
-    public static <B extends ByteBuf, E> PacketCodec<B, DataPool<E>> weightedListCodec(PacketCodec<B, E> elementCodec) {
-        return PacketCodec.<B, Weighted.Present<E>, E, Weight>tuple(
-                elementCodec, Weighted.Present::data,
-                PacketCodecs.VAR_INT.xmap(Weight::of, Weight::getValue), Weighted.Present::weight,
-                Weighted.Present::new
-        ).collect(PacketCodecs.toList()).xmap(DataPool::new, DataPool::getEntries);
+    public static <B extends ByteBuf, E> PacketCodec<B, Pool<E>> weightedListCodec(PacketCodec<B, E> elementCodec) {
+        return PacketCodec.<B, Weighted<E>, E, Integer>tuple(
+                elementCodec, Weighted::value,
+                PacketCodecs.VAR_INT, Weighted::weight,
+                Weighted::new
+        ).collect(PacketCodecs.toList()).xmap(Pool::new, Pool::getEntries);
     }
 }

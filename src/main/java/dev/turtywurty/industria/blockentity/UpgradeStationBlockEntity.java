@@ -218,36 +218,36 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        if (nbt.contains("MultiblockPositions", NbtElement.LIST_TYPE)) {
-            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MultiblockPositions", NbtElement.COMPOUND_TYPE));
+        if (nbt.contains("MultiblockPositions")) {
+            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
         }
 
-        if (nbt.contains("Inventory", NbtElement.LIST_TYPE)) {
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory")) {
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
         }
 
-        if (nbt.contains("Energy", NbtElement.LIST_TYPE)) {
-            this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Energy")) {
+            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
         }
 
-        if (nbt.contains("SelectedRecipe", NbtElement.STRING_TYPE)) {
+        if (nbt.contains("SelectedRecipe")) {
             this.selectedRecipe = getRecipeKey(Objects.requireNonNull(nbt.get("SelectedRecipe")));
         }
 
-        if (nbt.contains("AvailableRecipes", NbtElement.LIST_TYPE)) {
+        if (nbt.contains("AvailableRecipes")) {
             this.availableRecipes.clear();
-            NbtList availableRecipes = nbt.getList("AvailableRecipes", NbtElement.STRING_TYPE);
+            NbtList availableRecipes = nbt.getListOrEmpty("AvailableRecipes");
             for (NbtElement recipe : availableRecipes) {
                 this.availableRecipes.add(getRecipeKey(recipe));
             }
         }
 
-        if (nbt.contains("SelectedRecipeIndex", NbtElement.INT_TYPE)) {
-            this.selectedRecipeIndex = nbt.getInt("SelectedRecipeIndex");
+        if (nbt.contains("SelectedRecipeIndex")) {
+            this.selectedRecipeIndex = nbt.getInt("SelectedRecipeIndex", 0);
         }
 
-        if (nbt.contains("Progress", NbtElement.INT_TYPE)) {
-            this.progress = nbt.getInt("Progress");
+        if (nbt.contains("Progress")) {
+            this.progress = nbt.getInt("Progress", 0);
         }
 
         if (this.isFirstRead) {
@@ -257,7 +257,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
     }
 
     private static RegistryKey<Recipe<?>> getRecipeKey(NbtElement element) {
-        return getRecipeKey(element.asString());
+        return getRecipeKey(element.asString().orElse(""));
     }
 
     private static RegistryKey<Recipe<?>> getRecipeKey(String string) {

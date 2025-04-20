@@ -1,108 +1,38 @@
 package dev.turtywurty.industria.pipe;
 
-import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
-import dev.turtywurty.heatapi.api.HeatStorage;
+import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.block.PipeBlock;
+import dev.turtywurty.industria.init.PipeNetworkManagerInit;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.network.SyncPipeNetworksPayload;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
-import dev.turtywurty.industria.pipe.impl.CableNetwork;
-import dev.turtywurty.industria.pipe.impl.FluidPipeNetwork;
-import dev.turtywurty.industria.pipe.impl.HeatPipeNetwork;
-import dev.turtywurty.industria.pipe.impl.SlurryPipeNetwork;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.api.EnergyStorage;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 // TODO: Splitting output between storages doesn't work
 public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
-    private static final List<PipeNetworkManager<?, ?>> MANAGERS = new ArrayList<>();
+    public static final Codec<PipeNetworkManager<?, ?>> CODEC = PipeNetworkManagerInit.PIPE_NETWORK_MANAGERS.getCodec();
+    public static final Codec<List<PipeNetworkManager<?, ?>>> LIST_CODEC = CODEC.listOf();
+    public static final PacketCodec<RegistryByteBuf, PipeNetworkManager<?, ?>> PACKET_CODEC = PacketCodecs.registryCodec(CODEC);
+    public static final PacketCodec<RegistryByteBuf, List<PipeNetworkManager<?, ?>>> LIST_PACKET_CODEC = PacketCodecs.collection(ArrayList::new, PACKET_CODEC);
 
-    public static final PipeNetworkManager<Storage<FluidVariant>, FluidPipeNetwork> FLUID = new PipeNetworkManager<>(
-            TransferType.FLUID, FluidPipeNetwork::new);
-
-    public static final PipeNetworkManager<Storage<SlurryVariant>, SlurryPipeNetwork> SLURRY = new PipeNetworkManager<>(
-            TransferType.SLURRY, SlurryPipeNetwork::new);
-
-    public static final PipeNetworkManager<EnergyStorage, CableNetwork> ENERGY = new PipeNetworkManager<>(
-            TransferType.ENERGY, CableNetwork::new);
-
-    public static final PipeNetworkManager<HeatStorage, HeatPipeNetwork> HEAT = new PipeNetworkManager<>(
-            TransferType.HEAT, HeatPipeNetwork::new);
-
-    private final Map<RegistryKey<World>, PipeNetworksData<S, N>> pipeNetworksData = new ConcurrentHashMap<>();
     private final TransferType<S, ?, ?> transferType;
     private final PipeNetwork.Factory<S, N> networkSupplier;
+
+    private final Map<RegistryKey<World>, PipeNetworksData<S, N>> pipeNetworksData = new ConcurrentHashMap<>();
 
     public PipeNetworkManager(TransferType<S, ?, ?> transferType, PipeNetwork.Factory<S, N> networkSupplier) {
         this.transferType = transferType;
         this.networkSupplier = networkSupplier;
-
-        MANAGERS.add(this);
-    }
-
-    public static List<PipeNetworkManager<?, ?>> getManagers() {
-        return MANAGERS;
-    }
-
-    public static void sync(ServerPlayerEntity player) {
-        ServerWorld serverWorld = player.getServerWorld();
-        for (PipeNetworkManager<?, ?> manager : PipeNetworkManager.getManagers()) {
-            PipeNetworksData<?, ?> networksData = manager.getPipeNetworksData(serverWorld);
-            String data = networksData.writeNbt(serverWorld.getRegistryManager()).toString();
-            byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
-
-            // split into chunks of max size 1.75kb
-            int maxChunkSize = 1792;
-            int totalChunks = (bytes.length + maxChunkSize - 1) / maxChunkSize;
-
-            UUID packetGroupId = UUID.randomUUID();
-            for (int index = 0; index < totalChunks; index++) {
-                int chunkSize = Math.min(maxChunkSize, bytes.length - index * maxChunkSize);
-                var chunk = new String(bytes, index * maxChunkSize, chunkSize, StandardCharsets.UTF_8);
-
-                ServerPlayNetworking.send(player, new SyncPipeNetworksPayload(
-                        manager.getTransferType().getName(),
-                        packetGroupId,
-                        index,
-                        totalChunks,
-                        chunk));
-            }
-        }
-    }
-
-    public static void readAllNbt(ServerWorld serverWorld, NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        readAllNbt(serverWorld.getRegistryKey(), nbt, registries);
-    }
-
-    public static void readAllNbt(RegistryKey<World> dimension, NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        for (PipeNetworkManager<?, ?> manager : MANAGERS) {
-            manager.getPipeNetworksData(dimension).readNbt(nbt.getCompound(manager.transferType.getName()), registries);
-        }
-    }
-
-    public static void writeAllNbt(ServerWorld serverWorld, NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        writeAllNbt(serverWorld.getRegistryKey(), nbt, registries);
-    }
-
-    public static void writeAllNbt(RegistryKey<World> dimension, NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        for (PipeNetworkManager<?, ?> manager : MANAGERS) {
-            nbt.put(manager.transferType.getName(), manager.getPipeNetworksData(dimension).writeNbt(registries));
-        }
     }
 
     public void tick(ServerWorld world) {
@@ -132,7 +62,7 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     }
 
     public PipeNetworksData<S, N> getPipeNetworksData(RegistryKey<World> dimension) {
-        return this.pipeNetworksData.computeIfAbsent(dimension, key -> new PipeNetworksData<>(key, this.networkSupplier));
+        return this.pipeNetworksData.computeIfAbsent(dimension, PipeNetworksData::new);
     }
 
     public @Nullable N getNetwork(ServerWorld world, UUID id) {

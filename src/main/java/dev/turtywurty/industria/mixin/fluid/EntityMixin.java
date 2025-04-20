@@ -147,7 +147,7 @@ public abstract class EntityMixin {
         for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
             double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
             double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getWorld().addParticle(fluidData.bubbleParticle(),
+            thisEntity.getWorld().addParticleClient(fluidData.bubbleParticle(),
                     thisEntity.getX() + xOffset,
                     yPos + 1.0F,
                     thisEntity.getZ() + yOffset,
@@ -159,7 +159,7 @@ public abstract class EntityMixin {
         for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
             double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
             double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getWorld().addParticle(fluidData.splashParticle(),
+            thisEntity.getWorld().addParticleClient(fluidData.splashParticle(),
                     thisEntity.getX() + xOffset,
                     yPos + 1.0F,
                     thisEntity.getZ() + yOffset,

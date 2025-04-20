@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity.util.slurry;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SingleSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
@@ -51,16 +50,15 @@ public class WrappedSlurryStorage<T extends Storage<SlurryVariant>> extends Wrap
     @Override
     public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
         for (int index = 0; index < nbt.size(); index++) {
-            var compound = nbt.getCompound(index);
+            var compound = nbt.getCompoundOrEmpty(index);
             T storage = this.storages.get(index);
             if (storage == null)
                 continue;
 
             if(storage instanceof SingleSlurryStorage singleSlurryStorage) {
-                singleSlurryStorage.amount = compound.getLong("Amount");
-                singleSlurryStorage.variant = SlurryVariant.CODEC.decode(NbtOps.INSTANCE, compound.get("Slurry"))
-                        .map(Pair::getFirst)
-                        .getOrThrow();
+                singleSlurryStorage.amount = compound.getLong("Amount", 0L);
+                singleSlurryStorage.variant = compound.get("Slurry", SlurryVariant.CODEC)
+                        .orElse(SlurryVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read slurry storage of type: " + storage.getClass().getName());
             }

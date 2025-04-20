@@ -3,7 +3,7 @@ package dev.turtywurty.industria.datagen.builder;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.recipe.RecipeExporter;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.RegistryKey;
 

@@ -19,7 +19,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -89,7 +88,7 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
         super.readNbt(nbt, registries);
 
         this.towers.clear();
-        int numberOfTowers = nbt.getInt("NumberOfTowers");
+        int numberOfTowers = nbt.getInt("NumberOfTowers", 0);
         for (int i = 1; i <= numberOfTowers; i++) {
             this.towers.add(new BlockPos(this.pos.getX(), this.pos.getY() + i, this.pos.getZ()));
         }
@@ -104,11 +103,11 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
 
         nbt.putInt("NumberOfTowers", this.towers.size());
 
-        if(nbt.contains("FluidStorage", NbtElement.LIST_TYPE))
-            this.fluidStorage.readNbt(nbt.getList("FluidStorage", NbtElement.COMPOUND_TYPE), registries);
+        if(nbt.contains("FluidStorage"))
+            this.fluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registries);
 
-        if(nbt.contains("HeatStorage", NbtElement.LIST_TYPE))
-            this.heatStorage.readNbt(nbt.getList("HeatStorage", NbtElement.COMPOUND_TYPE), registries);
+        if(nbt.contains("HeatStorage"))
+            this.heatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
     }
 
     @Override

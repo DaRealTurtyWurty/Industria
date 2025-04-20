@@ -15,7 +15,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -76,8 +75,8 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        if (nbt.contains("MachinePositions", NbtElement.LIST_TYPE)) {
-            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MachinePositions", NbtElement.INT_ARRAY_TYPE));
+        if (nbt.contains("MachinePositions")) {
+            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
         }
     }
 

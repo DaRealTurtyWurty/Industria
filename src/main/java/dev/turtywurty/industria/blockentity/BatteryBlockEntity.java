@@ -27,7 +27,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -136,9 +135,9 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
-        this.chargeMode = ChargeMode.valueOf(nbt.getString("ChargeMode"));
-        this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.wrappedEnergyStorage.readNbt(nbt.getList("Energy", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.chargeMode = nbt.get("ChargeMode", ChargeMode.CODEC).orElse(ChargeMode.CHARGE);
+        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
+        this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
     }
 
     @Override

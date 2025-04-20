@@ -27,7 +27,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            woodSet.generateEnglishLanguage(translationBuilder);
+            WoodSetDatagen.generateEnglishLanguage(woodSet, translationBuilder);
         }
 
         translationBuilder.add(BlockInit.ALLOY_FURNACE, "Alloy Furnace");

@@ -22,7 +22,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -132,11 +131,11 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);
 
-        this.energyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registryLookup);
-        this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registryLookup);
+        this.energyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
+        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
 
-        this.burnTime = nbt.getInt("BurnTime");
-        this.fuelTime = nbt.getInt("FuelTime");
+        this.burnTime = nbt.getInt("BurnTime", 0);
+        this.fuelTime = nbt.getInt("FuelTime", 0);
     }
 
     @Nullable

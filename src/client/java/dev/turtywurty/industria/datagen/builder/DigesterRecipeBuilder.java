@@ -3,7 +3,7 @@ package dev.turtywurty.industria.datagen.builder;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
-import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.recipe.RecipeExporter;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.NotNull;

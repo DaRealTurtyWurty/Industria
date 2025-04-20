@@ -26,7 +26,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -169,14 +168,14 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if (nbt.contains("HeatStorage", NbtElement.LIST_TYPE))
-            this.heatStorage.readNbt(nbt.getList("HeatStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("HeatStorage"))
+            this.heatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
 
-        if (nbt.contains("WaterStorage", NbtElement.LIST_TYPE))
-            this.waterStorage.readNbt(nbt.getList("WaterStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("WaterStorage"))
+            this.waterStorage.readNbt(nbt.getListOrEmpty("WaterStorage"), registries);
 
-        if (nbt.contains("EnergyStorage", NbtElement.LIST_TYPE))
-            this.energyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("EnergyStorage"))
+            this.energyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registries);
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {

@@ -7,6 +7,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +15,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
 
 public class RotaryKilnBlock extends IndustriaBlock {
     public static final IntProperty SEGMENT_INDEX = IntProperty.of("segment_index", 1, 15);
@@ -54,7 +54,8 @@ public class RotaryKilnBlock extends IndustriaBlock {
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        BlockState newState = world.getBlockState(pos);
         if (!state.isOf(newState.getBlock()) && !world.isClient) {
             BlockPos controllerPos = pos.offset(state.get(Properties.HORIZONTAL_FACING).getOpposite());
             BlockState controllerState = world.getBlockState(controllerPos);
@@ -72,6 +73,6 @@ public class RotaryKilnBlock extends IndustriaBlock {
             }
         }
 
-        super.onStateReplaced(state, world, pos, newState, moved);
+        super.onStateReplaced(state, world, pos, moved);
     }
 }

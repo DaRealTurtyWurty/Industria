@@ -7,6 +7,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +38,8 @@ public class FractionalDistillationTowerBlock extends IndustriaBlock {
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        BlockState newState = world.getBlockState(pos);
         if (state.getBlock() != newState.getBlock()) {
             if (world.getBlockEntity(pos) instanceof FractionalDistillationTowerBlockEntity blockEntity) {
                 if (blockEntity.getControllerPos() != null && world.getBlockEntity(blockEntity.getControllerPos()) instanceof FractionalDistillationControllerBlockEntity controller) {
@@ -46,6 +48,6 @@ public class FractionalDistillationTowerBlock extends IndustriaBlock {
             }
         }
 
-        super.onStateReplaced(state, world, pos, newState, moved);
+        super.onStateReplaced(state, world, pos, moved);
     }
 }

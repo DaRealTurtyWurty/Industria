@@ -2,8 +2,8 @@ package dev.turtywurty.industria.datagen.builder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.data.client.ModelIds;
+import net.minecraft.client.data.ItemModelGenerator;
+import net.minecraft.client.data.ModelIds;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.util.Identifier;
@@ -113,7 +113,7 @@ public class BuiltinEntityModelBuilder {
     }
 
     private void write() {
-        this.writer.writer.accept(this.id, () -> {
+        this.writer.modelCollector.accept(this.id, () -> {
             var object = new JsonObject();
             object.addProperty("parent", "minecraft:builtin/entity");
 

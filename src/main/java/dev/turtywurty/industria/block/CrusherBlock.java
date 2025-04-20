@@ -49,7 +49,7 @@ public class CrusherBlock extends IndustriaBlock {
             var particle = new ItemStackParticleEffect(ParticleTypes.ITEM, stack);
             for (float[] offset : PARTICLE_OFFSETS) {
                 for (int i = 0; i < random.nextInt(2) + 1; i++) {
-                    world.addParticle(particle,
+                    world.addParticleClient(particle,
                             pos.getX() + offset[0] + MathHelper.nextFloat(random, -0.1f, 0.1f),
                             pos.getY() + 0.55 + MathHelper.nextFloat(random, -0.1f, 0.1f),
                             pos.getZ() + offset[1] + MathHelper.nextFloat(random, -0.1f, 0.1f),

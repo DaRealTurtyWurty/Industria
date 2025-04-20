@@ -17,7 +17,7 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
     @Override
     public void generate() {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            woodSet.generateBlockLootTables(this);
+            WoodSetDatagen.generateBlockLootTables(woodSet, this);
         }
 
         addDrop(BlockInit.ALLOY_FURNACE);

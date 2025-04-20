@@ -3,7 +3,6 @@ package dev.turtywurty.industria.blockentity;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -41,13 +40,13 @@ public interface RecipeExperienceBlockEntity {
     }
 
     static void readRecipesUsed(NbtCompound nbt, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
-        if (nbt.contains(name, NbtElement.COMPOUND_TYPE)) {
-            NbtCompound recipesUsedNbt = nbt.getCompound(name);
+        if (nbt.contains(name)) {
+            NbtCompound recipesUsedNbt = nbt.getCompoundOrEmpty(name);
 
             recipesUsed.clear();
             for (String key : recipesUsedNbt.getKeys()) {
                 RegistryKey<Recipe<?>> recipeKey = RegistryKey.of(RegistryKeys.RECIPE, Identifier.of(key));
-                recipesUsed.put(recipeKey, recipesUsedNbt.getInt(key));
+                recipesUsed.put(recipeKey, recipesUsedNbt.getInt(key, 0));
             }
         }
     }

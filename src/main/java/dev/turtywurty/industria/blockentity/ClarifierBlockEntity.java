@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
@@ -32,8 +31,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -126,7 +123,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
         if (!this.outputItemStack.isEmpty()) {
@@ -165,7 +162,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
                 update();
             }
 
-            if(!this.nextOutputItemStack.isEmpty()) {
+            if (!this.nextOutputItemStack.isEmpty()) {
                 this.nextOutputItemStack = ItemStack.EMPTY;
                 update();
             }
@@ -189,7 +186,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
             this.outputItemStack = recipe.craft(recipeInput, this.world.getRegistryManager());
             this.outputFluidStack = recipe.outputFluidStack();
             inputFluidStorage.amount -= recipe.inputFluid().amount();
-            
+
             this.currentRecipeId = null;
             this.maxProgress = 0;
             this.progress = 0;
@@ -244,11 +241,11 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
     @Override
     public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
         Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if(Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 1 && direction == Direction.UP)
+        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 1 && direction == Direction.UP)
             transferTypes.put(Direction.UP, List.of(TransferType.FLUID));
-        else if(offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == -1 && offsetFromPrimary.getX() == 0 && direction == Direction.NORTH)
+        else if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == -1 && offsetFromPrimary.getX() == 0 && direction == Direction.NORTH)
             transferTypes.put(Direction.NORTH, List.of(TransferType.FLUID));
-        else if(offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == 1 && offsetFromPrimary.getX() == 0 && direction == Direction.SOUTH)
+        else if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == 1 && offsetFromPrimary.getX() == 0 && direction == Direction.SOUTH)
             transferTypes.put(Direction.SOUTH, List.of(TransferType.ITEM));
 
         return Multiblockable.toIOPortMap(transferTypes);
@@ -265,10 +262,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
         nbt.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
+            nbt.put("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE), this.currentRecipeId);
         }
 
         if (!this.outputItemStack.isEmpty()) {
@@ -276,56 +270,49 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
         }
 
         if (!this.outputFluidStack.isEmpty()) {
-            nbt.put("OutputFluid", FluidStack.CODEC.codec()
-                    .encodeStart(NbtOps.INSTANCE, this.outputFluidStack)
-                    .getOrThrow());
+            nbt.put("OutputFluid", FluidStack.CODEC.codec(), this.outputFluidStack);
         }
 
-        nbt.put("NextOutputStack", this.nextOutputItemStack.toNbtAllowEmpty(registries));
+        nbt.put("NextOutputStack", ItemStack.OPTIONAL_CODEC, this.nextOutputItemStack);
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if(nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        if(nbt.contains("FluidTank", NbtElement.LIST_TYPE))
-            this.wrappedFluidStorage.readNbt(nbt.getList("FluidTank", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("FluidTank"))
+            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
 
-        if(nbt.contains("MultiblockPositions", NbtElement.LIST_TYPE))
-            Multiblockable.readMultiblockFromNbt(this, nbt.getList("MultiblockPositions", NbtElement.INT_ARRAY_TYPE));
+        if (nbt.contains("MultiblockPositions"))
+            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
 
-        if(nbt.contains("Progress", NbtElement.INT_TYPE))
-            this.progress = nbt.getInt("Progress");
+        if (nbt.contains("Progress"))
+            this.progress = nbt.getInt("Progress", 0);
 
-        if(nbt.contains("MaxProgress", NbtElement.INT_TYPE))
-            this.maxProgress = nbt.getInt("MaxProgress");
+        if (nbt.contains("MaxProgress"))
+            this.maxProgress = nbt.getInt("MaxProgress", 0);
 
-        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null :
-                    RegistryKey.createCodec(RegistryKeys.RECIPE)
-                            .decode(NbtOps.INSTANCE, currentRecipe)
-                            .map(Pair::getFirst)
-                            .result()
-                            .orElse(null);
+        if (nbt.contains("CurrentRecipe")) {
+            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                    .orElse(null);
         }
 
-        if (nbt.contains("OutputStack", NbtElement.COMPOUND_TYPE)) {
-            this.outputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("OutputStack"));
+        if (nbt.contains("OutputStack")) {
+            this.outputItemStack = ItemStack.fromNbt(registries, nbt.get("OutputStack"))
+                    .orElse(ItemStack.EMPTY);
         }
 
-        if (nbt.contains("OutputFluid", NbtElement.COMPOUND_TYPE)) {
-            this.outputFluidStack = FluidStack.CODEC.codec()
-                    .decode(NbtOps.INSTANCE, nbt.getCompound("OutputFluid"))
-                    .map(Pair::getFirst)
-                    .getOrThrow();
+        if (nbt.contains("OutputFluid")) {
+            this.outputFluidStack = nbt.get("OutputFluid", FluidStack.CODEC.codec())
+                    .orElse(FluidStack.EMPTY);
         }
 
-        if(nbt.contains("NextOutputStack", NbtElement.COMPOUND_TYPE))
-            this.nextOutputItemStack = ItemStack.fromNbtOrEmpty(registries, nbt.getCompound("NextOutputStack"));
+        if (nbt.contains("NextOutputStack"))
+            this.nextOutputItemStack = nbt.get("NextOutputStack", ItemStack.OPTIONAL_CODEC)
+                    .orElse(ItemStack.EMPTY);
     }
 
     @Override

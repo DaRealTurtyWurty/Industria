@@ -99,7 +99,7 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
 
         @Override
         protected void onCrafted(ItemStack stack) {
-            stack.onCraftByPlayer(this.player.getWorld(), this.player, this.amount);
+            stack.onCraftByPlayer(this.player, this.amount);
             if(this.player instanceof ServerPlayerEntity serverPlayerEntity) {
                 this.blockEntity.dropExperienceForRecipesUsed(serverPlayerEntity);
             }

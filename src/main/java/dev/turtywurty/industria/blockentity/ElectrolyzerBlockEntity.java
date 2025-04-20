@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.Industria;
@@ -302,48 +301,39 @@ public class ElectrolyzerBlockEntity extends UpdatableBlockEntity implements Syn
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if (nbt.contains("Inventory", NbtElement.LIST_TYPE))
-            this.wrappedInventoryStorage.readNbt(nbt.getList("Inventory", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("Inventory"))
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        if (nbt.contains("FluidStorage", NbtElement.LIST_TYPE))
-            this.wrappedFluidStorage.readNbt(nbt.getList("FluidStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("FluidStorage"))
+            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registries);
 
-        if (nbt.contains("EnergyStorage", NbtElement.LIST_TYPE))
-            this.wrappedEnergyStorage.readNbt(nbt.getList("EnergyStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("EnergyStorage"))
+            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registries);
 
-        if (nbt.contains("GasStorage", NbtElement.LIST_TYPE))
-            this.wrappedGasStorage.readNbt(nbt.getList("GasStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("GasStorage"))
+            this.wrappedGasStorage.readNbt(nbt.getListOrEmpty("GasStorage"), registries);
 
-        if (nbt.contains("HeatStorage", NbtElement.LIST_TYPE))
-            this.wrappedHeatStorage.readNbt(nbt.getList("HeatStorage", NbtElement.COMPOUND_TYPE), registries);
+        if (nbt.contains("HeatStorage"))
+            this.wrappedHeatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
 
-        this.progress = nbt.getInt("Progress");
-        this.maxProgress = nbt.getInt("MaxProgress");
+        this.progress = nbt.getInt("Progress", 0);
+        this.maxProgress = nbt.getInt("MaxProgress", 0);
 
-        if (nbt.contains("CurrentRecipe", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound currentRecipe = nbt.getCompound("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null :
-                    RegistryKey.createCodec(RegistryKeys.RECIPE)
-                            .decode(NbtOps.INSTANCE, currentRecipe)
-                            .map(Pair::getFirst)
-                            .result()
-                            .orElse(null);
+        if (nbt.contains("CurrentRecipe")) {
+            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                    .orElse(null);
         }
 
-        if (nbt.contains("LeftoverOutputFluid", NbtElement.COMPOUND_TYPE)) {
-            this.leftoverOutputFluid = FluidStack.CODEC.codec()
-                    .decode(NbtOps.INSTANCE, nbt.getCompound("LeftoverOutputFluid"))
-                    .map(Pair::getFirst)
-                    .getOrThrow();
+        if (nbt.contains("LeftoverOutputFluid")) {
+            this.leftoverOutputFluid = nbt.get("LeftoverOutputFluid", FluidStack.CODEC.codec())
+                    .orElse(FluidStack.EMPTY);
         } else {
             this.leftoverOutputFluid = FluidStack.EMPTY;
         }
 
-        if (nbt.contains("LeftoverOutputGas", NbtElement.COMPOUND_TYPE)) {
-            this.leftoverOutputGas = GasStack.CODEC.codec()
-                    .decode(NbtOps.INSTANCE, nbt.getCompound("LeftoverOutputGas"))
-                    .map(Pair::getFirst)
-                    .getOrThrow();
+        if (nbt.contains("LeftoverOutputGas")) {
+            this.leftoverOutputGas = nbt.get("LeftoverOutputGas", GasStack.CODEC.codec())
+                    .orElse(GasStack.EMPTY);
         } else {
             this.leftoverOutputGas = GasStack.EMPTY;
         }

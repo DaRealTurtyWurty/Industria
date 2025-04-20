@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
+import com.mojang.serialization.Codec;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.gasapi.api.GasVariant;
@@ -20,6 +21,9 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -94,8 +98,19 @@ public class TransferType<S, V, A extends Number> {
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
 
+    public static final Codec<TransferType<?, ?, ?>> CODEC = Codec.STRING.xmap(TransferType::getByName, TransferType::getName);
+    public static final PacketCodec<RegistryByteBuf, TransferType<?, ?, ?>> PACKET_CODEC =
+            PacketCodec.tuple(PacketCodecs.STRING, TransferType::getName, TransferType::getByName);
+
     public static List<TransferType<?, ?, ?>> getValues() {
         return List.copyOf(VALUES);
+    }
+
+    public static TransferType<?, ?, ?> getByName(String name) {
+        return VALUES.stream()
+                .filter(transferType -> transferType.name.equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No TransferType found for name: " + name));
     }
 
     private final String name;

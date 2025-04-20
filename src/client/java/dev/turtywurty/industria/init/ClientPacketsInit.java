@@ -1,25 +1,21 @@
 package dev.turtywurty.industria.init;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
 import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
-import dev.turtywurty.industria.network.SyncPipeNetworksPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
-import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import dev.turtywurty.industria.persistent.WorldPipeNetworks;
+import dev.turtywurty.industria.pipe.PipeNetworkNetworking;
 import dev.turtywurty.industria.renderer.world.FluidPocketWorldRenderer;
 import dev.turtywurty.industria.screen.SeismicScannerScreen;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.StringNbtReader;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
 import net.minecraft.world.World;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClientPacketsInit {
     public static void init() {
@@ -38,36 +34,36 @@ public class ClientPacketsInit {
             }
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(SyncPipeNetworksPayload.ID, new SyncPipeNetworksHandler());
+        ClientPlayNetworking.registerGlobalReceiver(PipeNetworkNetworking.Payload.ID, new SyncPipeNetworksHandler());
     }
 
-    public static class SyncPipeNetworksHandler implements ClientPlayNetworking.PlayPayloadHandler<SyncPipeNetworksPayload> {
-        private final Map<UUID, Map<Integer, String>> packetChunkMap = new HashMap<>();
+    public static class SyncPipeNetworksHandler implements ClientPlayNetworking.PlayPayloadHandler<PipeNetworkNetworking.Payload> {
+        private final Map<UUID, List<byte[]>> packetChunkMap = new HashMap<>();
 
         @Override
-        public void receive(SyncPipeNetworksPayload payload, ClientPlayNetworking.Context context) {
-            Map<Integer, String> chunkList = packetChunkMap.computeIfAbsent(payload.packetGroupId(), k -> new HashMap<>());
-            int index = payload.index();
-            chunkList.put(index, payload.data());
-
-            boolean allReceived = chunkList.size() == payload.chunks();
-            if(!allReceived)
+        public void receive(PipeNetworkNetworking.Payload payload, ClientPlayNetworking.Context context) {
+            if(payload.data().length != 0) {
+                packetChunkMap.computeIfAbsent(payload.uuid(), k -> new ArrayList<>()).add(payload.data());
                 return;
-
-            ClientPlayerEntity player = context.player();
-            if(payload.index() == payload.chunks() - 1) {
-                RegistryKey<World> worldKey = player.getEntityWorld().getRegistryKey();
-                String nbtString = chunkList.values().stream().reduce((a, b) -> a + b).orElse("");
-
-                try {
-                    NbtCompound data = StringNbtReader.parse(nbtString);
-                    PipeNetworkManager.readAllNbt(worldKey, data, player.getEntityWorld().getRegistryManager());
-                } catch (CommandSyntaxException e) {
-                    player.sendMessage(Text.literal("Failed to read pipe network data").withColor(0xFF0000), false);
-                }
             }
 
-            packetChunkMap.remove(payload.packetGroupId());
+            if (packetChunkMap.containsKey(payload.uuid())) {
+                List<byte[]> chunks = packetChunkMap.get(payload.uuid());
+                byte[] data = new byte[chunks.stream().mapToInt(arr -> arr.length).sum()];
+                int offset = 0;
+                for (byte[] chunk : chunks) {
+                    System.arraycopy(chunk, 0, data, offset, chunk.length);
+                    offset += chunk.length;
+                }
+
+                packetChunkMap.remove(payload.uuid());
+
+                PacketByteBuf packetByteBuf = PacketByteBufs.create();
+                packetByteBuf.writeBytes(data);
+
+                RegistryByteBuf registryByteBuf = new RegistryByteBuf(packetByteBuf, context.player().getRegistryManager());
+                WorldPipeNetworks worldPipeNetworks = WorldPipeNetworks.PACKET_CODEC.decode(registryByteBuf);
+            }
         }
     }
 }

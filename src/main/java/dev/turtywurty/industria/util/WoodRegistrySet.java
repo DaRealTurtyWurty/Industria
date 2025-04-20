@@ -7,26 +7,13 @@ import dev.turtywurty.industria.init.EntityTypeInit;
 import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.mixin.BlockEntityTypeAccessor;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.object.builder.v1.block.type.WoodTypeBuilder;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
-import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.block.*;
 import net.minecraft.block.dispenser.BoatDispenserBehavior;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.data.client.BlockStateModelGenerator;
-import net.minecraft.data.client.ItemModelGenerator;
-import net.minecraft.data.client.Models;
-import net.minecraft.data.client.TexturedModel;
 import net.minecraft.data.family.BlockFamily;
-import net.minecraft.data.server.loottable.BlockLootTableGenerator;
-import net.minecraft.data.server.recipe.RecipeExporter;
-import net.minecraft.data.server.recipe.RecipeGenerator;
-import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
-import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.vehicle.BoatEntity;
@@ -35,21 +22,11 @@ import net.minecraft.item.BoatItem;
 import net.minecraft.item.HangingSignItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.SignItem;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.EntityTypeTags;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.featuretoggle.FeatureSet;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static dev.turtywurty.industria.datagen.IndustriaRecipeProvider.hasTag;
 
 public class WoodRegistrySet {
     private static final List<WoodRegistrySet> WOOD_SETS = new ArrayList<>();
@@ -118,7 +95,7 @@ public class WoodRegistrySet {
         this.wood = BlockInit.registerWithItemCopy(this.name + "_wood",
                 wood == null ? PillarBlock::new : wood, Blocks.OAK_WOOD);
         this.leaves = BlockInit.registerWithItemCopy(this.name + "_leaves",
-                leaves == null ? LeavesBlock::new : leaves, Blocks.OAK_LEAVES);
+                leaves == null ? settings -> new TintedParticleLeavesBlock(0.01F, settings) : leaves, Blocks.OAK_LEAVES);
         this.sapling = BlockInit.registerWithItemCopy(this.name + "_sapling",
                 sapling == null ? settings -> new SaplingBlock(this.saplingGenerator, settings) : sapling, Blocks.OAK_SAPLING);
         this.stairs = BlockInit.registerWithItemCopy(this.name + "_stairs",
@@ -229,279 +206,6 @@ public class WoodRegistrySet {
                 .group("wooden")
                 .unlockCriterionName("has_planks")
                 .build();
-    }
-
-    public void generateBlockLootTables(FabricBlockLootTableProvider provider) {
-        provider.addDrop(this.planks);
-        provider.addDrop(this.log);
-        provider.addDrop(this.strippedLog);
-        provider.addDrop(this.strippedWood);
-        provider.addDrop(this.wood);
-        provider.addDrop(this.sapling);
-        provider.addDrop(this.stairs);
-        provider.addDrop(this.slab);
-        provider.addDrop(this.fence);
-        provider.addDrop(this.fenceGate);
-        provider.addDrop(this.door);
-        provider.addDrop(this.trapdoor);
-        provider.addDrop(this.pressurePlate);
-        provider.addDrop(this.button);
-        provider.addDrop(this.sign, this.signItem);
-        provider.addDrop(this.wallSign, this.signItem);
-        provider.addDrop(this.hangingSign, this.hangingSignItem);
-        provider.addDrop(this.wallHangingSign, this.hangingSignItem);
-
-        provider.leavesDrops(this.leaves, this.sapling, BlockLootTableGenerator.SAPLING_DROP_CHANCE);
-    }
-
-    public void generateEnglishLanguage(FabricLanguageProvider.TranslationBuilder translationBuilder) {
-        String typeCaseName = snakeToTypeCase(this.name);
-        translationBuilder.add(this.planks, typeCaseName + " Planks");
-        translationBuilder.add(this.log, typeCaseName + " Log");
-        translationBuilder.add(this.strippedLog, "Stripped " + typeCaseName + " Log");
-        translationBuilder.add(this.strippedWood, "Stripped " + typeCaseName + " Wood");
-        translationBuilder.add(this.wood, typeCaseName + " Wood");
-        translationBuilder.add(this.leaves, typeCaseName + " Leaves");
-        translationBuilder.add(this.sapling, typeCaseName + " Sapling");
-        translationBuilder.add(this.stairs, typeCaseName + " Stairs");
-        translationBuilder.add(this.slab, typeCaseName + " Slab");
-        translationBuilder.add(this.fence, typeCaseName + " Fence");
-        translationBuilder.add(this.fenceGate, typeCaseName + " Fence Gate");
-        translationBuilder.add(this.door, typeCaseName + " Door");
-        translationBuilder.add(this.trapdoor, typeCaseName + " Trapdoor");
-        translationBuilder.add(this.pressurePlate, typeCaseName + " Pressure Plate");
-        translationBuilder.add(this.button, typeCaseName + " Button");
-        translationBuilder.add(this.sign, typeCaseName + " Sign");
-        translationBuilder.add(this.wallSign, typeCaseName + " Wall Sign");
-        translationBuilder.add(this.hangingSign, typeCaseName + " Hanging Sign");
-        translationBuilder.add(this.wallHangingSign, typeCaseName + " Wall Hanging Sign");
-        translationBuilder.add(this.boatItem, typeCaseName + " Boat");
-        translationBuilder.add(this.chestBoatItem, typeCaseName + " Chest Boat");
-        translationBuilder.add(this.boatEntityType, typeCaseName + " Boat");
-        translationBuilder.add(this.chestBoatEntityType, typeCaseName + " Chest Boat");
-        translationBuilder.add(this.signItem, typeCaseName + " Sign");
-        translationBuilder.add(this.hangingSignItem, typeCaseName + " Hanging Sign");
-    }
-
-    public void generateBlockStateAndModels(BlockStateModelGenerator blockStateModelGenerator) {
-        blockStateModelGenerator.registerLog(this.log)
-                .log(this.log)
-                .wood(this.wood);
-        blockStateModelGenerator.registerLog(this.strippedLog)
-                .log(this.strippedLog)
-                .wood(this.strippedWood);
-        blockStateModelGenerator.registerSingleton(this.leaves, TexturedModel.LEAVES);
-        blockStateModelGenerator.registerTintableCross(this.sapling, BlockStateModelGenerator.TintType.NOT_TINTED);
-        blockStateModelGenerator.registerHangingSign(this.strippedLog, this.hangingSign, this.wallHangingSign);
-        blockStateModelGenerator.registerCubeAllModelTexturePool(this.planks)
-                .family(createBlockFamily());
-    }
-
-    public void generateItemModels(ItemModelGenerator itemModelGenerator) {
-        itemModelGenerator.register(this.boatItem, Models.GENERATED);
-        itemModelGenerator.register(this.chestBoatItem, Models.GENERATED);
-    }
-
-    public void generateRecipes(RecipeGenerator generator, RecipeExporter exporter, RegistryEntryLookup<Item> registries) {
-        ShapelessRecipeJsonBuilder.create(registries, RecipeCategory.BUILDING_BLOCKS, this.planks, 4)
-                .input(Ingredient.fromTag(registries.getOrThrow(this.logsItemTag)))
-                .criterion(hasTag(this.logsItemTag), generator.conditionsFromTag(this.logsItemTag))
-                .offerTo(exporter);
-
-        ShapedRecipeJsonBuilder.create(registries, RecipeCategory.DECORATIONS, this.hangingSignItem, 6)
-                .input('P', this.planks)
-                .input('C', ConventionalItemTags.CHAINS)
-                .pattern("C C")
-                .pattern("PPP")
-                .pattern("PPP")
-                .criterion(RecipeGenerator.hasItem(this.planks), generator.conditionsFromItem(this.planks))
-                .criterion(hasTag(ConventionalItemTags.CHAINS), generator.conditionsFromTag(ConventionalItemTags.CHAINS))
-                .offerTo(exporter);
-
-        ShapedRecipeJsonBuilder.create(registries, RecipeCategory.TRANSPORTATION, this.boatItem)
-                .input('P', this.planks)
-                .pattern("P P")
-                .pattern("PPP")
-                .criterion(RecipeGenerator.hasItem(this.planks), generator.conditionsFromItem(this.planks))
-                .offerTo(exporter);
-
-        ShapelessRecipeJsonBuilder.create(registries, RecipeCategory.TRANSPORTATION, this.chestBoatItem)
-                .input(Ingredient.fromTag(registries.getOrThrow(this.logsItemTag)))
-                .input(Ingredient.fromTag(registries.getOrThrow(ConventionalItemTags.WOODEN_CHESTS)))
-                .criterion(hasTag(this.logsItemTag), generator.conditionsFromTag(this.logsItemTag))
-                .criterion(hasTag(ConventionalItemTags.WOODEN_CHESTS), generator.conditionsFromTag(ConventionalItemTags.WOODEN_CHESTS))
-                .offerTo(exporter);
-
-        generator.generateFamily(createBlockFamily(), FeatureSet.empty());
-    }
-
-    public void generateItemTags(FabricTagProvider<Item> provider) {
-        Method getOrCreateTagBuilderMethod;
-        try {
-            getOrCreateTagBuilderMethod = provider.getClass().getMethod("getOrCreateTagBuilder", TagKey.class);
-            getOrCreateTagBuilderMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to access getOrCreateTagBuilder method", e);
-        }
-
-        try {
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, this.logsItemTag))
-                    .add(this.log.asItem())
-                    .add(this.strippedLog.asItem())
-                    .add(this.wood.asItem())
-                    .add(this.strippedWood.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.LOGS_THAT_BURN))
-                    .addTag(this.logsItemTag);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.PLANKS))
-                    .add(this.planks.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.LEAVES))
-                    .add(this.leaves.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.SAPLINGS))
-                    .add(this.sapling.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_BUTTONS))
-                    .add(this.button.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_DOORS))
-                    .add(this.door.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_FENCES))
-                    .add(this.fence.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.FENCE_GATES))
-                    .add(this.fenceGate.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_PRESSURE_PLATES))
-                    .add(this.pressurePlate.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_TRAPDOORS))
-                    .add(this.trapdoor.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_STAIRS))
-                    .add(this.stairs.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_SLABS))
-                    .add(this.slab.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.SIGNS))
-                    .add(this.sign.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.HANGING_SIGNS))
-                    .add(this.hangingSign.asItem());
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.BOATS))
-                    .add(this.boatItem);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.CHEST_BOATS))
-                    .add(this.chestBoatItem);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate item tags", e);
-        }
-    }
-
-    public void generateBlockTags(FabricTagProvider<Block> provider) {
-        Method getOrCreateTagBuilderMethod;
-        try {
-            getOrCreateTagBuilderMethod = provider.getClass().getMethod("getOrCreateTagBuilder", TagKey.class);
-            getOrCreateTagBuilderMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to access getOrCreateTagBuilder method", e);
-        }
-
-        try {
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, this.logsBlockTag))
-                    .add(this.log)
-                    .add(this.strippedLog)
-                    .add(this.wood)
-                    .add(this.strippedWood);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.LOGS_THAT_BURN))
-                    .addTag(this.logsBlockTag);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.PLANKS))
-                    .add(this.planks);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.LEAVES))
-                    .add(this.leaves);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.SAPLINGS))
-                    .add(this.sapling);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_BUTTONS))
-                    .add(this.button);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_DOORS))
-                    .add(this.door);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_FENCES))
-                    .add(this.fence);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.FENCE_GATES))
-                    .add(this.fenceGate);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_PRESSURE_PLATES))
-                    .add(this.pressurePlate);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_TRAPDOORS))
-                    .add(this.trapdoor);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_STAIRS))
-                    .add(this.stairs);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_SLABS))
-                    .add(this.slab);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.STANDING_SIGNS))
-                    .add(this.sign);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WALL_SIGNS))
-                    .add(this.wallSign);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.CEILING_HANGING_SIGNS))
-                    .add(this.hangingSign);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WALL_HANGING_SIGNS))
-                    .add(this.wallHangingSign);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to invoke getOrCreateTagBuilder method", e);
-        }
-    }
-
-    public void generateEntityTags(FabricTagProvider<EntityType<?>> provider) {
-        Method getOrCreateTagBuilderMethod;
-        try {
-            getOrCreateTagBuilderMethod = provider.getClass().getMethod("getOrCreateTagBuilder", TagKey.class);
-            getOrCreateTagBuilderMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to access getOrCreateTagBuilder method", e);
-        }
-
-        try {
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, EntityTypeTags.BOAT))
-                    .add(this.boatEntityType)
-                    .add(this.chestBoatEntityType);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate entity tags", e);
-        }
-    }
-
-    private static String snakeToTypeCase(String str) {
-        StringBuilder result = new StringBuilder();
-        boolean toUpperCase = true;
-        for (char c : str.toCharArray()) {
-            if (c == '_') {
-                toUpperCase = true;
-            } else {
-                result.append(toUpperCase ? Character.toUpperCase(c) : c);
-                toUpperCase = false;
-            }
-        }
-
-        return result.toString();
     }
 
     public static List<WoodRegistrySet> getWoodSets() {
