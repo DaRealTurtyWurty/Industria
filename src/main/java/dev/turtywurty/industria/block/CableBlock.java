@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.pipe.impl.CableNetwork;
+import dev.turtywurty.industria.pipe.impl.network.CableNetwork;
 import team.reborn.energy.api.EnergyStorage;
 
 public class CableBlock extends PipeBlock<EnergyStorage, CableNetwork, Long> {

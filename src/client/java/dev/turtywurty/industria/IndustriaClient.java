@@ -1,5 +1,6 @@
 package dev.turtywurty.industria;
 
+import dev.turtywurty.industria.data.ClientPipeNetworks;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import net.fabricmc.api.ClientModInitializer;
@@ -23,5 +24,6 @@ public class IndustriaClient implements ClientModInitializer {
         DebugRenderingRegistry.init();
         EntityRendererInit.init();
         ColorProviderInit.init();
+        ClientPipeNetworks.init();
     }
 }

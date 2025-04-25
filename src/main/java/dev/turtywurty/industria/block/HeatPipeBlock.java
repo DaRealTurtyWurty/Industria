@@ -3,7 +3,7 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.heatapi.api.unit.HeatUnit;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.pipe.impl.HeatPipeNetwork;
+import dev.turtywurty.industria.pipe.impl.network.HeatPipeNetwork;
 
 public class HeatPipeBlock extends PipeBlock<HeatStorage, HeatPipeNetwork, Double> {
     public HeatPipeBlock(Settings settings) {

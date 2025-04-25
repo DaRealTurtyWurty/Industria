@@ -78,7 +78,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     }
 
     public PipeNetworkManager<S, N> getNetworkManager(ServerWorld world) {
-        return WorldPipeNetworks.getOrCreate(world).getNetwork(getTransferType());
+        return WorldPipeNetworks.getOrCreate(world).getNetworkManager(getTransferType());
     }
 
     public TransferType<S, ?, A> getTransferType() {
@@ -259,16 +259,16 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
 
         if(world instanceof ServerWorld serverWorld) {
             PipeNetworkManager<S, N> networkManager = getNetworkManager(serverWorld);
-            PipeNetwork<S> network = networkManager.getNetwork(world, pos);
+            PipeNetwork<S> network = networkManager.getNetwork(pos);
             if (network == null) {
                 networkManager.traverseCreateNetwork(serverWorld, pos);
-                network = networkManager.getNetwork(world, pos);
+                network = networkManager.getNetwork(pos);
                 if(network == null)
                     return ActionResult.PASS;
             }
 
-            A amount = getAmount(network.getStorage(world, pos));
-            A capacity = getCapacity(network.getStorage(world, pos));
+            A amount = getAmount(network.getStorage(pos));
+            A capacity = getCapacity(network.getStorage(pos));
 
             DecimalFormat df = new DecimalFormat("#.##");
             DecimalFormat scientific = new DecimalFormat("#.##E0");

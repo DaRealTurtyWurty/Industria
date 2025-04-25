@@ -1,34 +1,40 @@
-package dev.turtywurty.industria.pipe.impl;
+package dev.turtywurty.industria.pipe.impl.network;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.turtywurty.industria.init.PipeNetworkTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
+import dev.turtywurty.industria.pipe.PipeNetworkType;
+import dev.turtywurty.industria.util.ExtraCodecs;
+import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.util.Uuids;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
+import java.util.Set;
 import java.util.UUID;
 
 public class CableNetwork extends PipeNetwork<EnergyStorage> {
-    public static final MapCodec<CableNetwork> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    Uuids.CODEC.fieldOf("id").forGetter(CableNetwork::getId),
-                    BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(CableNetwork::getPipes),
-                    BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(CableNetwork::getConnectedBlocks),
-                    TransferType.CODEC.fieldOf("transferType").forGetter(CableNetwork::getTransferType),
-                    Codec.LONG.fieldOf("storageAmount").forGetter(network -> network.storage.getAmount())
-            ).apply(instance, (id, pipes, connectedBlocks, transferType, storageAmount) -> {
-                var network = new CableNetwork(id);
-                network.pipes.addAll(pipes);
-                network.connectedBlocks.addAll(connectedBlocks);
-                ((CableNetworkEnergyStorage) network.storage).amount = storageAmount;
+    public static final MapCodec<CableNetwork> CODEC = PipeNetwork.createCodec(
+            Codec.LONG.fieldOf("storageAmount").forGetter(network -> network.storage.getAmount()),
+            (storage, storageAmount) -> ((CableNetworkEnergyStorage) storage).amount = storageAmount,
+            CableNetwork::new);
 
-                return network;
-            }));
+    public static final PacketCodec<RegistryByteBuf, CableNetwork> PACKET_CODEC =
+            PipeNetwork.createPacketCodec(
+                    PacketCodecs.LONG,
+                    network -> ((CableNetworkEnergyStorage) network.storage).amount,
+                    (storage, storageAmount) -> ((CableNetworkEnergyStorage) storage).amount = storageAmount,
+                    CableNetwork::new);
+
+    public static final Codec<Set<CableNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
+    public static final PacketCodec<RegistryByteBuf, Set<CableNetwork>> SET_PACKET_CODEC =
+            ExtraPacketCodecs.setOf(PACKET_CODEC);
 
     public CableNetwork(UUID id) {
         super(id, TransferType.ENERGY);
@@ -40,8 +46,8 @@ public class CableNetwork extends PipeNetwork<EnergyStorage> {
     }
 
     @Override
-    public MapCodec<? extends PipeNetwork<?>> getCodec() {
-        return CODEC;
+    protected PipeNetworkType<EnergyStorage, CableNetwork> getType() {
+        return PipeNetworkTypeInit.ENERGY;
     }
 
     public static class CableNetworkEnergyStorage extends SimpleEnergyStorage {

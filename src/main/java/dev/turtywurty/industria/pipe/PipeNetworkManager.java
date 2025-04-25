@@ -1,15 +1,28 @@
 package dev.turtywurty.industria.pipe;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.block.PipeBlock;
-import dev.turtywurty.industria.init.PipeNetworkManagerInit;
+import dev.turtywurty.industria.init.PipeNetworkManagerTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.network.AddPipeNetworkPayload;
+import dev.turtywurty.industria.network.ModifyPipeNetworkPayload;
+import dev.turtywurty.industria.network.RemovePipeNetworkPayload;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
+import dev.turtywurty.industria.util.ExtraCodecs;
+import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import io.netty.buffer.ByteBuf;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -17,26 +30,128 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 // TODO: Splitting output between storages doesn't work
-public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
-    public static final Codec<PipeNetworkManager<?, ?>> CODEC = PipeNetworkManagerInit.PIPE_NETWORK_MANAGERS.getCodec();
+public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
+    public static final Codec<PipeNetworkManager<?, ?>> CODEC = PipeNetworkManagerTypeInit.CODEC.dispatch(
+            PipeNetworkManager::getType, PipeNetworkManagerType::codec);
+
     public static final Codec<List<PipeNetworkManager<?, ?>>> LIST_CODEC = CODEC.listOf();
-    public static final PacketCodec<RegistryByteBuf, PipeNetworkManager<?, ?>> PACKET_CODEC = PacketCodecs.registryCodec(CODEC);
-    public static final PacketCodec<RegistryByteBuf, List<PipeNetworkManager<?, ?>>> LIST_PACKET_CODEC = PacketCodecs.collection(ArrayList::new, PACKET_CODEC);
 
-    private final TransferType<S, ?, ?> transferType;
-    private final PipeNetwork.Factory<S, N> networkSupplier;
+    public static final PacketCodec<RegistryByteBuf, PipeNetworkManager<?, ?>> PACKET_CODEC =
+            PipeNetworkManagerTypeInit.PACKET_CODEC.dispatch(
+                    PipeNetworkManager::getType, PipeNetworkManagerType::packetCodec);
 
-    private final Map<RegistryKey<World>, PipeNetworksData<S, N>> pipeNetworksData = new ConcurrentHashMap<>();
+    public static final PacketCodec<RegistryByteBuf, List<PipeNetworkManager<?, ?>>> LIST_PACKET_CODEC =
+            PacketCodecs.collection(ArrayList::new, PACKET_CODEC);
 
-    public PipeNetworkManager(TransferType<S, ?, ?> transferType, PipeNetwork.Factory<S, N> networkSupplier) {
+    public static final Codec<Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_CODEC = Codec.unboundedMap(
+            BlockPos.CODEC, Uuids.CODEC);
+
+    public static final PacketCodec<ByteBuf, Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_PACKET_CODEC =
+            PacketCodecs.map(HashMap::new, BlockPos.PACKET_CODEC, Uuids.PACKET_CODEC);
+
+    protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> MapCodec<M> createCodec(Codec<N> networkCodec, Function<RegistryKey<World>, M> factory) {
+        return RecordCodecBuilder.mapCodec(instance ->
+                instance.group(
+                        RegistryKey.createCodec(RegistryKeys.WORLD).fieldOf("dimension").forGetter(PipeNetworkManager::getDimension),
+                        ExtraCodecs.setOf(networkCodec).fieldOf("networks").forGetter(PipeNetworkManager::getNetworks),
+                        PIPE_TO_NETWORK_ID_CODEC.fieldOf("pipeToNetworkId").forGetter(PipeNetworkManager::getPipeToNetworkId)
+                ).apply(instance, (dimension, networks, pipeToNetworkId) -> {
+                    var manager = factory.apply(dimension);
+                    manager.networks.addAll(networks);
+                    manager.pipeToNetworkId.putAll(pipeToNetworkId);
+                    return manager;
+                }));
+    }
+
+    protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> PacketCodec<RegistryByteBuf, M> createPacketCodec(PacketCodec<RegistryByteBuf, N> networkCodec, Function<RegistryKey<World>, M> factory) {
+        return PacketCodec.tuple(
+                RegistryKey.createPacketCodec(RegistryKeys.WORLD), PipeNetworkManager::getDimension,
+                ExtraPacketCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
+                PIPE_TO_NETWORK_ID_PACKET_CODEC, PipeNetworkManager::getPipeToNetworkId,
+                (dimension, networks, pipeToNetworkId) -> {
+                    var manager = factory.apply(dimension);
+                    manager.networks.addAll(networks);
+                    manager.pipeToNetworkId.putAll(pipeToNetworkId);
+                    return manager;
+                });
+    }
+
+    protected final PipeNetworkManagerType<S, N> type;
+    protected final TransferType<S, ?, ?> transferType;
+    protected final RegistryKey<World> dimension;
+    protected final Set<N> networks = ConcurrentHashMap.newKeySet();
+    protected final Map<BlockPos, UUID> pipeToNetworkId = new ConcurrentHashMap<>();
+
+    public PipeNetworkManager(PipeNetworkManagerType<S, N> type, TransferType<S, ?, ?> transferType, RegistryKey<World> dimension) {
+        this.type = type;
         this.transferType = transferType;
-        this.networkSupplier = networkSupplier;
+        this.dimension = dimension;
+    }
+
+    protected abstract N createNetwork(UUID id);
+
+    public PipeNetworkManagerType<S, N> getType() {
+        return this.type;
+    }
+
+    public TransferType<S, ?, ?> getTransferType() {
+        return this.transferType;
+    }
+
+    public RegistryKey<World> getDimension() {
+        return dimension;
+    }
+
+    public Set<N> getNetworks() {
+        return this.networks;
+    }
+
+    public @Nullable N getNetwork(UUID id) {
+        return this.networks.stream()
+                .filter(network -> network.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public @Nullable UUID getNetworkId(BlockPos pos) {
+        return this.pipeToNetworkId.get(pos);
+    }
+
+    public @Nullable N getNetwork(BlockPos pos) {
+        UUID networkId = getNetworkId(pos);
+        return networkId == null ? null : getNetwork(networkId);
+    }
+
+    public void addNetwork(N network) {
+        this.networks.add(network);
+    }
+
+    public void removeNetwork(N network) {
+        this.networks.remove(network);
+    }
+
+    public void addPipe(BlockPos pos, UUID networkId) {
+        this.pipeToNetworkId.put(pos, networkId);
+    }
+
+    public UUID removePipe(BlockPos pos) {
+        return this.pipeToNetworkId.remove(pos);
+    }
+
+    public boolean containsPipe(BlockPos pos) {
+        return this.pipeToNetworkId.containsKey(pos);
+    }
+
+    public void clear() {
+        this.networks.clear();
+        this.pipeToNetworkId.clear();
     }
 
     public void tick(ServerWorld world) {
-        for (PipeNetwork<S> network : getPipeNetworksData(world).getNetworks()) {
+        for (PipeNetwork<S> network : this.networks) {
             network.tick(world);
         }
     }
@@ -57,38 +172,16 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
-    public PipeNetworksData<S, N> getPipeNetworksData(World world) {
-        return getPipeNetworksData(world.getRegistryKey());
-    }
-
-    public PipeNetworksData<S, N> getPipeNetworksData(RegistryKey<World> dimension) {
-        return this.pipeNetworksData.computeIfAbsent(dimension, PipeNetworksData::new);
-    }
-
-    public @Nullable N getNetwork(ServerWorld world, UUID id) {
-        return getPipeNetworksData(world).getNetwork(id);
-    }
-
-    public @Nullable N getNetwork(World world, BlockPos pos) {
-        return getPipeNetworksData(world).getNetwork(pos);
-    }
-
-    public TransferType<S, ?, ?> getTransferType() {
-        return this.transferType;
-    }
-
     protected void onPlacePipe(ServerWorld world, BlockPos pos) {
         Map<BlockPos, N> adjacentNetworks = new HashMap<>();
         Set<BlockPos> adjacentBlocks = new HashSet<>();
 
-        PipeNetworksData<S, N> pipeNetworksData = getPipeNetworksData(world);
-
         for (Direction direction : Direction.values()) {
             BlockPos offset = pos.offset(direction);
             if (isPipe(world, offset)) {
-                UUID networkId = pipeNetworksData.getNetworkId(offset);
+                UUID networkId = getNetworkId(offset);
                 if (networkId != null) {
-                    N network = pipeNetworksData.getNetwork(networkId);
+                    N network = getNetwork(networkId);
                     if (network != null) {
                         adjacentNetworks.put(offset, network);
                     }
@@ -99,37 +192,89 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         }
 
         Map.Entry<BlockPos, N> networkEntry;
+        boolean isNewNetwork = false;
+        List<N> mergedNetworks = new ArrayList<>();
         if (adjacentNetworks.isEmpty()) {
-            networkEntry = Map.entry(pos, this.networkSupplier.create(UUID.randomUUID()));
-            pipeNetworksData.addNetwork(networkEntry.getValue());
+            networkEntry = Map.entry(pos, createNetwork(UUID.randomUUID()));
+            addNetwork(networkEntry.getValue());
+            isNewNetwork = true;
         } else {
             List<Map.Entry<BlockPos, N>> entrySet = adjacentNetworks.entrySet().stream().toList();
             networkEntry = entrySet.getFirst();
             for (int i = 1; i < entrySet.size(); i++) {
                 Map.Entry<BlockPos, N> otherNetwork = entrySet.get(i);
                 mergeNetworks(world, networkEntry, otherNetwork);
+                mergedNetworks.add(otherNetwork.getValue());
             }
         }
 
         N network = networkEntry.getValue();
         network.addPipe(pos);
         network.addConnectedBlocks(world, adjacentBlocks);
-        pipeNetworksData.addPipe(pos, network.getId());
+        addPipe(pos, network.getId());
+
+        List<CustomPayload> payloads = new ArrayList<>();
+        if (isNewNetwork) {
+            payloads.add(new AddPipeNetworkPayload(
+                    world.getRegistryKey(),
+                    this.transferType,
+                    network));
+        }
+
+        if (!mergedNetworks.isEmpty()) {
+            for (N mergedNetwork : mergedNetworks) {
+                payloads.add(new RemovePipeNetworkPayload(
+                        world.getRegistryKey(),
+                        this.transferType,
+                        mergedNetwork.id));
+            }
+
+            payloads.add(new RemovePipeNetworkPayload(
+                    world.getRegistryKey(),
+                    this.transferType,
+                    network.id));
+
+            payloads.add(new AddPipeNetworkPayload(
+                    world.getRegistryKey(),
+                    this.transferType,
+                    network));
+        } else {
+            payloads.add(new ModifyPipeNetworkPayload(
+                    ModifyPipeNetworkPayload.Operation.ADD_PIPE,
+                    world.getRegistryKey(),
+                    this.transferType,
+                    network.id,
+                    pos));
+
+            for (BlockPos adjacentBlock : adjacentBlocks) {
+                payloads.add(new ModifyPipeNetworkPayload(
+                        ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK,
+                        world.getRegistryKey(),
+                        this.transferType,
+                        network.id,
+                        adjacentBlock));
+            }
+        }
+
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            for (CustomPayload payload : payloads) {
+                ServerPlayNetworking.send(player, payload);
+            }
+        }
     }
 
     protected void onRemovePipe(ServerWorld world, BlockPos pos) {
-        PipeNetworksData<S, N> pipeNetworksData = getPipeNetworksData(world);
-        UUID networkId = pipeNetworksData.removePipe(pos);
+        UUID networkId = removePipe(pos);
         if (networkId == null)
             return;
 
-        N network = pipeNetworksData.getNetwork(networkId);
+        N network = getNetwork(networkId);
         if (network == null)
             return;
 
         network.removePipe(pos);
         if (network.getPipes().isEmpty()) {
-            pipeNetworksData.removeNetwork(network);
+            removeNetwork(network);
             return;
         }
 
@@ -152,10 +297,10 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         if (connectedComponents.size() == 1)
             return;
 
-        pipeNetworksData.removeNetwork(network);
+        removeNetwork(network);
         int totalPipes = network.getPipes().size();
         for (Set<BlockPos> connectedComponent : connectedComponents) {
-            N newNetwork = this.networkSupplier.create(UUID.randomUUID());
+            N newNetwork = createNetwork(UUID.randomUUID());
             newNetwork.movePipesFrom(network, connectedComponent);
             updateConnectedBlocks(world, newNetwork);
 
@@ -164,31 +309,29 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
                 List<BlockPos> adjacentPipes = new ArrayList<>();
                 for (Direction direction : Direction.values()) {
                     BlockPos offset = pos.offset(direction);
-                    if (isPipe(world, offset) && pipeNetworksData.containsPipe(offset)) {
+                    if (isPipe(world, offset) && containsPipe(offset)) {
                         adjacentPipes.add(offset);
                     }
                 }
 
                 double newFraction = fraction / adjacentPipes.size();
                 for (BlockPos adjacentPipePos : adjacentPipes) {
-                    this.transferType.transferFraction(network.getStorage(world, pos),
-                            newNetwork.getStorage(world, adjacentPipePos),
+                    this.transferType.transferFraction(network.getStorage(pos),
+                            newNetwork.getStorage(adjacentPipePos),
                             newFraction);
                 }
             }
 
-            pipeNetworksData.addNetwork(newNetwork);
+            addNetwork(newNetwork);
             for (BlockPos pipe : connectedComponent) {
-                pipeNetworksData.addPipe(pipe, newNetwork.getId());
+                addPipe(pipe, newNetwork.getId());
             }
         }
 
         WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
-    private void mergeNetworks(ServerWorld world, Map.Entry<BlockPos, N> targetEntry, Map.Entry<BlockPos, N> sourceEntry) {
-        PipeNetworksData<S, N> pipeNetworksData = getPipeNetworksData(world);
-
+    protected void mergeNetworks(ServerWorld world, Map.Entry<BlockPos, N> targetEntry, Map.Entry<BlockPos, N> sourceEntry) {
         N target = targetEntry.getValue();
         N source = sourceEntry.getValue();
         if (target == source || !target.isOfSameType(source)) {
@@ -198,18 +341,18 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         target.movePipesFrom(source, source.getPipes());
         target.addConnectedBlocks(world, source);
         for (BlockPos pipe : source.getPipes()) {
-            pipeNetworksData.addPipe(pipe, target.getId());
+            addPipe(pipe, target.getId());
         }
 
         if (target.hasCentralStorage()) {
-            this.transferType.transferAll(source.getStorage(world, targetEntry.getKey()),
-                    target.getStorage(world, targetEntry.getKey()));
+            this.transferType.transferAll(source.getStorage(targetEntry.getKey()),
+                    target.getStorage(targetEntry.getKey()));
         }
 
-        pipeNetworksData.removeNetwork(source);
+        removeNetwork(source);
     }
 
-    private void updateConnectedBlocks(ServerWorld world, N network) {
+    protected void updateConnectedBlocks(ServerWorld world, N network) {
         network.clearConnectedBlocks(world);
 
         Set<BlockPos> newConnectedBlocks = new HashSet<>();
@@ -225,7 +368,7 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         network.addConnectedBlocks(world, newConnectedBlocks);
     }
 
-    private void floodFill(ServerWorld world, BlockPos pos, Set<BlockPos> visited, Set<BlockPos> connectedComponent) {
+    protected void floodFill(ServerWorld world, BlockPos pos, Set<BlockPos> visited, Set<BlockPos> connectedComponent) {
         Queue<BlockPos> queue = new LinkedList<>();
         queue.add(pos);
 
@@ -249,26 +392,25 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     }
 
     public void traverseCreateNetwork(ServerWorld world, BlockPos pos) {
-        PipeNetworksData<S, N> pipeNetworksData = getPipeNetworksData(world);
-        if (!isPipe(world, pos) || pipeNetworksData.containsPipe(pos))
+        if (!isPipe(world, pos) || containsPipe(pos))
             return;
 
         Set<BlockPos> connectedPipes = new HashSet<>();
         traverseCreateNetwork(world, pos, connectedPipes);
 
-        N network = this.networkSupplier.create(UUID.randomUUID());
+        N network = createNetwork(UUID.randomUUID());
         network.getPipes().addAll(connectedPipes);
 
         updateConnectedBlocks(world, network);
 
         for (BlockPos connectedPipe : connectedPipes) {
-            pipeNetworksData.addPipe(connectedPipe, network.getId());
+            addPipe(connectedPipe, network.getId());
         }
 
-        pipeNetworksData.addNetwork(network);
+        addNetwork(network);
     }
 
-    private void traverseCreateNetwork(ServerWorld world, BlockPos pos, Set<BlockPos> visited) {
+    protected void traverseCreateNetwork(ServerWorld world, BlockPos pos, Set<BlockPos> visited) {
         if (!isPipe(world, pos) || visited.contains(pos))
             return;
 
@@ -278,5 +420,9 @@ public class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             BlockPos offset = pos.offset(direction);
             traverseCreateNetwork(world, offset, visited);
         }
+    }
+
+    public Map<BlockPos, UUID> getPipeToNetworkId() {
+        return this.pipeToNetworkId;
     }
 }

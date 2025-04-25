@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.pipe.impl.FluidPipeNetwork;
+import dev.turtywurty.industria.pipe.impl.network.FluidPipeNetwork;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;

@@ -2,8 +2,6 @@ package dev.turtywurty.industria;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.serialization.Codec;
-import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.gasapi.api.GasVariantAttributes;
 import dev.turtywurty.gasapi.api.storage.GasStorage;
@@ -23,10 +21,7 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
-import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
-import dev.turtywurty.industria.pipe.PipeNetworkNetworking;
-import dev.turtywurty.industria.pipe.impl.HeatPipeNetwork;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
@@ -46,7 +41,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.command.CommandManager;
@@ -54,14 +48,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import team.reborn.energy.api.EnergyStorage;
-
-import java.util.List;
 
 // TODO: Use ServerRecipeManager.createCachedMatchGetter
 // TODO: Test all the mixins to see what i broke lol
@@ -70,27 +61,6 @@ public class Industria implements ModInitializer {
     public static final String MOD_ID = "industria";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-
-    public static final Codec<Box> BOX_CODEC = Codec.DOUBLE
-            .listOf()
-            .xmap(
-                    list -> new Box(
-                            list.get(0),
-                            list.get(1),
-                            list.get(2),
-                            list.get(3),
-                            list.get(4),
-                            list.get(5)
-                    ),
-                    box -> List.of(
-                            box.minX,
-                            box.minY,
-                            box.minZ,
-                            box.maxX,
-                            box.maxY,
-                            box.maxZ
-                    )
-            );
 
     public static Identifier id(String path) {
         return Identifier.of(MOD_ID, path);
@@ -126,12 +96,11 @@ public class Industria implements ModInitializer {
         GasInit.init();
         WoodSetInit.init();
         TrunkPlacerTypeInit.init();
-        PipeNetworkTypesInit.init();
-        PipeNetworkManagerInit.init();
+        PipeNetworkTypeInit.init();
+        PipeNetworkManagerTypeInit.init();
 
         ExtraPacketCodecs.registerDefaults();
 
-        // Item Lookup
         ItemStorage.SIDED.registerForBlockEntity(AlloyFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ALLOY_FURNACE);
 
         EnergyStorage.SIDED.registerForBlockEntity(ThermalGeneratorBlockEntity::getEnergyProvider, BlockEntityTypeInit.THERMAL_GENERATOR);
@@ -197,24 +166,35 @@ public class Industria implements ModInitializer {
         }
 
         FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            PipeNetwork<Storage<FluidVariant>> network = PipeNetworkManagerInit.FLUID.getNetwork(world, pos);
-            return network == null ? null : network.getStorage(world, pos);
+            if (world instanceof ServerWorld serverWorld) {
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.FLUID, pos);
+            }
+
+            return null;
         }, BlockInit.FLUID_PIPE);
 
         SlurryStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            PipeNetwork<Storage<SlurryVariant>> network = PipeNetworkManagerInit.SLURRY.getNetwork(world, pos);
-            return network == null ? null : network.getStorage(world, pos);
+            if (world instanceof ServerWorld serverWorld) {
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.SLURRY, pos);
+            }
+
+            return null;
         }, BlockInit.SLURRY_PIPE);
 
         HeatStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            HeatPipeNetwork network = PipeNetworkManagerInit.HEAT.getNetwork(world, pos);
+            if(world instanceof ServerWorld serverWorld) {
+                WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.HEAT, pos);
+            }
 
-            return network == null ? null : network.getStorage(world, pos);
+            return null;
         }, BlockInit.HEAT_PIPE);
 
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            PipeNetwork<EnergyStorage> network = PipeNetworkManagerInit.ENERGY.getNetwork(world, pos);
-            return network == null ? null : network.getStorage(world, pos);
+            if (world instanceof ServerWorld serverWorld) {
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.ENERGY, pos);
+            }
+
+            return null;
         }, BlockInit.CABLE);
 
         // Payloads
@@ -226,9 +206,11 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(ChangeDrillOverflowModePayload.ID, ChangeDrillOverflowModePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(UpgradeStationUpdateRecipesPayload.ID, UpgradeStationUpdateRecipesPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(RequestSyncPipeNetworksPayload.ID, RequestSyncPipeNetworksPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(SyncPipeNetworksPayload.ID, SyncPipeNetworksPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SyncPipeNetworkManagerPayload.ID, SyncPipeNetworkManagerPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(AddPipeNetworkPayload.ID, AddPipeNetworkPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(RemovePipeNetworkPayload.ID, RemovePipeNetworkPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ModifyPipeNetworkPayload.ID, ModifyPipeNetworkPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -281,9 +263,6 @@ public class Industria implements ModInitializer {
             }
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(RequestSyncPipeNetworksPayload.ID,
-                (payload, context) -> PipeNetworkNetworking.sync(context.player()));
-
         ServerPlayNetworking.registerGlobalReceiver(FluidTankChangeExtractModePayload.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
             if (player.currentScreenHandler instanceof FluidTankScreenHandler handler) {
@@ -291,8 +270,10 @@ public class Industria implements ModInitializer {
             }
         });
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
-                sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld())));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld()));
+            WorldPipeNetworks.syncToClient(sender, handler.player.getServerWorld());
+        });
 
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (!(world instanceof ServerWorld serverWorld))
@@ -328,7 +309,7 @@ public class Industria implements ModInitializer {
         ServerTickEvents.START_WORLD_TICK.register(world -> {
             MultiblockBlock.SHAPE_CACHE.clear();
 
-            for (PipeNetworkManager<?, ?> manager : PipeNetworkManagerInit.PIPE_NETWORK_MANAGERS.stream().toList()) {
+            for (PipeNetworkManager<?, ?> manager : WorldPipeNetworks.getOrCreate(world).getPipeNetworkManagers()) {
                 manager.tick(world);
             }
         });

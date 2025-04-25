@@ -8,17 +8,26 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.collection.Pool;
 import net.minecraft.util.collection.Weighted;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.floatprovider.*;
 import net.minecraft.util.math.intprovider.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class ExtraPacketCodecs {
     private static final Map<IntProviderType<?>, PacketCodec<RegistryByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
     private static final Map<FloatProviderType<?>, PacketCodec<RegistryByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
+
+    public static final PacketCodec<ByteBuf, Set<BlockPos>> BLOCK_POS_SET_PACKET_CODEC = setOf(BlockPos.PACKET_CODEC);
+
+    public static <B extends ByteBuf, V> PacketCodec<B, Set<V>> setOf(PacketCodec<? super B, V> codec) {
+        return PacketCodecs.collection(HashSet::new, codec);
+    }
 
     /**
      * Registers a codec for an {@link IntProviderType}.
@@ -605,7 +614,7 @@ public class ExtraPacketCodecs {
         registerIntProviderCodec(IntProviderType.WEIGHTED_LIST, PacketCodec.ofStatic(
                 (buf, value) -> {
                     PacketCodec<RegistryByteBuf, ? extends IntProvider> codec = getIntProviderCodec(value.getType());
-                    Pool<IntProvider> entries = value.entries;
+                    Pool<IntProvider> entries = value.weightedList;
                     PacketCodec<RegistryByteBuf, Pool<IntProvider>> entriesCodec = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec);
                     entriesCodec.encode(buf, entries);
                 },

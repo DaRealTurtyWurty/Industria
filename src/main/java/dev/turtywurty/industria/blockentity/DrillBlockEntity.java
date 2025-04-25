@@ -25,6 +25,7 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.DrillRenderData;
+import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -262,7 +263,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
         }
 
         if (nbt.contains("DrillHeadAABB")) {
-            this.drillHeadAABB = nbt.get("DrillHeadAABB", Industria.BOX_CODEC)
+            this.drillHeadAABB = nbt.get("DrillHeadAABB", ExtraCodecs.BOX_CODEC)
                     .orElseGet(() -> Box.from(Vec3d.of(this.pos)));
         }
 
@@ -299,7 +300,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
         nbt.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
 
         if (this.drillHeadAABB != null) {
-            nbt.put("DrillHeadAABB", Industria.BOX_CODEC, this.drillHeadAABB);
+            nbt.put("DrillHeadAABB", ExtraCodecs.BOX_CODEC, this.drillHeadAABB);
         }
     }
 

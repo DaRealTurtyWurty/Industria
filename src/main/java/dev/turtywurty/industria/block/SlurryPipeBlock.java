@@ -2,7 +2,7 @@ package dev.turtywurty.industria.block;
 
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.pipe.impl.SlurryPipeNetwork;
+import dev.turtywurty.industria.pipe.impl.network.SlurryPipeNetwork;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 

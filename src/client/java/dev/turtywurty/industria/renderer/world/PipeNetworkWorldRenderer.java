@@ -2,7 +2,7 @@ package dev.turtywurty.industria.renderer.world;
 
 import com.google.common.collect.ImmutableMap;
 import dev.turtywurty.industria.block.PipeBlock;
-import dev.turtywurty.industria.init.PipeNetworkManagerInit;
+import dev.turtywurty.industria.data.ClientPipeNetworks;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
@@ -71,10 +71,10 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
             return;
 
         RegistryKey<World> dimension = cameraEntity.getEntityWorld().getRegistryKey();
-        for (PipeNetworkManager<?, ?> manager : PipeNetworkManagerInit.PIPE_NETWORK_MANAGERS.stream().toList()) {
+        for (PipeNetworkManager<?, ?> manager : ClientPipeNetworks.get(dimension).pipeNetworkManagers()) {
             TransferType<?, ?, ?> transferType = manager.getTransferType();
             float[] color = COLOR_MAP.get(transferType);
-            for (PipeNetwork<?> network : manager.getPipeNetworksData(dimension).getNetworks()) {
+            for (PipeNetwork<?> network : manager.getNetworks()) {
                 for (BlockPos pipe : network.getPipes()) {
                     Vec3d vertex = pipe.toCenterPos();
 

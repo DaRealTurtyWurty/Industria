@@ -1,34 +1,101 @@
 package dev.turtywurty.industria.pipe;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import dev.turtywurty.industria.init.PipeNetworkTypesInit;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.turtywurty.industria.init.PipeNetworkTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.util.ExtraCodecs;
+import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public abstract class PipeNetwork<S> {
-    public static final Codec<Set<PipeNetwork<?>>> SET_CODEC = Codec.list(PipeNetworkTypesInit.CODEC.codec()).xmap(Sets::newHashSet, Lists::newArrayList);
-    public static final Codec<Set<BlockPos>> BLOCK_POS_SET_CODEC = Codec.list(BlockPos.CODEC).xmap(Sets::newHashSet, Lists::newArrayList);
-    public static final PacketCodec<RegistryByteBuf, Set<PipeNetwork<?>>> SET_PACKET_CODEC =
-            PacketCodecs.collection(HashSet::new, PacketCodecs.registryCodec(PipeNetworkTypesInit.CODEC.codec()));
+    public static final Codec<PipeNetwork<?>> CODEC = PipeNetworkTypeInit.CODEC.dispatch(
+            PipeNetwork::getType, PipeNetworkType::codec);
 
+    public static final PacketCodec<RegistryByteBuf, PipeNetwork<?>> PACKET_CODEC =
+            PipeNetworkTypeInit.PACKET_CODEC.dispatch(PipeNetwork::getType, PipeNetworkType::packetCodec);
+
+    protected static <S, ST, N extends PipeNetwork<S>> MapCodec<N> createCodec(RecordCodecBuilder<N, ST> storageApp, BiConsumer<S, ST> storageModifier, Function<UUID, N> factory) {
+        return RecordCodecBuilder.mapCodec(instance ->
+                instance.group(
+                        Uuids.CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
+                        ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(PipeNetwork::getPipes),
+                        ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(PipeNetwork::getConnectedBlocks),
+                        TransferType.CODEC.fieldOf("transferType").forGetter(PipeNetwork::getTransferType),
+                        storageApp
+                ).apply(instance, (id, pipes, connectedBlocks, transferType, storage) -> {
+                    var network = factory.apply(id);
+                    network.pipes.addAll(pipes);
+                    network.connectedBlocks.addAll(connectedBlocks);
+                    storageModifier.accept(network.storage, storage);
+
+                    return network;
+                }));
+    }
+
+    protected static <S, ST, N extends PipeNetwork<S>> PacketCodec<RegistryByteBuf, N> createPacketCodec(
+            PacketCodec<ByteBuf, ST> storageTypeCodec,
+            Function<N, ST> storageTypeRetriever,
+            BiConsumer<S, ST> storageModifier,
+            Function<UUID, N> factory) {
+        return PacketCodec.tuple(
+                Uuids.PACKET_CODEC, PipeNetwork::getId,
+                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getPipes,
+                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getConnectedBlocks,
+                TransferType.PACKET_CODEC, PipeNetwork::getTransferType,
+                storageTypeCodec, storageTypeRetriever,
+                (id, pipes, connectedBlocks, transferType, storage) -> {
+                    var network = factory.apply(id);
+                    network.pipes.addAll(pipes);
+                    network.connectedBlocks.addAll(connectedBlocks);
+                    storageModifier.accept(network.storage, storage);
+
+                    return network;
+                });
+    }
+
+    protected static <S, ST, N extends PipeNetwork<S>> PacketCodec<RegistryByteBuf, N> createPacketCodecWithRegistryByteBuf(
+            PacketCodec<RegistryByteBuf, ST> storageTypeCodec,
+            Function<N, ST> storageTypeRetriever,
+            BiConsumer<S, ST> storageModifier,
+            Function<UUID, N> factory) {
+        return PacketCodec.tuple(
+                Uuids.PACKET_CODEC, PipeNetwork::getId,
+                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getPipes,
+                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getConnectedBlocks,
+                TransferType.PACKET_CODEC, PipeNetwork::getTransferType,
+                storageTypeCodec, storageTypeRetriever,
+                (id, pipes, connectedBlocks, transferType, storage) -> {
+                    var network = factory.apply(id);
+                    network.pipes.addAll(pipes);
+                    network.connectedBlocks.addAll(connectedBlocks);
+                    storageModifier.accept(network.storage, storage);
+
+                    return network;
+                });
+    }
 
     protected UUID id;
     protected final Set<BlockPos> pipes = ConcurrentHashMap.newKeySet();
     protected final Set<BlockPos> connectedBlocks = ConcurrentHashMap.newKeySet();
     protected final TransferType<S, ?, ?> transferType;
-    protected final S storage;
+    public final S storage;
 
     public PipeNetwork(UUID id, TransferType<S, ?, ?> transferType) {
         this.id = id;
@@ -127,9 +194,10 @@ public abstract class PipeNetwork<S> {
     }
 
     protected abstract S createStorage();
-    public abstract MapCodec<? extends PipeNetwork<?>> getCodec();
 
-    public S getStorage(World world, BlockPos pos) {
+    protected abstract PipeNetworkType<S, ? extends PipeNetwork<S>> getType();
+
+    public S getStorage(BlockPos pos) {
         return this.storage;
     }
 
