@@ -31,7 +31,7 @@ public class CrystallizerModel extends Model {
                 .uv(170, 39).cuboid(-26.0F, -62.0F, 26.0F, 36.0F, 60.0F, 2.0F, new Dilation(0.0F))
                 .uv(85, 86).cuboid(-28.0F, -62.0F, -12.0F, 2.0F, 60.0F, 40.0F, new Dilation(0.0F))
                 .uv(0, 86).cuboid(10.0F, -62.0F, -12.0F, 2.0F, 60.0F, 40.0F, new Dilation(0.0F))
-                .uv(170, 156).cuboid(-16.0F, -14.0F, -13.0F, 16.0F, 12.0F, 3.0F, new Dilation(0.0F)), ModelTransform.rotation(8.0F, 24.0F, -8.0F));
+                .uv(170, 156).cuboid(-16.0F, -14.0F, -13.0F, 16.0F, 12.0F, 3.0F, new Dilation(0.0F)), ModelTransform.origin(8.0F, 24.0F, -8.0F));
 
         return TexturedModelData.of(modelData, 512, 512);
     }

@@ -28,7 +28,7 @@ public class SimpleDrillHeadModel extends Model {
     public static TexturedModelData getTexturedModelData() {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, 24.0F, 0.0F));
+        ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 24.0F, 0.0F));
 
         main.addChild("clockwise", ModelPartBuilder.create()
                 .uv(0, 19)
@@ -38,7 +38,7 @@ public class SimpleDrillHeadModel extends Model {
                 .uv(0, 51)
                 .cuboid(-3.0F, 1.0F, -3.0F, 6.0F, 2.0F, 6.0F, new Dilation(0.0F))
                 .uv(49, 36)
-                .cuboid(-5.0F, -3.0F, -5.0F, 10.0F, 2.0F, 10.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, -7.0F, 0.0F));
+                .cuboid(-5.0F, -3.0F, -5.0F, 10.0F, 2.0F, 10.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, -7.0F, 0.0F));
 
         main.addChild("counterClockwise", ModelPartBuilder.create()
                 .uv(25, 51)
@@ -48,7 +48,7 @@ public class SimpleDrillHeadModel extends Model {
                 .uv(0, 36)
                 .cuboid(-6.0F, -3.0F, -6.0F, 12.0F, 2.0F, 12.0F, new Dilation(0.0F))
                 .uv(0, 0)
-                .cuboid(-8.0F, -7.0F, -8.0F, 16.0F, 2.0F, 16.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, -9.0F, 0.0F));
+                .cuboid(-8.0F, -7.0F, -8.0F, 16.0F, 2.0F, 16.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, -9.0F, 0.0F));
         return TexturedModelData.of(modelData, 128, 128);
     }
 

@@ -24,7 +24,7 @@ public class DigesterModel extends Model {
     public static TexturedModelData getTexturedModelData() {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
-        modelPartData.addChild("main", ModelPartBuilder.create().uv(0, 0).cuboid(-28.0F, -80.0F, -12.0F, 40.0F, 80.0F, 40.0F, new Dilation(0.0F)), ModelTransform.rotation(8.0F, 24.0F, -8.0F));
+        modelPartData.addChild("main", ModelPartBuilder.create().uv(0, 0).cuboid(-28.0F, -80.0F, -12.0F, 40.0F, 80.0F, 40.0F, new Dilation(0.0F)), ModelTransform.origin(8.0F, 24.0F, -8.0F));
 
         return TexturedModelData.of(modelData, 256, 256);
     }

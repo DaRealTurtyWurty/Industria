@@ -33,17 +33,17 @@ public class WindTurbineModel extends Model {
                 .uv(33, 48).cuboid(-2.0F, -24.125F, -2.0625F, 4.0F, 22.0F, 4.0F, new Dilation(0.0F))
                 .uv(38, 30).cuboid(-3.0F, -30.125F, -6.0625F, 6.0F, 6.0F, 11.0F, new Dilation(0.0F))
                 .uv(0, 17).cuboid(-1.0F, 29.875F, -1.0625F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F))
-                .uv(0, 6).cuboid(-2.0F, -29.125F, -7.0625F, 4.0F, 4.0F, 1.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, -7.875F, 0.0625F));
+                .uv(0, 6).cuboid(-2.0F, -29.125F, -7.0625F, 4.0F, 4.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, -7.875F, 0.0625F));
 
-        ModelPartData propellers = modelPartData.addChild("propellers", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, -35.0F, -8.0F));
+        ModelPartData propellers = modelPartData.addChild("propellers", ModelPartBuilder.create(), ModelTransform.origin(0.0F, -35.0F, -8.0F));
 
-        ModelPartData propeller0 = propellers.addChild("propeller0", ModelPartBuilder.create().uv(50, 48).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
+        ModelPartData propeller0 = propellers.addChild("propeller0", ModelPartBuilder.create().uv(50, 48).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 0.0F, 0.0F));
 
-        ModelPartData propeller1 = propellers.addChild("propeller1", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
+        ModelPartData propeller1 = propellers.addChild("propeller1", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
 
         ModelPartData cube_r1 = propeller1.addChild("cube_r1", ModelPartBuilder.create().uv(57, 0).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -2.1817F));
 
-        ModelPartData propeller2 = propellers.addChild("propeller2", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
+        ModelPartData propeller2 = propellers.addChild("propeller2", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
 
         ModelPartData cube_r2 = propeller2.addChild("cube_r2", ModelPartBuilder.create().uv(57, 48).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 2.1817F));
         return TexturedModelData.of(modelData, 128, 128);

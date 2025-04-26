@@ -47,7 +47,7 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             PacketCodecs.collection(ArrayList::new, PACKET_CODEC);
 
     public static final Codec<Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_CODEC = Codec.unboundedMap(
-            BlockPos.CODEC, Uuids.CODEC);
+            ExtraCodecs.BLOCK_POS_STRING_CODEC, Uuids.CODEC);
 
     public static final PacketCodec<ByteBuf, Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_PACKET_CODEC =
             PacketCodecs.map(HashMap::new, BlockPos.PACKET_CODEC, Uuids.PACKET_CODEC);

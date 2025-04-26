@@ -3,6 +3,7 @@ package dev.turtywurty.industria.util;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -32,6 +33,24 @@ public class ExtraCodecs {
                             box.maxZ
                     )
             );
+
+    public static final Codec<BlockPos> BLOCK_POS_STRING_CODEC = Codec.STRING.comapFlatMap(
+            str -> {
+                String[] parts = str.split(",");
+                if (parts.length != 3) {
+                    return DataResult.error(() -> "Invalid BlockPos format: " + str);
+                }
+
+                try {
+                    int x = Integer.parseInt(parts[0]);
+                    int y = Integer.parseInt(parts[1]);
+                    int z = Integer.parseInt(parts[2]);
+                    return DataResult.success(new BlockPos(x, y, z));
+                } catch (NumberFormatException e) {
+                    return DataResult.error(() -> "Invalid BlockPos format: " + str);
+                }
+            },
+            BlockPos::toShortString);
 
     public static <T> Codec<Set<T>> setOf(Codec<T> codec) {
         return Codec.list(codec).xmap(Sets::newHashSet, Lists::newArrayList);
