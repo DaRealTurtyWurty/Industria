@@ -1,7 +1,6 @@
 package dev.turtywurty.industria.renderer.block;
 
 import com.mojang.datafixers.util.Either;
-import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.model.DrillCableModel;
 import dev.turtywurty.industria.model.DrillFrameModel;
@@ -28,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<DrillBlockEntity> {
-    private static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_frame.png");
-
     private final Map<DrillHeadable, Model> drillHeadModels = new HashMap<>();
     private final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
@@ -75,7 +72,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
             this.model.getCableWheel().pitch = entity.clientMotorRotation;
             this.model.getCableWheelRod().pitch = entity.clientMotorRotation;
 
-            this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION)), light, overlay);
+            this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(DrillFrameModel.TEXTURE_LOCATION)), light, overlay);
 
             this.model.getCableWheel().pitch = prevCableWheelPitch;
             this.model.getCableWheelRod().pitch = prevCableWheelRodPitch;

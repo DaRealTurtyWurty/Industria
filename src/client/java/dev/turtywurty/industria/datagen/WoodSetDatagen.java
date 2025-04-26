@@ -26,7 +26,7 @@ import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 
-import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import static dev.turtywurty.industria.datagen.IndustriaRecipeProvider.hasTag;
 
@@ -90,7 +90,7 @@ public class WoodSetDatagen {
         blockStateModelGenerator.createLogTexturePool(woodSet.strippedLog)
                 .log(woodSet.strippedLog)
                 .wood(woodSet.strippedWood);
-        blockStateModelGenerator.registerSingleton(woodSet.leaves, TexturedModel.LEAVES);
+        blockStateModelGenerator.registerTintedBlockAndItem(woodSet.leaves, TexturedModel.LEAVES, 0x00BB0A);
         blockStateModelGenerator.registerTintableCross(woodSet.sapling, BlockStateModelGenerator.CrossType.NOT_TINTED);
         blockStateModelGenerator.registerHangingSign(woodSet.strippedLog, woodSet.hangingSign, woodSet.wallHangingSign);
         blockStateModelGenerator.registerCubeAllModelTexturePool(woodSet.planks)
@@ -135,158 +135,122 @@ public class WoodSetDatagen {
         generator.generateFamily(woodSet.createBlockFamily(), FeatureSet.empty());
     }
 
-    public static void generateItemTags(WoodRegistrySet woodSet, FabricTagProvider<Item> provider) {
-        Method getOrCreateTagBuilderMethod;
-        try {
-            getOrCreateTagBuilderMethod = provider.getClass().getMethod("getOrCreateTagBuilder", TagKey.class);
-            getOrCreateTagBuilderMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to access getOrCreateTagBuilder method", e);
-        }
+    public static void generateItemTags(WoodRegistrySet woodSet, Function<TagKey<Item>, FabricTagProvider<Item>.FabricTagBuilder> provider) {
+        provider.apply(woodSet.logsItemTag)
+                .add(woodSet.log.asItem())
+                .add(woodSet.strippedLog.asItem())
+                .add(woodSet.wood.asItem())
+                .add(woodSet.strippedWood.asItem());
 
-        try {
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, woodSet.logsItemTag))
-                    .add(woodSet.log.asItem())
-                    .add(woodSet.strippedLog.asItem())
-                    .add(woodSet.wood.asItem())
-                    .add(woodSet.strippedWood.asItem());
+        provider.apply(ItemTags.LOGS_THAT_BURN)
+                .addTag(woodSet.logsItemTag);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.LOGS_THAT_BURN))
-                    .addTag(woodSet.logsItemTag);
+        provider.apply(ItemTags.PLANKS)
+                .add(woodSet.planks.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.PLANKS))
-                    .add(woodSet.planks.asItem());
+        provider.apply(ItemTags.LEAVES)
+                .add(woodSet.leaves.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.LEAVES))
-                    .add(woodSet.leaves.asItem());
+        provider.apply(ItemTags.SAPLINGS)
+                .add(woodSet.sapling.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.SAPLINGS))
-                    .add(woodSet.sapling.asItem());
+        provider.apply(ItemTags.WOODEN_BUTTONS)
+                .add(woodSet.button.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_BUTTONS))
-                    .add(woodSet.button.asItem());
+        provider.apply(ItemTags.WOODEN_DOORS)
+                .add(woodSet.door.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_DOORS))
-                    .add(woodSet.door.asItem());
+        provider.apply(ItemTags.WOODEN_FENCES)
+                .add(woodSet.fence.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_FENCES))
-                    .add(woodSet.fence.asItem());
+        provider.apply(ItemTags.FENCE_GATES)
+                .add(woodSet.fenceGate.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.FENCE_GATES))
-                    .add(woodSet.fenceGate.asItem());
+        provider.apply(ItemTags.WOODEN_PRESSURE_PLATES)
+                .add(woodSet.pressurePlate.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_PRESSURE_PLATES))
-                    .add(woodSet.pressurePlate.asItem());
+        provider.apply(ItemTags.WOODEN_TRAPDOORS)
+                .add(woodSet.trapdoor.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_TRAPDOORS))
-                    .add(woodSet.trapdoor.asItem());
+        provider.apply(ItemTags.WOODEN_STAIRS)
+                .add(woodSet.stairs.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_STAIRS))
-                    .add(woodSet.stairs.asItem());
+        provider.apply(ItemTags.WOODEN_SLABS)
+                .add(woodSet.slab.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.WOODEN_SLABS))
-                    .add(woodSet.slab.asItem());
+        provider.apply(ItemTags.SIGNS)
+                .add(woodSet.sign.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.SIGNS))
-                    .add(woodSet.sign.asItem());
+        provider.apply(ItemTags.HANGING_SIGNS)
+                .add(woodSet.hangingSign.asItem());
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.HANGING_SIGNS))
-                    .add(woodSet.hangingSign.asItem());
+        provider.apply(ItemTags.BOATS)
+                .add(woodSet.boatItem);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.BOATS))
-                    .add(woodSet.boatItem);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, ItemTags.CHEST_BOATS))
-                    .add(woodSet.chestBoatItem);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate item tags", e);
-        }
+        provider.apply(ItemTags.CHEST_BOATS)
+                .add(woodSet.chestBoatItem);
     }
 
-    public static void generateBlockTags(WoodRegistrySet woodSet, FabricTagProvider<Block> provider) {
-        Method getOrCreateTagBuilderMethod;
-        try {
-            getOrCreateTagBuilderMethod = provider.getClass().getMethod("getOrCreateTagBuilder", TagKey.class);
-            getOrCreateTagBuilderMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to access getOrCreateTagBuilder method", e);
-        }
+    public static void generateBlockTags(WoodRegistrySet woodSet, Function<TagKey<Block>, FabricTagProvider<Block>.FabricTagBuilder> provider) {
+        provider.apply(woodSet.logsBlockTag)
+                .add(woodSet.log)
+                .add(woodSet.strippedLog)
+                .add(woodSet.wood)
+                .add(woodSet.strippedWood);
 
-        try {
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, woodSet.logsBlockTag))
-                    .add(woodSet.log)
-                    .add(woodSet.strippedLog)
-                    .add(woodSet.wood)
-                    .add(woodSet.strippedWood);
+        provider.apply(BlockTags.LOGS_THAT_BURN)
+                .addTag(woodSet.logsBlockTag);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.LOGS_THAT_BURN))
-                    .addTag(woodSet.logsBlockTag);
+        provider.apply(BlockTags.PLANKS)
+                .add(woodSet.planks);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.PLANKS))
-                    .add(woodSet.planks);
+        provider.apply(BlockTags.LEAVES)
+                .add(woodSet.leaves);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.LEAVES))
-                    .add(woodSet.leaves);
+        provider.apply(BlockTags.SAPLINGS)
+                .add(woodSet.sapling);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.SAPLINGS))
-                    .add(woodSet.sapling);
+        provider.apply(BlockTags.WOODEN_BUTTONS)
+                .add(woodSet.button);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_BUTTONS))
-                    .add(woodSet.button);
+        provider.apply(BlockTags.WOODEN_DOORS)
+                .add(woodSet.door);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_DOORS))
-                    .add(woodSet.door);
+        provider.apply(BlockTags.WOODEN_FENCES)
+                .add(woodSet.fence);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_FENCES))
-                    .add(woodSet.fence);
+        provider.apply(BlockTags.FENCE_GATES)
+                .add(woodSet.fenceGate);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.FENCE_GATES))
-                    .add(woodSet.fenceGate);
+        provider.apply(BlockTags.WOODEN_PRESSURE_PLATES)
+                .add(woodSet.pressurePlate);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_PRESSURE_PLATES))
-                    .add(woodSet.pressurePlate);
+        provider.apply(BlockTags.WOODEN_TRAPDOORS)
+                .add(woodSet.trapdoor);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_TRAPDOORS))
-                    .add(woodSet.trapdoor);
+        provider.apply(BlockTags.WOODEN_STAIRS)
+                .add(woodSet.stairs);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_STAIRS))
-                    .add(woodSet.stairs);
+        provider.apply(BlockTags.WOODEN_SLABS)
+                .add(woodSet.slab);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WOODEN_SLABS))
-                    .add(woodSet.slab);
+        provider.apply(BlockTags.STANDING_SIGNS)
+                .add(woodSet.sign);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.STANDING_SIGNS))
-                    .add(woodSet.sign);
+        provider.apply(BlockTags.WALL_SIGNS)
+                .add(woodSet.wallSign);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WALL_SIGNS))
-                    .add(woodSet.wallSign);
+        provider.apply(BlockTags.CEILING_HANGING_SIGNS)
+                .add(woodSet.hangingSign);
 
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.CEILING_HANGING_SIGNS))
-                    .add(woodSet.hangingSign);
-
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, BlockTags.WALL_HANGING_SIGNS))
-                    .add(woodSet.wallHangingSign);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to invoke getOrCreateTagBuilder method", e);
-        }
+        provider.apply(BlockTags.WALL_HANGING_SIGNS)
+                .add(woodSet.wallHangingSign);
     }
 
-    public static void generateEntityTags(WoodRegistrySet woodSet, FabricTagProvider<EntityType<?>> provider) {
-        Method getOrCreateTagBuilderMethod;
-        try {
-            getOrCreateTagBuilderMethod = provider.getClass().getMethod("getOrCreateTagBuilder", TagKey.class);
-            getOrCreateTagBuilderMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Failed to access getOrCreateTagBuilder method", e);
-        }
-
-        try {
-            ((FabricTagProvider.FabricTagBuilder) getOrCreateTagBuilderMethod.invoke(provider, EntityTypeTags.BOAT))
-                    .add(woodSet.boatEntityType)
-                    .add(woodSet.chestBoatEntityType);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate entity tags", e);
-        }
+    public static void generateEntityTags(WoodRegistrySet woodSet, Function<TagKey<EntityType<?>>, FabricTagProvider<EntityType<?>>.FabricTagBuilder> provider) {
+        provider.apply(EntityTypeTags.BOAT)
+                .add(woodSet.boatEntityType)
+                .add(woodSet.chestBoatEntityType);
     }
 
     private static String snakeToTypeCase(String str) {

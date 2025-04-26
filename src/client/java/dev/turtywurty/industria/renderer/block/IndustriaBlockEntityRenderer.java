@@ -17,10 +17,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.Colors;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix3f;
@@ -84,7 +81,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
     protected void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {}
 
     @Override
-    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         setupBlockEntityTransformations(matrices, entity);
         onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
@@ -180,7 +177,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
             return;
 
         matrices.push();
-        modelPart.rotate(matrices); // Also applies translation and scale (stupid yarn)
+        modelPart.applyTransform(matrices);
 
         {
             MatrixStack.Entry entry = matrices.peek();

@@ -22,7 +22,7 @@ public class UpgradeStationModel extends Model {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
         ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create().uv(0, 0).cuboid(-24.0F, -16.0F, -40.0F, 48.0F, 16.0F, 64.0F, new Dilation(0.0F))
-                .uv(0, 80).cuboid(-8.0F, -32.0F, -24.0F, 16.0F, 16.0F, 16.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+                .uv(0, 80).cuboid(-8.0F, -32.0F, -24.0F, 16.0F, 16.0F, 16.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 24.0F, 0.0F));
         return TexturedModelData.of(modelData, 256, 256);
     }
 }

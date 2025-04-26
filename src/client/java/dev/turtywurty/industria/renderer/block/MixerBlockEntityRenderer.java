@@ -8,8 +8,8 @@ import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
@@ -84,7 +84,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                     matrices.multiply(RotationAxis.POSITIVE_Z.rotation(entity.getWorld().getTime() * 0.25f));
                 }
 
-                this.context.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+                this.context.getItemRenderer().renderItem(stack, ItemDisplayContext.FIXED, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
                 matrices.pop();
             }
         }

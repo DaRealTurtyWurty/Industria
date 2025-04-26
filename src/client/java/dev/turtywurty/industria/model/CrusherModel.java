@@ -27,7 +27,7 @@ public class CrusherModel extends Model {
         ModelPartData modelPartData = modelData.getRoot();
 
         ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create(),
-                ModelTransform.pivot(0.0F, 20.3889F, 0.0F));
+                ModelTransform.rotation(0.0F, 20.3889F, 0.0F));
 
         ModelPartData structure = main.addChild("structure", ModelPartBuilder.create().uv(0, 0)
                         .cuboid(-8.0F, 0.75F, -8.0F, 16.0F, 1.0F, 16.0F, new Dilation(0.0F)).uv(19, 26)
@@ -35,18 +35,18 @@ public class CrusherModel extends Model {
                         .cuboid(-8.0F, -6.25F, -8.0F, 1.0F, 7.0F, 16.0F, new Dilation(0.0F)).uv(59, 35)
                         .cuboid(-7.0F, -6.25F, -8.0F, 14.0F, 7.0F, 1.0F, new Dilation(0.0F)).uv(57, 18)
                         .cuboid(-7.0F, -6.25F, 7.0F, 14.0F, 7.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -0.1389F, 0.0F));
+                ModelTransform.rotation(0.0F, -0.1389F, 0.0F));
 
         structure.addChild("bars", ModelPartBuilder.create().uv(36, 53)
                         .cuboid(4.0F, -8.0F, -7.0F, 1.0F, 1.0F, 14.0F, new Dilation(0.0F)).uv(49, 0)
                         .cuboid(-3.0F, -5.0F, -7.0F, 1.0F, 1.0F, 14.0F, new Dilation(0.0F)).uv(53, 55)
                         .cuboid(-5.0F, -8.0F, -7.0F, 1.0F, 1.0F, 14.0F, new Dilation(0.0F)).uv(19, 50)
                         .cuboid(2.0F, -5.0F, -7.0F, 1.0F, 1.0F, 14.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 3.75F, 0.0F));
+                ModelTransform.rotation(0.0F, 3.75F, 0.0F));
 
         ModelPartData funnel = structure.addChild("funnel", ModelPartBuilder.create().uv(0, 42)
                         .cuboid(-1.0F, -1.4616F, -7.0F, 2.0F, 2.0F, 14.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, -4.7884F, 0.0F));
+                ModelTransform.rotation(0.0F, -4.7884F, 0.0F));
 
         funnel.addChild("cube_r1", ModelPartBuilder.create().uv(40, 36)
                         .cuboid(-1.5F, -1.5F, -7.0F, 2.0F, 2.0F, 14.0F, new Dilation(0.0F)),
@@ -61,10 +61,10 @@ public class CrusherModel extends Model {
                         .cuboid(6.0F, 1.75F, 6.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(0, 64)
                         .cuboid(-8.0F, 1.75F, 6.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)).uv(9, 64)
                         .cuboid(-8.0F, 1.75F, -8.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+                ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
         ModelPartData left = main.addChild("left", ModelPartBuilder.create(),
-                ModelTransform.pivot(-2.5F, -0.8889F, 0.0F));
+                ModelTransform.rotation(-2.5F, -0.8889F, 0.0F));
 
         left.addChild("bottomLeft", ModelPartBuilder.create().uv(0, 47)
                         .cuboid(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(0, 42)
@@ -74,7 +74,7 @@ public class CrusherModel extends Model {
                         .cuboid(-1.5F, -1.5F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.0F)).uv(37, 18)
                         .cuboid(-1.5F, -1.5F, -7.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(19, 28)
                         .cuboid(-1.5F, -1.5F, -5.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+                ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
         left.addChild("topLeft", ModelPartBuilder.create().uv(0, 59)
                         .cuboid(-1.5F, -1.5F, -2.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(59, 44)
@@ -83,10 +83,10 @@ public class CrusherModel extends Model {
                         .cuboid(-1.5F, -1.5F, 1.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(36, 58)
                         .cuboid(-1.5F, -1.5F, -6.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(53, 58)
                         .cuboid(-1.5F, -1.5F, -4.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-2.0F, -3.0F, 0.0F));
+                ModelTransform.rotation(-2.0F, -3.0F, 0.0F));
 
         ModelPartData right = main.addChild("right", ModelPartBuilder.create(),
-                ModelTransform.pivot(4.5F, -3.8889F, 0.0F));
+                ModelTransform.rotation(4.5F, -3.8889F, 0.0F));
 
         right.addChild("bottomRight", ModelPartBuilder.create().uv(0, 18)
                         .cuboid(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(19, 18)
@@ -96,7 +96,7 @@ public class CrusherModel extends Model {
                         .cuboid(-1.5F, -1.5F, -7.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(28, 18)
                         .cuboid(-1.5F, -1.5F, -5.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(0, 0)
                         .cuboid(-1.5F, -1.5F, -1.0F, 3.0F, 3.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(-2.0F, 3.0F, 0.0F));
+                ModelTransform.rotation(-2.0F, 3.0F, 0.0F));
 
         right.addChild("topRight", ModelPartBuilder.create().uv(49, 0)
                         .cuboid(-1.5F, -1.5F, -2.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(49, 5)
@@ -105,7 +105,7 @@ public class CrusherModel extends Model {
                         .cuboid(-1.5F, -1.5F, 1.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(53, 53)
                         .cuboid(-1.5F, -1.5F, -6.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)).uv(57, 27)
                         .cuboid(-1.5F, -1.5F, -4.0F, 3.0F, 3.0F, 1.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+                ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
         return TexturedModelData.of(modelData, 128, 128);
     }

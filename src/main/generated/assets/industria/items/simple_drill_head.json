@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/simple_drill_head",
+    "model": {
+      "type": "industria:drill_head"
+    }
+  }
+}

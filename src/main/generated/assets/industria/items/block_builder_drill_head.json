@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/block_builder_drill_head",
+    "model": {
+      "type": "industria:drill_head"
+    }
+  }
+}

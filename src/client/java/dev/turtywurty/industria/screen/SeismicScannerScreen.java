@@ -4,7 +4,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
-import dev.turtywurty.industria.util.BlockStateScreenElement;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.DrawContext;
@@ -102,11 +101,11 @@ public class SeismicScannerScreen extends Screen {
                 int y = pos.getY() - fluidPocket.minY();
                 int z = -(pos.getZ() - fluidPocket.minZ());
 
-                new BlockStateScreenElement(blockState)
-                        .scale(12)
-                        .localPos(x, y, z)
-                        .pos(this.x + 96, this.y - 550)
-                        .render(context, mouseX, mouseY, delta);
+//                new BlockStateScreenElement(blockState)
+//                        .scale(12)
+//                        .localPos(x, y, z)
+//                        .pos(this.x + 96, this.y - 550)
+//                        .render(context, mouseX, mouseY, delta);
             }
             matrixStack.pop();
         }

@@ -37,7 +37,7 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     public static final Codec<PipeNetworkManager<?, ?>> CODEC = PipeNetworkManagerTypeInit.CODEC.dispatch(
             PipeNetworkManager::getType, PipeNetworkManagerType::codec);
 
-    public static final Codec<List<PipeNetworkManager<?, ?>>> LIST_CODEC = CODEC.listOf();
+    public static final Codec<List<PipeNetworkManager<?, ?>>> LIST_CODEC = CODEC.listOf().xmap(ArrayList::new, Function.identity());
 
     public static final PacketCodec<RegistryByteBuf, PipeNetworkManager<?, ?>> PACKET_CODEC =
             PipeNetworkManagerTypeInit.PACKET_CODEC.dispatch(

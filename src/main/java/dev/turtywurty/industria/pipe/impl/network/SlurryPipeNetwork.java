@@ -33,7 +33,7 @@ public class SlurryPipeNetwork extends PipeNetwork<Storage<SlurryVariant>> {
             SlurryPipeNetwork::new);
 
     public static final PacketCodec<RegistryByteBuf, SlurryPipeNetwork> PACKET_CODEC =
-            PipeNetwork.createPacketCodecWithRegistryByteBuf(
+            PipeNetwork.createPacketCodec(
                     SlurryStack.PACKET_CODEC,
                     network -> {
                         SingleSlurryStorage slurryStorage = (SingleSlurryStorage) network.storage;

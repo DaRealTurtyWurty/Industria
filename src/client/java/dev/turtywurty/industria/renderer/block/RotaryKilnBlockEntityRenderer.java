@@ -7,7 +7,7 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ModelTransformationMode;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -71,7 +71,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
                 matrices.scale(0.5F, 0.5F, 0.5F);
                 matrices.multiply(facing.getRotationQuaternion());
 
-                this.context.getItemRenderer().renderItem(recipe.inputStack(), ModelTransformationMode.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+                this.context.getItemRenderer().renderItem(recipe.inputStack(), ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
                 matrices.pop();
             }
         }

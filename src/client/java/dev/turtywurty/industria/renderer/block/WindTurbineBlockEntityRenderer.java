@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.model.WindTurbineModel;
 import net.minecraft.client.render.VertexConsumer;
@@ -9,13 +8,11 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 
 public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindTurbineBlockEntity> {
-    private static final Identifier TEXTURE = Industria.id("textures/block/wind_turbine.png");
-
     private final BlockEntityRendererFactory.Context context;
     private final WindTurbineModel model;
 
@@ -26,7 +23,7 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
     }
 
     @Override
-    public void render(WindTurbineBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(WindTurbineBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
@@ -42,7 +39,7 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
         entity.setPropellerRotation(entity.getPropellerRotation() + (outputPercentage * 0.25f));
         model.getWindTurbineParts().propellers().roll = entity.getPropellerRotation();
 
-        VertexConsumer consumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE));
+        VertexConsumer consumer = vertexConsumers.getBuffer(this.model.getLayer(WindTurbineModel.TEXTURE_LOCATION));
         this.model.render(matrices, consumer, light, overlay);
         this.model.getWindTurbineParts().propellers().roll = 0.0F;
         matrices.pop();

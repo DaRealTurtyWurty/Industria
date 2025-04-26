@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.model.OilPumpJackModel;
 import net.minecraft.client.model.ModelPart;
@@ -11,13 +10,11 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
 public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPumpJackBlockEntity> {
-    private static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/oil_pump_jack.png");
-
     private final BlockEntityRendererFactory.Context context;
     private final OilPumpJackModel model;
     private final OilPumpJackModel.OilPumpJackParts parts;
@@ -30,7 +27,7 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
     }
 
     @Override
-    public void render(OilPumpJackBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(OilPumpJackBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
@@ -81,7 +78,7 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
         // Draw bridle
         drawBridle(matrices, vertexConsumers, attachmentBPosition, attachmentCPosition, attachmentDPosition);
 
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE_LOCATION));
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(OilPumpJackModel.TEXTURE_LOCATION));
         this.model.render(matrices, vertexConsumer, light, overlay);
         matrices.pop();
 

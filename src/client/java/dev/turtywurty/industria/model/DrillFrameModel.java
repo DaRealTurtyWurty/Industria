@@ -4,9 +4,11 @@ import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.util.Identifier;
 
 public class DrillFrameModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("drill_frame"), "main");
+    public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_frame.png");
 
     private final ModelPart cableWheel;
     private final ModelPart cableWheelRod;
@@ -50,7 +52,7 @@ public class DrillFrameModel extends Model {
                 .uv(0, 0).cuboid(-15.0865F, 24.3298F, -17.8072F, 31.0F, 2.0F, 2.0F, new Dilation(0.0F))
                 .uv(0, 68).cuboid(-12.0865F, 11.3298F, -14.8072F, 24.0F, 2.0F, 2.0F, new Dilation(0.0F))
                 .uv(0, 5).cuboid(-15.0865F, 24.3298F, 14.1928F, 31.0F, 2.0F, 2.0F, new Dilation(0.0F))
-                .uv(68, 16).cuboid(-12.0865F, 11.3298F, 11.1928F, 24.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0865F, -14.3298F, 0.8072F));
+                .uv(68, 16).cuboid(-12.0865F, 11.3298F, 11.1928F, 24.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0865F, -14.3298F, 0.8072F));
 
         ModelPartData cube_r1 = main.addChild("cube_r1", ModelPartBuilder.create().uv(68, 21).cuboid(-12.25F, -7.5F, 12.0F, 24.0F, 2.0F, 2.0F, new Dilation(0.0F))
                 .uv(0, 10).cuboid(-15.25F, 5.5F, 15.0F, 31.0F, 2.0F, 2.0F, new Dilation(0.0F))
@@ -72,11 +74,11 @@ public class DrillFrameModel extends Model {
         ModelPartData cube_r7 = main.addChild("cube_r7", ModelPartBuilder.create().uv(0, 20).cuboid(-2.0F, -21.5F, -2.0F, 4.0F, 43.0F, 4.0F, new Dilation(0.0F)), ModelTransform.of(13.6368F, 17.3142F, -14.5305F, -0.3927F, -0.7854F, 0.0F));
 
         ModelPartData cableWheelRod = main.addChild("cableWheelRod", ModelPartBuilder.create().uv(68, 64).cuboid(1.0F, -0.5F, -0.5F, 6.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                .uv(68, 61).cuboid(-7.0F, -0.5F, -0.5F, 6.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(-0.0865F, -8.3146F, 7.1928F));
+                .uv(68, 61).cuboid(-7.0F, -0.5F, -0.5F, 6.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.rotation(-0.0865F, -8.3146F, 7.1928F));
 
         ModelPartData cableWheel = main.addChild("cableWheel", ModelPartBuilder.create().uv(109, 93).cuboid(0.0F, -2.0F, -2.0F, 1.0F, 3.0F, 3.0F, new Dilation(0.0F))
                 .uv(33, 96).cuboid(1.0F, -4.0F, -4.0F, 1.0F, 7.0F, 7.0F, new Dilation(0.0F))
-                .uv(50, 96).cuboid(-1.0F, -4.0F, -4.0F, 1.0F, 7.0F, 7.0F, new Dilation(0.0F)), ModelTransform.pivot(-0.4642F, -7.8122F, 7.5715F));
+                .uv(50, 96).cuboid(-1.0F, -4.0F, -4.0F, 1.0F, 7.0F, 7.0F, new Dilation(0.0F)), ModelTransform.rotation(-0.4642F, -7.8122F, 7.5715F));
         return TexturedModelData.of(modelData, 128, 128);
     }
 

@@ -71,7 +71,7 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
             return;
 
         RegistryKey<World> dimension = cameraEntity.getEntityWorld().getRegistryKey();
-        for (PipeNetworkManager<?, ?> manager : ClientPipeNetworks.get(dimension).pipeNetworkManagers()) {
+        for (PipeNetworkManager<?, ?> manager : ClientPipeNetworks.get(dimension)) {
             TransferType<?, ?, ?> transferType = manager.getTransferType();
             float[] color = COLOR_MAP.get(transferType);
             for (PipeNetwork<?> network : manager.getNetworks()) {

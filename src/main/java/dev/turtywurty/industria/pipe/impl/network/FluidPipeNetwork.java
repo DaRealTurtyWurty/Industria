@@ -33,7 +33,7 @@ public class FluidPipeNetwork extends PipeNetwork<Storage<FluidVariant>> {
             FluidPipeNetwork::new);
 
     public static final PacketCodec<RegistryByteBuf, FluidPipeNetwork> PACKET_CODEC =
-            PipeNetwork.createPacketCodecWithRegistryByteBuf(
+            PipeNetwork.createPacketCodec(
                     FluidStack.PACKET_CODEC,
                     network -> {
                         SingleFluidStorage fluidStorage = (SingleFluidStorage) network.storage;

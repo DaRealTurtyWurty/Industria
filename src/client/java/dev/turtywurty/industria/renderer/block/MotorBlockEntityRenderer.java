@@ -8,6 +8,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 
 public class MotorBlockEntityRenderer implements BlockEntityRenderer<MotorBlockEntity> {
     private final BlockEntityRendererFactory.Context context;
@@ -20,7 +21,7 @@ public class MotorBlockEntityRenderer implements BlockEntityRenderer<MotorBlockE
     }
 
     @Override
-    public void render(MotorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(MotorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         matrices.push();
         matrices.translate(0.5, 1.5, 0.5);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));

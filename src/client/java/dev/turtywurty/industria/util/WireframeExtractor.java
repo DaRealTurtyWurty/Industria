@@ -1,12 +1,9 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedGeometry;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Math;
 import org.joml.Vector3f;
 
@@ -16,15 +13,15 @@ import java.util.List;
 import java.util.Set;
 
 public interface WireframeExtractor {
-    static List<Line> fromBakedModel(BakedModel model, @Nullable BlockState state, Random random) {
+    static List<Line> fromBakedModel(BakedGeometry model) {
         Set<Line> lines = new HashSet<>(); // We are using a set to avoid duplicate lines (hashes are used to determine if a line is a duplicate)
         for (Direction direction : Direction.values()) {
-            for (BakedQuad quad : model.getQuads(state, direction, random)) {
+            for (BakedQuad quad : model.getQuads(direction)) {
                 extractVerticesFromBakedQuad(lines, quad);
             }
         }
 
-        for (BakedQuad quad : model.getQuads(state, null, random)) {
+        for (BakedQuad quad : model.getQuads(null)) {
             extractVerticesFromBakedQuad(lines, quad);
         }
 
@@ -32,7 +29,7 @@ public interface WireframeExtractor {
     }
 
     private static void extractVerticesFromBakedQuad(Set<Line> lines, BakedQuad quad) {
-        int[] vertices = quad.getVertexData();
+        int[] vertices = quad.vertexData();
         for (int vIndex = 0; vIndex < 4; vIndex++) {
             int offset = calculateOffset(vIndex);
             float x1 = Float.intBitsToFloat(vertices[offset]);

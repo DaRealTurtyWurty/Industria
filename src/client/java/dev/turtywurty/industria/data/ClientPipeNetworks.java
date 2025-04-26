@@ -4,6 +4,7 @@ import dev.turtywurty.industria.init.PipeNetworkManagerTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.AddPipeNetworkPayload;
 import dev.turtywurty.industria.network.ModifyPipeNetworkPayload;
+import dev.turtywurty.industria.network.RemovePipeNetworkPayload;
 import dev.turtywurty.industria.network.SyncPipeNetworkManagerPayload;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
@@ -18,16 +19,15 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientPipeNetworks {
-    private static final Map<RegistryKey<World>, List<PipeNetworkManager<?, ?>>> PIPE_NETWORKS = new ConcurrentHashMap<>();
+    private static final Map<RegistryKey<World>, List<PipeNetworkManager<?, PipeNetwork<?>>>> PIPE_NETWORKS = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("unchecked")
     public static void init() {
         ClientPlayNetworking.registerGlobalReceiver(SyncPipeNetworkManagerPayload.ID, (payload, context) -> {
             RegistryKey<World> worldKey = payload.dimension();
             TransferType<?, ?, ?> transferType = payload.transferType();
             Map<BlockPos, UUID> pipeToNetworkId = payload.pipeToNetworkId();
 
-            List<PipeNetworkManager<?, ?>> pipeNetworkManagers = PIPE_NETWORKS.computeIfAbsent(worldKey, k -> new ArrayList<>());
+            List<PipeNetworkManager<?, PipeNetwork<?>>> pipeNetworkManagers = PIPE_NETWORKS.computeIfAbsent(worldKey, k -> new ArrayList<>());
             pipeNetworkManagers.removeIf(pipeNetworkManager -> pipeNetworkManager.getTransferType() == transferType);
             PipeNetworkManagerType<?, ? extends PipeNetwork<?>> type = PipeNetworkManagerTypeInit.getType(transferType);
             PipeNetworkManager<?, ? extends PipeNetwork<?>> manager = type.factory().apply(worldKey);
@@ -39,19 +39,39 @@ public class ClientPipeNetworks {
             TransferType<?, ?, ?> transferType = payload.transferType();
             PipeNetwork<?> network = payload.network();
 
-            List<PipeNetworkManager<?, ?>> pipeNetworkManagers = PIPE_NETWORKS.get(worldKey);
+            List<PipeNetworkManager<?, PipeNetwork<?>>> pipeNetworkManagers = PIPE_NETWORKS.get(worldKey);
             if (pipeNetworkManagers == null)
                 return;
 
-            PipeNetworkManager<?, ?> manager = pipeNetworkManagers.stream()
+            PipeNetworkManager<?, PipeNetwork<?>> manager = pipeNetworkManagers.stream()
                     .filter(pipeNetworkManager -> pipeNetworkManager.getTransferType() == transferType)
                     .findFirst()
                     .orElse(null);
             if (manager == null)
                 return;
 
-            List<PipeNetwork<?>> networks = (List<PipeNetwork<?>>) manager.getNetworks();
+            Set<PipeNetwork<?>> networks = manager.getNetworks();
             networks.add(network);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(RemovePipeNetworkPayload.ID, (payload, context) -> {
+            RegistryKey<World> worldKey = payload.world();
+            TransferType<?, ?, ?> transferType = payload.transferType();
+            UUID networkId = payload.networkId();
+
+            List<PipeNetworkManager<?, PipeNetwork<?>>> pipeNetworkManagers = PIPE_NETWORKS.get(worldKey);
+            if (pipeNetworkManagers == null)
+                return;
+
+            PipeNetworkManager<?, PipeNetwork<?>> manager = pipeNetworkManagers.stream()
+                    .filter(pipeNetworkManager -> pipeNetworkManager.getTransferType() == transferType)
+                    .findFirst()
+                    .orElse(null);
+            if (manager == null)
+                return;
+
+            Set<PipeNetwork<?>> networks = manager.getNetworks();
+            networks.removeIf(pipeNetwork -> pipeNetwork.getId().equals(networkId));
         });
 
         ClientPlayNetworking.registerGlobalReceiver(ModifyPipeNetworkPayload.ID, (payload, context) -> {
@@ -61,18 +81,18 @@ public class ClientPipeNetworks {
             UUID networkId = payload.networkId();
             BlockPos pos = payload.pos();
 
-            List<PipeNetworkManager<?, ?>> pipeNetworkManagers = PIPE_NETWORKS.get(worldKey);
+            List<PipeNetworkManager<?, PipeNetwork<?>>> pipeNetworkManagers = PIPE_NETWORKS.get(worldKey);
             if (pipeNetworkManagers == null)
                 return;
 
-            PipeNetworkManager<?, ?> manager = pipeNetworkManagers.stream()
+            PipeNetworkManager<?, PipeNetwork<?>> manager = pipeNetworkManagers.stream()
                     .filter(pipeNetworkManager -> pipeNetworkManager.getTransferType() == transferType)
                     .findFirst()
                     .orElse(null);
             if (manager == null)
                 return;
 
-            List<PipeNetwork<?>> networks = (List<PipeNetwork<?>>) manager.getNetworks();
+            Set<PipeNetwork<?>> networks = manager.getNetworks();
             Optional<PipeNetwork<?>> network = networks.stream()
                     .filter(pipeNetwork -> pipeNetwork.getId().equals(networkId))
                     .findFirst();
@@ -91,7 +111,7 @@ public class ClientPipeNetworks {
                 PIPE_NETWORKS.clear());
     }
 
-    public static List<PipeNetworkManager<?, ?>> get(RegistryKey<World> worldKey) {
+    public static List<PipeNetworkManager<?, PipeNetwork<?>>> get(RegistryKey<World> worldKey) {
         return PIPE_NETWORKS.get(worldKey);
     }
 }

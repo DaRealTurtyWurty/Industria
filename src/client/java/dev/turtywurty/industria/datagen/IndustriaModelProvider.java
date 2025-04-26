@@ -7,14 +7,18 @@ import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.renderer.item.DrillHeadItemRenderer;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.block.Block;
-import net.minecraft.client.data.BlockStateModelGenerator;
-import net.minecraft.client.data.ItemModelGenerator;
-import net.minecraft.client.data.Models;
-import net.minecraft.client.data.TexturedModel;
+import net.minecraft.client.data.*;
+import net.minecraft.client.render.model.json.ModelVariant;
+import net.minecraft.client.render.model.json.MultipartModelConditionBuilder;
+import net.minecraft.client.render.model.json.WeightedVariant;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.Pool;
+import net.minecraft.util.math.AxisRotation;
 
 public class IndustriaModelProvider extends FabricModelProvider {
     public IndustriaModelProvider(FabricDataOutput output) {
@@ -75,57 +79,62 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
 
     private static void registerPipe(BlockStateModelGenerator blockStateModelGenerator, Block block, String name) {
-        BlockStateSupplier pipeSupplier = createPipeBlockStateSupplier(block, name);
+        BlockModelDefinitionCreator pipeSupplier = createPipeBlockModelDefinitionCreator(block, name);
         blockStateModelGenerator.blockStateCollector.accept(pipeSupplier);
     }
 
-    private static BlockStateSupplier createPipeBlockStateSupplier(Block block, String name) {
-        return MultipartBlockStateSupplier.create(block)
-                .with(BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/" + name + "_dot")))
-                .with(When.anyOf(When.create().set(PipeBlock.NORTH, PipeBlock.ConnectorType.PIPE)),
-                        BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/" + name)))
-                .with(When.anyOf(When.create().set(PipeBlock.EAST, PipeBlock.ConnectorType.PIPE)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name))
-                                .put(VariantSettings.Y, VariantSettings.Rotation.R90))
-                .with(When.anyOf(When.create().set(PipeBlock.SOUTH, PipeBlock.ConnectorType.PIPE)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name))
-                                .put(VariantSettings.Y, VariantSettings.Rotation.R180))
-                .with(When.anyOf(When.create().set(PipeBlock.WEST, PipeBlock.ConnectorType.PIPE)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name))
-                                .put(VariantSettings.Y, VariantSettings.Rotation.R270))
-                .with(When.anyOf(When.create().set(PipeBlock.UP, PipeBlock.ConnectorType.PIPE)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name))
-                                .put(VariantSettings.X, VariantSettings.Rotation.R270))
-                .with(When.anyOf(When.create().set(PipeBlock.DOWN, PipeBlock.ConnectorType.PIPE)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name))
-                                .put(VariantSettings.X, VariantSettings.Rotation.R90))
-                .with(When.anyOf(When.create().set(PipeBlock.NORTH, PipeBlock.ConnectorType.BLOCK)),
-                        BlockStateVariant.create().put(VariantSettings.MODEL, Industria.id("block/" + name + "_connected")))
-                .with(When.anyOf(When.create().set(PipeBlock.EAST, PipeBlock.ConnectorType.BLOCK)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name + "_connected"))
-                                .put(VariantSettings.Y, VariantSettings.Rotation.R90))
-                .with(When.anyOf(When.create().set(PipeBlock.SOUTH, PipeBlock.ConnectorType.BLOCK)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name + "_connected"))
-                                .put(VariantSettings.Y, VariantSettings.Rotation.R180))
-                .with(When.anyOf(When.create().set(PipeBlock.WEST, PipeBlock.ConnectorType.BLOCK)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name + "_connected"))
-                                .put(VariantSettings.Y, VariantSettings.Rotation.R270))
-                .with(When.anyOf(When.create().set(PipeBlock.UP, PipeBlock.ConnectorType.BLOCK)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name + "_connected"))
-                                .put(VariantSettings.X, VariantSettings.Rotation.R270))
-                .with(When.anyOf(When.create().set(PipeBlock.DOWN, PipeBlock.ConnectorType.BLOCK)),
-                        BlockStateVariant.create()
-                                .put(VariantSettings.MODEL, Industria.id("block/" + name + "_connected"))
-                                .put(VariantSettings.X, VariantSettings.Rotation.R90));
+    public static WeightedVariant createWeightedVariant(Identifier id, ModelVariant.ModelState modelState) {
+        return new WeightedVariant(Pool.of(new ModelVariant(id, modelState)));
+    }
+
+    public static WeightedVariant createWeightedVariant(Identifier id) {
+        return new WeightedVariant(Pool.of(new ModelVariant(id)));
+    }
+
+    private static BlockModelDefinitionCreator createPipeBlockModelDefinitionCreator(Block block, String name) {
+        Identifier blockModelId = Industria.id("block/" + name);
+        Identifier connectedBlockModelId = Industria.id("block/" + name + "_connected");
+        return MultipartBlockModelDefinitionCreator.create(block)
+                .with(createWeightedVariant(Industria.id("block/" + name + "_dot")))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.NORTH, PipeBlock.ConnectorType.PIPE),
+                        createWeightedVariant(blockModelId))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.EAST, PipeBlock.ConnectorType.PIPE),
+                        createWeightedVariant(blockModelId,
+                                ModelVariant.ModelState.DEFAULT
+                                        .setRotationY(AxisRotation.R90)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.SOUTH, PipeBlock.ConnectorType.PIPE),
+                        createWeightedVariant(blockModelId,
+                                ModelVariant.ModelState.DEFAULT
+                                        .setRotationY(AxisRotation.R180)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.WEST, PipeBlock.ConnectorType.PIPE),
+                        createWeightedVariant(blockModelId,
+                                ModelVariant.ModelState.DEFAULT
+                                        .setRotationY(AxisRotation.R270)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.UP, PipeBlock.ConnectorType.PIPE),
+                        createWeightedVariant(blockModelId,
+                                ModelVariant.ModelState.DEFAULT
+                                        .setRotationX(AxisRotation.R270)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.DOWN, PipeBlock.ConnectorType.PIPE),
+                        createWeightedVariant(blockModelId,
+                                ModelVariant.ModelState.DEFAULT
+                                        .setRotationX(AxisRotation.R90)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.NORTH, PipeBlock.ConnectorType.BLOCK),
+                        createWeightedVariant(connectedBlockModelId, ModelVariant.ModelState.DEFAULT))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.EAST, PipeBlock.ConnectorType.BLOCK),
+                        createWeightedVariant(connectedBlockModelId, ModelVariant.ModelState.DEFAULT
+                                .setRotationY(AxisRotation.R90)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.SOUTH, PipeBlock.ConnectorType.BLOCK),
+                        createWeightedVariant(connectedBlockModelId, ModelVariant.ModelState.DEFAULT
+                                .setRotationY(AxisRotation.R180)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.WEST, PipeBlock.ConnectorType.BLOCK),
+                        createWeightedVariant(connectedBlockModelId, ModelVariant.ModelState.DEFAULT
+                                .setRotationY(AxisRotation.R270)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.UP, PipeBlock.ConnectorType.BLOCK),
+                        createWeightedVariant(connectedBlockModelId, ModelVariant.ModelState.DEFAULT
+                                .setRotationX(AxisRotation.R270)))
+                .with(new MultipartModelConditionBuilder().put(PipeBlock.DOWN, PipeBlock.ConnectorType.BLOCK),
+                        createWeightedVariant(connectedBlockModelId, ModelVariant.ModelState.DEFAULT
+                                .setRotationX(AxisRotation.R90)));
     }
 
     @Override
@@ -140,6 +149,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.register(FluidInit.SODIUM_ALUMINATE.bucket(), Models.GENERATED);
         itemModelGenerator.register(FluidInit.MOLTEN_ALUMINIUM.bucket(), Models.GENERATED);
         itemModelGenerator.register(FluidInit.MOLTEN_CRYOLITE.bucket(), Models.GENERATED);
+        itemModelGenerator.output.accept(ItemInit.SIMPLE_DRILL_HEAD, ItemModels.special(ModelIds.getItemModelId(ItemInit.SIMPLE_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
+        itemModelGenerator.output.accept(ItemInit.BLOCK_BUILDER_DRILL_HEAD, ItemModels.special(ModelIds.getItemModelId(ItemInit.BLOCK_BUILDER_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {

@@ -10,11 +10,7 @@
         "model": "industria:block/heat_pipe"
       },
       "when": {
-        "OR": [
-          {
-            "north": "pipe"
-          }
-        ]
+        "north": "pipe"
       }
     },
     {
@@ -23,11 +19,7 @@
         "y": 90
       },
       "when": {
-        "OR": [
-          {
-            "east": "pipe"
-          }
-        ]
+        "east": "pipe"
       }
     },
     {
@@ -36,11 +28,7 @@
         "y": 180
       },
       "when": {
-        "OR": [
-          {
-            "south": "pipe"
-          }
-        ]
+        "south": "pipe"
       }
     },
     {
@@ -49,11 +37,7 @@
         "y": 270
       },
       "when": {
-        "OR": [
-          {
-            "west": "pipe"
-          }
-        ]
+        "west": "pipe"
       }
     },
     {
@@ -62,11 +46,7 @@
         "x": 270
       },
       "when": {
-        "OR": [
-          {
-            "up": "pipe"
-          }
-        ]
+        "up": "pipe"
       }
     },
     {
@@ -75,11 +55,7 @@
         "x": 90
       },
       "when": {
-        "OR": [
-          {
-            "down": "pipe"
-          }
-        ]
+        "down": "pipe"
       }
     },
     {
@@ -87,11 +63,7 @@
         "model": "industria:block/heat_pipe_connected"
       },
       "when": {
-        "OR": [
-          {
-            "north": "block"
-          }
-        ]
+        "north": "block"
       }
     },
     {
@@ -100,11 +72,7 @@
         "y": 90
       },
       "when": {
-        "OR": [
-          {
-            "east": "block"
-          }
-        ]
+        "east": "block"
       }
     },
     {
@@ -113,11 +81,7 @@
         "y": 180
       },
       "when": {
-        "OR": [
-          {
-            "south": "block"
-          }
-        ]
+        "south": "block"
       }
     },
     {
@@ -126,11 +90,7 @@
         "y": 270
       },
       "when": {
-        "OR": [
-          {
-            "west": "block"
-          }
-        ]
+        "west": "block"
       }
     },
     {
@@ -139,11 +99,7 @@
         "x": 270
       },
       "when": {
-        "OR": [
-          {
-            "up": "block"
-          }
-        ]
+        "up": "block"
       }
     },
     {
@@ -152,11 +108,7 @@
         "x": 90
       },
       "when": {
-        "OR": [
-          {
-            "down": "block"
-          }
-        ]
+        "down": "block"
       }
     }
   ]

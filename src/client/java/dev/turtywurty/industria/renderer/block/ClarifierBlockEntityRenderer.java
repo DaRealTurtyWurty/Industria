@@ -9,10 +9,11 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 
 public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<ClarifierBlockEntity> {
     private final ClarifierModel model;
@@ -79,7 +80,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
             float yOff = position.y * (scale + (0.0625f * scale));
             matrices.translate(xOff, startY - yOff, zOffset);
             matrices.scale(scale, scale, scale);
-            this.context.getItemRenderer().renderItem(outputStack, ModelTransformationMode.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+            this.context.getItemRenderer().renderItem(outputStack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
             matrices.pop();
         }
     }
@@ -125,7 +126,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         matrices.translate(0, 0.75 - scale / 2 - dy, 0 + dz);
         matrices.scale(scale, scale, scale);
         matrices.multiply(RotationAxis.POSITIVE_X.rotation(rotation));
-        this.context.getItemRenderer().renderItem(nextOutput, ModelTransformationMode.NONE, light, overlay, matrices, vertexConsumers, blockEntity.getWorld(), 0);
+        this.context.getItemRenderer().renderItem(nextOutput, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, blockEntity.getWorld(), 0);
         matrices.pop();
     }
 

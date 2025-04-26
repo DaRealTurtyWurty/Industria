@@ -8,6 +8,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 
 public class UpgradeStationBlockEntityRenderer implements BlockEntityRenderer<UpgradeStationBlockEntity> {
     private final BlockEntityRendererFactory.Context context;
@@ -19,7 +20,7 @@ public class UpgradeStationBlockEntityRenderer implements BlockEntityRenderer<Up
     }
 
     @Override
-    public void render(UpgradeStationBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    public void render(UpgradeStationBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));

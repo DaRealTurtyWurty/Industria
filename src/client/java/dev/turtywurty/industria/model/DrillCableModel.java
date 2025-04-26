@@ -25,7 +25,7 @@ public class DrillCableModel extends Model {
         modelPartData.addChild("main", ModelPartBuilder.create()
                         .uv(0, 0)
                         .cuboid(-1.5F, -3.5F, -3.5F, 3.0F, 7.0F, 7.0F, new Dilation(-0.05F)),
-                ModelTransform.pivot(0.1223F, -22.642F, 7.8787F));
+                ModelTransform.rotation(0.1223F, -22.642F, 7.8787F));
 
         return TexturedModelData.of(modelData, 32, 32);
     }

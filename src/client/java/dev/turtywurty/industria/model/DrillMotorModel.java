@@ -52,12 +52,12 @@ public class DrillMotorModel extends Model {
                 .uv(39, 52).cuboid(2.5F, -11.7203F, 12.1345F, 1.0F, 1.4125F, 1.0F, new Dilation(0.0F))
                 .uv(47, 18).cuboid(-4.5F, -12.4274F, 12.8416F, 7.0F, 2.825F, 1.0F, new Dilation(0.0F)), ModelTransform.of(-0.4583F, 11.5295F, -0.0001F, 0.7854F, 0.0F, 0.0F));
 
-        ModelPartData spinRod = main.addChild("spinRod", ModelPartBuilder.create(), ModelTransform.pivot(8.2583F, -4.0455F, -0.0001F));
+        ModelPartData spinRod = main.addChild("spinRod", ModelPartBuilder.create(), ModelTransform.rotation(8.2583F, -4.0455F, -0.0001F));
 
         ModelPartData rodGear = spinRod.addChild("rodGear", ModelPartBuilder.create().uv(15, 33).cuboid(-7.75F, -0.5F, -0.5F, 10.0F, 1.0F, 1.0F, new Dilation(0.0F))
-                .uv(34, 18).cuboid(2.25F, -2.5F, -2.5F, 1.0F, 5.0F, 5.0F, new Dilation(0.0F)), ModelTransform.pivot(2.5333F, 0.0F, 0.0F));
+                .uv(34, 18).cuboid(2.25F, -2.5F, -2.5F, 1.0F, 5.0F, 5.0F, new Dilation(0.0F)), ModelTransform.rotation(2.5333F, 0.0F, 0.0F));
 
-        ModelPartData connectingGear = spinRod.addChild("connectingGear", ModelPartBuilder.create().uv(15, 36).cuboid(-0.5F, -2.5F, -2.5F, 1.0F, 5.0F, 5.0F, new Dilation(0.0F)), ModelTransform.pivot(5.2833F, 0.0F, 5.0F));
+        ModelPartData connectingGear = spinRod.addChild("connectingGear", ModelPartBuilder.create().uv(15, 36).cuboid(-0.5F, -2.5F, -2.5F, 1.0F, 5.0F, 5.0F, new Dilation(0.0F)), ModelTransform.rotation(5.2833F, 0.0F, 5.0F));
         return TexturedModelData.of(modelData, 64, 64);
     }
 

@@ -4,9 +4,11 @@ import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.util.Identifier;
 
 public class OilPumpJackModel extends Model {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("oil_pump_jack"), "main");
+    public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/oil_pump_jack.png");
 
     private final OilPumpJackParts parts;
 
@@ -95,14 +97,14 @@ public class OilPumpJackModel extends Model {
     public static TexturedModelData getTexturedModelData() {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
+        ModelPartData main = modelPartData.addChild("main", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, 24.0F, 0.0F));
 
-        ModelPartData counterWeights = main.addChild("counterWeights", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, -42.0F, 24.0F));
+        ModelPartData counterWeights = main.addChild("counterWeights", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, -42.0F, 24.0F));
 
         ModelPartData leftCounterWeight = counterWeights.addChild("leftCounterWeight", ModelPartBuilder.create().uv(17, 230).cuboid(0.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, new Dilation(0.0F))
                 .uv(242, 0).cuboid(3.998F, -5.002F, -40.002F, 2.004F, 10.004F, 44.004F, new Dilation(0.002F))
                 .uv(79, 198).cuboid(4.0F, -19.0F, -24.0F, 2.0F, 10.0F, 8.0F, new Dilation(0.0F))
-                .uv(180, 223).cuboid(4.0F, -20.027F, -22.4F, 2.0F, 1.027F, 6.4F, new Dilation(0.0F)), ModelTransform.pivot(10.0F, 0.0F, 1.0F));
+                .uv(180, 223).cuboid(4.0F, -20.027F, -22.4F, 2.0F, 1.027F, 6.4F, new Dilation(0.0F)), ModelTransform.rotation(10.0F, 0.0F, 1.0F));
 
         ModelPartData bone9 = leftCounterWeight.addChild("bone9", ModelPartBuilder.create().uv(47, 97).cuboid(-1.0F, -6.0F, -8.0F, 2.0F, 12.0F, 16.0F, new Dilation(0.0F)), ModelTransform.of(5.0F, -7.2716F, -28.2614F, 0.8727F, 0.0F, 0.0F));
 
@@ -123,7 +125,7 @@ public class OilPumpJackModel extends Model {
         ModelPartData rightCounterWeight = counterWeights.addChild("rightCounterWeight", ModelPartBuilder.create().uv(0, 253).cuboid(-6.002F, -5.002F, -40.002F, 2.004F, 10.004F, 44.004F, new Dilation(0.002F))
                 .uv(21, 198).cuboid(-6.0F, -19.0F, -24.0F, 2.0F, 10.0F, 8.0F, new Dilation(0.0F))
                 .uv(207, 19).cuboid(-6.0F, -20.027F, -22.4F, 2.0F, 1.027F, 6.4F, new Dilation(0.0F))
-                .uv(0, 230).cuboid(-4.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(-10.0F, 0.0F, 1.0F));
+                .uv(0, 230).cuboid(-4.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.rotation(-10.0F, 0.0F, 1.0F));
 
         ModelPartData bone15 = rightCounterWeight.addChild("bone15", ModelPartBuilder.create().uv(0, 97).cuboid(-1.0F, -6.0F, -8.0F, 2.0F, 12.0F, 16.0F, new Dilation(0.0F)), ModelTransform.of(-5.0F, -7.2716F, -28.2614F, 0.8727F, 0.0F, 0.0F));
 
@@ -158,13 +160,13 @@ public class OilPumpJackModel extends Model {
                 .uv(132, 227).cuboid(18.0F, -52.5F, -2.7778F, 2.0F, 2.0F, 6.0F, new Dilation(0.0F))
                 .uv(127, 272).cuboid(-20.0F, -44.5F, -2.7778F, 2.0F, 48.0F, 6.0F, new Dilation(0.0F))
                 .uv(174, 69).cuboid(18.0F, -50.5F, 1.2222F, 2.0F, 6.0F, 2.0F, new Dilation(0.0F))
-                .uv(0, 167).cuboid(-20.0F, -50.5F, 1.2222F, 2.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -0.5F, -10.2222F));
+                .uv(0, 167).cuboid(-20.0F, -50.5F, 1.2222F, 2.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, -0.5F, -10.2222F));
 
-        ModelPartData pitmanArmLeftPivot = pitmanArm.addChild("pitmanArmLeftPivot", ModelPartBuilder.create().uv(121, 220).cuboid(0.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)), ModelTransform.pivot(16.0F, 0.5F, 0.2222F));
+        ModelPartData pitmanArmLeftPivot = pitmanArm.addChild("pitmanArmLeftPivot", ModelPartBuilder.create().uv(121, 220).cuboid(0.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)), ModelTransform.rotation(16.0F, 0.5F, 0.2222F));
 
-        ModelPartData pitmanArmRightPivot = pitmanArm.addChild("pitmanArmRightPivot", ModelPartBuilder.create().uv(68, 97).cuboid(-2.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)), ModelTransform.pivot(-16.0F, 0.5F, 0.2222F));
+        ModelPartData pitmanArmRightPivot = pitmanArm.addChild("pitmanArmRightPivot", ModelPartBuilder.create().uv(68, 97).cuboid(-2.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)), ModelTransform.rotation(-16.0F, 0.5F, 0.2222F));
 
-        ModelPartData staticParts = main.addChild("staticParts", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        ModelPartData staticParts = main.addChild("staticParts", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
         ModelPartData supports = staticParts.addChild("supports", ModelPartBuilder.create().uv(0, 167).cuboid(-6.001F, 2.099F, -6.001F, 12.002F, 4.002F, 12.002F, new Dilation(0.001F))
                 .uv(37, 151).cuboid(6.0F, 2.1F, -8.0F, 2.0F, 2.0F, 16.0F, new Dilation(0.0F))
@@ -175,7 +177,7 @@ public class OilPumpJackModel extends Model {
                 .uv(68, 0).cuboid(4.0F, -6.9F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F))
                 .uv(224, 5).cuboid(-4.0F, -4.9F, -5.0F, 8.0F, 2.0F, 2.0F, new Dilation(0.0F))
                 .uv(219, 193).cuboid(-4.0F, -4.9F, 3.0F, 8.0F, 2.0F, 2.0F, new Dilation(0.0F))
-                .uv(21, 0).cuboid(-6.0F, -6.9F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, -96.1F, -28.0F));
+                .uv(21, 0).cuboid(-6.0F, -6.9F, -3.0F, 2.0F, 6.0F, 6.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, -96.1F, -28.0F));
 
         ModelPartData bone28 = supports.addChild("bone28", ModelPartBuilder.create().uv(247, 100).cuboid(-4.0F, -31.0F, -4.0F, 8.0F, 62.0F, 8.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 31.9853F, 15.7679F, 0.5236F, 0.0F, 0.0F));
 
@@ -211,11 +213,11 @@ public class OilPumpJackModel extends Model {
                 .uv(142, 109).cuboid(-11.3704F, 1.1111F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F))
                 .uv(47, 97).cuboid(-13.3704F, -2.8889F, -2.0F, 2.0F, 4.0F, 4.0F, new Dilation(0.0F))
                 .uv(0, 97).cuboid(4.6296F, -2.8889F, -2.0F, 2.0F, 4.0F, 4.0F, new Dilation(0.0F))
-                .uv(142, 100).cuboid(8.6296F, -2.8889F, -2.0F, 2.0F, 4.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(3.3704F, -29.1111F, 56.0F));
+                .uv(142, 100).cuboid(8.6296F, -2.8889F, -2.0F, 2.0F, 4.0F, 4.0F, new Dilation(0.0F)), ModelTransform.rotation(3.3704F, -29.1111F, 56.0F));
 
         ModelPartData bone42 = motor.addChild("bone42", ModelPartBuilder.create().uv(0, 217).cuboid(-1.0F, -2.0F, -4.0F, 2.0F, 4.0F, 8.0F, new Dilation(0.0F))
                 .uv(0, 106).cuboid(-1.0F, -4.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F))
-                .uv(74, 77).cuboid(-1.0F, 2.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(11.6296F, -0.8889F, 0.0F));
+                .uv(74, 77).cuboid(-1.0F, 2.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.rotation(11.6296F, -0.8889F, 0.0F));
 
         ModelPartData bone41 = bone42.addChild("bone41", ModelPartBuilder.create().uv(34, 217).cuboid(-1.0F, -1.0F, -1.4125F, 2.0F, 2.0F, 2.825F, new Dilation(0.0F)), ModelTransform.of(-0.01F, 2.2913F, -2.2937F, 2.3562F, 0.0F, 0.0F));
 
@@ -227,7 +229,7 @@ public class OilPumpJackModel extends Model {
 
         ModelPartData bone43 = motor.addChild("bone43", ModelPartBuilder.create().uv(203, 0).cuboid(-1.0F, -2.0F, -4.0F, 2.0F, 4.0F, 8.0F, new Dilation(0.0F))
                 .uv(47, 9).cuboid(-1.0F, -4.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F))
-                .uv(0, 9).cuboid(-1.0F, 2.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(7.6296F, -0.8889F, 0.0F));
+                .uv(0, 9).cuboid(-1.0F, 2.0F, -2.0F, 2.0F, 2.0F, 4.0F, new Dilation(0.0F)), ModelTransform.rotation(7.6296F, -0.8889F, 0.0F));
 
         ModelPartData bone44 = bone43.addChild("bone44", ModelPartBuilder.create().uv(13, 217).cuboid(-1.0F, -1.0F, -1.4125F, 2.0F, 2.0F, 2.825F, new Dilation(0.0F)), ModelTransform.of(-0.01F, 2.2913F, -2.2937F, 2.3562F, 0.0F, 0.0F));
 
@@ -254,7 +256,7 @@ public class OilPumpJackModel extends Model {
                 .uv(137, 43).cuboid(-8.0004F, -0.2428F, -21.3034F, 8.0F, 16.0F, 4.0F, new Dilation(0.0F))
                 .uv(182, 19).cuboid(-0.0004F, -0.2428F, -21.3034F, 8.0F, 6.0F, 4.0F, new Dilation(0.0F))
                 .uv(159, 170).cuboid(-0.0004F, -0.2428F, 20.6966F, 8.0F, 6.0F, 4.0F, new Dilation(0.0F))
-                .uv(235, 218).cuboid(-10.0004F, -24.8726F, -14.3417F, 20.0F, 4.0F, 35.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0004F, -23.7572F, 19.3034F));
+                .uv(235, 218).cuboid(-10.0004F, -24.8726F, -14.3417F, 20.0F, 4.0F, 35.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0004F, -23.7572F, 19.3034F));
 
         ModelPartData bone25 = frame.addChild("bone25", ModelPartBuilder.create().uv(167, 43).cuboid(-10.0F, -9.0F, -2.0F, 20.0F, 18.0F, 4.0F, new Dilation(0.0F)), ModelTransform.of(0.0016F, -15.7923F, -16.0115F, -0.3927F, 0.0F, 0.0F));
 
@@ -263,13 +265,13 @@ public class OilPumpJackModel extends Model {
         ModelPartData bone27 = frame.addChild("bone27", ModelPartBuilder.create().uv(214, 64).cuboid(-1.0F, -10.0F, -1.0F, 2.0F, 20.0F, 2.0F, new Dilation(0.0F)), ModelTransform.of(10.9976F, 9.7386F, 34.7449F, -0.829F, 0.0F, 0.0F));
 
         ModelPartData belt = staticParts.addChild("belt", ModelPartBuilder.create().uv(199, 79).cuboid(-1.0F, -11.014F, -13.9986F, 2.0F, 0.0F, 8.0F, new Dilation(0.0F))
-                .uv(13, 198).cuboid(-1.0F, 11.006F, 7.9986F, 2.0F, 0.0F, 4.0F, new Dilation(0.0F)), ModelTransform.pivot(13.0F, -38.996F, 45.9986F));
+                .uv(13, 198).cuboid(-1.0F, 11.006F, 7.9986F, 2.0F, 0.0F, 4.0F, new Dilation(0.0F)), ModelTransform.rotation(13.0F, -38.996F, 45.9986F));
 
         ModelPartData wheel = belt.addChild("wheel", ModelPartBuilder.create().uv(39, 144).cuboid(-18.1111F, -1.0F, -1.0F, 22.0F, 2.0F, 2.0F, new Dilation(0.0F))
                 .uv(61, 77).cuboid(-0.1111F, 6.0F, -4.0F, 2.0F, 2.0F, 8.0F, new Dilation(0.0F))
                 .uv(0, 144).cuboid(-0.1111F, -4.0F, 6.0F, 2.0F, 8.0F, 2.0F, new Dilation(0.0F))
                 .uv(139, 174).cuboid(-0.1111F, -8.0F, -4.0F, 2.0F, 2.0F, 8.0F, new Dilation(0.0F))
-                .uv(136, 143).cuboid(-0.1111F, -4.0F, -8.0F, 2.0F, 8.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(-0.8889F, -3.004F, -9.9986F));
+                .uv(136, 143).cuboid(-0.1111F, -4.0F, -8.0F, 2.0F, 8.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(-0.8889F, -3.004F, -9.9986F));
 
         ModelPartData bone21 = wheel.addChild("bone21", ModelPartBuilder.create().uv(227, 157).cuboid(-1.0F, -1.0F, -3.0F, 2.0F, 2.0F, 6.0F, new Dilation(0.0F)), ModelTransform.of(0.8869F, 4.0F, 0.0F, -1.5708F, 0.0F, 0.0F));
 
@@ -299,14 +301,14 @@ public class OilPumpJackModel extends Model {
 
         ModelPartData bone8 = belt.addChild("bone8", ModelPartBuilder.create().uv(190, 108).cuboid(-1.0F, 0.0F, -2.0F, 2.0F, 0.0F, 4.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 8.9951F, 12.0095F, 1.5708F, 0.0F, 0.0F));
 
-        ModelPartData arm = main.addChild("arm", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, -101.0F, -28.0F));
+        ModelPartData arm = main.addChild("arm", ModelPartBuilder.create(), ModelTransform.rotation(0.0F, -101.0F, -28.0F));
 
         ModelPartData head = arm.addChild("head", ModelPartBuilder.create().uv(190, 100).cuboid(-6.0F, -32.0F, -7.3333F, 12.0F, 40.0F, 16.0F, new Dilation(0.0F))
                 .uv(97, 143).cuboid(-6.0F, 8.0F, -5.3333F, 12.0F, 8.0F, 14.0F, new Dilation(0.0F))
                 .uv(190, 157).cuboid(-6.0F, 16.0F, -3.3333F, 12.0F, 8.0F, 12.0F, new Dilation(0.0F))
                 .uv(142, 119).cuboid(-6.0F, 24.0F, 0.6667F, 12.0F, 4.0F, 8.0F, new Dilation(0.0F))
                 .uv(97, 97).cuboid(-6.0F, -24.0F, -9.3333F, 12.0F, 26.0F, 2.0F, new Dilation(0.0F))
-                .uv(137, 69).cuboid(-6.0F, -38.0F, -7.3333F, 12.0F, 6.0F, 12.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 7.0F, -48.6667F));
+                .uv(137, 69).cuboid(-6.0F, -38.0F, -7.3333F, 12.0F, 6.0F, 12.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 7.0F, -48.6667F));
 
         ModelPartData beam = arm.addChild("beam", ModelPartBuilder.create().uv(0, 97).cuboid(-2.2727F, -5.3636F, -72.8182F, 4.0F, 12.0F, 88.0F, new Dilation(0.0F))
                 .uv(190, 100).cuboid(1.7273F, 4.6364F, -72.8182F, 2.0F, 2.0F, 90.0F, new Dilation(0.0F))
@@ -315,19 +317,19 @@ public class OilPumpJackModel extends Model {
                 .uv(97, 143).cuboid(1.7273F, -1.3636F, 17.1818F, 2.0F, 8.0F, 2.0F, new Dilation(0.0F))
                 .uv(137, 69).cuboid(-4.2727F, -1.3636F, 17.1818F, 2.0F, 8.0F, 2.0F, new Dilation(0.0F))
                 .uv(21, 97).cuboid(-2.2727F, -1.3636F, 15.1818F, 4.0F, 8.0F, 4.0F, new Dilation(0.0F))
-                .uv(160, 19).cuboid(-2.2727F, -3.3636F, 15.1818F, 4.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.2727F, -6.6364F, 32.8182F));
+                .uv(160, 19).cuboid(-2.2727F, -3.3636F, 15.1818F, 4.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.2727F, -6.6364F, 32.8182F));
 
         ModelPartData bone37 = beam.addChild("bone37", ModelPartBuilder.create().uv(100, 220).cuboid(-4.0F, -8.0F, -1.0F, 8.0F, 8.5F, 2.0F, new Dilation(0.0F)), ModelTransform.of(-0.2727F, -1.0101F, 18.1212F, 0.7854F, 0.0F, 0.0F));
 
-        ModelPartData attachmentA = main.addChild("attachmentA", ModelPartBuilder.create().uv(2, 1).cuboid(-16.0F, -43.0F, 24.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        ModelPartData attachmentA = main.addChild("attachmentA", ModelPartBuilder.create().uv(2, 1).cuboid(-16.0F, -43.0F, 24.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
-        ModelPartData attachmentB = main.addChild("attachmentB", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -103.0F, -28.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        ModelPartData attachmentB = main.addChild("attachmentB", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -103.0F, -28.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
-        ModelPartData attachmentC = main.addChild("attachmentC", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -93.0F, -87.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        ModelPartData attachmentC = main.addChild("attachmentC", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -93.0F, -87.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
-        ModelPartData attachmentD = main.addChild("attachmentD", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -2.0F, -87.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        ModelPartData attachmentD = main.addChild("attachmentD", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -2.0F, -87.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
 
-        ModelPartData attachmentE = main.addChild("attachmentE", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -102.0F, 13.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+        ModelPartData attachmentE = main.addChild("attachmentE", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -102.0F, 13.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.rotation(0.0F, 0.0F, 0.0F));
         return TexturedModelData.of(modelData, 512, 512);
     }
 

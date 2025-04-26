@@ -7,7 +7,6 @@ import dev.turtywurty.industria.init.PipeNetworkTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.util.Uuids;
@@ -50,28 +49,7 @@ public abstract class PipeNetwork<S> {
     }
 
     protected static <S, ST, N extends PipeNetwork<S>> PacketCodec<RegistryByteBuf, N> createPacketCodec(
-            PacketCodec<ByteBuf, ST> storageTypeCodec,
-            Function<N, ST> storageTypeRetriever,
-            BiConsumer<S, ST> storageModifier,
-            Function<UUID, N> factory) {
-        return PacketCodec.tuple(
-                Uuids.PACKET_CODEC, PipeNetwork::getId,
-                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getPipes,
-                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getConnectedBlocks,
-                TransferType.PACKET_CODEC, PipeNetwork::getTransferType,
-                storageTypeCodec, storageTypeRetriever,
-                (id, pipes, connectedBlocks, transferType, storage) -> {
-                    var network = factory.apply(id);
-                    network.pipes.addAll(pipes);
-                    network.connectedBlocks.addAll(connectedBlocks);
-                    storageModifier.accept(network.storage, storage);
-
-                    return network;
-                });
-    }
-
-    protected static <S, ST, N extends PipeNetwork<S>> PacketCodec<RegistryByteBuf, N> createPacketCodecWithRegistryByteBuf(
-            PacketCodec<RegistryByteBuf, ST> storageTypeCodec,
+            PacketCodec<? super RegistryByteBuf, ST> storageTypeCodec,
             Function<N, ST> storageTypeRetriever,
             BiConsumer<S, ST> storageModifier,
             Function<UUID, N> factory) {

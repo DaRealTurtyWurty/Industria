@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.screen.widget;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.util.ScreenUtils;
 import dev.turtywurty.industria.util.enums.EnumValueCacher;
@@ -109,8 +109,8 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int color = ColorHelper.getWhite(this.alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
+        GlStateManager._enableBlend(); // TODO: Come back and check if this is okay?
+        GlStateManager._enableDepthTest();
         ScreenUtils.drawGuiTexture(context, TEXTURES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height, color);
         ScreenUtils.drawTexture(context, this.textureMap.get(this.value), getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16, color);
 
@@ -134,7 +134,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
             }
 
             // draw hover tooltip
-            if(isMouseOverSelectionArea(mouseX, mouseY)) {
+            if (isMouseOverSelectionArea(mouseX, mouseY)) {
                 int ordinal = getOrdinal(mouseX, mouseY);
 
                 T current = this.value.getValues()[ordinal];
@@ -142,7 +142,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
             }
         }
 
-        if(isHovered()) {
+        if (isHovered()) {
             context.drawTooltip(this.textRenderer, this.value.getAsText(), mouseX, mouseY);
         }
 
@@ -151,7 +151,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     private T findNextEnabled(T value) {
         T next = value.next();
-        while(this.disabledValues.contains(next)) {
+        while (this.disabledValues.contains(next)) {
             next = next.next();
         }
 
@@ -160,7 +160,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     private T findPreviousEnabled(T value) {
         T previous = value.previous();
-        while(this.disabledValues.contains(previous)) {
+        while (this.disabledValues.contains(previous)) {
             previous = previous.previous();
         }
 
@@ -175,7 +175,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
         int startX = getSelectionLeft();
         int startY = getBottom();
         int localX = x - startX;
-        if(localX < 0)
+        if (localX < 0)
             return -1;
 
         int column = localX / this.width;
@@ -187,7 +187,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
         int startY = getBottom();
         int numValues = this.value.getValues().length;
         int endY = startY + (this.height * MathHelper.ceil(numValues / (float) this.columns));
-        if(mouseY < startY || mouseY > endY) return false;
+        if (mouseY < startY || mouseY > endY) return false;
 
         int ordinal = getOrdinal((int) mouseX, (int) mouseY);
         return ordinal < numValues && ordinal >= 0;

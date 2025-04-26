@@ -167,7 +167,7 @@ public class Industria implements ModInitializer {
 
         FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {
-                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.FLUID, pos);
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(serverWorld, TransferType.FLUID, pos);
             }
 
             return null;
@@ -175,7 +175,7 @@ public class Industria implements ModInitializer {
 
         SlurryStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {
-                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.SLURRY, pos);
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(serverWorld, TransferType.SLURRY, pos);
             }
 
             return null;
@@ -183,7 +183,7 @@ public class Industria implements ModInitializer {
 
         HeatStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if(world instanceof ServerWorld serverWorld) {
-                WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.HEAT, pos);
+                WorldPipeNetworks.getOrCreate(serverWorld).getStorage(serverWorld, TransferType.HEAT, pos);
             }
 
             return null;
@@ -191,7 +191,7 @@ public class Industria implements ModInitializer {
 
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {
-                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.ENERGY, pos);
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(serverWorld, TransferType.ENERGY, pos);
             }
 
             return null;

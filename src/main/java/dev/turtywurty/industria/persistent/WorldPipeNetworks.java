@@ -3,9 +3,10 @@ package dev.turtywurty.industria.persistent;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.init.PipeNetworkManagerTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.network.SyncPipeNetworkManagerPayload;
 import dev.turtywurty.industria.network.AddPipeNetworkPayload;
+import dev.turtywurty.industria.network.SyncPipeNetworkManagerPayload;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -67,18 +68,21 @@ public class WorldPipeNetworks extends PersistentState {
     }
 
     @SuppressWarnings("unchecked")
-    public <S, N extends PipeNetwork<S>> PipeNetworkManager<S, N> getNetworkManager(TransferType<S, ?, ?> transferType) {
+    public <S, N extends PipeNetwork<S>> PipeNetworkManager<S, N> getNetworkManager(ServerWorld serverWorld, TransferType<S, ?, ?> transferType) {
         for (PipeNetworkManager<?, ?> pipeNetworkManager : getPipeNetworkManagers()) {
             if (pipeNetworkManager.getTransferType() == transferType) {
                 return (PipeNetworkManager<S, N>) pipeNetworkManager;
             }
         }
 
-        return null;
+        PipeNetworkManager<S, PipeNetwork<S>> manager = PipeNetworkManagerTypeInit.getType(transferType).factory().apply(serverWorld.getRegistryKey());
+        this.data.pipeNetworkManagers.add(manager);
+        return (PipeNetworkManager<S, N>) manager;
+
     }
 
-    public <S, N extends PipeNetwork<S>> @Nullable N getNetwork(TransferType<S, ?, ?> transferType, BlockPos pos) {
-        PipeNetworkManager<S, N> pipeNetworkManager = getNetworkManager(transferType);
+    public <S, N extends PipeNetwork<S>> @Nullable N getNetwork(ServerWorld serverWorld, TransferType<S, ?, ?> transferType, BlockPos pos) {
+        PipeNetworkManager<S, N> pipeNetworkManager = getNetworkManager(serverWorld, transferType);
         if (pipeNetworkManager != null) {
             return pipeNetworkManager.getNetwork(pos);
         }
@@ -86,8 +90,8 @@ public class WorldPipeNetworks extends PersistentState {
         return null;
     }
 
-    public <S, N extends PipeNetwork<S>> @Nullable S getStorage(TransferType<S, ?, ?> transferType, BlockPos pos) {
-        N network = getNetwork(transferType, pos);
+    public <S, N extends PipeNetwork<S>> @Nullable S getStorage(ServerWorld serverWorld, TransferType<S, ?, ?> transferType, BlockPos pos) {
+        N network = getNetwork(serverWorld, transferType, pos);
         if (network != null) {
             return network.getStorage(pos);
         }
@@ -105,7 +109,6 @@ public class WorldPipeNetworks extends PersistentState {
         ).apply(instance, Data::new));
 
         public static final PacketCodec<RegistryByteBuf, Data> PACKET_CODEC =
-                PacketCodec.tuple(PipeNetworkManager.LIST_PACKET_CODEC, Data::pipeNetworkManagers,
-                        Data::new);
+                PacketCodec.tuple(PipeNetworkManager.LIST_PACKET_CODEC, Data::pipeNetworkManagers, Data::new);
     }
 }
