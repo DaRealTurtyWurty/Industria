@@ -7,8 +7,6 @@ import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.pipe.impl.network.CableNetwork;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.UUID;
@@ -20,8 +18,8 @@ public class CableNetworkManager extends PipeNetworkManager<EnergyStorage, Cable
     public static final PacketCodec<RegistryByteBuf, CableNetworkManager> PACKET_CODEC =
             PipeNetworkManager.createPacketCodec(CableNetwork.PACKET_CODEC, CableNetworkManager::new);
 
-    public CableNetworkManager(RegistryKey<World> dimension) {
-        super(PipeNetworkManagerTypeInit.ENERGY, TransferType.ENERGY, dimension);
+    public CableNetworkManager() {
+        super(PipeNetworkManagerTypeInit.ENERGY, TransferType.ENERGY);
     }
 
     @Override

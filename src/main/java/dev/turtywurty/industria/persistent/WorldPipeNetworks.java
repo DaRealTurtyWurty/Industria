@@ -52,9 +52,9 @@ public class WorldPipeNetworks extends PersistentState {
     public static void syncToClient(PacketSender sender, ServerWorld serverWorld) {
         WorldPipeNetworks worldPipeNetworks = getOrCreate(serverWorld);
         for (PipeNetworkManager<?, ?> manager : worldPipeNetworks.getPipeNetworkManagers()) {
-            sender.sendPacket(new SyncPipeNetworkManagerPayload(manager.getTransferType(), manager.getDimension(), manager.getPipeToNetworkId()));
+            sender.sendPacket(new SyncPipeNetworkManagerPayload(manager.getTransferType(), serverWorld.getRegistryKey(), manager.getPipeToNetworkId()));
             for (PipeNetwork<?> network : manager.getNetworks()) {
-                sender.sendPacket(new AddPipeNetworkPayload(manager.getDimension(), manager.getTransferType(), network));
+                sender.sendPacket(new AddPipeNetworkPayload(serverWorld.getRegistryKey(), manager.getTransferType(), network));
             }
         }
     }
@@ -68,21 +68,20 @@ public class WorldPipeNetworks extends PersistentState {
     }
 
     @SuppressWarnings("unchecked")
-    public <S, N extends PipeNetwork<S>> PipeNetworkManager<S, N> getNetworkManager(ServerWorld serverWorld, TransferType<S, ?, ?> transferType) {
+    public <S, N extends PipeNetwork<S>> PipeNetworkManager<S, N> getNetworkManager(TransferType<S, ?, ?> transferType) {
         for (PipeNetworkManager<?, ?> pipeNetworkManager : getPipeNetworkManagers()) {
             if (pipeNetworkManager.getTransferType() == transferType) {
                 return (PipeNetworkManager<S, N>) pipeNetworkManager;
             }
         }
 
-        PipeNetworkManager<S, PipeNetwork<S>> manager = PipeNetworkManagerTypeInit.getType(transferType).factory().apply(serverWorld.getRegistryKey());
+        PipeNetworkManager<S, N> manager = PipeNetworkManagerTypeInit.<S, N>getType(transferType).factory().get();
         this.data.pipeNetworkManagers.add(manager);
-        return (PipeNetworkManager<S, N>) manager;
-
+        return manager;
     }
 
-    public <S, N extends PipeNetwork<S>> @Nullable N getNetwork(ServerWorld serverWorld, TransferType<S, ?, ?> transferType, BlockPos pos) {
-        PipeNetworkManager<S, N> pipeNetworkManager = getNetworkManager(serverWorld, transferType);
+    public <S, N extends PipeNetwork<S>> @Nullable N getNetwork(TransferType<S, ?, ?> transferType, BlockPos pos) {
+        PipeNetworkManager<S, N> pipeNetworkManager = getNetworkManager(transferType);
         if (pipeNetworkManager != null) {
             return pipeNetworkManager.getNetwork(pos);
         }
@@ -90,8 +89,8 @@ public class WorldPipeNetworks extends PersistentState {
         return null;
     }
 
-    public <S, N extends PipeNetwork<S>> @Nullable S getStorage(ServerWorld serverWorld, TransferType<S, ?, ?> transferType, BlockPos pos) {
-        N network = getNetwork(serverWorld, transferType, pos);
+    public <S, N extends PipeNetwork<S>> @Nullable S getStorage(TransferType<S, ?, ?> transferType, BlockPos pos) {
+        N network = getNetwork(transferType, pos);
         if (network != null) {
             return network.getStorage(pos);
         }

@@ -78,7 +78,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     }
 
     public PipeNetworkManager<S, N> getNetworkManager(ServerWorld world) {
-        return WorldPipeNetworks.getOrCreate(world).getNetworkManager(world, getTransferType());
+        return WorldPipeNetworks.getOrCreate(world).getNetworkManager(getTransferType());
     }
 
     public TransferType<S, ?, A> getTransferType() {

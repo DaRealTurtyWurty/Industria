@@ -87,17 +87,13 @@ public class IndustriaModelProvider extends FabricModelProvider {
         return new WeightedVariant(Pool.of(new ModelVariant(id, modelState)));
     }
 
-    public static WeightedVariant createWeightedVariant(Identifier id) {
-        return new WeightedVariant(Pool.of(new ModelVariant(id)));
-    }
-
     private static BlockModelDefinitionCreator createPipeBlockModelDefinitionCreator(Block block, String name) {
         Identifier blockModelId = Industria.id("block/" + name);
         Identifier connectedBlockModelId = Industria.id("block/" + name + "_connected");
         return MultipartBlockModelDefinitionCreator.create(block)
-                .with(createWeightedVariant(Industria.id("block/" + name + "_dot")))
+                .with(createWeightedVariant(Industria.id("block/" + name + "_dot"), ModelVariant.ModelState.DEFAULT))
                 .with(new MultipartModelConditionBuilder().put(PipeBlock.NORTH, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId))
+                        createWeightedVariant(blockModelId, ModelVariant.ModelState.DEFAULT))
                 .with(new MultipartModelConditionBuilder().put(PipeBlock.EAST, PipeBlock.ConnectorType.PIPE),
                         createWeightedVariant(blockModelId,
                                 ModelVariant.ModelState.DEFAULT

@@ -2,7 +2,7 @@ package dev.turtywurty.industria.blockentity.abstraction;
 
 import org.jetbrains.annotations.Nullable;
 
-public class BlockEntityField<T, B extends IndustriaBlockEntity> {
+public class BlockEntityField<T, B extends IndustriaBlockEntity<?>> {
     private final T defaultValue;
     private final @Nullable FieldGetter<T, B> getter;
     private final @Nullable FieldSetter<T, B> setter;
@@ -40,12 +40,12 @@ public class BlockEntityField<T, B extends IndustriaBlockEntity> {
     }
 
     @FunctionalInterface
-    public interface FieldGetter<T, B extends IndustriaBlockEntity> {
+    public interface FieldGetter<T, B extends IndustriaBlockEntity<?>> {
         T get(B blockEntity);
     }
 
     @FunctionalInterface
-    public interface FieldSetter<T, B extends IndustriaBlockEntity> {
+    public interface FieldSetter<T, B extends IndustriaBlockEntity<?>> {
         void set(B blockEntity, T value);
     }
 }

@@ -36,7 +36,7 @@ public class ExtraCodecs {
 
     public static final Codec<BlockPos> BLOCK_POS_STRING_CODEC = Codec.STRING.comapFlatMap(
             str -> {
-                String[] parts = str.split(",");
+                String[] parts = str.split(" ");
                 if (parts.length != 3) {
                     return DataResult.error(() -> "Invalid BlockPos format: " + str);
                 }
@@ -50,7 +50,7 @@ public class ExtraCodecs {
                     return DataResult.error(() -> "Invalid BlockPos format: " + str);
                 }
             },
-            BlockPos::toShortString);
+            blockPos -> blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ());
 
     public static <T> Codec<Set<T>> setOf(Codec<T> codec) {
         return Codec.list(codec).xmap(Sets::newHashSet, Lists::newArrayList);
