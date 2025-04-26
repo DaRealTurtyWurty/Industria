@@ -32,6 +32,7 @@ public class ClientPipeNetworks {
             PipeNetworkManagerType<?, ? extends PipeNetwork<?>> type = PipeNetworkManagerTypeInit.getType(transferType);
             PipeNetworkManager<?, ? extends PipeNetwork<?>> manager = type.factory().apply(worldKey);
             manager.getPipeToNetworkId().putAll(pipeToNetworkId);
+            pipeNetworkManagers.add((PipeNetworkManager<?, PipeNetwork<?>>) manager);
         });
 
         ClientPlayNetworking.registerGlobalReceiver(AddPipeNetworkPayload.ID, (payload, context) -> {

@@ -161,7 +161,6 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             return;
 
         onPlacePipe(world, pos);
-        WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
     public void removePipe(ServerWorld world, BlockPos pos) {
@@ -169,7 +168,6 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             return;
 
         onRemovePipe(world, pos);
-        WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
     protected void onPlacePipe(ServerWorld world, BlockPos pos) {
@@ -256,11 +254,7 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             }
         }
 
-        for (ServerPlayerEntity player : world.getPlayers()) {
-            for (CustomPayload payload : payloads) {
-                ServerPlayNetworking.send(player, payload);
-            }
-        }
+        syncAndSave(world, payloads);
     }
 
     protected void onRemovePipe(ServerWorld world, BlockPos pos) {
@@ -272,13 +266,40 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         if (network == null)
             return;
 
+        List<CustomPayload> payloads = new ArrayList<>();
         network.removePipe(pos);
+
+        payloads.add(new ModifyPipeNetworkPayload(
+                ModifyPipeNetworkPayload.Operation.REMOVE_PIPE,
+                world.getRegistryKey(),
+                this.transferType,
+                networkId,
+                pos));
+
         if (network.getPipes().isEmpty()) {
             removeNetwork(network);
+            payloads.add(new RemovePipeNetworkPayload(
+                    world.getRegistryKey(),
+                    this.transferType,
+                    networkId));
+
+            syncAndSave(world, payloads);
             return;
         }
 
+        List<BlockPos> previousConnectedBlocks = new ArrayList<>(network.getConnectedBlocks());
         updateConnectedBlocks(world, network);
+        List<BlockPos> removedConnectedBlocks = new ArrayList<>(previousConnectedBlocks);
+        removedConnectedBlocks.removeAll(network.getConnectedBlocks());
+
+        for (BlockPos connectedBlock : removedConnectedBlocks) {
+            payloads.add(new ModifyPipeNetworkPayload(
+                    ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK,
+                    world.getRegistryKey(),
+                    this.transferType,
+                    networkId,
+                    connectedBlock));
+        }
 
         Set<BlockPos> visited = new HashSet<>();
         List<Set<BlockPos>> connectedComponents = new ArrayList<>();
@@ -294,10 +315,17 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             }
         }
 
-        if (connectedComponents.size() == 1)
+        if (connectedComponents.size() == 1) {
+            syncAndSave(world, payloads);
             return;
+        }
 
+        payloads.add(new RemovePipeNetworkPayload(
+                world.getRegistryKey(),
+                this.transferType,
+                networkId));
         removeNetwork(network);
+
         int totalPipes = network.getPipes().size();
         for (Set<BlockPos> connectedComponent : connectedComponents) {
             N newNetwork = createNetwork(UUID.randomUUID());
@@ -325,6 +353,21 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
             addNetwork(newNetwork);
             for (BlockPos pipe : connectedComponent) {
                 addPipe(pipe, newNetwork.getId());
+            }
+
+            payloads.add(new AddPipeNetworkPayload(
+                    world.getRegistryKey(),
+                    this.transferType,
+                    newNetwork));
+        }
+
+        syncAndSave(world, payloads);
+    }
+
+    private static void syncAndSave(ServerWorld world, List<CustomPayload> payloads) {
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            for (CustomPayload payload : payloads) {
+                ServerPlayNetworking.send(player, payload);
             }
         }
 

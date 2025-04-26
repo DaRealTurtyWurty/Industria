@@ -33,8 +33,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -269,23 +267,23 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
         nbt.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
+            nbt.put("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE), this.currentRecipeId);
         }
 
         if (!this.outputItemStack.isEmpty()) {
-            nbt.put("OutputStack", this.outputItemStack.toNbt(registries));
+            nbt.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.byproductItemStack.isEmpty()) {
-            nbt.put("ByproductStack", this.byproductItemStack.toNbt(registries));
+            nbt.put("ByproductStack", ItemStack.CODEC, this.byproductItemStack);
         }
 
         nbt.putInt("CatalystUsesLeft", this.catalystUsesLeft);
         nbt.putInt("MaxCatalystUses", this.maxCatalystUses);
-        nbt.put("NextOutputStack", this.nextOutputItemStack.toNbt(registries));
+
+        if (!this.nextOutputItemStack.isEmpty()) {
+            nbt.put("NextOutputStack", ItemStack.CODEC, this.nextOutputItemStack);
+        }
     }
 
     @Override
