@@ -220,7 +220,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         if (this.rightClickToOpenGui) {
             if (!world.isClient) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
-                if (player instanceof ServerPlayerEntity sPlayer && blockEntity instanceof BlockEntityWithGui blockEntityWithGui) { // TODO: Replace with component access maybe?
+                if (player instanceof ServerPlayerEntity sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
                     sPlayer.openHandledScreen(blockEntityWithGui);
                 }
             }

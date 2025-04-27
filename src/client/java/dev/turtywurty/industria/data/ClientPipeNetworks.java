@@ -30,7 +30,7 @@ public class ClientPipeNetworks {
             List<PipeNetworkManager<?, PipeNetwork<?>>> pipeNetworkManagers = PIPE_NETWORKS.computeIfAbsent(worldKey, k -> new ArrayList<>());
             pipeNetworkManagers.removeIf(pipeNetworkManager -> pipeNetworkManager.getTransferType() == transferType);
             PipeNetworkManagerType<?, ? extends PipeNetwork<?>> type = PipeNetworkManagerTypeInit.getType(transferType);
-            PipeNetworkManager<?, ? extends PipeNetwork<?>> manager = type.factory().apply(worldKey);
+            PipeNetworkManager<?, ? extends PipeNetwork<?>> manager = type.factory().get();
             manager.getPipeToNetworkId().putAll(pipeToNetworkId);
             pipeNetworkManagers.add((PipeNetworkManager<?, PipeNetwork<?>>) manager);
         });
@@ -94,18 +94,17 @@ public class ClientPipeNetworks {
                 return;
 
             Set<PipeNetwork<?>> networks = manager.getNetworks();
-            Optional<PipeNetwork<?>> network = networks.stream()
+            Optional<PipeNetwork<?>> optionalNetwork = networks.stream()
                     .filter(pipeNetwork -> pipeNetwork.getId().equals(networkId))
                     .findFirst();
-            if (operation == ModifyPipeNetworkPayload.Operation.ADD_PIPE) {
-                network.ifPresent(pipeNetwork -> pipeNetwork.addPipe(pos));
-            } else if (operation == ModifyPipeNetworkPayload.Operation.REMOVE_PIPE) {
-                network.ifPresent(pipeNetwork -> pipeNetwork.removePipe(pos));
-            } else if (operation == ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK) {
-                network.ifPresent(pipeNetwork -> pipeNetwork.getConnectedBlocks().add(pos));
-            } else if (operation == ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK) {
-                network.ifPresent(pipeNetwork -> pipeNetwork.getConnectedBlocks().remove(pos));
-            }
+            optionalNetwork.ifPresent(network -> {
+                switch (operation) {
+                    case ADD_PIPE -> network.addPipe(pos);
+                    case REMOVE_PIPE -> network.removePipe(pos);
+                    case ADD_CONNECTED_BLOCK -> network.getConnectedBlocks().add(pos);
+                    case REMOVE_CONNECTED_BLOCK -> network.getConnectedBlocks().remove(pos);
+                }
+            });
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->

@@ -65,11 +65,11 @@ public class MultiblockBlock extends Block {
     }
 
     public static MultiblockData getMultiblockData(WorldView world, BlockPos pos) {
-        Map<String, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
+        Map<BlockPos, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
         if (map == null)
             return null;
 
-        return map.get(pos.toShortString());
+        return map.get(pos);
     }
 
     public static BlockPos getPrimaryPos(WorldView world, BlockPos pos) {

@@ -1,14 +1,17 @@
 package dev.turtywurty.industria.multiblock;
 
+import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.util.NbtUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -22,7 +25,7 @@ import java.util.*;
 /**
  * Represents an object that acts as a multiblock controller.
  *
- * @apiNote This interface is designed to be implemented on a {@link net.minecraft.block.entity.BlockEntity} instance.
+ * @apiNote This interface is designed to be implemented on a {@link BlockEntity} instance.
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Multiblockable {
@@ -104,9 +107,9 @@ public interface Multiblockable {
             getMultiblockPositions().add(position);
 
             Chunk chunk = world.getChunk(position);
-            Map<String, MultiblockData> map = chunk.getAttachedOrCreate(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT, HashMap::new);
-            Map<String, MultiblockData> copy = new HashMap<>(map);
-            copy.put(position.toShortString(), new MultiblockData(pos, type()));
+            Map<BlockPos, MultiblockData> map = chunk.getAttachedOrCreate(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT, HashMap::new);
+            Map<BlockPos, MultiblockData> copy = new HashMap<>(map);
+            copy.put(position, new MultiblockData(pos, type()));
             chunk.setAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT, copy);
         }
 
@@ -137,12 +140,12 @@ public interface Multiblockable {
             world.breakBlock(machinePos, false);
 
             Chunk chunk = world.getChunk(machinePos);
-            Map<String, MultiblockData> map = chunk.getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
+            Map<BlockPos, MultiblockData> map = chunk.getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
             if (map == null)
                 return;
 
-            Map<String, MultiblockData> copy = new HashMap<>(map);
-            copy.remove(machinePos.toShortString());
+            Map<BlockPos, MultiblockData> copy = new HashMap<>(map);
+            copy.remove(machinePos);
             if (copy.isEmpty()) {
                 chunk.removeAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
             } else {
@@ -156,29 +159,26 @@ public interface Multiblockable {
     /**
      * Writes the multiblock positions to NBT.
      *
-     * @return An NBT list of type {@link net.minecraft.nbt.NbtIntArray} that represents the multiblock positions.
+     * @return An {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
      */
     static NbtList writeMultiblockToNbt(Multiblockable multiblockable) {
-        var machinePositions = new NbtList();
-        for (BlockPos machinePosition : multiblockable.getMultiblockPositions()) {
-            machinePositions.add(NbtUtils.toNbt(machinePosition));
-        }
-
-        return machinePositions;
+        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
+        return (NbtList) BlockPos.CODEC.listOf()
+                .encodeStart(NbtOps.INSTANCE, multiblockPositions)
+                .result().orElseGet(NbtList::new);
     }
 
     /**
      * Reads the multiblock positions from NBT.
      *
      * @param multiblockable The multiblock controller to read the positions to.
-     * @param nbt            The NBT list of type {@link net.minecraft.nbt.NbtIntArray} that represents the multiblock positions.
+     * @param nbt            The {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
      */
     static void readMultiblockFromNbt(Multiblockable multiblockable, NbtList nbt) {
-        List<BlockPos> machinePositions = multiblockable.getMultiblockPositions();
-        machinePositions.clear();
-        for (int i = 0; i < nbt.size(); i++) {
-            NbtUtils.fromNbt(nbt.getCompoundOrEmpty(i)).ifPresent(machinePositions::add);
-        }
+        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
+        multiblockPositions.clear();
+        BlockPos.CODEC.listOf().decode(NbtOps.INSTANCE, nbt).result().map(Pair::getFirst)
+                .ifPresent(multiblockPositions::addAll);
     }
 
     /**

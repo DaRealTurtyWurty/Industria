@@ -9,8 +9,6 @@ import dev.turtywurty.industria.pipe.impl.network.SlurryPipeNetwork;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
 
 import java.util.UUID;
 
@@ -21,8 +19,8 @@ public class SlurryPipeNetworkManager extends PipeNetworkManager<Storage<SlurryV
     public static final PacketCodec<RegistryByteBuf, SlurryPipeNetworkManager> PACKET_CODEC =
             PipeNetworkManager.createPacketCodec(SlurryPipeNetwork.PACKET_CODEC, SlurryPipeNetworkManager::new);
 
-    public SlurryPipeNetworkManager(RegistryKey<World> dimension) {
-        super(PipeNetworkManagerTypeInit.SLURRY, TransferType.SLURRY, dimension);
+    public SlurryPipeNetworkManager() {
+        super(PipeNetworkManagerTypeInit.SLURRY, TransferType.SLURRY);
     }
 
     @Override

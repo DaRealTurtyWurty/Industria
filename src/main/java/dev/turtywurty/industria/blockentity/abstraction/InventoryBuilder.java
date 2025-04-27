@@ -54,7 +54,7 @@ public class InventoryBuilder {
         return addComponent(new OutputOnlyInventoryComponent());
     }
 
-    public InventoryBuilder syncing(IndustriaBlockEntity blockEntity) {
+    public InventoryBuilder syncing(IndustriaBlockEntity<?> blockEntity) {
         return addComponent(new SyncingComponent(blockEntity));
     }
 

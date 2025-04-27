@@ -57,41 +57,29 @@ public class SolarPanelScreen extends HandledScreen<SolarPanelScreenHandler> {
                     Text.literal("Sunlight: %d%%".formatted((int) MathHelper.clamp(this.handler.getEnergyPerTickPercent() * 100, 0, 100)))
             ));
 
+
             if(this.client != null && this.client.world != null) {
                 World world = this.client.world;
 
-                boolean addedNewLine = false;
+                List<Text> notices = new ArrayList<>();
                 if(world.isNight()) {
-                    tooltip.add(Text.empty());
-                    tooltip.add(Text.literal("⚠ Night").withColor(0xFF5555));
-
-                    addedNewLine = true;
+                    notices.add(Text.literal("⚠ Night").withColor(0xFF5555));
                 }
 
                 if(world.isThundering()) {
-                    if(!addedNewLine) {
-                        tooltip.add(Text.empty());
-                        addedNewLine = true;
-                    }
-
-                    tooltip.add(Text.literal("⚠ Thundering").withColor(0xFF5555));
+                    notices.add(Text.literal("⚠ Thundering").withColor(0xFF5555));
                 } else if(world.isRaining()) {
-                    if(!addedNewLine) {
-                        tooltip.add(Text.empty());
-                        addedNewLine = true;
-                    }
-
-                    tooltip.add(Text.literal("⚠ Raining").withColor(0xFF5555));
+                    notices.add(Text.literal("⚠ Raining").withColor(0xFF5555));
                 }
 
                 int brightness = world.getLightLevel(LightType.SKY, this.handler.getBlockEntity().getPos().up());
                 if(brightness < 15) {
-                    if(!addedNewLine) {
-                        tooltip.add(Text.empty());
-                        addedNewLine = true;
-                    }
+                    notices.add(Text.literal("⚠ Low Light").withColor(0xFF5555));
+                }
 
-                    tooltip.add(Text.literal("⚠ Low Light").withColor(0xFF5555));
+                if (!notices.isEmpty()) {
+                    tooltip.add(Text.empty());
+                    tooltip.addAll(notices);
                 }
             }
 

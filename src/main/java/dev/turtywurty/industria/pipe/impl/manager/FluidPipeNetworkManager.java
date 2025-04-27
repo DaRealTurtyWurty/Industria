@@ -9,8 +9,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
 
 import java.util.UUID;
 
@@ -21,8 +19,8 @@ public class FluidPipeNetworkManager extends PipeNetworkManager<Storage<FluidVar
     public static final PacketCodec<RegistryByteBuf, FluidPipeNetworkManager> PACKET_CODEC =
             PipeNetworkManager.createPacketCodec(FluidPipeNetwork.PACKET_CODEC, FluidPipeNetworkManager::new);
 
-    public FluidPipeNetworkManager(RegistryKey<World> dimension) {
-        super(PipeNetworkManagerTypeInit.FLUID, TransferType.FLUID, dimension);
+    public FluidPipeNetworkManager() {
+        super(PipeNetworkManagerTypeInit.FLUID, TransferType.FLUID);
     }
 
     @Override

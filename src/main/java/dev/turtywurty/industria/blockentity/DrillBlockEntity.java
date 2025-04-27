@@ -243,7 +243,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
         if (nbt.contains("OverflowStacks")) {
             this.overflowStacks.clear();
             for (NbtElement element : nbt.getListOrEmpty("OverflowStacks")) {
-                ItemStack.fromNbt(registryLookup, (NbtCompound) element)
+                ItemStack.fromNbt(registryLookup, element)
                         .ifPresent(this.overflowStacks::add);
             }
 

@@ -18,19 +18,17 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 // TODO: Splitting output between storages doesn't work
 public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
@@ -52,27 +50,25 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     public static final PacketCodec<ByteBuf, Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_PACKET_CODEC =
             PacketCodecs.map(HashMap::new, BlockPos.PACKET_CODEC, Uuids.PACKET_CODEC);
 
-    protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> MapCodec<M> createCodec(Codec<N> networkCodec, Function<RegistryKey<World>, M> factory) {
+    protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> MapCodec<M> createCodec(Codec<N> networkCodec, Supplier<M> factory) {
         return RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
-                        RegistryKey.createCodec(RegistryKeys.WORLD).fieldOf("dimension").forGetter(PipeNetworkManager::getDimension),
                         ExtraCodecs.setOf(networkCodec).fieldOf("networks").forGetter(PipeNetworkManager::getNetworks),
                         PIPE_TO_NETWORK_ID_CODEC.fieldOf("pipeToNetworkId").forGetter(PipeNetworkManager::getPipeToNetworkId)
-                ).apply(instance, (dimension, networks, pipeToNetworkId) -> {
-                    var manager = factory.apply(dimension);
+                ).apply(instance, (networks, pipeToNetworkId) -> {
+                    var manager = factory.get();
                     manager.networks.addAll(networks);
                     manager.pipeToNetworkId.putAll(pipeToNetworkId);
                     return manager;
                 }));
     }
 
-    protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> PacketCodec<RegistryByteBuf, M> createPacketCodec(PacketCodec<RegistryByteBuf, N> networkCodec, Function<RegistryKey<World>, M> factory) {
+    protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> PacketCodec<RegistryByteBuf, M> createPacketCodec(PacketCodec<RegistryByteBuf, N> networkCodec, Supplier<M> factory) {
         return PacketCodec.tuple(
-                RegistryKey.createPacketCodec(RegistryKeys.WORLD), PipeNetworkManager::getDimension,
                 ExtraPacketCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
                 PIPE_TO_NETWORK_ID_PACKET_CODEC, PipeNetworkManager::getPipeToNetworkId,
-                (dimension, networks, pipeToNetworkId) -> {
-                    var manager = factory.apply(dimension);
+                (networks, pipeToNetworkId) -> {
+                    var manager = factory.get();
                     manager.networks.addAll(networks);
                     manager.pipeToNetworkId.putAll(pipeToNetworkId);
                     return manager;
@@ -81,14 +77,12 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
 
     protected final PipeNetworkManagerType<S, N> type;
     protected final TransferType<S, ?, ?> transferType;
-    protected final RegistryKey<World> dimension;
     protected final Set<N> networks = ConcurrentHashMap.newKeySet();
     protected final Map<BlockPos, UUID> pipeToNetworkId = new ConcurrentHashMap<>();
 
-    public PipeNetworkManager(PipeNetworkManagerType<S, N> type, TransferType<S, ?, ?> transferType, RegistryKey<World> dimension) {
+    public PipeNetworkManager(PipeNetworkManagerType<S, N> type, TransferType<S, ?, ?> transferType) {
         this.type = type;
         this.transferType = transferType;
-        this.dimension = dimension;
     }
 
     protected abstract N createNetwork(UUID id);
@@ -99,10 +93,6 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
 
     public TransferType<S, ?, ?> getTransferType() {
         return this.transferType;
-    }
-
-    public RegistryKey<World> getDimension() {
-        return dimension;
     }
 
     public Set<N> getNetworks() {

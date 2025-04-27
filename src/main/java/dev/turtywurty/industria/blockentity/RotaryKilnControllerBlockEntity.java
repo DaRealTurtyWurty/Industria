@@ -22,7 +22,6 @@ import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
-import dev.turtywurty.industria.util.NbtUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -32,7 +31,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -254,12 +255,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
         nbt.put("Heat", this.wrappedHeatStorage.writeNbt(registries));
         nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
 
-        var kilnSegments = new NbtList();
-        for (BlockPos pos : this.kilnSegments) {
-            kilnSegments.add(NbtUtils.toNbt(pos));
-        }
-
-        nbt.put("KilnSegments", kilnSegments);
+        nbt.put("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
 
         var recipesNbt = new NbtList();
         for (InputRecipeEntry inputRecipeEntry : this.recipes) {
@@ -307,11 +303,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
 
         if (nbt.contains("KilnSegments")) {
             this.kilnSegments.clear();
-
-            NbtList kilnSegments = nbt.getListOrEmpty("KilnSegments");
-            for (NbtElement kilnSegment : kilnSegments) {
-                kilnSegment.asCompound().flatMap(NbtUtils::fromNbt).ifPresent(this.kilnSegments::add);
-            }
+            nbt.get("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
         }
 
         if (nbt.contains("Recipes")) {
