@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
+import dev.turtywurty.industria.blockentity.behaviourtree.*;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
@@ -40,11 +41,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final BehaviourTree<AlloyFurnaceBlockEntity> behaviourTree;
 
     private int progress, maxProgress, burnTime, maxBurnTime;
     private ItemStack bufferedStack = ItemStack.EMPTY;
@@ -87,6 +91,167 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (itemStack, slot) -> isFuel(itemStack)), Direction.UP);
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
+
+        this.behaviourTree = new BehaviourTree<>();
+        setupBehaviourTree();
+    }
+
+    private void initializeBlackboard() {
+        Blackboard blackboard = this.behaviourTree.getBlackboard();
+        blackboard.set("bufferedStack", this.bufferedStack);
+        blackboard.set("burnTime", this.burnTime);
+        blackboard.set("maxBurnTime", this.maxBurnTime);
+        blackboard.set("progress", this.progress);
+        blackboard.set("maxProgress", this.maxProgress);
+        blackboard.set("currentRecipeId", this.currentRecipeId);
+    }
+
+    private void setupBehaviourTree() {
+        SelectorNode<AlloyFurnaceBlockEntity> root = new SelectorNode<>();
+
+        SequenceNode<AlloyFurnaceBlockEntity> handleBufferedOutput = new SequenceNode<>();
+        handleBufferedOutput.addChild(new CheckStackNotEmptyCondition("bufferedStack"));
+        handleBufferedOutput.addChild(new CanInsertItemStackCondition("bufferedStack", this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT)));
+        handleBufferedOutput.addChild(new InsertItemStackAction("bufferedStack", this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT)));
+        root.addChild(handleBufferedOutput);
+
+        SequenceNode<AlloyFurnaceBlockEntity> smeltRecipe = new SequenceNode<>();
+        smeltRecipe.addChild(new HandleFuelBurningAction("burnTime", "maxBurnTime", wrappedInventoryStorage.getInventory(FUEL_SLOT)));
+        smeltRecipe.addChild(new HasValidRecipeCondition<>(
+                this::getCurrentRecipe,
+                "currentRecipeId",
+                new ResetAction()
+        ));
+        smeltRecipe.addChild(new CanOutputRecipeCondition(wrappedInventoryStorage.getInventory(OUTPUT_SLOT)));
+        smeltRecipe.addChild(new SmeltItemAction(wrappedInventoryStorage.getRecipeInventory(), wrappedInventoryStorage.getInventory(OUTPUT_SLOT)));
+        root.addChild(smeltRecipe);
+
+        root.addChild(new ResetAction());
+
+        behaviorTree.setRoot(root);
+    }
+
+    private static class CheckStackNotEmptyCondition extends ConditionNode<AlloyFurnaceBlockEntity> {
+        private final String itemStackKey;
+
+        public CheckStackNotEmptyCondition(String itemStackKey) {
+            this.itemStackKey = itemStackKey;
+        }
+
+        @Override
+        public Status tick(AlloyFurnaceBlockEntity context) {
+            ItemStack stack = blackboard.get(itemStackKey, ItemStack.class);
+            if (stack == null)
+                return Status.FAILURE;
+
+            return !stack.isEmpty() ? Status.SUCCESS : Status.FAILURE;
+        }
+    }
+
+    private static class CanInsertItemStackCondition extends ConditionNode<AlloyFurnaceBlockEntity> {
+        private final String itemStackKey;
+        private final SimpleInventory targetInventory;
+
+        public CanInsertItemStackCondition(String itemStackKey, SimpleInventory targetInventory) {
+            this.itemStackKey = itemStackKey;
+            this.targetInventory = targetInventory;
+        }
+
+        @Override
+        public Status tick(AlloyFurnaceBlockEntity context) {
+            ItemStack stack = (ItemStack) blackboard.get(itemStackKey);
+            return stack != null && targetInventory.canInsert(stack) ? Status.SUCCESS : Status.FAILURE;
+        }
+    }
+
+    private static class InsertItemStackAction extends ActionNode<AlloyFurnaceBlockEntity> {
+        private final String itemStackKey;
+        private final SimpleInventory targetInventory;
+
+        public InsertItemStackAction(String itemStackKey, SimpleInventory targetInventory) {
+            this.itemStackKey = itemStackKey;
+            this.targetInventory = targetInventory;
+        }
+
+        @Override
+        public Status tick(AlloyFurnaceBlockEntity context) {
+            ItemStack stack = (ItemStack) blackboard.get(itemStackKey);
+            if (stack != null && !stack.isEmpty()) {
+                targetInventory.addStack(stack);
+                blackboard.set(itemStackKey, ItemStack.EMPTY);
+                context.update();
+                return Status.SUCCESS;
+            }
+
+            return Status.FAILURE;
+        }
+    }
+
+    private static class HandleFuelBurningAction extends ActionNode<AlloyFurnaceBlockEntity> {
+        private final String burnTimeKey, maxBurnTimeKey;
+        private final SimpleInventory fuelInventory;
+
+        public HandleFuelBurningAction(String burnTimeKey, String maxBurnTimeKey, SimpleInventory fuelInventory) {
+            this.burnTimeKey = burnTimeKey;
+            this.maxBurnTimeKey = maxBurnTimeKey;
+            this.fuelInventory = fuelInventory;
+        }
+
+        @Override
+        public Status tick(AlloyFurnaceBlockEntity context) {
+            int burnTime = (int) blackboard.get(burnTimeKey);
+            if (burnTime > 0) {
+                burnTime--;
+                blackboard.set(burnTimeKey, burnTime);
+                context.world.setBlockState(context.pos, context.getCachedState().with(Properties.LIT, burnTime > 0));
+                context.update();
+                return Status.SUCCESS;
+            }
+
+            ItemStack fuel = fuelInventory.getStack(0);
+            if (context.isFuel(fuel)) {
+                int newBurnTime = context.getFuelTime(fuel);
+                blackboard.set(this.maxBurnTimeKey, newBurnTime);
+                blackboard.set(burnTimeKey, newBurnTime);
+                fuelInventory.removeStack(0, 1);
+                context.world.setBlockState(context.pos, context.getCachedState().with(Properties.LIT, true));
+                context.update();
+                return Status.SUCCESS;
+            }
+            return Status.FAILURE;
+        }
+    }
+
+    private static class HasValidRecipeCondition<T extends Recipe<?>> extends ConditionNode<AlloyFurnaceBlockEntity> {
+        private final Supplier<Optional<RecipeEntry<T>>> recipeFunction;
+        private final String currentRecipeKey, maxProgressKey, progressKey;
+
+        public HasValidRecipeCondition(Supplier<Optional<RecipeEntry<T>>> recipeFunction, String currentRecipeKey, String maxProgressKey, String progressKey) {
+            this.recipeFunction = recipeFunction;
+            this.currentRecipeKey = currentRecipeKey;
+            this.maxProgressKey = maxProgressKey;
+            this.progressKey = progressKey;
+        }
+
+        @Override
+        public Status tick(AlloyFurnaceBlockEntity context) {
+            Optional<RecipeEntry<T>> recipeEntry = recipeFunction.get();
+            if (recipeEntry.isEmpty()) {
+                return Status.FAILURE;
+            }
+
+            @SuppressWarnings("unchecked")
+            RegistryKey<Recipe<?>> currentRecipeId = blackboard.get(currentRecipeKey, RegistryKey.class);
+            if (currentRecipeId == null) {
+                blackboard.set(currentRecipeKey, recipeEntry.get().id());
+                blackboard.set(maxProgressKey, recipeEntry.get().value().smeltTime());
+                blackboard.set(progressKey, 0);
+                context.update();
+                return Status.SUCCESS;
+            }
+
+            return recipeEntry.get().id().equals(currentRecipeId) ? Status.SUCCESS : Status.FAILURE;
+        }
     }
 
     public boolean isFuel(ItemStack stack) {
