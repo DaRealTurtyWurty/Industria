@@ -52,7 +52,6 @@ public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<In
                 RecordCodecBuilder.mapCodec(instance -> instance.group(
                         ENTITY_MODEL_LAYER_CODEC.fieldOf("model_layer").forGetter(IndustriaBlockEntityItemRenderer.Unbaked::modelLayer),
                         Identifier.CODEC.fieldOf("texture").forGetter(IndustriaBlockEntityItemRenderer.Unbaked::texture)
-
                 ).apply(instance, IndustriaBlockEntityItemRenderer.Unbaked::new));
 
         @Override

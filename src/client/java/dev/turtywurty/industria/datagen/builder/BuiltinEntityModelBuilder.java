@@ -99,11 +99,13 @@ public class BuiltinEntityModelBuilder {
                     .translation(0, 1.6f, 0.8f)
                     .scale(0.68f));
 
+    private final Item item;
     private final Identifier id;
     private final ItemModelGenerator writer;
     private final List<DisplaySettings> displaySettings = new ArrayList<>();
 
-    private BuiltinEntityModelBuilder(Identifier id, ItemModelGenerator writer) {
+    private BuiltinEntityModelBuilder(Item item, Identifier id, ItemModelGenerator writer) {
+        this.item = item;
         this.id = id;
         this.writer = writer;
     }
@@ -151,14 +153,18 @@ public class BuiltinEntityModelBuilder {
             object.add("display", display);
             return object;
         });
+
+//        if(item instanceof BlockItem) {
+//            this.writer.output.accept(this.item, ItemModels.special(ModelIds.getItemModelId(this.item), DynamicItemRendererInit.getItemRenderer(this.item)));
+//        }
     }
 
-    public static void write(ItemModelGenerator writer, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
-        new BuiltinEntityModelBuilder.Builder(writer, id).defaultDisplaySettings(defaultBuilder).build().write();
+    public static void write(ItemModelGenerator writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
+        new BuiltinEntityModelBuilder.Builder(writer, item, id).defaultDisplaySettings(defaultBuilder).build().write();
     }
 
     public static void write(ItemModelGenerator writer, Item item, DefaultDisplaySettingsBuilder defaultBuilder) {
-        write(writer, ModelIds.getItemModelId(item), defaultBuilder);
+        write(writer, item, ModelIds.getItemModelId(item), defaultBuilder);
     }
 
     public static void write(ItemModelGenerator writer, ItemConvertible item, DefaultDisplaySettingsBuilder defaultBuilder) {
@@ -306,13 +312,15 @@ public class BuiltinEntityModelBuilder {
 
     public static class Builder {
         private final ItemModelGenerator writer;
+        private final Item item;
         private final Identifier id;
 
         private final Map<String, DisplaySettings.Builder> displaySettings = new HashMap<>();
         private DefaultDisplaySettingsBuilder defaultDisplaySettingsBuilder;
 
-        public Builder(ItemModelGenerator writer, Identifier id) {
+        public Builder(ItemModelGenerator writer, Item item, Identifier id) {
             this.writer = writer;
+            this.item = item;
             this.id = id;
         }
 
@@ -327,7 +335,7 @@ public class BuiltinEntityModelBuilder {
         }
 
         public BuiltinEntityModelBuilder build() {
-            var builder = new BuiltinEntityModelBuilder(this.id, this.writer);
+            var builder = new BuiltinEntityModelBuilder(this.item, this.id, this.writer);
             if (this.defaultDisplaySettingsBuilder != null) {
                 for (Map.Entry<String, DisplaySettings> displaySettingsEntry : this.defaultDisplaySettingsBuilder.build().entrySet()) {
                     builder.displaySettings.add(displaySettingsEntry.getValue());

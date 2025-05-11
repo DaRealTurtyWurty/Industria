@@ -23,11 +23,12 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.noise.PerlinNoiseSampler;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.Nullable;
@@ -35,14 +36,16 @@ import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
-import java.util.Random;
 
 public class WindTurbineBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
-
     private float windSpeed = -1F;
+
+    private PerlinNoiseSampler windNoise;
+    private boolean canReceiveWind = true;
+
     private float propellerRotation = 0F; // Client side only
 
     public WindTurbineBlockEntity(BlockPos pos, BlockState state) {
@@ -51,19 +54,21 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         this.energy.addStorage(new SyncingEnergyStorage(this, 100_000, 0, 500));
     }
 
-    public static int getEnergyOutput(World world, BlockPos pos, float windSpeed) {
-        if(world == null || pos == null || !world.isSkyVisibleAllowingSea(pos) || pos.getY() < world.getSeaLevel())
+    public static int getEnergyOutput(World world, BlockPos pos, float windSpeed, boolean canReceiveWind) {
+        if (!canReceiveWind || world == null || pos == null || !world.isSkyVisibleAllowingSea(pos) || pos.getY() < world.getSeaLevel())
             return 0;
 
         RegistryEntry<Biome> biome = world.getBiome(pos);
         float biomeModifier = 1.0F;
-        if(biome.isIn(BiomeTags.IS_OCEAN) || biome.isIn(BiomeTags.IS_MOUNTAIN))
+        if (biome.isIn(BiomeTags.IS_OCEAN) || biome.isIn(BiomeTags.IS_MOUNTAIN))
             biomeModifier = 1.5F;
-        else if(biome.isIn(BiomeTags.IS_HILL))
+        else if (biome.isIn(BiomeTags.IS_HILL))
             biomeModifier = 1.25F;
 
-        float heightMultiplier = Math.min(1.0F, (float)pos.getY() / (world.getHeight() + world.getBottomY()));
-        float output = biomeModifier * heightMultiplier * windSpeed * 1000.0F;
+        float heightMultiplier = Math.min(1.0F, (float) pos.getY() / (world.getHeight() + world.getBottomY()));
+        // if the time of day is > 12000, reduce the output by 50%
+        float timeOfDayModifier = world.getTimeOfDay() > 12000 ? 0.5F : 1.0F;
+        float output = biomeModifier * heightMultiplier * windSpeed * timeOfDayModifier * 1000.0F;
         return (int) output;
     }
 
@@ -77,8 +82,31 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         if (this.world == null || this.world.isClient)
             return;
 
-        if(this.windSpeed == -1F) {
-            this.windSpeed = new Random(((ServerWorld)this.world).getSeed() + this.pos.up(4).asLong()).nextFloat();
+        if (this.windNoise == null) {
+            this.windNoise = new PerlinNoiseSampler(this.world.random);
+        }
+
+        if (this.windSpeed == -1F || this.world.getTime() % 24000 == 0) {
+            float offset = this.world.getTime() / 24000F;
+            this.windSpeed = (float) this.windNoise.sample(
+                    this.pos.getX() + offset,
+                    this.pos.getY() + offset,
+                    this.pos.getZ() + offset) + 1.0F;
+        }
+
+        if (this.world.getTime() % 100 == 0) {
+            this.canReceiveWind = true;
+
+            // check 8 blocks in front. if any of them are not air, set canReceiveWind to false
+            for (int i = 1; i <= 8; i++) {
+                BlockPos pos = this.pos.up(3).add(getCachedState().get(Properties.HORIZONTAL_FACING).getVector().multiply(i));
+                if (!this.world.getBlockState(pos).isAir()) {
+                    this.canReceiveWind = false;
+                    break;
+                }
+            }
+
+            update();
         }
 
         SimpleEnergyStorage storage = (SimpleEnergyStorage) getEnergyStorage();
@@ -116,6 +144,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         super.readNbt(nbt, registryLookup);
         this.energy.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
         this.windSpeed = nbt.getFloat("WindSpeed", 0.0F);
+        this.canReceiveWind = nbt.getBoolean("CanReceiveWind", true);
     }
 
     @Override
@@ -123,6 +152,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         super.writeNbt(nbt, registryLookup);
         nbt.put("Energy", this.energy.writeNbt(registryLookup));
         nbt.putFloat("WindSpeed", this.windSpeed);
+        nbt.putBoolean("CanReceiveWind", this.canReceiveWind);
     }
 
     @Nullable
@@ -151,7 +181,7 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
     }
 
     public int getEnergyOutput() {
-        return getEnergyOutput(this.world, this.pos.up(4), this.windSpeed);
+        return getEnergyOutput(this.world, this.pos.up(3), this.windSpeed, this.canReceiveWind);
     }
 
     public float getPropellerRotation() {

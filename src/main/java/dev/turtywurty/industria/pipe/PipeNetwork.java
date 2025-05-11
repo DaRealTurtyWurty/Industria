@@ -189,9 +189,4 @@ public abstract class PipeNetwork<S> {
             }
         }
     }
-
-    @FunctionalInterface
-    public interface Factory<S, N extends PipeNetwork<S>> {
-        N create(UUID id);
-    }
 }

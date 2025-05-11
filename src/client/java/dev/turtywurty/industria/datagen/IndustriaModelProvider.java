@@ -133,6 +133,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 .setRotationX(AxisRotation.R90)));
     }
 
+
+
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
