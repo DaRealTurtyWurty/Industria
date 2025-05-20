@@ -25,6 +25,8 @@ public class ExtraPacketCodecs {
 
     public static final PacketCodec<ByteBuf, Set<BlockPos>> BLOCK_POS_SET_PACKET_CODEC = setOf(BlockPos.PACKET_CODEC);
 
+    public static final PacketCodec<ByteBuf, BlockPos> BLOCK_POS_STRING_CODEC = PacketCodecs.codec(ExtraCodecs.BLOCK_POS_STRING_CODEC);
+
     public static <B extends ByteBuf, V> PacketCodec<B, Set<V>> setOf(PacketCodec<? super B, V> codec) {
         return PacketCodecs.collection(HashSet::new, codec);
     }

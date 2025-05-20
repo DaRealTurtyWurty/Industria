@@ -32,10 +32,7 @@ public class MultiblockBlock extends Block {
             return VoxelShapes.empty();
 
         BlockState primaryState = world.getBlockState(data.primaryPos());
-        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING, null) : Direction.NORTH;
-        if(direction == null)
-            direction = Direction.NORTH;
-
+        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING, Direction.NORTH) : Direction.NORTH;
         Vec3i offset = getOffsetFromPrimary(data.primaryPos(), pos, null);
 
         VoxelShape shape = data.type().getShape(world, data.primaryPos(), direction);

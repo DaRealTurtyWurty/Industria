@@ -527,7 +527,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
     public enum OverflowMethod implements IndustriaEnum<OverflowMethod> {
         VOID, PAUSE, SPILLAGE;
 
-        public static final Codec<OverflowMethod> CODEC = Codec.STRING.xmap(OverflowMethod::valueOf, OverflowMethod::getSerializedName);
+        public static final Codec<OverflowMethod> CODEC = Codec.STRING.xmap(str -> OverflowMethod.valueOf(str.toUpperCase(Locale.ROOT)), OverflowMethod::getSerializedName);
 
         private final Text text = Text.translatable("industria.overflow_method." + getSerializedName());
 

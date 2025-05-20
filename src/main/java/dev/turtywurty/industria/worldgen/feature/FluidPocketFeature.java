@@ -12,9 +12,7 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class FluidPocketFeature extends Feature<FluidPocketConfig> {
     public FluidPocketFeature() {
@@ -73,12 +71,16 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
             }
         }
 
-        var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, new ArrayList<>(positions));
+        Map<BlockPos, Integer> positionsWithAmount = new HashMap<>();
+        for (BlockPos pos : positions) {
+            positionsWithAmount.put(pos, random.nextBetween(75, 125));
+        }
+
+        var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, positionsWithAmount);
         WorldFluidPocketsState.getServerState(serverWorld).addFluidPocket(pocket);
         WorldFluidPocketsState.sync(serverWorld);
 
         System.out.println("Generated fluid pocket at " + origin);
-
         return true;
     }
 }

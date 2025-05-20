@@ -52,7 +52,7 @@ public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
         for (WorldFluidPocketsState.FluidPocket pocket : nearbyFluidPockets) {
             // TODO: Draw different colored particles based on fluid
 
-            for (BlockPos pos : pocket.fluidPositions()) {
+            for (BlockPos pos : pocket.fluidPositions().keySet()) {
                 ParticleUtil.spawnParticlesAround(world, pos, 1, ParticleTypes.DRIPPING_WATER);
             }
         }

@@ -113,6 +113,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, BlockInit.FLUID_TANK)
                     .build());
 
+    public static final BlockEntityType<WellheadBlockEntity> WELLHEAD = register("wellhead",
+            FabricBlockEntityTypeBuilder.create(WellheadBlockEntity::new, BlockInit.WELLHEAD)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

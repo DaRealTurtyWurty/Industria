@@ -60,4 +60,8 @@ public class SyncingFluidStorage extends SingleFluidStorage implements SyncableS
     public boolean canExtract(FluidStack fluidStack) {
         return this.variant == fluidStack.variant() && fluidStack.amount() <= this.amount;
     }
+
+    public void markDirty() {
+        this.isDirty = true;
+    }
 }

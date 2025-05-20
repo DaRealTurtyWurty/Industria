@@ -18,6 +18,7 @@ import net.minecraft.util.math.RotationAxis;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SeismicScannerScreen extends Screen {
     private static final Identifier TEXTURE = Industria.id("textures/gui/seismic_scanner.png");
@@ -78,7 +79,7 @@ public class SeismicScannerScreen extends Screen {
         MatrixStack matrixStack = context.getMatrices();
         for (WorldFluidPocketsState.FluidPocket fluidPocket : this.fluidPockets) {
             BlockState blockState = fluidPocket.fluidState().getBlockState();
-            List<BlockPos> positions = fluidPocket.fluidPositions();
+            Set<BlockPos> positions = fluidPocket.fluidPositions().keySet();
 
             int minX = fluidPocket.minX();
             int minY = fluidPocket.minY();
