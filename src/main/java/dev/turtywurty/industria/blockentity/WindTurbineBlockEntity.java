@@ -65,11 +65,22 @@ public class WindTurbineBlockEntity extends UpdatableBlockEntity implements Sync
         else if (biome.isIn(BiomeTags.IS_HILL))
             biomeModifier = 1.25F;
 
-        float heightMultiplier = Math.min(1.0F, (float) pos.getY() / (world.getHeight() + world.getBottomY()));
+        float heightMultiplier = calculateHeightMultiplier(pos, world);
         // if the time of day is > 12000, reduce the output by 50%
         float timeOfDayModifier = world.getTimeOfDay() > 12000 ? 0.5F : 1.0F;
         float output = biomeModifier * heightMultiplier * windSpeed * timeOfDayModifier * 1000.0F;
         return (int) output;
+    }
+
+    private static float calculateHeightMultiplier(BlockPos pos, World world) {
+        int seaLevel = world.getSeaLevel();
+        int worldBottom = world.getBottomY();
+        int worldTop = world.getHeight() + worldBottom;
+
+        int fullHeightRange = worldTop - worldBottom;
+        float normalizedHeight = (float) (pos.getY() - seaLevel) / fullHeightRange + 0.5F;
+
+        return MathHelper.clamp(normalizedHeight, 0.0F, 1.0F);
     }
 
     @Override
