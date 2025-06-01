@@ -15,7 +15,7 @@ public class PredicateSlot extends Slot {
     }
 
     public PredicateSlot(SimpleInventory inventory, int index, int x, int y) {
-        this(inventory, index, x, y, inventory::canInsert);
+        this(inventory, index, x, y, stack -> inventory.isValid(index, stack));
     }
 
     @Override

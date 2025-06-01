@@ -6,9 +6,9 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.inventory.*;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
@@ -41,7 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -81,7 +81,7 @@ public class AlloyFurnaceBlockEntity extends UpdatableBlockEntity implements Syn
     private RegistryKey<Recipe<?>> currentRecipeId;
 
     public AlloyFurnaceBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.ALLOY_FURNACE, pos, state);
+        super(BlockInit.ALLOY_FURNACE, BlockEntityTypeInit.ALLOY_FURNACE, pos, state);
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);

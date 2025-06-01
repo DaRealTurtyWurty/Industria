@@ -5,13 +5,13 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ElectricFurnaceScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
@@ -25,9 +25,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.registry.RegistryKey;
@@ -49,7 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, RecipeExperienceBlockEntity, BlockEntityContentsDropper {
+public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, RecipeExperienceBlockEntity, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("electric_furnace");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -60,7 +57,7 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
     private int progress = 0, maxProgress = 0;
 
     public ElectricFurnaceBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.ELECTRIC_FURNACE, pos, state);
+        super(BlockInit.ELECTRIC_FURNACE, BlockEntityTypeInit.ELECTRIC_FURNACE, pos, state);
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
@@ -239,18 +236,6 @@ public class ElectricFurnaceBlockEntity extends UpdatableBlockEntity implements 
         OutputSimpleInventory output = (OutputSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
         SyncingEnergyStorage energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         return List.of(input, output, energy);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     public int getProgress() {

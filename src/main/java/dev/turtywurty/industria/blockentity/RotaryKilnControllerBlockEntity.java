@@ -7,7 +7,6 @@ import dev.turtywurty.industria.block.RotaryKilnBlock;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.heat.InputHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
@@ -56,7 +55,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable {
+public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable {
     private final List<BlockPos> kilnSegments = new ArrayList<>();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
@@ -68,7 +67,7 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
     private int ticks = 0;
 
     public RotaryKilnControllerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, pos, state);
+        super(BlockInit.ROTARY_KILN_CONTROLLER, BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, pos, state);
 
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
                 Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
@@ -330,18 +329,6 @@ public class RotaryKilnControllerBlockEntity extends UpdatableBlockEntity implem
                 this.recipes.add(new InputRecipeEntry(registryKey, inputStack, progress));
             }
         }
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     public void handleSegmentSearching() {

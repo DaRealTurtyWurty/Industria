@@ -5,12 +5,12 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.heat.InputHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FractionalDistillationControllerScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -34,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FractionalDistillationControllerBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class FractionalDistillationControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("fractional_distillation_controller");
 
     private final List<BlockPos> towers = new ArrayList<>();
@@ -42,7 +42,7 @@ public class FractionalDistillationControllerBlockEntity extends UpdatableBlockE
     private final WrappedHeatStorage<SimpleHeatStorage> heatStorage = new WrappedHeatStorage<>();
 
     public FractionalDistillationControllerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER, pos, state);
+        super(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER, pos, state);
         this.fluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
         this.heatStorage.addStorage(new InputHeatStorage(this, 400, 50));
     }

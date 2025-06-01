@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -18,11 +17,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RotaryKilnBlockEntity extends UpdatableBlockEntity implements Multiblockable {
+public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multiblockable {
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     public RotaryKilnBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.ROTARY_KILN, pos, state);
+        super(BlockInit.ROTARY_KILN, BlockEntityTypeInit.ROTARY_KILN, pos, state);
     }
 
     @Override

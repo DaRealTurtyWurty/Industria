@@ -23,83 +23,37 @@ public class MultiblockTypeInit {
     public static final MultiblockType<MixerBlockEntity> MIXER = register("mixer",
             new MultiblockType.Builder<MixerBlockEntity>(26) // 3x3x3
                     .setHasDirectionProperty(true)
-                    .shapes(MixerBlock.VOXEL_SHAPE)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof MixerBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-
-                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
-                        }
-                    }));
+                    .shapes(MixerBlock.VOXEL_SHAPE));
 
     public static final MultiblockType<DigesterBlockEntity> DIGESTER = register("digester",
             new MultiblockType.Builder<DigesterBlockEntity>(44) // 3x3x4
                     .setHasDirectionProperty(true)
-                    .shapes(DigesterBlock.VOXEL_SHAPE)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof DigesterBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-
-                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
-                        }
-                    }));
+                    .shapes(DigesterBlock.VOXEL_SHAPE));
 
     public static final MultiblockType<ClarifierBlockEntity> CLARIFIER = register("clarifier",
             new MultiblockType.Builder<ClarifierBlockEntity>(17) // 3x3x2
                     .setHasDirectionProperty(true)
-                    .shapes(ClarifierBlock.VOXEL_SHAPE)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof ClarifierBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-
-                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
-                        }
-                    }));
+                    .shapes(ClarifierBlock.VOXEL_SHAPE));
 
     public static final MultiblockType<CrystallizerBlockEntity> CRYSTALLIZER = register("crystallizer",
             new MultiblockType.Builder<CrystallizerBlockEntity>(35) // 3x3x4
                     .setHasDirectionProperty(true)
-                    .shapes(CrystallizerBlock.VOXEL_SHAPE)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof CrystallizerBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-
-                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
-                        }
-                    }));
+                    .shapes(CrystallizerBlock.VOXEL_SHAPE));
 
     public static final MultiblockType<RotaryKilnControllerBlockEntity> ROTARY_KILN_CONTROLLER = register("rotary_kiln_controller",
             new MultiblockType.Builder<RotaryKilnControllerBlockEntity>(24) // 5x5x1
                     .setHasDirectionProperty(true)
-                    .shapeFactory(RotaryKilnControllerBlock::getVoxelShape)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-
-                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
-                        }
-                    }));
+                    .shapeFactory(RotaryKilnControllerBlock::getVoxelShape));
 
     public static final MultiblockType<RotaryKilnBlockEntity> ROTARY_KILN = register("rotary_kiln",
             new MultiblockType.Builder<RotaryKilnBlockEntity>(24) // 5x5x1
                     .setHasDirectionProperty(true)
-                    .shapeFactory(RotaryKilnBlock::getVoxelShape)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof RotaryKilnBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-                        }
-                    }));
+                    .shapeFactory(RotaryKilnBlock::getVoxelShape));
 
     public static final MultiblockType<ElectrolyzerBlockEntity> ELECTROLYZER = register("electrolyzer",
             new MultiblockType.Builder<ElectrolyzerBlockEntity>(11) // 3x2x2
                     .setHasDirectionProperty(true)
-                    .shapes(ElectrolyzerBlock.VOXEL_SHAPE)
-                    .setOnMultiblockBreak((world, pos) -> {
-                        if (world.getBlockEntity(pos) instanceof ElectrolyzerBlockEntity blockEntity) {
-                            blockEntity.breakMultiblock(world, pos);
-                            blockEntity.getWrappedInventoryStorage().dropContents(world, pos);
-                        }
-                    }));
+                    .shapes(ElectrolyzerBlock.VOXEL_SHAPE));
 
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());

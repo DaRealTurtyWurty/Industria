@@ -5,12 +5,12 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.*;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
@@ -31,9 +31,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -51,7 +48,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ClarifierBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable, BlockEntityWithGui<BlockPosPayload> {
+public class ClarifierBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("clarifier");
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -94,7 +91,7 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
     };
 
     public ClarifierBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.CLARIFIER, pos, state);
+        super(BlockInit.CLARIFIER, BlockEntityTypeInit.CLARIFIER, pos, state);
 
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.UP);
 
@@ -313,18 +310,6 @@ public class ClarifierBlockEntity extends UpdatableBlockEntity implements Syncab
         if (nbt.contains("NextOutputStack"))
             this.nextOutputItemStack = nbt.get("NextOutputStack", ItemStack.OPTIONAL_CODEC)
                     .orElse(ItemStack.EMPTY);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     @Override

@@ -7,7 +7,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
@@ -28,9 +27,6 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -43,7 +39,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
 
-public class BatteryBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class BatteryBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("battery");
     public static final Text CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Text.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
@@ -53,9 +49,9 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
 
     private ChargeMode chargeMode = ChargeMode.DISCHARGE;
 
-    public BatteryBlockEntity(BlockPos pos, BlockState state, BatteryBlock.BatteryLevel batteryLevel) {
-        super(BlockEntityTypeInit.BATTERY, pos, state);
-        this.batteryLevel = batteryLevel;
+    public BatteryBlockEntity(BatteryBlock block, BlockPos pos, BlockState state) {
+        super(block, BlockEntityTypeInit.BATTERY, pos, state);
+        this.batteryLevel = block.getLevel();
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(), this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer()));
@@ -146,19 +142,6 @@ public class BatteryBlockEntity extends UpdatableBlockEntity implements Syncable
         nbt.putString("ChargeMode", this.chargeMode.name());
         nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
         nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = new NbtCompound();
-        writeNbt(nbt, registryLookup);
-        return nbt;
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {

@@ -2,19 +2,20 @@ package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -27,14 +28,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WellheadBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity {
+public class WellheadBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
     private BlockPos oilPumpJackPos;
     private final Map<BlockPos, Integer> drillTubes = new HashMap<>();
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
 
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.WELLHEAD, pos, state);
+        super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.WELLHEAD, pos, state);
 
         OutputFluidStorage storage = new OutputFluidStorage(this, FluidConstants.BUCKET);
         Direction.Type.HORIZONTAL.stream().forEach(direction ->
@@ -90,18 +91,6 @@ public class WellheadBlockEntity extends UpdatableBlockEntity implements Syncabl
         nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
     }
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
     private void findDrillTubes() {
         if (this.world == null || this.oilPumpJackPos == null)
             return;
@@ -109,7 +98,10 @@ public class WellheadBlockEntity extends UpdatableBlockEntity implements Syncabl
         BlockPos.Mutable mutablePos = this.pos.down().mutableCopy();
         BlockState below = this.world.getBlockState(mutablePos);
         while (below.isOf(BlockInit.DRILL_TUBE)) {
-            this.drillTubes.put(mutablePos.toImmutable(), 0);
+            if (!this.drillTubes.containsKey(mutablePos)) {
+                this.drillTubes.put(mutablePos.toImmutable(), 0);
+            }
+
             mutablePos.move(Direction.DOWN);
             below = this.world.getBlockState(mutablePos);
         }
@@ -119,6 +111,8 @@ public class WellheadBlockEntity extends UpdatableBlockEntity implements Syncabl
     public void onTick() {
         if (this.world == null || this.world.isClient || this.oilPumpJackPos == null)
             return;
+
+        distributeFluid();
 
         if (!(this.world.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity)
                 || !oilPumpJackBlockEntity.isRunning())
@@ -151,7 +145,7 @@ public class WellheadBlockEntity extends UpdatableBlockEntity implements Syncabl
         if (inBottomTube >= FluidConstants.BUCKET)
             return;
 
-        int amountToExtract = (int) (FluidConstants.BUCKET - inBottomTube);
+        int amountToExtract = (int) (FluidConstants.NUGGET - inBottomTube);
 
         long extracted = fluidPocket.extractFluid(amountToExtract);
         if (extracted == 0) {
@@ -161,6 +155,48 @@ public class WellheadBlockEntity extends UpdatableBlockEntity implements Syncabl
 
         this.drillTubes.put(bottomOfTubes.up(), inBottomTube + (int) extracted);
         fluidPocketsState.markDirty();
+    }
+
+    private void distributeFluid() {
+        SyncingFluidStorage tank = getFluidStorageBuffer();
+        if(tank.isResourceBlank() || tank.amount <= 0)
+            return;
+
+        Map<Storage<FluidVariant>, Long> storages = new HashMap<>();
+        for (Direction direction : Direction.values()) {
+            Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.world, this.pos.offset(direction), direction.getOpposite());
+            if(fluidStorage == null || !fluidStorage.supportsInsertion())
+                continue;
+
+            long maxInsert;
+            try(Transaction transaction = Transaction.openOuter()) {
+                maxInsert = fluidStorage.insert(tank.variant, tank.amount, transaction);
+            }
+
+            if(maxInsert > 0) {
+                storages.put(fluidStorage, maxInsert);
+            }
+        }
+
+        int size = storages.size();
+        long totalCanTransfer = Math.min(tank.amount, storages.values().stream().mapToLong(Number::longValue).sum());
+        for (Map.Entry<Storage<FluidVariant>, Long> entry : storages.entrySet()) {
+            Storage<FluidVariant> storage = entry.getKey();
+            long maxAmount = entry.getValue();
+
+            long amountToTransfer = Math.min(totalCanTransfer / size, maxAmount);
+            if (amountToTransfer <= 0)
+                continue;
+
+            try (Transaction transaction = Transaction.openOuter()) {
+                long transferred = storage.insert(tank.variant, amountToTransfer, transaction);
+                if (transferred > 0) {
+                    tank.amount -= transferred;
+                    transaction.commit();
+                    update();
+                }
+            }
+        }
     }
 
     public Map<BlockPos, Integer> getDrillTubes() {

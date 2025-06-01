@@ -198,19 +198,15 @@ public class WorldFluidPocketsState extends PersistentState {
         }
 
         public long extractFluid(long amount) {
-            long originalAmount = amount;
+            long originalAmount = this.fluidAmount;
 
             if(amount > this.fluidAmount)
                 amount = this.fluidAmount;
 
-            this.fluidAmount -= amount;
-
             Map<BlockPos, Integer> nonEmptyPositions = new HashMap<>();
             for (Map.Entry<BlockPos, Integer> entry : this.fluidPositions.entrySet()) {
-                int fluidAmount = entry.getValue();
-
-                if (fluidAmount > 0) {
-                    nonEmptyPositions.put(entry.getKey(), fluidAmount);
+                if (entry.getValue() > 0) {
+                    nonEmptyPositions.put(entry.getKey(), entry.getValue());
                 }
             }
 

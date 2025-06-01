@@ -2,6 +2,7 @@ package dev.turtywurty.industria.worldgen.feature;
 
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.worldgen.config.FluidPocketConfig;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.server.world.ServerWorld;
@@ -73,7 +74,7 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
 
         Map<BlockPos, Integer> positionsWithAmount = new HashMap<>();
         for (BlockPos pos : positions) {
-            positionsWithAmount.put(pos, random.nextBetween(75, 125));
+            positionsWithAmount.put(pos, random.nextBetween((int) FluidConstants.BOTTLE, (int) (FluidConstants.BUCKET * 5)));
         }
 
         var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, positionsWithAmount);

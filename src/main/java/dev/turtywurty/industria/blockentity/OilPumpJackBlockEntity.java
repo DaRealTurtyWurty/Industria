@@ -4,11 +4,12 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.MultiblockType;
@@ -17,13 +18,11 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -38,7 +37,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable {
+public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -52,7 +51,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
     public boolean reverseCounterWeights;
 
     public OilPumpJackBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.OIL_PUMP_JACK, pos, state);
+        super(BlockInit.OIL_PUMP_JACK, BlockEntityTypeInit.OIL_PUMP_JACK, pos, state);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
     }
@@ -90,11 +89,11 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
             findWellhead();
         }
 
-        if(this.wellheadPos == null)
+        if (this.wellheadPos == null)
             return;
 
         this.running = true;
-        if(this.world.getBlockEntity(this.wellheadPos) instanceof WellheadBlockEntity wellheadBlockEntity && this.running) {
+        if (this.world.getBlockEntity(this.wellheadPos) instanceof WellheadBlockEntity wellheadBlockEntity && this.running) {
             Map<BlockPos, Integer> drillTubes = wellheadBlockEntity.getDrillTubes();
 
             List<BlockPos> orderedPositions = new ArrayList<>(drillTubes.keySet());
@@ -104,10 +103,13 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
             boolean hasPumped = false;
             for (BlockPos pos : orderedPositions) {
                 int amount = drillTubes.get(pos);
+                if(amount <= 0)
+                    continue;
+
                 BlockPos newPos = pos.up();
                 if (drillTubes.containsKey(newPos)) {
                     int currentlyStored = drillTubes.get(newPos);
-                    if(currentlyStored < FluidConstants.BUCKET) {
+                    if (currentlyStored < FluidConstants.BUCKET) {
                         int availableSpace = (int) (FluidConstants.BUCKET - currentlyStored);
                         if (amount > availableSpace) {
                             drillTubes.put(newPos, currentlyStored + availableSpace);
@@ -125,6 +127,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
                         long amountToInsert = Math.min(storage.getCapacity() - storage.getAmount(), amount);
                         if (amountToInsert > 0) {
                             storage.amount += amountToInsert;
+                            storage.variant = FluidVariant.of(FluidInit.CRUDE_OIL.still()); // TODO: Temporary solution, pls fix
                             storage.markDirty();
                             drillTubes.put(pos, amount - (int) amountToInsert);
 
@@ -134,7 +137,7 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
                 }
             }
 
-            if(hasPumped) {
+            if (hasPumped) {
                 SyncingEnergyStorage energyStorage = getEnergyStorage();
                 if (this.running && energyStorage.getAmount() > 50) {
                     energyStorage.amount -= 50;
@@ -195,25 +198,12 @@ public class OilPumpJackBlockEntity extends UpdatableBlockEntity implements Sync
         super.writeNbt(nbt, registryLookup);
 
         nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
-        if(this.wellheadPos != null) {
+        if (this.wellheadPos != null) {
             nbt.put("WellheadPos", BlockPos.CODEC, this.wellheadPos);
         }
 
         nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
         nbt.putBoolean("Running", this.running);
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registryLookup);
-        writeNbt(nbt, registryLookup);
-        return nbt;
     }
 
     @Override

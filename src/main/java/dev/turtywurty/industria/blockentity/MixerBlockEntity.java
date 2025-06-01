@@ -8,7 +8,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -24,6 +23,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
@@ -53,9 +53,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -102,7 +99,7 @@ import java.util.*;
 //                        .build());
 //    }
 // TODO: Fix issue where items in the slots are duplicated as ghost items on the client
-public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("mixer");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -146,7 +143,7 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
     };
 
     public MixerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.MIXER, pos, state);
+        super(BlockInit.MIXER, BlockEntityTypeInit.MIXER, pos, state);
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 6), Direction.EAST);
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.WEST);
@@ -425,18 +422,6 @@ public class MixerBlockEntity extends UpdatableBlockEntity implements SyncableTi
     private MixerRecipeInput createRecipeInput() {
         SyncingFluidStorage inputFluidTank = getInputFluidTank();
         return new MixerRecipeInput(getInputInventory(), new FluidStack(inputFluidTank.variant, inputFluidTank.amount), this.temperature);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     @Override

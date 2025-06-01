@@ -4,20 +4,17 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.SolarPanelScreenHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -32,13 +29,13 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
 
-public class SolarPanelBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
+public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("solar_panel");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
 
     public SolarPanelBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.SOLAR_PANEL, pos, state);
+        super(BlockInit.SOLAR_PANEL, BlockEntityTypeInit.SOLAR_PANEL, pos, state);
 
         this.energy.addStorage(new SyncingEnergyStorage(this, 100_000, 0, 500));
     }
@@ -79,12 +76,12 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Synca
 
     @Override
     public void onTick() {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
         long currentEnergy = energyStorage.getAmount();
-        if(currentEnergy < energyStorage.getCapacity()) {
+        if (currentEnergy < energyStorage.getCapacity()) {
             int outputSignal = getEnergyOutput();
             energyStorage.amount += MathHelper.clamp(outputSignal, 0, energyStorage.getCapacity() - currentEnergy);
             if (currentEnergy != energyStorage.getAmount())
@@ -122,19 +119,6 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Synca
         nbt.put("Energy", this.energy.writeNbt(registryLookup));
     }
 
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = new NbtCompound();
-        writeNbt(nbt, registryLookup);
-        return nbt;
-    }
-
     public EnergyStorage getEnergyStorage() {
         return this.energy.getStorage(null);
     }
@@ -144,7 +128,7 @@ public class SolarPanelBlockEntity extends UpdatableBlockEntity implements Synca
     }
 
     public int getEnergyOutput() {
-        if(this.world == null)
+        if (this.world == null)
             return 0;
 
         long dayTime = this.world.getTimeOfDay();

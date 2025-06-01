@@ -15,7 +15,6 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -45,22 +44,21 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public class IndustriaBlock extends Block implements BlockEntityProvider {
-    private final StateProperties stateProperties;
-    private final boolean placeFacingOpposite;
-    private final Supplier<BlockEntityType<?>> blockEntityTypeSupplier;
-    private final boolean shouldTick;
-    private final BlockEntityFactory<?> blockEntityFactory;
-    private final BlockEntityTickerFactory<?> blockEntityTicker;
-    private final boolean hasComparatorOutput;
-    private final TriFunction<BlockState, World, BlockPos, Integer> comparatorOutput;
-    private final BlockRenderType renderType;
-    private final ShapeFactory shapeFactory;
-    private final MultiblockType<?> multiblockType;
-    private final boolean rightClickToOpenGui;
-    private final boolean dropContentsOnBreak;
-    private final BiPredicate<WorldView, BlockPos> canExistAt;
-    private final Map<Direction, VoxelShape> cachedDirectionalShapes;
-    // public ToIntFunction<BlockState> tempLuminance;
+    public final StateProperties stateProperties;
+    public final boolean placeFacingOpposite;
+    public final Supplier<BlockEntityType<?>> blockEntityTypeSupplier;
+    public final boolean shouldTick;
+    public final BlockEntityFactory<?> blockEntityFactory;
+    public final BlockEntityTickerFactory<?> blockEntityTicker;
+    public final boolean hasComparatorOutput;
+    public final TriFunction<BlockState, World, BlockPos, Integer> comparatorOutput;
+    public final BlockRenderType renderType;
+    public final ShapeFactory shapeFactory;
+    public final MultiblockType<?> multiblockType;
+    public final boolean rightClickToOpenGui;
+    public final BiPredicate<WorldView, BlockPos> canExistAt;
+    public final Map<Direction, VoxelShape> cachedDirectionalShapes;
+    public final boolean dropContentsOnBreak;
 
     @SuppressWarnings("unchecked")
     public IndustriaBlock(Settings settings, BlockProperties properties) {
@@ -112,7 +110,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         super.appendProperties(builder);
 
-        if(this.stateProperties != null) {
+        if (this.stateProperties != null) {
             this.stateProperties.addToBuilder(builder);
         }
     }
@@ -186,25 +184,6 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     @Override
     protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return this.shapeFactory.create(state, world, pos, context);
-    }
-
-    @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        BlockState newState = world.getBlockState(pos);
-        if (this.multiblockType != null) {
-            if (!state.isOf(newState.getBlock())) {
-                this.multiblockType.onMultiblockBreak(world, pos);
-            }
-        } else if (this.dropContentsOnBreak) {
-            if (!state.isOf(newState.getBlock())) {
-                BlockEntity blockEntity = world.getBlockEntity(pos);
-                if (blockEntity instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component access maybe?
-                    blockEntityWithInventory.dropContents(world, pos);
-                }
-            }
-        }
-
-        super.onStateReplaced(state, world, pos, moved);
     }
 
     @Override
@@ -412,11 +391,11 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         }
 
         public BlockProperties useRotatedShapes(VoxelShape shape) {
-            if(!this.stateProperties.containsProperty(Properties.HORIZONTAL_FACING)) {
+            if (!this.stateProperties.containsProperty(Properties.HORIZONTAL_FACING)) {
                 hasHorizontalFacing();
             }
 
-            if(this.cachedDirectionalShapes.isEmpty()) {
+            if (this.cachedDirectionalShapes.isEmpty()) {
                 runShapeCalculation(this.cachedDirectionalShapes, shape);
             }
 
@@ -445,13 +424,13 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         }
 
         public static class BlockBlockEntityProperties<T extends BlockEntity> {
-            private final Supplier<BlockEntityType<T>> blockEntityTypeSupplier;
-            private boolean shouldTick = false;
-            private BlockEntityFactory<T> blockEntityFactory;
-            private BlockEntityTickerFactory<T> blockEntityTicker = (world, state, type) -> TickableBlockEntity.createTicker(world);
-            private MultiblockProperties<T> multiblockProperties;
-            private boolean rightClickToOpenGui = false;
-            private boolean dropContentsOnBreak = false;
+            public final Supplier<BlockEntityType<T>> blockEntityTypeSupplier;
+            public boolean shouldTick = false;
+            public BlockEntityFactory<T> blockEntityFactory;
+            public BlockEntityTickerFactory<T> blockEntityTicker = (world, state, type) -> TickableBlockEntity.createTicker(world);
+            public MultiblockProperties<T> multiblockProperties;
+            public boolean rightClickToOpenGui = false;
+            public boolean dropContentsOnBreak = false;
 
             public BlockBlockEntityProperties(Supplier<BlockEntityType<T>> blockEntityTypeSupplier) {
                 this.blockEntityTypeSupplier = blockEntityTypeSupplier;

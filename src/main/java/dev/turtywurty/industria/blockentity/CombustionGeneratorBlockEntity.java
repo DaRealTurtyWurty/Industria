@@ -5,13 +5,13 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -22,9 +22,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -37,7 +34,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
 
-public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
+public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
@@ -47,7 +44,7 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
     private int fuelTime = 0;
 
     public CombustionGeneratorBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.COMBUSTION_GENERATOR, pos, state);
+        super(BlockInit.COMBUSTION_GENERATOR, BlockEntityTypeInit.COMBUSTION_GENERATOR, pos, state);
 
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
@@ -136,19 +133,6 @@ public class CombustionGeneratorBlockEntity extends UpdatableBlockEntity impleme
 
         this.burnTime = nbt.getInt("BurnTime", 0);
         this.fuelTime = nbt.getInt("FuelTime", 0);
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = new NbtCompound();
-        writeNbt(nbt, registryLookup);
-        return nbt;
     }
 
     public EnergyStorage getEnergyStorage() {

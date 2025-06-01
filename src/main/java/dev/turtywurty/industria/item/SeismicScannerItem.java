@@ -7,7 +7,6 @@ import dev.turtywurty.industria.network.OpenSeismicScannerPayload;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentHolder;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -58,15 +57,17 @@ public class SeismicScannerItem extends Item {
 
     @Override
     public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
-        boolean selected = entity instanceof EquipmentHolder holder &&
-                (holder.getEquippedStack(EquipmentSlot.MAINHAND) == stack ||
-                        holder.getEquippedStack(EquipmentSlot.OFFHAND) == stack);
-        if (selected && entity instanceof PlayerEntity player) {
+        if (!(entity instanceof PlayerEntity player))
+            return;
+
+        boolean selected = player.getEquippedStack(EquipmentSlot.MAINHAND).isOf(this) ||
+                player.getEquippedStack(EquipmentSlot.OFFHAND).isOf(this);
+        if (selected) {
             WorldFluidPocketsState state = WorldFluidPocketsState.getServerState(world);
             List<Text> fluidBelow = new ArrayList<>();
             for (WorldFluidPocketsState.FluidPocket fluidPocket : state.existsBelow(player.getBlockPos())) {
                 Optional<RegistryKey<Fluid>> regKey = fluidPocket.fluidState().getRegistryEntry().getKey();
-                regKey.ifPresent(key -> fluidBelow.add(Text.translatable(key.getValue().toTranslationKey())));
+                regKey.ifPresent(key -> fluidBelow.add(Text.translatable(key.getValue().toTranslationKey()).append(": " + fluidPocket.minY())));
             }
 
             if (fluidBelow.isEmpty())

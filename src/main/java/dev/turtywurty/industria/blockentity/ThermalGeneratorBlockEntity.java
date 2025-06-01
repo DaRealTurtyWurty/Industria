@@ -5,7 +5,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
@@ -14,6 +13,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ThermalGeneratorScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -32,9 +32,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -48,7 +45,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
 
-public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
+public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("thermal_generator");
 
     private static final int CONSUME_RATE = 500;
@@ -58,7 +55,7 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
 
     public ThermalGeneratorBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.THERMAL_GENERATOR, pos, state);
+        super(BlockInit.THERMAL_GENERATOR, BlockEntityTypeInit.THERMAL_GENERATOR, pos, state);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
         this.wrappedFluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
@@ -164,19 +161,6 @@ public class ThermalGeneratorBlockEntity extends UpdatableBlockEntity implements
         this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
         this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registryLookup);
         this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = new NbtCompound();
-        writeNbt(nbt, registryLookup);
-        return nbt;
     }
 
     public EnergyStorage getWrappedEnergyStorage() {

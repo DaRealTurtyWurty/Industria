@@ -4,11 +4,11 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.PredicateFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -21,9 +21,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -37,14 +34,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FluidTankBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class FluidTankBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("fluid_tank");
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private boolean isExtractMode = false;
 
     public FluidTankBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.FLUID_TANK, pos, state);
+        super(BlockInit.FLUID_TANK, BlockEntityTypeInit.FLUID_TANK, pos, state);
 
         this.wrappedFluidStorage.addStorage(new PredicateFluidStorage(
                 this,
@@ -134,18 +131,6 @@ public class FluidTankBlockEntity extends UpdatableBlockEntity implements Syncab
 
         if (nbt.contains("FluidStorage"))
             this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registries);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     public SingleFluidStorage getFluidProvider(Direction direction) {

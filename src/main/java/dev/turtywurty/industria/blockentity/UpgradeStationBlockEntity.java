@@ -5,7 +5,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
@@ -13,6 +12,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.MultiblockType;
@@ -33,9 +33,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.ServerRecipeManager;
@@ -57,7 +54,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
+public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("upgrade_station");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -97,7 +94,7 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
     };
 
     public UpgradeStationBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.UPGRADE_STATION, pos, state);
+        super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.UPGRADE_STATION, pos, state);
 
         var inputInventory = new SyncingSimpleInventory(this, 9);
         this.wrappedInventoryStorage.addInventory(inputInventory, Direction.UP);
@@ -262,18 +259,6 @@ public class UpgradeStationBlockEntity extends UpdatableBlockEntity implements B
 
     private static RegistryKey<Recipe<?>> getRecipeKey(String string) {
         return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(string));
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     @Override

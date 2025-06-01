@@ -8,7 +8,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -23,6 +22,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
@@ -51,9 +51,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -73,7 +70,7 @@ import team.reborn.energy.api.EnergyStorage;
 import java.util.*;
 
 // TODO: Make this work with temperature and pressure
-public class DigesterBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+public class DigesterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("digester");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -113,7 +110,7 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
     };
 
     public DigesterBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.DIGESTER, pos, state);
+        super(BlockInit.DIGESTER, BlockEntityTypeInit.DIGESTER, pos, state);
 
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createSlurryPredicate(() -> {
@@ -220,7 +217,7 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
             }
         }
 
-        if(this.currentRecipeId == null) {
+        if (this.currentRecipeId == null) {
             Optional<RecipeEntry<DigesterRecipe>> recipeEntry = getCurrentRecipe();
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
@@ -245,7 +242,7 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
         if (this.progress >= this.maxProgress) {
             OutputFluidStorage outputFluidStorage = getOutputFluidStorage();
             FluidStack outputFluidStack = recipe.outputFluid();
-            if(outputFluidStorage.canInsert(outputFluidStack) && hasEnergy()) {
+            if (outputFluidStorage.canInsert(outputFluidStack) && hasEnergy()) {
                 extractEnergy();
 
                 InputSlurryStorage inputSlurryStorage = getInputSlurryStorage();
@@ -325,43 +322,31 @@ public class DigesterBlockEntity extends UpdatableBlockEntity implements Syncabl
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        if(nbt.contains("Inventory"))
+        if (nbt.contains("Inventory"))
             this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
 
-        if(nbt.contains("Energy"))
+        if (nbt.contains("Energy"))
             this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
 
-        if(nbt.contains("SlurryTank"))
+        if (nbt.contains("SlurryTank"))
             this.wrappedSlurryStorage.readNbt(nbt.getListOrEmpty("SlurryTank"), registries);
 
-        if(nbt.contains("FluidTank"))
+        if (nbt.contains("FluidTank"))
             this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
 
-        if(nbt.contains("MultiblockPositions"))
+        if (nbt.contains("MultiblockPositions"))
             Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
 
-        if(nbt.contains("Progress"))
+        if (nbt.contains("Progress"))
             this.progress = nbt.getInt("Progress", 0);
 
-        if(nbt.contains("MaxProgress"))
+        if (nbt.contains("MaxProgress"))
             this.maxProgress = nbt.getInt("MaxProgress", 0);
 
         if (nbt.contains("CurrentRecipe")) {
             this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
                     .orElse(null);
         }
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     @Override

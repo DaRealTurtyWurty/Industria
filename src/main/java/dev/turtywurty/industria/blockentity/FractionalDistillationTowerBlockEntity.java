@@ -2,17 +2,14 @@ package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -21,14 +18,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class FractionalDistillationTowerBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity {
+public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
     private BlockPos controllerPos = null;
     private int ticks = 0;
 
     private final WrappedFluidStorage<SingleFluidStorage> tank = new WrappedFluidStorage<>();
 
     public FractionalDistillationTowerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER, pos, state);
+        super(BlockInit.FRACTIONAL_DISTILLATION_TOWER, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER, pos, state);
         this.tank.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 5));
     }
 
@@ -38,13 +35,28 @@ public class FractionalDistillationTowerBlockEntity extends UpdatableBlockEntity
     }
 
     @Override
-    public void onTick() {
-        if(this.world == null || this.world.isClient)
+    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
+        super.onBlockReplaced(pos, oldState);
+
+        if (this.world == null || pos == null || oldState == null)
             return;
 
-        if(this.ticks++ == 0) {
+        BlockState newState = world.getBlockState(pos);
+        if (!oldState.isOf(newState.getBlock())) {
+            if (this.controllerPos != null && world.getBlockEntity(this.controllerPos) instanceof FractionalDistillationControllerBlockEntity controller) {
+                controller.removeTower(pos);
+            }
+        }
+    }
+
+    @Override
+    public void onTick() {
+        if (this.world == null || this.world.isClient)
+            return;
+
+        if (this.ticks++ == 0) {
             this.controllerPos = searchForController();
-            if(this.controllerPos == null) {
+            if (this.controllerPos == null) {
                 this.world.breakBlock(this.pos, true);
             }
         } else if (this.ticks > Integer.MAX_VALUE - 1) {
@@ -56,7 +68,7 @@ public class FractionalDistillationTowerBlockEntity extends UpdatableBlockEntity
         for (int i = 1; i <= 8; i++) {
             BlockPos pos = this.pos.down(i);
             if (this.world.getBlockEntity(pos) instanceof FractionalDistillationControllerBlockEntity blockEntity) {
-                if(!blockEntity.addTower(this.pos))
+                if (!blockEntity.addTower(this.pos))
                     return null;
 
                 return pos;
@@ -76,22 +88,10 @@ public class FractionalDistillationTowerBlockEntity extends UpdatableBlockEntity
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.writeNbt(nbt, registries);
-        if(this.controllerPos != null)
+        if (this.controllerPos != null)
             nbt.putLong("ControllerPos", this.controllerPos.asLong());
 
         nbt.putInt("Ticks", this.ticks);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     public BlockPos getControllerPos() {

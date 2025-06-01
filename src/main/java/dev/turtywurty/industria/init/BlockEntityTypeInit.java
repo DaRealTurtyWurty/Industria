@@ -20,7 +20,7 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<BatteryBlockEntity> BATTERY = register("battery",
             FabricBlockEntityTypeBuilder.create(
-                            (pos, state) -> new BatteryBlockEntity(pos, state, ((BatteryBlock) state.getBlock()).getLevel()),
+                            (pos, state) -> new BatteryBlockEntity(((BatteryBlock) state.getBlock()), pos, state),
                             BlockInit.BASIC_BATTERY, BlockInit.ADVANCED_BATTERY, BlockInit.ELITE_BATTERY,
                             BlockInit.ULTIMATE_BATTERY, BlockInit.CREATIVE_BATTERY)
                     .build());

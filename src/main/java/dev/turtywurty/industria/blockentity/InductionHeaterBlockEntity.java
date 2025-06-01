@@ -6,7 +6,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
@@ -14,6 +13,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.heat.OutputHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.InductionHeaterScreenHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -26,9 +26,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -41,7 +38,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
 
-public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("induction_heater");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
@@ -49,7 +46,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
     private final WrappedFluidStorage<SingleFluidStorage> waterStorage = new WrappedFluidStorage<>();
 
     public InductionHeaterBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.INDUCTION_HEATER, pos, state);
+        super(BlockInit.INDUCTION_HEATER, BlockEntityTypeInit.INDUCTION_HEATER, pos, state);
 
         this.heatStorage.addStorage(new OutputHeatStorage(this, Long.MAX_VALUE, Long.MAX_VALUE));
         this.waterStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10, variant -> variant.isOf(Fluids.WATER)));
@@ -72,8 +69,8 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
 
         OutputHeatStorage heatStorage = getHeatStorage();
         InputFluidStorage waterStorage = getWaterStorage();
-        if(waterStorage.amount < FluidConstants.DROPLET) {
-            if(heatStorage.getAmount() > 0) {
+        if (waterStorage.amount < FluidConstants.DROPLET) {
+            if (heatStorage.getAmount() > 0) {
                 subtractHeat(heatStorage);
             }
 
@@ -81,7 +78,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
         }
 
         SyncingEnergyStorage energyStorage = getEnergyStorage();
-        if(energyStorage.amount <= 0) {
+        if (energyStorage.amount <= 0) {
             subtractHeat(heatStorage);
             return;
         }
@@ -99,7 +96,7 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
                 double heatDifference = heatStorage.getAmount() - targetHeat.getAmount();
                 if (heatDifference > 0) {
                     double transferAmount = Math.min(heatDifference / 2, heatStorage.getAmount());
-                    try(Transaction transaction = Transaction.openOuter()) {
+                    try (Transaction transaction = Transaction.openOuter()) {
                         double extracted = heatStorage.extract(transferAmount, transaction);
                         double inserted = targetHeat.insert(extracted, transaction);
 
@@ -141,18 +138,6 @@ public class InductionHeaterBlockEntity extends UpdatableBlockEntity implements 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
         return new InductionHeaterScreenHandler(syncId, this);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     @Override

@@ -4,12 +4,12 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FluidPumpScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
@@ -24,9 +24,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -42,7 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FluidPumpBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("fluid_pump");
 
     private static final Direction[] CHECK_DIRECTIONS = {Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
@@ -51,7 +48,7 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     public FluidPumpBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.FLUID_PUMP, pos, state);
+        super(BlockInit.FLUID_PUMP, BlockEntityTypeInit.FLUID_PUMP, pos, state);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.SOUTH);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0), Direction.UP);
     }
@@ -185,18 +182,6 @@ public class FluidPumpBlockEntity extends UpdatableBlockEntity implements Syncab
             this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
         if (nbt.contains("Energy"))
             this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {

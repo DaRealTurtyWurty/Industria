@@ -7,7 +7,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.*;
@@ -21,6 +20,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInvent
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
@@ -64,7 +64,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class ElectrolyzerBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
+public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("electrolyzer");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -111,7 +111,7 @@ public class ElectrolyzerBlockEntity extends UpdatableBlockEntity implements Syn
     };
 
     public ElectrolyzerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.ELECTROLYZER, pos, state);
+        super(BlockInit.ELECTROLYZER, BlockEntityTypeInit.ELECTROLYZER, pos, state);
 
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.SOUTH);
@@ -337,18 +337,6 @@ public class ElectrolyzerBlockEntity extends UpdatableBlockEntity implements Syn
         } else {
             this.leftoverOutputGas = GasStack.EMPTY;
         }
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     @Override

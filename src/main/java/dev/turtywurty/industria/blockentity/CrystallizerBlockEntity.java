@@ -5,7 +5,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
@@ -13,6 +12,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockIOPort;
@@ -33,9 +33,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -61,7 +58,7 @@ import java.util.*;
 // output:
 // aluminium hydroxide (gibbsite) (item)
 // sodium carbonate (item) - by-product
-public class CrystallizerBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
+public class CrystallizerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("crystallizer");
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -109,7 +106,7 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
     };
 
     public CrystallizerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.CRYSTALLIZER, pos, state);
+        super(BlockInit.CRYSTALLIZER, BlockEntityTypeInit.CRYSTALLIZER, pos, state);
 
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 5, $ -> !isRunning()), Direction.SOUTH);
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET, $ -> !isRunning()), Direction.UP);
@@ -186,7 +183,7 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
                 update();
             }
 
-            if(!this.nextOutputItemStack.isEmpty()) {
+            if (!this.nextOutputItemStack.isEmpty()) {
                 this.nextOutputItemStack = ItemStack.EMPTY;
                 update();
             }
@@ -195,7 +192,7 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
         }
 
         CrystallizerRecipe recipe = getRecipeById(this.currentRecipeId);
-        if(recipe == null) {
+        if (recipe == null) {
             this.currentRecipeId = null;
             this.maxProgress = 0;
             this.progress = 0;
@@ -205,12 +202,12 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
             return;
         }
 
-        if(this.catalystUsesLeft <= 0) {
-            if(recipe.catalyst().testForRecipe(catalystItemStack)) {
+        if (this.catalystUsesLeft <= 0) {
+            if (recipe.catalyst().testForRecipe(catalystItemStack)) {
                 this.catalystUsesLeft = recipe.catalystUses();
                 this.maxCatalystUses = recipe.catalystUses();
                 update();
-            } else if(recipe.requiresCatalyst()) {
+            } else if (recipe.requiresCatalyst()) {
                 this.currentRecipeId = null;
                 this.maxProgress = 0;
                 this.progress = 0;
@@ -219,7 +216,7 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
             }
         }
 
-        if(this.progress >= this.maxProgress) {
+        if (this.progress >= this.maxProgress) {
             ItemStack output = recipe.createOutput(this.world.random);
             ItemStack byproduct = recipe.createByProduct(this.world.random);
 
@@ -317,7 +314,7 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
         this.catalystUsesLeft = nbt.getInt("CatalystUsesLeft", 0);
         this.maxCatalystUses = nbt.getInt("MaxCatalystUses", 0);
 
-        if(nbt.contains("NextOutputStack")) {
+        if (nbt.contains("NextOutputStack")) {
             this.nextOutputItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("NextOutputStack"))
                     .orElse(ItemStack.EMPTY);
         }
@@ -450,18 +447,6 @@ public class CrystallizerBlockEntity extends UpdatableBlockEntity implements Syn
 
     public ItemStack getNextOutputItemStack() {
         return this.nextOutputItemStack;
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        var nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
     }
 
     public int getProgress() {

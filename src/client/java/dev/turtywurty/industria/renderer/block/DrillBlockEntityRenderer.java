@@ -113,6 +113,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
             return;
 
         { // Render drill cable
+            matrices.push();
             MatrixStack.Entry entry = matrices.peek();
             VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
 
@@ -154,6 +155,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
             Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> drillHeadData.textureLocation());
 
             drillHeadData.onRender().render(entity, drillHeadStack, tickDelta, matrices, vertexConsumers, drillHeadModel, vertexConsumers.getBuffer(drillHeadModel.getLayer(drillHeadTexture)), light, overlay);
+            matrices.pop();
         }
     }
 

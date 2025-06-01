@@ -6,7 +6,6 @@ import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
@@ -27,6 +26,7 @@ import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.DrillRenderData;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -41,9 +41,6 @@ import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -57,7 +54,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
+public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("drill");
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
@@ -79,7 +76,7 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
     public float clientMotorRotation;
 
     public DrillBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.DRILL, pos, state);
+        super(BlockInit.DRILL, BlockEntityTypeInit.DRILL, pos, state);
 
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable) {
             @Override
@@ -305,18 +302,6 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
     }
 
     @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registryLookup);
-        writeNbt(nbt, registryLookup);
-        return nbt;
-    }
-
-    @Override
     public MultiblockType<?> type() {
         return MultiblockTypeInit.DRILL;
     }
@@ -324,6 +309,14 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
     @Override
     public List<BlockPos> getMultiblockPositions() {
         return this.multiblockPositions;
+    }
+
+    public InventoryStorage getInventoryProvider(@Nullable Direction direction) {
+        return this.wrappedInventoryStorage.getStorage(direction);
+    }
+
+    public EnergyStorage getEnergyProvider(@Nullable Direction direction) {
+        return this.wrappedEnergyStorage.getStorage(direction);
     }
 
     @Override
@@ -339,8 +332,8 @@ public class DrillBlockEntity extends UpdatableBlockEntity implements BlockEntit
             ports.put(Direction.NORTH, new MultiblockIOPort(Direction.NORTH, TransferType.ITEM));
         }
 
-        if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == 0 && offsetFromPrimary.getZ() == 0) {
-            ports.put(Direction.UP, new MultiblockIOPort(Direction.UP, TransferType.ENERGY));
+        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 2) {
+            ports.put(Direction.DOWN, new MultiblockIOPort(Direction.DOWN, TransferType.ENERGY));
         }
 
         return ports;

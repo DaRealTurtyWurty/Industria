@@ -4,19 +4,16 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -30,7 +27,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.List;
 
-public class MotorBlockEntity extends UpdatableBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("motor");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -39,7 +36,7 @@ public class MotorBlockEntity extends UpdatableBlockEntity implements SyncableTi
     public float rodRotation = 0.0F; // Client only
 
     public MotorBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.MOTOR, pos, state);
+        super(BlockInit.MOTOR, BlockEntityTypeInit.MOTOR, pos, state);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
     }
@@ -116,18 +113,6 @@ public class MotorBlockEntity extends UpdatableBlockEntity implements SyncableTi
 
         if (nbt.contains("EnergyStorage"))
             this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
-    }
-
-    @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = super.toInitialChunkDataNbt(registryLookup);
-        writeNbt(nbt, registryLookup);
-        return nbt;
     }
 
     public EnergyStorage getEnergyStorage() {

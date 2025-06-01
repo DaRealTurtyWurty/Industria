@@ -93,8 +93,6 @@ public class MultiblockBlock extends Block {
 
     @Override
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        super.onStateReplaced(state, world, pos, moved);
-
         BlockState newState = world.getBlockState(pos);
         if (!world.isClient && !state.isOf(newState.getBlock())) {
             MultiblockData data = getMultiblockData(world, pos);
@@ -107,6 +105,8 @@ public class MultiblockBlock extends Block {
 
             data.type().onMultiblockBreak(world, primaryPos);
         }
+
+        super.onStateReplaced(state, world, pos, moved);
     }
 
     @Override
