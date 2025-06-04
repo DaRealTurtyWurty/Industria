@@ -450,10 +450,10 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.SLURRY);
         }
 
-        if (offsetFromPrimary.getZ() != 0 && offsetFromPrimary.getX() == 0 && offsetFromPrimary.getY() == 0) {
-            if (offsetFromPrimary.getZ() == -1 && direction == Direction.EAST) {
+        if (offsetFromPrimary.getX() != 0 && offsetFromPrimary.getZ() == 0 && offsetFromPrimary.getY() == 0) {
+            if (offsetFromPrimary.getX() == 1 && direction == Direction.EAST) {
                 transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-            } else if (offsetFromPrimary.getZ() == 1 && direction == Direction.WEST) {
+            } else if (offsetFromPrimary.getX() == -1 && direction == Direction.WEST) {
                 transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
             }
         }
