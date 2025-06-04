@@ -189,8 +189,8 @@ public class Industria implements ModInitializer {
         }, BlockInit.SLURRY_PIPE);
 
         HeatStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            if(world instanceof ServerWorld serverWorld) {
-                WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.HEAT, pos);
+            if (world instanceof ServerWorld serverWorld) {
+                return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.HEAT, pos);
             }
 
             return null;
