@@ -40,6 +40,10 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     private final Map<BlockPos, Map<BlockPos, Integer>> pipeToSourceDistance = new HashMap<>();
     private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
 
+    private static final double PIPE_CONDUCTIVITY = 0.25D;
+    private static final double BLOCK_CONDUCTIVITY = 0.15D;
+    private static final double PIPE_DISSIPATION = 0.02D;
+
     public HeatPipeNetwork(UUID id) {
         super(id, TransferType.HEAT);
     }
@@ -166,21 +170,21 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
 
         Map<HeatStorage, Double> heatChanges = new HashMap<>();
 
-        // Step 1: Transfer heat between adjacent pipes
+        // Conduct heat between adjacent pipes
         for (BlockPos pipePos : this.pipes) {
             HeatStorage pipeStorage = getStorage(pipePos);
             for (Direction dir : Direction.values()) {
-                BlockPos neighborPos = pipePos.offset(dir);
-                if (this.pipes.contains(neighborPos)) {
-                    HeatStorage neighborStorage = getStorage(neighborPos);
-                    double transfer = calculateTransfer(pipeStorage, neighborStorage);
+                BlockPos neighbourPos = pipePos.offset(dir);
+                if (this.pipes.contains(neighbourPos)) {
+                    HeatStorage neighbourStorage = getStorage(neighbourPos);
+                    double transfer = conduct(pipeStorage, neighbourStorage, PIPE_CONDUCTIVITY);
                     heatChanges.merge(pipeStorage, -transfer, Double::sum);
-                    heatChanges.merge(neighborStorage, transfer, Double::sum);
+                    heatChanges.merge(neighbourStorage, transfer, Double::sum);
                 }
             }
         }
 
-        // Step 2: Transfer heat between pipes and connected blocks (sources or sinks)
+        // Conduct heat between pipes and connected blocks
         for (BlockPos connectedPos : this.connectedBlocks) {
             for (Direction dir : Direction.values()) {
                 BlockPos pipePos = connectedPos.offset(dir);
@@ -188,7 +192,7 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
                     HeatStorage pipeStorage = getStorage(pipePos);
                     HeatStorage connectedStorage = this.transferType.lookup(world, connectedPos, dir.getOpposite());
                     if (connectedStorage != null && connectedStorage.supportsInsertion()) {
-                        double transfer = calculateTransfer(pipeStorage, connectedStorage);
+                        double transfer = conduct(pipeStorage, connectedStorage, BLOCK_CONDUCTIVITY);
                         heatChanges.merge(pipeStorage, -transfer, Double::sum);
                         heatChanges.merge(connectedStorage, transfer, Double::sum);
                     }
@@ -196,21 +200,21 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
             }
         }
 
-        // Step 3: Apply all heat changes
+        // Apply heat changes
         for (Map.Entry<HeatStorage, Double> entry : heatChanges.entrySet()) {
             HeatStorage storage = entry.getKey();
             double change = entry.getValue();
             ((SimpleHeatStorage) storage).setAmount(Math.max(0, storage.getAmount() + change));
         }
 
-        // Step 4: Apply dissipation to pipes
+        // Ambient dissipation
         for (HeatStorage pipeStorage : this.pipeStorages.values()) {
-            double dissipation = pipeStorage.getAmount() / 100D; // Dissipate 1% of the heat every tick
-            ((SimpleHeatStorage) pipeStorage).setAmount(Math.max(0, pipeStorage.getAmount() - dissipation));
+            double loss = pipeStorage.getAmount() * PIPE_DISSIPATION;
+            ((SimpleHeatStorage) pipeStorage).setAmount(Math.max(0, pipeStorage.getAmount() - loss));
         }
     }
 
-    private static double calculateTransfer(HeatStorage a, HeatStorage b) {
-        return (a.getAmount() - b.getAmount()) / 10D; // Transfer 10% of the heat difference
+    private static double conduct(HeatStorage from, HeatStorage to, double coefficient) {
+        return (from.getAmount() - to.getAmount()) * coefficient;
     }
 }

@@ -45,6 +45,10 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
     private final WrappedHeatStorage<SimpleHeatStorage> heatStorage = new WrappedHeatStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> waterStorage = new WrappedFluidStorage<>();
 
+    private static final double HEAT_PER_ENERGY = 0.5D;
+    private static final double PASSIVE_COOLING = 0.01D;
+    private static final double TRANSFER_COEFFICIENT = 0.25D;
+
     public InductionHeaterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.INDUCTION_HEATER, BlockEntityTypeInit.INDUCTION_HEATER, pos, state);
 
@@ -69,21 +73,13 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
 
         OutputHeatStorage heatStorage = getHeatStorage();
         InputFluidStorage waterStorage = getWaterStorage();
-        if (waterStorage.amount < FluidConstants.DROPLET) {
-            if (heatStorage.getAmount() > 0) {
-                subtractHeat(heatStorage);
-            }
-
-            return;
-        }
-
         SyncingEnergyStorage energyStorage = getEnergyStorage();
-        if (energyStorage.amount <= 0) {
-            subtractHeat(heatStorage);
-            return;
-        }
 
-        increaseHeat(heatStorage, waterStorage, energyStorage);
+        if (energyStorage.amount > 0 && waterStorage.amount >= FluidConstants.DROPLET) {
+            increaseHeat(heatStorage, waterStorage, energyStorage);
+        } else if (heatStorage.getAmount() > 0) {
+            cool(heatStorage);
+        }
     }
 
     @Override
@@ -95,7 +91,8 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
             if (targetHeat != null && targetHeat.supportsInsertion()) {
                 double heatDifference = heatStorage.getAmount() - targetHeat.getAmount();
                 if (heatDifference > 0) {
-                    double transferAmount = Math.min(heatDifference / 2, heatStorage.getAmount());
+                    double transferAmount = heatDifference * TRANSFER_COEFFICIENT;
+                    transferAmount = Math.min(transferAmount, heatStorage.getAmount());
                     try (Transaction transaction = Transaction.openOuter()) {
                         double extracted = heatStorage.extract(transferAmount, transaction);
                         double inserted = targetHeat.insert(extracted, transaction);
@@ -111,15 +108,17 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
         super.endTick();
     }
 
-    private void subtractHeat(SimpleHeatStorage heatStorage) {
-        heatStorage.setAmount(Math.max(0, heatStorage.getAmount() - 1));
+    private void cool(SimpleHeatStorage heatStorage) {
+        double newAmount = heatStorage.getAmount() * (1 - PASSIVE_COOLING);
+        heatStorage.setAmount(Math.max(0, newAmount));
         update();
     }
 
     private void increaseHeat(SimpleHeatStorage heatStorage, SingleFluidStorage waterTank, SyncingEnergyStorage energyStorage) {
-        long energyConsumed = Math.min(energyStorage.amount, 10);
-        long heatIncrease = energyConsumed / 2; // Example: 1 heat per 2 energy units
-        heatStorage.setAmount((long) MathHelper.clamp(heatStorage.getAmount() + heatIncrease, 0, ((float) waterTank.amount / (FluidConstants.BUCKET * 10)) * 500));
+        long energyConsumed = Math.min(energyStorage.amount, 20);
+        double heatIncrease = energyConsumed * HEAT_PER_ENERGY;
+        long maxHeat = (long) (((double) waterTank.amount / (FluidConstants.BUCKET * 10)) * 500);
+        heatStorage.setAmount(MathHelper.clamp(heatStorage.getAmount() + heatIncrease, 0, maxHeat));
         waterTank.amount -= FluidConstants.DROPLET;
         energyStorage.amount -= energyConsumed;
         update();
