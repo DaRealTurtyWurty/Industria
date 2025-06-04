@@ -7,6 +7,8 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorageHolder;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
@@ -37,10 +39,11 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable {
+public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, WrappedInventoryStorageHolder {
     public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
+    private final WrappedInventoryStorage<?> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final List<BlockPos> machinePositions = new ArrayList<>();
 
     private int ticks;
@@ -92,7 +95,6 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
         if (this.wellheadPos == null)
             return;
 
-        this.running = true;
         if (this.world.getBlockEntity(this.wellheadPos) instanceof WellheadBlockEntity wellheadBlockEntity && this.running) {
             Map<BlockPos, Integer> drillTubes = wellheadBlockEntity.getDrillTubes();
 
@@ -173,7 +175,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new OilPumpJackScreenHandler(syncId, playerInventory, this);
+        return new OilPumpJackScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
     }
 
     @Override
@@ -190,6 +192,10 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
             this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
         }
 
+        if(nbt.contains("Inventory")) {
+            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
+        }
+
         this.running = nbt.getBoolean("Running", false);
     }
 
@@ -203,6 +209,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
         }
 
         nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
+        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
         nbt.putBoolean("Running", this.running);
     }
 
@@ -340,5 +347,10 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     public void setRunning(boolean running) {
         this.running = running;
         update();
+    }
+
+    @Override
+    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
+        return this.wrappedInventoryStorage;
     }
 }

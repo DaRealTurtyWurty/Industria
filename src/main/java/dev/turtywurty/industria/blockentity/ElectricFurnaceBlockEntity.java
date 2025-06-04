@@ -252,13 +252,13 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {
-        Direction facing = getCachedState().get(Properties.FACING);
+        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
         Direction relative = MathUtils.getRelativeDirection(direction, facing);
         return this.wrappedInventoryStorage.getStorage(relative);
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
-        Direction facing = getCachedState().get(Properties.FACING);
+        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
         Direction relative = MathUtils.getRelativeDirection(direction, facing);
         return this.wrappedEnergyStorage.getStorage(relative);
     }

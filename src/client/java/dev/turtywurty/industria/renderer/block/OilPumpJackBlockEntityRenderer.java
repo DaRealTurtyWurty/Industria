@@ -39,13 +39,16 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
             default -> 0;
         }));
 
-        float clientRotation = entity.clientRotation + 0.1f * tickDelta;
-        if (clientRotation > Math.PI * 2) {
-            clientRotation -= (float) (Math.PI * 2);
-            entity.reverseCounterWeights = !entity.reverseCounterWeights;
-        }
+        float clientRotation = entity.clientRotation;
+        if (entity.isRunning()) {
+            clientRotation = clientRotation + 0.1f * tickDelta;
+            if (clientRotation > Math.PI * 2) {
+                clientRotation -= (float) (Math.PI * 2);
+                entity.reverseCounterWeights = !entity.reverseCounterWeights;
+            }
 
-        entity.clientRotation = clientRotation;
+            entity.clientRotation = clientRotation;
+        }
 
         // Save previous values
         float previousWheelPitch = parts.wheel().pitch;

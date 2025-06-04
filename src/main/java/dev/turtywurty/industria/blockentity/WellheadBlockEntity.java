@@ -91,22 +91,6 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
     }
 
-    private void findDrillTubes() {
-        if (this.world == null || this.oilPumpJackPos == null)
-            return;
-
-        BlockPos.Mutable mutablePos = this.pos.down().mutableCopy();
-        BlockState below = this.world.getBlockState(mutablePos);
-        while (below.isOf(BlockInit.DRILL_TUBE)) {
-            if (!this.drillTubes.containsKey(mutablePos)) {
-                this.drillTubes.put(mutablePos.toImmutable(), 0);
-            }
-
-            mutablePos.move(Direction.DOWN);
-            below = this.world.getBlockState(mutablePos);
-        }
-    }
-
     @Override
     public void onTick() {
         if (this.world == null || this.world.isClient || this.oilPumpJackPos == null)
@@ -117,8 +101,6 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         if (!(this.world.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity)
                 || !oilPumpJackBlockEntity.isRunning())
             return;
-
-        findDrillTubes();
 
         BlockPos bottomOfTubes = this.drillTubes.keySet().stream()
                 .min(Comparator.comparingInt(Vec3i::getY))
@@ -159,21 +141,21 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     private void distributeFluid() {
         SyncingFluidStorage tank = getFluidStorageBuffer();
-        if(tank.isResourceBlank() || tank.amount <= 0)
+        if (tank.isResourceBlank() || tank.amount <= 0)
             return;
 
         Map<Storage<FluidVariant>, Long> storages = new HashMap<>();
         for (Direction direction : Direction.values()) {
             Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.world, this.pos.offset(direction), direction.getOpposite());
-            if(fluidStorage == null || !fluidStorage.supportsInsertion())
+            if (fluidStorage == null || !fluidStorage.supportsInsertion())
                 continue;
 
             long maxInsert;
-            try(Transaction transaction = Transaction.openOuter()) {
+            try (Transaction transaction = Transaction.openOuter()) {
                 maxInsert = fluidStorage.insert(tank.variant, tank.amount, transaction);
             }
 
-            if(maxInsert > 0) {
+            if (maxInsert > 0) {
                 storages.put(fluidStorage, maxInsert);
             }
         }
@@ -224,5 +206,17 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
                 oilPumpJackBlockEntity.removeWellhead();
             }
         }
+    }
+
+    public void modifyDrillTubes(List<BlockPos> positions) {
+        for (BlockPos blockPos : this.drillTubes.keySet()) {
+            if (!positions.contains(blockPos)) {
+                this.drillTubes.remove(blockPos);
+            } else {
+                positions.remove(blockPos);
+            }
+        }
+
+        positions.forEach(position -> this.drillTubes.put(position, 0));
     }
 }

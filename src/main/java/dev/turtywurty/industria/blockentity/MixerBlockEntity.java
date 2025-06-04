@@ -98,7 +98,6 @@ import java.util.*;
 //                        .incrementProgress()
 //                        .build());
 //    }
-// TODO: Fix issue where items in the slots are duplicated as ghost items on the client
 public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("mixer");
 
@@ -439,6 +438,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         return new MixerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
     }
 
+    // TODO: Figure out why getPorts is causing the items in the input inventory to shift one slot forward
     @Override
     public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
         Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);

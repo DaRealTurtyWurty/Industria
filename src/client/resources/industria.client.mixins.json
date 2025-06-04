@@ -3,7 +3,8 @@
   "package": "dev.turtywurty.industria.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "BipedEntityModelMixin"
+    "BipedEntityModelMixin",
+    "HandledScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

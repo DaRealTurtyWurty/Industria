@@ -22,10 +22,7 @@ import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
-import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
-import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
-import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
-import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
+import dev.turtywurty.industria.screenhandler.*;
 import dev.turtywurty.industria.screenhandler.base.TickableScreenHandler;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
@@ -218,6 +215,7 @@ public class Industria implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(AddPipeNetworkPayload.ID, AddPipeNetworkPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(RemovePipeNetworkPayload.ID, RemovePipeNetworkPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ModifyPipeNetworkPayload.ID, ModifyPipeNetworkPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC);
 
         // Packets
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
@@ -274,6 +272,13 @@ public class Industria implements ModInitializer {
             ServerPlayerEntity player = context.player();
             if (player.currentScreenHandler instanceof FluidTankScreenHandler handler) {
                 handler.getBlockEntity().setExtractMode(payload.extractMode());
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(OilPumpJackSetRunningPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if(player.currentScreenHandler instanceof OilPumpJackScreenHandler handler) {
+                handler.getBlockEntity().setRunning(payload.isRunning());
             }
         });
 
