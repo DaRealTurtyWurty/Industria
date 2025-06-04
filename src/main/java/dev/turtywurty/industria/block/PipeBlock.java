@@ -20,6 +20,7 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
@@ -270,8 +271,8 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
             A amount = getAmount(network.getStorage(pos));
             A capacity = getCapacity(network.getStorage(pos));
 
-            DecimalFormat df = new DecimalFormat("#.##");
-            DecimalFormat scientific = new DecimalFormat("#.##E0");
+            var df = new DecimalFormat("#.##");
+            var scientific = new DecimalFormat("#.##E0");
 
             String amountStr = df.format(amount).replace(".00", "");
             String capacityStr = df.format(capacity).replace(".00", "");
@@ -285,7 +286,15 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
                 capacityStr = scientific.format(capacity);
             }
 
-            player.sendMessage(Text.literal(amountStr + " " + getUnit() + " / " + capacityStr + " " + getUnit()), true);
+            if(!(this instanceof HeatPipeBlock)) {
+                player.sendMessage(Text.literal("Pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
+                        .append(Text.literal(amountStr + " " + getUnit() + " / " + capacityStr + " " + getUnit())
+                                .formatted(Formatting.GREEN)), true);
+            } else {
+                player.sendMessage(Text.literal("Heat pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
+                        .append(Text.literal(amount + " " + getUnit())
+                                .formatted(Formatting.RED)), true);
+            }
             return ActionResult.SUCCESS_SERVER;
         }
 
