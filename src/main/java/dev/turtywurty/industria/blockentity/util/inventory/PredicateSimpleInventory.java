@@ -2,8 +2,11 @@ package dev.turtywurty.industria.blockentity.util.inventory;
 
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
+import dev.turtywurty.gasapi.api.GasVariant;
+import dev.turtywurty.gasapi.api.storage.GasStorage;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -82,6 +85,30 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
 
             try (Transaction transaction = Transaction.openOuter()) {
                 return storage.extract(slurryStackSupplier.get().variant(), FluidConstants.BUCKET, transaction) > 0;
+            }
+        };
+    }
+
+    public static BiPredicate<ItemStack, Integer> createEmptyGasPredicate(Supplier<GasVariant> gasVariantSupplier) {
+        return (stack, integer) -> {
+            Storage<GasVariant> storage = ContainerItemContext.withConstant(stack).find(GasStorage.ITEM);
+            if (storage == null || !storage.supportsInsertion())
+                return false;
+
+            try (Transaction transaction = Transaction.openOuter()) {
+                return storage.insert(gasVariantSupplier.get(), FluidConstants.BUCKET, transaction) > 0;
+            }
+        };
+    }
+
+    public static BiPredicate<ItemStack, Integer> createGasPredicate(Supplier<GasStack> gasStackSupplier) {
+        return (stack, index) -> {
+            Storage<GasVariant> storage = ContainerItemContext.withConstant(stack).find(GasStorage.ITEM);
+            if (storage == null || !storage.supportsExtraction())
+                return false;
+
+            try (Transaction transaction = Transaction.openOuter()) {
+                return storage.extract(gasStackSupplier.get().variant(), FluidConstants.BUCKET, transaction) > 0;
             }
         };
     }

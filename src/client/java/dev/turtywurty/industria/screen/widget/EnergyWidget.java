@@ -10,8 +10,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.function.Consumer;
 
-// TODO: Redo rendering of energy widget to make it look better
-// TODO: Add orientation options (horizontal, vertical, etc.)
+// TODO: Use texture for the energy bar instead of a solid color fill
 public class EnergyWidget implements Drawable, Widget {
     private final EnergyStorage energyStorage;
     private final int width, height;
@@ -39,20 +38,20 @@ public class EnergyWidget implements Drawable, Widget {
         int fillX, fillY, fillWidth, fillHeight;
 
         if (orientation == Orientation.VERTICAL) {
-            fillHeight = (int) (this.height * percentage);
+            fillHeight = (int) (height * percentage);
             fillX = x;
-            fillY = y + this.height - fillHeight;
-            fillWidth = this.width;
+            fillY = y + height - fillHeight;
+            fillWidth = width;
         } else { // HORIZONTAL
-            fillWidth = (int) (this.width * percentage);
+            fillWidth = (int) (width * percentage);
             fillX = x;
             fillY = y;
-            fillHeight = this.height;
+            fillHeight = height;
         }
 
-        context.fill(fillX, fillY, fillX + fillWidth, fillY + fillHeight, color);
+        context.fill(fillX, fillY, fillX + fillWidth, fillY + fillHeight, this.color);
 
-        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
+        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
