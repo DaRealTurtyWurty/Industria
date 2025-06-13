@@ -37,7 +37,6 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     public static final PacketCodec<RegistryByteBuf, Set<HeatPipeNetwork>> SET_PACKET_CODEC =
             ExtraPacketCodecs.setOf(PACKET_CODEC);
 
-    private final Map<BlockPos, Map<BlockPos, Integer>> pipeToSourceDistance = new HashMap<>();
     private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
 
     private static final double PIPE_CONDUCTIVITY = 0.25D;
@@ -56,76 +55,6 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     @Override
     protected PipeNetworkType<HeatStorage, ? extends PipeNetwork<HeatStorage>> getType() {
         return PipeNetworkTypeInit.HEAT;
-    }
-
-    @Override
-    protected void onConnectedBlocksChanged(World world) {
-        super.onConnectedBlocksChanged(world);
-        this.pipeToSourceDistance.clear();
-
-        // Go through connected blocks, get the heat storage, check if it supports extraction
-        Set<BlockPos> sources = new HashSet<>();
-        for (BlockPos connectedBlockPos : this.connectedBlocks) {
-            for (Direction direction : Direction.values()) {
-                BlockPos offset = connectedBlockPos.offset(direction);
-                if (!this.pipes.contains(offset))
-                    continue;
-
-                HeatStorage storage = this.transferType.lookup(world, connectedBlockPos, direction);
-                if (storage != null && storage.supportsExtraction()) {
-                    sources.add(connectedBlockPos);
-                    break;
-                }
-            }
-        }
-
-        // Go through sources, calculate distance to each pipe
-        for (BlockPos sourcePos : sources) {
-            Map<BlockPos, Integer> pipeDistances = calculateDistancesFromSource(sourcePos);
-            this.pipeToSourceDistance.put(sourcePos, pipeDistances);
-        }
-    }
-
-    private Map<BlockPos, Integer> calculateDistancesFromSource(BlockPos sourcePos) {
-        // Find adjacent pipes
-        Set<BlockPos> adjacentPipes = new HashSet<>();
-        for (Direction dir : Direction.values()) {
-            BlockPos adjacentPos = sourcePos.offset(dir);
-            if (this.pipes.contains(adjacentPos)) {
-                adjacentPipes.add(adjacentPos);
-            }
-        }
-
-        if (adjacentPipes.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        // BFS to compute the distances to all pipes
-        Map<BlockPos, Integer> distances = new HashMap<>();
-        Set<BlockPos> visited = new HashSet<>();
-        Queue<BlockPos> queue = new LinkedList<>();
-
-        for (BlockPos startPos : adjacentPipes) {
-            queue.add(startPos);
-            distances.put(startPos, 0);
-            visited.add(startPos);
-        }
-
-        while (!queue.isEmpty()) {
-            BlockPos current = queue.poll();
-            int currentDistance = distances.get(current);
-
-            for (Direction dir : Direction.values()) {
-                BlockPos neighbor = current.offset(dir);
-                if (this.pipes.contains(neighbor) && !visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    distances.put(neighbor, currentDistance + 1);
-                    queue.add(neighbor);
-                }
-            }
-        }
-
-        return distances;
     }
 
     @Override
@@ -170,16 +99,14 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
 
         Map<HeatStorage, Double> heatChanges = new HashMap<>();
 
-        // Conduct heat between adjacent pipes
+        // Conduct heat between adjacent pipes only once per pair
         for (BlockPos pipePos : this.pipes) {
             HeatStorage pipeStorage = getStorage(pipePos);
             for (Direction dir : Direction.values()) {
                 BlockPos neighbourPos = pipePos.offset(dir);
-                if (this.pipes.contains(neighbourPos)) {
+                if (this.pipes.contains(neighbourPos) && pipePos.asLong() < neighbourPos.asLong()) {
                     HeatStorage neighbourStorage = getStorage(neighbourPos);
-                    double transfer = conduct(pipeStorage, neighbourStorage, PIPE_CONDUCTIVITY);
-                    heatChanges.merge(pipeStorage, -transfer, Double::sum);
-                    heatChanges.merge(neighbourStorage, transfer, Double::sum);
+                    exchange(pipeStorage, neighbourStorage, PIPE_CONDUCTIVITY);
                 }
             }
         }
@@ -192,21 +119,11 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
                     HeatStorage pipeStorage = getStorage(pipePos);
                     HeatStorage connectedStorage = this.transferType.lookup(world, connectedPos, dir.getOpposite());
                     if (connectedStorage != null && connectedStorage.supportsInsertion()) {
-                        double transfer = conduct(pipeStorage, connectedStorage, BLOCK_CONDUCTIVITY);
-                        heatChanges.merge(pipeStorage, -transfer, Double::sum);
-                        heatChanges.merge(connectedStorage, transfer, Double::sum);
+                        exchange(pipeStorage, connectedStorage, BLOCK_CONDUCTIVITY);
                     }
                 }
             }
         }
-
-        // Apply heat changes
-        for (Map.Entry<HeatStorage, Double> entry : heatChanges.entrySet()) {
-            HeatStorage storage = entry.getKey();
-            double change = entry.getValue();
-            ((SimpleHeatStorage) storage).setAmount(Math.max(0, storage.getAmount() + change));
-        }
-
         // Ambient dissipation
         for (HeatStorage pipeStorage : this.pipeStorages.values()) {
             double loss = pipeStorage.getAmount() * PIPE_DISSIPATION;
@@ -214,7 +131,9 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
         }
     }
 
-    private static double conduct(HeatStorage from, HeatStorage to, double coefficient) {
-        return (from.getAmount() - to.getAmount()) * coefficient;
+    private static void exchange(HeatStorage from, HeatStorage to, double coefficient) {
+        double transfer = (from.getAmount() - to.getAmount()) * coefficient;
+        ((SimpleHeatStorage) from).setAmount(from.getAmount() - transfer);
+        ((SimpleHeatStorage) to).setAmount(to.getAmount() + transfer);
     }
 }
