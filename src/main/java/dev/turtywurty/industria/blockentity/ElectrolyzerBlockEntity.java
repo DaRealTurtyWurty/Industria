@@ -1,5 +1,7 @@
 package dev.turtywurty.industria.blockentity;
 
+import dev.turtywurty.gasapi.api.GasVariant;
+import dev.turtywurty.gasapi.api.storage.GasStorage;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.Industria;
@@ -31,20 +33,23 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
 import dev.turtywurty.industria.screenhandler.ElectrolyzerScreenHandler;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -149,6 +154,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
             return;
 
         processOutputs();
+        handleOutputSlots();
+
         if(hasLeftover())
             return;
 
@@ -251,6 +258,46 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
             this.leftoverOutputGas = this.leftoverOutputGas.withAmount(this.leftoverOutputGas.amount() - inserted);
             update();
+        }
+    }
+
+    private void handleOutputSlots() {
+        PredicateSimpleInventory outputFluidInv = getOutputFluidInventory();
+        if (!outputFluidInv.isEmpty()) {
+            ItemStack stack = outputFluidInv.getStack(0);
+            Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+            if (storage != null && storage.supportsInsertion()) {
+                SyncingFluidStorage outputFluid = getOutputFluidStorage();
+                if (outputFluid.amount > 0) {
+                    try (Transaction transaction = Transaction.openOuter()) {
+                        long inserted = storage.insert(outputFluid.variant, FluidConstants.BUCKET, transaction);
+                        if (inserted > 0) {
+                            outputFluid.amount -= inserted;
+                            transaction.commit();
+                            update();
+                        }
+                    }
+                }
+            }
+        }
+
+        PredicateSimpleInventory outputGasInv = getOutputGasInventory();
+        if (!outputGasInv.isEmpty()) {
+            ItemStack stack = outputGasInv.getStack(0);
+            Storage<GasVariant> storage = GasStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+            if (storage != null && storage.supportsInsertion()) {
+                SyncingGasStorage gasStorage = getOutputGasStorage();
+                if (gasStorage.amount > 0) {
+                    try (Transaction transaction = Transaction.openOuter()) {
+                        long inserted = storage.insert(gasStorage.variant, FluidConstants.BUCKET, transaction);
+                        if (inserted > 0) {
+                            gasStorage.amount -= inserted;
+                            transaction.commit();
+                            update();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -373,6 +420,14 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     public SyncingSimpleInventory getCathodeInventory() {
         return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+    }
+
+    public PredicateSimpleInventory getOutputFluidInventory() {
+        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(4);
+    }
+
+    public PredicateSimpleInventory getOutputGasInventory() {
+        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(5);
     }
 
     public InputFluidStorage getElectrolyteFluidStorage() {
