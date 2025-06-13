@@ -72,9 +72,10 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
         Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
 
-        // TODO: Make this depend on the direction that the pump jack is facing (and also only accept the back)
-        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 0 && direction == Direction.DOWN)
-            transferTypes.put(Direction.DOWN, List.of(TransferType.ENERGY));
+        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
+        Direction back = facing.getOpposite();
+        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 0 && direction == back)
+            transferTypes.put(back, List.of(TransferType.ENERGY));
 
         return Multiblockable.toIOPortMap(transferTypes);
     }
