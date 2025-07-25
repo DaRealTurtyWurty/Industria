@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "industria:item/raw_tin"
+    "layer0": "industria:item/raw_cassiterite"
   }
 }

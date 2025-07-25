@@ -6,7 +6,7 @@
     "targets": [
       {
         "state": {
-          "Name": "industria:tin_ore"
+          "Name": "industria:cassiterite_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",
@@ -15,7 +15,7 @@
       },
       {
         "state": {
-          "Name": "industria:deepslate_tin_ore"
+          "Name": "industria:deepslate_cassiterite_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",

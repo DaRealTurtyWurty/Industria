@@ -84,10 +84,10 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, FluidPumpBlockEntity.TITLE, "Fluid Pump");
 
         translationBuilder.add(BlockInit.BAUXITE_ORE, "Bauxite Ore");
-        translationBuilder.add(BlockInit.TIN_ORE, "Tin Ore");
+        translationBuilder.add(BlockInit.CASSITERITE_ORE, "Cassiterite Ore");
         translationBuilder.add(BlockInit.ZINC_ORE, "Zinc Ore");
         translationBuilder.add(BlockInit.DEEPSLATE_BAUXITE_ORE, "Deepslate Bauxite Ore");
-        translationBuilder.add(BlockInit.DEEPSLATE_TIN_ORE, "Deepslate Tin Ore");
+        translationBuilder.add(BlockInit.DEEPSLATE_CASSITERITE_ORE, "Deepslate Cassiterite Ore");
         translationBuilder.add(BlockInit.DEEPSLATE_ZINC_ORE, "Deepslate Zinc Ore");
 
         translationBuilder.add(BlockInit.ALUMINIUM_BLOCK, "Aluminium Block");
@@ -95,11 +95,11 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.ZINC_BLOCK, "Zinc Block");
 
         translationBuilder.add(BlockInit.RAW_BAUXITE_BLOCK, "Raw Bauxite Block");
-        translationBuilder.add(BlockInit.RAW_TIN_BLOCK, "Raw Tin Block");
+        translationBuilder.add(BlockInit.RAW_CASSITERITE_BLOCK, "Raw Cassiterite Block");
         translationBuilder.add(BlockInit.RAW_ZINC_BLOCK, "Raw Zinc Block");
 
         translationBuilder.add(ItemInit.RAW_BAUXITE, "Raw Bauxite");
-        translationBuilder.add(ItemInit.RAW_TIN, "Raw Tin");
+        translationBuilder.add(ItemInit.RAW_CASSITERITE, "Raw Cassiterite");
         translationBuilder.add(ItemInit.RAW_ZINC, "Raw Zinc");
 
         translationBuilder.add(ItemInit.ALUMINIUM_INGOT, "Aluminium Ingot");

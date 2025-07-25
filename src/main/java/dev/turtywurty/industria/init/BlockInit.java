@@ -96,7 +96,7 @@ public class BlockInit {
     public static final Block BAUXITE_ORE = registerWithItemCopy("bauxite_ore",
             Block::new, Blocks.IRON_ORE, settings -> settings);
 
-    public static final Block TIN_ORE = registerWithItemCopy("tin_ore",
+    public static final Block CASSITERITE_ORE = registerWithItemCopy("cassiterite_ore",
             Block::new, Blocks.IRON_ORE, settings -> settings);
 
     public static final Block ZINC_ORE = registerWithItemCopy("zinc_ore",
@@ -105,7 +105,7 @@ public class BlockInit {
     public static final Block DEEPSLATE_BAUXITE_ORE = registerWithItemCopy("deepslate_bauxite_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE, settings -> settings);
 
-    public static final Block DEEPSLATE_TIN_ORE = registerWithItemCopy("deepslate_tin_ore",
+    public static final Block DEEPSLATE_CASSITERITE_ORE = registerWithItemCopy("deepslate_cassiterite_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE, settings -> settings);
 
     public static final Block DEEPSLATE_ZINC_ORE = registerWithItemCopy("deepslate_zinc_ore",
@@ -123,7 +123,7 @@ public class BlockInit {
     public static final Block RAW_BAUXITE_BLOCK = registerWithItemCopy("raw_bauxite_block",
             Block::new, Blocks.RAW_IRON_BLOCK, settings -> settings);
 
-    public static final Block RAW_TIN_BLOCK = registerWithItemCopy("raw_tin_block",
+    public static final Block RAW_CASSITERITE_BLOCK = registerWithItemCopy("raw_cassiterite_block",
             Block::new, Blocks.RAW_IRON_BLOCK, settings -> settings);
 
     public static final Block RAW_ZINC_BLOCK = registerWithItemCopy("raw_zinc_block",

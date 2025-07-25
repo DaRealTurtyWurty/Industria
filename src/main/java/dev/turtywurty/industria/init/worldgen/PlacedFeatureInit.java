@@ -23,7 +23,7 @@ public class PlacedFeatureInit {
     public static final RegistryKey<PlacedFeature> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
 
     public static final RegistryKey<PlacedFeature> BAUXITE_ORE = registerKey("bauxite_ore");
-    public static final RegistryKey<PlacedFeature> TIN_ORE = registerKey("tin_ore");
+    public static final RegistryKey<PlacedFeature> CASSITERITE_ORE = registerKey("cassiterite_ore");
     public static final RegistryKey<PlacedFeature> ZINC_ORE = registerKey("zinc_ore");
 
     public static final RegistryKey<PlacedFeature> RUBBER_TREE = registerKey("rubber_tree");
@@ -39,7 +39,7 @@ public class PlacedFeatureInit {
                 Modifiers.modifiersCount(10,
                         HeightRangePlacementModifier.uniform(YOffset.fixed(32), YOffset.fixed(128))));
 
-        register(context, TIN_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.TIN_ORE),
+        register(context, CASSITERITE_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.CASSITERITE_ORE),
                 Modifiers.modifiersCount(7,
                         HeightRangePlacementModifier.uniform(YOffset.fixed(-16), YOffset.fixed(32))));
 

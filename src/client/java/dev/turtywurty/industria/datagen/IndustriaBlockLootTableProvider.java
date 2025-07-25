@@ -48,10 +48,10 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.HEAT_PIPE);
 
         oreDrops(BlockInit.BAUXITE_ORE, ItemInit.RAW_BAUXITE);
-        oreDrops(BlockInit.TIN_ORE, ItemInit.RAW_TIN);
+        oreDrops(BlockInit.CASSITERITE_ORE, ItemInit.RAW_CASSITERITE);
         oreDrops(BlockInit.ZINC_ORE, ItemInit.RAW_ZINC);
         oreDrops(BlockInit.DEEPSLATE_BAUXITE_ORE, ItemInit.RAW_BAUXITE);
-        oreDrops(BlockInit.DEEPSLATE_TIN_ORE, ItemInit.RAW_TIN);
+        oreDrops(BlockInit.DEEPSLATE_CASSITERITE_ORE, ItemInit.RAW_CASSITERITE);
         oreDrops(BlockInit.DEEPSLATE_ZINC_ORE, ItemInit.RAW_ZINC);
 
         addDrop(BlockInit.ALUMINIUM_BLOCK);
@@ -59,7 +59,7 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.ZINC_BLOCK);
 
         addDrop(BlockInit.RAW_BAUXITE_BLOCK);
-        addDrop(BlockInit.RAW_TIN_BLOCK);
+        addDrop(BlockInit.RAW_CASSITERITE_BLOCK);
         addDrop(BlockInit.RAW_ZINC_BLOCK);
 
         addDrop(BlockInit.MIXER);

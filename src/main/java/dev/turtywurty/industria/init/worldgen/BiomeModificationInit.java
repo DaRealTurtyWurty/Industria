@@ -17,7 +17,7 @@ public class BiomeModificationInit {
 
         BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                 GenerationStep.Feature.UNDERGROUND_ORES,
-                PlacedFeatureInit.TIN_ORE);
+                PlacedFeatureInit.CASSITERITE_ORE);
 
         BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                 GenerationStep.Feature.UNDERGROUND_ORES,

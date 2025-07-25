@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_raw_cassiterite": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:raw_cassiterite"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "minecraft:tin_ingot_from_smelting_raw_cassiterite"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_raw_cassiterite"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:tin_ingot_from_smelting_raw_cassiterite"
+    ]
+  }
+}

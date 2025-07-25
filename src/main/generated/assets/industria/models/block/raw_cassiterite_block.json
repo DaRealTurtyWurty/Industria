@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "industria:block/raw_tin_block"
+    "all": "industria:block/raw_cassiterite_block"
   }
 }

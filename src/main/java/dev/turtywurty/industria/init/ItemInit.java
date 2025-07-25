@@ -34,7 +34,7 @@ public class ItemInit {
     public static final Item ZINC_NUGGET = register("zinc_nugget");
 
     public static final Item RAW_BAUXITE = register("raw_bauxite");
-    public static final Item RAW_TIN = register("raw_tin");
+    public static final Item RAW_CASSITERITE = register("raw_cassiterite");
     public static final Item RAW_ZINC = register("raw_zinc");
 
     public static final Item SODIUM_HYDROXIDE = register("sodium_hydroxide");

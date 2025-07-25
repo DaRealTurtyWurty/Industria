@@ -28,7 +28,7 @@ public class ConfiguredFeatureInit {
     public static final RegistryKey<ConfiguredFeature<?, ?>> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
 
     public static final RegistryKey<ConfiguredFeature<?, ?>> BAUXITE_ORE = registerKey("bauxite_ore");
-    public static final RegistryKey<ConfiguredFeature<?, ?>> TIN_ORE = registerKey("tin_ore");
+    public static final RegistryKey<ConfiguredFeature<?, ?>> CASSITERITE_ORE = registerKey("cassiterite_ore");
     public static final RegistryKey<ConfiguredFeature<?, ?>> ZINC_ORE = registerKey("zinc_ore");
 
     public static final RegistryKey<ConfiguredFeature<?, ?>> RUBBER_TREE = registerKey("rubber_tree");
@@ -52,15 +52,15 @@ public class ConfiguredFeatureInit {
                 OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_BAUXITE_ORE.getDefaultState()));
 
         List<OreFeatureConfig.Target> tinTargets = List.of(
-                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.TIN_ORE.getDefaultState()),
-                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_TIN_ORE.getDefaultState()));
+                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.CASSITERITE_ORE.getDefaultState()),
+                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_CASSITERITE_ORE.getDefaultState()));
 
         List<OreFeatureConfig.Target> zincTargets = List.of(
                 OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.ZINC_ORE.getDefaultState()),
                 OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_ZINC_ORE.getDefaultState()));
 
         register(context, BAUXITE_ORE, Feature.ORE, new OreFeatureConfig(bauxiteTargets, 8, 0.25f));
-        register(context, TIN_ORE, Feature.ORE, new OreFeatureConfig(tinTargets, 14));
+        register(context, CASSITERITE_ORE, Feature.ORE, new OreFeatureConfig(tinTargets, 14));
         register(context, ZINC_ORE, Feature.SCATTERED_ORE, new OreFeatureConfig(zincTargets, 10));
 
         register(context, RUBBER_TREE, Feature.TREE,

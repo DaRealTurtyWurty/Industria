@@ -63,10 +63,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.BAUXITE_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.CASSITERITE_ORE);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ZINC_ORE);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_BAUXITE_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_TIN_ORE);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_CASSITERITE_ORE);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_ZINC_ORE);
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ALUMINIUM_BLOCK);
@@ -74,7 +74,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ZINC_BLOCK);
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_BAUXITE_BLOCK);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_TIN_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_CASSITERITE_BLOCK);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_ZINC_BLOCK);
     }
 
@@ -240,7 +240,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ItemInit.TIN_NUGGET, Models.GENERATED);
         itemModelGenerator.register(ItemInit.ZINC_NUGGET, Models.GENERATED);
         itemModelGenerator.register(ItemInit.RAW_BAUXITE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.RAW_TIN, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_CASSITERITE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.RAW_ZINC, Models.GENERATED);
         itemModelGenerator.register(ItemInit.SODIUM_HYDROXIDE, Models.GENERATED);
         itemModelGenerator.register(ItemInit.SODIUM_ALUMINATE, Models.GENERATED);

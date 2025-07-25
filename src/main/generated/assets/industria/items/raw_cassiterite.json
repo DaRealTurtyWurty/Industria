@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "industria:block/raw_tin_block"
+    "model": "industria:item/raw_cassiterite"
   }
 }

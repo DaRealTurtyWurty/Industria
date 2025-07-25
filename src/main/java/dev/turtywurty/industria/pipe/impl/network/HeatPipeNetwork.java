@@ -97,8 +97,6 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     public void tick(World world) {
         super.tick(world);
 
-        Map<HeatStorage, Double> heatChanges = new HashMap<>();
-
         // Conduct heat between adjacent pipes only once per pair
         for (BlockPos pipePos : this.pipes) {
             HeatStorage pipeStorage = getStorage(pipePos);
@@ -124,6 +122,7 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
                 }
             }
         }
+
         // Ambient dissipation
         for (HeatStorage pipeStorage : this.pipeStorages.values()) {
             double loss = pipeStorage.getAmount() * PIPE_DISSIPATION;

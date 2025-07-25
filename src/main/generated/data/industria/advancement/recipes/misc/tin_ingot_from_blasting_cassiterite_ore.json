@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_raw_tin_block": {
+    "has_cassiterite_ore": {
       "conditions": {
         "items": [
           {
-            "items": "industria:raw_tin_block"
+            "items": "industria:cassiterite_ore"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:raw_tin"
+        "recipe": "minecraft:tin_ingot_from_blasting_cassiterite_ore"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_raw_tin_block"
+      "has_cassiterite_ore"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:raw_tin"
+      "minecraft:tin_ingot_from_blasting_cassiterite_ore"
     ]
   }
 }
