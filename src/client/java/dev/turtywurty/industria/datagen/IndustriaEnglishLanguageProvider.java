@@ -1,5 +1,8 @@
 package dev.turtywurty.industria.datagen;
 
+import dev.turtywurty.fabricslurryapi.api.Slurry;
+import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.fabricslurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
@@ -152,6 +155,15 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(ItemInit.ROTARY_KILN, "Rotary Kiln");
         translationBuilder.add(ItemInit.CRYOLITE, "Cryolite");
         translationBuilder.add(ItemInit.CARBON_ROD, "Carbon Rod");
+
+        translationBuilder.add(BlockInit.SHAKING_TABLE, "Shaking Table");
+        addText(translationBuilder, ShakingTableBlockEntity.TITLE, "Shaking Table");
+
+        translationBuilder.add(ItemInit.CRUSHED_CASSITERITE, "Crushed Cassiterite");
+        translationBuilder.add(ItemInit.CASSITERITE_CONCENTRATE, "Cassiterite Concentrate");
+
+        addSlurry(translationBuilder, SlurryInit.BAUXITE_SLURRY, "Bauxite Slurry");
+        addSlurry(translationBuilder, SlurryInit.CLAY_SLURRY, "Clay Slurry");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {
@@ -170,5 +182,14 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         RegistryEntryLookup<DamageType> lookup = regLookup.getOrThrow(RegistryKeys.DAMAGE_TYPE);
         DamageType damageType = lookup.getOrThrow(key).value();
         translationBuilder.add("death.attack." + damageType.msgId(), value);
+    }
+
+    private static void addSlurry(TranslationBuilder translationBuilder, Slurry slurry, String value) {
+        Text name = SlurryVariantAttributes.getName(SlurryVariant.of(slurry));
+        if (name.getContent() instanceof TranslatableTextContent translatableTextContent) {
+            translationBuilder.add(translatableTextContent.getKey(), value);
+        } else {
+            throw new IllegalArgumentException("Slurry name must be translatable! " + name);
+        }
     }
 }

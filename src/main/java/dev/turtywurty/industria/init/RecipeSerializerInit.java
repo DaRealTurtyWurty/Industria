@@ -35,6 +35,9 @@ public class RecipeSerializerInit {
     public static final RecipeSerializer<ElectrolyzerRecipe> ELECTROLYZER =
             register("electrolyzer", ElectrolyzerRecipe.Serializer.INSTANCE);
 
+    public static final RecipeSerializer<ShakingTableRecipe> SHAKING_TABLE =
+            register("shaking_table", ShakingTableRecipe.Serializer.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
         return Registry.register(Registries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }

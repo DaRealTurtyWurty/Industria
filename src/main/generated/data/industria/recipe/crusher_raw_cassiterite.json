@@ -1,0 +1,17 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "ingredients": "industria:raw_cassiterite"
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 2,
+    "item": "industria:crushed_cassiterite"
+  },
+  "output_b": {
+    "chance": 0.3,
+    "count": 1,
+    "item": "industria:crushed_cassiterite"
+  },
+  "process_time": 100
+}

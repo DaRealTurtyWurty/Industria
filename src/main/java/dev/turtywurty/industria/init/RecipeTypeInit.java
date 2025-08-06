@@ -35,6 +35,9 @@ public class RecipeTypeInit {
     public static final RecipeType<ElectrolyzerRecipe> ELECTROLYZER =
             register("electrolyzer", ElectrolyzerRecipe.Type.INSTANCE);
 
+    public static final RecipeType<ShakingTableRecipe> SHAKING_TABLE =
+            register("shaking_table", ShakingTableRecipe.Type.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeType<T> register(String name, RecipeType<T> type) {
         return Registry.register(Registries.RECIPE_TYPE, Industria.id(name), type);
     }

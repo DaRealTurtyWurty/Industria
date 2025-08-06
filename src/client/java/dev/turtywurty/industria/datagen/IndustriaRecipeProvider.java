@@ -257,6 +257,18 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new FluidStack(FluidVariant.of(FluidInit.MOLTEN_ALUMINIUM.still()), FluidConstants.BUCKET * 2),
                         new GasStack(GasInit.CARBON_DIOXIDE, FluidConstants.INGOT),
                         2_000, 10_000, 1_000);
+
+                offerCrusher(exporter, RecipeCategory.MISC,
+                        new IndustriaIngredient(1, ItemInit.RAW_CASSITERITE),
+                        new OutputItemStack(ItemInit.CRUSHED_CASSITERITE, 2, 1),
+                        new OutputItemStack(ItemInit.CRUSHED_CASSITERITE, 1, (3 / 10F)),
+                        100, "raw_cassiterite");
+
+                offerShakingTableRecipe(exporter,
+                        new IndustriaIngredient(1, ItemInit.CRUSHED_CASSITERITE),
+                        new OutputItemStack(ItemInit.CASSITERITE_CONCENTRATE, 1, 1),
+                        new SlurryStack(SlurryVariant.of(SlurryInit.CLAY_SLURRY), FluidConstants.BUCKET / 2),
+                        200, 4, RecipeCategory.MISC);
             }
         };
     }
@@ -301,6 +313,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                                                 int processTime, int energyCost, int temperature) {
         new ElectrolyzerRecipeBuilder(input, anode, cathode, electrolyteItem, electrolyteFluid, outputFluid, outputGas, processTime, energyCost, temperature)
                 .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("electrolyzer_" + getRecipeName(outputFluid.variant().getFluid()))));
+    }
+
+    private static void offerShakingTableRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int frequency, RecipeCategory category) {
+        new ShakingTableRecipeBuilder(input, output, outputSlurry, processTime, frequency, category)
+                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("shaking_table_" + RecipeGenerator.getRecipeName(output.item()))));
     }
 
     public static String getRecipeName(Fluid fluid) {

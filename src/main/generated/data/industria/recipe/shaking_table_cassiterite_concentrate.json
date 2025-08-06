@@ -1,0 +1,19 @@
+{
+  "type": "industria:shaking_table",
+  "frequency": 4,
+  "input": {
+    "ingredients": "industria:crushed_cassiterite"
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:cassiterite_concentrate"
+  },
+  "output_slurry": {
+    "amount": 40500,
+    "variant": {
+      "slurry": "industria:clay_slurry"
+    }
+  },
+  "process_time": 200
+}

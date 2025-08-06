@@ -55,6 +55,11 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true)
                     .shapes(ElectrolyzerBlock.VOXEL_SHAPE));
 
+    public static final MultiblockType<ShakingTableBlockEntity> SHAKING_TABLE = register("shaking_table",
+            new MultiblockType.Builder<ShakingTableBlockEntity>(29) // 5x3x2
+                    .setHasDirectionProperty(true)
+                    .shapes(ShakingTableBlock.VOXEL_SHAPE));
+
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }

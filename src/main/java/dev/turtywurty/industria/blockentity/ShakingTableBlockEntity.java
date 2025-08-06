@@ -31,9 +31,9 @@ import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
-import dev.turtywurty.industria.recipe.MixerRecipe;
-import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
-import dev.turtywurty.industria.screenhandler.MixerScreenHandler;
+import dev.turtywurty.industria.recipe.ShakingTableRecipe;
+import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
+import dev.turtywurty.industria.screenhandler.ShakingTableScreenHandler;
 import dev.turtywurty.industria.util.TransferUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -46,8 +46,10 @@ import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -62,60 +64,30 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-// Leaving this here as an example, just in case I decide to make this system in the future
-// public TickBuilder createTickBuilder() {
-//        return TickBuilder.builder()
-//                .progress(this.progress)
-//                .maxProgress(this.maxProgress)
-//                .currentRecipeId(this.currentRecipeId)
-//                .validateWorld(false)
-//                .fluidInputThroughBucket(getBucketInputInventory(), getInputFluidTank())
-//                .fluidOutputThroughBucket(getBucketOutputInventory(), getOutputFluidTank())
-//                .tryClearItemBuffer(this.outputItemStack, getOutputInventory())
-//                .tryClearFluidBuffer(this.outputSlurryStack, getOutputFluidTank())
-//                .checkForRecipe(RecipeTypeInit.MIXER)
-//                .onComplete(new OnCompleteBuilder()
-//                        .checkEnergy(10)
-//                        .extractEnergy(10)
-//                        .craftRecipe()
-//                        .insertOutput()
-//                        .resetProgress()
-//                        .build())
-//                .onProgress(new OnProgressBuilder()
-//                        .checkEnergy(10)
-//                        .extractEnergy(10)
-//                        .incrementProgress()
-//                        .build());
-//    }
-public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("mixer");
+public class ShakingTableBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+    public static final Text TITLE = Industria.containerTitle("shaking_table");
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
-    private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
-
-    private int temperature = 175;
-    private int progress, maxProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
-    private ItemStack outputItemStack = ItemStack.EMPTY;
-    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
+    private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
-    public float stirringRotation = 0.0F;
-    public final List<Vec3d> mixingItemPositions = DefaultedList.ofSize(6, new Vec3d(0, 1, 0));
+    private int progress, maxProgress;
+
+    private RegistryKey<Recipe<?>> currentRecipeId;
+    private int recipeFrequency;
+    private ItemStack outputItemStack = ItemStack.EMPTY;
+    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
@@ -141,11 +113,13 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         }
     };
 
-    public MixerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockInit.MIXER, BlockEntityTypeInit.MIXER, pos, state);
+    private final Box shakeBox;
 
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 6), Direction.EAST);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.WEST);
+    public ShakingTableBlockEntity(BlockPos pos, BlockState state) {
+        super(BlockInit.SHAKING_TABLE, BlockEntityTypeInit.SHAKING_TABLE, pos, state);
+
+        this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
+        this.wrappedInventoryStorage.addExtractOnlyInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createFluidPredicate(() -> {
                     SyncingFluidStorage inputFluidTank = getInputFluidTank();
@@ -153,29 +127,81 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 })), Direction.NORTH);
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().variant)), Direction.SOUTH);
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10, variant -> variant.isOf(Fluids.WATER)), Direction.UP);
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 10_000, 0));
+        this.wrappedSlurryStorage.addStorage(new OutputSlurryStorage(this, FluidConstants.BUCKET * 10), Direction.DOWN);
 
-        this.wrappedFluidStorage.addStorage(
-                new InputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.UP);
+        this.shakeBox = createShakeBox();
+    }
 
-        this.wrappedSlurryStorage.addStorage(
-                new OutputSlurryStorage(this, FluidConstants.BUCKET * 10), Direction.DOWN);
+    public Box createShakeBox() {
+        Vec3d topCenter = this.pos.toBottomCenterPos().add(0, 1, 0);
+        float x1 = -18 / 16f;
+        float y1 = 4 / 16f;
+        float z1 = -19 / 16f;
 
-        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
+        float x2 = 18 / 16f;
+        float y2 = y1 + 7 / 16f;
+        float z2 = 35 / 16f;
+
+        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
+
+        double dx1, dz1, dx2, dz2;
+        switch (facing) {
+            case NORTH:
+                dx1 = x1;
+                dz1 = z2;
+                dx2 = x2;
+                dz2 = z1;
+                break;
+            case SOUTH:
+                dx1 = x1;
+                dz1 = -z1;
+                dx2 = x2;
+                dz2 = -z2;
+                break;
+            case WEST:
+                dx1 = z1;
+                dz1 = x1;
+                dx2 = z2;
+                dz2 = x2;
+                break;
+            case EAST:
+            default:
+                dx1 = -z2;
+                dz1 = x1;
+                dx2 = -z1;
+                dz2 = x2;
+                break;
+        }
+
+        return new Box(
+                topCenter.getX() + dx1,
+                topCenter.getY() + y1,
+                topCenter.getZ() + dz1,
+                topCenter.getX() + dx2,
+                topCenter.getY() + y2,
+                topCenter.getZ() + dz2
+        );
+    }
+
+    @Override
+    public Block getBlock() {
+        return this.blockRef;
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        SyncingSimpleInventory inputInventory = getInputInventory();
-        SyncingSimpleInventory outputInventory = getOutputInventory();
-        SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
-        SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
-
-        SyncingFluidStorage inputFluidTank = getInputFluidTank();
-        SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
-
-        SyncingEnergyStorage energy = getEnergyStorage();
-
-        return List.of(inputInventory, outputInventory, bucketInputInventory, bucketOutputInventory, inputFluidTank, outputSlurryTank, energy);
+        SyncableStorage inventoryStorage = getInputInventory();
+        SyncableStorage outputInventoryStorage = getOutputInventory();
+        SyncableStorage bucketInputInventory = getBucketInputInventory();
+        SyncableStorage bucketOutputInventory = getBucketOutputInventory();
+        SyncableStorage inputFluidTank = getInputFluidTank();
+        SyncableStorage outputSlurryTank = getOutputSlurryTank();
+        SyncableStorage energyStorage = getEnergyStorage();
+        return List.of(inventoryStorage, outputInventoryStorage, bucketInputInventory, bucketOutputInventory,
+                inputFluidTank, outputSlurryTank,
+                energyStorage);
     }
 
     @Override
@@ -234,24 +260,29 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
-            if (outputSlurryTank.canInsert(this.outputSlurryStack)) {
-                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
-                outputSlurryTank.variant = this.outputSlurryStack.variant();
-                outputSlurryTank.amount += inserted;
-                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
-                update();
-            }
-
-            return;
+//            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
+//            if (Objects.equals(outputSlurryTank.variant, this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.amount >= 0) {
+//                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
+//                outputSlurryTank.variant = this.outputSlurryStack.variant();
+//                outputSlurryTank.amount += inserted;
+//                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
+//                update();
+//            }
+//
+//            return;
+            this.outputSlurryStack = this.outputSlurryStack.withAmount(0); // TODO: Remove after slurry pipes are fixed
         }
 
-        MixerRecipeInput recipeInput = createRecipeInput();
+        ShakingTableRecipeInput recipeInput = createRecipeInput();
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<MixerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
-            if (recipeEntry.isPresent()) {
-                this.currentRecipeId = recipeEntry.get().id();
-                this.maxProgress = recipeEntry.get().value().processTime();
+            Optional<RecipeEntry<ShakingTableRecipe>> recipeEntryOpt = getCurrentRecipe(recipeInput);
+            if (recipeEntryOpt.isPresent()) {
+                RecipeEntry<ShakingTableRecipe> recipeEntry = recipeEntryOpt.get();
+                this.currentRecipeId = recipeEntry.id();
+
+                ShakingTableRecipe recipe = recipeEntry.value();
+                this.recipeFrequency = recipe.frequency();
+                this.maxProgress = recipe.processTime();
                 this.progress = 0;
                 update();
             }
@@ -259,23 +290,26 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             return;
         }
 
-        Optional<RecipeEntry<MixerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+        Optional<RecipeEntry<ShakingTableRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
+            this.recipeFrequency = 0;
             this.maxProgress = 0;
             this.progress = 0;
             update();
             return;
         }
 
-        MixerRecipe recipe = recipeEntry.get().value();
+        ShakingTableRecipe recipe = recipeEntry.get().value();
+        this.recipeFrequency = recipe.frequency();
         if (this.progress >= this.maxProgress) {
-            if (hasEnergy()) {
+            if (hasEnergy(recipe)) {
                 extractEnergy(recipe);
+                getInputInventory().getStackInSlot(0).decrement(recipe.input().stackData().count());
 
                 ItemStack output = recipe.craft(recipeInput, this.world.getRegistryManager());
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                inputFluidTank.amount -= recipe.inputFluid().amount();
+                inputFluidTank.amount -= FluidConstants.BUCKET * 2;
 
                 SyncingSimpleInventory outputInventory = getOutputInventory();
                 SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
@@ -303,12 +337,47 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 update();
             }
         } else {
-            if (hasEnergy()) {
+            if (hasEnergy(recipe)) {
                 this.progress++;
                 extractEnergy(recipe);
                 update();
             }
         }
+
+        if (this.progress < this.maxProgress) {
+            float shakesPerTick = this.recipeFrequency / 20f; // Convert frequency to shakes per tick
+            int sign = (((this.progress & 1) == 0) ? 1 : -1); // Alternate shake direction every tick
+            float amountToShake = shakesPerTick * sign;
+
+            Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
+            Vec3d shakeDirection = facing.getAxis() == Direction.Axis.X
+                    ? new Vec3d(amountToShake, 0, 0)
+                    : new Vec3d(0, 0, amountToShake);
+
+            for (LivingEntity livingEntity : this.world.getEntitiesByClass(LivingEntity.class, this.shakeBox, entity -> true)) {
+                livingEntity.addVelocity(shakeDirection);
+                livingEntity.velocityModified = true;
+            }
+        }
+    }
+
+    private Optional<RecipeEntry<ShakingTableRecipe>> getCurrentRecipe(ShakingTableRecipeInput recipeInput) {
+        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+            return Optional.empty();
+
+        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.SHAKING_TABLE, recipeInput, this.world);
+    }
+
+    private ShakingTableRecipeInput createRecipeInput() {
+        return new ShakingTableRecipeInput(getInputInventory(), getInputFluidTank().amount);
+    }
+
+    private boolean hasEnergy(ShakingTableRecipe recipe) {
+        return getEnergyStorage().amount >= recipe.frequency() * 50L;
+    }
+
+    private void extractEnergy(ShakingTableRecipe recipe) {
+        getEnergyStorage().amount -= recipe.frequency() * 50L;
     }
 
     @Override
@@ -317,13 +386,15 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
         nbt.putInt("Progress", this.progress);
         nbt.putInt("MaxProgress", this.maxProgress);
-        nbt.putInt("Temperature", this.temperature);
+
         if (this.currentRecipeId != null) {
             Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
                     .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
                     .result();
             result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
         }
+
+        nbt.putInt("RecipeFrequency", this.recipeFrequency);
 
         nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
         nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
@@ -355,13 +426,13 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             this.maxProgress = nbt.getInt("MaxProgress", 0);
         }
 
-        if (nbt.contains("Temperature")) {
-            this.temperature = nbt.getInt("Temperature", 0);
-        }
-
         if (nbt.contains("CurrentRecipe")) {
             this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
                     .orElse(null);
+        }
+
+        if (nbt.contains("RecipeFrequency")) {
+            this.recipeFrequency = nbt.getInt("RecipeFrequency", 0);
         }
 
         if (nbt.contains("Inventory"))
@@ -391,36 +462,64 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         }
     }
 
-    private boolean hasEnergy() {
-        return getEnergyStorage().amount >= 100;
+    @Override
+    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
+        return this.wrappedInventoryStorage;
     }
 
-    private void extractEnergy(MixerRecipe recipe) {
-        getEnergyStorage().amount -= recipe.maxTemp() - recipe.minTemp();
+    @Override
+    public MultiblockType<?> type() {
+        return MultiblockTypeInit.SHAKING_TABLE;
     }
 
-    public int getProgress() {
-        return this.progress;
+    @Override
+    public List<BlockPos> findPositions(@Nullable Direction facing) {
+        if (this.world == null)
+            return List.of();
+
+        List<BlockPos> positions = new ArrayList<>();
+        List<BlockPos> invalidPositions = new ArrayList<>();
+
+        boolean isNorthSouth = facing == Direction.NORTH || facing == Direction.SOUTH;
+        for (int z = (isNorthSouth ? -2 : -1); z <= (isNorthSouth ? 2 : 1); z++) {
+            for (int x = (isNorthSouth ? -1 : -2); x <= (isNorthSouth ? 1 : 2); x++) {
+                for (int y = 0; y <= 1; y++) {
+                    if (x == 0 && z == 0 && y == 0)
+                        continue;
+
+                    BlockPos pos = this.pos.add(x, y, z);
+                    if (this.world.getBlockState(pos).isReplaceable()) {
+                        positions.add(pos);
+                    } else {
+                        invalidPositions.add(pos);
+                    }
+                }
+            }
+        }
+
+        return invalidPositions.isEmpty() ? positions : List.of();
     }
 
-    public int getMaxProgress() {
-        return this.maxProgress;
+    @Override
+    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
+        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
+        if (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN) {
+            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ENERGY);
+            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.SLURRY);
+            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
+        }
+
+        if (offsetFromPrimary.getY() == 1 && direction == Direction.UP) {
+            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.FLUID);
+            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
+        }
+
+        return Multiblockable.toIOPortMap(transferTypes);
     }
 
-    public int getTemperature() {
-        return this.temperature;
-    }
-
-    private Optional<RecipeEntry<MixerRecipe>> getCurrentRecipe(MixerRecipeInput recipeInput) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
-            return Optional.empty();
-
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.MIXER, recipeInput, this.world);
-    }
-
-    private MixerRecipeInput createRecipeInput() {
-        SyncingFluidStorage inputFluidTank = getInputFluidTank();
-        return new MixerRecipeInput(getInputInventory(), new FluidStack(inputFluidTank.variant, inputFluidTank.amount), this.temperature);
+    @Override
+    public List<BlockPos> getMultiblockPositions() {
+        return this.multiblockPositions;
     }
 
     @Override
@@ -435,33 +534,19 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     @Override
     public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new MixerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
+        return new ShakingTableScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
     }
 
-    @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (offsetFromPrimary.getY() == 2 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.FLUID);
-        }
+    public int getRecipeFrequency() {
+        return this.recipeFrequency;
+    }
 
-        if (offsetFromPrimary.getY() == 0 && !Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.DOWN) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.SLURRY);
-        }
+    public int getProgress() {
+        return this.progress;
+    }
 
-        if (offsetFromPrimary.getX() != 0 && offsetFromPrimary.getZ() == 0 && offsetFromPrimary.getY() == 0) {
-            if (offsetFromPrimary.getX() == 1 && direction == Direction.EAST) {
-                transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-            } else if (offsetFromPrimary.getX() == -1 && direction == Direction.WEST) {
-                transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-            }
-        }
-
-        if (((offsetFromPrimary.getY() == 2 && direction == Direction.UP) || (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN)) && !Multiblockable.isCenterColumn(offsetFromPrimary)) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ENERGY);
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public int getMaxProgress() {
+        return this.maxProgress;
     }
 
     public SyncingSimpleInventory getInputInventory() {
@@ -506,55 +591,5 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     public EnergyStorage getEnergyProvider(Direction side) {
         return this.wrappedEnergyStorage.getStorage(side);
-    }
-
-    @Override
-    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return wrappedInventoryStorage;
-    }
-
-    @Override
-    public Block getBlock() {
-        return getCachedState().getBlock();
-    }
-
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.MIXER;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-        for (int x = -1; x < 2; x++) {
-            for (int z = -1; z < 2; z++) {
-                for (int y = 0; y < 3; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
-    }
-
-    public boolean isMixing() {
-        return this.progress > 0 && this.progress < this.maxProgress;
     }
 }

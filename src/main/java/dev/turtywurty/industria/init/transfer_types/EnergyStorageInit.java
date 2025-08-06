@@ -25,6 +25,7 @@ public class EnergyStorageInit {
         EnergyStorage.SIDED.registerForBlockEntity(OilPumpJackBlockEntity::getEnergyProvider, BlockEntityTypeInit.OIL_PUMP_JACK);
         EnergyStorage.SIDED.registerForBlockEntity(DrillBlockEntity::getEnergyProvider, BlockEntityTypeInit.DRILL);
         EnergyStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getEnergyProvider, BlockEntityTypeInit.DIGESTER);
+        EnergyStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getEnergyProvider, BlockEntityTypeInit.SHAKING_TABLE);
 
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {

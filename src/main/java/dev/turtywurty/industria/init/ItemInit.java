@@ -37,6 +37,9 @@ public class ItemInit {
     public static final Item RAW_CASSITERITE = register("raw_cassiterite");
     public static final Item RAW_ZINC = register("raw_zinc");
 
+    public static final Item CRUSHED_CASSITERITE = register("crushed_cassiterite");
+    public static final Item CASSITERITE_CONCENTRATE = register("cassiterite_concentrate");
+
     public static final Item SODIUM_HYDROXIDE = register("sodium_hydroxide");
     public static final Item SODIUM_ALUMINATE = register("sodium_aluminate");
 

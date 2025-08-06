@@ -18,6 +18,6 @@ public class ItemStorageInit {
         ItemStorage.SIDED.registerForBlockEntity(RotaryKilnControllerBlockEntity::getInventoryProvider, BlockEntityTypeInit.ROTARY_KILN_CONTROLLER);
         ItemStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getInventoryProvider, BlockEntityTypeInit.ELECTROLYZER);
         ItemStorage.SIDED.registerForBlockEntity(DrillBlockEntity::getInventoryProvider, BlockEntityTypeInit.DRILL);
-
+        ItemStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getInventoryProvider, BlockEntityTypeInit.SHAKING_TABLE);
     }
 }

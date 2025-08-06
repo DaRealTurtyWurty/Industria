@@ -30,6 +30,7 @@ public class EntityModelLayerInit {
         EntityModelLayerRegistry.registerModelLayer(CrystallizerModel.LAYER_LOCATION, CrystallizerModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(RotaryKilnModel.LAYER_LOCATION, RotaryKilnModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ElectrolyzerModel.LAYER_LOCATION, ElectrolyzerModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(ShakingTableModel.LAYER_LOCATION, ShakingTableModel::getTexturedModelData);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             var normalLayer = new EntityModelLayer(Industria.id("boat/" + woodSet.getName()), "main");

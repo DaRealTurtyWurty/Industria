@@ -117,6 +117,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(WellheadBlockEntity::new, BlockInit.WELLHEAD)
                     .build());
 
+    public static final BlockEntityType<ShakingTableBlockEntity> SHAKING_TABLE = register("shaking_table",
+            FabricBlockEntityTypeBuilder.create(ShakingTableBlockEntity::new, BlockInit.SHAKING_TABLE)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }
