@@ -23,6 +23,7 @@ public class FluidStorageInit {
         FluidStorage.SIDED.registerForBlockEntity(FluidTankBlockEntity::getFluidProvider, BlockEntityTypeInit.FLUID_TANK);
         FluidStorage.SIDED.registerForBlockEntity(WellheadBlockEntity::getFluidProvider, BlockEntityTypeInit.WELLHEAD);
         FluidStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getFluidProvider, BlockEntityTypeInit.SHAKING_TABLE);
+        FluidStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getFluidProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
 
         FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {

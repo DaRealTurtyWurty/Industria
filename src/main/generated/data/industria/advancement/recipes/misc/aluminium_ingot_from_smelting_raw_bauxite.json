@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:aluminium_ingot_from_smelting_raw_bauxite"
+        "recipe": "industria:aluminium_ingot_from_smelting_raw_bauxite"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:aluminium_ingot_from_smelting_raw_bauxite"
+      "industria:aluminium_ingot_from_smelting_raw_bauxite"
     ]
   }
 }

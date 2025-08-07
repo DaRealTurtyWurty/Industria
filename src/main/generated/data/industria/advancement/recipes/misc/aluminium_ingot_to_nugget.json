@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:aluminium_ingot_to_nugget"
+        "recipe": "industria:aluminium_ingot_to_nugget"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:aluminium_ingot_to_nugget"
+      "industria:aluminium_ingot_to_nugget"
     ]
   }
 }

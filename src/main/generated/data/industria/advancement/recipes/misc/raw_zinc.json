@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:raw_zinc"
+        "recipe": "industria:raw_zinc"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:raw_zinc"
+      "industria:raw_zinc"
     ]
   }
 }

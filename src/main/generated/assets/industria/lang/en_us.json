@@ -6,6 +6,7 @@
   "block.industria.bauxite_ore": "Bauxite Ore",
   "block.industria.cable": "Cable",
   "block.industria.cassiterite_ore": "Cassiterite Ore",
+  "block.industria.centrifugal_concentrator": "Centrifugal Concentrator",
   "block.industria.clarifier": "Clarifier",
   "block.industria.combustion_generator": "Combustion Generator",
   "block.industria.creative_battery": "Creative Battery",
@@ -71,6 +72,7 @@
   "block.minecraft.oak_sign": "Rubber Wall Sign",
   "container.industria.alloy_furnace": "Alloy Furnace",
   "container.industria.battery": "Battery",
+  "container.industria.centrifugal_concentrator": "Centrifugal Concentrator",
   "container.industria.clarifier": "Clarifier",
   "container.industria.combustion_generator": "Combustion Generator",
   "container.industria.crusher": "Crusher",
@@ -132,5 +134,7 @@
   "item.industria.zinc_ingot": "Zinc Ingot",
   "item.industria.zinc_nugget": "Zinc Nugget",
   "itemGroup.industria.main": "Industria",
-  "screen.industria.seismic_scanner": "Seismic Scanner"
+  "screen.industria.seismic_scanner": "Seismic Scanner",
+  "slurry.industria.bauxite_slurry": "Bauxite Slurry",
+  "slurry.industria.clay_slurry": "Clay Slurry"
 }

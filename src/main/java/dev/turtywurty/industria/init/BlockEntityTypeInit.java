@@ -121,6 +121,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(ShakingTableBlockEntity::new, BlockInit.SHAKING_TABLE)
                     .build());
 
+    public static final BlockEntityType<CentrifugalConcentratorBlockEntity> CENTRIFUGAL_CONCENTRATOR = register("centrifugal_concentrator",
+            FabricBlockEntityTypeBuilder.create(CentrifugalConcentratorBlockEntity::new, BlockInit.CENTRIFUGAL_CONCENTRATOR)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

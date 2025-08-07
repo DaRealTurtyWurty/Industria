@@ -162,6 +162,9 @@ public class BlockInit {
     public static final ShakingTableBlock SHAKING_TABLE = registerWithItemCopy("shaking_table",
             ShakingTableBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static final CentrifugalConcentratorBlock CENTRIFUGAL_CONCENTRATOR = registerWithItemCopy("centrifugal_concentrator",
+            CentrifugalConcentratorBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

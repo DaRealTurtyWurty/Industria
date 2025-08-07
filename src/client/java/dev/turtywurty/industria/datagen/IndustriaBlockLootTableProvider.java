@@ -70,5 +70,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootTableProvide
         addDrop(BlockInit.ROTARY_KILN, ItemInit.ROTARY_KILN);
         addDrop(BlockInit.FLUID_TANK);
         addDrop(BlockInit.SHAKING_TABLE);
+        addDrop(BlockInit.CENTRIFUGAL_CONCENTRATOR);
     }
 }

@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:tin_ingot"
+        "recipe": "industria:tin_ingot"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:tin_ingot"
+      "industria:tin_ingot"
     ]
   }
 }

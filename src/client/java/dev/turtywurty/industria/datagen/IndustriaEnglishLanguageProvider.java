@@ -164,6 +164,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
 
         addSlurry(translationBuilder, SlurryInit.BAUXITE_SLURRY, "Bauxite Slurry");
         addSlurry(translationBuilder, SlurryInit.CLAY_SLURRY, "Clay Slurry");
+
+        translationBuilder.add(BlockInit.CENTRIFUGAL_CONCENTRATOR, "Centrifugal Concentrator");
+        addText(translationBuilder, CentrifugalConcentratorBlockEntity.TITLE, "Centrifugal Concentrator");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Text text, String value) {

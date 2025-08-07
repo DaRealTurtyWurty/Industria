@@ -16,6 +16,7 @@ public class RecipeBookCategoryInit {
     public static final RecipeBookCategory ROTARY_KILN = register("rotary_kiln");
     public static final RecipeBookCategory ELECTROLYZER = register("electrolyzer");
     public static final RecipeBookCategory SHAKING_TABLE = register("shaking_table");
+    public static final RecipeBookCategory CENTRIFUGAL_CONCENTRATOR = register("centrifugal_concentrator");
 
     public static RecipeBookCategory register(String name) {
         return Registry.register(Registries.RECIPE_BOOK_CATEGORY, Industria.id(name), new RecipeBookCategory());

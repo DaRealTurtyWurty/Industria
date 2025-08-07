@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:raw_cassiterite_block"
+        "recipe": "industria:raw_cassiterite_block"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:raw_cassiterite_block"
+      "industria:raw_cassiterite_block"
     ]
   }
 }

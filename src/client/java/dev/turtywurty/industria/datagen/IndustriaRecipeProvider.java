@@ -269,6 +269,12 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new OutputItemStack(ItemInit.CASSITERITE_CONCENTRATE, 1, 1),
                         new SlurryStack(SlurryVariant.of(SlurryInit.CLAY_SLURRY), FluidConstants.BUCKET / 2),
                         200, 4, RecipeCategory.MISC);
+
+                offerCentrifugalConcentratorRecipe(exporter,
+                        new IndustriaIngredient(1, ItemInit.CASSITERITE_CONCENTRATE),
+                        new OutputItemStack(ItemInit.CASSITERITE_CONCENTRATE, 1, 1),
+                        new SlurryStack(SlurryVariant.of(SlurryInit.CLAY_SLURRY), FluidConstants.BUCKET / 4),
+                        200, 500, RecipeCategory.MISC);
             }
         };
     }
@@ -318,6 +324,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
     private static void offerShakingTableRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int frequency, RecipeCategory category) {
         new ShakingTableRecipeBuilder(input, output, outputSlurry, processTime, frequency, category)
                 .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("shaking_table_" + RecipeGenerator.getRecipeName(output.item()))));
+    }
+
+    private static void offerCentrifugalConcentratorRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int rpm, RecipeCategory category) {
+        new CentrifugalConcentratorRecipeBuilder(input, output, outputSlurry, processTime, rpm, category)
+                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("centrifugal_concentrator_" + RecipeGenerator.getRecipeName(output.item()))));
     }
 
     public static String getRecipeName(Fluid fluid) {

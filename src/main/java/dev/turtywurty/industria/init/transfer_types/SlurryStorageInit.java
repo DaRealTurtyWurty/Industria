@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
+import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
 import dev.turtywurty.industria.blockentity.DigesterBlockEntity;
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
 import dev.turtywurty.industria.blockentity.ShakingTableBlockEntity;
@@ -15,6 +16,7 @@ public class SlurryStorageInit {
         SlurryStorage.SIDED.registerForBlockEntity(MixerBlockEntity::getSlurryProvider, BlockEntityTypeInit.MIXER);
         SlurryStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getSlurryProvider, BlockEntityTypeInit.DIGESTER);
         SlurryStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getSlurryProvider, BlockEntityTypeInit.SHAKING_TABLE);
+        SlurryStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getSlurryProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
 
         SlurryStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {
