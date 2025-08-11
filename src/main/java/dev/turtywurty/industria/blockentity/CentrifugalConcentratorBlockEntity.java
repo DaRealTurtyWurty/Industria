@@ -114,6 +114,9 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         }
     };
 
+    // Render data
+    public float bowlRotation = 0.0f;
+
     public CentrifugalConcentratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CENTRIFUGAL_CONCENTRATOR, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, pos, state);
 
@@ -508,5 +511,17 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     public EnergyStorage getEnergyProvider(Direction side) {
         return this.wrappedEnergyStorage.getStorage(side);
+    }
+
+    public int getProgress() {
+        return this.progress;
+    }
+
+    public int getMaxProgress() {
+        return this.maxProgress;
+    }
+
+    public int getRecipeRPM() {
+        return this.recipeRPM;
     }
 }
