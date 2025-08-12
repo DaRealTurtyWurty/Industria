@@ -31,10 +31,6 @@ public class ShakingTableModel extends Model {
         this.modelParts = new ModelParts(main, table, waterChannels, motorConnection, supports, baseSupports, legsSupports, leg1, leg2, motor, motorLegs, springs);
     }
 
-    public ModelParts getModelParts() {
-        return modelParts;
-    }
-
     public static TexturedModelData getTexturedModelData() {
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
@@ -161,6 +157,10 @@ public class ShakingTableModel extends Model {
         motor.addChild("springs", ModelPartBuilder.create().uv(218, 236).cuboid(-4.0F, -20.0F, -24.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F))
                 .uv(209, 236).cuboid(2.0F, -20.0F, -24.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 19.0F, 32.0F));
         return TexturedModelData.of(modelData, 512, 512);
+    }
+
+    public ModelParts getModelParts() {
+        return modelParts;
     }
 
     public record ModelParts(

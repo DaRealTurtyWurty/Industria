@@ -32,7 +32,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputItemStack output, SlurryStack outputSlurry,
-                                            int processTime, int rpm) implements Recipe<CentrifugalConcentratorRecipeInput> {
+                                            int processTime,
+                                            int rpm) implements Recipe<CentrifugalConcentratorRecipeInput> {
     @Override
     public boolean matches(CentrifugalConcentratorRecipeInput input, World world) {
         return this.input.testForRecipe(input.recipeInventory().getStackInSlot(0)) &&
@@ -96,10 +97,6 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
 
     public static class Serializer implements RecipeSerializer<CentrifugalConcentratorRecipe> {
         public static final Serializer INSTANCE = new Serializer();
-
-        private Serializer() {
-        }
-
         private static final MapCodec<CentrifugalConcentratorRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IndustriaIngredient.CODEC.fieldOf("input").forGetter(CentrifugalConcentratorRecipe::input),
                 OutputItemStack.CODEC.fieldOf("output").forGetter(CentrifugalConcentratorRecipe::output),
@@ -107,7 +104,6 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
                 Codec.INT.fieldOf("process_time").forGetter(CentrifugalConcentratorRecipe::processTime),
                 Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipe::rpm)
         ).apply(instance, CentrifugalConcentratorRecipe::new));
-
         private static final PacketCodec<RegistryByteBuf, CentrifugalConcentratorRecipe> PACKET_CODEC =
                 PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, CentrifugalConcentratorRecipe::input,
                         OutputItemStack.PACKET_CODEC, CentrifugalConcentratorRecipe::output,
@@ -115,6 +111,9 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
                         PacketCodecs.INTEGER, CentrifugalConcentratorRecipe::processTime,
                         PacketCodecs.INTEGER, CentrifugalConcentratorRecipe::rpm,
                         CentrifugalConcentratorRecipe::new);
+
+        private Serializer() {
+        }
 
         @Override
         public MapCodec<CentrifugalConcentratorRecipe> codec() {
@@ -128,8 +127,8 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
     }
 
     public record CentrifugalConcentratorRecipeDisplay(IndustriaIngredient input, SlotDisplay craftingStation,
-                                            OutputItemStack output, SlurryStack outputSlurry,
-                                            int processTime, int rpm) implements RecipeDisplay {
+                                                       OutputItemStack output, SlurryStack outputSlurry,
+                                                       int processTime, int rpm) implements RecipeDisplay {
         public static final MapCodec<CentrifugalConcentratorRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IndustriaIngredient.CODEC.fieldOf("input").forGetter(CentrifugalConcentratorRecipeDisplay::input),
                 SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(CentrifugalConcentratorRecipeDisplay::craftingStation),

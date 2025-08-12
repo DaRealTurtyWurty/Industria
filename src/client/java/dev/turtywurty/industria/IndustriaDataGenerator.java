@@ -12,25 +12,25 @@ import net.minecraft.registry.RegistryBuilder;
 import net.minecraft.registry.RegistryKeys;
 
 public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
-	@Override
-	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
-		FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
-		pack.addProvider(IndustriaEnglishLanguageProvider::new);
-		pack.addProvider(IndustriaModelProvider::new);
-		pack.addProvider(IndustriaBlockLootTableProvider::new);
-		pack.addProvider(IndustriaRecipeProvider::new);
-		pack.addProvider(IndustriaBlockTagProvider::new);
-		pack.addProvider(IndustriaItemTagProvider::new);
-		pack.addProvider(IndustriaFluidTagProvider::new);
-		pack.addProvider(IndustriaEntityTypeTagProvider::new);
-		pack.addProvider(IndustriaWorldGenerator::new);
-		pack.addProvider(IndustriaDamageTypeGenerator::new);
-	}
+    @Override
+    public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
+        FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
+        pack.addProvider(IndustriaEnglishLanguageProvider::new);
+        pack.addProvider(IndustriaModelProvider::new);
+        pack.addProvider(IndustriaBlockLootTableProvider::new);
+        pack.addProvider(IndustriaRecipeProvider::new);
+        pack.addProvider(IndustriaBlockTagProvider::new);
+        pack.addProvider(IndustriaItemTagProvider::new);
+        pack.addProvider(IndustriaFluidTagProvider::new);
+        pack.addProvider(IndustriaEntityTypeTagProvider::new);
+        pack.addProvider(IndustriaWorldGenerator::new);
+        pack.addProvider(IndustriaDamageTypeGenerator::new);
+    }
 
-	@Override
-	public void buildRegistry(RegistryBuilder registryBuilder) {
-		registryBuilder.addRegistry(RegistryKeys.CONFIGURED_FEATURE, ConfiguredFeatureInit::bootstrap);
-		registryBuilder.addRegistry(RegistryKeys.PLACED_FEATURE, PlacedFeatureInit::bootstrap);
-		registryBuilder.addRegistry(RegistryKeys.DAMAGE_TYPE, DamageTypeInit::bootstrap);
-	}
+    @Override
+    public void buildRegistry(RegistryBuilder registryBuilder) {
+        registryBuilder.addRegistry(RegistryKeys.CONFIGURED_FEATURE, ConfiguredFeatureInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.PLACED_FEATURE, PlacedFeatureInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.DAMAGE_TYPE, DamageTypeInit::bootstrap);
+    }
 }

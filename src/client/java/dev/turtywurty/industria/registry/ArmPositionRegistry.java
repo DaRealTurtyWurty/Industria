@@ -26,10 +26,11 @@ public class ArmPositionRegistry {
         return armPositions;
     }
 
-    public record Entry(Predicate<ItemStack> predicate, DynamicArmPosition armPosition) {}
-
     @FunctionalInterface
     public interface DynamicArmPosition {
         void apply(BipedEntityRenderState bipedEntityRenderState, ModelPart leftArm, ModelPart rightArm);
+    }
+
+    public record Entry(Predicate<ItemStack> predicate, DynamicArmPosition armPosition) {
     }
 }

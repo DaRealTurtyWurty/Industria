@@ -38,8 +38,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class TransferType<S, V, A extends Number> {
-    private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
-
     public static final TransferType<Storage<ItemVariant>, ItemVariant, Long> ITEM =
             new TransferType<>("item", ItemStorage.SIDED, ItemStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> TransferUtils.findFirstVariant(storage, null)
@@ -48,7 +46,6 @@ public class TransferType<S, V, A extends Number> {
                     aDouble -> (long) Math.ceil(aDouble),
                     ItemVariant::isBlank,
                     Storage::supportsInsertion, Storage::supportsExtraction);
-
     public static final TransferType<Storage<FluidVariant>, FluidVariant, Long> FLUID =
             new TransferType<>("fluid", FluidStorage.SIDED, FluidStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> TransferUtils.findFirstVariant(storage, null)
@@ -57,7 +54,6 @@ public class TransferType<S, V, A extends Number> {
                     aDouble -> (long) Math.ceil(aDouble),
                     FluidVariant::isBlank,
                     Storage::supportsInsertion, Storage::supportsExtraction);
-
     public static final TransferType<EnergyStorage, Long, Long> ENERGY =
             new TransferType<>("energy", EnergyStorage.SIDED, EnergyStorage.ITEM,
                     (storage, value, maxAmount, transaction) -> storage.insert(maxAmount, transaction),
@@ -67,7 +63,6 @@ public class TransferType<S, V, A extends Number> {
                     aDouble -> (long) Math.ceil(aDouble),
                     value -> value <= 0,
                     EnergyStorage::supportsInsertion, EnergyStorage::supportsExtraction);
-
     public static final TransferType<HeatStorage, Double, Double> HEAT =
             new TransferType<>("heat", HeatStorage.SIDED, HeatStorage.ITEM,
                     (storage, value, maxAmount, transaction) -> storage.insert(value, transaction),
@@ -77,7 +72,6 @@ public class TransferType<S, V, A extends Number> {
                     Function.identity(),
                     value -> value <= 0,
                     HeatStorage::supportsInsertion, HeatStorage::supportsExtraction);
-
     public static final TransferType<Storage<SlurryVariant>, SlurryVariant, Long> SLURRY =
             new TransferType<>("slurry", SlurryStorage.SIDED, SlurryStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> TransferUtils.findFirstVariant(storage, null)
@@ -86,7 +80,6 @@ public class TransferType<S, V, A extends Number> {
                     aDouble -> (long) Math.ceil(aDouble),
                     SlurryVariant::isBlank,
                     Storage::supportsInsertion, Storage::supportsExtraction);
-
     public static final TransferType<Storage<GasVariant>, GasVariant, Long> GAS =
             new TransferType<>("gas", GasStorage.SIDED, GasStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> TransferUtils.findFirstVariant(storage, null)
@@ -95,24 +88,12 @@ public class TransferType<S, V, A extends Number> {
                     aDouble -> (long) Math.ceil(aDouble),
                     GasVariant::isBlank,
                     Storage::supportsInsertion, Storage::supportsExtraction);
+    private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
-
     public static final Codec<TransferType<?, ?, ?>> CODEC = Codec.STRING.xmap(TransferType::getByName, TransferType::getName);
     public static final PacketCodec<RegistryByteBuf, TransferType<?, ?, ?>> PACKET_CODEC =
             PacketCodec.tuple(PacketCodecs.STRING, TransferType::getName, TransferType::getByName);
-
-    public static List<TransferType<?, ?, ?>> getValues() {
-        return List.copyOf(VALUES);
-    }
-
-    public static TransferType<?, ?, ?> getByName(String name) {
-        return VALUES.stream()
-                .filter(transferType -> transferType.name.equals(name))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No TransferType found for name: " + name));
-    }
-
     private final String name;
     private final BlockApiLookup<S, @Nullable Direction> blockLookup;
     private final ItemApiLookup<S, ContainerItemContext> itemLookup;
@@ -125,7 +106,6 @@ public class TransferType<S, V, A extends Number> {
     private final Predicate<V> isBlank;
     private final Predicate<S> supportsInsert;
     private final Predicate<S> supportsExtract;
-
     public TransferType(@NotNull String name,
                         @NotNull BlockApiLookup<S, @Nullable Direction> blockLookup,
                         @NotNull ItemApiLookup<S, ContainerItemContext> itemLookup,
@@ -167,6 +147,17 @@ public class TransferType<S, V, A extends Number> {
         this.supportsExtract = supportsExtract;
 
         VALUES.add(this);
+    }
+
+    public static List<TransferType<?, ?, ?>> getValues() {
+        return List.copyOf(VALUES);
+    }
+
+    public static TransferType<?, ?, ?> getByName(String name) {
+        return VALUES.stream()
+                .filter(transferType -> transferType.name.equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No TransferType found for name: " + name));
     }
 
     public BlockApiLookup<S, @Nullable Direction> getBlockLookup() {
@@ -268,10 +259,10 @@ public class TransferType<S, V, A extends Number> {
     }
 
     public A getAmount(World world, BlockPos pos) {
-        try(Transaction transaction = Transaction.openOuter()) {
+        try (Transaction transaction = Transaction.openOuter()) {
             S storage = lookup(world, pos, null);
             V value = this.valueGetter.apply(storage);
-            if(this.isBlank.test(value))
+            if (this.isBlank.test(value))
                 return this.zeroAmount;
 
             return extract(storage, value, this.maxAmount, transaction);

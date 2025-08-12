@@ -122,20 +122,18 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
 
     public record RotaryKilnRecipeDisplay(SlotDisplay input, SlotDisplay craftingStation, SlotDisplay result,
                                           int requiredTemperature) implements RecipeDisplay {
-        private static final MapCodec<RotaryKilnRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                SlotDisplay.CODEC.fieldOf("input").forGetter(RotaryKilnRecipeDisplay::input),
-                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(RotaryKilnRecipeDisplay::craftingStation),
-                SlotDisplay.CODEC.fieldOf("result").forGetter(RotaryKilnRecipeDisplay::result),
-                Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipeDisplay::requiredTemperature)
-        ).apply(instance, RotaryKilnRecipeDisplay::new));
-
         public static final PacketCodec<RegistryByteBuf, RotaryKilnRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
                 SlotDisplay.PACKET_CODEC, RotaryKilnRecipeDisplay::input,
                 SlotDisplay.PACKET_CODEC, RotaryKilnRecipeDisplay::craftingStation,
                 SlotDisplay.PACKET_CODEC, RotaryKilnRecipeDisplay::result,
                 PacketCodecs.INTEGER, RotaryKilnRecipeDisplay::requiredTemperature,
                 RotaryKilnRecipeDisplay::new);
-
+        private static final MapCodec<RotaryKilnRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                SlotDisplay.CODEC.fieldOf("input").forGetter(RotaryKilnRecipeDisplay::input),
+                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(RotaryKilnRecipeDisplay::craftingStation),
+                SlotDisplay.CODEC.fieldOf("result").forGetter(RotaryKilnRecipeDisplay::result),
+                Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipeDisplay::requiredTemperature)
+        ).apply(instance, RotaryKilnRecipeDisplay::new));
         private static final Serializer<RotaryKilnRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
 
         @Override

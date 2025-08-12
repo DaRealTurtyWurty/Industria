@@ -14,10 +14,13 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 
 public class ScreenHandlerTypeInit {
-    public static final ScreenHandlerType<AlloyFurnaceScreenHandler> ALLOY_FURNACE =
+    public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
+        return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));
+    }    public static final ScreenHandlerType<AlloyFurnaceScreenHandler> ALLOY_FURNACE =
             register("alloy_furnace", AlloyFurnaceScreenHandler::new, BlockPosPayload.CODEC);
 
-    public static final ScreenHandlerType<ThermalGeneratorScreenHandler> THERMAL_GENERATOR =
+    public static void init() {
+    }    public static final ScreenHandlerType<ThermalGeneratorScreenHandler> THERMAL_GENERATOR =
             register("thermal_generator", ThermalGeneratorScreenHandler::new, BlockPosPayload.CODEC);
 
     public static final ScreenHandlerType<BatteryScreenHandler> BATTERY =
@@ -83,10 +86,7 @@ public class ScreenHandlerTypeInit {
     public static final ScreenHandlerType<CentrifugalConcentratorScreenHandler> CENTRIFUGAL_CONCENTRATOR =
             register("centrifugal_concentrator", CentrifugalConcentratorScreenHandler::new, BlockPosPayload.CODEC);
 
-    public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> register(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {
-        return Registry.register(Registries.SCREEN_HANDLER, Industria.id(name), new ExtendedScreenHandlerType<>(factory, codec));
-    }
 
-    public static void init() {
-    }
+
+
 }

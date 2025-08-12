@@ -47,5 +47,6 @@ public class FluidInit {
         return Registry.register(Registries.FLUID, Industria.id(name), fluid);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

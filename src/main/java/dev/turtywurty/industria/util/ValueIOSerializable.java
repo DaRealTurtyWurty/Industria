@@ -5,5 +5,6 @@ import net.minecraft.storage.WriteView;
 
 public interface ValueIOSerializable {
     void readData(ReadView view);
+
     void writeData(WriteView view);
 }

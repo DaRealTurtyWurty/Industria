@@ -56,22 +56,6 @@ public class WindTurbineBlock extends IndustriaBlock {
         }
     }
 
-    @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient) {
-            BlockPos blockEntityPos = pos;
-            if (state.get(PART) != 0) {
-                blockEntityPos = pos.down(state.get(PART));
-            }
-
-            if (world.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
-                player.openHandledScreen(windTurbine);
-            }
-        }
-
-        return ActionResult.SUCCESS;
-    }
-
     private static Map<Direction, VoxelShape> runShapeCalculation(VoxelShape shape) {
         Map<Direction, VoxelShape> shapes = new HashMap<>();
         for (final Direction direction : Direction.values()) {
@@ -108,6 +92,22 @@ public class WindTurbineBlock extends IndustriaBlock {
         shape = VoxelShapes.combine(shape, VoxelShapes.cuboid(0.4375, 3.625, 0, 0.5625, 3.75, 0.0625), BooleanBiFunction.OR);
 
         return shape.simplify();
+    }
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (!world.isClient) {
+            BlockPos blockEntityPos = pos;
+            if (state.get(PART) != 0) {
+                blockEntityPos = pos.down(state.get(PART));
+            }
+
+            if (world.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
+                player.openHandledScreen(windTurbine);
+            }
+        }
+
+        return ActionResult.SUCCESS;
     }
 
     @Override

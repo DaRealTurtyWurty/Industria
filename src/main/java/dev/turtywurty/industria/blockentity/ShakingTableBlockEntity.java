@@ -53,14 +53,10 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -84,14 +80,8 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
+    private final Box shakeBox;
     private int progress, maxProgress;
-
-    private RegistryKey<Recipe<?>> currentRecipeId;
-    private int recipeFrequency;
-    private ItemStack outputItemStack = ItemStack.EMPTY;
-    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
-
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -115,8 +105,10 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
             return 2;
         }
     };
-
-    private final Box shakeBox;
+    private RegistryKey<Recipe<?>> currentRecipeId;
+    private int recipeFrequency;
+    private ItemStack outputItemStack = ItemStack.EMPTY;
+    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     public ShakingTableBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.SHAKING_TABLE, BlockEntityTypeInit.SHAKING_TABLE, pos, state);

@@ -33,5 +33,6 @@ public class AttachmentTypeInit {
                                             PacketCodecs.registryEntry(RegistryKeys.FLUID)),
                                     AttachmentSyncPredicate.all()));
 
-    public static void init() {}
+    public static void init() {
+    }
 }

@@ -72,7 +72,7 @@ public class ElectrolyzerScreenHandler extends IndustriaScreenHandler<Electrolyz
     public float getProgressPercent() {
         float progress = getProgress();
         float maxProgress = getMaxProgress();
-        if(maxProgress == 0 || progress == 0) {
+        if (maxProgress == 0 || progress == 0) {
             return 0.0f;
         }
 

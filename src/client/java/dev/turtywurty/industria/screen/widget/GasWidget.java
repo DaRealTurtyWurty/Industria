@@ -37,6 +37,10 @@ public class GasWidget implements Drawable, Widget {
         this.posSupplier = posSupplier;
     }
 
+    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
+        return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
+    }
+
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Gas gas = this.gasTank.variant.getGas();
@@ -78,23 +82,23 @@ public class GasWidget implements Drawable, Widget {
     }
 
     @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    @Override
     public int getX() {
         return x;
     }
 
     @Override
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    @Override
     public int getY() {
         return y;
+    }
+
+    @Override
+    public void setY(int y) {
+        this.y = y;
     }
 
     @Override
@@ -113,10 +117,6 @@ public class GasWidget implements Drawable, Widget {
 
     @Override
     public void forEachChild(Consumer<ClickableWidget> consumer) {
-    }
-
-    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
-        return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
     }
 
     public static class Builder {

@@ -40,10 +40,11 @@ public class DrillHeadRegistry {
     public static void init() {
     }
 
-    public record DrillHeadClientData(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model> modelResolver,
-                                      boolean renderDynamicItem,
-                                      RenderFunction onRender,
-                                      Identifier textureLocation) {
+    public record DrillHeadClientData(
+            Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model> modelResolver,
+            boolean renderDynamicItem,
+            RenderFunction onRender,
+            Identifier textureLocation) {
         public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model> modelResolver,
                                                  boolean renderDynamicItem,
                                                  RenderFunction onRender,

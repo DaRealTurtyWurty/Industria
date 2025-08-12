@@ -13,18 +13,23 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
 
 public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<ClarifierBlockEntity> {
-    private final ClarifierModel model;
-    private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
-
     private static final GridPosition[] OUTPUT_ITEM_POSITIONS = new GridPosition[64];
 
     static {
         for (int i = 0; i < OUTPUT_ITEM_POSITIONS.length; i++) {
             OUTPUT_ITEM_POSITIONS[i] = getPosition(i, 14);
         }
+    }
+
+    private final ClarifierModel model;
+    private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
+
+    public ClarifierBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+        super(context);
+
+        this.model = new ClarifierModel(context.getLayerModelPart(ClarifierModel.LAYER_LOCATION));
     }
 
     private static GridPosition getPosition(int index, int width) {
@@ -41,12 +46,6 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         }
 
         return new GridPosition(x, y);
-    }
-
-    public ClarifierBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        super(context);
-
-        this.model = new ClarifierModel(context.getLayerModelPart(ClarifierModel.LAYER_LOCATION));
     }
 
     @Override
@@ -140,7 +139,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         long amount = fluidStorage.amount;
         float fluidProgress = (float) amount / (FluidConstants.BUCKET * 5);
         // fluidProgress = (float) (Math.sin(entity.getWorld().getTime() / 64.0) * 0.5 + 0.5);
-        float fluidHeight = -0.625f + (fluidProgress * 1 + 1.999f/16f);
+        float fluidHeight = -0.625f + (fluidProgress * 1 + 1.999f / 16f);
 
         float size = 1.25f;
         if (fluidHeight < 0f)

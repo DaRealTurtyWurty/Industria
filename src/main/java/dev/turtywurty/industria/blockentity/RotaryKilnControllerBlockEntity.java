@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.RotaryKilnBlock;
@@ -31,18 +30,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
@@ -75,6 +67,13 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
                 Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
         this.wrappedHeatStorage.addStorage(new InputHeatStorage(this, 2000, 2000));
+    }
+
+    public static ServerRecipeManager getRecipeManager(World world) {
+        if (world == null || world.isClient)
+            return null;
+
+        return !(world instanceof ServerWorld serverWorld) ? null : serverWorld.getRecipeManager();
     }
 
     @Override
@@ -361,13 +360,6 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             this.recipes.remove(inputRecipeEntry);
         }
-    }
-
-    public static ServerRecipeManager getRecipeManager(World world) {
-        if (world == null || world.isClient)
-            return null;
-
-        return !(world instanceof ServerWorld serverWorld) ? null : serverWorld.getRecipeManager();
     }
 
     public Optional<RecipeEntry<?>> getRecipe(RegistryKey<Recipe<?>> recipeKey) {

@@ -4,7 +4,8 @@ import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.input.RecipeInput;
 
-public record CentrifugalConcentratorRecipeInput(RecipeSimpleInventory recipeInventory, long waterAmount) implements RecipeInput {
+public record CentrifugalConcentratorRecipeInput(RecipeSimpleInventory recipeInventory,
+                                                 long waterAmount) implements RecipeInput {
     @Override
     public ItemStack getStackInSlot(int slot) {
         return this.recipeInventory.getStackInSlot(slot);

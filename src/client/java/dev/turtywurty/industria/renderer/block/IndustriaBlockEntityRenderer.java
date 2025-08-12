@@ -56,48 +56,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         this.context = context;
     }
 
-    /**
-     * Called to render the block entity.
-     *
-     * @param entity          The block entity
-     * @param tickDelta       The partial tick
-     * @param matrices        The matrix stack
-     * @param vertexConsumers The vertex consumer provider
-     * @param light           The light level
-     * @param overlay         The overlay
-     */
-    protected abstract void onRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
-
-    /**
-     * Called after the block entity and wireframe have been rendered.
-     *
-     * @param entity          The block entity
-     * @param tickDelta       The partial tick
-     * @param matrices        The matrix stack
-     * @param vertexConsumers The vertex consumer provider
-     * @param light           The light level
-     * @param overlay         The overlay
-     */
-    protected void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {}
-
-    @Override
-    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        setupBlockEntityTransformations(matrices, entity);
-        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-
-        if (isPlayerLookingAt(entity.getPos())) {
-            List<ModelPart> wireframe = getModelParts();
-            if (!wireframe.isEmpty()) {
-                boolean isHighContrast = isHighContrast();
-                renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
-            }
-        }
-
-        matrices.pop();
-
-        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-    }
-
     private static boolean isHighContrast() {
         return MinecraftClient.getInstance().options.getHighContrastBlockOutline().getValue();
     }
@@ -161,16 +119,16 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
     /**
      * Visits a model part and renders its wireframe.
      *
-     * @param modelPart            The model part to visit
-     * @param matrices             The matrix stack
-     * @param vertexConsumer       The vertex consumer
-     * @param color                The color of the wireframe
-     * @param v0                   The first vertex
-     * @param v1                   The second vertex
-     * @param v2                   The third vertex
-     * @param v3                   The fourth vertex
-     * @param pos                  The position of the vertex
-     * @param normal               The normal of the vertex
+     * @param modelPart      The model part to visit
+     * @param matrices       The matrix stack
+     * @param vertexConsumer The vertex consumer
+     * @param color          The color of the wireframe
+     * @param v0             The first vertex
+     * @param v1             The second vertex
+     * @param v2             The third vertex
+     * @param v3             The fourth vertex
+     * @param pos            The position of the vertex
+     * @param normal         The normal of the vertex
      */
     private static void visitPart(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
         if (!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
@@ -253,6 +211,49 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
 
         BlockPos primaryPos = MultiblockBlock.getPrimaryPos(world, hitPos);
         return Objects.equals(primaryPos, bePos);
+    }
+
+    /**
+     * Called to render the block entity.
+     *
+     * @param entity          The block entity
+     * @param tickDelta       The partial tick
+     * @param matrices        The matrix stack
+     * @param vertexConsumers The vertex consumer provider
+     * @param light           The light level
+     * @param overlay         The overlay
+     */
+    protected abstract void onRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
+
+    /**
+     * Called after the block entity and wireframe have been rendered.
+     *
+     * @param entity          The block entity
+     * @param tickDelta       The partial tick
+     * @param matrices        The matrix stack
+     * @param vertexConsumers The vertex consumer provider
+     * @param light           The light level
+     * @param overlay         The overlay
+     */
+    protected void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    }
+
+    @Override
+    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
+        setupBlockEntityTransformations(matrices, entity);
+        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+
+        if (isPlayerLookingAt(entity.getPos())) {
+            List<ModelPart> wireframe = getModelParts();
+            if (!wireframe.isEmpty()) {
+                boolean isHighContrast = isHighContrast();
+                renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
+            }
+        }
+
+        matrices.pop();
+
+        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
     /**

@@ -55,14 +55,14 @@ public class SimpleDrillHeadModel extends Model {
     public static void onRender(DrillBlockEntity blockEntity, ItemStack headStack, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Model pModel, VertexConsumer vertexConsumer, int light, int overlay) {
         SimpleDrillHeadModel model = (SimpleDrillHeadModel) pModel;
         Object renderData = blockEntity.getRenderData();
-        if(!(renderData instanceof DrillRenderData rotationData))
+        if (!(renderData instanceof DrillRenderData rotationData))
             return;
 
         DrillHeadParts parts = model.getDrillHeadParts();
         float previousClockwiseYaw = parts.clockwise().yaw;
         float previousCounterClockwiseYaw = parts.counterClockwise().yaw;
 
-        if(blockEntity.isDrilling() && !blockEntity.isPaused()) {
+        if (blockEntity.isDrilling() && !blockEntity.isPaused()) {
             parts.clockwise().yaw = rotationData.clockwiseRotation += 0.1F;
             parts.counterClockwise().yaw = rotationData.counterClockwiseRotation -= 0.125F;
         } else {
@@ -85,5 +85,6 @@ public class SimpleDrillHeadModel extends Model {
         return this.parts;
     }
 
-    public record DrillHeadParts(ModelPart main, ModelPart clockwise, ModelPart counterClockwise) {}
+    public record DrillHeadParts(ModelPart main, ModelPart clockwise, ModelPart counterClockwise) {
+    }
 }

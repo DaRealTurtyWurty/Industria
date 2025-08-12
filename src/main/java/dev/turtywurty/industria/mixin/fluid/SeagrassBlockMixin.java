@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(SeagrassBlock.class)
 public class SeagrassBlockMixin {
     @ModifyExpressionValue(method = "getPlacementState",
-    at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getPlacementState(boolean original, ItemPlacementContext ctx, @Local FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         FluidData data = FluidData.FLUID_DATA.get(fluidState.getFluid());

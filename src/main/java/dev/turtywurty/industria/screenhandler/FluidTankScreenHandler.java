@@ -109,7 +109,7 @@ public class FluidTankScreenHandler extends ScreenHandler implements TickableScr
         SyncingFluidStorage fluidTank = this.blockEntity.getFluidTank();
         if (fluidTank.amount > 0 && extractMode) {
             ItemStack stack = this.inventory.getStack(0);
-            if(stack.isEmpty())
+            if (stack.isEmpty())
                 return;
 
             Storage<FluidVariant> fluidStorage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
@@ -124,9 +124,9 @@ public class FluidTankScreenHandler extends ScreenHandler implements TickableScr
                     this.blockEntity.update();
                 }
             }
-        } else if(fluidTank.amount <= 0 && !extractMode) {
+        } else if (fluidTank.amount <= 0 && !extractMode) {
             ItemStack stack = this.inventory.getStack(0);
-            if(stack.isEmpty())
+            if (stack.isEmpty())
                 return;
 
             Storage<FluidVariant> fluidStorage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
@@ -135,7 +135,7 @@ public class FluidTankScreenHandler extends ScreenHandler implements TickableScr
 
             try (Transaction transaction = Transaction.openOuter()) {
                 Optional<FluidVariant> variantToExtract = TransferUtils.findFirstVariant(fluidStorage, fluidTank.variant);
-                if(variantToExtract.filter(variant -> !variant.isBlank()).isEmpty())
+                if (variantToExtract.filter(variant -> !variant.isBlank()).isEmpty())
                     return;
 
                 FluidVariant fluidVariant = variantToExtract.get();

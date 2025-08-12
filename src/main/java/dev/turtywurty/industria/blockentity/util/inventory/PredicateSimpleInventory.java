@@ -32,15 +32,6 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
         this.predicate = predicate;
     }
 
-    @Override
-    public boolean isValid(int slot, ItemStack stack) {
-        return this.predicate.test(stack, slot);
-    }
-
-    public BiPredicate<ItemStack, Integer> getPredicate() {
-        return this.predicate;
-    }
-
     public static BiPredicate<ItemStack, Integer> createEmptyFluidPredicate(Supplier<FluidVariant> fluidVariantSupplier) {
         return (stack, integer) -> {
             Storage<FluidVariant> storage = ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
@@ -111,5 +102,14 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
                 return storage.extract(gasStackSupplier.get().variant(), FluidConstants.BUCKET, transaction) > 0;
             }
         };
+    }
+
+    @Override
+    public boolean isValid(int slot, ItemStack stack) {
+        return this.predicate.test(stack, slot);
+    }
+
+    public BiPredicate<ItemStack, Integer> getPredicate() {
+        return this.predicate;
     }
 }

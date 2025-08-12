@@ -25,8 +25,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
@@ -48,18 +46,20 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedInventoryStorage<?> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final List<BlockPos> machinePositions = new ArrayList<>();
-
+    public float clientRotation;
+    public boolean reverseCounterWeights;
     private int ticks;
     private BlockPos wellheadPos;
     private boolean running = false;
-
-    public float clientRotation;
-    public boolean reverseCounterWeights;
 
     public OilPumpJackBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.OIL_PUMP_JACK, BlockEntityTypeInit.OIL_PUMP_JACK, pos, state);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
+    }
+
+    private static boolean isValidPosition(World world, BlockPos position) {
+        return true;
     }
 
     @Override
@@ -318,10 +318,6 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
         }
 
         return incorrectPositions.isEmpty() ? correctPositions : incorrectPositions;
-    }
-
-    private static boolean isValidPosition(World world, BlockPos position) {
-        return true;
     }
 
     public void removeWellhead() {

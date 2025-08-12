@@ -26,6 +26,15 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
         this.parts = this.model.getOilPumpJackParts();
     }
 
+    private static Vector3f getAttachmentPosition(ModelPart part) {
+        ModelPart.Cuboid cuboid = part.cuboids.getFirst();
+        return new Vector3f(cuboid.minX, cuboid.minY, cuboid.minZ);
+    }
+
+    public static float map(float value, float fromStart, float fromEnd, float toStart, float toEnd) {
+        return toStart + (value - fromStart) * (toEnd - toStart) / (fromEnd - fromStart);
+    }
+
     @Override
     public void render(OilPumpJackBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
         matrices.push();
@@ -129,14 +138,5 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
         Vector3f difference = attachmentAPosition.sub(attachmentBPosition);
         float angleX = (float) Math.atan2(difference.y, Math.sqrt(difference.x * difference.x + difference.z * difference.z));
         parts.arm().pitch = -angleX;
-    }
-
-    private static Vector3f getAttachmentPosition(ModelPart part) {
-        ModelPart.Cuboid cuboid = part.cuboids.getFirst();
-        return new Vector3f(cuboid.minX, cuboid.minY, cuboid.minZ);
-    }
-
-    public static float map(float value, float fromStart, float fromEnd, float toStart, float toEnd) {
-        return toStart + (value - fromStart) * (toEnd - toStart) / (fromEnd - fromStart);
     }
 }

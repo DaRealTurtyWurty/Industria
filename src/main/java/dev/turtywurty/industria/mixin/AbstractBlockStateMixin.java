@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
 public class AbstractBlockStateMixin {
     @ModifyExpressionValue(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/AbstractBlock$AbstractBlockState;asBlockState()Lnet/minecraft/block/BlockState;"))
     private BlockState onConstruct(BlockState original, @Local(argsOnly = true) Block block, @Local AbstractBlock.Settings settings) {
-        if(block instanceof IndustriaBlock) {
-            if(original.propertyMap.containsKey(Properties.LIT))
+        if (block instanceof IndustriaBlock) {
+            if (original.propertyMap.containsKey(Properties.LIT))
                 return original;
 
             Reference2ObjectArrayMap<Property<?>, Comparable<?>> clone = original.propertyMap.clone();

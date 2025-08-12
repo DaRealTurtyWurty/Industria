@@ -1,10 +1,8 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.util.ValueIOSerializable;
 import dev.turtywurty.industria.util.ViewUtils;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
@@ -21,12 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface RecipeExperienceBlockEntity {
-    void setLastRecipe(@Nullable RecipeEntry<?> recipe);
-
-    void dropExperienceForRecipesUsed(ServerPlayerEntity player);
-
-    List<RecipeEntry<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos);
-
     static void dropExperience(ServerWorld world, Vec3d pos, int multiplier, float experience) {
         int i = MathHelper.floor((float) multiplier * experience);
         float f = MathHelper.fractionalPart((float) multiplier * experience);
@@ -51,4 +43,10 @@ public interface RecipeExperienceBlockEntity {
             recipesUsed.put(recipeKey, recipesUsedView.getInt(key, 0));
         }
     }
+
+    void setLastRecipe(@Nullable RecipeEntry<?> recipe);
+
+    void dropExperienceForRecipesUsed(ServerPlayerEntity player);
+
+    List<RecipeEntry<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos);
 }

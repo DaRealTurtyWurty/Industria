@@ -33,16 +33,16 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
         ImmutableMap.Builder<TransferType<?, ?, ?>, float[]> builder = ImmutableMap.builder();
         for (TransferType<?, ?, ?> transferType : TransferType.getValues()) {
             float[] color;
-            if(transferType == TransferType.ITEM) {
+            if (transferType == TransferType.ITEM) {
                 color = new float[]{0.0F, 0.0F, 0.0F};
             } else if (transferType == TransferType.ENERGY) {
-                color = new float[]{1.0F, 1.0F, 51/255F};
+                color = new float[]{1.0F, 1.0F, 51 / 255F};
             } else if (transferType == TransferType.FLUID) {
-                color = new float[]{135/255F, 206/255F, 250/255F};
+                color = new float[]{135 / 255F, 206 / 255F, 250 / 255F};
             } else if (transferType == TransferType.SLURRY) {
-                color = new float[]{139/255F, 69/255F, 19/255F};
+                color = new float[]{139 / 255F, 69 / 255F, 19 / 255F};
             } else if (transferType == TransferType.HEAT) {
-                color = new float[]{1.0F, 127/255F, 80/255F};
+                color = new float[]{1.0F, 127 / 255F, 80 / 255F};
             } else {
                 color = new float[]{0.5F, 0.5F, 0.5F};
             }
@@ -55,19 +55,19 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
 
     @Override
     public void render(WorldRenderContext context) {
-        if(!DebugRenderingRegistry.debugRendering)
+        if (!DebugRenderingRegistry.debugRendering)
             return;
 
         VertexConsumerProvider consumers = context.consumers();
-        if(consumers == null)
+        if (consumers == null)
             return;
 
         MatrixStack matrices = context.matrixStack();
-        if(matrices == null)
+        if (matrices == null)
             return;
 
         Entity cameraEntity = context.camera().getFocusedEntity();
-        if(cameraEntity == null)
+        if (cameraEntity == null)
             return;
 
         RegistryKey<World> dimension = cameraEntity.getWorld().getRegistryKey();
@@ -93,14 +93,14 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
 
                     MinecraftClient client = MinecraftClient.getInstance();
                     ClientWorld world = client.world;
-                    if(world == null)
+                    if (world == null)
                         return;
 
                     Block block = world.getBlockState(pipe).getBlock();
                     if (!(block instanceof PipeBlock<?, ?, ?> pipeBlock))
                         continue;
                     double amount = transferType.getAmount(world, pipe).doubleValue();
-                    if(transferType == TransferType.HEAT) {
+                    if (transferType == TransferType.HEAT) {
                         amount += 23;
                     }
 
@@ -115,7 +115,7 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
                     Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
                     TextRenderer textRenderer = client.textRenderer;
-                    float xOffset = (float)(-textRenderer.getWidth(text)) / 2.0F;
+                    float xOffset = (float) (-textRenderer.getWidth(text)) / 2.0F;
 
                     textRenderer.draw(text, xOffset, 0, Colors.WHITE, false, matrix4f, consumers, TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                     matrices.pop();

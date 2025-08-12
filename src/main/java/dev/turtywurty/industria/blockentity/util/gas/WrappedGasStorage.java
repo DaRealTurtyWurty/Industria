@@ -6,10 +6,6 @@ import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 
@@ -37,7 +33,7 @@ public class WrappedGasStorage<T extends Storage<GasVariant>> extends WrappedSto
     @Override
     public void writeData(WriteView view) {
         for (T tank : this.storages) {
-            if(tank instanceof SingleGasStorage singleGasStorage) {
+            if (tank instanceof SingleGasStorage singleGasStorage) {
                 view.putLong("Amount", singleGasStorage.getAmount());
                 view.put("Gas", GasVariant.CODEC, singleGasStorage.getResource());
             }
@@ -51,7 +47,7 @@ public class WrappedGasStorage<T extends Storage<GasVariant>> extends WrappedSto
             if (storage == null)
                 continue;
 
-            if(storage instanceof SingleGasStorage singleGasStorage) {
+            if (storage instanceof SingleGasStorage singleGasStorage) {
                 singleGasStorage.amount = view.getLong("Amount", 0L);
                 singleGasStorage.variant = view.read("Gas", GasVariant.CODEC)
                         .orElse(GasVariant.blank());

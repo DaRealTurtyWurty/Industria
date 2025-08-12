@@ -19,7 +19,7 @@ public abstract class WitchEntityMixin extends RaiderEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/entity/mob/WitchEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$tickMovement(boolean original) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()

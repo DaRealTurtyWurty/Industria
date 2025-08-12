@@ -30,10 +30,6 @@ import java.util.function.Supplier;
 
 public class WoodRegistrySet {
     private static final List<WoodRegistrySet> WOOD_SETS = new ArrayList<>();
-
-    private final String name;
-    private final SaplingGenerator saplingGenerator;
-
     public final WoodType woodType;
     public final BlockSetType blockSetType;
     public final PillarBlock log, strippedLog;
@@ -49,21 +45,20 @@ public class WoodRegistrySet {
     public final TrapdoorBlock trapdoor;
     public final PressurePlateBlock pressurePlate;
     public final ButtonBlock button;
-
     public final SignBlock sign;
     public final WallSignBlock wallSign;
     public final HangingSignBlock hangingSign;
     public final WallHangingSignBlock wallHangingSign;
     public final SignItem signItem;
     public final HangingSignItem hangingSignItem;
-
     public final EntityType<BoatEntity> boatEntityType;
     public final EntityType<ChestBoatEntity> chestBoatEntityType;
     public final Item boatItem;
     public final Item chestBoatItem;
-
     public final TagKey<Item> logsItemTag;
     public final TagKey<Block> logsBlockTag;
+    private final String name;
+    private final SaplingGenerator saplingGenerator;
 
     public WoodRegistrySet(String name, SaplingGenerator saplingGenerator, Supplier<WoodType> woodType,
                            Function<AbstractBlock.Settings, Block> planks,
@@ -192,6 +187,10 @@ public class WoodRegistrySet {
                 .build());
     }
 
+    public static List<WoodRegistrySet> getWoodSets() {
+        return WOOD_SETS;
+    }
+
     public BlockFamily createBlockFamily() {
         return new BlockFamily.Builder(this.planks)
                 .button(this.button)
@@ -206,10 +205,6 @@ public class WoodRegistrySet {
                 .group("wooden")
                 .unlockCriterionName("has_planks")
                 .build();
-    }
-
-    public static List<WoodRegistrySet> getWoodSets() {
-        return WOOD_SETS;
     }
 
     public String getName() {

@@ -114,51 +114,6 @@ public class BuiltinEntityModelBuilder {
         write(itemModelGenerator, item, null);
     }
 
-    private void write() {
-        this.writer.modelCollector.accept(this.id, () -> {
-            var object = new JsonObject();
-            object.addProperty("parent", "minecraft:builtin/entity");
-
-            var display = new JsonObject();
-            for (DisplaySettings displaySetting : this.displaySettings) {
-                var displayObject = new JsonObject();
-
-                if(displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0 || displaySetting.rotation.z != 0) {
-                    var rotation = new JsonArray();
-                    rotation.add(displaySetting.rotation.x);
-                    rotation.add(displaySetting.rotation.y);
-                    rotation.add(displaySetting.rotation.z);
-                    displayObject.add("rotation", rotation);
-                }
-
-                if(displaySetting.translation.x != 0 || displaySetting.translation.y != 0 || displaySetting.translation.z != 0) {
-                    var translation = new JsonArray();
-                    translation.add(displaySetting.translation.x);
-                    translation.add(displaySetting.translation.y);
-                    translation.add(displaySetting.translation.z);
-                    displayObject.add("translation", translation);
-                }
-
-                if(displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
-                    var scale = new JsonArray();
-                    scale.add(displaySetting.scale.x);
-                    scale.add(displaySetting.scale.y);
-                    scale.add(displaySetting.scale.z);
-                    displayObject.add("scale", scale);
-                }
-
-                display.add(displaySetting.name, displayObject);
-            }
-
-            object.add("display", display);
-            return object;
-        });
-
-//        if(item instanceof BlockItem) {
-//            this.writer.output.accept(this.item, ItemModels.special(ModelIds.getItemModelId(this.item), DynamicItemRendererInit.getItemRenderer(this.item)));
-//        }
-    }
-
     public static void write(ItemModelGenerator writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
         new BuiltinEntityModelBuilder.Builder(writer, item, id).defaultDisplaySettings(defaultBuilder).build().write();
     }
@@ -185,6 +140,51 @@ public class BuiltinEntityModelBuilder {
 
     public static DefaultDisplaySettingsBuilder defaultRod() {
         return DEFAULT_ROD;
+    }
+
+    private void write() {
+        this.writer.modelCollector.accept(this.id, () -> {
+            var object = new JsonObject();
+            object.addProperty("parent", "minecraft:builtin/entity");
+
+            var display = new JsonObject();
+            for (DisplaySettings displaySetting : this.displaySettings) {
+                var displayObject = new JsonObject();
+
+                if (displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0 || displaySetting.rotation.z != 0) {
+                    var rotation = new JsonArray();
+                    rotation.add(displaySetting.rotation.x);
+                    rotation.add(displaySetting.rotation.y);
+                    rotation.add(displaySetting.rotation.z);
+                    displayObject.add("rotation", rotation);
+                }
+
+                if (displaySetting.translation.x != 0 || displaySetting.translation.y != 0 || displaySetting.translation.z != 0) {
+                    var translation = new JsonArray();
+                    translation.add(displaySetting.translation.x);
+                    translation.add(displaySetting.translation.y);
+                    translation.add(displaySetting.translation.z);
+                    displayObject.add("translation", translation);
+                }
+
+                if (displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
+                    var scale = new JsonArray();
+                    scale.add(displaySetting.scale.x);
+                    scale.add(displaySetting.scale.y);
+                    scale.add(displaySetting.scale.z);
+                    displayObject.add("scale", scale);
+                }
+
+                display.add(displaySetting.name, displayObject);
+            }
+
+            object.add("display", display);
+            return object;
+        });
+
+//        if(item instanceof BlockItem) {
+//            this.writer.output.accept(this.item, ItemModels.special(ModelIds.getItemModelId(this.item), DynamicItemRendererInit.getItemRenderer(this.item)));
+//        }
     }
 
     public static class DefaultDisplaySettingsBuilder {

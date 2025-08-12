@@ -19,7 +19,7 @@ public class RespawnAnchorBlockMixin {
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z",
                     ordinal = 0))
     private static boolean industria$hasStillWater$0(boolean original, BlockPos pos, World world, @Local FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         FluidData fluidData = FluidData.FLUID_DATA.get(fluidState.getFluid());
@@ -31,7 +31,7 @@ public class RespawnAnchorBlockMixin {
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z",
                     ordinal = 1))
     private static boolean industria$hasStillWater$1(boolean original, BlockPos pos, World world, @Local(ordinal = 1) FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         FluidData fluidData = FluidData.FLUID_DATA.get(fluidState.getFluid());

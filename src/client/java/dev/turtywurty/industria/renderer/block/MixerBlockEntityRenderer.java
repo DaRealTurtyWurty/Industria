@@ -56,7 +56,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
 
                 Vec3d position = entity.mixingItemPositions.get(index);
 
-                if(isMixing) {
+                if (isMixing) {
                     // Calculate angle for each item
                     float angle = (float) (2 * Math.PI * index / inputInventory.heldStacks.size()); // Evenly space items around circle
                     // Add rotation over time using world time
@@ -77,7 +77,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                 matrices.translate(position.x, position.y, position.z);
                 matrices.scale(0.5f, 0.5f, 0.5f);
 
-                if(isMixing) {
+                if (isMixing) {
                     matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead (maybe? :3)
                     matrices.multiply(RotationAxis.POSITIVE_Y.rotation(entity.getWorld().getTime() * 0.25f));
                     matrices.multiply(RotationAxis.POSITIVE_X.rotation(entity.getWorld().getTime() * 0.25f));

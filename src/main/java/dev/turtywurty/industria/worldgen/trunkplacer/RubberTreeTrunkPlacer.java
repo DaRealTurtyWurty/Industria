@@ -22,8 +22,8 @@ import java.util.function.BiConsumer;
 public class RubberTreeTrunkPlacer extends TrunkPlacer {
     public static final MapCodec<RubberTreeTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(instance ->
             fillTrunkPlacerFields(instance).and(
-                    instance.group(IntProvider.POSITIVE_CODEC.fieldOf("branch_start_height").forGetter(placer -> placer.branchStartHeight),
-                            IntProvider.NON_NEGATIVE_CODEC.fieldOf("branch_length").forGetter(placer -> placer.branchLength)))
+                            instance.group(IntProvider.POSITIVE_CODEC.fieldOf("branch_start_height").forGetter(placer -> placer.branchStartHeight),
+                                    IntProvider.NON_NEGATIVE_CODEC.fieldOf("branch_length").forGetter(placer -> placer.branchLength)))
                     .apply(instance, RubberTreeTrunkPlacer::new));
     public final IntProvider branchStartHeight;
     public final IntProvider branchLength;
@@ -51,8 +51,8 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
         for (int yPos = 0; yPos < freeTreeHeight; ++yPos) {
             getAndSetState(world, replacer, random, startPos.up(yPos), config);
 
-            if(yPos >= height - 1) {
-                if(random.nextFloat() < branchingPossibility) {
+            if (yPos >= height - 1) {
+                if (random.nextFloat() < branchingPossibility) {
                     branchingPossibility *= branchingPossibility;
 
                     Direction direction;
@@ -72,7 +72,7 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
                         BlockPos offsetPos = pos.add(offsetX, hPos, offsetZ);
                         getAndSetState(world, replacer, random, offsetPos, config);
 
-                        if(hPos == 0 || random.nextFloat() < 0.8F) {
+                        if (hPos == 0 || random.nextFloat() < 0.8F) {
                             offsetX += branchDirection.getOffsetX();
                             offsetZ += branchDirection.getOffsetZ();
                         }

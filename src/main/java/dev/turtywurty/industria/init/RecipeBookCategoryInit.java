@@ -22,5 +22,6 @@ public class RecipeBookCategoryInit {
         return Registry.register(Registries.RECIPE_BOOK_CATEGORY, Industria.id(name), new RecipeBookCategory());
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

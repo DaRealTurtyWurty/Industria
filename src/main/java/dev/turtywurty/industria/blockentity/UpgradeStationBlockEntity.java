@@ -30,16 +30,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -63,17 +58,13 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
+    private final List<RegistryKey<Recipe<?>>> availableRecipes = new ArrayList<>();
     @Nullable
     private RegistryKey<Recipe<?>> selectedRecipe;
-    private final List<RegistryKey<Recipe<?>>> availableRecipes = new ArrayList<>();
     private int selectedRecipeIndex = 0;
     private ItemStack previousCenterStack = ItemStack.EMPTY;
 
     private int progress = 0;
-    private boolean isFirstRead = true;
-    private ItemStack overflowStack = ItemStack.EMPTY;
-
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -95,6 +86,8 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
             return 1;
         }
     };
+    private boolean isFirstRead = true;
+    private ItemStack overflowStack = ItemStack.EMPTY;
 
     public UpgradeStationBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.UPGRADE_STATION, pos, state);
@@ -140,6 +133,10 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
 
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 1_000, 0));
+    }
+
+    private static RegistryKey<Recipe<?>> getRecipeKey(String string) {
+        return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(string));
     }
 
     @Override
@@ -233,10 +230,6 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
             this.isFirstRead = false;
             this.previousCenterStack = getInputInventory().getStack(4);
         }
-    }
-
-    private static RegistryKey<Recipe<?>> getRecipeKey(String string) {
-        return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(string));
     }
 
     @Override

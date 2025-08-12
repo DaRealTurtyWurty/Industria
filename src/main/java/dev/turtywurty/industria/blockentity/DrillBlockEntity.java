@@ -39,10 +39,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootWorldContext;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -65,6 +61,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private final List<ItemStack> overflowStacks = new ArrayList<>(); // Only used if overflowMethod is set to PAUSE
+    public float clientMotorRotation;
     private boolean drilling = false;
     private float drillYOffset = 1.0F;
     private boolean retracting = false;
@@ -73,10 +70,8 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
     private boolean isPaused;
     private Box drillHeadAABB;
-
     // Only used client side
     private DrillRenderData renderData;
-    public float clientMotorRotation;
 
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.DRILL, BlockEntityTypeInit.DRILL, pos, state);
@@ -360,8 +355,16 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
         return this.drilling;
     }
 
+    public void setDrilling(boolean drilling) {
+        this.drilling = drilling;
+    }
+
     public boolean isRetracting() {
         return this.retracting;
+    }
+
+    public void setRetracting(boolean retracting) {
+        this.retracting = retracting;
     }
 
     public boolean hasMotor() {
@@ -376,24 +379,16 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
         return this.drillYOffset;
     }
 
-    public void setDrilling(boolean drilling) {
-        this.drilling = drilling;
-    }
-
-    public void setRetracting(boolean retracting) {
-        this.retracting = retracting;
-    }
-
-    public void setTargetRotationSpeed(float targetRotationSpeed) {
-        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
-    }
-
     public float getRotationSpeed() {
         return this.currentRotationSpeed;
     }
 
     public float getTargetRotationSpeed() {
         return this.targetRotationSpeed;
+    }
+
+    public void setTargetRotationSpeed(float targetRotationSpeed) {
+        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
     }
 
     public Box getDrillHeadAABB() {
@@ -415,6 +410,10 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
 
     public OverflowMethod getOverflowMethod() {
         return this.overflowMethod;
+    }
+
+    public void setOverflowMethod(OverflowMethod overflowMethod) {
+        this.overflowMethod = overflowMethod;
     }
 
     public SimpleInventory getOutputInventory() {
@@ -464,10 +463,6 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
         }
 
         world.breakBlock(pos, false);
-    }
-
-    public void setOverflowMethod(OverflowMethod overflowMethod) {
-        this.overflowMethod = overflowMethod;
     }
 
     public boolean isPaused() {

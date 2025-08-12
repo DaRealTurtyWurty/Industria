@@ -196,7 +196,7 @@ public class RotaryKilnModel extends Model {
                 .uv(689, 37).cuboid(22.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
                 .uv(689, 111).cuboid(-24.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
 
-         rotate_seg12.addChild("octagon_r11", ModelPartBuilder.create().uv(689, 74).cuboid(-24.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
+        rotate_seg12.addChild("octagon_r11", ModelPartBuilder.create().uv(689, 74).cuboid(-24.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
                 .uv(687, 0).cuboid(22.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
                 .uv(73, 624).cuboid(-9.9411F, -24.0F, -8.0F, 19.8823F, 2.0F, 16.0F, new Dilation(0.0F))
                 .uv(617, 565).cuboid(-9.9411F, 22.0F, -8.0F, 19.8823F, 2.0F, 16.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.7854F));

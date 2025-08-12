@@ -15,15 +15,15 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(DrownedEntity.class)
 public class DrownedEntityMixin {
     @ModifyExpressionValue(method = "canSpawn(Lnet/minecraft/entity/EntityType;Lnet/minecraft/world/ServerWorldAccess;Lnet/minecraft/entity/SpawnReason;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/random/Random;)Z",
-    at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z",
-            ordinal = 0))
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z",
+                    ordinal = 0))
     private static boolean industria$canSpawn$0(boolean original, EntityType<?> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
         FluidState fluidState = world.getFluidState(pos.down());
 
         boolean result = original;
         for (FluidData fluidData : FluidData.FLUID_DATA.values()) {
-            if(fluidData.canDrownedSpawn())
+            if (fluidData.canDrownedSpawn())
                 continue;
 
             result = original || !fluidState.isIn(fluidData.fluidTag());

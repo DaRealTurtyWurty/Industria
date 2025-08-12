@@ -5,17 +5,14 @@ import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
@@ -27,10 +24,9 @@ public class SeismicScannerScreen extends Screen {
 
     private final int backgroundWidth = 176;
     private final int backgroundHeight = 166;
-    private int x, y;
-
     private final ItemStack stack;
     private final List<WorldFluidPocketsState.FluidPocket> fluidPockets = new ArrayList<>();
+    private int x, y;
 
     public SeismicScannerScreen(ItemStack stack) {
         super(SeismicScannerItem.TITLE);
@@ -46,7 +42,7 @@ public class SeismicScannerScreen extends Screen {
         this.y = (this.height - this.backgroundHeight) / 2;
 
         this.fluidPockets.clear();
-        if(this.stack.contains(ComponentTypeInit.FLUID_POCKETS)) {
+        if (this.stack.contains(ComponentTypeInit.FLUID_POCKETS)) {
             this.fluidPockets.addAll(this.stack.get(ComponentTypeInit.FLUID_POCKETS).pockets());
         }
     }
@@ -68,7 +64,7 @@ public class SeismicScannerScreen extends Screen {
             return;
         }
 
-        if(this.client == null)
+        if (this.client == null)
             return;
 
         // Render fluid pockets

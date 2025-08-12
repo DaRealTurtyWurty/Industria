@@ -79,14 +79,11 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
+    // Render data
+    public float bowlRotation = 0.0f;
     private int progress, maxProgress;
-
     private RegistryKey<Recipe<?>> currentRecipeId;
     private int recipeRPM;
-    private ItemStack outputItemStack = ItemStack.EMPTY;
-    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
-
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -111,9 +108,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
             return 3;
         }
     };
-
-    // Render data
-    public float bowlRotation = 0.0f;
+    private ItemStack outputItemStack = ItemStack.EMPTY;
+    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     public CentrifugalConcentratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CENTRIFUGAL_CONCENTRATOR, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, pos, state);
@@ -330,7 +326,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         view.putInt("RecipeRPM", this.recipeRPM);
 
         ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
-        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage); 
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
 
@@ -352,7 +348,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC).orElse(null);
         this.recipeRPM = view.getInt("RecipeRPM", 0);
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
-        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage); 
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);

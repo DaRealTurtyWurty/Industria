@@ -19,7 +19,7 @@ public class IndustriaSimpleInventory extends SimpleInventory {
     public void markDirty() {
         super.markDirty();
 
-        if(this.componentContainer.hasComponent(SyncingComponent.class)) {
+        if (this.componentContainer.hasComponent(SyncingComponent.class)) {
             this.componentContainer.getComponent(SyncingComponent.class).sync();
         }
     }
@@ -27,11 +27,11 @@ public class IndustriaSimpleInventory extends SimpleInventory {
     @Override
     public boolean isValid(int slot, ItemStack stack) {
         boolean valid = true;
-        if(this.componentContainer.hasComponent(StackPredicateComponent.class)) {
+        if (this.componentContainer.hasComponent(StackPredicateComponent.class)) {
             valid = this.componentContainer.getComponent(StackPredicateComponent.class).test(slot, stack);
         }
 
-        if(this.componentContainer.hasComponent(OutputOnlyInventoryComponent.class)) {
+        if (this.componentContainer.hasComponent(OutputOnlyInventoryComponent.class)) {
             valid = false;
         }
 

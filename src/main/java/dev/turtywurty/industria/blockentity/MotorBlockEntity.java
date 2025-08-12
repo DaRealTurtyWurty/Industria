@@ -14,8 +14,6 @@ import dev.turtywurty.industria.util.ViewUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.storage.ReadView;
@@ -34,9 +32,8 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
     public static final Text TITLE = Industria.containerTitle("motor");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
-    private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
-
     public float rodRotation = 0.0F; // Client only
+    private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
 
     public MotorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.MOTOR, BlockEntityTypeInit.MOTOR, pos, state);
@@ -119,15 +116,15 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
         return this.wrappedEnergyStorage.getStorage(null);
     }
 
-    public void setTargetRotationSpeed(float targetRotationSpeed) {
-        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
-    }
-
     public float getRotationSpeed() {
         return this.currentRotationSpeed;
     }
 
     public float getTargetRotationSpeed() {
         return this.targetRotationSpeed;
+    }
+
+    public void setTargetRotationSpeed(float targetRotationSpeed) {
+        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
     }
 }

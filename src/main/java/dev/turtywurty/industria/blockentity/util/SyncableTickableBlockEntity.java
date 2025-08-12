@@ -12,7 +12,7 @@ public interface SyncableTickableBlockEntity extends TickableBlockEntity {
         onTick();
         getSyncableStorages().forEach(SyncableStorage::sync);
 
-        if(this instanceof UpdatableBlockEntity updatableBlockEntity) {
+        if (this instanceof UpdatableBlockEntity updatableBlockEntity) {
             updatableBlockEntity.endTick();
         }
     }

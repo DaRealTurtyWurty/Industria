@@ -18,7 +18,7 @@ public class WaterCreatureEntityMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private static boolean industria$canSpawn(boolean original, EntityType<?> entityType, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
-        if(original)
+        if (original)
             return true;
 
         FluidState fluidState = world.getFluidState(pos);

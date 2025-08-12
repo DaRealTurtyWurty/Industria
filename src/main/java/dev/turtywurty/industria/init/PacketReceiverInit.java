@@ -69,7 +69,7 @@ public class PacketReceiverInit {
 
         ServerPlayNetworking.registerGlobalReceiver(OilPumpJackSetRunningPayload.ID, (payload, context) -> {
             ServerPlayerEntity player = context.player();
-            if(player.currentScreenHandler instanceof OilPumpJackScreenHandler handler) {
+            if (player.currentScreenHandler instanceof OilPumpJackScreenHandler handler) {
                 handler.getBlockEntity().setRunning(payload.isRunning());
             }
         });

@@ -11,11 +11,11 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(KelpBlock.class)
 public class KelpBlockMixin {
-    @ModifyExpressionValue(method="getPlacementState",
-            at=@At(value = "INVOKE",
-                    target="Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+    @ModifyExpressionValue(method = "getPlacementState",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getPlacementState(boolean original, ItemPlacementContext ctx, @Local FluidState fluidState) {
-        if(original)
+        if (original)
             return true;
 
         FluidData fluidData = FluidData.FLUID_DATA.get(fluidState.getFluid());

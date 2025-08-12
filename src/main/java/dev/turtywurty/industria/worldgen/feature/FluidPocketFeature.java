@@ -13,7 +13,10 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class FluidPocketFeature extends Feature<FluidPocketConfig> {
     public FluidPocketFeature() {
@@ -30,14 +33,14 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
         Random random = context.getRandom();
 
         BlockState originState = world.getBlockState(origin);
-        if(originState.isAir() || !config.replaceable().test(originState, random))
+        if (originState.isAir() || !config.replaceable().test(originState, random))
             return false;
 
-        if(random.nextInt(100) < 50)
+        if (random.nextInt(100) < 50)
             return false;
 
         ServerWorld serverWorld;
-        if(!(world instanceof ServerWorld)) {
+        if (!(world instanceof ServerWorld)) {
             if (world instanceof ChunkRegion) {
                 serverWorld = ((ChunkRegion) world).toServerWorld();
             } else {

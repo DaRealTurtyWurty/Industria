@@ -45,5 +45,6 @@ public class RecipeSerializerInit {
         return Registry.register(Registries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

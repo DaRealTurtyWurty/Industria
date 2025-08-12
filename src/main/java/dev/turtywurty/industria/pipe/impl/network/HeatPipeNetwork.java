@@ -18,7 +18,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     public static final MapCodec<HeatPipeNetwork> CODEC = PipeNetwork.createCodec(
@@ -36,15 +39,19 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     public static final Codec<Set<HeatPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
     public static final PacketCodec<RegistryByteBuf, Set<HeatPipeNetwork>> SET_PACKET_CODEC =
             ExtraPacketCodecs.setOf(PACKET_CODEC);
-
-    private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
-
     private static final double PIPE_CONDUCTIVITY = 0.25D;
     private static final double BLOCK_CONDUCTIVITY = 0.15D;
     private static final double PIPE_DISSIPATION = 0.02D;
+    private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
 
     public HeatPipeNetwork(UUID id) {
         super(id, TransferType.HEAT);
+    }
+
+    private static void exchange(HeatStorage from, HeatStorage to, double coefficient) {
+        double transfer = (from.getAmount() - to.getAmount()) * coefficient;
+        ((SimpleHeatStorage) from).setAmount(from.getAmount() - transfer);
+        ((SimpleHeatStorage) to).setAmount(to.getAmount() + transfer);
     }
 
     @Override
@@ -128,11 +135,5 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
             double loss = pipeStorage.getAmount() * PIPE_DISSIPATION;
             ((SimpleHeatStorage) pipeStorage).setAmount(Math.max(0, pipeStorage.getAmount() - loss));
         }
-    }
-
-    private static void exchange(HeatStorage from, HeatStorage to, double coefficient) {
-        double transfer = (from.getAmount() - to.getAmount()) * coefficient;
-        ((SimpleHeatStorage) from).setAmount(from.getAmount() - transfer);
-        ((SimpleHeatStorage) to).setAmount(to.getAmount() + transfer);
     }
 }

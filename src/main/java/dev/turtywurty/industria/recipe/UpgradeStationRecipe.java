@@ -150,7 +150,8 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
     public static class Type implements RecipeType<UpgradeStationRecipe> {
         public static final Type INSTANCE = new Type();
 
-        private Type() {}
+        private Type() {
+        }
 
         @Override
         public String toString() {
@@ -164,19 +165,17 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         public static final Codec<Character> CHAR_CODEC = Codec.STRING.xmap(s -> s.charAt(0), String::valueOf);
 
         private static final Codec<Map<Character, IndustriaIngredient>> KEY_CODEC = Codec.unboundedMap(CHAR_CODEC, IndustriaIngredient.CODEC);
-        private static final PacketCodec<RegistryByteBuf, Map<Character, IndustriaIngredient>> KEY_PACKET_CODEC = PacketCodec.of(
-                (value, buf) -> buf.writeMap(value, (buf1, value1) -> buf.writeChar(value1),
-                        (buf1, value1) -> IndustriaIngredient.PACKET_CODEC.encode((RegistryByteBuf) buf1, value1)),
-                buf -> buf.readMap(ByteBuf::readChar,
-                        buf1 -> IndustriaIngredient.PACKET_CODEC.decode((RegistryByteBuf) buf1)));
-
         public static final MapCodec<UpgradeStationRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
                         KEY_CODEC.fieldOf("key").forGetter(UpgradeStationRecipe::key),
                         Codec.STRING.listOf().fieldOf("pattern").forGetter(recipe -> Arrays.asList(recipe.pattern)),
                         ItemStack.VALIDATED_CODEC.fieldOf("output").forGetter(UpgradeStationRecipe::output)
                 ).apply(instance, (keys, pattern, output) -> new UpgradeStationRecipe(keys, pattern.toArray(new String[0]), output)));
-
+        private static final PacketCodec<RegistryByteBuf, Map<Character, IndustriaIngredient>> KEY_PACKET_CODEC = PacketCodec.of(
+                (value, buf) -> buf.writeMap(value, (buf1, value1) -> buf.writeChar(value1),
+                        (buf1, value1) -> IndustriaIngredient.PACKET_CODEC.encode((RegistryByteBuf) buf1, value1)),
+                buf -> buf.readMap(ByteBuf::readChar,
+                        buf1 -> IndustriaIngredient.PACKET_CODEC.decode((RegistryByteBuf) buf1)));
         public static final PacketCodec<RegistryByteBuf, UpgradeStationRecipe> PACKET_CODEC = PacketCodec.tuple(
                 KEY_PACKET_CODEC, UpgradeStationRecipe::key,
                 PacketCodecs.collection(ArrayList::new, PacketCodecs.STRING), recipe -> Arrays.asList(recipe.pattern),

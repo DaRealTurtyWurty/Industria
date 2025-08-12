@@ -18,9 +18,27 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
         super(context);
     }
 
+    private static float[] getColor(TransferType<?, ?, ?> type) {
+        if (type == TransferType.ITEM) {
+            return new float[]{0.0F, 0.0F, 0.0F};
+        } else if (type == TransferType.ENERGY) {
+            return new float[]{1.0F, 1.0F, 51 / 255F};
+        } else if (type == TransferType.FLUID) {
+            return new float[]{135 / 255F, 206 / 255F, 250 / 255F};
+        } else if (type == TransferType.SLURRY) {
+            return new float[]{139 / 255F, 69 / 255F, 19 / 255F};
+        } else if (type == TransferType.HEAT) {
+            return new float[]{1.0F, 127 / 255F, 80 / 255F};
+        } else if (type == TransferType.GAS) {
+            return new float[]{58 / 255F, 159 / 255F, 2 / 255F};
+        }
+
+        throw new IllegalStateException("Unexpected value: " + type);
+    }
+
     @Override
     protected void onRender(MultiblockIOBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        if(!this.context.getEntityRenderDispatcher().shouldRenderHitboxes())
+        if (!this.context.getEntityRenderDispatcher().shouldRenderHitboxes())
             return;
 
         matrices.push();
@@ -78,23 +96,5 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
         }
 
         matrices.pop();
-    }
-
-    private static float[] getColor(TransferType<?, ?, ?> type) {
-        if(type == TransferType.ITEM) {
-            return new float[]{0.0F, 0.0F, 0.0F};
-        } else if (type == TransferType.ENERGY) {
-            return new float[]{1.0F, 1.0F, 51/255F};
-        } else if (type == TransferType.FLUID) {
-            return new float[]{135/255F, 206/255F, 250/255F};
-        } else if (type == TransferType.SLURRY) {
-            return new float[]{139/255F, 69/255F, 19/255F};
-        } else if (type == TransferType.HEAT) {
-            return new float[]{1.0F, 127/255F, 80/255F};
-        } else if (type == TransferType.GAS) {
-            return new float[]{58/255F, 159/255F, 2/255F};
-        }
-
-        throw new IllegalStateException("Unexpected value: " + type);
     }
 }

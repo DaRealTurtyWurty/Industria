@@ -40,6 +40,66 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
         super(output, registriesFuture);
     }
 
+    private static void offerAlloySmelting(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime) {
+        offerAlloySmelting(exporter, category, inputA, inputB, output, smeltTime, RecipeGenerator.getRecipeName(output.getItem()));
+    }
+
+    private static void offerAlloySmelting(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime, String name) {
+        new AlloyFurnaceRecipeBuilder(inputA, inputB, output, smeltTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("alloy_" + name)));
+    }
+
+    private static void offerCrusher(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, String name) {
+        new CrusherRecipeBuilder(input, outputA, outputB, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crusher_" + name)));
+    }
+
+    private static void offerMixer(RecipeExporter exporter, RecipeCategory category, List<IndustriaIngredient> inputs, @Nullable FluidStack inputFluid, int minTemperature, int maxTemperature, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, String name) {
+        new MixerRecipeBuilder(inputs, inputFluid, minTemperature, maxTemperature, output, outputSlurry, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("mixer_" + name)));
+    }
+
+    private static void offerDigester(RecipeExporter exporter, SlurryStack inputSlurry, FluidStack outputFluid, int processTime, String name) {
+        new DigesterRecipeBuilder(inputSlurry, outputFluid, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("digester_" + name)));
+    }
+
+    private static void offerClarifier(RecipeExporter exporter, FluidStack inputFluid, FluidStack outputFluid, OutputItemStack outputItem, int processTime, String name) {
+        new ClarifierRecipeBuilder(inputFluid, outputFluid, outputItem, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("clarifier_" + name)));
+    }
+
+    private static void offerCrystallizerRecipe(RecipeExporter exporter, FluidStack waterFluid, FluidStack crystalFluid, IndustriaIngredient catalyst, OutputItemStack output, OutputItemStack byproduct, boolean requiresCatalyst, int catalystUses, int processTime, String name) {
+        new CrystallizerRecipeBuilder(waterFluid, crystalFluid, catalyst, output, byproduct, requiresCatalyst, catalystUses, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crystallizer_" + name)));
+    }
+
+    private static void offerRotaryKilnRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, int requiredTemperature) {
+        new RotaryKilnRecipeBuilder(input, output, requiredTemperature).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("rotary_kiln_" + RecipeGenerator.getRecipeName(output.item()))));
+    }
+
+    private static void offerElectrolyzerRecipe(RecipeExporter exporter,
+                                                IndustriaIngredient input,
+                                                IndustriaIngredient anode, IndustriaIngredient cathode,
+                                                IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
+                                                FluidStack outputFluid, GasStack outputGas,
+                                                int processTime, int energyCost, int temperature) {
+        new ElectrolyzerRecipeBuilder(input, anode, cathode, electrolyteItem, electrolyteFluid, outputFluid, outputGas, processTime, energyCost, temperature)
+                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("electrolyzer_" + getRecipeName(outputFluid.variant().getFluid()))));
+    }
+
+    private static void offerShakingTableRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int frequency, RecipeCategory category) {
+        new ShakingTableRecipeBuilder(input, output, outputSlurry, processTime, frequency, category)
+                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("shaking_table_" + RecipeGenerator.getRecipeName(output.item()))));
+    }
+
+    private static void offerCentrifugalConcentratorRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int rpm, RecipeCategory category) {
+        new CentrifugalConcentratorRecipeBuilder(input, output, outputSlurry, processTime, rpm, category)
+                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("centrifugal_concentrator_" + RecipeGenerator.getRecipeName(output.item()))));
+    }
+
+    public static String getRecipeName(Fluid fluid) {
+        return Registries.FLUID.getId(fluid).getPath();
+    }
+
+    public static @NotNull String hasTag(@NotNull TagKey<Item> tag) {
+        return "has_" + tag.id().toString();
+    }
+
     @Override
     public RecipeGenerator getRecipeGenerator(RegistryWrapper.WrapperLookup wrapperLookup, RecipeExporter exporter) {
         return new RecipeGenerator(wrapperLookup, exporter) {
@@ -277,66 +337,6 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         200, 500, RecipeCategory.MISC);
             }
         };
-    }
-
-    private static void offerAlloySmelting(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime) {
-        offerAlloySmelting(exporter, category, inputA, inputB, output, smeltTime, RecipeGenerator.getRecipeName(output.getItem()));
-    }
-
-    private static void offerAlloySmelting(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime, String name) {
-        new AlloyFurnaceRecipeBuilder(inputA, inputB, output, smeltTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("alloy_" + name)));
-    }
-
-    private static void offerCrusher(RecipeExporter exporter, RecipeCategory category, IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, String name) {
-        new CrusherRecipeBuilder(input, outputA, outputB, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crusher_" + name)));
-    }
-
-    private static void offerMixer(RecipeExporter exporter, RecipeCategory category, List<IndustriaIngredient> inputs, @Nullable FluidStack inputFluid, int minTemperature, int maxTemperature, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, String name) {
-        new MixerRecipeBuilder(inputs, inputFluid, minTemperature, maxTemperature, output, outputSlurry, processTime, category).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("mixer_" + name)));
-    }
-
-    private static void offerDigester(RecipeExporter exporter, SlurryStack inputSlurry, FluidStack outputFluid, int processTime, String name) {
-        new DigesterRecipeBuilder(inputSlurry, outputFluid, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("digester_" + name)));
-    }
-
-    private static void offerClarifier(RecipeExporter exporter, FluidStack inputFluid, FluidStack outputFluid, OutputItemStack outputItem, int processTime, String name) {
-        new ClarifierRecipeBuilder(inputFluid, outputFluid, outputItem, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("clarifier_" + name)));
-    }
-
-    private static void offerCrystallizerRecipe(RecipeExporter exporter, FluidStack waterFluid, FluidStack crystalFluid, IndustriaIngredient catalyst, OutputItemStack output, OutputItemStack byproduct, boolean requiresCatalyst, int catalystUses, int processTime, String name) {
-        new CrystallizerRecipeBuilder(waterFluid, crystalFluid, catalyst, output, byproduct, requiresCatalyst, catalystUses, processTime).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("crystallizer_" + name)));
-    }
-
-    private static void offerRotaryKilnRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, int requiredTemperature) {
-        new RotaryKilnRecipeBuilder(input, output, requiredTemperature).offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("rotary_kiln_" + RecipeGenerator.getRecipeName(output.item()))));
-    }
-
-    private static void offerElectrolyzerRecipe(RecipeExporter exporter,
-                                                IndustriaIngredient input,
-                                                IndustriaIngredient anode, IndustriaIngredient cathode,
-                                                IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
-                                                FluidStack outputFluid, GasStack outputGas,
-                                                int processTime, int energyCost, int temperature) {
-        new ElectrolyzerRecipeBuilder(input, anode, cathode, electrolyteItem, electrolyteFluid, outputFluid, outputGas, processTime, energyCost, temperature)
-                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("electrolyzer_" + getRecipeName(outputFluid.variant().getFluid()))));
-    }
-
-    private static void offerShakingTableRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int frequency, RecipeCategory category) {
-        new ShakingTableRecipeBuilder(input, output, outputSlurry, processTime, frequency, category)
-                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("shaking_table_" + RecipeGenerator.getRecipeName(output.item()))));
-    }
-
-    private static void offerCentrifugalConcentratorRecipe(RecipeExporter exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int rpm, RecipeCategory category) {
-        new CentrifugalConcentratorRecipeBuilder(input, output, outputSlurry, processTime, rpm, category)
-                .offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, Industria.id("centrifugal_concentrator_" + RecipeGenerator.getRecipeName(output.item()))));
-    }
-
-    public static String getRecipeName(Fluid fluid) {
-        return Registries.FLUID.getId(fluid).getPath();
-    }
-
-    public static @NotNull String hasTag(@NotNull TagKey<Item> tag) {
-        return "has_" + tag.id().toString();
     }
 
     @Override

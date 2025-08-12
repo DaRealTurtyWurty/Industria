@@ -2,9 +2,6 @@ package dev.turtywurty.industria.blockentity.util.energy;
 
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import team.reborn.energy.api.EnergyStorage;

@@ -10,20 +10,23 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
 public class BlockEntityTypeInit {
-    public static final BlockEntityType<AlloyFurnaceBlockEntity> ALLOY_FURNACE = register("alloy_furnace",
-            FabricBlockEntityTypeBuilder.create(AlloyFurnaceBlockEntity::new, BlockInit.ALLOY_FURNACE)
-                    .build());
-
-    public static final BlockEntityType<ThermalGeneratorBlockEntity> THERMAL_GENERATOR = register("thermal_generator",
-            FabricBlockEntityTypeBuilder.create(ThermalGeneratorBlockEntity::new, BlockInit.THERMAL_GENERATOR)
-                    .build());
-
     public static final BlockEntityType<BatteryBlockEntity> BATTERY = register("battery",
             FabricBlockEntityTypeBuilder.create(
                             (pos, state) -> new BatteryBlockEntity(((BatteryBlock) state.getBlock()), pos, state),
                             BlockInit.BASIC_BATTERY, BlockInit.ADVANCED_BATTERY, BlockInit.ELITE_BATTERY,
                             BlockInit.ULTIMATE_BATTERY, BlockInit.CREATIVE_BATTERY)
+                    .build());    public static final BlockEntityType<AlloyFurnaceBlockEntity> ALLOY_FURNACE = register("alloy_furnace",
+            FabricBlockEntityTypeBuilder.create(AlloyFurnaceBlockEntity::new, BlockInit.ALLOY_FURNACE)
                     .build());
+
+    public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
+        return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
+    }    public static final BlockEntityType<ThermalGeneratorBlockEntity> THERMAL_GENERATOR = register("thermal_generator",
+            FabricBlockEntityTypeBuilder.create(ThermalGeneratorBlockEntity::new, BlockInit.THERMAL_GENERATOR)
+                    .build());
+
+    public static void init() {
+    }
 
     public static final BlockEntityType<CombustionGeneratorBlockEntity> COMBUSTION_GENERATOR = register("combustion_generator",
             FabricBlockEntityTypeBuilder.create(CombustionGeneratorBlockEntity::new, BlockInit.COMBUSTION_GENERATOR)
@@ -125,10 +128,7 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(CentrifugalConcentratorBlockEntity::new, BlockInit.CENTRIFUGAL_CONCENTRATOR)
                     .build());
 
-    public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
-        return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
-    }
 
-    public static void init() {
-    }
+
+
 }

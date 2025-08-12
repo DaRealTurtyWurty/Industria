@@ -26,15 +26,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -94,6 +89,10 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 2), Direction.DOWN);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
+    }
+
+    public static long getEnergyCost() {
+        return 10;
     }
 
     @Override
@@ -228,10 +227,6 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
 
     private void consumeEnergy() {
         getEnergy().amount -= getEnergyCost();
-    }
-
-    public static long getEnergyCost() {
-        return 10;
     }
 
     private void reset() {

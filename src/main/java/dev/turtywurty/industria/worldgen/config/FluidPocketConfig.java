@@ -7,7 +7,8 @@ import net.minecraft.structure.rule.RuleTest;
 import net.minecraft.util.math.intprovider.IntProvider;
 import net.minecraft.world.gen.feature.FeatureConfig;
 
-public record FluidPocketConfig(FluidState fluidState, IntProvider radius, IntProvider depth, RuleTest replaceable) implements FeatureConfig {
+public record FluidPocketConfig(FluidState fluidState, IntProvider radius, IntProvider depth,
+                                RuleTest replaceable) implements FeatureConfig {
     public static final Codec<FluidPocketConfig> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     FluidState.CODEC.fieldOf("fluid_state").forGetter(FluidPocketConfig::fluidState),

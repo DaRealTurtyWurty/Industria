@@ -28,31 +28,70 @@ import java.util.Objects;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
     @Shadow
+    protected boolean firstUpdate;
+    @Shadow
+    protected Object2DoubleMap<TagKey<Fluid>> fluidHeight;
+    @Shadow
+    protected boolean touchingWater;
+    @Shadow
+    private BlockPos blockPos;
+    @Shadow
+    private EntityDimensions dimensions;
+
+    @Unique
+    private static void industria$onSwimmingStart(Entity thisEntity, EntityDimensions dimensions, SoundEvent entitySplashSound, SoundEvent entityHighSpeedSplashSound, FluidData fluidData) {
+        Entity entity = Objects.requireNonNullElse(thisEntity.getControllingPassenger(), thisEntity);
+        float distanceModifier = entity == thisEntity ? 0.2F : 0.9F;
+
+        Vec3d velocity = entity.getVelocity();
+        float volume = Math.min(1.0F, (float) Math.sqrt(velocity.x * velocity.x * 0.2F + velocity.y * velocity.y + velocity.z * velocity.z * 0.2F) * distanceModifier);
+        if (volume < 0.25F) {
+            thisEntity.playSound(entitySplashSound, volume,
+                    1.0F + (thisEntity.getRandom().nextFloat() - thisEntity.getRandom().nextFloat()) * 0.4F);
+        } else {
+            thisEntity.playSound(entityHighSpeedSplashSound, volume,
+                    1.0F + (thisEntity.getRandom().nextFloat() - thisEntity.getRandom().nextFloat()) * 0.4F);
+        }
+
+        float yPos = (float) MathHelper.floor(thisEntity.getY());
+        for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
+            double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
+            double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
+            thisEntity.getWorld().addParticleClient(fluidData.bubbleParticle(),
+                    thisEntity.getX() + xOffset,
+                    yPos + 1.0F,
+                    thisEntity.getZ() + yOffset,
+                    velocity.x,
+                    velocity.y - thisEntity.getRandom().nextDouble() * 0.2F,
+                    velocity.z);
+        }
+
+        for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
+            double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
+            double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
+            thisEntity.getWorld().addParticleClient(fluidData.splashParticle(),
+                    thisEntity.getX() + xOffset,
+                    yPos + 1.0F,
+                    thisEntity.getZ() + yOffset,
+                    velocity.x,
+                    velocity.y,
+                    velocity.z);
+        }
+
+        thisEntity.emitGameEvent(GameEvent.SPLASH);
+    }
+
+    @Shadow
     public abstract World getWorld();
 
     @Shadow
-    private BlockPos blockPos;
-
-    @Shadow
     public abstract boolean updateMovementInFluid(TagKey<Fluid> tag, double speed);
-
-    @Shadow
-    protected boolean firstUpdate;
-
-    @Shadow
-    protected Object2DoubleMap<TagKey<Fluid>> fluidHeight;
-
-    @Shadow
-    protected boolean touchingWater;
 
     @Shadow
     public abstract void onLanding();
 
     @Shadow
     public abstract void extinguish();
-
-    @Shadow
-    private EntityDimensions dimensions;
 
     @Shadow
     protected abstract SoundEvent getSplashSound();
@@ -126,48 +165,5 @@ public abstract class EntityMixin {
                 callback.cancel();
             }
         }
-    }
-
-    @Unique
-    private static void industria$onSwimmingStart(Entity thisEntity, EntityDimensions dimensions, SoundEvent entitySplashSound, SoundEvent entityHighSpeedSplashSound, FluidData fluidData) {
-        Entity entity = Objects.requireNonNullElse(thisEntity.getControllingPassenger(), thisEntity);
-        float distanceModifier = entity == thisEntity ? 0.2F : 0.9F;
-
-        Vec3d velocity = entity.getVelocity();
-        float volume = Math.min(1.0F, (float) Math.sqrt(velocity.x * velocity.x * 0.2F + velocity.y * velocity.y + velocity.z * velocity.z * 0.2F) * distanceModifier);
-        if (volume < 0.25F) {
-            thisEntity.playSound(entitySplashSound, volume,
-                    1.0F + (thisEntity.getRandom().nextFloat() - thisEntity.getRandom().nextFloat()) * 0.4F);
-        } else {
-            thisEntity.playSound(entityHighSpeedSplashSound, volume,
-                    1.0F + (thisEntity.getRandom().nextFloat() - thisEntity.getRandom().nextFloat()) * 0.4F);
-        }
-
-        float yPos = (float) MathHelper.floor(thisEntity.getY());
-        for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
-            double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getWorld().addParticleClient(fluidData.bubbleParticle(),
-                    thisEntity.getX() + xOffset,
-                    yPos + 1.0F,
-                    thisEntity.getZ() + yOffset,
-                    velocity.x,
-                    velocity.y - thisEntity.getRandom().nextDouble() * 0.2F,
-                    velocity.z);
-        }
-
-        for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
-            double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getWorld().addParticleClient(fluidData.splashParticle(),
-                    thisEntity.getX() + xOffset,
-                    yPos + 1.0F,
-                    thisEntity.getZ() + yOffset,
-                    velocity.x,
-                    velocity.y,
-                    velocity.z);
-        }
-
-        thisEntity.emitGameEvent(GameEvent.SPLASH);
     }
 }

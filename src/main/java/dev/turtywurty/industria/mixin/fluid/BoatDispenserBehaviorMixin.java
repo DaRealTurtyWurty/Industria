@@ -17,7 +17,7 @@ public class BoatDispenserBehaviorMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$dispenseSilently(boolean original, BlockPointer pointer, ItemStack stack, @Local ServerWorld serverWorld, @Local BlockPos blockPos) {
-        if(original)
+        if (original)
             return true;
 
         FluidData data = FluidData.FLUID_DATA.get(serverWorld.getFluidState(blockPos).getFluid());

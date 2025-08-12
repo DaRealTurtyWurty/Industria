@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class MathUtils {
     public static @Nullable Direction getRelativeDirection(@Nullable Direction direction, @Nullable Direction facing) {
-        if(direction == null || facing == null || direction.getAxis().isVertical())
+        if (direction == null || facing == null || direction.getAxis().isVertical())
             return direction;
 
         Direction relative = direction;

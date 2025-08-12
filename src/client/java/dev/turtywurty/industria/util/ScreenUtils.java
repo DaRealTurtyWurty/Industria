@@ -3,12 +3,9 @@ package dev.turtywurty.industria.util;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-
-import java.util.function.Function;
 
 public class ScreenUtils {
     public static void drawTexture(DrawContext context, Identifier texture, int x, int y, float u, float v, int width, int height) {

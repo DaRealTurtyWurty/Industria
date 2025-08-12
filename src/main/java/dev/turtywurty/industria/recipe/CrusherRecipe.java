@@ -31,7 +31,8 @@ import net.minecraft.world.World;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime) implements Recipe<RecipeSimpleInventory> {
+public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB,
+                            int processTime) implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, World world) {
         return this.input.testForRecipe(input.getStack(0));
@@ -92,7 +93,8 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
     public static class Type implements RecipeType<CrusherRecipe> {
         public static final Type INSTANCE = new Type();
 
-        private Type() {}
+        private Type() {
+        }
 
         @Override
         public String toString() {
@@ -128,7 +130,8 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
         }
     }
 
-    public record CrusherRecipeDisplay(SlotDisplay input, SlotDisplay output, SlotDisplay craftingStation, int processTime) implements RecipeDisplay {
+    public record CrusherRecipeDisplay(SlotDisplay input, SlotDisplay output, SlotDisplay craftingStation,
+                                       int processTime) implements RecipeDisplay {
         public static final MapCodec<CrusherRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
                 instance -> instance.group(
                         SlotDisplay.CODEC.fieldOf("input").forGetter(CrusherRecipeDisplay::input),

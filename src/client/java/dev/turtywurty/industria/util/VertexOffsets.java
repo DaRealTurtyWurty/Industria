@@ -13,7 +13,7 @@ public interface VertexOffsets {
     int NORMAL = getOffset(VertexFormatElement.NORMAL);
 
     private static int getOffset(VertexFormatElement element) {
-        if(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.contains(element)) {
+        if (VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.contains(element)) {
             return VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL.getOffset(element) / 4;
         }
 

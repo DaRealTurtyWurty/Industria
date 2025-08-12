@@ -21,7 +21,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         int rpm = entity.getRecipeRPM();
         float progress = entity.getProgress() / (float) entity.getMaxProgress();
         float prevBowlYRot = this.model.getBowl().yaw;
-        if(progress == 0 || Double.isNaN(progress)) {
+        if (progress == 0 || Double.isNaN(progress)) {
             entity.bowlRotation = 0f;
         } else {
             entity.bowlRotation = (entity.bowlRotation + (rpm / 60f / 20f) * tickDelta) % 360f;

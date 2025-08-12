@@ -14,7 +14,7 @@ public class EndermanEntityMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$teleportTo(boolean original, @Local BlockState blockState) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()

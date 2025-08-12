@@ -11,7 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public record UpgradeStationOpenPayload(BlockPos pos, List<UpgradeStationRecipe> recipes) implements HasPositionPayload {
+public record UpgradeStationOpenPayload(BlockPos pos,
+                                        List<UpgradeStationRecipe> recipes) implements HasPositionPayload {
     public static final Id<UpgradeStationOpenPayload> ID = new Id<>(Industria.id("upgrade_station_open"));
     public static final PacketCodec<RegistryByteBuf, UpgradeStationOpenPayload> CODEC =
             PacketCodec.tuple(BlockPos.PACKET_CODEC, UpgradeStationOpenPayload::pos,

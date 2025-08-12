@@ -41,8 +41,8 @@ public class CrusherBlock extends IndustriaBlock {
 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        if(world.getBlockEntity(pos) instanceof CrusherBlockEntity blockEntity) {
-            if(blockEntity.getProgress() <= 0)
+        if (world.getBlockEntity(pos) instanceof CrusherBlockEntity blockEntity) {
+            if (blockEntity.getProgress() <= 0)
                 return;
 
             ItemStack stack = blockEntity.getWrappedInventoryStorage().getInventory(CrusherBlockEntity.INPUT_SLOT).getStack(0);

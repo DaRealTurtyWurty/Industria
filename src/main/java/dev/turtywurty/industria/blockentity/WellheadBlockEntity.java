@@ -17,7 +17,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
@@ -32,10 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 public class WellheadBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
-    private BlockPos oilPumpJackPos;
     private final Map<BlockPos, Integer> drillTubes = new HashMap<>();
-
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
+    private BlockPos oilPumpJackPos;
 
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.WELLHEAD, pos, state);
@@ -186,17 +184,17 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         return this.drillTubes;
     }
 
-    public void setOilPumpJackPos(@Nullable BlockPos pos) {
-        this.oilPumpJackPos = pos;
-        update();
-    }
-
     public boolean hasOilPumpJack() {
         return this.oilPumpJackPos != null;
     }
 
     public BlockPos getOilPumpJackPos() {
         return this.oilPumpJackPos;
+    }
+
+    public void setOilPumpJackPos(@Nullable BlockPos pos) {
+        this.oilPumpJackPos = pos;
+        update();
     }
 
     @Override

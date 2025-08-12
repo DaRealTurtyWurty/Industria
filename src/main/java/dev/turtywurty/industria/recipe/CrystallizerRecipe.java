@@ -34,7 +34,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid, IndustriaIngredient catalyst,
                                  OutputItemStack output, OutputItemStack byProduct,
-                                 boolean requiresCatalyst, int catalystUses, int processTime) implements Recipe<CrystallizerRecipeInput> {
+                                 boolean requiresCatalyst, int catalystUses,
+                                 int processTime) implements Recipe<CrystallizerRecipeInput> {
     @Override
     public boolean matches(CrystallizerRecipeInput input, World world) {
         FluidStack waterFluid = input.waterFluid();
@@ -147,7 +148,8 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
     public record CrystallizerRecipeDisplay(FluidStack waterFluid, FluidStack crystalFluid,
                                             SlotDisplay catalyst, SlotDisplay craftingStation,
                                             SlotDisplay output, SlotDisplay byProduct,
-                                            boolean requiresCatalyst, int catalystUses, int processTime) implements RecipeDisplay {
+                                            boolean requiresCatalyst, int catalystUses,
+                                            int processTime) implements RecipeDisplay {
         private static final MapCodec<CrystallizerRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 FluidStack.CODEC.fieldOf("water_fluid").forGetter(CrystallizerRecipeDisplay::waterFluid),
                 FluidStack.CODEC.fieldOf("crystal_fluid").forGetter(CrystallizerRecipeDisplay::crystalFluid),

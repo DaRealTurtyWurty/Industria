@@ -26,8 +26,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.storage.ReadView;
@@ -43,14 +41,12 @@ import java.util.List;
 
 public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("induction_heater");
-
-    private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-    private final WrappedHeatStorage<SimpleHeatStorage> heatStorage = new WrappedHeatStorage<>();
-    private final WrappedFluidStorage<SingleFluidStorage> waterStorage = new WrappedFluidStorage<>();
-
     private static final double HEAT_PER_ENERGY = 0.5D;
     private static final double PASSIVE_COOLING = 0.01D;
     private static final double TRANSFER_COEFFICIENT = 0.25D;
+    private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
+    private final WrappedHeatStorage<SimpleHeatStorage> heatStorage = new WrappedHeatStorage<>();
+    private final WrappedFluidStorage<SingleFluidStorage> waterStorage = new WrappedFluidStorage<>();
 
     public InductionHeaterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.INDUCTION_HEATER, BlockEntityTypeInit.INDUCTION_HEATER, pos, state);

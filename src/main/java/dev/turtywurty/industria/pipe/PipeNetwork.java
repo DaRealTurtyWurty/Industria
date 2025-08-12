@@ -29,6 +29,16 @@ public abstract class PipeNetwork<S> {
 
     public static final PacketCodec<RegistryByteBuf, PipeNetwork<?>> PACKET_CODEC =
             PipeNetworkTypeInit.PACKET_CODEC.dispatch(PipeNetwork::getType, PipeNetworkType::packetCodec);
+    public final S storage;
+    protected final Set<BlockPos> pipes = ConcurrentHashMap.newKeySet();
+    protected final Set<BlockPos> connectedBlocks = ConcurrentHashMap.newKeySet();
+    protected final TransferType<S, ?, ?> transferType;
+    protected UUID id;
+    public PipeNetwork(UUID id, TransferType<S, ?, ?> transferType) {
+        this.id = id;
+        this.transferType = transferType;
+        this.storage = createStorage();
+    }
 
     protected static <S, ST, N extends PipeNetwork<S>> MapCodec<N> createCodec(RecordCodecBuilder<N, ST> storageApp, BiConsumer<S, ST> storageModifier, Function<UUID, N> factory) {
         return RecordCodecBuilder.mapCodec(instance ->
@@ -67,18 +77,6 @@ public abstract class PipeNetwork<S> {
 
                     return network;
                 });
-    }
-
-    protected UUID id;
-    protected final Set<BlockPos> pipes = ConcurrentHashMap.newKeySet();
-    protected final Set<BlockPos> connectedBlocks = ConcurrentHashMap.newKeySet();
-    protected final TransferType<S, ?, ?> transferType;
-    public final S storage;
-
-    public PipeNetwork(UUID id, TransferType<S, ?, ?> transferType) {
-        this.id = id;
-        this.transferType = transferType;
-        this.storage = createStorage();
     }
 
     public boolean isOfSameType(@NotNull PipeNetwork<?> storage) {

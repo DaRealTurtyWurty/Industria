@@ -39,7 +39,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                           int processTime) implements Recipe<MixerRecipeInput> {
     @Override
     public boolean matches(MixerRecipeInput input, World world) {
-        if(!input.fluidStack().matches(this.inputFluid) || input.temperature() < this.minTemp || input.temperature() > this.maxTemp)
+        if (!input.fluidStack().matches(this.inputFluid) || input.temperature() < this.minTemp || input.temperature() > this.maxTemp)
             return false;
 
         List<IndustriaIngredient> remainingIngredients = new ArrayList<>(this.inputs);

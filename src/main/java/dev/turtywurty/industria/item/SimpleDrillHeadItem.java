@@ -40,7 +40,7 @@ public class SimpleDrillHeadItem extends Item implements DrillHeadable {
             drillYOffset -= 0.1F;
         }
 
-        if(WorldFluidPocketsState.getServerState((ServerWorld) world).isPositionInPocket(down)) {
+        if (WorldFluidPocketsState.getServerState((ServerWorld) world).isPositionInPocket(down)) {
             blockEntity.setDrilling(false);
             blockEntity.setRetracting(true);
             return drillYOffset - 0.1F;

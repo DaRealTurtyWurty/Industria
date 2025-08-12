@@ -25,6 +25,33 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         super(dataOutput, registryLookup);
     }
 
+    private static void addText(TranslationBuilder translationBuilder, Text text, String value) {
+        if (text.getContent() instanceof TranslatableTextContent translatableTextContent) {
+            translationBuilder.add(translatableTextContent.getKey(), value);
+        } else {
+            throw new IllegalArgumentException("Text must be translatable! " + text);
+        }
+    }
+
+    private static void addTextEnum(TranslationBuilder translationBuilder, TextEnum textEnum, String value) {
+        addText(translationBuilder, textEnum.getAsText(), value);
+    }
+
+    private static void addDamageType(TranslationBuilder translationBuilder, RegistryWrapper.WrapperLookup regLookup, RegistryKey<DamageType> key, String value) {
+        RegistryEntryLookup<DamageType> lookup = regLookup.getOrThrow(RegistryKeys.DAMAGE_TYPE);
+        DamageType damageType = lookup.getOrThrow(key).value();
+        translationBuilder.add("death.attack." + damageType.msgId(), value);
+    }
+
+    private static void addSlurry(TranslationBuilder translationBuilder, Slurry slurry, String value) {
+        Text name = SlurryVariantAttributes.getName(SlurryVariant.of(slurry));
+        if (name.getContent() instanceof TranslatableTextContent translatableTextContent) {
+            translationBuilder.add(translatableTextContent.getKey(), value);
+        } else {
+            throw new IllegalArgumentException("Slurry name must be translatable! " + name);
+        }
+    }
+
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder translationBuilder) {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
@@ -167,32 +194,5 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
 
         translationBuilder.add(BlockInit.CENTRIFUGAL_CONCENTRATOR, "Centrifugal Concentrator");
         addText(translationBuilder, CentrifugalConcentratorBlockEntity.TITLE, "Centrifugal Concentrator");
-    }
-
-    private static void addText(TranslationBuilder translationBuilder, Text text, String value) {
-        if(text.getContent() instanceof TranslatableTextContent translatableTextContent) {
-            translationBuilder.add(translatableTextContent.getKey(), value);
-        } else {
-            throw new IllegalArgumentException("Text must be translatable! " + text);
-        }
-    }
-
-    private static void addTextEnum(TranslationBuilder translationBuilder, TextEnum textEnum, String value) {
-        addText(translationBuilder, textEnum.getAsText(), value);
-    }
-
-    private static void addDamageType(TranslationBuilder translationBuilder, RegistryWrapper.WrapperLookup regLookup, RegistryKey<DamageType> key, String value) {
-        RegistryEntryLookup<DamageType> lookup = regLookup.getOrThrow(RegistryKeys.DAMAGE_TYPE);
-        DamageType damageType = lookup.getOrThrow(key).value();
-        translationBuilder.add("death.attack." + damageType.msgId(), value);
-    }
-
-    private static void addSlurry(TranslationBuilder translationBuilder, Slurry slurry, String value) {
-        Text name = SlurryVariantAttributes.getName(SlurryVariant.of(slurry));
-        if (name.getContent() instanceof TranslatableTextContent translatableTextContent) {
-            translationBuilder.add(translatableTextContent.getKey(), value);
-        } else {
-            throw new IllegalArgumentException("Slurry name must be translatable! " + name);
-        }
     }
 }

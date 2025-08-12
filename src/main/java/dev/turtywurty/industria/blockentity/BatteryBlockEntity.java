@@ -26,9 +26,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.storage.ReadView;
@@ -59,7 +57,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         this.batteryLevel = block.getLevel();
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
-        if(this.batteryLevel != BatteryBlock.BatteryLevel.CREATIVE)
+        if (this.batteryLevel != BatteryBlock.BatteryLevel.CREATIVE)
             this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(), this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer()));
         else
             this.wrappedEnergyStorage.addStorage(new InfiniteEnergyStorage());
@@ -71,7 +69,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         List<SyncableStorage> storages = new ArrayList<>();
         storages.add(input);
-        if(batteryLevel != BatteryBlock.BatteryLevel.CREATIVE) {
+        if (batteryLevel != BatteryBlock.BatteryLevel.CREATIVE) {
             storages.add(energy);
         }
 

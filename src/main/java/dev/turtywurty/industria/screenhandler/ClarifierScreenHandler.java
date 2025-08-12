@@ -35,7 +35,7 @@ public class ClarifierScreenHandler extends IndustriaScreenHandler<ClarifierBloc
     @Override
     protected void addBlockEntitySlots(PlayerInventory playerInventory) {
         SimpleInventory inventory = this.wrappedInventoryStorage.getInventory(0);
-        addSlot(new OutputSlot(inventory, 0, 134,60));
+        addSlot(new OutputSlot(inventory, 0, 134, 60));
     }
 
     @Override

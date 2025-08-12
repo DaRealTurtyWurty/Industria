@@ -49,14 +49,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -321,7 +317,8 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
-        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
 
         this.progress = view.getInt("Progress", 0);
 

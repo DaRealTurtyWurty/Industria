@@ -76,7 +76,7 @@ public class StateProperties {
     }
 
     public @Nullable BlockState applyDefaults(@Nullable BlockState state) {
-        if(state == null)
+        if (state == null)
             return null;
 
         for (StateProperty<?> property : this.properties.values()) {

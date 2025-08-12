@@ -51,7 +51,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     @Override
     protected void postRender(ShakingTableBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         super.postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-        if(DebugRenderingRegistry.debugRendering) {
+        if (DebugRenderingRegistry.debugRendering) {
             Box shakeBox = entity.createShakeBox();
             shakeBox = shakeBox.offset(-entity.getPos().getX(), -entity.getPos().getY(), -entity.getPos().getZ());
             if (shakeBox != null) {
@@ -68,7 +68,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
 
     private void renderSurfaceFluid(ShakingTableBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float shakeOffset) {
         float progress = entity.getProgress() / (float) entity.getMaxProgress();
-        if(progress <= 0.0f)
+        if (progress <= 0.0f)
             return;
 
         float width = 35f / 16f;
@@ -93,7 +93,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),
-                x1, -4/16f, -2.0f - 2f / 16f,
+                x1, -4 / 16f, -2.0f - 2f / 16f,
                 x2Start, height, 1 + 2f / 16f,
                 0xFFFFFFFF, ColorMode.MULTIPLICATION,
                 IndeterminateBoolean.TRUE);

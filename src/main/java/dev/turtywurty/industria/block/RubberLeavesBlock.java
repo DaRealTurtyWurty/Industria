@@ -30,12 +30,11 @@ import net.minecraft.world.tick.ScheduledTickView;
 import java.util.OptionalInt;
 
 public class RubberLeavesBlock extends Block implements Waterloggable {
-    public static final MapCodec<RubberLeavesBlock> CODEC = createCodec(RubberLeavesBlock::new);
-
     public static final int DECAY_DISTANCE = 13;
     public static final IntProperty DISTANCE = IntProperty.of("distance", 1, DECAY_DISTANCE);
     public static final BooleanProperty PERSISTENT = Properties.PERSISTENT;
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    public static final MapCodec<RubberLeavesBlock> CODEC = createCodec(RubberLeavesBlock::new);
     private static final int TICK_DELAY = 1;
 
     public RubberLeavesBlock(Settings settings) {
@@ -55,6 +54,37 @@ public class RubberLeavesBlock extends Block implements Waterloggable {
                 .with(DISTANCE, DECAY_DISTANCE)
                 .with(PERSISTENT, Boolean.FALSE)
                 .with(WATERLOGGED, Boolean.FALSE));
+    }
+
+    private static BlockState updateDistanceFromLogs(BlockState state, WorldAccess world, BlockPos pos) {
+        int distance = DECAY_DISTANCE;
+        var mutable = new BlockPos.Mutable();
+
+        for (Direction direction : Direction.values()) {
+            mutable.set(pos, direction);
+            distance = Math.min(distance, getDistanceFromLog(world.getBlockState(mutable)) + 1);
+            if (distance == 1) {
+                break;
+            }
+        }
+
+        return state.with(DISTANCE, distance);
+    }
+
+    private static int getDistanceFromLog(BlockState state) {
+        return getOptionalDistanceFromLog(state).orElse(DECAY_DISTANCE);
+    }
+
+    public static OptionalInt getOptionalDistanceFromLog(BlockState state) {
+        if (state.isIn(BlockTags.LOGS)) {
+            return OptionalInt.of(0);
+        } else if (state.contains(DISTANCE)) {
+            return OptionalInt.of(state.get(DISTANCE));
+        } else if (state.contains(LeavesBlock.DISTANCE)) {
+            return OptionalInt.of(state.get(LeavesBlock.DISTANCE));
+        } else {
+            return OptionalInt.empty();
+        }
     }
 
     @Override
@@ -107,37 +137,6 @@ public class RubberLeavesBlock extends Block implements Waterloggable {
         }
 
         return state;
-    }
-
-    private static BlockState updateDistanceFromLogs(BlockState state, WorldAccess world, BlockPos pos) {
-        int distance = DECAY_DISTANCE;
-        var mutable = new BlockPos.Mutable();
-
-        for (Direction direction : Direction.values()) {
-            mutable.set(pos, direction);
-            distance = Math.min(distance, getDistanceFromLog(world.getBlockState(mutable)) + 1);
-            if (distance == 1) {
-                break;
-            }
-        }
-
-        return state.with(DISTANCE, distance);
-    }
-
-    private static int getDistanceFromLog(BlockState state) {
-        return getOptionalDistanceFromLog(state).orElse(DECAY_DISTANCE);
-    }
-
-    public static OptionalInt getOptionalDistanceFromLog(BlockState state) {
-        if (state.isIn(BlockTags.LOGS)) {
-            return OptionalInt.of(0);
-        } else if (state.contains(DISTANCE)) {
-            return OptionalInt.of(state.get(DISTANCE));
-        } else if (state.contains(LeavesBlock.DISTANCE)) {
-            return OptionalInt.of(state.get(LeavesBlock.DISTANCE));
-        } else {
-            return OptionalInt.empty();
-        }
     }
 
     @Override

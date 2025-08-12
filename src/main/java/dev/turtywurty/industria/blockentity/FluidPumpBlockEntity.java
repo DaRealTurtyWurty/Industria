@@ -24,8 +24,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
@@ -54,6 +52,30 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         super(BlockInit.FLUID_PUMP, BlockEntityTypeInit.FLUID_PUMP, pos, state);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.SOUTH);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0), Direction.UP);
+    }
+
+    private static @Nullable FluidState getMostCommon(Map<Direction, FluidState> fluidStateMap) {
+        FluidState mostCommon = null;
+        int mostCommonCount = 0;
+
+        for (FluidState state : fluidStateMap.values()) {
+            int count = 0;
+            for (FluidState value : fluidStateMap.values()) {
+                if (value.getFluid() == state.getFluid())
+                    count++;
+            }
+
+            if (count > mostCommonCount) {
+                mostCommon = state;
+                mostCommonCount = count;
+            }
+        }
+
+        return mostCommon;
+    }
+
+    private static boolean isEmpty(SingleFluidStorage storage) {
+        return storage.amount <= 0 || storage.isResourceBlank();
     }
 
     @Override
@@ -130,30 +152,6 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
                 update();
             }
         }
-    }
-
-    private static @Nullable FluidState getMostCommon(Map<Direction, FluidState> fluidStateMap) {
-        FluidState mostCommon = null;
-        int mostCommonCount = 0;
-
-        for (FluidState state : fluidStateMap.values()) {
-            int count = 0;
-            for (FluidState value : fluidStateMap.values()) {
-                if (value.getFluid() == state.getFluid())
-                    count++;
-            }
-
-            if (count > mostCommonCount) {
-                mostCommon = state;
-                mostCommonCount = count;
-            }
-        }
-
-        return mostCommon;
-    }
-
-    private static boolean isEmpty(SingleFluidStorage storage) {
-        return storage.amount <= 0 || storage.isResourceBlank();
     }
 
     @Override

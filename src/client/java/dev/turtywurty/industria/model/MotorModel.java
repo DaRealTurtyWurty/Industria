@@ -49,5 +49,6 @@ public class MotorModel extends Model {
         return this.parts;
     }
 
-    public record MotorParts(ModelPart main, ModelPart spinRod) {}
+    public record MotorParts(ModelPart main, ModelPart spinRod) {
+    }
 }

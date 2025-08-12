@@ -14,7 +14,8 @@ public interface TickOperation<T extends IndustriaBlockEntity<T>, F extends Bloc
         public static final Empty<?, ?> INSTANCE = new Empty<>();
 
         @Override
-        public void run(T blockEntity, F fields) {}
+        public void run(T blockEntity, F fields) {
+        }
     }
 
     class Default<T extends IndustriaBlockEntity<T>, F extends BlockEntityFields<T>> implements TickOperation<T, F> {

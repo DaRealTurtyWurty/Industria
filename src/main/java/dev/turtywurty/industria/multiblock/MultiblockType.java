@@ -80,20 +80,18 @@ public class MultiblockType<T extends BlockEntity> {
 
     public static class Builder<T extends BlockEntity> {
         private final int numBlocks;
+        private final Map<Direction, VoxelShape> shapes = new HashMap<>();
         private boolean hasDirectionProperty = true;
         private QuadConsumer<World, PlayerEntity, BlockHitResult, BlockPos> onPrimaryBlockUse = (world, player, hitResult, pos) -> {
             if (world.getBlockEntity(pos) instanceof NamedScreenHandlerFactory blockEntity) {
                 player.openHandledScreen(blockEntity);
             }
         };
-
         private BiConsumer<World, BlockPos> onMultiblockBreak = (world, pos) -> {
             if (world.getBlockEntity(pos) instanceof Multiblockable blockEntity) {
                 blockEntity.breakMultiblock(world, pos);
             }
         };
-
-        private final Map<Direction, VoxelShape> shapes = new HashMap<>();
         private Function3<WorldView, BlockPos, Direction, VoxelShape> shapeFactory =
                 (world, pos, direction) -> shapes.get(direction);
 

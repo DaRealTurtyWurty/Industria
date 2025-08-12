@@ -27,24 +27,9 @@ public class WellheadBlock extends IndustriaBlock {
                         .shouldTick()));
     }
 
-    @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack);
-        loadDrillTubes(world, pos);
-    }
-
-    @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        if(direction == Direction.DOWN) {
-            loadDrillTubes(world, pos);
-        }
-
-        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-    }
-
     private static void loadDrillTubes(WorldView world, BlockPos pos) {
         List<BlockPos> positions = findDrillTubes(world, pos);
-        if(!positions.isEmpty() && world.getBlockEntity(pos) instanceof WellheadBlockEntity wellheadBlockEntity) {
+        if (!positions.isEmpty() && world.getBlockEntity(pos) instanceof WellheadBlockEntity wellheadBlockEntity) {
             wellheadBlockEntity.modifyDrillTubes(positions);
         }
     }
@@ -65,5 +50,20 @@ public class WellheadBlock extends IndustriaBlock {
         }
 
         return drillTubes;
+    }
+
+    @Override
+    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        super.onPlaced(world, pos, state, placer, itemStack);
+        loadDrillTubes(world, pos);
+    }
+
+    @Override
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        if (direction == Direction.DOWN) {
+            loadDrillTubes(world, pos);
+        }
+
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 }

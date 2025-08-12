@@ -24,22 +24,22 @@ public class RotaryKilnBlockItem extends BlockItem {
         BlockState infrontState = context.getWorld().getBlockState(infrontPos);
 
         BlockState toPlace;
-        if(infrontState.isOf(BlockInit.ROTARY_KILN)) {
+        if (infrontState.isOf(BlockInit.ROTARY_KILN)) {
             int segmentIndex = infrontState.get(RotaryKilnBlock.SEGMENT_INDEX);
-            if(segmentIndex < 15) {
+            if (segmentIndex < 15) {
                 toPlace = infrontState.with(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex + 1);
             } else {
                 toPlace = BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState();
             }
-        } else if(infrontState.isOf(BlockInit.ROTARY_KILN_CONTROLLER)) {
+        } else if (infrontState.isOf(BlockInit.ROTARY_KILN_CONTROLLER)) {
             toPlace = BlockInit.ROTARY_KILN.getDefaultState().with(RotaryKilnBlock.SEGMENT_INDEX, 1);
         } else {
             toPlace = BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState();
         }
 
-        if(toPlace.getBlock() != BlockInit.ROTARY_KILN_CONTROLLER) {
+        if (toPlace.getBlock() != BlockInit.ROTARY_KILN_CONTROLLER) {
             BlockPos controllerPos = infrontPos.offset(facing, toPlace.get(RotaryKilnBlock.SEGMENT_INDEX) - 1);
-            if(context.getWorld().getBlockEntity(controllerPos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
+            if (context.getWorld().getBlockEntity(controllerPos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
                 blockEntity.addKilnSegment(context.getBlockPos());
             }
         }

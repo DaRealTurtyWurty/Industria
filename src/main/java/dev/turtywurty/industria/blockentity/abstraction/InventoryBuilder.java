@@ -15,7 +15,7 @@ public class InventoryBuilder {
     private ItemStack[] stacks;
 
     public InventoryBuilder(int size) {
-        if(size <= 0) {
+        if (size <= 0) {
             throw new IllegalArgumentException("Size must be greater than 0!");
         }
 

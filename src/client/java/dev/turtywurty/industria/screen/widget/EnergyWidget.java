@@ -14,9 +14,9 @@ import java.util.function.Consumer;
 public class EnergyWidget implements Drawable, Widget {
     private final EnergyStorage energyStorage;
     private final int width, height;
+    private final Orientation orientation;
     private int x, y;
     private int color;
-    private final Orientation orientation;
 
     public EnergyWidget(EnergyStorage energyStorage, int x, int y, int width, int height, int color, Orientation orientation) {
         this.energyStorage = energyStorage;
@@ -26,6 +26,10 @@ public class EnergyWidget implements Drawable, Widget {
         this.height = height;
         this.color = color;
         this.orientation = orientation;
+    }
+
+    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
+        return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
     }
 
     @Override
@@ -63,23 +67,23 @@ public class EnergyWidget implements Drawable, Widget {
     }
 
     @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    @Override
     public int getX() {
         return this.x;
     }
 
     @Override
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    @Override
     public int getY() {
         return this.y;
+    }
+
+    @Override
+    public void setY(int y) {
+        this.y = y;
     }
 
     @Override
@@ -92,12 +96,12 @@ public class EnergyWidget implements Drawable, Widget {
         return this.height;
     }
 
-    public void setColor(int color) {
-        this.color = color;
-    }
-
     public int getColor() {
         return this.color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 
     public EnergyStorage getEnergyStorage() {
@@ -105,10 +109,12 @@ public class EnergyWidget implements Drawable, Widget {
     }
 
     @Override
-    public void forEachChild(Consumer<ClickableWidget> consumer) {}
+    public void forEachChild(Consumer<ClickableWidget> consumer) {
+    }
 
-    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
-        return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
+    public enum Orientation {
+        VERTICAL,
+        HORIZONTAL
     }
 
     public static class Builder {
@@ -175,10 +181,5 @@ public class EnergyWidget implements Drawable, Widget {
         public EnergyWidget build() {
             return new EnergyWidget(energyStorage, x, y, width, height, color, orientation);
         }
-    }
-
-    public enum Orientation {
-        VERTICAL,
-        HORIZONTAL
     }
 }

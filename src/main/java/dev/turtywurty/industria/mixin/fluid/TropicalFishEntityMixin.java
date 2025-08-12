@@ -18,7 +18,7 @@ public class TropicalFishEntityMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private static boolean industria$canTropicalFishSpawn$0(boolean original, EntityType<TropicalFishEntity> type, WorldAccess world, SpawnReason reason, BlockPos pos, Random random) {
-        if(original)
+        if (original)
             return true;
 
         FluidState fluidState = world.getFluidState(pos.down());
@@ -31,7 +31,7 @@ public class TropicalFishEntityMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/block/BlockState;isOf(Lnet/minecraft/block/Block;)Z"))
     private static boolean industria$canTropicalFishSpawn$1(boolean original, EntityType<TropicalFishEntity> type, WorldAccess world, SpawnReason reason, BlockPos pos, Random random) {
-        if(original)
+        if (original)
             return true;
 
         FluidState fluidState = world.getFluidState(pos.up());

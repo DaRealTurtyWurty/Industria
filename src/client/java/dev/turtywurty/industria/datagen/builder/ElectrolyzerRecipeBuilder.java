@@ -15,9 +15,9 @@ public class ElectrolyzerRecipeBuilder {
     private final int processTime, energyCost, temperature;
 
     public ElectrolyzerRecipeBuilder(IndustriaIngredient input, IndustriaIngredient anode, IndustriaIngredient cathode,
-                                      IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
-                                      FluidStack outputFluid, GasStack outputGas,
-                                      int processTime, int energyCost, int temperature) {
+                                     IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
+                                     FluidStack outputFluid, GasStack outputGas,
+                                     int processTime, int energyCost, int temperature) {
         this.input = input;
         this.anode = anode;
         this.cathode = cathode;

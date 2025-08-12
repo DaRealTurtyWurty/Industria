@@ -46,6 +46,26 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
         this(entries, StackData.create(count, components));
     }
 
+    public static Predicate<Integer> countEquals(int count) {
+        return value -> value == count;
+    }
+
+    public static Predicate<Integer> countLessThan(int count) {
+        return value -> value < count;
+    }
+
+    public static Predicate<Integer> countLessThanOrEquals(int count) {
+        return value -> value <= count;
+    }
+
+    public static Predicate<Integer> countGreaterThan(int count) {
+        return value -> value > count;
+    }
+
+    public static Predicate<Integer> countGreaterThanOrEquals(int count) {
+        return value -> value >= count;
+    }
+
     public List<ItemStack> getMatchingStacks() {
         return this.entries.stream().map(item -> new ItemStack(item, this.stackData.count(), this.stackData.components())).toList();
     }
@@ -78,28 +98,8 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
                         this.stackData.components().equals(stack.getComponentChanges()));
     }
 
-    public static Predicate<Integer> countEquals(int count) {
-        return value -> value == count;
-    }
-
-    public static Predicate<Integer> countLessThan(int count) {
-        return value -> value < count;
-    }
-
-    public static Predicate<Integer> countLessThanOrEquals(int count) {
-        return value -> value <= count;
-    }
-
-    public static Predicate<Integer> countGreaterThan(int count) {
-        return value -> value > count;
-    }
-
-    public static Predicate<Integer> countGreaterThanOrEquals(int count) {
-        return value -> value >= count;
-    }
-
     public SlotDisplay toDisplay() {
-        if(isEmpty())
+        if (isEmpty())
             return SlotDisplay.EmptySlotDisplay.INSTANCE;
 
         return new SlotDisplay.CompositeSlotDisplay(

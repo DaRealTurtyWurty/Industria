@@ -24,7 +24,7 @@ public class BlockEntityFields<B extends IndustriaBlockEntity<B>> {
 
     public <T> BlockEntityField<T, B> getField(String name, Class<T> type) {
         try {
-            if(!containsField(name)) {
+            if (!containsField(name)) {
                 throw new IllegalArgumentException("Field with name '" + name + "' does not exist");
             }
 
@@ -33,7 +33,7 @@ public class BlockEntityFields<B extends IndustriaBlockEntity<B>> {
                 throw new IllegalArgumentException("Field with name '" + name + "' does not exist");
             }
 
-            if(type.isInstance(field.getDefaultValue())) {
+            if (type.isInstance(field.getDefaultValue())) {
                 //noinspection unchecked
                 return (BlockEntityField<T, B>) field;
             } else {

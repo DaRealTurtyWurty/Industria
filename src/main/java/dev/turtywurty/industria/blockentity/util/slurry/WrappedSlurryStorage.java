@@ -6,10 +6,6 @@ import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 
@@ -37,7 +33,7 @@ public class WrappedSlurryStorage<T extends Storage<SlurryVariant>> extends Wrap
     @Override
     public void writeData(WriteView view) {
         for (T tank : this.storages) {
-            if(tank instanceof SingleSlurryStorage singleSlurryStorage) {
+            if (tank instanceof SingleSlurryStorage singleSlurryStorage) {
                 view.putLong("Amount", singleSlurryStorage.getAmount());
                 view.put("Slurry", SlurryVariant.CODEC, singleSlurryStorage.getResource());
             }

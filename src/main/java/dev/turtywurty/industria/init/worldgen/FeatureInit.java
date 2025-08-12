@@ -16,5 +16,6 @@ public class FeatureInit {
         return Registry.register(Registries.FEATURE, Industria.id(name), feature);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

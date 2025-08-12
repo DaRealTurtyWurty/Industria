@@ -19,7 +19,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/entity/player/PlayerEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$updateTurtleHelmet(boolean original) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()
@@ -31,7 +31,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/entity/player/PlayerEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getBlockBreakingSpeed(boolean original) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()

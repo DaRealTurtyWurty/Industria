@@ -50,9 +50,9 @@ public interface WireframeExtractor {
     }
 
     record Line(float x1, float y1, float z1,
-                       float x2, float y2, float z2,
-                       float normalX, float normalY, float normalZ,
-                       int hash) {
+                float x2, float y2, float z2,
+                float normalX, float normalY, float normalZ,
+                int hash) {
         /**
          * Creates a line from two points.
          * The normal of the line is calculated by normalizing the vector from the first point to the second point.

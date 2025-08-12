@@ -54,6 +54,18 @@ public class WorldFluidPocketsState extends PersistentState {
         return persistentStateManager.getOrCreate(TYPE);
     }
 
+    public static SyncFluidPocketsPayload createSyncPacket(ServerWorld world) {
+        return new SyncFluidPocketsPayload(getServerState(world).fluidPockets);
+    }
+
+    public static void sync(ServerWorld world) {
+        List<ServerPlayerEntity> players = world.getPlayers();
+        if (!players.isEmpty()) {
+            SyncFluidPocketsPayload payload = WorldFluidPocketsState.createSyncPacket(world);
+            players.forEach(player -> ServerPlayNetworking.send(player, payload));
+        }
+    }
+
     public void addFluidPocket(FluidPocket fluidPocket) {
         if (fluidPocket.isEmpty())
             return;
@@ -98,18 +110,6 @@ public class WorldFluidPocketsState extends PersistentState {
         return List.of();
     }
 
-    public static SyncFluidPocketsPayload createSyncPacket(ServerWorld world) {
-        return new SyncFluidPocketsPayload(getServerState(world).fluidPockets);
-    }
-
-    public static void sync(ServerWorld world) {
-        List<ServerPlayerEntity> players = world.getPlayers();
-        if (!players.isEmpty()) {
-            SyncFluidPocketsPayload payload = WorldFluidPocketsState.createSyncPacket(world);
-            players.forEach(player -> ServerPlayNetworking.send(player, payload));
-        }
-    }
-
     public boolean isPositionInPocket(BlockPos pos) {
         return this.fluidPockets.stream().anyMatch(fluidPocket -> fluidPocket.fluidPositions().containsKey(pos));
     }
@@ -125,6 +125,18 @@ public class WorldFluidPocketsState extends PersistentState {
     }
 
     public static class FluidPocket {
+        public static final PacketCodec<RegistryByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_PACKET_CODEC =
+                PacketCodecs.map(HashMap::new, ExtraPacketCodecs.BLOCK_POS_STRING_CODEC, PacketCodecs.INTEGER);
+        public static final PacketCodec<RegistryByteBuf, FluidPocket> PACKET_CODEC = PacketCodec.tuple(
+                PacketCodecs.registryCodec(FluidState.CODEC), FluidPocket::fluidState,
+                FLUID_POSITIONS_PACKET_CODEC, FluidPocket::fluidPositions,
+                FluidPocket::new);
+        private static final Codec<Map<BlockPos, Integer>> FLUID_POSITIONS_CODEC =
+                Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT);
+        public static final Codec<FluidPocket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                FluidState.CODEC.fieldOf("FluidState").forGetter(FluidPocket::fluidState),
+                FLUID_POSITIONS_CODEC.fieldOf("FluidPositions").forGetter(FluidPocket::fluidPositions)
+        ).apply(instance, FluidPocket::new));
         private final FluidState fluidState;
         private final Map<BlockPos, Integer> fluidPositions = new HashMap<>();
         private int minX, minY, minZ, maxX, maxY, maxZ;
@@ -177,22 +189,6 @@ public class WorldFluidPocketsState extends PersistentState {
             return this.fluidAmount;
         }
 
-        private static final Codec<Map<BlockPos, Integer>> FLUID_POSITIONS_CODEC =
-                Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT);
-
-        public static final PacketCodec<RegistryByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_PACKET_CODEC =
-                PacketCodecs.map(HashMap::new, ExtraPacketCodecs.BLOCK_POS_STRING_CODEC, PacketCodecs.INTEGER);
-
-        public static final Codec<FluidPocket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                FluidState.CODEC.fieldOf("FluidState").forGetter(FluidPocket::fluidState),
-                FLUID_POSITIONS_CODEC.fieldOf("FluidPositions").forGetter(FluidPocket::fluidPositions)
-        ).apply(instance, FluidPocket::new));
-
-        public static final PacketCodec<RegistryByteBuf, FluidPocket> PACKET_CODEC = PacketCodec.tuple(
-                PacketCodecs.registryCodec(FluidState.CODEC), FluidPocket::fluidState,
-                FLUID_POSITIONS_PACKET_CODEC, FluidPocket::fluidPositions,
-                FluidPocket::new);
-
         public boolean isEmpty() {
             return this.fluidPositions.isEmpty() || this.fluidState.isEmpty() || this.fluidAmount <= 0;
         }
@@ -200,7 +196,7 @@ public class WorldFluidPocketsState extends PersistentState {
         public long extractFluid(long amount) {
             long originalAmount = this.fluidAmount;
 
-            if(amount > this.fluidAmount)
+            if (amount > this.fluidAmount)
                 amount = this.fluidAmount;
 
             Map<BlockPos, Integer> nonEmptyPositions = new HashMap<>();
@@ -210,7 +206,7 @@ public class WorldFluidPocketsState extends PersistentState {
                 }
             }
 
-            while(!nonEmptyPositions.isEmpty() && amount > 0) {
+            while (!nonEmptyPositions.isEmpty() && amount > 0) {
                 int randomIndex = ThreadLocalRandom.current().nextInt(nonEmptyPositions.size());
                 BlockPos randomPos = (BlockPos) nonEmptyPositions.keySet().toArray()[randomIndex];
                 int fluidAmount = nonEmptyPositions.get(randomPos);

@@ -107,20 +107,6 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
 
     public static class Serializer implements RecipeSerializer<ElectrolyzerRecipe> {
         public static final Serializer INSTANCE = new Serializer();
-
-        private static final MapCodec<ElectrolyzerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                IndustriaIngredient.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipe::input),
-                IndustriaIngredient.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipe::anode),
-                IndustriaIngredient.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipe::cathode),
-                IndustriaIngredient.CODEC.fieldOf("electrolyte_item").forGetter(ElectrolyzerRecipe::electrolyteItem),
-                FluidStack.CODEC.fieldOf("electrolyte_fluid").forGetter(ElectrolyzerRecipe::electrolyteFluid),
-                FluidStack.CODEC.fieldOf("output_fluid").forGetter(ElectrolyzerRecipe::outputFluid),
-                GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipe::outputGas),
-                Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipe::processTime),
-                Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipe::energyCost),
-                Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature)
-        ).apply(instance, ElectrolyzerRecipe::new));
-
         public static final PacketCodec<RegistryByteBuf, ElectrolyzerRecipe> PACKET_CODEC = ExtraPacketCodecs.tuple(
                 IndustriaIngredient.PACKET_CODEC, ElectrolyzerRecipe::input,
                 IndustriaIngredient.PACKET_CODEC, ElectrolyzerRecipe::anode,
@@ -133,6 +119,18 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
                 PacketCodecs.INTEGER, ElectrolyzerRecipe::energyCost,
                 PacketCodecs.INTEGER, ElectrolyzerRecipe::temperature,
                 ElectrolyzerRecipe::new);
+        private static final MapCodec<ElectrolyzerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                IndustriaIngredient.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipe::input),
+                IndustriaIngredient.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipe::anode),
+                IndustriaIngredient.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipe::cathode),
+                IndustriaIngredient.CODEC.fieldOf("electrolyte_item").forGetter(ElectrolyzerRecipe::electrolyteItem),
+                FluidStack.CODEC.fieldOf("electrolyte_fluid").forGetter(ElectrolyzerRecipe::electrolyteFluid),
+                FluidStack.CODEC.fieldOf("output_fluid").forGetter(ElectrolyzerRecipe::outputFluid),
+                GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipe::outputGas),
+                Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipe::processTime),
+                Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipe::energyCost),
+                Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature)
+        ).apply(instance, ElectrolyzerRecipe::new));
 
         @Override
         public MapCodec<ElectrolyzerRecipe> codec() {

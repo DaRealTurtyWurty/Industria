@@ -22,7 +22,7 @@ public abstract class FallingBlockEntityMixin extends Entity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$tick(boolean original, @Local BlockPos blockPos) {
-        if(original)
+        if (original)
             return true;
 
         FluidState fluidState = getWorld().getFluidState(blockPos);

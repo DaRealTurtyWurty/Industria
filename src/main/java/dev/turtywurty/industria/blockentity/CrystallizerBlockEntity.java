@@ -33,12 +33,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -76,9 +74,6 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     private ItemStack byproductItemStack = ItemStack.EMPTY;
     private int catalystUsesLeft;
     private int maxCatalystUses;
-
-    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
-
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -107,6 +102,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
             return 4;
         }
     };
+    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
 
     public CrystallizerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CRYSTALLIZER, BlockEntityTypeInit.CRYSTALLIZER, pos, state);

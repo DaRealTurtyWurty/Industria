@@ -36,7 +36,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         Direction left = facing.rotateYCounterclockwise();
         Vec3i facingVector = facing.getVector();
         Vec3i leftVector = left.getVector();
-        if(true)
+        if (true)
             return;
 
         float rotation = (entity.getWorld().getTime() % 360) * 0.1F;
@@ -55,14 +55,14 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
                 float progress = recipe.getProgress() / 100F;
 
                 float baseXOffset = facingVector.getX() * (index - 1);
-                if(facingVector.getX() != 0) {
+                if (facingVector.getX() != 0) {
                     baseXOffset += facingVector.getX() * progress;
                 }
 
                 float baseYOffset = 0.375f - leftVector.getY() * (index - 1);
 
                 float baseZOffset = facingVector.getZ() * (index - 1);
-                if(facingVector.getZ() != 0) {
+                if (facingVector.getZ() != 0) {
                     baseZOffset += facingVector.getZ() * progress;
                 }
 

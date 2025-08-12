@@ -78,14 +78,6 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         createShapeCache();
     }
 
-    public PipeNetworkManager<S, N> getNetworkManager(ServerWorld world) {
-        return WorldPipeNetworks.getOrCreate(world).getNetworkManager(getTransferType());
-    }
-
-    public TransferType<S, ?, A> getTransferType() {
-        return this.transferType;
-    }
-
     private static VoxelShape createCableShape(Direction direction, int diameter) {
         double min = diameter / 16.0;
         double max = 1 - min;
@@ -127,6 +119,14 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     protected static int calculateShapeIndex(ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
         int size = ConnectorType.VALUES.length;
         return ((((south.ordinal() * size + north.ordinal()) * size + west.ordinal()) * size + east.ordinal()) * size + up.ordinal()) * size + down.ordinal();
+    }
+
+    public PipeNetworkManager<S, N> getNetworkManager(ServerWorld world) {
+        return WorldPipeNetworks.getOrCreate(world).getNetworkManager(getTransferType());
+    }
+
+    public TransferType<S, ?, A> getTransferType() {
+        return this.transferType;
     }
 
     protected void createShapeCache() {
@@ -224,7 +224,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
-        if(!world.isClient() && world instanceof ServerWorld serverWorld) {
+        if (!world.isClient() && world instanceof ServerWorld serverWorld) {
             getNetworkManager(serverWorld).placePipe(serverWorld, pos);
         }
 
@@ -235,7 +235,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
     @Override
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
         BlockState newState = world.getBlockState(pos);
-        if(!state.isOf(newState.getBlock()) && !world.isClient()) {
+        if (!state.isOf(newState.getBlock()) && !world.isClient()) {
             getNetworkManager(world).removePipe(world, pos);
         }
 
@@ -258,13 +258,13 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         if (player.getMainHandStack().getItem() instanceof BlockItem)
             return ActionResult.PASS;
 
-        if(world instanceof ServerWorld serverWorld) {
+        if (world instanceof ServerWorld serverWorld) {
             PipeNetworkManager<S, N> networkManager = getNetworkManager(serverWorld);
             PipeNetwork<S> network = networkManager.getNetwork(pos);
             if (network == null) {
                 networkManager.traverseCreateNetwork(serverWorld, pos);
                 network = networkManager.getNetwork(pos);
-                if(network == null)
+                if (network == null)
                     return ActionResult.PASS;
             }
 
@@ -286,7 +286,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
                 capacityStr = scientific.format(capacity);
             }
 
-            if(!(this instanceof HeatPipeBlock)) {
+            if (!(this instanceof HeatPipeBlock)) {
                 player.sendMessage(Text.literal("Pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
                         .append(Text.literal(amountStr + " " + getUnit() + " / " + capacityStr + " " + getUnit())
                                 .formatted(Formatting.GREEN)), true);

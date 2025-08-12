@@ -21,6 +21,10 @@ import net.minecraft.world.WorldView;
 import java.util.function.Supplier;
 
 public abstract class MoltenFluid extends IndustriaFluid {
+    public MoltenFluid(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+        super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
+    }
+
     public void randomDisplayTick(World world, BlockPos pos, FluidState state, Random random) {
         BlockPos blockPos = pos.up();
         if (world.getBlockState(blockPos).isAir() && !world.getBlockState(blockPos).isOpaqueFullCube()) {
@@ -44,7 +48,7 @@ public abstract class MoltenFluid extends IndustriaFluid {
             if (fireChance > 0) {
                 BlockPos blockPos = pos;
 
-                for(int j = 0; j < fireChance; ++j) {
+                for (int j = 0; j < fireChance; ++j) {
                     blockPos = blockPos.add(random.nextInt(2) - 1, 1, random.nextInt(2) - 1);
                     if (!world.isPosLoaded(blockPos)) {
                         return;
@@ -61,7 +65,7 @@ public abstract class MoltenFluid extends IndustriaFluid {
                     }
                 }
             } else {
-                for(int k = 0; k < 2; ++k) {
+                for (int k = 0; k < 2; ++k) {
                     BlockPos blockPos2 = pos.add(random.nextInt(2) - 1, 0, random.nextInt(2) - 1);
                     if (!world.isPosLoaded(blockPos2)) {
                         return;
@@ -90,10 +94,6 @@ public abstract class MoltenFluid extends IndustriaFluid {
 
     private boolean hasBurnableBlock(WorldView world, BlockPos pos) {
         return (!world.isInHeightLimit(pos.getY()) || world.isChunkLoaded(pos)) && world.getBlockState(pos).isBurnable();
-    }
-
-    public MoltenFluid(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
-        super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
     }
 
     public static class Still extends MoltenFluid {

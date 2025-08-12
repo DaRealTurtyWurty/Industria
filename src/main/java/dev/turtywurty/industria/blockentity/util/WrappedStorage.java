@@ -1,8 +1,6 @@
 package dev.turtywurty.industria.blockentity.util;
 
-import dev.turtywurty.industria.util.NBTSerializable;
 import dev.turtywurty.industria.util.ValueIOSerializable;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;

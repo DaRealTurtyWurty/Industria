@@ -30,14 +30,12 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     private final int scrollBarX, scrollBarY, scrollBarWidth, scrollBarHandleHeight;
 
     private final List<T> recipes = new ArrayList<>();
-    private @Nullable T selectedRecipe;
     private final Function<T, ItemStack> outputFunction;
     private final BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected;
     private final List<Consumer<T>> recipeListeners = new ArrayList<>();
-
     private final int columnCount, rowCount;
     private final boolean lockable;
-
+    private @Nullable T selectedRecipe;
     private float scrollAmount;
     private boolean mouseClicked;
     private int scrollOffset;
@@ -73,20 +71,16 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         this.recipeListeners.forEach(listener -> listener.accept(this.selectedRecipe));
     }
 
-    public void setSelectedRecipeIndex(int selectedRecipeIndex) {
-        setSelectedRecipe(selectedRecipeIndex >= this.recipes.size() ? null : this.recipes.get(MathHelper.clamp(selectedRecipeIndex, 0, this.recipes.isEmpty() ? 0 : this.recipes.size() - 1)));
-    }
-
     public int getSelectedRecipeIndex() {
         return this.recipes.indexOf(this.selectedRecipe);
     }
 
-    public List<T> getRecipes() {
-        return this.recipes;
+    public void setSelectedRecipeIndex(int selectedRecipeIndex) {
+        setSelectedRecipe(selectedRecipeIndex >= this.recipes.size() ? null : this.recipes.get(MathHelper.clamp(selectedRecipeIndex, 0, this.recipes.isEmpty() ? 0 : this.recipes.size() - 1)));
     }
 
-    public boolean isLockable() {
-        return this.lockable;
+    public List<T> getRecipes() {
+        return this.recipes;
     }
 
     public void setRecipes(List<T> recipes) {
@@ -101,6 +95,10 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         if (this.selectedRecipe == null || this.recipes.isEmpty()) {
             this.isRecipeLocked = false;
         }
+    }
+
+    public boolean isLockable() {
+        return this.lockable;
     }
 
     public void setCanCraft(boolean canCraft) {
@@ -179,7 +177,8 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -246,14 +245,15 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     public static class Builder<T extends Recipe<?>> {
+        private final List<T> recipes = new ArrayList<>();
         private int x;
         private int y;
         private int width;
         private int height;
-        private final List<T> recipes = new ArrayList<>();
         private int selectedRecipeIndex = 0;
         private Function<T, ItemStack> outputFunction = recipe -> ItemStack.EMPTY;
-        private BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected = (widget, index) -> {};
+        private BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected = (widget, index) -> {
+        };
         private boolean canCraft = false;
         private int scrollBarX;
         private int scrollBarY;

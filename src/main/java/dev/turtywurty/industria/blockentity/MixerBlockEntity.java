@@ -51,14 +51,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -103,23 +99,15 @@ import java.util.*;
 //    }
 public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("mixer");
-
+    public final List<Vec3d> mixingItemPositions = DefaultedList.ofSize(6, new Vec3d(0, 1, 0));
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
-
+    private final List<BlockPos> multiblockPositions = new ArrayList<>();
+    public float stirringRotation = 0.0F;
     private int temperature = 175;
     private int progress, maxProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
-    private ItemStack outputItemStack = ItemStack.EMPTY;
-    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
-
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
-    public float stirringRotation = 0.0F;
-    public final List<Vec3d> mixingItemPositions = DefaultedList.ofSize(6, new Vec3d(0, 1, 0));
-
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -143,6 +131,9 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             return 2;
         }
     };
+    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ItemStack outputItemStack = ItemStack.EMPTY;
+    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     public MixerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.MIXER, BlockEntityTypeInit.MIXER, pos, state);
@@ -349,7 +340,8 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 .orElse(null);
 
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
-        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);        ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
                 .orElse(ItemStack.EMPTY);

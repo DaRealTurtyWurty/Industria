@@ -111,14 +111,14 @@ public class DrillScreen extends HandledScreen<DrillScreenHandler> implements Mo
     }
 
     @Override
-    public void setTargetRPM(int targetRPM) {
-        this.handler.getBlockEntity().setTargetRotationSpeed(targetRPM / 60f);
-        ClientPlayNetworking.send(new SetMotorTargetRPMPayload(targetRPM));
+    public int getTargetRPM() {
+        return this.handler.getTargetRPM();
     }
 
     @Override
-    public int getTargetRPM() {
-        return this.handler.getTargetRPM();
+    public void setTargetRPM(int targetRPM) {
+        this.handler.getBlockEntity().setTargetRotationSpeed(targetRPM / 60f);
+        ClientPlayNetworking.send(new SetMotorTargetRPMPayload(targetRPM));
     }
 
     @Override

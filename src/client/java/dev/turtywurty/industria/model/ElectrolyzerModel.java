@@ -22,9 +22,9 @@ public class ElectrolyzerModel extends Model {
         var modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
         modelPartData.addChild("main", ModelPartBuilder.create()
-                .uv(0, 0)
-                .cuboid(-23.0F, -32.0F, -1.0F, 48.0F, 32.0F, 32.0F,
-                        new Dilation(0.0F)),
+                        .uv(0, 0)
+                        .cuboid(-23.0F, -32.0F, -1.0F, 48.0F, 32.0F, 32.0F,
+                                new Dilation(0.0F)),
                 ModelTransform.origin(-1.0F, 24.0F, -7.0F));
 
         return TexturedModelData.of(modelData, 256, 256);

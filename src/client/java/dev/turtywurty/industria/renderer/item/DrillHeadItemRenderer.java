@@ -33,7 +33,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillHeadItem
 
     @Override
     public void render(DrillHeadItemRenderData data, ItemDisplayContext displayContext, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, boolean glint) {
-        if(data == null)
+        if (data == null)
             return;
 
         ItemStack stack = data.stack();

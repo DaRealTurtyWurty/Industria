@@ -29,7 +29,8 @@ public class ToggleButton extends ButtonWidget {
     private boolean toggled;
 
     protected ToggleButton(int x, int y, BiConsumer<ToggleButton, Boolean> onPressed, NarrationSupplier narrationSupplier, boolean defaultToggle, ButtonTextures textures) {
-        super(x, y, 32, 16, Text.empty(), $ -> {}, narrationSupplier);
+        super(x, y, 32, 16, Text.empty(), $ -> {
+        }, narrationSupplier);
         this.toggled = defaultToggle;
         this.textures = textures;
         this.onPressed = onPressed;
@@ -60,12 +61,12 @@ public class ToggleButton extends ButtonWidget {
         );
     }
 
-    public void setToggled(boolean isToggled) {
-        this.toggled = isToggled;
-    }
-
     public boolean isToggled() {
         return this.toggled;
+    }
+
+    public void setToggled(boolean isToggled) {
+        this.toggled = isToggled;
     }
 
     public ButtonTextures getTextures() {
@@ -74,7 +75,8 @@ public class ToggleButton extends ButtonWidget {
 
     public static class Builder {
         private final int x, y;
-        private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {};
+        private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {
+        };
         private NarrationSupplier narrationSupplier = textSupplier -> Text.empty();
         private boolean defaultToggled;
         private ButtonTextures textures = ToggleButton.DEFAULT_TEXTURES;

@@ -73,7 +73,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         this.canExistAt = properties.canExistAt;
         this.cachedDirectionalShapes = properties.cachedDirectionalShapes;
 
-        if(properties.blockEntityProperties != null) {
+        if (properties.blockEntityProperties != null) {
             this.blockEntityTypeSupplier = (Supplier<BlockEntityType<?>>) (Object) properties.blockEntityProperties.blockEntityTypeSupplier;
             this.shouldTick = properties.blockEntityProperties.shouldTick;
             this.blockEntityFactory = properties.blockEntityProperties.blockEntityFactory;
@@ -236,16 +236,52 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
                 : super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
+    @FunctionalInterface
+    public interface BlockEntityFactory<T extends BlockEntity> {
+        T create(BlockPos pos, BlockState state);
+    }
+
+    @FunctionalInterface
+    public interface BlockEntityTickerFactory<T extends BlockEntity> {
+        BlockEntityTicker<T> create(World world, BlockState state, BlockEntityType<?> type);
+    }
+
+    @FunctionalInterface
+    public interface ShapeFactory {
+        VoxelShape create(BlockState state, BlockView world, BlockPos pos, ShapeContext context);
+    }
+
     public static class BlockProperties {
+        private final StateProperties stateProperties = new StateProperties();
+        private final Map<Direction, VoxelShape> cachedDirectionalShapes = new HashMap<>();
         private boolean placeFacingOpposite = true;
         private BlockBlockEntityProperties<?> blockEntityProperties;
         private boolean hasComparatorOutput = false;
         private TriFunction<BlockState, World, BlockPos, Integer> comparatorOutput = (state, world, pos) -> ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
         private BlockRenderType renderType = BlockRenderType.MODEL;
         private ShapeFactory shapeFactory = (state, world, pos, context) -> VoxelShapes.fullCube();
-        private final StateProperties stateProperties = new StateProperties();
         private BiPredicate<WorldView, BlockPos> canExistAt = (world, pos) -> true;
-        private final Map<Direction, VoxelShape> cachedDirectionalShapes = new HashMap<>();
+
+        public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
+            for (final Direction direction : Direction.values()) {
+                shapeCache.put(direction, calculateShape(direction, shape));
+            }
+        }
+
+        public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
+            final VoxelShape[] buffer = {shape, VoxelShapes.empty()};
+
+            final int times = (to.getHorizontalQuarterTurns() - Direction.NORTH.getHorizontalQuarterTurns() + 4) % 4;
+            for (int i = 0; i < times; i++) {
+                buffer[0].forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
+                        buffer[1] = VoxelShapes.union(buffer[1],
+                                VoxelShapes.cuboid(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+                buffer[0] = buffer[1];
+                buffer[1] = VoxelShapes.empty();
+            }
+
+            return buffer[0];
+        }
 
         public BlockProperties hasHorizontalFacing() {
             return hasHorizontalFacing(true);
@@ -402,27 +438,6 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
             return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes.get(state.get(Properties.HORIZONTAL_FACING)));
         }
 
-        public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
-            for (final Direction direction : Direction.values()) {
-                shapeCache.put(direction, calculateShape(direction, shape));
-            }
-        }
-
-        public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
-            final VoxelShape[] buffer = {shape, VoxelShapes.empty()};
-
-            final int times = (to.getHorizontalQuarterTurns() - Direction.NORTH.getHorizontalQuarterTurns() + 4) % 4;
-            for (int i = 0; i < times; i++) {
-                buffer[0].forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
-                        buffer[1] = VoxelShapes.union(buffer[1],
-                                VoxelShapes.cuboid(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
-                buffer[0] = buffer[1];
-                buffer[1] = VoxelShapes.empty();
-            }
-
-            return buffer[0];
-        }
-
         public static class BlockBlockEntityProperties<T extends BlockEntity> {
             public final Supplier<BlockEntityType<T>> blockEntityTypeSupplier;
             public boolean shouldTick = false;
@@ -493,20 +508,5 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
                 }
             }
         }
-    }
-
-    @FunctionalInterface
-    public interface BlockEntityFactory<T extends BlockEntity> {
-        T create(BlockPos pos, BlockState state);
-    }
-
-    @FunctionalInterface
-    public interface BlockEntityTickerFactory<T extends BlockEntity> {
-        BlockEntityTicker<T> create(World world, BlockState state, BlockEntityType<?> type);
-    }
-
-    @FunctionalInterface
-    public interface ShapeFactory {
-        VoxelShape create(BlockState state, BlockView world, BlockPos pos, ShapeContext context);
     }
 }

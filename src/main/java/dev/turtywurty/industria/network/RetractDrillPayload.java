@@ -8,7 +8,8 @@ import net.minecraft.network.packet.CustomPayload;
 public class RetractDrillPayload implements CustomPayload {
     public static final Id<RetractDrillPayload> ID = new Id<>(Industria.id("retract_drill"));
     public static final PacketCodec<ByteBuf, RetractDrillPayload> CODEC =
-            PacketCodec.of((value, buf) -> {}, buf -> new RetractDrillPayload());
+            PacketCodec.of((value, buf) -> {
+            }, buf -> new RetractDrillPayload());
 
     @Override
     public Id<? extends CustomPayload> getId() {

@@ -57,7 +57,7 @@ public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEnt
         EnergyStorage storage = this.blockEntity.getEnergy();
         long energy = storage.getAmount();
         long capacity = storage.getCapacity();
-        if(energy == 0 || capacity == 0)
+        if (energy == 0 || capacity == 0)
             return 0.0f;
 
         return MathHelper.clamp((float) energy / (float) capacity, 0.0f, 1.0f);

@@ -15,7 +15,8 @@ import net.minecraft.world.World;
 
 import java.util.UUID;
 
-public record ModifyPipeNetworkPayload(Operation operation, RegistryKey<World> world, TransferType<?, ?, ?> transferType,
+public record ModifyPipeNetworkPayload(Operation operation, RegistryKey<World> world,
+                                       TransferType<?, ?, ?> transferType,
                                        UUID networkId, BlockPos pos) implements CustomPayload {
     public static final Id<ModifyPipeNetworkPayload> ID = new Id<>(Industria.id("modify_pipe_network"));
     public static final PacketCodec<RegistryByteBuf, ModifyPipeNetworkPayload> CODEC =

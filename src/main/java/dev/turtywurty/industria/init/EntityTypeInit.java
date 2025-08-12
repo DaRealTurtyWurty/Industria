@@ -15,5 +15,6 @@ public class EntityTypeInit {
         return Registry.register(Registries.ENTITY_TYPE, id, type.build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, id)));
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

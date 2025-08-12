@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 public class FarmlandBlockMixin {
     @ModifyExpressionValue(method = "isWaterNearby",
             at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+                    target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private static boolean industria$isWaterNearby(boolean original, WorldView world, BlockPos pos) {
-        if(original)
+        if (original)
             return true;
 
         FluidData fluidData = FluidData.FLUID_DATA.get(world.getFluidState(pos).getFluid());

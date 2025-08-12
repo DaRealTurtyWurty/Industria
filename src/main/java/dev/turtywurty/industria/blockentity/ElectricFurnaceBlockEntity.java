@@ -25,11 +25,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -265,7 +263,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
     @Override
     public void dropContents(World world, BlockPos pos) {
         BlockEntityContentsDropper.super.dropContents(world, pos);
-        if(world instanceof ServerWorld serverWorld) {
+        if (world instanceof ServerWorld serverWorld) {
             getRecipesUsedAndDropExperience(serverWorld, Vec3d.ofCenter(pos));
         }
     }

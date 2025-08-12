@@ -40,6 +40,29 @@ public interface Multiblockable {
     }
 
     /**
+     * Writes the multiblock positions to NBT.
+     *
+     * @return An {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
+     */
+    static void write(Multiblockable multiblockable, WriteView view) {
+        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
+        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockPositions);
+    }
+
+    /**
+     * Reads the multiblock positions from NBT.
+     *
+     * @param multiblockable The multiblock controller to read the positions to.
+     * @param nbt            The {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
+     */
+    static void read(Multiblockable multiblockable, ReadView view) {
+        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
+        multiblockPositions.clear();
+        view.read("MachinePositions", BlockPos.CODEC.listOf())
+                .ifPresent(multiblockPositions::addAll);
+    }
+
+    /**
      * Gets the type of multiblock this controller is.
      *
      * @return The type of multiblock this controller is.
@@ -95,7 +118,7 @@ public interface Multiblockable {
         for (BlockPos position : checkPositions) {
             Vec3i offset = MultiblockBlock.getOffsetFromPrimary(pos, position, facing);
             Block toSet = BlockInit.MULTIBLOCK_BLOCK;
-            for(Direction direction : Direction.values()) {
+            for (Direction direction : Direction.values()) {
                 Map<Direction, MultiblockIOPort> ports = getPorts(offset, direction);
                 if (ports.isEmpty())
                     continue;
@@ -154,29 +177,6 @@ public interface Multiblockable {
         }
 
         world.breakBlock(pos, true);
-    }
-
-    /**
-     * Writes the multiblock positions to NBT.
-     *
-     * @return An {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
-     */
-    static void write(Multiblockable multiblockable, WriteView view) {
-        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
-        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockPositions);
-    }
-
-    /**
-     * Reads the multiblock positions from NBT.
-     *
-     * @param multiblockable The multiblock controller to read the positions to.
-     * @param nbt            The {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
-     */
-    static void read(Multiblockable multiblockable, ReadView view) {
-        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
-        multiblockPositions.clear();
-        view.read("MachinePositions", BlockPos.CODEC.listOf())
-                .ifPresent(multiblockPositions::addAll);
     }
 
     /**

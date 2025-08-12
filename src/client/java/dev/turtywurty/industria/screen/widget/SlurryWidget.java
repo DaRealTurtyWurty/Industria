@@ -12,7 +12,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -36,6 +35,10 @@ public class SlurryWidget implements Drawable, Widget {
         this.width = width;
         this.height = height;
         this.posSupplier = posSupplier;
+    }
+
+    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
+        return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
     }
 
     @Override
@@ -79,23 +82,23 @@ public class SlurryWidget implements Drawable, Widget {
     }
 
     @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    @Override
     public int getX() {
         return x;
     }
 
     @Override
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    @Override
     public int getY() {
         return y;
+    }
+
+    @Override
+    public void setY(int y) {
+        this.y = y;
     }
 
     @Override
@@ -114,10 +117,6 @@ public class SlurryWidget implements Drawable, Widget {
 
     @Override
     public void forEachChild(Consumer<ClickableWidget> consumer) {
-    }
-
-    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
-        return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
     }
 
     public static class Builder {

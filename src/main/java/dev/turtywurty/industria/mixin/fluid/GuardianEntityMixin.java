@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(GuardianEntity.class)
 public class GuardianEntityMixin {
     @ModifyExpressionValue(method = "getPathfindingFavor",
-    at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getPathfindingFavor(boolean original, BlockPos pos, WorldView world) {
-        if(original)
+        if (original)
             return true;
 
         FluidState fluidState = world.getFluidState(pos);

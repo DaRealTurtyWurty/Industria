@@ -6,8 +6,6 @@ import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.MultiblockType;
 import dev.turtywurty.industria.multiblock.Multiblockable;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
@@ -45,7 +43,7 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return List.of();
 
         // 5x5x1 structure
@@ -85,7 +83,7 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
         for (int w = -widthRange; w <= widthRange; w++) {
             for (int h = 0; h <= heightRange; h++) {
                 for (int d = 0; d <= depthRange; d++) {
-                    if(w == 0 && h == 0 && d == 0)
+                    if (w == 0 && h == 0 && d == 0)
                         continue;
 
                     BlockPos pos = this.pos
@@ -117,7 +115,7 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
         Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
         BlockPos offsetPos = pos.offset(facing);
         BlockState offsetState = world.getBlockState(offsetPos);
-        if(offsetState.isOf(BlockInit.ROTARY_KILN)) {
+        if (offsetState.isOf(BlockInit.ROTARY_KILN)) {
             world.setBlockState(offsetPos, BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState().with(Properties.HORIZONTAL_FACING, facing));
         }
     }

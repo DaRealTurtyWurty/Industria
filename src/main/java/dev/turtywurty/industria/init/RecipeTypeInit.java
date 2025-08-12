@@ -45,5 +45,6 @@ public class RecipeTypeInit {
         return Registry.register(Registries.RECIPE_TYPE, Industria.id(name), type);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

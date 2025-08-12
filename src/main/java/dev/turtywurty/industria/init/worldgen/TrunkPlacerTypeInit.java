@@ -14,5 +14,6 @@ public class TrunkPlacerTypeInit {
         return Registry.register(Registries.TRUNK_PLACER_TYPE, Industria.id(name), type);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

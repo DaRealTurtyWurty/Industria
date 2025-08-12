@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ConcretePowderBlock.class)
 public class ConcretePowderBlockMixin {
-    @Inject(method="hardensIn", at=@At("HEAD"), cancellable=true)
+    @Inject(method = "hardensIn", at = @At("HEAD"), cancellable = true)
     private static void industria$hardensIn(BlockState state, CallbackInfoReturnable<Boolean> callback) {
         FluidData fluidData = FluidData.FLUID_DATA.get(state.getFluidState().getFluid());
         if (fluidData != null && fluidData.hardensConcrete()) {

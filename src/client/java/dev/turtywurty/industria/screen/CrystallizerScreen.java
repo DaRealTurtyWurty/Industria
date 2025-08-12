@@ -12,6 +12,7 @@ import net.minecraft.util.Identifier;
 
 public class CrystallizerScreen extends HandledScreen<CrystallizerScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/crystallizer.png");
+
     public CrystallizerScreen(CrystallizerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
         this.backgroundHeight = 176;
@@ -46,7 +47,7 @@ public class CrystallizerScreen extends HandledScreen<CrystallizerScreenHandler>
         super.render(context, mouseX, mouseY, delta);
 
         float catalystUsesPercent = this.handler.getCatalystUsesPercent();
-        if(catalystUsesPercent > 0) {
+        if (catalystUsesPercent > 0) {
             int width = (int) (18 * catalystUsesPercent);
             context.fill(this.x + 52, this.y + 27, this.x + 53 + width, this.y + 29, 0xaaFF0000);
         }

@@ -39,7 +39,7 @@ public class ItemListTooltipComponent implements TooltipComponent {
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        if(this.stacks.isEmpty())
+        if (this.stacks.isEmpty())
             return;
 
         x = x + 2;

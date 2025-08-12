@@ -58,7 +58,7 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
         int progress = getProgress();
         int maxProgress = getMaxProgress();
 
-        if(progress == 0 || maxProgress == 0)
+        if (progress == 0 || maxProgress == 0)
             return 0;
 
         return MathHelper.clamp((float) progress / maxProgress, 0, 1);
@@ -78,7 +78,7 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
 
         @Override
         public ItemStack takeStack(int amount) {
-            if(hasStack()) {
+            if (hasStack()) {
                 this.amount += Math.min(amount, getStack().getCount());
             }
 
@@ -100,7 +100,7 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
         @Override
         protected void onCrafted(ItemStack stack) {
             stack.onCraftByPlayer(this.player, this.amount);
-            if(this.player instanceof ServerPlayerEntity serverPlayerEntity) {
+            if (this.player instanceof ServerPlayerEntity serverPlayerEntity) {
                 this.blockEntity.dropExperienceForRecipesUsed(serverPlayerEntity);
             }
 

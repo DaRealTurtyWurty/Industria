@@ -1,43 +1,43 @@
 {
-	"schemaVersion": 1,
-	"id": "industria",
-	"version": "${version}",
-	"name": "Industria",
-	"description": "This is an example description! Tell everyone what your mod is about!",
-	"authors": [
-		"TurtyWurty"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "CC0-1.0",
-	"icon": "assets/industria/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"dev.turtywurty.industria.Industria"
-		],
-		"client": [
-			"dev.turtywurty.industria.IndustriaClient"
-		],
-		"fabric-datagen": [
-			"dev.turtywurty.industria.IndustriaDataGenerator"
-		]
-	},
-	"accessWidener": "industria.accesswidener",
-	"mixins": [
-		"industria.mixins.json",
-		{
-			"config": "industria.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.17.2",
-		"minecraft": "~1.21.8",
-		"java": ">=21",
-		"fabric-api": "*",
-		"heatapi": ">=1.0.1"
-	}
+  "schemaVersion": 1,
+  "id": "industria",
+  "version": "${version}",
+  "name": "Industria",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "TurtyWurty"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/industria/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.turtywurty.industria.Industria"
+    ],
+    "client": [
+      "dev.turtywurty.industria.IndustriaClient"
+    ],
+    "fabric-datagen": [
+      "dev.turtywurty.industria.IndustriaDataGenerator"
+    ]
+  },
+  "accessWidener": "industria.accesswidener",
+  "mixins": [
+    "industria.mixins.json",
+    {
+      "config": "industria.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.17.2",
+    "minecraft": "~1.21.8",
+    "java": ">=21",
+    "fabric-api": "*",
+    "heatapi": ">=1.0.1"
+  }
 }

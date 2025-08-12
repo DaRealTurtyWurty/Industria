@@ -32,8 +32,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.storage.ReadView;
@@ -94,7 +92,7 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
 
         fluidStorage.amount -= CONSUME_RATE;
         energyStorage.amount += MathHelper.clamp(storedLava, 0, energyStorage.getCapacity() - energyStorage.getAmount());
-        if(energyStorage.getAmount() > energyStorage.getCapacity())
+        if (energyStorage.getAmount() > energyStorage.getCapacity())
             energyStorage.amount = energyStorage.getCapacity();
         update();
     }

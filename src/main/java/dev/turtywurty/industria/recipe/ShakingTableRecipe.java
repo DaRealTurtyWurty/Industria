@@ -96,10 +96,6 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
 
     public static class Serializer implements RecipeSerializer<ShakingTableRecipe> {
         public static final Serializer INSTANCE = new Serializer();
-
-        private Serializer() {
-        }
-
         private static final MapCodec<ShakingTableRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IndustriaIngredient.CODEC.fieldOf("input").forGetter(ShakingTableRecipe::input),
                 OutputItemStack.CODEC.fieldOf("output").forGetter(ShakingTableRecipe::output),
@@ -107,7 +103,6 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
                 Codec.INT.fieldOf("process_time").forGetter(ShakingTableRecipe::processTime),
                 Codec.INT.fieldOf("frequency").forGetter(ShakingTableRecipe::frequency)
         ).apply(instance, ShakingTableRecipe::new));
-
         private static final PacketCodec<RegistryByteBuf, ShakingTableRecipe> PACKET_CODEC =
                 PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, ShakingTableRecipe::input,
                         OutputItemStack.PACKET_CODEC, ShakingTableRecipe::output,
@@ -115,6 +110,9 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
                         PacketCodecs.INTEGER, ShakingTableRecipe::processTime,
                         PacketCodecs.INTEGER, ShakingTableRecipe::frequency,
                         ShakingTableRecipe::new);
+
+        private Serializer() {
+        }
 
         @Override
         public MapCodec<ShakingTableRecipe> codec() {

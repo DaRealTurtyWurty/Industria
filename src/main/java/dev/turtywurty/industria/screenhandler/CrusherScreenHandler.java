@@ -51,7 +51,7 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
     public float getProgressPercent() {
         float progress = getProgress();
         float maxProgress = getMaxProgress();
-        if(maxProgress == 0 || progress == 0) {
+        if (maxProgress == 0 || progress == 0) {
             return 0.0f;
         }
 
@@ -69,7 +69,7 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
     public float getEnergyPercent() {
         long energy = getEnergy();
         long maxEnergy = getMaxEnergy();
-        if(maxEnergy == 0 || energy == 0) {
+        if (maxEnergy == 0 || energy == 0) {
             return 0.0f;
         }
 

@@ -18,135 +18,13 @@ import org.jetbrains.annotations.Nullable;
 public class InWorldFluidRenderingComponent {
     private boolean shouldDebugAmount = false;
 
-    public void setShouldDebugAmount(boolean shouldDebugAmount) {
-        this.shouldDebugAmount = shouldDebugAmount;
-    }
-
-    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2) {
-        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, IndeterminateBoolean.INDETERMINATE);
-    }
-
-    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, IndeterminateBoolean drawTopFace) {
-        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, drawTopFace);
-    }
-
-    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
-        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, color, colorMode, IndeterminateBoolean.INDETERMINATE);
-    }
-
-    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode, IndeterminateBoolean drawTopFace) {
-        if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0)
-            return;
-
-        FluidVariant fluidVariant = fluidTank.getResource();
-        long amount = fluidTank.amount;
-        long capacity = fluidTank.getCapacity();
-        float fillPercentage = (float) amount / capacity;
-        fillPercentage = MathHelper.clamp(fillPercentage, 0.0F, 1.0F);
-
-        if(this.shouldDebugAmount) {
-            fillPercentage = (float) (Math.sin(world.getTime() / 64.0) * 0.5 + 0.5);
-        }
-
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
-        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
-
-        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if(stillSprite == null)
-            return;
-
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
-
-        float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
-
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-        }
-
-        MatrixStack.Entry entry = matrices.peek();
-
-        int blockLight = (light >> 4) & 0xF;
-        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
-        light = (light & 0xF00000) | (luminosity << 4);
-
-        // Front (XY plane, z constant)
-        drawTiledXYQuad(vertexConsumer, entry,
-                x1, y1, z1 + 0.001F,
-                x2, y2, z1 + 0.001F,
-                stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, -1.0F);
-
-        // Back (XY plane, z constant)
-        drawReversedTiledXYQuad(vertexConsumer, entry,
-                x1, y1, z2 - 0.001F,
-                x2, y2, z2 - 0.001F,
-                stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, 1.0F);
-
-        // Left (YZ plane, x constant)
-        drawReversedTiledYZQuad(vertexConsumer, entry,
-                x1 + 0.001F, y1, z1,
-                y2, z2,
-                stillSprite, fluidColor, light, overlay, 1.0F, 1.0F, 0.0F);
-
-        // Right (YZ plane, x constant)
-        drawTiledYZQuad(vertexConsumer, entry,
-                x2 - 0.001F, y1, z1,
-                y2, z2,
-                stillSprite, fluidColor, light, overlay, -1.0F, 1.0F, 0.0F);
-
-        if (drawTopFace.evaluate(fillPercentage < 1.0F)) {
-            drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
-        }
-
-        matrices.pop();
-    }
-
-    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
-        renderTopFaceOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
-    }
-
-    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
-        if (fluidVariant == null)
-            return;
-
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
-        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
-
-        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if(stillSprite == null)
-            return;
-
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
-
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-        }
-
-        MatrixStack.Entry entry = matrices.peek();
-
-        int blockLight = (light >> 4) & 0xF;
-        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
-        light = (light & 0xF00000) | (luminosity << 4);
-
-        drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
-
-        matrices.pop();
-    }
-
     public static void drawTiledTopQuad(VertexConsumer vertexConsumer,
-                                         MatrixStack.Entry entry,
-                                         float x1, float y, float z1,
-                                         float x2, float z2,
-                                         Sprite sprite,
-                                         int color,
-                                         int light, int overlay) {
+                                        MatrixStack.Entry entry,
+                                        float x1, float y, float z1,
+                                        float x2, float z2,
+                                        Sprite sprite,
+                                        int color,
+                                        int light, int overlay) {
         float tileSize = 1.0f; // Maximum tile size in world space
         int tileCountX = Math.max(1, Math.round((x2 - x1) / tileSize));
         int tileCountZ = Math.max(1, Math.round((z2 - z1) / tileSize));
@@ -203,51 +81,15 @@ public class InWorldFluidRenderingComponent {
         }
     }
 
-    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
-        drawTiledXYQuadOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
-    }
-
-    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, int color, ColorMode colorMode) {
-        if (fluidVariant == null)
-            return;
-
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
-        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
-
-        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if(stillSprite == null)
-            return;
-
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
-
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-        }
-
-        MatrixStack.Entry entry = matrices.peek();
-
-        int blockLight = (light >> 4) & 0xF;
-        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
-        light = (light & 0xF00000) | (luminosity << 4);
-
-        drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, -1.0F);
-
-        matrices.pop();
-    }
-
     // For front and back (XY plane)
     public static void drawTiledXYQuad(VertexConsumer vertexConsumer,
-                                        MatrixStack.Entry entry,
-                                        float x1, float y1, float z1,
-                                        float x2, float y2, float z2,
-                                        Sprite sprite,
-                                        int color,
-                                        int light, int overlay,
-                                        float nx, float ny, float nz) {
+                                       MatrixStack.Entry entry,
+                                       float x1, float y1, float z1,
+                                       float x2, float y2, float z2,
+                                       Sprite sprite,
+                                       int color,
+                                       int light, int overlay,
+                                       float nx, float ny, float nz) {
         float tileSize = 1.0f;
         int fullTilesX = (int) ((x2 - x1) / tileSize);
         int fullTilesY = (int) ((y2 - y1) / tileSize);
@@ -315,13 +157,13 @@ public class InWorldFluidRenderingComponent {
 
     // For left and right (YZ plane)
     public static void drawTiledYZQuad(VertexConsumer vertexConsumer,
-                                        MatrixStack.Entry entry,
-                                        float x, float y1, float z1,
-                                        float y2, float z2,
-                                        Sprite sprite,
-                                        int color,
-                                        int light, int overlay,
-                                        float nx, float ny, float nz) {
+                                       MatrixStack.Entry entry,
+                                       float x, float y1, float z1,
+                                       float y2, float z2,
+                                       Sprite sprite,
+                                       int color,
+                                       int light, int overlay,
+                                       float nx, float ny, float nz) {
         float tileSize = 1.0f;
         int fullTilesZ = (int) ((z2 - z1) / tileSize);
         int fullTilesY = (int) ((y2 - y1) / tileSize);
@@ -588,5 +430,163 @@ public class InWorldFluidRenderingComponent {
                 drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
+    }
+
+    public void setShouldDebugAmount(boolean shouldDebugAmount) {
+        this.shouldDebugAmount = shouldDebugAmount;
+    }
+
+    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2) {
+        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, IndeterminateBoolean.INDETERMINATE);
+    }
+
+    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, IndeterminateBoolean drawTopFace) {
+        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, drawTopFace);
+    }
+
+    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
+        render(fluidTank, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, color, colorMode, IndeterminateBoolean.INDETERMINATE);
+    }
+
+    public void render(@Nullable SingleFluidStorage fluidTank, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode, IndeterminateBoolean drawTopFace) {
+        if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0)
+            return;
+
+        FluidVariant fluidVariant = fluidTank.getResource();
+        long amount = fluidTank.amount;
+        long capacity = fluidTank.getCapacity();
+        float fillPercentage = (float) amount / capacity;
+        fillPercentage = MathHelper.clamp(fillPercentage, 0.0F, 1.0F);
+
+        if (this.shouldDebugAmount) {
+            fillPercentage = (float) (Math.sin(world.getTime() / 64.0) * 0.5 + 0.5);
+        }
+
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
+        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+
+        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        if (stillSprite == null)
+            return;
+
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
+
+        float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        light = (light & 0xF00000) | (luminosity << 4);
+
+        // Front (XY plane, z constant)
+        drawTiledXYQuad(vertexConsumer, entry,
+                x1, y1, z1 + 0.001F,
+                x2, y2, z1 + 0.001F,
+                stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, -1.0F);
+
+        // Back (XY plane, z constant)
+        drawReversedTiledXYQuad(vertexConsumer, entry,
+                x1, y1, z2 - 0.001F,
+                x2, y2, z2 - 0.001F,
+                stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, 1.0F);
+
+        // Left (YZ plane, x constant)
+        drawReversedTiledYZQuad(vertexConsumer, entry,
+                x1 + 0.001F, y1, z1,
+                y2, z2,
+                stillSprite, fluidColor, light, overlay, 1.0F, 1.0F, 0.0F);
+
+        // Right (YZ plane, x constant)
+        drawTiledYZQuad(vertexConsumer, entry,
+                x2 - 0.001F, y1, z1,
+                y2, z2,
+                stillSprite, fluidColor, light, overlay, -1.0F, 1.0F, 0.0F);
+
+        if (drawTopFace.evaluate(fillPercentage < 1.0F)) {
+            drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
+        }
+
+        matrices.pop();
+    }
+
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
+        renderTopFaceOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    }
+
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
+        if (fluidVariant == null)
+            return;
+
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
+        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+
+        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        if (stillSprite == null)
+            return;
+
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        light = (light & 0xF00000) | (luminosity << 4);
+
+        drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, light, overlay);
+
+        matrices.pop();
+    }
+
+    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
+        drawTiledXYQuadOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    }
+
+    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, int color, ColorMode colorMode) {
+        if (fluidVariant == null)
+            return;
+
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
+        fluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+
+        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        if (stillSprite == null)
+            return;
+
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        light = (light & 0xF00000) | (luminosity << 4);
+
+        drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, fluidColor, light, overlay, 0.0F, 1.0F, -1.0F);
+
+        matrices.pop();
     }
 }

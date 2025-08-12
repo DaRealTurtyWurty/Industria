@@ -13,5 +13,6 @@ public class SlurryInit {
         return FabricSlurryApi.register(Industria.id(name));
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

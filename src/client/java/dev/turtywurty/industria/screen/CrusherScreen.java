@@ -39,7 +39,7 @@ public class CrusherScreen extends HandledScreen<CrusherScreenHandler> {
         super.render(context, mouseX, mouseY, delta);
         drawMouseoverTooltip(context, mouseX, mouseY);
 
-        if(isPointWithinBounds(144, 10, 20, 66, mouseX, mouseY)) {
+        if (isPointWithinBounds(144, 10, 20, 66, mouseX, mouseY)) {
             context.drawTooltip(this.textRenderer, Text.literal("Energy: " + this.handler.getEnergy() + " / " + this.handler.getMaxEnergy() + " FE"), mouseX, mouseY);
         }
     }

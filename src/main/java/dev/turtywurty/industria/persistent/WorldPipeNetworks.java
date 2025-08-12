@@ -33,12 +33,6 @@ public class WorldPipeNetworks extends PersistentState {
             CODEC,
             null
     );
-
-    public static WorldPipeNetworks getOrCreate(ServerWorld serverWorld) {
-        PersistentStateManager persistentStateManager = serverWorld.getPersistentStateManager();
-        return persistentStateManager.getOrCreate(TYPE);
-    }
-
     private final Data data;
 
     public WorldPipeNetworks() {
@@ -47,6 +41,11 @@ public class WorldPipeNetworks extends PersistentState {
 
     public WorldPipeNetworks(Data data) {
         this.data = data;
+    }
+
+    public static WorldPipeNetworks getOrCreate(ServerWorld serverWorld) {
+        PersistentStateManager persistentStateManager = serverWorld.getPersistentStateManager();
+        return persistentStateManager.getOrCreate(TYPE);
     }
 
     public static void syncToClient(PacketSender sender, ServerWorld serverWorld) {
@@ -99,15 +98,14 @@ public class WorldPipeNetworks extends PersistentState {
     }
 
     public record Data(List<PipeNetworkManager<?, ?>> pipeNetworkManagers) {
-        public Data() {
-            this(new ArrayList<>());
-        }
-
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 PipeNetworkManager.LIST_CODEC.fieldOf("pipeNetworkManagers").forGetter(Data::pipeNetworkManagers)
         ).apply(instance, Data::new));
-
         public static final PacketCodec<RegistryByteBuf, Data> PACKET_CODEC =
                 PacketCodec.tuple(PipeNetworkManager.LIST_PACKET_CODEC, Data::pipeNetworkManagers, Data::new);
+
+        public Data() {
+            this(new ArrayList<>());
+        }
     }
 }

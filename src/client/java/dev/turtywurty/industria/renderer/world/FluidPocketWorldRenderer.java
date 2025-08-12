@@ -22,7 +22,7 @@ public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
 
     @Override
     public void render(WorldRenderContext context) {
-        if(!DebugRenderingRegistry.debugRendering)
+        if (!DebugRenderingRegistry.debugRendering)
             return;
 
         PlayerEntity player = MinecraftClient.getInstance().player;

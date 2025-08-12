@@ -66,10 +66,10 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
         //Industria.LOGGER.debug("Controller at {} has {} towers.", this.pos, getTowerCount());
 
         SingleFluidStorage tank = getFluidTank();
-        if(tank.isResourceBlank() || tank.amount == 0)
+        if (tank.isResourceBlank() || tank.amount == 0)
             return;
 
-        
+
     }
 
     @Override

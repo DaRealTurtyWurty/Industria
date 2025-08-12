@@ -39,21 +39,31 @@ public class PipeNetworkManagerTypeInit {
     public static final Codec<PipeNetworkManagerType<?, ?>> CODEC = PipeNetworkManagerTypeInit.PIPE_NETWORK_MANAGER_TYPES.getCodec();
     public static final PacketCodec<RegistryByteBuf, PipeNetworkManagerType<?, ?>> PACKET_CODEC = PacketCodecs.registryCodec(CODEC);
 
-    public static final PipeNetworkManagerType<EnergyStorage, CableNetwork> ENERGY =
+    @SuppressWarnings("unchecked")
+    public static <S, N extends PipeNetwork<S>> PipeNetworkManagerType<S, N> getType(TransferType<S, ?, ?> transferType) {
+        return PIPE_NETWORK_MANAGER_TYPES.stream()
+                .filter(type -> type.transferType() == transferType)
+                .map(type -> (PipeNetworkManagerType<S, N>) type)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No PipeNetworkManagerType found for transfer type: " + transferType));
+    }    public static final PipeNetworkManagerType<EnergyStorage, CableNetwork> ENERGY =
             register("energy", new PipeNetworkManagerType<>(
                     TransferType.ENERGY,
                     CableNetworkManager::new,
                     CableNetworkManager.CODEC,
                     CableNetworkManager.PACKET_CODEC));
 
-    public static final PipeNetworkManagerType<Storage<FluidVariant>, FluidPipeNetwork> FLUID =
+    public static <S, N extends PipeNetwork<S>, T extends PipeNetworkManagerType<S, N>> T register(String name, T type) {
+        return Registry.register(PIPE_NETWORK_MANAGER_TYPES, Industria.id(name), type);
+    }    public static final PipeNetworkManagerType<Storage<FluidVariant>, FluidPipeNetwork> FLUID =
             register("fluid", new PipeNetworkManagerType<>(
                     TransferType.FLUID,
                     FluidPipeNetworkManager::new,
                     FluidPipeNetworkManager.CODEC,
                     FluidPipeNetworkManager.PACKET_CODEC));
 
-    public static final PipeNetworkManagerType<Storage<SlurryVariant>, SlurryPipeNetwork> SLURRY =
+    public static void init() {
+    }    public static final PipeNetworkManagerType<Storage<SlurryVariant>, SlurryPipeNetwork> SLURRY =
             register("slurry", new PipeNetworkManagerType<>(
                     TransferType.SLURRY,
                     SlurryPipeNetworkManager::new,
@@ -67,19 +77,9 @@ public class PipeNetworkManagerTypeInit {
                     HeatPipeNetworkManager.CODEC,
                     HeatPipeNetworkManager.PACKET_CODEC));
 
-    @SuppressWarnings("unchecked")
-    public static <S, N extends PipeNetwork<S>> PipeNetworkManagerType<S, N> getType(TransferType<S, ?, ?> transferType) {
-        return PIPE_NETWORK_MANAGER_TYPES.stream()
-                .filter(type -> type.transferType() == transferType)
-                .map(type -> (PipeNetworkManagerType<S, N>) type)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No PipeNetworkManagerType found for transfer type: " + transferType));
-    }
 
-    public static <S, N extends PipeNetwork<S>, T extends PipeNetworkManagerType<S, N>> T register(String name, T type) {
-        return Registry.register(PIPE_NETWORK_MANAGER_TYPES, Industria.id(name), type);
-    }
 
-    public static void init() {
-    }
+
+
+
 }

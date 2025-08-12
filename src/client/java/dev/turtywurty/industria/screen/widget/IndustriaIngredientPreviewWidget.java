@@ -25,14 +25,12 @@ import java.util.function.Function;
 public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Widget, Drawable {
     private final int slotIndex;
     private final Function<T, IndustriaIngredient> ingredientGetter;
-
+    private final MinecraftClient client = MinecraftClient.getInstance();
+    private final TextRenderer textRenderer = client.textRenderer;
     private int x, y;
     private @Nullable T recipe;
     private long cycleTimeMs;
     private boolean shouldRender = true;
-
-    private final MinecraftClient client = MinecraftClient.getInstance();
-    private final TextRenderer textRenderer = client.textRenderer;
 
     public IndustriaIngredientPreviewWidget(int x, int y, int slotIndex, @NotNull Function<T, IndustriaIngredient> ingredientGetter) {
         this(x, y, slotIndex, 1000, ingredientGetter);
@@ -44,6 +42,10 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
         this.slotIndex = slotIndex;
         this.cycleTimeMs = cycleTimeMs;
         this.ingredientGetter = ingredientGetter;
+    }
+
+    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
+        return pointX >= x && pointX < x + width && pointY >= y && pointY < y + height;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
 
             context.drawItem(stack, this.x, this.y);
             context.drawStackOverlay(this.textRenderer, stack, this.x, this.y);
-            context.fill(this.x, this.y, this.x + 16, this. y + 16, 0x88808080);
+            context.fill(this.x, this.y, this.x + 16, this.y + 16, 0x88808080);
 
             if (!isPointWithinBounds(this.x, this.y, 16, 16, mouseX, mouseY))
                 return;
@@ -94,12 +96,12 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
         return this.slotIndex;
     }
 
-    public void setRecipe(@Nullable T recipe) {
-        this.recipe = recipe;
-    }
-
     public @Nullable T getRecipe() {
         return this.recipe;
+    }
+
+    public void setRecipe(@Nullable T recipe) {
+        this.recipe = recipe;
     }
 
     public void setShouldRender(boolean shouldRender) {
@@ -110,22 +112,12 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
         return this.shouldRender;
     }
 
-    public void setCycleTimeMs(long cycleTimeMs) {
-        this.cycleTimeMs = cycleTimeMs;
-    }
-
     public long getCycleTimeMs() {
         return this.cycleTimeMs;
     }
 
-    @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
+    public void setCycleTimeMs(long cycleTimeMs) {
+        this.cycleTimeMs = cycleTimeMs;
     }
 
     @Override
@@ -134,8 +126,18 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
     }
 
     @Override
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    @Override
     public int getY() {
         return this.y;
+    }
+
+    @Override
+    public void setY(int y) {
+        this.y = y;
     }
 
     @Override
@@ -150,9 +152,5 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
 
     @Override
     public void forEachChild(Consumer<ClickableWidget> consumer) {
-    }
-
-    private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
-        return pointX >= x && pointX < x + width && pointY >= y && pointY < y + height;
     }
 }

@@ -56,7 +56,7 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
     public float getProgressPercent() {
         float progress = getProgress();
         float maxProgress = getMaxProgress();
-        if(maxProgress == 0 || progress == 0) {
+        if (maxProgress == 0 || progress == 0) {
             return 0.0f;
         }
 
@@ -78,7 +78,7 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
     public float getCatalystUsesPercent() {
         float uses = getCatalystUses();
         float maxUses = getMaxCatalystUses();
-        if(maxUses == 0 || uses == 0) {
+        if (maxUses == 0 || uses == 0) {
             return 0.0f;
         }
 

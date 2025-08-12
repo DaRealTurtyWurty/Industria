@@ -53,6 +53,7 @@ public class WindTurbineModel extends Model {
         return this.parts;
     }
 
-    public record WindTurbineParts(ModelPart core, ModelPart propellers, ModelPart propeller0, ModelPart propeller1, ModelPart propeller2) {
+    public record WindTurbineParts(ModelPart core, ModelPart propellers, ModelPart propeller0, ModelPart propeller1,
+                                   ModelPart propeller2) {
     }
 }

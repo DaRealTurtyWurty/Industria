@@ -20,16 +20,16 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     static {
         var random = new Random(438489438L);
 
-        float minX = -18f/16f + 0.125f;
+        float minX = -18f / 16f + 0.125f;
         float minY = -0.25f;
-        float minZ = -18f/16f + 0.125f;
-        float maxX = 18f/16f - 0.125f;
-        float maxY = 46f/16f - 0.625f;
-        float maxZ = 18f/16f - 0.125f;
+        float minZ = -18f / 16f + 0.125f;
+        float maxX = 18f / 16f - 0.125f;
+        float maxY = 46f / 16f - 0.625f;
+        float maxZ = 18f / 16f - 0.125f;
 
         for (int i = 0; i < OUTPUT_ITEM_POSITIONS.length; i++) {
             int attempts = 0;
-            while(true) {
+            while (true) {
                 Vec3d generatedPos = generatePosition(random, minX, -minY, minZ, maxX, -maxY, maxZ);
                 if (!intersects(generatedPos, i, 0.35) || attempts++ > 100) {
                     OUTPUT_ITEM_POSITIONS[i] = generatedPos;
@@ -37,6 +37,14 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
                 }
             }
         }
+    }
+
+    private final CrystallizerModel model;
+    private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
+
+    public CrystallizerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+        super(context);
+        this.model = new CrystallizerModel(context.getLayerModelPart(CrystallizerModel.LAYER_LOCATION));
     }
 
     private static boolean intersects(Vec3d pos, int count, double radius) {
@@ -55,14 +63,6 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
                 minY + random.nextFloat() * (maxY - minY),
                 minZ + random.nextFloat() * (maxZ - minZ)
         );
-    }
-
-    private final CrystallizerModel model;
-    private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
-
-    public CrystallizerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        super(context);
-        this.model = new CrystallizerModel(context.getLayerModelPart(CrystallizerModel.LAYER_LOCATION));
     }
 
     @Override
@@ -103,14 +103,14 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),
-                -18f/16f, -0.5001f, -18f/16f,
-                18f/16f, 46f, 18f/16f - 0.001f, 0x40000000, ColorMode.SUBTRACTION);
+                -18f / 16f, -0.5001f, -18f / 16f,
+                18f / 16f, 46f, 18f / 16f - 0.001f, 0x40000000, ColorMode.SUBTRACTION);
 
         this.fluidRenderer.render(entity.getWaterFluidStorage(),
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),
-                -18f/16f, -0.5f, -18f/16f,
-                18f/16f, 46f, 18f/16f);
+                -18f / 16f, -0.5f, -18f / 16f,
+                18f / 16f, 46f, 18f / 16f);
     }
 }

@@ -31,12 +31,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -62,12 +60,6 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     private RegistryKey<Recipe<?>> currentRecipeId;
     private int progress;
     private int maxProgress;
-
-    private ItemStack outputItemStack = ItemStack.EMPTY;
-    private FluidStack outputFluidStack = FluidStack.EMPTY;
-
-    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
-
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -92,6 +84,9 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
             return 2;
         }
     };
+    private ItemStack outputItemStack = ItemStack.EMPTY;
+    private FluidStack outputFluidStack = FluidStack.EMPTY;
+    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
 
     public ClarifierBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CLARIFIER, BlockEntityTypeInit.CLARIFIER, pos, state);
@@ -277,7 +272,8 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     @Override
     protected void readData(ReadView view) {
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
-        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
 
         this.progress = view.getInt("Progress", 0);
 

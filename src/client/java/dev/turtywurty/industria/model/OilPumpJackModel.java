@@ -337,7 +337,9 @@ public class OilPumpJackModel extends Model {
         return this.parts;
     }
 
-    public record OilPumpJackParts(ModelPart main, ModelPart wheel, ModelPart counterWeights, ModelPart pitmanArm, ModelPart arm,
-                                   ModelPart attachmentA, ModelPart attachmentB, ModelPart attachmentC, ModelPart attachmentD, ModelPart attachmentE) {
+    public record OilPumpJackParts(ModelPart main, ModelPart wheel, ModelPart counterWeights, ModelPart pitmanArm,
+                                   ModelPart arm,
+                                   ModelPart attachmentA, ModelPart attachmentB, ModelPart attachmentC,
+                                   ModelPart attachmentD, ModelPart attachmentE) {
     }
 }

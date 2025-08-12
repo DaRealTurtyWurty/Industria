@@ -15,5 +15,6 @@ public class PositionSourceTypeInit {
         return Registry.register(Registries.POSITION_SOURCE_TYPE, Industria.id(name), type);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

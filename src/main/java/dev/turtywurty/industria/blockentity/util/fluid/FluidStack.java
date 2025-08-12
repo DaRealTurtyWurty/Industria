@@ -31,7 +31,7 @@ public record FluidStack(FluidVariant variant, long amount) {
     }
 
     public boolean matches(@Nullable FluidStack other) {
-        if(this == EMPTY && other == EMPTY)
+        if (this == EMPTY && other == EMPTY)
             return true;
 
         return other == null ? isEmpty() : this.variant.equals(other.variant()) && this.amount >= other.amount();

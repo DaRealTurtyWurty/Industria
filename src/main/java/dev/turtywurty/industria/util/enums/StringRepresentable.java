@@ -3,8 +3,6 @@ package dev.turtywurty.industria.util.enums;
 import java.util.Objects;
 
 public interface StringRepresentable {
-    String getSerializedName();
-
     static <T extends Enum<?> & StringRepresentable> T getEnumByName(Class<T> enumClass, String serializedName) {
         return getEnumByName(enumClass.getEnumConstants(), serializedName);
     }
@@ -18,4 +16,6 @@ public interface StringRepresentable {
 
         return null;
     }
+
+    String getSerializedName();
 }

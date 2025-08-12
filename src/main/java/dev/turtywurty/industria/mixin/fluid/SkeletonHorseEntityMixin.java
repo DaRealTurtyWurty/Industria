@@ -16,10 +16,10 @@ public abstract class SkeletonHorseEntityMixin extends AbstractHorseEntity {
     }
 
     @ModifyExpressionValue(method = "getAmbientSound",
-    at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/mob/SkeletonHorseEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/mob/SkeletonHorseEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean industria$getAmbientSound(boolean original) {
-        if(original)
+        if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()

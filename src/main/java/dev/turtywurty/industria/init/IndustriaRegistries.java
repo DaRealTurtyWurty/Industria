@@ -15,5 +15,6 @@ public class IndustriaRegistries {
                     .attribute(RegistryAttribute.SYNCED)
                     .buildAndRegister();
 
-    public static void init() {}
+    public static void init() {
+    }
 }

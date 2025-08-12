@@ -11,7 +11,6 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.util.math.BlockPos;
@@ -33,6 +32,10 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
 
     IndustriaBlock blockRef;
 
+    public IndustriaBlockEntity(BlockPos pos, BlockState state, BlockEntityType<T> type) {
+        super(type, pos, state);
+    }
+
     @Override
     public void onBlockReplaced(BlockPos pos, BlockState oldState) {
         BlockState newState = world.getBlockState(pos);
@@ -47,10 +50,6 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
                 }
             }
         }
-    }
-
-    public IndustriaBlockEntity(BlockPos pos, BlockState state, BlockEntityType<T> type) {
-        super(type, pos, state);
     }
 
     @Override
@@ -117,14 +116,12 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
 
     public static class BlockEntityProperties<T extends IndustriaBlockEntity<T>> {
         private final T blockEntity;
-        private int tickRate = 0;
-        private TickLogic<T, BlockEntityFields<T>> tickLogic;
-
         private final WrappedInventoryStorage<SimpleInventory> inventoryStorage = new WrappedInventoryStorage<>();
         private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
         private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-
         private final BlockEntityFields<T> fields = new BlockEntityFields<>();
+        private int tickRate = 0;
+        private TickLogic<T, BlockEntityFields<T>> tickLogic;
 
         public BlockEntityProperties(T blockEntity) {
             this.blockEntity = blockEntity;

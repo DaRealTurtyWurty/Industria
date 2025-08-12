@@ -48,14 +48,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -85,10 +81,6 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     private int progress, maxProgress;
     private int electrolyteConversionProgress, maxElectrolyteConversionProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
-    private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
-    private GasStack leftoverOutputGas = GasStack.EMPTY;
-
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -117,6 +109,9 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
             return 4;
         }
     };
+    private RegistryKey<Recipe<?>> currentRecipeId;
+    private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
+    private GasStack leftoverOutputGas = GasStack.EMPTY;
 
     public ElectrolyzerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.ELECTROLYZER, BlockEntityTypeInit.ELECTROLYZER, pos, state);

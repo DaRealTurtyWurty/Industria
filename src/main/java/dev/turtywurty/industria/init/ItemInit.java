@@ -72,7 +72,8 @@ public class ItemInit {
         return register(name, constructor, settings -> settings);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(Registries.ITEM, Industria.id(name), item);

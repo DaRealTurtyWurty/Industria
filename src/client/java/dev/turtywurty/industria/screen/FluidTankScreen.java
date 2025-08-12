@@ -38,7 +38,7 @@ public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 boolean mouseClicked = super.mouseClicked(mouseX, mouseY, button);
-                if(mouseClicked) {
+                if (mouseClicked) {
                     this.toggled = !this.toggled;
                 }
 
@@ -53,7 +53,7 @@ public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
 
             @Override
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-                if(this.toggled) {
+                if (this.toggled) {
                     ScreenUtils.drawTexture(context, TEXTURE, getX(), getY(), 176, 0, 20, 20);
                 } else {
                     ScreenUtils.drawTexture(context, TEXTURE, getX(), getY(), 176, 20, 20, 20);
@@ -65,7 +65,7 @@ public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
     @Override
     protected void handledScreenTick() {
         super.handledScreenTick();
-        if(this.toggleButton != null)
+        if (this.toggleButton != null)
             this.toggleButton.setToggled(this.handler.getBlockEntity().isExtractMode());
     }
 

@@ -32,8 +32,8 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "tickMovement",
-    at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;isTouchingWater()Z"))
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;isTouchingWater()Z"))
     private void industria$tickMovement(CallbackInfo callback, @Local(ordinal = 3) LocalDoubleRef g) {
         if (g.get() != 0.0D)
             return;

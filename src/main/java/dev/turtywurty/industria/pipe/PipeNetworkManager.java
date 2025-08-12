@@ -49,6 +49,14 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
 
     public static final PacketCodec<ByteBuf, Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_PACKET_CODEC =
             PacketCodecs.map(HashMap::new, BlockPos.PACKET_CODEC, Uuids.PACKET_CODEC);
+    protected final PipeNetworkManagerType<S, N> type;
+    protected final TransferType<S, ?, ?> transferType;
+    protected final Set<N> networks = ConcurrentHashMap.newKeySet();
+    protected final Map<BlockPos, UUID> pipeToNetworkId = new ConcurrentHashMap<>();
+    public PipeNetworkManager(PipeNetworkManagerType<S, N> type, TransferType<S, ?, ?> transferType) {
+        this.type = type;
+        this.transferType = transferType;
+    }
 
     protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> MapCodec<M> createCodec(Codec<N> networkCodec, Supplier<M> factory) {
         return RecordCodecBuilder.mapCodec(instance ->
@@ -75,14 +83,14 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
                 });
     }
 
-    protected final PipeNetworkManagerType<S, N> type;
-    protected final TransferType<S, ?, ?> transferType;
-    protected final Set<N> networks = ConcurrentHashMap.newKeySet();
-    protected final Map<BlockPos, UUID> pipeToNetworkId = new ConcurrentHashMap<>();
+    private static void syncAndSave(ServerWorld world, List<CustomPayload> payloads) {
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            for (CustomPayload payload : payloads) {
+                ServerPlayNetworking.send(player, payload);
+            }
+        }
 
-    public PipeNetworkManager(PipeNetworkManagerType<S, N> type, TransferType<S, ?, ?> transferType) {
-        this.type = type;
-        this.transferType = transferType;
+        WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
     protected abstract N createNetwork(UUID id);
@@ -352,16 +360,6 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         }
 
         syncAndSave(world, payloads);
-    }
-
-    private static void syncAndSave(ServerWorld world, List<CustomPayload> payloads) {
-        for (ServerPlayerEntity player : world.getPlayers()) {
-            for (CustomPayload payload : payloads) {
-                ServerPlayNetworking.send(player, payload);
-            }
-        }
-
-        WorldPipeNetworks.getOrCreate(world).markDirty();
     }
 
     protected void mergeNetworks(ServerWorld world, Map.Entry<BlockPos, N> targetEntry, Map.Entry<BlockPos, N> sourceEntry) {

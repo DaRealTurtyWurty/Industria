@@ -9,8 +9,6 @@ import dev.turtywurty.industria.init.BlockInit;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
@@ -21,10 +19,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
+    private final WrappedFluidStorage<SingleFluidStorage> tank = new WrappedFluidStorage<>();
     private BlockPos controllerPos = null;
     private int ticks = 0;
-
-    private final WrappedFluidStorage<SingleFluidStorage> tank = new WrappedFluidStorage<>();
 
     public FractionalDistillationTowerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.FRACTIONAL_DISTILLATION_TOWER, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_TOWER, pos, state);

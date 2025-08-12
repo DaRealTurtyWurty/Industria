@@ -69,7 +69,7 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
         EnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long capacity = energyStorage.getCapacity();
-        if(energy == 0 || capacity == 0) return 0;
+        if (energy == 0 || capacity == 0) return 0;
 
         return MathHelper.clamp((float) energy / capacity, 0, 1);
     }

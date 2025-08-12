@@ -19,9 +19,8 @@ import java.util.List;
 
 public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/upgrade_station.png");
-
-    private SelectRecipeWidget<UpgradeStationRecipe> recipeSelector;
     private final List<IndustriaIngredientPreviewWidget<UpgradeStationRecipe>> ingredientWidgets = new ArrayList<>();
+    private SelectRecipeWidget<UpgradeStationRecipe> recipeSelector;
     private boolean isDirty = false;
 
     public UpgradeStationScreen(UpgradeStationScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -95,7 +94,7 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
 
     @Override
     protected void handledScreenTick() {
-        if(this.isDirty) {
+        if (this.isDirty) {
             if (this.recipeSelector != null) {
                 this.recipeSelector.setCanCraft(this.handler.canCraft());
                 if (!this.recipeSelector.canCraft()) {
@@ -130,7 +129,7 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+        if (!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
             return hoveredElement(mouseX, mouseY).filter(element -> element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)).isPresent();
         }
 

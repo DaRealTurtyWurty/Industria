@@ -46,7 +46,7 @@ public class ThermalGeneratorScreen extends HandledScreen<ThermalGeneratorScreen
         int fluidBarHeight = Math.round((float) fluidAmount / fluidCapacity * 60);
 
         FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-        if(fluidRenderHandler == null || fluidAmount <= 0)
+        if (fluidRenderHandler == null || fluidAmount <= 0)
             return;
 
         BlockPos pos = this.handler.getBlockEntity().getPos();
