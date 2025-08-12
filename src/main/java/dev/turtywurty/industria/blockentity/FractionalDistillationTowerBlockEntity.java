@@ -11,6 +11,8 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -79,19 +81,17 @@ public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-        this.controllerPos = nbt.contains("ControllerPos") ? BlockPos.fromLong(nbt.getLong("ControllerPos", 0L)) : null;
-        this.ticks = nbt.getInt("Ticks", 0);
+    protected void readData(ReadView view) {
+        this.controllerPos = BlockPos.fromLong(view.getLong("ControllerPos", 0L));
+        this.ticks = view.getInt("Ticks", 0);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
         if (this.controllerPos != null)
-            nbt.putLong("ControllerPos", this.controllerPos.asLong());
+            view.putLong("ControllerPos", this.controllerPos.asLong());
 
-        nbt.putInt("Ticks", this.ticks);
+        view.putInt("Ticks", this.ticks);
     }
 
     public BlockPos getControllerPos() {

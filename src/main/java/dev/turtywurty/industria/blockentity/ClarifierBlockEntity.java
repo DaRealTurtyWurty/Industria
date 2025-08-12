@@ -21,6 +21,7 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ClarifierRecipe;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
 import dev.turtywurty.industria.screenhandler.ClarifierScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -40,6 +41,8 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -249,67 +252,48 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("MultiblockPositions", Multiblockable.writeMultiblockToNbt(this));
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        Multiblockable.write(this, view);
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            nbt.put("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE), this.currentRecipeId);
+            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (!this.outputItemStack.isEmpty()) {
-            nbt.put("OutputStack", this.outputItemStack.toNbt(registries));
+            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.outputFluidStack.isEmpty()) {
-            nbt.put("OutputFluid", FluidStack.CODEC.codec(), this.outputFluidStack);
+            view.put("OutputFluid", FluidStack.CODEC.codec(), this.outputFluidStack);
         }
 
-        nbt.put("NextOutputStack", ItemStack.OPTIONAL_CODEC, this.nextOutputItemStack);
+        view.put("NextOutputStack", ItemStack.OPTIONAL_CODEC, this.nextOutputItemStack);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
 
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
+        this.progress = view.getInt("Progress", 0);
 
-        if (nbt.contains("FluidTank"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
+        this.maxProgress = view.getInt("MaxProgress", 0);
 
-        if (nbt.contains("MultiblockPositions"))
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
+        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                .orElse(null);
 
-        if (nbt.contains("Progress"))
-            this.progress = nbt.getInt("Progress", 0);
+        this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
+                .orElse(ItemStack.EMPTY);
 
-        if (nbt.contains("MaxProgress"))
-            this.maxProgress = nbt.getInt("MaxProgress", 0);
+        this.outputFluidStack = view.read("OutputFluid", FluidStack.CODEC.codec())
+                .orElse(FluidStack.EMPTY);
 
-        if (nbt.contains("CurrentRecipe")) {
-            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
-        }
-
-        if (nbt.contains("OutputStack")) {
-            this.outputItemStack = ItemStack.fromNbt(registries, nbt.get("OutputStack"))
-                    .orElse(ItemStack.EMPTY);
-        }
-
-        if (nbt.contains("OutputFluid")) {
-            this.outputFluidStack = nbt.get("OutputFluid", FluidStack.CODEC.codec())
-                    .orElse(FluidStack.EMPTY);
-        }
-
-        if (nbt.contains("NextOutputStack"))
-            this.nextOutputItemStack = nbt.get("NextOutputStack", ItemStack.OPTIONAL_CODEC)
-                    .orElse(ItemStack.EMPTY);
+        this.nextOutputItemStack = view.read("NextOutputStack", ItemStack.OPTIONAL_CODEC)
+                .orElse(ItemStack.EMPTY);
     }
 
     @Override

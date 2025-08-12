@@ -8,6 +8,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -18,6 +19,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -57,29 +60,27 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        this.oilPumpJackPos = nbt.get("OilPumpJackPos", BlockPos.CODEC).orElse(null);
+        this.oilPumpJackPos = view.read("OilPumpJackPos", BlockPos.CODEC).orElse(null);
         this.drillTubes.clear();
-        NbtCompound drillTubesNbt = nbt.getCompoundOrEmpty("DrillTubes");
+        NbtCompound drillTubesNbt = view.read("DrillTubes", NbtCompound.CODEC).orElseThrow();
         for (String key : drillTubesNbt.getKeys()) {
             BlockPos pos = BlockPos.fromLong(Long.parseLong(key));
             int fluidAmount = drillTubesNbt.getInt(key, 0);
             this.drillTubes.put(pos, fluidAmount);
         }
 
-        if (nbt.contains("FluidTank")) {
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-        }
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
         if (this.oilPumpJackPos != null) {
-            nbt.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
+            view.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
         }
 
         NbtCompound drillTubesNbt = new NbtCompound();
@@ -87,8 +88,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
             drillTubesNbt.putLong(String.valueOf(entry.getKey().asLong()), entry.getValue());
         }
 
-        nbt.put("DrillTubes", drillTubesNbt);
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
+        ViewUtils.put(view.get("DrillTubes"), drillTubesNbt);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
     }
 
     @Override

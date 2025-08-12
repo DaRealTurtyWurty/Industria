@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.10.1'
+	id 'fabric-loom' version '1.11-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -11,6 +11,7 @@ base {
 }
 
 repositories {
+	mavenLocal()
 	maven {
 		url = "https://api.modrinth.com/maven"
 	}
@@ -32,10 +33,6 @@ loom {
 	}
 
 	accessWidenerPath = file("src/main/resources/${project.archives_base_name}.accesswidener")
-
-	runConfigs.configureEach {
-		ideConfigGenerated = false
-	}
 }
 
 fabricApi {

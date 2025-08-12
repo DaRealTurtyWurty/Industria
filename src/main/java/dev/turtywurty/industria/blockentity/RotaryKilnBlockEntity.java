@@ -9,6 +9,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -30,17 +32,15 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
 
-        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
+        Multiblockable.write(this, view);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
 
-        Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
+        Multiblockable.read(this, view.getReadView("MachinePositions"));
     }
 
     @Override

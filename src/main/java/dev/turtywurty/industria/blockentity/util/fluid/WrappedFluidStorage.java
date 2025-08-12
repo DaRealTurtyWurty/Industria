@@ -11,6 +11,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,33 +36,24 @@ public class WrappedFluidStorage<T extends Storage<FluidVariant>> extends Wrappe
     }
 
     @Override
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var list = new NbtList();
+    public void writeData(WriteView view) {
         for (T tank : this.storages) {
             if (tank instanceof SingleFluidStorage singleFluidStorage) {
-                var nbt = new NbtCompound();
-                nbt.putLong("Amount", singleFluidStorage.getAmount());
-                nbt.put("Fluid", FluidVariant.CODEC.encode(singleFluidStorage.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
-                list.add(nbt);
+                view.putLong("Amount", singleFluidStorage.getAmount());
+                view.put("Fluid", FluidVariant.CODEC, singleFluidStorage.getResource());
             }
         }
-
-        return list;
     }
 
     @Override
-    public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        for (int index = 0; index < nbt.size(); index++) {
-            var compound = nbt.getCompoundOrEmpty(index);
-            T storage = this.storages.get(index);
+    public void readData(ReadView view) {
+        for (T storage : this.storages) {
             if (storage == null)
                 continue;
 
-            if(storage instanceof SingleFluidStorage singleFluidStorage) {
-                singleFluidStorage.amount = compound.getLong("Amount", 0L);
-                singleFluidStorage.variant = FluidVariant.CODEC.decode(NbtOps.INSTANCE, compound.get("Fluid"))
-                        .map(Pair::getFirst)
-                        .getOrThrow();
+            if (storage instanceof SingleFluidStorage singleFluidStorage) {
+                singleFluidStorage.amount = view.getLong("Amount", 0L);
+                singleFluidStorage.variant = view.read("Fluid", FluidVariant.CODEC).orElseThrow();
             } else {
                 throw new UnsupportedOperationException("Cannot read fluid storage of type: " + storage.getClass().getName());
             }

@@ -11,6 +11,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -24,6 +25,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -60,23 +63,23 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
         if (this.world == null || this.world.isClient)
             return;
 
-        if(this.isExtractMode) {
+        if (this.isExtractMode) {
             SyncingFluidStorage tank = getFluidTank();
-            if(tank.isResourceBlank() || tank.amount <= 0)
+            if (tank.isResourceBlank() || tank.amount <= 0)
                 return;
 
             Map<Storage<FluidVariant>, Long> storages = new HashMap<>();
             for (Direction direction : Direction.values()) {
                 Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.world, this.pos.offset(direction), direction.getOpposite());
-                if(fluidStorage == null || !fluidStorage.supportsInsertion())
+                if (fluidStorage == null || !fluidStorage.supportsInsertion())
                     continue;
 
                 long maxInsert;
-                try(Transaction transaction = Transaction.openOuter()) {
+                try (Transaction transaction = Transaction.openOuter()) {
                     maxInsert = fluidStorage.insert(tank.variant, tank.amount, transaction);
                 }
 
-                if(maxInsert > 0) {
+                if (maxInsert > 0) {
                     storages.put(fluidStorage, maxInsert);
                 }
             }
@@ -115,22 +118,15 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-
-        nbt.putBoolean("ExtractMode", this.isExtractMode);
-        nbt.put("FluidStorage", this.wrappedFluidStorage.writeNbt(registries));
+    protected void writeData(WriteView view) {
+        view.putBoolean("ExtractMode", this.isExtractMode);
+        ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-
-        if (nbt.contains("ExtractMode"))
-            this.isExtractMode = nbt.getBoolean("ExtractMode", false);
-
-        if (nbt.contains("FluidStorage"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registries);
+    protected void readData(ReadView view) {
+        this.isExtractMode = view.getBoolean("ExtractMode", false);
+        ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
     }
 
     public SingleFluidStorage getFluidProvider(Direction direction) {

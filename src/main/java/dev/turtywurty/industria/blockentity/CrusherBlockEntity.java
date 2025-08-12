@@ -16,6 +16,7 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrusherRecipe;
 import dev.turtywurty.industria.screenhandler.CrusherScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -38,6 +39,8 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -280,61 +283,43 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+    protected void writeData(WriteView view) {
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
+            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (hasItemsInBuffer()) {
-            var bufferArray = new NbtList();
+            var bufferArray = view.getListAppender("Buffer", ItemStack.CODEC);
             for (ItemStack stack : this.buffer) {
                 if (stack == null || stack.isEmpty())
                     continue;
 
-                bufferArray.add(stack.toNbt(registryLookup));
+                bufferArray.add(stack);
             }
-
-            nbt.put("Buffer", bufferArray);
         }
 
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        this.progress = view.getInt("Progress", 0);
+        this.maxProgress = view.getInt("MaxProgress", 0);
 
-        if (nbt.contains("Progress"))
-            this.progress = nbt.getInt("Progress", 0);
+        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                .orElse(null);
 
-        if (nbt.contains("MaxProgress"))
-            this.maxProgress = nbt.getInt("MaxProgress", 0);
+        for (int i = 0; i < view.getTypedListView("Buffer", ItemStack.CODEC).stream().toList().size(); i++) {
 
-        if (nbt.contains("CurrentRecipe")) {
-            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
+            this.buffer[i] = view.read(ItemStack.MAP_CODEC)
+                    .orElse(ItemStack.EMPTY);
         }
 
-        if (nbt.contains("Buffer")) {
-            NbtList bufferArray = nbt.getListOrEmpty("Buffer");
-            for (int i = 0; i < bufferArray.size(); i++) {
-                this.buffer[i] = ItemStack.fromNbt(registryLookup, bufferArray.getCompoundOrEmpty(i))
-                        .orElse(ItemStack.EMPTY);
-            }
-        }
-
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
-
-        if (nbt.contains("Energy"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     public InventoryStorage getInventoryProvider(Direction direction) {

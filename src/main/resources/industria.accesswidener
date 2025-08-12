@@ -12,12 +12,12 @@ accessible field net/minecraft/client/model/ModelPart children Ljava/util/Map;
 accessible field net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
 accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V
 accessible field net/minecraft/client/gui/widget/PressableWidget TEXTURES Lnet/minecraft/client/gui/screen/ButtonTextures;
-accessible method net/minecraft/client/gui/DrawContext drawTooltip (Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;)V
+accessible    method    net/minecraft/client/gui/DrawContext    drawTooltip    (Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;Z)V
 mutable field net/minecraft/block/Block stateManager Lnet/minecraft/state/StateManager;
 accessible field net/minecraft/block/AbstractBlock$Settings luminance Ljava/util/function/ToIntFunction;
 accessible field net/minecraft/state/State propertyMap Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
-accessible method net/minecraft/client/gui/DrawContext drawSpriteTiled (Ljava/util/function/Function;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
-accessible method net/minecraft/client/gui/DrawContext drawSpriteNineSliced (Ljava/util/function/Function;Lnet/minecraft/client/texture/Sprite;Lnet/minecraft/client/texture/Scaling$NineSlice;IIIII)V
-accessible method net/minecraft/client/gui/DrawContext drawInnerSprite (Ljava/util/function/Function;Lnet/minecraft/client/texture/Scaling$NineSlice;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
-accessible method net/minecraft/client/gui/DrawContext drawTexturedQuad (Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
+accessible    method    net/minecraft/client/gui/DrawContext    drawSpriteTiled    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
+accessible    method    net/minecraft/client/gui/DrawContext    drawSpriteNineSliced    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Sprite;Lnet/minecraft/client/texture/Scaling$NineSlice;IIIII)V
+accessible    method    net/minecraft/client/gui/DrawContext    drawInnerSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Scaling$NineSlice;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
+accessible    method    net/minecraft/client/gui/DrawContext    drawTexturedQuad    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
 accessible field net/minecraft/data/loottable/BlockLootTableGenerator SAPLING_DROP_CHANCE [F

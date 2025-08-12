@@ -176,8 +176,12 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
     }
 
     @Override
-    public boolean rendersOutsideBoundingBox(DrillBlockEntity blockEntity) {
-        return blockEntity.isDrilling() || blockEntity.isRetracting() && blockEntity.getDrillYOffset() < -1F;
+    public boolean rendersOutsideBoundingBox() {
+        // this should be true if your block entity can EVER render outside the bounding box.
+        //the client maintains a list of globally-renderable blockentities
+        //rendersOutsideBoundingBox is only checked when the blockentity is added to the world or the chunk model is baked
+        //so it's important not to treat rendersOutsideBoundingBox as something whose value could change easily
+        return true;
     }
 
     @Override

@@ -25,6 +25,7 @@ import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.DrillRenderData;
 import dev.turtywurty.industria.util.ExtraCodecs;
+import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
@@ -45,6 +46,8 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.*;
@@ -205,64 +208,31 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
 
-        if (nbt.contains("MultiblockPositions")) {
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
+        this.drilling = view.getBoolean("Drilling", false);
+
+        this.retracting = view.getBoolean("Retracting", false);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
+        this.drillYOffset = view.getFloat("DrillYOffset", 0.0F);
+        this.overflowMethod = view.read("OverflowMethod", OverflowMethod.CODEC)
+                .orElse(OverflowMethod.VOID);
+
+        this.overflowStacks.clear();
+        for (ItemStack stack : view.getTypedListView("OverflowStacks", ItemStack.CODEC)) {
+            this.overflowStacks.add(stack);
         }
 
-        if (nbt.contains("Drilling")) {
-            this.drilling = nbt.getBoolean("Drilling", false);
-        }
+        this.isPaused = view.getBoolean("Paused", false);
 
-        if (nbt.contains("Retracting")) {
-            this.retracting = nbt.getBoolean("Retracting", false);
-        }
+        this.currentRotationSpeed = view.getFloat("CurrentRotationSpeed", 0.0F);
 
-        if (nbt.contains("Inventory")) {
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
-        }
+        this.targetRotationSpeed = view.getFloat("TargetRotationSpeed", 0.0F);
 
-        if (nbt.contains("Energy")) {
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
-        }
-
-        if (nbt.contains("DrillYOffset")) {
-            this.drillYOffset = nbt.getFloat("DrillYOffset", 0.0F);
-        }
-
-        if (nbt.contains("OverflowMethod")) {
-            this.overflowMethod = nbt.get("OverflowMethod", OverflowMethod.CODEC)
-                    .orElse(OverflowMethod.VOID);
-        }
-
-        if (nbt.contains("OverflowStacks")) {
-            this.overflowStacks.clear();
-            for (NbtElement element : nbt.getListOrEmpty("OverflowStacks")) {
-                ItemStack.fromNbt(registryLookup, element)
-                        .ifPresent(this.overflowStacks::add);
-            }
-
-            this.overflowStacks.removeIf(ItemStack::isEmpty);
-        }
-
-        if (nbt.contains("Paused")) {
-            this.isPaused = nbt.getBoolean("Paused", false);
-        }
-
-        if (nbt.contains("CurrentRotationSpeed")) {
-            this.currentRotationSpeed = nbt.getFloat("CurrentRotationSpeed", 0.0F);
-        }
-
-        if (nbt.contains("TargetRotationSpeed")) {
-            this.targetRotationSpeed = nbt.getFloat("TargetRotationSpeed", 0.0F);
-        }
-
-        if (nbt.contains("DrillHeadAABB")) {
-            this.drillHeadAABB = nbt.get("DrillHeadAABB", ExtraCodecs.BOX_CODEC)
-                    .orElseGet(() -> Box.from(Vec3d.of(this.pos)));
-        }
+        this.drillHeadAABB = view.read("DrillHeadAABB", ExtraCodecs.BOX_CODEC)
+                .orElseGet(() -> Box.from(Vec3d.of(this.pos)));
 
         if (this.world != null && this.world.isClient && this.renderData == null && getDrillStack().getItem() instanceof DrillHeadable drillHeadable) {
             setRenderData(drillHeadable.createRenderData());
@@ -270,34 +240,31 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.put("MultiblockPositions", Multiblockable.writeMultiblockToNbt(this));
-        nbt.putBoolean("Drilling", this.drilling);
-        nbt.putBoolean("Retracting", this.retracting);
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
-        nbt.putFloat("DrillYOffset", this.drillYOffset);
-        nbt.putString("OverflowMethod", this.overflowMethod.getSerializedName());
+    protected void writeData(WriteView view) {
+        Multiblockable.write(this, view);
+        view.putBoolean("Drilling", this.drilling);
+        view.putBoolean("Retracting", this.retracting);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
+        view.putFloat("DrillYOffset", this.drillYOffset);
+        view.put("OverflowMethod", OverflowMethod.CODEC, this.overflowMethod);
 
         if (!this.overflowStacks.isEmpty()) {
-            var overflowStacks = new NbtList();
+            var overflowStacks = view.getListAppender("OverflowStacks", ItemStack.CODEC);
             for (ItemStack stack : this.overflowStacks) {
                 if (stack.isEmpty())
                     continue;
 
-                overflowStacks.add(stack.toNbt(registryLookup));
+                overflowStacks.add(stack);
             }
-
-            nbt.put("OverflowStacks", overflowStacks);
         }
 
-        nbt.putBoolean("Paused", this.isPaused);
-        nbt.putFloat("CurrentRotationSpeed", this.currentRotationSpeed);
-        nbt.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
+        view.putBoolean("Paused", this.isPaused);
+        view.putFloat("CurrentRotationSpeed", this.currentRotationSpeed);
+        view.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
 
         if (this.drillHeadAABB != null) {
-            nbt.put("DrillHeadAABB", ExtraCodecs.BOX_CODEC, this.drillHeadAABB);
+            view.put("DrillHeadAABB", ExtraCodecs.BOX_CODEC, this.drillHeadAABB);
         }
     }
 

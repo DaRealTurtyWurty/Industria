@@ -3,7 +3,6 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.block.Block;
 import net.minecraft.client.data.BlockStateModelGenerator;
@@ -15,6 +14,7 @@ import net.minecraft.data.recipe.RecipeExporter;
 import net.minecraft.data.recipe.RecipeGenerator;
 import net.minecraft.data.recipe.ShapedRecipeJsonBuilder;
 import net.minecraft.data.recipe.ShapelessRecipeJsonBuilder;
+import net.minecraft.data.tag.ProvidedTagBuilder;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Ingredient;
@@ -104,7 +104,7 @@ public class WoodSetDatagen {
 
     public static void generateRecipes(WoodRegistrySet woodSet, RecipeGenerator generator, RecipeExporter exporter, RegistryEntryLookup<Item> registries) {
         ShapelessRecipeJsonBuilder.create(registries, RecipeCategory.BUILDING_BLOCKS, woodSet.planks, 4)
-                .input(Ingredient.fromTag(registries.getOrThrow(woodSet.logsItemTag)))
+                .input(Ingredient.ofTag(registries.getOrThrow(woodSet.logsItemTag)))
                 .criterion(hasTag(woodSet.logsItemTag), generator.conditionsFromTag(woodSet.logsItemTag))
                 .offerTo(exporter);
 
@@ -126,8 +126,8 @@ public class WoodSetDatagen {
                 .offerTo(exporter);
 
         ShapelessRecipeJsonBuilder.create(registries, RecipeCategory.TRANSPORTATION, woodSet.chestBoatItem)
-                .input(Ingredient.fromTag(registries.getOrThrow(woodSet.logsItemTag)))
-                .input(Ingredient.fromTag(registries.getOrThrow(ConventionalItemTags.WOODEN_CHESTS)))
+                .input(Ingredient.ofTag(registries.getOrThrow(woodSet.logsItemTag)))
+                .input(Ingredient.ofTag(registries.getOrThrow(ConventionalItemTags.WOODEN_CHESTS)))
                 .criterion(hasTag(woodSet.logsItemTag), generator.conditionsFromTag(woodSet.logsItemTag))
                 .criterion(hasTag(ConventionalItemTags.WOODEN_CHESTS), generator.conditionsFromTag(ConventionalItemTags.WOODEN_CHESTS))
                 .offerTo(exporter);
@@ -135,7 +135,8 @@ public class WoodSetDatagen {
         generator.generateFamily(woodSet.createBlockFamily(), FeatureSet.empty());
     }
 
-    public static void generateItemTags(WoodRegistrySet woodSet, Function<TagKey<Item>, FabricTagProvider<Item>.FabricTagBuilder> provider) {
+    public static void generateItemTags(WoodRegistrySet woodSet, Function<TagKey<Item>, ProvidedTagBuilder<Item, Item>> provider) {
+        provider.apply(woodSet.logsItemTag);
         provider.apply(woodSet.logsItemTag)
                 .add(woodSet.log.asItem())
                 .add(woodSet.strippedLog.asItem())
@@ -191,7 +192,7 @@ public class WoodSetDatagen {
                 .add(woodSet.chestBoatItem);
     }
 
-    public static void generateBlockTags(WoodRegistrySet woodSet, Function<TagKey<Block>, FabricTagProvider<Block>.FabricTagBuilder> provider) {
+    public static void generateBlockTags(WoodRegistrySet woodSet, Function<TagKey<Block>, ProvidedTagBuilder<Block, Block>> provider) {
         provider.apply(woodSet.logsBlockTag)
                 .add(woodSet.log)
                 .add(woodSet.strippedLog)
@@ -247,7 +248,7 @@ public class WoodSetDatagen {
                 .add(woodSet.wallHangingSign);
     }
 
-    public static void generateEntityTags(WoodRegistrySet woodSet, Function<TagKey<EntityType<?>>, FabricTagProvider<EntityType<?>>.FabricTagBuilder> provider) {
+    public static void generateEntityTags(WoodRegistrySet woodSet, Function<TagKey<EntityType<?>>, ProvidedTagBuilder<EntityType<?>, EntityType<?>>> provider) {
         provider.apply(EntityTypeTags.BOAT)
                 .add(woodSet.boatEntityType)
                 .add(woodSet.chestBoatEntityType);

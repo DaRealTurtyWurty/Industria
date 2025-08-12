@@ -6,26 +6,21 @@ import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 
 public class WrappedHeatStorage<T extends HeatStorage> extends WrappedStorage<T> {
     @Override
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var list = new NbtList();
+    public void writeData(WriteView view) {
         for (HeatStorage storage : this.storages) {
-            var nbt = new NbtCompound();
-            nbt.putDouble("Amount", storage.getAmount());
-            list.add(nbt);
+            view.putDouble("Amount", storage.getAmount());
         }
-
-        return list;
     }
 
     @Override
-    public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        for (int index = 0; index < nbt.size(); index++) {
-            NbtCompound compound = nbt.getCompoundOrEmpty(index);
-            HeatStorage storage = this.storages.get(index);
-            double amount = compound.getDouble("Amount", 0);
+    public void readData(ReadView view) {
+        for (HeatStorage storage : this.storages) {
+            double amount = view.getDouble("Amount", 0);
             if (storage instanceof SimpleHeatStorage simpleHeatStorage) {
                 simpleHeatStorage.setAmount(amount);
             } else {

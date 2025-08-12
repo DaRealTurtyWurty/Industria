@@ -16,6 +16,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.InductionHeaterScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -29,6 +30,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -140,26 +143,17 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-
-        nbt.put("HeatStorage", this.heatStorage.writeNbt(registries));
-        nbt.put("WaterStorage", this.waterStorage.writeNbt(registries));
-        nbt.put("EnergyStorage", this.energyStorage.writeNbt(registries));
+    protected void writeData(WriteView view) {
+        this.heatStorage.writeData(view.get("HeatStorage"));
+        this.waterStorage.writeData(view.get("WaterStorage"));
+        ViewUtils.putChild(view, "EnergyStorage", this.energyStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-
-        if (nbt.contains("HeatStorage"))
-            this.heatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
-
-        if (nbt.contains("WaterStorage"))
-            this.waterStorage.readNbt(nbt.getListOrEmpty("WaterStorage"), registries);
-
-        if (nbt.contains("EnergyStorage"))
-            this.energyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registries);
+    protected void readData(ReadView view) {
+        this.heatStorage.readData(view.getReadView("HeatStorage"));
+        this.waterStorage.readData(view.getReadView("WaterStorage"));
+        ViewUtils.readChild(view, "EnergyStorage", this.energyStorage);
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {

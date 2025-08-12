@@ -14,6 +14,9 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
+
+import java.util.Set;
 
 public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     private final ModelPart modelPart;
@@ -34,6 +37,13 @@ public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<In
             return;
 
         this.modelPart.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(this.texture)), light, overlay);
+    }
+
+    // @todo needs checking
+    @Override
+    public void collectVertices(Set<Vector3f> vertices) {
+        MatrixStack matrices = new MatrixStack();
+        this.modelPart.collectVertices(matrices, vertices);
     }
 
     @Override

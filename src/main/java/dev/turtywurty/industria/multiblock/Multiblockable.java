@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.multiblock;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
@@ -11,8 +10,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -161,11 +161,9 @@ public interface Multiblockable {
      *
      * @return An {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
      */
-    static NbtList writeMultiblockToNbt(Multiblockable multiblockable) {
+    static void write(Multiblockable multiblockable, WriteView view) {
         List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
-        return (NbtList) BlockPos.CODEC.listOf()
-                .encodeStart(NbtOps.INSTANCE, multiblockPositions)
-                .result().orElseGet(NbtList::new);
+        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockPositions);
     }
 
     /**
@@ -174,10 +172,10 @@ public interface Multiblockable {
      * @param multiblockable The multiblock controller to read the positions to.
      * @param nbt            The {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
      */
-    static void readMultiblockFromNbt(Multiblockable multiblockable, NbtList nbt) {
+    static void read(Multiblockable multiblockable, ReadView view) {
         List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
         multiblockPositions.clear();
-        BlockPos.CODEC.listOf().decode(NbtOps.INSTANCE, nbt).result().map(Pair::getFirst)
+        view.read("MachinePositions", BlockPos.CODEC.listOf())
                 .ifPresent(multiblockPositions::addAll);
     }
 

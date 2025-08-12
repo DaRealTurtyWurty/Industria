@@ -13,6 +13,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FluidPumpScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -28,6 +29,8 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -169,19 +172,15 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-        if (nbt.contains("FluidTank"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-        if (nbt.contains("Energy"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {

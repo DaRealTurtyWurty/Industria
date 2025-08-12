@@ -10,6 +10,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,31 +35,24 @@ public class WrappedSlurryStorage<T extends Storage<SlurryVariant>> extends Wrap
     }
 
     @Override
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var list = new NbtList();
+    public void writeData(WriteView view) {
         for (T tank : this.storages) {
             if(tank instanceof SingleSlurryStorage singleSlurryStorage) {
-                var nbt = new NbtCompound();
-                nbt.putLong("Amount", singleSlurryStorage.getAmount());
-                nbt.put("Slurry", SlurryVariant.CODEC.encode(singleSlurryStorage.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
-                list.add(nbt);
+                view.putLong("Amount", singleSlurryStorage.getAmount());
+                view.put("Slurry", SlurryVariant.CODEC, singleSlurryStorage.getResource());
             }
         }
-
-        return list;
     }
 
     @Override
-    public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        for (int index = 0; index < nbt.size(); index++) {
-            var compound = nbt.getCompoundOrEmpty(index);
-            T storage = this.storages.get(index);
+    public void readData(ReadView view) {
+        for (T storage : this.storages) {
             if (storage == null)
                 continue;
 
-            if(storage instanceof SingleSlurryStorage singleSlurryStorage) {
-                singleSlurryStorage.amount = compound.getLong("Amount", 0L);
-                singleSlurryStorage.variant = compound.get("Slurry", SlurryVariant.CODEC)
+            if (storage instanceof SingleSlurryStorage singleSlurryStorage) {
+                singleSlurryStorage.amount = view.getLong("Amount", 0L);
+                singleSlurryStorage.variant = view.read("Slurry", SlurryVariant.CODEC)
                         .orElse(SlurryVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read slurry storage of type: " + storage.getClass().getName());

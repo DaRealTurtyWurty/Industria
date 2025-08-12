@@ -19,6 +19,7 @@ import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.BlockState;
@@ -29,6 +30,8 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -106,7 +109,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
             boolean hasPumped = false;
             for (BlockPos pos : orderedPositions) {
                 int amount = drillTubes.get(pos);
-                if(amount <= 0)
+                if (amount <= 0)
                     continue;
 
                 BlockPos newPos = pos.up();
@@ -180,38 +183,23 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-
-        if (nbt.contains("MachinePositions")) {
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
-        }
-
-        this.wellheadPos = nbt.get("WellheadPos", BlockPos.CODEC).orElse(null);
-
-        if (nbt.contains("Energy")) {
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
-        }
-
-        if(nbt.contains("Inventory")) {
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
-        }
-
-        this.running = nbt.getBoolean("Running", false);
+    protected void readData(ReadView view) {
+        Multiblockable.read(this, view.getReadView("MachinePositions"));
+        this.wellheadPos = view.read("WellheadPos", BlockPos.CODEC).orElse(null);
+        ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        this.running = view.getBoolean("Running", false);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-
-        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
+    protected void writeData(WriteView view) {
+        Multiblockable.write(this, view);
         if (this.wellheadPos != null) {
-            nbt.put("WellheadPos", BlockPos.CODEC, this.wellheadPos);
+            view.put("WellheadPos", BlockPos.CODEC, this.wellheadPos);
         }
-
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
-        nbt.putBoolean("Running", this.running);
+        ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        view.putBoolean("Running", this.running);
     }
 
     @Override

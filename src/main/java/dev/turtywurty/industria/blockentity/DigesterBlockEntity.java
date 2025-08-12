@@ -34,6 +34,7 @@ import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
 import dev.turtywurty.industria.screenhandler.DigesterScreenHandler;
 import dev.turtywurty.industria.util.TransferUtils;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -60,6 +61,8 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -299,54 +302,33 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
-        nbt.put("SlurryTank", this.wrappedSlurryStorage.writeNbt(registries));
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("MultiblockPositions", Multiblockable.writeMultiblockToNbt(this));
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
+        this.wrappedSlurryStorage.writeData(view.get("FluidTank"));
+        this.wrappedFluidStorage.writeData(view.get("SlurryTank"));
+        Multiblockable.write(this, view);
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
+            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
+        ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
 
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
+        this.progress = view.getInt("Progress", 0);
 
-        if (nbt.contains("Energy"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
+        this.maxProgress = view.getInt("MaxProgress", 0);
 
-        if (nbt.contains("SlurryTank"))
-            this.wrappedSlurryStorage.readNbt(nbt.getListOrEmpty("SlurryTank"), registries);
-
-        if (nbt.contains("FluidTank"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-
-        if (nbt.contains("MultiblockPositions"))
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
-
-        if (nbt.contains("Progress"))
-            this.progress = nbt.getInt("Progress", 0);
-
-        if (nbt.contains("MaxProgress"))
-            this.maxProgress = nbt.getInt("MaxProgress", 0);
-
-        if (nbt.contains("CurrentRecipe")) {
-            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
-        }
+        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                .orElse(null);
     }
 
     @Override

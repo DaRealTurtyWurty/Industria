@@ -8,9 +8,9 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluid;
@@ -64,7 +64,7 @@ public class FluidPumpScreen extends HandledScreen<FluidPumpScreenHandler> {
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
         float blue = (tintColor & 0xFF) / 255.0F;
-        context.drawSpriteStretched(RenderLayer::getGuiTextured, stillTexture, this.x + 146, this.y + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+        context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED, stillTexture, this.x + 146, this.y + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
     }
 
     @Override

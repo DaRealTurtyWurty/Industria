@@ -13,6 +13,7 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
 import dev.turtywurty.industria.screenhandler.AlloyFurnaceScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -33,6 +34,8 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -230,66 +233,32 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView view) {
 
-        var modidData = new NbtCompound();
-        modidData.putInt("Progress", this.progress);
-        modidData.putInt("MaxProgress", this.maxProgress);
-        modidData.putInt("BurnTime", this.burnTime);
-        modidData.putInt("MaxBurnTime", this.maxBurnTime);
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
+        view.putInt("BurnTime", this.burnTime);
+        view.putInt("MaxBurnTime", this.maxBurnTime);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> modidData.put("CurrentRecipe", nbtElement));
+            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
-        modidData.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
 
         if (!this.bufferedStack.isEmpty())
-            modidData.put("BufferedStack", this.bufferedStack.toNbt(registryLookup));
-
-        nbt.put(Industria.MOD_ID, modidData);
+            view.put("BufferedStack", ItemStack.CODEC, this.bufferedStack);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-
-        if (!nbt.contains(Industria.MOD_ID))
-            return;
-
-        NbtCompound modidData = nbt.getCompoundOrEmpty(Industria.MOD_ID);
-        if (modidData.contains("Progress"))
-            this.progress = modidData.getInt("Progress", 0);
-
-        if (modidData.contains("MaxProgress"))
-            this.maxProgress = modidData.getInt("MaxProgress", 0);
-
-        if (modidData.contains("BurnTime"))
-            this.burnTime = modidData.getInt("BurnTime", 0);
-
-        if (modidData.contains("MaxBurnTime"))
-            this.maxBurnTime = modidData.getInt("MaxBurnTime", 0);
-
-        if (modidData.contains("CurrentRecipe")) {
-            NbtCompound currentRecipe = modidData.getCompoundOrEmpty("CurrentRecipe");
-            this.currentRecipeId = currentRecipe.isEmpty() ? null :
-                    RegistryKey.createCodec(RegistryKeys.RECIPE)
-                            .decode(NbtOps.INSTANCE, currentRecipe)
-                            .map(Pair::getFirst)
-                            .result()
-                            .orElse(null);
-        }
-
-        if (modidData.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(modidData.getListOrEmpty("Inventory"), registryLookup);
-
-        if (modidData.contains("BufferedStack"))
-            this.bufferedStack = ItemStack.fromNbt(registryLookup, modidData.getCompoundOrEmpty("BufferedStack"))
-                    .orElse(ItemStack.EMPTY);
+    protected void readData(ReadView view) {
+        this.progress = view.getInt("Progress", 0);
+        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.burnTime = view.getInt("BurnTime", 0);
+        this.maxBurnTime = view.getInt("MaxBurnTime", 0);
+        this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC).orElse(null);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        this.bufferedStack = view.read("BufferedStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
     }
 
     @Override

@@ -15,6 +15,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ElectricFurnaceScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
+import dev.turtywurty.industria.util.ViewUtils;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -33,6 +34,8 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -146,33 +149,24 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-        if (nbt.contains("Progress"))
-            this.progress = nbt.getShort("Progress", (short) 0);
+    protected void readData(ReadView view) {
+        this.progress = view.getShort("Progress", (short) 0);
+        this.maxProgress = view.getShort("MaxProgress", (short) 0);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
 
-        if (nbt.contains("MaxProgress"))
-            this.maxProgress = nbt.getShort("MaxProgress", (short) 0);
-
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
-
-        if (nbt.contains("Energy"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
-
-        RecipeExperienceBlockEntity.readRecipesUsed(nbt, "RecipesUsed", this.recipesUsed);
+        RecipeExperienceBlockEntity.readRecipesUsed(view, "RecipesUsed", this.recipesUsed);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
 
-        nbt.putShort("Progress", (short) this.progress);
-        nbt.putShort("MaxProgress", (short) this.maxProgress);
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
+        view.putShort("Progress", (short) this.progress);
+        view.putShort("MaxProgress", (short) this.maxProgress);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
 
-        RecipeExperienceBlockEntity.writeRecipesUsed(this.recipesUsed, nbt, "RecipesUsed");
+        RecipeExperienceBlockEntity.writeRecipesUsed(view, "RecipesUsed", this.recipesUsed);
     }
 
     @Override
@@ -185,7 +179,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
 
     @Override
     public void dropExperienceForRecipesUsed(ServerPlayerEntity player) {
-        List<RecipeEntry<?>> list = getRecipesUsedAndDropExperience(player.getServerWorld(), player.getPos());
+        List<RecipeEntry<?>> list = getRecipesUsedAndDropExperience(player.getWorld(), player.getPos());
         player.unlockRecipes(list);
 
         for (RecipeEntry<?> recipeEntry : list) {

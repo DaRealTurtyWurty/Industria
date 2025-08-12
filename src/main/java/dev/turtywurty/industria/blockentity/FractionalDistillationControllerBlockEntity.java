@@ -25,7 +25,11 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -84,30 +88,24 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
 
         this.towers.clear();
-        int numberOfTowers = nbt.getInt("NumberOfTowers", 0);
+        int numberOfTowers = view.getInt("NumberOfTowers", 0);
         for (int i = 1; i <= numberOfTowers; i++) {
             this.towers.add(new BlockPos(this.pos.getX(), this.pos.getY() + i, this.pos.getZ()));
         }
 
-        nbt.put("FluidStorage", this.fluidStorage.writeNbt(registries));
-        nbt.put("HeatStorage", this.heatStorage.writeNbt(registries));
+        this.fluidStorage.readData(view.getReadView("FluidStorage"));
+        this.heatStorage.readData(view.getReadView("HeatStorage"));
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
 
-        nbt.putInt("NumberOfTowers", this.towers.size());
-
-        if(nbt.contains("FluidStorage"))
-            this.fluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registries);
-
-        if(nbt.contains("HeatStorage"))
-            this.heatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
+        view.putInt("NumberOfTowers", this.towers.size());
+        this.fluidStorage.writeData(view.get("FluidStorage"));
+        this.heatStorage.writeData(view.get("HeatStorage"));
     }
 
     @Override
@@ -117,9 +115,9 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
 
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtCompound nbt = super.toInitialChunkDataNbt(registries);
-        writeNbt(nbt, registries);
-        return nbt;
+        NbtWriteView view = NbtWriteView.create(ErrorReporter.EMPTY, registries);
+        writeData(view);
+        return view.getNbt();
     }
 
     public boolean addTower(BlockPos pos) {
