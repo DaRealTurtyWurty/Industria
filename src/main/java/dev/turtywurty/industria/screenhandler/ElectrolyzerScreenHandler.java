@@ -38,7 +38,7 @@ public class ElectrolyzerScreenHandler extends IndustriaScreenHandler<Electrolyz
 
     @Override
     protected int getInventorySize() {
-        return 4;
+        return 6;
     }
 
     @Override
@@ -58,7 +58,8 @@ public class ElectrolyzerScreenHandler extends IndustriaScreenHandler<Electrolyz
         addSlot(new PredicateSlot(anodeInventory, 0, 58, 55));
         addSlot(new Slot(cathodeInventory, 0, 126, 55));
 
-        // TODO: Add bucket output slots
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(4), 0, 150, 114));
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(5), 0, 174, 114));
     }
 
     public int getProgress() {

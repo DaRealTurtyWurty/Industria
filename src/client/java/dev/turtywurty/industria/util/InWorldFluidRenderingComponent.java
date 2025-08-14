@@ -15,6 +15,8 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.UnaryOperator;
+
 public class InWorldFluidRenderingComponent {
     private boolean shouldDebugAmount = false;
 
@@ -104,11 +106,19 @@ public class InWorldFluidRenderingComponent {
         matrices.pop();
     }
 
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, UnaryOperator<RenderLayer> wrapRenderLayer) {
+        renderTopFaceOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, wrapRenderLayer);
+    }
+
     public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
         renderTopFaceOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
     }
 
     public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
+        renderTopFaceOnly(fluidVariant, vertexConsumers, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, color, colorMode, renderLayer -> renderLayer);
+    }
+
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode, UnaryOperator<RenderLayer> wrapRenderLayer) {
         if (fluidVariant == null)
             return;
 
@@ -120,6 +130,7 @@ public class InWorldFluidRenderingComponent {
             return;
 
         RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        renderLayer = wrapRenderLayer.apply(renderLayer);
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
 
         matrices.push();

@@ -13,6 +13,8 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 
+import java.util.function.UnaryOperator;
+
 public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity> {
     private final CentrifugalConcentratorModel model;
 
@@ -40,15 +42,14 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
         this.model.getCylinderTop().hidden = false;
 
-
-        fluidRendering(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+        renderInputFluid(entity, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
-    private void fluidRendering(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-       SyncingFluidStorage fluidTank = entity.getInputFluidTank();
-        if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0) return;
+    private void renderInputFluid(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        SyncingFluidStorage fluidTank = entity.getInputFluidTank();
+        if (fluidTank.isResourceBlank() || fluidTank.amount <= 0) return;
 
-        FluidVariant fluidVariant = fluidTank.variant; //FluidVariant.of(Fluids.WATER);
+        FluidVariant fluidVariant = fluidTank.variant;
 
         Sprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
         VertexConsumer vc = vertexConsumers.getBuffer(RenderLayer.getTranslucent());
@@ -82,6 +83,5 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         float v = BastiUtil.map(z, -uvSize, uvSize, sprite.getMinV(), sprite.getMaxV());
 
         vc.vertex(matrixStack.peek(), x, 0, z).color(fluidColor).texture(u, v).overlay(overlay).light(light).normal(0.0f, 1f, 0.0f);
-
     }
 }
