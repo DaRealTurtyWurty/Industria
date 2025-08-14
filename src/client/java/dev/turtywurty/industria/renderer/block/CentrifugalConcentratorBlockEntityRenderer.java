@@ -82,6 +82,5 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         float v = BastiUtil.map(z, -uvSize, uvSize, sprite.getMinV(), sprite.getMaxV());
 
         vc.vertex(matrixStack.peek(), x, 0, z).color(fluidColor).texture(u, v).overlay(overlay).light(light).normal(0.0f, 1f, 0.0f);
-
     }
 }
