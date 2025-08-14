@@ -122,10 +122,24 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.SOUTH);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1, (stack, integer) -> stack.isIn(TagList.Items.ELECTROLYSIS_RODS)), Direction.WEST);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+                PredicateSimpleInventory.createFluidPredicate(() -> {
+                    SyncingFluidStorage outputFluidTank = getOutputFluidStorage();
+                    return new FluidStack(outputFluidTank.variant, outputFluidTank.amount);
+                })), Direction.NORTH);
+        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+                PredicateSimpleInventory.createGasPredicate(() -> {
+                    SyncingGasStorage outputGasTank = getOutputGasStorage();
+                    return new GasStack(outputGasTank.variant, outputGasTank.amount);
+                })), Direction.DOWN);
+
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.NORTH);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.DOWN);
+
         this.wrappedGasStorage.addStorage(new OutputGasStorage(this, FluidConstants.BUCKET * 5), Direction.NORTH);
+
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000_000, 100_000, 0), Direction.UP);
+
         this.wrappedHeatStorage.addStorage(new SyncingHeatStorage(this, 1000, 1000, 0), Direction.DOWN);
     }
 

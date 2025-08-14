@@ -1,0 +1,36 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "src_alpha",
+    "dstrgb": "one_minus_src_alpha"
+  },
+  "vertex": "industria:centrifugal_concentrator",
+  "fragment": "industria:centrifugal_concentrator",
+  "attributes": [
+    "Position",
+    "Color",
+    "UV0"
+  ],
+  "samplers": [
+    "Sampler0"
+  ],
+  "uniforms": [
+    {
+      "name": "ModelViewMat",
+      "type": "matrix4x4"
+    },
+    {
+      "name": "ProjMat",
+      "type": "matrix4x4"
+    },
+    {
+      "name": "OuterInner",
+      "type": "float",
+      "count": 2
+    },
+    {
+      "name": "Sides",
+      "type": "int"
+    }
+  ]
+}

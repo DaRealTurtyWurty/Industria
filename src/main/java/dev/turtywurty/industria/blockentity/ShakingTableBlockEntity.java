@@ -83,7 +83,6 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private int progress, maxProgress;
-
     private RegistryKey<Recipe<?>> currentRecipeId;
     private int recipeFrequency;
     private ItemStack outputItemStack = ItemStack.EMPTY;
