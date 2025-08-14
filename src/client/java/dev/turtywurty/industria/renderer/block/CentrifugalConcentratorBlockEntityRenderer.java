@@ -1,19 +1,22 @@
 package dev.turtywurty.industria.renderer.block;
 
+import dev.turtywurty.industria.basti_shit.BastiUtil;
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
-import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.function.UnaryOperator;
 
 public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity> {
     private final CentrifugalConcentratorModel model;
-    private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public CentrifugalConcentratorBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         super(context);
@@ -27,7 +30,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         int rpm = entity.getRecipeRPM();
         float progress = entity.getProgress() / (float) entity.getMaxProgress();
         float prevBowlYRot = this.model.getBowl().yaw;
-        if(progress == 0 || Double.isNaN(progress)) {
+        if (progress == 0 || Double.isNaN(progress)) {
             entity.bowlRotation = 0f;
         } else {
             entity.bowlRotation = (entity.bowlRotation + (rpm / 60f / 20f) * tickDelta) % 360f;
@@ -39,41 +42,46 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
         this.model.getCylinderTop().hidden = false;
 
-        renderInputFluid(entity, matrices, vertexConsumers, light, overlay);
+        renderInputFluid(entity, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
-    private void renderInputFluid(CentrifugalConcentratorBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    private void renderInputFluid(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         SyncingFluidStorage fluidTank = entity.getInputFluidTank();
-        long fluidAmount = fluidTank.getAmount();
-        if (fluidAmount <= 0)
-            return;
+        if (fluidTank.isResourceBlank() || fluidTank.amount <= 0) return;
 
-        long capacity = fluidTank.getCapacity();
-        FluidVariant fluidVariant = fluidTank.getResource();
+        FluidVariant fluidVariant = fluidTank.variant;
 
-        float y1 = -2 / 16f;
-        float height = 1 + 5 / 16f;
-        float y2 = y1 + (height * (fluidAmount / (float) capacity));
+        Sprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
+        VertexConsumer vc = vertexConsumers.getBuffer(RenderLayer.getTranslucent());
 
-        float radius = 18/16f;
+        int sides = 16;
+        float outerRadius = 1.3f;
+        float innerRadius = 0.2f;
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, entity.getWorld(), entity.getPos());
 
-//        ShaderInit.uOuterInner.set(36f, 4f);
-//        ShaderInit.uSides.set(16);
+        matrices.push();
+        matrices.translate(0, -1, 0);
 
-        this.fluidRenderer.renderTopFaceOnly(
-                fluidVariant,
-                vertexConsumers,
-                matrices,
-                light,
-                overlay,
-                entity.getWorld(),
-                entity.getPos(),
-                -radius,
-                y2,
-                -radius,
-                radius,
-                radius,
-                UnaryOperator.identity()/*ShaderInit.CENTRIFUGAL_CONCENTRATOR_FRAMEBUFFER::getRenderLayer*/
-        );
+        for (int i = 0; i < sides; i += 1) {
+            float angle0 = (float) (2.0 * Math.PI * i / sides);
+            float angle1 = (float) (2.0 * Math.PI * (i + 1) / sides);
+
+            angledFluidVertex(vc, matrices, fluidSprite, fluidColor, angle0, innerRadius, outerRadius, light, overlay);
+            angledFluidVertex(vc, matrices, fluidSprite, fluidColor, angle0, outerRadius, outerRadius, light, overlay);
+            angledFluidVertex(vc, matrices, fluidSprite, fluidColor, angle1, outerRadius, outerRadius, light, overlay);
+            angledFluidVertex(vc, matrices, fluidSprite, fluidColor, angle1, innerRadius, outerRadius, light, overlay);
+        }
+
+        matrices.pop();
+    }
+
+    private void angledFluidVertex(VertexConsumer vc, MatrixStack matrixStack, Sprite sprite, int fluidColor, float angle, float radius, float uvSize, int light, int overlay) {
+        float x = radius * (float) Math.cos(angle);
+        float z = radius * (float) Math.sin(angle);
+
+        float u = BastiUtil.map(x, -uvSize, uvSize, sprite.getMinU(), sprite.getMaxU());
+        float v = BastiUtil.map(z, -uvSize, uvSize, sprite.getMinV(), sprite.getMaxV());
+
+        vc.vertex(matrixStack.peek(), x, 0, z).color(fluidColor).texture(u, v).overlay(overlay).light(light).normal(0.0f, 1f, 0.0f);
     }
 }
