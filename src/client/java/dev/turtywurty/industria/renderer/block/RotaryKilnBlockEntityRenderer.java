@@ -150,7 +150,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         long lastRenderTime = System.nanoTime();
 
         public RendererData() {
-            box2dWorld = new World(new Vec2(0, 9.8f));
+            box2dWorld = new World(new Vec2(0, GRAVITY));
 
             var barrelDef = new BodyDef();
             barrelDef.type = BodyType.KINEMATIC;
