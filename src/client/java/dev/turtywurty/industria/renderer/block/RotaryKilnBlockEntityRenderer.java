@@ -28,6 +28,9 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     private static final float MAX_FRICTION = 4f;
     private static final float MIN_RESTITUTION = 0.2f;
     private static final float MAX_RESTITUTION = 0.4f;
+    private static final float ITEM_START_Z = -1.5f;
+    private static final float ITEM_END_OFFSET_Z = 0.25f;
+    private static final float GRAVITY = 9.8f;
 
     private final RotaryKilnModel model;
 
