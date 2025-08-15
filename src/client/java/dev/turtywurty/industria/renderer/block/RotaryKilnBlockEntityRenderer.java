@@ -17,13 +17,9 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 
 import java.util.*;
-
-public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
-
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
-
     public static final Map<BlockPos, RendererData> blockEntityPosToDataMap = new ConcurrentHashMap<>();
 
     private static final float BARREL_ANGULAR_VELOCITY = 1.5f;
@@ -33,14 +29,12 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     private static final float MIN_RESTITUTION = 0.2f;
     private static final float MAX_RESTITUTION = 0.4f;
 
-
     private final RotaryKilnModel model;
 
     public RotaryKilnBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         super(context);
         this.model = new RotaryKilnModel(context.getLayerModelPart(RotaryKilnModel.LAYER_LOCATION));
     }
-
 
     @Override
     protected void onRender(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
@@ -115,10 +109,9 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     private Body createNewItemBody(World box2dWorld, ItemStack itemStack) {
-
         boolean blockItem = itemStack.getItem() instanceof BlockItem;
 
-        BodyDef squareDef = new BodyDef();
+        var squareDef = new BodyDef();
         squareDef.type = BodyType.DYNAMIC;
         squareDef.position.set(new Vec2(0, 0));
         squareDef.bullet = true;
@@ -126,14 +119,14 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         box.setGravityScale(1f);
         box.setLinearVelocity(new Vec2(((float) Math.random() - 0.5f) * 2f, ((float) Math.random() - 0.5f) * 2f));
 
-        PolygonShape squareShape = new PolygonShape();
+        var squareShape = new PolygonShape();
         if (blockItem) {
             squareShape.setAsBox(0.25f, 0.25f);
         } else {
             squareShape.setAsBox(0.25f, 0.01f);
         }
 
-        FixtureDef squareFixture = new FixtureDef();
+        var squareFixture = new FixtureDef();
         squareFixture.shape = squareShape;
         squareFixture.density = 0.5f;
         squareFixture.friction = MathHelper.lerp((float) Math.random(), MIN_FRICTION, MAX_FRICTION);
@@ -147,7 +140,6 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     private static final class RendererData {
-
         Map<InputRecipeEntry, Body> recipeToBodyMap = new HashMap<>();
         World box2dWorld;
         Body barrelBody;
@@ -157,7 +149,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         public RendererData() {
             box2dWorld = new World(new Vec2(0, 9.8f));
 
-            BodyDef barrelDef = new BodyDef();
+            var barrelDef = new BodyDef();
             barrelDef.type = BodyType.KINEMATIC;
             barrelDef.position.set(0, 0);
 
@@ -172,10 +164,10 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
                 barrelVertices[i] = new Vec2(barrelSize * (float) Math.cos(angle), barrelSize * (float) Math.sin(angle));
             }
 
-            ChainShape barrelShape = new ChainShape();
+            var barrelShape = new ChainShape();
             barrelShape.createLoop(barrelVertices, barrelVertices.length);
 
-            FixtureDef barrelFixture = new FixtureDef();
+            var barrelFixture = new FixtureDef();
             barrelFixture.shape = barrelShape;
             barrelFixture.density = 1f;
             barrelFixture.friction = 5f;
