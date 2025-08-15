@@ -95,7 +95,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             float rawProgress = recipe.getProgress() + tickDelta;
 
             int numKilnSegments = Math.min(entity.getKilnSegments().size(), 15);
-            float z = MathHelper.map(rawProgress / 100f / numKilnSegments, 0, 1, -1.5f, -numKilnSegments - 0.25f);
+            float z = MathHelper.map(rawProgress / 100f / numKilnSegments, 0, 1, ITEM_START_Z, -numKilnSegments + ITEM_END_OFFSET_Z);
 
             matrices.push();
             matrices.translate(body.getPosition().x, body.getPosition().y, z);
