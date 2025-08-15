@@ -329,7 +329,17 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
                         .orElse(ItemStack.EMPTY);
 
                 int progress = recipeNbt.getInt("Progress", 0);
-                UUID uuid = UUID.fromString(recipeNbt.getString("UUID").orElse(""));
+                UUID uuid;
+                String uuidStr = recipeNbt.getString("UUID").orElse("");
+                if (uuidStr != null && !uuidStr.isEmpty()) {
+                    try {
+                        uuid = UUID.fromString(uuidStr);
+                    } catch (IllegalArgumentException e) {
+                        uuid = UUID.randomUUID();
+                    }
+                } else {
+                    uuid = UUID.randomUUID();
+                }
 
                 InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);
                 this.recipes.add(inputRecipeEntry);
