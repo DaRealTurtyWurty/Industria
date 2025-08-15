@@ -63,6 +63,9 @@ dependencies {
 	include modApi("dev.turtywurty:gasapi:${project.gas_api_version}")
 
 	modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
+
+
+	implementation "org.jbox2d:jbox2d-library:2.2.1.1"
 }
 
 processResources {
