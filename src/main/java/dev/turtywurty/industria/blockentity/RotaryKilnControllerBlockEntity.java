@@ -63,7 +63,6 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
     private final List<InputRecipeEntry> recipes = new ArrayList<>();
-
     private int ticks = 0;
 
     public RotaryKilnControllerBlockEntity(BlockPos pos, BlockState state) {
@@ -72,6 +71,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
                 Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
         this.wrappedHeatStorage.addStorage(new InputHeatStorage(this, 2000, 2000));
+
     }
 
     @Override
@@ -172,7 +172,10 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             return;
 
         if (this.recipes.stream().noneMatch(r -> r.progress <= 100)) {
-            this.recipes.add(new InputRecipeEntry(recipeEntry.get().id(), inputStack));
+            InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(recipeEntry.get().id(), inputStack);
+
+            this.recipes.add(inputRecipeEntry);
+
             inventory.removeStack(0, recipe.input().stackData().count());
             update();
         }
@@ -281,9 +284,9 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             recipeNbt.put("InputStack", inputRecipeEntry.inputStack().toNbt(registries));
             recipeNbt.putInt("Progress", inputRecipeEntry.getProgress());
+            recipeNbt.putString("UUID", inputRecipeEntry.uuid.toString());
             recipesNbt.add(recipeNbt);
         }
-
         nbt.put("Recipes", recipesNbt);
     }
 
@@ -326,7 +329,20 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
                         .orElse(ItemStack.EMPTY);
 
                 int progress = recipeNbt.getInt("Progress", 0);
-                this.recipes.add(new InputRecipeEntry(registryKey, inputStack, progress));
+                UUID uuid;
+                String uuidStr = recipeNbt.getString("UUID").orElse("");
+                if (uuidStr != null && !uuidStr.isEmpty()) {
+                    try {
+                        uuid = UUID.fromString(uuidStr);
+                    } catch (IllegalArgumentException e) {
+                        uuid = UUID.randomUUID();
+                    }
+                } else {
+                    uuid = UUID.randomUUID();
+                }
+
+                InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);
+                this.recipes.add(inputRecipeEntry);
             }
         }
     }
@@ -427,18 +443,21 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     public static final class InputRecipeEntry {
+
+        private final UUID uuid;
         private final RegistryKey<Recipe<?>> registryKey;
         private final ItemStack inputStack;
         private int progress;
 
         public InputRecipeEntry(RegistryKey<Recipe<?>> registryKey, ItemStack inputStack) {
-            this.registryKey = registryKey;
-            this.inputStack = inputStack;
+            this(registryKey, inputStack, 0, UUID.randomUUID());
         }
 
-        public InputRecipeEntry(RegistryKey<Recipe<?>> registryKey, ItemStack inputStack, int progress) {
-            this(registryKey, inputStack);
+        public InputRecipeEntry(RegistryKey<Recipe<?>> registryKey, ItemStack inputStack, int progress, UUID uuid) {
+            this.registryKey = registryKey;
+            this.inputStack = inputStack;
             this.progress = progress;
+            this.uuid = uuid;
         }
 
         public RegistryKey<Recipe<?>> registryKey() {
@@ -453,6 +472,10 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             return this.progress;
         }
 
+        public UUID getUuid() {
+            return uuid;
+        }
+
         public void incrementProgress() {
             this.progress++;
         }
@@ -462,14 +485,13 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
             var that = (InputRecipeEntry) obj;
-            return Objects.equals(this.registryKey, that.registryKey) &&
-                    Objects.equals(this.inputStack, that.inputStack) &&
-                    this.progress == that.progress;
+
+            return uuid.equals(that.uuid);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(registryKey, inputStack, progress);
+            return uuid.hashCode();
         }
 
         @Override
