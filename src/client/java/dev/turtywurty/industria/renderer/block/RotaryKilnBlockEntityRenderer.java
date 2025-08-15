@@ -20,7 +20,11 @@ import java.util.*;
 
 public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
 
-    public static final Map<BlockPos, RendererData> blockEntityPosToDataMap = new HashMap<>();
+import java.util.concurrent.ConcurrentHashMap;
+
+public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
+
+    public static final Map<BlockPos, RendererData> blockEntityPosToDataMap = new ConcurrentHashMap<>();
 
     private static final float BARREL_ANGULAR_VELOCITY = 1.5f;
 
