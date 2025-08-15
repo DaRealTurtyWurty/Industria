@@ -64,7 +64,6 @@ dependencies {
 
 	modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
-
 	implementation "org.jbox2d:jbox2d-library:2.2.1.1"
 }
 
