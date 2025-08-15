@@ -12,22 +12,25 @@ public final class ViewUtils {
     private ViewUtils() {
     }
 
+    /**
+     * relative to {@link NbtCompound#getKeys()}, but in view form.
+     * Helper method from neoforge.
+     */
     public static Set<String> getKeys(ReadView view) {
-        // noinspection deprecation
         return view.read(MapCodec.assumeMapUnsafe(NbtCompound.CODEC)).orElseThrow().getKeys();
     }
 
     public static void put(WriteView view, NbtCompound compound) {
-        for (var entry : compound.entrySet()) {
-            view.put(entry.getKey(), Codecs.NBT_ELEMENT, entry.getValue());
-        }
+        compound.entrySet().forEach(entry -> view.put(entry.getKey(), Codecs.NBT_ELEMENT, entry.getValue()));
     }
 
-    public static void putChild(WriteView view, String key, ValueIOSerializable child) {
+    // from neo
+    public static void putChild(WriteView view, String key, ViewSerializable child) {
         child.writeData(view.get(key));
     }
 
-    public static void readChild(ReadView view, String key, ValueIOSerializable child) {
+    // inspired by neo
+    public static void readChild(ReadView view, String key, ViewSerializable child) {
         child.readData(view.getReadView(key));
     }
 }

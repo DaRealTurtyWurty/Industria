@@ -42,8 +42,7 @@ public class WrappedGasStorage<T extends Storage<GasVariant>> extends WrappedSto
 
     @Override
     public void readData(ReadView view) {
-        for (int index = 0; index < this.storages.size(); index++) {
-            T storage = this.storages.get(index);
+        for (T storage : this.storages) {
             if (storage == null)
                 continue;
 

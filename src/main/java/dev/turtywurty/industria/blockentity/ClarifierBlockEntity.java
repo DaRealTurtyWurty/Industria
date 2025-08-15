@@ -273,7 +273,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     protected void readData(ReadView view) {
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
-        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
+        Multiblockable.read(this, view);
 
         this.progress = view.getInt("Progress", 0);
 

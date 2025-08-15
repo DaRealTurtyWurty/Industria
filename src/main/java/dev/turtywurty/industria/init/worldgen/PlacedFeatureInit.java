@@ -14,6 +14,7 @@ import net.minecraft.world.gen.YOffset;
 import net.minecraft.world.gen.blockpredicate.BlockPredicate;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.PlacedFeature;
+import net.minecraft.world.gen.feature.PlacedFeatures;
 import net.minecraft.world.gen.placementmodifier.*;
 
 import java.util.List;
@@ -30,23 +31,23 @@ public class PlacedFeatureInit {
     public static void bootstrap(Registerable<PlacedFeature> context) {
         RegistryEntryLookup<ConfiguredFeature<?, ?>> registryLookup = context.getRegistryLookup(RegistryKeys.CONFIGURED_FEATURE);
 
-        register(context, CRUDE_OIL_POCKET, registryLookup.getOrThrow(ConfiguredFeatureInit.CRUDE_OIL_POCKET),
+        PlacedFeatures.register(context, CRUDE_OIL_POCKET, registryLookup.getOrThrow(ConfiguredFeatureInit.CRUDE_OIL_POCKET),
                 Modifiers.modifiersCount(1,
                         HeightRangePlacementModifier.uniform(YOffset.fixed(0), YOffset.fixed(64))));
 
-        register(context, BAUXITE_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.BAUXITE_ORE),
+        PlacedFeatures.register(context, BAUXITE_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.BAUXITE_ORE),
                 Modifiers.modifiersCount(10,
                         HeightRangePlacementModifier.uniform(YOffset.fixed(32), YOffset.fixed(128))));
 
-        register(context, CASSITERITE_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.CASSITERITE_ORE),
+        PlacedFeatures.register(context, CASSITERITE_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.CASSITERITE_ORE),
                 Modifiers.modifiersCount(7,
                         HeightRangePlacementModifier.uniform(YOffset.fixed(-16), YOffset.fixed(32))));
 
-        register(context, ZINC_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.ZINC_ORE),
+        PlacedFeatures.register(context, ZINC_ORE, registryLookup.getOrThrow(ConfiguredFeatureInit.ZINC_ORE),
                 Modifiers.modifiersCount(7,
                         HeightRangePlacementModifier.uniform(YOffset.getBottom(), YOffset.fixed(0))));
 
-        register(context, RUBBER_TREE, registryLookup.getOrThrow(ConfiguredFeatureInit.RUBBER_TREE),
+        PlacedFeatures.register(context, RUBBER_TREE, registryLookup.getOrThrow(ConfiguredFeatureInit.RUBBER_TREE),
                 List.of(
                         CountPlacementModifier.of(2),
                         SquarePlacementModifier.of(),
@@ -64,13 +65,6 @@ public class PlacedFeatureInit {
 
     private static RegistryKey<PlacedFeature> registerKey(String name) {
         return RegistryKey.of(RegistryKeys.PLACED_FEATURE, Industria.id(name));
-    }
-
-    private static void register(Registerable<PlacedFeature> context,
-                                 RegistryKey<PlacedFeature> key,
-                                 RegistryEntry<ConfiguredFeature<?, ?>> config,
-                                 List<PlacementModifier> modifiers) {
-        context.register(key, new PlacedFeature(config, List.copyOf(modifiers)));
     }
 
     public static class Modifiers {

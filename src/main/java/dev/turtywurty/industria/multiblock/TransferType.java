@@ -38,6 +38,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class TransferType<S, V, A extends Number> {
+    private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
     public static final TransferType<Storage<ItemVariant>, ItemVariant, Long> ITEM =
             new TransferType<>("item", ItemStorage.SIDED, ItemStorage.ITEM, Storage::insert, Storage::extract,
                     storage -> TransferUtils.findFirstVariant(storage, null)
@@ -88,7 +89,6 @@ public class TransferType<S, V, A extends Number> {
                     aDouble -> (long) Math.ceil(aDouble),
                     GasVariant::isBlank,
                     Storage::supportsInsertion, Storage::supportsExtraction);
-    private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
     public static final Codec<TransferType<?, ?, ?>> CODEC = Codec.STRING.xmap(TransferType::getByName, TransferType::getName);

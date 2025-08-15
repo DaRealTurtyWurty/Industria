@@ -8,7 +8,6 @@ import dev.turtywurty.industria.worldgen.config.FluidPocketConfig;
 import dev.turtywurty.industria.worldgen.trunkplacer.RubberTreeTrunkPlacer;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registerable;
-import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
@@ -39,9 +38,8 @@ public class ConfiguredFeatureInit {
         RuleTest netherOreReplaceables = new TagMatchRuleTest(BlockTags.BASE_STONE_NETHER);
         RuleTest endOreReplaceables = new BlockMatchRuleTest(Blocks.END_STONE);
 
-        RegistryEntryLookup<PlacedFeature> registryLookup = context.getRegistryLookup(RegistryKeys.PLACED_FEATURE);
 
-        register(context, CRUDE_OIL_POCKET, FeatureInit.FLUID_POCKET,
+        ConfiguredFeatures.register(context, CRUDE_OIL_POCKET, FeatureInit.FLUID_POCKET,
                 new FluidPocketConfig(FluidInit.CRUDE_OIL.still().getDefaultState(),
                         UniformIntProvider.create(4, 6),
                         UniformIntProvider.create(2, 4),
@@ -59,11 +57,11 @@ public class ConfiguredFeatureInit {
                 OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.ZINC_ORE.getDefaultState()),
                 OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_ZINC_ORE.getDefaultState()));
 
-        register(context, BAUXITE_ORE, Feature.ORE, new OreFeatureConfig(bauxiteTargets, 8, 0.25f));
-        register(context, CASSITERITE_ORE, Feature.ORE, new OreFeatureConfig(tinTargets, 14));
-        register(context, ZINC_ORE, Feature.SCATTERED_ORE, new OreFeatureConfig(zincTargets, 10));
+        ConfiguredFeatures.register(context, BAUXITE_ORE, Feature.ORE, new OreFeatureConfig(bauxiteTargets, 8, 0.25f));
+        ConfiguredFeatures.register(context, CASSITERITE_ORE, Feature.ORE, new OreFeatureConfig(tinTargets, 14));
+        ConfiguredFeatures.register(context, ZINC_ORE, Feature.SCATTERED_ORE, new OreFeatureConfig(zincTargets, 10));
 
-        register(context, RUBBER_TREE, Feature.TREE,
+        ConfiguredFeatures.register(context, RUBBER_TREE, Feature.TREE,
                 new TreeFeatureConfig.Builder(
                         SimpleBlockStateProvider.of(WoodSetInit.RUBBER.log),
                         new RubberTreeTrunkPlacer(15, 2, 1, UniformIntProvider.create(10, 13), UniformIntProvider.create(3, 5)),
@@ -77,12 +75,5 @@ public class ConfiguredFeatureInit {
 
     private static RegistryKey<ConfiguredFeature<?, ?>> registerKey(String name) {
         return RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, Industria.id(name));
-    }
-
-    private static <FC extends FeatureConfig, F extends Feature<FC>> void register(Registerable<ConfiguredFeature<?, ?>> context,
-                                                                                   RegistryKey<ConfiguredFeature<?, ?>> key,
-                                                                                   F feature,
-                                                                                   FC featureConfig) {
-        context.register(key, new ConfiguredFeature<>(feature, featureConfig));
     }
 }

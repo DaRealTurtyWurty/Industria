@@ -184,7 +184,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
 
     @Override
     protected void readData(ReadView view) {
-        Multiblockable.read(this, view.getReadView("MachinePositions"));
+        Multiblockable.read(this, view);
         this.wellheadPos = view.read("WellheadPos", BlockPos.CODEC).orElse(null);
         ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);

@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity.util;
 
-import dev.turtywurty.industria.util.ValueIOSerializable;
+import dev.turtywurty.industria.util.ViewSerializable;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class WrappedStorage<T> implements ValueIOSerializable {
+public abstract class WrappedStorage<T> implements ViewSerializable {
     protected final List<T> storages = new ArrayList<>(Direction.values().length);
     protected final Map<Direction, T> sidedStorageMap = new HashMap<>(Direction.values().length);
 

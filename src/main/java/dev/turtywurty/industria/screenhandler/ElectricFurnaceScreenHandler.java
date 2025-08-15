@@ -7,6 +7,7 @@ import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
+import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -30,11 +31,14 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
     protected void addBlockEntitySlots(PlayerInventory playerInventory) {
         addSlot(new Slot(wrappedInventoryStorage.getInventory(0), 0, 49, 33));
         addSlot(new ExperienceOutputSlot(playerInventory.player, blockEntity, wrappedInventoryStorage.getInventory(1), 0, 108, 33));
+
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(4), 0, 150, 114));
+        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(5), 0, 174, 114));
     }
 
     @Override
     protected int getInventorySize() {
-        return 2;
+        return 6;
     }
 
     @Override

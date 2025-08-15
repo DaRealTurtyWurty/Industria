@@ -13,6 +13,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class BlockInit {
     public static final AlloyFurnaceBlock ALLOY_FURNACE = registerWithItemCopy("alloy_furnace",
@@ -144,7 +145,7 @@ public class BlockInit {
         return registerWithCopy(name, constructor, toCopy, settings -> settings);
     }
 
-    public static <T extends Block> T registerWithCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
+    public static <T extends Block> T registerWithCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, UnaryOperator<AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.copy(toCopy)
                         .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
@@ -154,7 +155,7 @@ public class BlockInit {
         return registerWithItemCopy(name, constructor, toCopy, settings -> settings);
     }
 
-    public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
+    public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, UnaryOperator<AbstractBlock.Settings> settingsApplier) {
         T registeredBlock = registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.copy(toCopy)
                         .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));

@@ -318,7 +318,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
-        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
+        Multiblockable.read(this, view);
 
         this.progress = view.getInt("Progress", 0);
 

@@ -347,7 +347,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 .orElse(ItemStack.EMPTY);
         this.outputSlurryStack = view.read("OutputSlurry", SlurryStack.CODEC.codec())
                 .orElse(SlurryStack.EMPTY);
-        Multiblockable.read(this, view.getReadView("MachinePositions"));
+        Multiblockable.read(this, view);
     }
 
     private boolean hasEnergy() {

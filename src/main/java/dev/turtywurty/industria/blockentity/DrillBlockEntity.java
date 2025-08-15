@@ -204,7 +204,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
 
     @Override
     protected void readData(ReadView view) {
-        Multiblockable.read(this, view.getReadView("MultiblockPositions"));
+        Multiblockable.read(this, view);
 
         this.drilling = view.getBoolean("Drilling", false);
 

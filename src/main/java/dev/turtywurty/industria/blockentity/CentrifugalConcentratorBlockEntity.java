@@ -352,7 +352,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
-        Multiblockable.read(this, view.getReadView("MachinePositions"));
+        Multiblockable.read(this, view);
     }
 
     @Override

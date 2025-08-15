@@ -59,14 +59,12 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     protected void readData(ReadView view) {
-        super.readData(view);
-
         this.oilPumpJackPos = view.read("OilPumpJackPos", BlockPos.CODEC).orElse(null);
         this.drillTubes.clear();
-        NbtCompound drillTubesNbt = view.read("DrillTubes", NbtCompound.CODEC).orElseThrow();
-        for (String key : drillTubesNbt.getKeys()) {
+        ReadView drillTubesView = view.getReadView("DrillTubes");
+        for (String key : ViewUtils.getKeys(drillTubesView)) {
             BlockPos pos = BlockPos.fromLong(Long.parseLong(key));
-            int fluidAmount = drillTubesNbt.getInt(key, 0);
+            int fluidAmount = drillTubesView.getInt(key, 0);
             this.drillTubes.put(pos, fluidAmount);
         }
 
@@ -81,12 +79,11 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
             view.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
         }
 
-        NbtCompound drillTubesNbt = new NbtCompound();
+        WriteView drillTubesView = view.get("DrillTubes");
         for (Map.Entry<BlockPos, Integer> entry : this.drillTubes.entrySet()) {
-            drillTubesNbt.putLong(String.valueOf(entry.getKey().asLong()), entry.getValue());
+            drillTubesView.putLong(String.valueOf(entry.getKey().asLong()), entry.getValue());
         }
 
-        ViewUtils.put(view.get("DrillTubes"), drillTubesNbt);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
     }
 

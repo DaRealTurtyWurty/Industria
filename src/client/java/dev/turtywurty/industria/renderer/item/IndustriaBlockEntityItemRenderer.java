@@ -13,20 +13,14 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.Set;
 
-public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
-    private final ModelPart modelPart;
-    private final Identifier texture;
-
-    public IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture) {
-        this.modelPart = modelPart;
-        this.texture = texture;
-    }
-
+public record IndustriaBlockEntityItemRenderer(ModelPart modelPart,
+                                               Identifier texture) implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
     public void render(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, ItemDisplayContext displayContext, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, boolean glint) {
         if (data == null)
@@ -39,7 +33,6 @@ public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<In
         this.modelPart.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(this.texture)), light, overlay);
     }
 
-    // @todo needs checking
     @Override
     public void collectVertices(Set<Vector3f> vertices) {
         MatrixStack matrices = new MatrixStack();
@@ -47,7 +40,7 @@ public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<In
     }
 
     @Override
-    public @Nullable BlockEntityItemRenderData getData(ItemStack stack) {
+    public @NotNull BlockEntityItemRenderData getData(ItemStack stack) {
         return new BlockEntityItemRenderData(stack);
     }
 
@@ -58,14 +51,14 @@ public class IndustriaBlockEntityItemRenderer implements SpecialModelRenderer<In
                         Codec.STRING.fieldOf("name").forGetter(EntityModelLayer::name)
                 ).apply(instance, EntityModelLayer::new));
 
-        public static final MapCodec<IndustriaBlockEntityItemRenderer.Unbaked> CODEC =
+        public static final MapCodec<Unbaked> CODEC =
                 RecordCodecBuilder.mapCodec(instance -> instance.group(
-                        ENTITY_MODEL_LAYER_CODEC.fieldOf("model_layer").forGetter(IndustriaBlockEntityItemRenderer.Unbaked::modelLayer),
-                        Identifier.CODEC.fieldOf("texture").forGetter(IndustriaBlockEntityItemRenderer.Unbaked::texture)
-                ).apply(instance, IndustriaBlockEntityItemRenderer.Unbaked::new));
+                        ENTITY_MODEL_LAYER_CODEC.fieldOf("model_layer").forGetter(Unbaked::modelLayer),
+                        Identifier.CODEC.fieldOf("texture").forGetter(Unbaked::texture)
+                ).apply(instance, Unbaked::new));
 
         @Override
-        public MapCodec<IndustriaBlockEntityItemRenderer.Unbaked> getCodec() {
+        public MapCodec<Unbaked> getCodec() {
             return CODEC;
         }
 

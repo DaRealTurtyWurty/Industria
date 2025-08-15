@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
  * @see FloatProvider
  */
 public record OutputItemStack(Item item, IntProvider count, FloatProvider chance) {
+    private static final ConstantFloatProvider DEFAULT_CHANCE = ConstantFloatProvider.create(1.0F);
     public static final OutputItemStack EMPTY = new OutputItemStack(ItemStack.EMPTY);
     public static final MapCodec<OutputItemStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Registries.ITEM.getCodec().fieldOf("item").forGetter(OutputItemStack::item),
@@ -38,7 +39,6 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
     ).apply(instance, OutputItemStack::new));
     public static final PacketCodec<RegistryByteBuf, OutputItemStack> PACKET_CODEC =
             PacketCodec.ofStatic(OutputItemStack::encode, OutputItemStack::decode);
-    private static final ConstantFloatProvider DEFAULT_CHANCE = ConstantFloatProvider.create(1.0F);
 
     public OutputItemStack {
         if (item == null) {

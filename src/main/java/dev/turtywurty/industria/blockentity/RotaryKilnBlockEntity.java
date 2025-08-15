@@ -38,7 +38,7 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
     @Override
     protected void readData(ReadView view) {
 
-        Multiblockable.read(this, view.getReadView("MachinePositions"));
+        Multiblockable.read(this, view);
     }
 
     @Override
