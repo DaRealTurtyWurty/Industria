@@ -85,8 +85,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         setupBlockEntityTransformations(matrices, entity);
         onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
 
-
-
         if (isPlayerLookingAt(entity.getPos())) {
             List<ModelPart> wireframe = getModelParts();
             if (!wireframe.isEmpty()) {
