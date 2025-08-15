@@ -1,13 +1,9 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.basti_shit.BastiUtil;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity.InputRecipeEntry;
-import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.ItemInit;
 import dev.turtywurty.industria.model.RotaryKilnModel;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
@@ -15,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.common.Vec2;
@@ -99,7 +94,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             float rawProgress = recipe.getProgress() + tickDelta;
 
             int numKilnSegments = Math.min(entity.getKilnSegments().size(), 15);
-            float z = BastiUtil.map(rawProgress / 100f / numKilnSegments, 0, 1, -1.5f, -numKilnSegments - 0.25f);
+            float z = MathHelper.map(rawProgress / 100f / numKilnSegments, 0, 1, -1.5f, -numKilnSegments - 0.25f);
 
             matrices.push();
             matrices.translate(body.getPosition().x, body.getPosition().y, z);
@@ -128,7 +123,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         box.setLinearVelocity(new Vec2(((float) Math.random() - 0.5f) * 2f, ((float) Math.random() - 0.5f) * 2f));
 
         PolygonShape squareShape = new PolygonShape();
-        if(blockItem) {
+        if (blockItem) {
             squareShape.setAsBox(0.25f, 0.25f);
         } else {
             squareShape.setAsBox(0.25f, 0.01f);
@@ -137,8 +132,8 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         FixtureDef squareFixture = new FixtureDef();
         squareFixture.shape = squareShape;
         squareFixture.density = 0.5f;
-        squareFixture.friction = BastiUtil.lerp(MIN_FRICTION, MAX_FRICTION, (float) Math.random());
-        squareFixture.restitution = BastiUtil.lerp(MIN_RESTITUTION, MAX_RESTITUTION, (float) Math.random());
+        squareFixture.friction = MathHelper.lerp((float) Math.random(), MIN_FRICTION, MAX_FRICTION);
+        squareFixture.restitution = MathHelper.lerp((float) Math.random(), MIN_RESTITUTION, MAX_RESTITUTION);
         squareFixture.filter.categoryBits = 0x0002;
         squareFixture.filter.maskBits = 0x0001;
 
