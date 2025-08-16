@@ -13,14 +13,33 @@ import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.block.Block;
 import net.minecraft.client.data.*;
+import net.minecraft.client.render.model.json.BlockModelDefinition;
 import net.minecraft.client.render.model.json.ModelVariant;
 import net.minecraft.client.render.model.json.MultipartModelConditionBuilder;
 import net.minecraft.client.render.model.json.WeightedVariant;
+import net.minecraft.registry.Registries;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.Pool;
 import net.minecraft.util.math.AxisRotation;
 
+import static net.minecraft.client.data.Models.*;
+import static net.minecraft.client.data.TexturedModel.makeFactory;
+
 public class IndustriaModelProvider extends FabricModelProvider {
+    public static final TextureKey ORE_KEY = TextureKey.of("ore");
+    public static final Model ORE_MODEL = Models.block("ore", ORE_KEY);
+    public static final TexturedModel.Factory ORE = makeFactory(IndustriaModelProvider::ore, ORE_MODEL);
+
+    public static TextureMap ore(Block block) {
+        Identifier identifier = TextureMap.getId(block);
+        return ore(identifier);
+    }
+
+    public static TextureMap ore(Identifier id) {
+        return (new TextureMap()).put(ORE_KEY, id);
+    }
+
     public IndustriaModelProvider(FabricDataOutput output) {
         super(output);
     }
@@ -62,12 +81,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
 
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.BAUXITE_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.CASSITERITE_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ZINC_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_BAUXITE_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_CASSITERITE_ORE);
-        blockStateModelGenerator.registerSimpleCubeAll(BlockInit.DEEPSLATE_ZINC_ORE);
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.BAUXITE_ORE,"stone","bauxite");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.CASSITERITE_ORE,"stone","cassiterite");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.ZINC_ORE,"stone","zinc");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_BAUXITE_ORE,"deepslate","bauxite");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_CASSITERITE_ORE,"deepslate","cassiterite");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_ZINC_ORE,"deepslate","zinc");
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ALUMINIUM_BLOCK);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_BLOCK);
@@ -77,6 +96,23 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_CASSITERITE_BLOCK);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_ZINC_BLOCK);
     }
+
+    private void registerSimpleOreBlock(BlockStateModelGenerator blockStateModelGenerator, Block block, String type,String id) {
+        type += "_ore";
+        registerSimpleCubeAll(blockStateModelGenerator,block,type,id);
+        blockStateModelGenerator.registerParentedItemModel(block,Identifier.of(Industria.MOD_ID,"block/parent/%s".formatted(type)));
+    }
+
+    public void registerSingleton(BlockStateModelGenerator blockStateModelGenerator,Block block, TexturedModel.Factory modelFactory,
+                                  String type, String id) {
+        blockStateModelGenerator.blockStateCollector.accept(BlockStateModelGenerator.createSingletonBlockState(block,
+                BlockStateModelGenerator.createWeightedVariant(modelFactory.upload(block,
+                blockStateModelGenerator.modelCollector))));
+    }
+    public void registerSimpleCubeAll(BlockStateModelGenerator blockStateModelGenerator, Block block, String type,String id) {
+        registerSingleton(blockStateModelGenerator,block, ORE, type, id);
+    }
+
 
     private static void registerPipe(BlockStateModelGenerator blockStateModelGenerator, Block block, String name) {
         BlockModelDefinitionCreator pipeSupplier = createPipeBlockModelDefinitionCreator(block, name);
@@ -140,12 +176,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
             WoodSetDatagen.generateItemModels(woodSet, itemModelGenerator);
         }
 
-        itemModelGenerator.register(ItemInit.STEEL_INGOT, Models.GENERATED);
-        itemModelGenerator.register(FluidInit.CRUDE_OIL.bucket(), Models.GENERATED);
-        itemModelGenerator.register(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), Models.GENERATED);
-        itemModelGenerator.register(FluidInit.SODIUM_ALUMINATE.bucket(), Models.GENERATED);
-        itemModelGenerator.register(FluidInit.MOLTEN_ALUMINIUM.bucket(), Models.GENERATED);
-        itemModelGenerator.register(FluidInit.MOLTEN_CRYOLITE.bucket(), Models.GENERATED);
+        itemModelGenerator.register(ItemInit.STEEL_INGOT, GENERATED);
+        itemModelGenerator.register(FluidInit.CRUDE_OIL.bucket(), GENERATED);
+        itemModelGenerator.register(FluidInit.DIRTY_SODIUM_ALUMINATE.bucket(), GENERATED);
+        itemModelGenerator.register(FluidInit.SODIUM_ALUMINATE.bucket(), GENERATED);
+        itemModelGenerator.register(FluidInit.MOLTEN_ALUMINIUM.bucket(), GENERATED);
+        itemModelGenerator.register(FluidInit.MOLTEN_CRYOLITE.bucket(), GENERATED);
         itemModelGenerator.output.accept(ItemInit.SIMPLE_DRILL_HEAD, ItemModels.special(ModelIds.getItemModelId(ItemInit.SIMPLE_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
         itemModelGenerator.output.accept(ItemInit.BLOCK_BUILDER_DRILL_HEAD, ItemModels.special(ModelIds.getItemModelId(ItemInit.BLOCK_BUILDER_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
 
@@ -246,24 +282,24 @@ public class IndustriaModelProvider extends FabricModelProvider {
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        itemModelGenerator.register(ItemInit.ALUMINIUM_INGOT, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.TIN_INGOT, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.ZINC_INGOT, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.ALUMINIUM_NUGGET, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.TIN_NUGGET, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.ZINC_NUGGET, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.RAW_BAUXITE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.RAW_CASSITERITE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.RAW_ZINC, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.SODIUM_HYDROXIDE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.SODIUM_ALUMINATE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.RED_MUD, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.ALUMINIUM_HYDROXIDE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.SODIUM_CARBONATE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.ALUMINA, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.CRYOLITE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.CRUSHED_CASSITERITE, Models.GENERATED);
-        itemModelGenerator.register(ItemInit.CASSITERITE_CONCENTRATE, Models.GENERATED);
+        itemModelGenerator.register(ItemInit.ALUMINIUM_INGOT, GENERATED);
+        itemModelGenerator.register(ItemInit.TIN_INGOT, GENERATED);
+        itemModelGenerator.register(ItemInit.ZINC_INGOT, GENERATED);
+        itemModelGenerator.register(ItemInit.ALUMINIUM_NUGGET, GENERATED);
+        itemModelGenerator.register(ItemInit.TIN_NUGGET, GENERATED);
+        itemModelGenerator.register(ItemInit.ZINC_NUGGET, GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_BAUXITE, GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_CASSITERITE, GENERATED);
+        itemModelGenerator.register(ItemInit.RAW_ZINC, GENERATED);
+        itemModelGenerator.register(ItemInit.SODIUM_HYDROXIDE, GENERATED);
+        itemModelGenerator.register(ItemInit.SODIUM_ALUMINATE, GENERATED);
+        itemModelGenerator.register(ItemInit.RED_MUD, GENERATED);
+        itemModelGenerator.register(ItemInit.ALUMINIUM_HYDROXIDE, GENERATED);
+        itemModelGenerator.register(ItemInit.SODIUM_CARBONATE, GENERATED);
+        itemModelGenerator.register(ItemInit.ALUMINA, GENERATED);
+        itemModelGenerator.register(ItemInit.CRYOLITE, GENERATED);
+        itemModelGenerator.register(ItemInit.CRUSHED_CASSITERITE, GENERATED);
+        itemModelGenerator.register(ItemInit.CASSITERITE_CONCENTRATE, GENERATED);
     }
 
     private void createBattery(BlockStateModelGenerator blockStateModelGenerator, BatteryBlock block) {

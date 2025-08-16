@@ -1,0 +1,6 @@
+{
+  "parent": "industria:block/parent/ore",
+  "textures": {
+    "0": "minecraft:block/deepslate"
+  }
+}
