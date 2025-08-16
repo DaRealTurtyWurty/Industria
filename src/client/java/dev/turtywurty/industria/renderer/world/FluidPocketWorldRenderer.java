@@ -29,10 +29,10 @@ public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
         if (player == null)
             return;
 
-        if (!FLUID_POCKETS.containsKey(player.getEntityWorld().getRegistryKey()))
+        if (!FLUID_POCKETS.containsKey(player.getWorld().getRegistryKey()))
             return;
 
-        List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getEntityWorld().getRegistryKey())
+        List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getWorld().getRegistryKey())
                 .stream()
                 .filter(fluidPocket -> fluidPocket.isWithinDistance(player.getBlockPos(), 64))
                 .toList();

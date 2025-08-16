@@ -65,7 +65,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
 
             context.drawItem(stack, this.x, this.y);
             context.drawStackOverlay(this.textRenderer, stack, this.x, this.y);
-            context.fill(this.x, this.y, this.x + 16, this.y + 16, 256, 0x88808080);
+            context.fill(this.x, this.y, this.x + 16, this.y + 16, 0x8808080);
 
             if (!isPointWithinBounds(this.x, this.y, 16, 16, mouseX, mouseY))
                 return;
@@ -86,7 +86,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
             stack.getTooltipData().ifPresent((data) -> componentList.add(componentList.isEmpty() ? 0 : 1, TooltipComponent.of(data)));
             componentList.addFirst(itemListComponent);
 
-            context.drawTooltip(this.textRenderer, componentList, mouseX, mouseY, HoveredTooltipPositioner.INSTANCE, null);
+            context.drawTooltipImmediately(this.textRenderer, componentList, mouseX, mouseY, HoveredTooltipPositioner.INSTANCE, null);
         }
     }
 

@@ -16,6 +16,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ThermalGeneratorScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -31,10 +32,10 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -91,7 +92,7 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
 
         fluidStorage.amount -= CONSUME_RATE;
         energyStorage.amount += MathHelper.clamp(storedLava, 0, energyStorage.getCapacity() - energyStorage.getAmount());
-        if(energyStorage.getAmount() > energyStorage.getCapacity())
+        if (energyStorage.getAmount() > energyStorage.getCapacity())
             energyStorage.amount = energyStorage.getCapacity();
         update();
     }
@@ -146,21 +147,21 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
-        nbt.put("EnergyStorage", this.wrappedEnergyStorage.writeNbt(registryLookup));
-        nbt.put("FluidStorage", this.wrappedFluidStorage.writeNbt(registryLookup));
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
+        ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
+        ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
-        this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registryLookup);
-        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
+        ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
+        ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
     }
 
     public EnergyStorage getWrappedEnergyStorage() {

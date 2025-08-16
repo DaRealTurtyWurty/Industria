@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.RotaryKilnBlock;
@@ -21,6 +20,7 @@ import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -30,20 +30,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
@@ -63,6 +58,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
     private final List<InputRecipeEntry> recipes = new ArrayList<>();
+
     private int ticks = 0;
 
     public RotaryKilnControllerBlockEntity(BlockPos pos, BlockState state) {
@@ -71,7 +67,13 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
                 Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
         this.wrappedHeatStorage.addStorage(new InputHeatStorage(this, 2000, 2000));
+    }
 
+    public static ServerRecipeManager getRecipeManager(World world) {
+        if (world == null || world.isClient)
+            return null;
+
+        return !(world instanceof ServerWorld serverWorld) ? null : serverWorld.getRecipeManager();
     }
 
     @Override
@@ -172,10 +174,9 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             return;
 
         if (this.recipes.stream().noneMatch(r -> r.progress <= 100)) {
+            this.recipes.add(new InputRecipeEntry(recipeEntry.get().id(), inputStack));
             InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(recipeEntry.get().id(), inputStack);
-
             this.recipes.add(inputRecipeEntry);
-
             inventory.removeStack(0, recipe.input().stackData().count());
             update();
         }
@@ -250,21 +251,23 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
 
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("Heat", this.wrappedHeatStorage.writeNbt(registries));
-        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Heat", this.wrappedHeatStorage);
+        Multiblockable.write(this, view);
 
-        nbt.put("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
+        view.put("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
 
-        var recipesNbt = new NbtList();
+        var recipesView = view.getList("Recipes");
         for (InputRecipeEntry inputRecipeEntry : this.recipes) {
             if (inputRecipeEntry == null)
                 continue;
 
-            var recipeNbt = new NbtCompound();
+            var recipeIdx0 = recipesView.add();
+            var recipeIdx1 = recipesView.add();
+            var recipeIdx2 = recipesView.add();
+            var recipeIdx3 = recipesView.add();
 
             RegistryKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey();
             if (registryKey != null) {
@@ -274,63 +277,42 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
                     continue;
                 }
 
-                Identifier.CODEC.encodeStart(NbtOps.INSTANCE, identifier)
-                        .resultOrPartial(Industria.LOGGER::error)
-                        .ifPresent(nbtElement -> recipeNbt.put("RegistryKey", nbtElement));
+                recipeIdx0.put("RegistryKey", Identifier.CODEC, identifier);
             } else {
                 Industria.LOGGER.error("Failed to encode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
                 continue;
             }
 
-            recipeNbt.put("InputStack", inputRecipeEntry.inputStack().toNbt(registries));
-            recipeNbt.putInt("Progress", inputRecipeEntry.getProgress());
-            recipeNbt.putString("UUID", inputRecipeEntry.uuid.toString());
-            recipesNbt.add(recipeNbt);
+            recipeIdx1.put("InputStack", ItemStack.CODEC, inputRecipeEntry.inputStack());
+            recipeIdx2.putInt("Progress", inputRecipeEntry.getProgress());
+            recipeIdx3.putString("UUID", inputRecipeEntry.uuid.toString());
         }
-        nbt.put("Recipes", recipesNbt);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Heat", this.wrappedHeatStorage);
+        Multiblockable.read(this, view);
 
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
+        this.kilnSegments.clear();
+        view.read("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
 
-        if (nbt.contains("Heat"))
-            this.wrappedHeatStorage.readNbt(nbt.getListOrEmpty("Heat"), registries);
-
-        if (nbt.contains("MachinePositions"))
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
-
-        if (nbt.contains("KilnSegments")) {
-            this.kilnSegments.clear();
-            nbt.get("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
-        }
-
-        if (nbt.contains("Recipes")) {
-            this.recipes.clear();
-
-            NbtList recipesNbt = nbt.getListOrEmpty("Recipes");
-            for (int i = 0; i < recipesNbt.size(); i++) {
-                NbtCompound recipeNbt = recipesNbt.getCompoundOrEmpty(i);
-
+        ReadView.ListReadView recipesView = view.getListReadView("Recipes");
+        for (ReadView readView : recipesView) {
+            for (int i = 0; i < recipesView.stream().toList().size(); i++) {
                 RegistryKey<Recipe<?>> registryKey = RegistryKey.of(RegistryKeys.RECIPE,
-                        Identifier.CODEC.decode(NbtOps.INSTANCE, recipeNbt.get("RegistryKey"))
-                                .map(Pair::getFirst)
-                                .resultOrPartial(Industria.LOGGER::error)
-                                .orElse(null));
+                        readView.read("RegistryKey", Identifier.CODEC).orElse(null));
+
                 if (registryKey == null && Thread.currentThread().getName().toLowerCase(Locale.ROOT).contains("server")) {
                     Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
                     continue;
                 }
 
-                ItemStack inputStack = ItemStack.fromNbt(registries, recipeNbt.getCompoundOrEmpty("InputStack"))
-                        .orElse(ItemStack.EMPTY);
-
-                int progress = recipeNbt.getInt("Progress", 0);
+                ItemStack inputStack = readView.read("InputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+                int progress = readView.getInt("Progress", 0);
                 UUID uuid;
-                String uuidStr = recipeNbt.getString("UUID").orElse("");
+                String uuidStr = readView.getString("UUID", "");
                 if (uuidStr != null && !uuidStr.isEmpty()) {
                     try {
                         uuid = UUID.fromString(uuidStr);
@@ -386,7 +368,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
                     .filter(recipe -> MathHelper.floor(recipe.getProgress() / 100f) == segmentIndex)
                     .findFirst()
                     .orElse(null);
-            if(inputRecipeEntry == null)
+            if (inputRecipeEntry == null)
                 return;
 
             if (this.world != null && !this.world.isClient) {
@@ -395,13 +377,6 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             this.recipes.remove(inputRecipeEntry);
         }
-    }
-
-    public static ServerRecipeManager getRecipeManager(World world) {
-        if (world == null || world.isClient)
-            return null;
-
-        return !(world instanceof ServerWorld serverWorld) ? null : serverWorld.getRecipeManager();
     }
 
     public Optional<RecipeEntry<?>> getRecipe(RegistryKey<Recipe<?>> recipeKey) {

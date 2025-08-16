@@ -1,14 +1,16 @@
 package dev.turtywurty.industria.blockentity;
 
+import dev.turtywurty.industria.util.ViewUtils;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -17,12 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface RecipeExperienceBlockEntity {
-    void setLastRecipe(@Nullable RecipeEntry<?> recipe);
-
-    void dropExperienceForRecipesUsed(ServerPlayerEntity player);
-
-    List<RecipeEntry<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos);
-
     static void dropExperience(ServerWorld world, Vec3d pos, int multiplier, float experience) {
         int i = MathHelper.floor((float) multiplier * experience);
         float f = MathHelper.fractionalPart((float) multiplier * experience);
@@ -33,21 +29,24 @@ public interface RecipeExperienceBlockEntity {
         ExperienceOrbEntity.spawn(world, pos, i);
     }
 
-    static void writeRecipesUsed(Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed, NbtCompound nbt, String name) {
-        var recipesUsedNbt = new NbtCompound();
-        recipesUsed.forEach((recipeRegistryKey, count) -> recipesUsedNbt.putInt(recipeRegistryKey.getValue().toString(), count));
-        nbt.put(name, recipesUsedNbt);
+    static void writeRecipesUsed(WriteView view, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
+        var recipesUsedView = view.get(name);
+        recipesUsed.forEach((recipeRegistryKey, count) -> recipesUsedView.putInt(recipeRegistryKey.getValue().toString(), count));
     }
 
-    static void readRecipesUsed(NbtCompound nbt, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
-        if (nbt.contains(name)) {
-            NbtCompound recipesUsedNbt = nbt.getCompoundOrEmpty(name);
+    static void readRecipesUsed(ReadView view, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
+        ReadView recipesUsedView = view.getReadView(name);
 
-            recipesUsed.clear();
-            for (String key : recipesUsedNbt.getKeys()) {
-                RegistryKey<Recipe<?>> recipeKey = RegistryKey.of(RegistryKeys.RECIPE, Identifier.of(key));
-                recipesUsed.put(recipeKey, recipesUsedNbt.getInt(key, 0));
-            }
+        recipesUsed.clear();
+        for (String key : ViewUtils.getKeys(recipesUsedView)) {
+            RegistryKey<Recipe<?>> recipeKey = RegistryKey.of(RegistryKeys.RECIPE, Identifier.of(key));
+            recipesUsed.put(recipeKey, recipesUsedView.getInt(key, 0));
         }
     }
+
+    void setLastRecipe(@Nullable RecipeEntry<?> recipe);
+
+    void dropExperienceForRecipesUsed(ServerPlayerEntity player);
+
+    List<RecipeEntry<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos);
 }

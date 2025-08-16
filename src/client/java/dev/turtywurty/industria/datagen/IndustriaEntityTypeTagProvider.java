@@ -15,7 +15,7 @@ public class IndustriaEntityTypeTagProvider extends FabricTagProvider.EntityType
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            WoodSetDatagen.generateEntityTags(woodSet, this::getOrCreateTagBuilder);
+            WoodSetDatagen.generateEntityTags(woodSet, this::valueLookupBuilder);
         }
     }
 }

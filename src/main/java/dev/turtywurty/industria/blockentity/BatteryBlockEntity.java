@@ -15,6 +15,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -25,11 +26,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -56,7 +57,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         this.batteryLevel = block.getLevel();
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
-        if(this.batteryLevel != BatteryBlock.BatteryLevel.CREATIVE)
+        if (this.batteryLevel != BatteryBlock.BatteryLevel.CREATIVE)
             this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(), this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer()));
         else
             this.wrappedEnergyStorage.addStorage(new InfiniteEnergyStorage());
@@ -68,7 +69,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         List<SyncableStorage> storages = new ArrayList<>();
         storages.add(input);
-        if(batteryLevel != BatteryBlock.BatteryLevel.CREATIVE) {
+        if (batteryLevel != BatteryBlock.BatteryLevel.CREATIVE) {
             storages.add(energy);
         }
 
@@ -140,19 +141,17 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.chargeMode = nbt.get("ChargeMode", ChargeMode.CODEC).orElse(ChargeMode.CHARGE);
-        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
-        this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
+    protected void readData(ReadView view) {
+        this.chargeMode = view.read("ChargeMode", ChargeMode.CODEC).orElse(ChargeMode.CHARGE);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.putString("ChargeMode", this.chargeMode.name());
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registryLookup));
+    protected void writeData(WriteView view) {
+        view.put("ChargeMode", ChargeMode.CODEC, this.chargeMode);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {

@@ -1,13 +1,18 @@
 package dev.turtywurty.industria.blockentity;
 
+import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.math.BlockPos;
 
 public abstract class IndustriaBlockEntity extends UpdatableBlockEntity {
+    public static final Codec<RegistryKey<Recipe<?>>> RECIPE_CODEC = RegistryKey.createCodec(RegistryKeys.RECIPE);
     protected final IndustriaBlock blockRef;
 
     public IndustriaBlockEntity(IndustriaBlock blockRef, BlockEntityType<?> type, BlockPos pos, BlockState state) {

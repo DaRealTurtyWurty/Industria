@@ -11,13 +11,14 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.SolarPanelScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -108,15 +109,13 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.energy.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "Energy", this.energy);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.put("Energy", this.energy.writeNbt(registryLookup));
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "Energy", this.energy);
     }
 
     public EnergyStorage getEnergyStorage() {

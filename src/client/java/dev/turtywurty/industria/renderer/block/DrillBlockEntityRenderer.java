@@ -176,8 +176,10 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
     }
 
     @Override
-    public boolean rendersOutsideBoundingBox(DrillBlockEntity blockEntity) {
-        return blockEntity.isDrilling() || blockEntity.isRetracting() && blockEntity.getDrillYOffset() < -1F;
+    public boolean rendersOutsideBoundingBox() {
+        // this has turned into a one time check
+//                return blockEntity.isDrilling() || blockEntity.isRetracting() && blockEntity.getDrillYOffset() < -1F;
+        return true;
     }
 
     @Override
