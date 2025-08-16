@@ -6,17 +6,18 @@ import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import dev.turtywurty.industria.util.IndeterminateBoolean;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec2f;
 
 public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<ShakingTableBlockEntity> {
     private final ShakingTableModel model;
@@ -48,11 +49,12 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(ShakingTableModel.TEXTURE_LOCATION)), light, overlay);
         this.model.getModelParts().table().originZ = previousOriginZ;
 
+
         renderGutterFluids(entity, matrices, vertexConsumers, light, overlay, shakeOffset);
-        Pair<Float, Float> surfaceFluidValues =
-                renderSurfaceFluid(entity, matrices, vertexConsumers, light, overlay, shakeOffset);
-        renderItemStacks(entity, matrices, vertexConsumers, light, overlay, shakeOffset,
-                surfaceFluidValues.getLeft(), surfaceFluidValues.getRight());
+
+        Vec2f fluidEnd = renderSurfaceFluid(entity, matrices, vertexConsumers, light, overlay, shakeOffset);
+
+        renderItemStacks(entity, matrices, vertexConsumers, light, overlay, shakeOffset, fluidEnd.x, fluidEnd.y);
     }
 
     @Override
@@ -86,9 +88,9 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         float depth = 52f / 16f;
 
         for (float i = 0; i < 4; i++) {
-            float x = surfaceFluidX + 2/16f;
-            float y = (4f / 16f - 0.125f/16f) + surfaceFluidY;
-            float z = (-13/16f) + i * (depth / 4f);
+            float x = surfaceFluidX + 2 / 16f;
+            float y = (4f / 16f - 0.125f / 16f) + surfaceFluidY;
+            float z = (-13 / 16f) + i * (depth / 4f);
 
             matrices.push();
             matrices.translate(x, y, z);
@@ -110,41 +112,38 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         matrices.pop();
     }
 
-    private Pair<Float, Float> renderSurfaceFluid(ShakingTableBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float shakeOffset) {
+    private Vec2f renderSurfaceFluid(ShakingTableBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float shakeOffset) {
         float progress = entity.getProgress() / (float) entity.getMaxProgress();
-        if (progress <= 0.0f)
-            return new Pair<>(0.0f, 0.0f);
 
-        float width = 35f / 16f;
-        float waterWidth = 3 / 16f;
+        if (progress <= 0.0f) return new Vec2f(0, 0);
 
-        // x1 > x2
-        float x2Start = 1.0f + 1 / 16f;
-        float x1Start = x2Start - waterWidth;
+        float totalVolume = 3f;
+        float width = 3f;
 
-        float x1End = x2Start - width;
+        float minX = 1 + 1/16f;
+        float startX = minX - 0.4f;
+        float endX = -(1 + 2/16f);
 
-        float x1 = x1Start + (x1End - x1Start) * progress;
+        float fluidX = MathHelper.lerp(progress, startX, endX);
 
-        float startHeight = 1f;
-        float endHeight = 0.1f;
-
-        float height = startHeight + (endHeight - startHeight) * progress;
+        float height = totalVolume / width / Math.abs(minX - fluidX);
 
         matrices.push();
-        matrices.translate(0.0f, 0.0f, shakeOffset / 16f);
+        matrices.translate(0, 0.0f, shakeOffset / 16f);
+
         this.fluidRenderer.render(entity.getInputFluidTank(),
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),
-                x1, -4 / 16f, -2.0f - 2f / 16f,
-                x2Start, height, 1 + 2f / 16f,
+                fluidX, -4 / 16f, -2.0f - 2f / 16f,
+                minX, height, 1 + 2f / 16f,
                 0xFFFFFFFF, ColorMode.MULTIPLICATION,
                 IndeterminateBoolean.TRUE);
+
         matrices.pop();
 
         float endY = -(height / 16f);
-        return new Pair<>(x1, endY);
+        return new Vec2f(fluidX, endY);
     }
 
     private void renderGutterFluids(ShakingTableBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float shakeOffset) {

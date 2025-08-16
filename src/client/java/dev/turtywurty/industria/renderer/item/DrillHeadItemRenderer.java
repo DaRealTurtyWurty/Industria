@@ -64,6 +64,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillHeadItem
         return Industria.id("drill_head_item_renderer");
     }
 
+
     @Override
     public @Nullable DrillHeadItemRenderData getData(ItemStack stack) {
         return new DrillHeadItemRenderData(stack);
