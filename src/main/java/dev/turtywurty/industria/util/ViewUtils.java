@@ -8,8 +8,8 @@ import net.minecraft.storage.WriteView;
 import java.util.Set;
 
 public final class ViewUtils {
-
     private ViewUtils() {
+        // Prevent initialization
     }
 
     public static void putChild(WriteView view, String key, ViewSerializable serializable) {
