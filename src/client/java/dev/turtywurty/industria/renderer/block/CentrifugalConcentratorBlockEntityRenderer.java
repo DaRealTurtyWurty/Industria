@@ -50,8 +50,8 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         if (fluidSprite == null)
             return;
 
-        RenderLayer fluidLayer = getLayer(RenderLayers.getFluidLayer(fluidVariant.getFluid().getDefaultState()));
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(fluidLayer);
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(fluidSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
 
         int sides = 16;
         float outerRadius = 19 / 16f;
@@ -99,15 +99,5 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
                 .overlay(overlay)
                 .light(light)
                 .normal(0.0f, 1f, 0.0f);
-    }
-
-    private RenderLayer getLayer(BlockRenderLayer blockRenderLayer) {
-        return switch (blockRenderLayer) {
-            case SOLID -> RenderLayer.getSolid();
-            case CUTOUT_MIPPED -> RenderLayer.getCutoutMipped();
-            case CUTOUT -> RenderLayer.getCutout();
-            case TRANSLUCENT -> RenderLayer.getTranslucentMovingBlock();
-            case TRIPWIRE -> RenderLayer.getTripwire();
-        };
     }
 }
