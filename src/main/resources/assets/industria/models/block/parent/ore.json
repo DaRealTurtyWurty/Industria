@@ -1,9 +1,6 @@
 {
   "parent": "block/block",
   "render_type": "translucent",
-  "textures": {
-    "1": "industria:block/overlay/ore/cassiterite"
-  },
   "elements": [
     {
       "from": [0, 0, 0],
@@ -21,12 +18,12 @@
       "from": [0, 0, 0],
       "to": [16, 16, 16],
       "faces": {
-        "north":  { "texture": "#1", "tintindex": 1 },
-        "east":   { "texture": "#1", "tintindex": 1 },
-        "south":  { "texture": "#1", "tintindex": 1 },
-        "west":   { "texture": "#1", "tintindex": 1 },
-        "up":     { "texture": "#1", "tintindex": 1 },
-        "down":   { "texture": "#1", "tintindex": 1 }
+        "north":  { "texture": "#ore", "tintindex": 1 },
+        "east":   { "texture": "#ore", "tintindex": 1 },
+        "south":  { "texture": "#ore", "tintindex": 1 },
+        "west":   { "texture": "#ore", "tintindex": 1 },
+        "up":     { "texture": "#ore", "tintindex": 1 },
+        "down":   { "texture": "#ore", "tintindex": 1 }
       }
     }
   ]

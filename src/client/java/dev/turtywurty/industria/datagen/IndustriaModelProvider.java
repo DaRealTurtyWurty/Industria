@@ -23,14 +23,20 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.Pool;
 import net.minecraft.util.math.AxisRotation;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import static net.minecraft.client.data.Models.*;
 import static net.minecraft.client.data.TexturedModel.makeFactory;
 
 public class IndustriaModelProvider extends FabricModelProvider {
     public static final TextureKey ORE_KEY = TextureKey.of("ore");
-    public static final Model ORE_MODEL = Models.block("ore", ORE_KEY);
+    public static final Model ORE_MODEL = block("ore", ORE_KEY);
     public static final TexturedModel.Factory ORE = makeFactory(IndustriaModelProvider::ore, ORE_MODEL);
 
+    private static Model block(String parent, TextureKey... requiredTextureKeys) {
+        return new Model(Optional.of(Identifier.of(Industria.MOD_ID,"block/" + parent)), Optional.empty(), requiredTextureKeys);
+    }
     public static TextureMap ore(Block block) {
         Identifier identifier = TextureMap.getId(block);
         return ore(identifier);
@@ -98,16 +104,16 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
 
     private void registerSimpleOreBlock(BlockStateModelGenerator blockStateModelGenerator, Block block, String type,String id) {
-        type += "_ore";
+        if(!Objects.equals(type, "ore"))
+            type += "_ore";
         registerSimpleCubeAll(blockStateModelGenerator,block,type,id);
-        blockStateModelGenerator.registerParentedItemModel(block,Identifier.of(Industria.MOD_ID,"block/parent/%s".formatted(type)));
+        blockStateModelGenerator.registerParentedItemModel(block,Identifier.of(Industria.MOD_ID, "block/parent/%s".formatted(type)));
     }
 
     public void registerSingleton(BlockStateModelGenerator blockStateModelGenerator,Block block, TexturedModel.Factory modelFactory,
                                   String type, String id) {
         blockStateModelGenerator.blockStateCollector.accept(BlockStateModelGenerator.createSingletonBlockState(block,
-                BlockStateModelGenerator.createWeightedVariant(modelFactory.upload(block,
-                blockStateModelGenerator.modelCollector))));
+                BlockStateModelGenerator.createWeightedVariant(modelFactory.upload(block, blockStateModelGenerator.modelCollector))));
     }
     public void registerSimpleCubeAll(BlockStateModelGenerator blockStateModelGenerator, Block block, String type,String id) {
         registerSingleton(blockStateModelGenerator,block, ORE, type, id);
