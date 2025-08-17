@@ -5,28 +5,24 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class WrappedEnergyStorage extends WrappedStorage<EnergyStorage> {
-    @Override
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var list = new NbtList();
-        for (EnergyStorage storage : this.storages) {
-            var nbt = new NbtCompound();
-            nbt.putLong("Amount", storage.getAmount());
-            list.add(nbt);
-        }
 
-        return list;
+    @Override
+    public void writeData(WriteView view) {
+        for (EnergyStorage storage : this.storages) {
+            view.putLong("Amount", storage.getAmount());
+        }
     }
 
     @Override
-    public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        for (int index = 0; index < nbt.size(); index++) {
-            NbtCompound compound = nbt.getCompoundOrEmpty(index);
-            EnergyStorage storage = this.storages.get(index);
-            long amount = compound.getLong("Amount", 0L);
+    public void readData(ReadView view) {
+        for (EnergyStorage storage : this.storages) {
+            long amount = view.getLong("Amount", 0L);
             if (storage instanceof SimpleEnergyStorage simpleEnergyStorage) {
                 simpleEnergyStorage.amount = amount;
             } else {

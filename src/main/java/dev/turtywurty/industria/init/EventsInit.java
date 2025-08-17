@@ -21,8 +21,8 @@ import net.minecraft.server.world.ServerWorld;
 public class EventsInit {
     public static void init() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getServerWorld()));
-            WorldPipeNetworks.syncToClient(sender, handler.player.getServerWorld());
+            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getWorld()));
+            WorldPipeNetworks.syncToClient(sender, handler.player.getWorld());
         });
 
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {

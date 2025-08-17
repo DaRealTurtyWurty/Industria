@@ -33,6 +33,7 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
 import dev.turtywurty.industria.screenhandler.ElectrolyzerScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -47,19 +48,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -82,10 +81,6 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     private int progress, maxProgress;
     private int electrolyteConversionProgress, maxElectrolyteConversionProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
-    private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
-    private GasStack leftoverOutputGas = GasStack.EMPTY;
-
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -114,6 +109,9 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
             return 4;
         }
     };
+    private RegistryKey<Recipe<?>> currentRecipeId;
+    private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
+    private GasStack leftoverOutputGas = GasStack.EMPTY;
 
     public ElectrolyzerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.ELECTROLYZER, BlockEntityTypeInit.ELECTROLYZER, pos, state);
@@ -132,7 +130,6 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                     SyncingGasStorage outputGasTank = getOutputGasStorage();
                     return new GasStack(outputGasTank.variant, outputGasTank.amount);
                 })), Direction.DOWN);
-
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.NORTH);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.DOWN);
 
@@ -170,7 +167,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         processOutputs();
         handleOutputSlots();
 
-        if(hasLeftover())
+        if (hasLeftover())
             return;
 
         SyncingSimpleInventory inputInventory = getInputInventory();
@@ -185,9 +182,9 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 electrolyteInventory,
                 electrolyteFluidStorage
         );
-        if(this.currentRecipeId == null) {
+        if (this.currentRecipeId == null) {
             Optional<RecipeEntry<ElectrolyzerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
-            if(recipeEntry.isPresent()) {
+            if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
                 this.progress = 0;
@@ -207,10 +204,10 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         ElectrolyzerRecipe recipe = recipeEntry.get().value();
-        if(recipe.electrolyteItem().testForRecipe(electrolyteInventory.getStack(0))) {
+        if (recipe.electrolyteItem().testForRecipe(electrolyteInventory.getStack(0))) {
             FluidStack fluidStack = recipe.electrolyteFluid();
-            if(electrolyteFluidStorage.canInsert(fluidStack)) {
-                if(this.electrolyteConversionProgress >= this.maxElectrolyteConversionProgress) {
+            if (electrolyteFluidStorage.canInsert(fluidStack)) {
+                if (this.electrolyteConversionProgress >= this.maxElectrolyteConversionProgress) {
                     electrolyteFluidStorage.variant = fluidStack.variant();
                     electrolyteFluidStorage.amount += fluidStack.amount();
 
@@ -226,26 +223,27 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
             }
         }
 
-        if(!recipe.electrolyteFluid().testForRecipe(electrolyteFluidStorage))
+        if (!recipe.electrolyteFluid().testForRecipe(electrolyteFluidStorage))
             return;
 
-        if(this.progress >= this.maxProgress) {
-            if(recipe.outputFluid().amount() > 0) {
+        if (this.progress >= this.maxProgress) {
+            if (recipe.outputFluid().amount() > 0) {
                 this.leftoverOutputFluid = recipe.outputFluid();
             }
 
-            if(recipe.outputGas().amount() > 0) {
+            if (recipe.outputGas().amount() > 0) {
                 this.leftoverOutputGas = recipe.outputGas();
             }
 
             inputInventory.getStack(0).decrement(recipe.input().stackData().count());
-            anodeInventory.getStack(0).damage(1, (ServerWorld) this.world, null, item -> {});
+            anodeInventory.getStack(0).damage(1, (ServerWorld) this.world, null, item -> {
+            });
 
             this.progress = 0;
             update();
         } else {
             SyncingEnergyStorage energyStorage = getEnergyStorage();
-            if(energyStorage.amount >= recipe.energyCost()) {
+            if (energyStorage.amount >= recipe.energyCost()) {
                 energyStorage.amount -= recipe.energyCost();
                 this.progress++;
                 update();
@@ -255,7 +253,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     private void processOutputs() {
         SyncingFluidStorage outputFluidStorage = getOutputFluidStorage();
-        if(outputFluidStorage.canInsert(this.leftoverOutputFluid)) {
+        if (outputFluidStorage.canInsert(this.leftoverOutputFluid)) {
             long inserted = Math.min(outputFluidStorage.getCapacity() - outputFluidStorage.amount, this.leftoverOutputFluid.amount());
             outputFluidStorage.variant = this.leftoverOutputFluid.variant();
             outputFluidStorage.amount += inserted;
@@ -265,7 +263,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         SyncingGasStorage outputGasStorage = getOutputGasStorage();
-        if(outputGasStorage.canInsert(this.leftoverOutputGas)) {
+        if (outputGasStorage.canInsert(this.leftoverOutputGas)) {
             long inserted = Math.min(outputGasStorage.getCapacity() - outputGasStorage.amount, this.leftoverOutputGas.amount());
             outputGasStorage.variant = this.leftoverOutputGas.variant();
             outputGasStorage.amount += inserted;
@@ -320,84 +318,54 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     private Optional<RecipeEntry<ElectrolyzerRecipe>> getCurrentRecipe(ElectrolyzerRecipeInput recipeInput) {
-        if(this.world == null || !(this.world instanceof ServerWorld serverWorld))
+        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
             return Optional.empty();
 
         return serverWorld.getRecipeManager().getFirstMatch(ElectrolyzerRecipe.Type.INSTANCE, recipeInput, serverWorld);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("FluidStorage", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("EnergyStorage", this.wrappedEnergyStorage.writeNbt(registries));
-        nbt.put("GasStorage", this.wrappedGasStorage.writeNbt(registries));
-        nbt.put("HeatStorage", this.wrappedHeatStorage.writeNbt(registries));
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
+        ViewUtils.putChild(view, "GasStorage", this.wrappedGasStorage);
 
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
+            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (!this.leftoverOutputFluid.isEmpty()) {
-            nbt.put("LeftoverOutputFluid", FluidStack.CODEC.codec()
-                    .encodeStart(NbtOps.INSTANCE, this.leftoverOutputFluid)
-                    .getOrThrow());
+            view.put("LeftoverOutputFluid", FluidStack.CODEC.codec(), this.leftoverOutputFluid);
         }
 
         if (!this.leftoverOutputGas.isEmpty()) {
-            nbt.put("LeftoverOutputGas", GasStack.CODEC.codec()
-                    .encodeStart(NbtOps.INSTANCE, this.leftoverOutputGas)
-                    .getOrThrow());
+            view.put("LeftoverOutputGas", GasStack.CODEC.codec(), this.leftoverOutputGas);
         }
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
+        ViewUtils.readChild(view, "GasStorage", this.wrappedGasStorage);
+        ViewUtils.readChild(view, "HeatStorage", this.wrappedHeatStorage);
 
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
+        this.progress = view.getInt("Progress", 0);
+        this.maxProgress = view.getInt("MaxProgress", 0);
 
-        if (nbt.contains("FluidStorage"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidStorage"), registries);
+        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+                .orElse(null);
 
-        if (nbt.contains("EnergyStorage"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registries);
+        this.leftoverOutputFluid = view.read("LeftoverOutputFluid", FluidStack.CODEC.codec())
+                .orElse(FluidStack.EMPTY);
 
-        if (nbt.contains("GasStorage"))
-            this.wrappedGasStorage.readNbt(nbt.getListOrEmpty("GasStorage"), registries);
-
-        if (nbt.contains("HeatStorage"))
-            this.wrappedHeatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
-
-        this.progress = nbt.getInt("Progress", 0);
-        this.maxProgress = nbt.getInt("MaxProgress", 0);
-
-        if (nbt.contains("CurrentRecipe")) {
-            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
-        }
-
-        if (nbt.contains("LeftoverOutputFluid")) {
-            this.leftoverOutputFluid = nbt.get("LeftoverOutputFluid", FluidStack.CODEC.codec())
-                    .orElse(FluidStack.EMPTY);
-        } else {
-            this.leftoverOutputFluid = FluidStack.EMPTY;
-        }
-
-        if (nbt.contains("LeftoverOutputGas")) {
-            this.leftoverOutputGas = nbt.get("LeftoverOutputGas", GasStack.CODEC.codec())
-                    .orElse(GasStack.EMPTY);
-        } else {
-            this.leftoverOutputGas = GasStack.EMPTY;
-        }
+        this.leftoverOutputGas = view.read("LeftoverOutputGas", GasStack.CODEC.codec())
+                .orElse(GasStack.EMPTY);
     }
 
     @Override
@@ -493,7 +461,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     // 3 2 2
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if(this.world == null)
+        if (this.world == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -501,11 +469,11 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 0; z++) {
                 for (int y = 0; y <= 1; y++) {
-                    if(x == 0 && z == 0 && y == 0)
+                    if (x == 0 && z == 0 && y == 0)
                         continue;
 
                     BlockPos pos = this.pos.add(x, y, z);
-                    if(this.world.getBlockState(pos).isReplaceable()) {
+                    if (this.world.getBlockState(pos).isReplaceable()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -542,7 +510,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
             types.add(TransferType.GAS);
         }
 
-        if(offsetFromPrimary.getY() == 1 && direction == Direction.UP) {
+        if (offsetFromPrimary.getY() == 1 && direction == Direction.UP) {
             transferTypes.computeIfAbsent(Direction.UP, k -> new ArrayList<>()).add(TransferType.ITEM);
         }
 

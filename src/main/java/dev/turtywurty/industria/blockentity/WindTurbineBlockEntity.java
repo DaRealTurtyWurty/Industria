@@ -11,6 +11,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.WindTurbineScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -21,6 +22,8 @@ import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -148,19 +151,19 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.energy.readNbt(nbt.getListOrEmpty("Energy"), registryLookup);
-        this.windSpeed = nbt.getFloat("WindSpeed", 0.0F);
-        this.canReceiveWind = nbt.getBoolean("CanReceiveWind", true);
+    protected void readData(ReadView view) {
+        super.readData(view);
+        ViewUtils.readChild(view, "Energy", this.energy);
+        this.windSpeed = view.getFloat("WindSpeed", 0.0F);
+        this.canReceiveWind = view.getBoolean("CanReceiveWind", true);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.put("Energy", this.energy.writeNbt(registryLookup));
-        nbt.putFloat("WindSpeed", this.windSpeed);
-        nbt.putBoolean("CanReceiveWind", this.canReceiveWind);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
+        ViewUtils.putChild(view, "Energy", this.energy);
+        view.putFloat("WindSpeed", this.windSpeed);
+        view.putBoolean("CanReceiveWind", this.canReceiveWind);
     }
 
     public EnergyStorage getEnergyStorage() {

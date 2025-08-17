@@ -14,6 +14,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -21,10 +22,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -114,25 +115,21 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "EnergyStorage", this.energyStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
 
-        nbt.put("EnergyStorage", this.energyStorage.writeNbt(registryLookup));
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registryLookup));
-
-        nbt.putInt("BurnTime", this.burnTime);
-        nbt.putInt("FuelTime", this.fuelTime);
+        view.putInt("BurnTime", this.burnTime);
+        view.putInt("FuelTime", this.fuelTime);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "EnergyStorage", this.energyStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
 
-        this.energyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
-        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registryLookup);
-
-        this.burnTime = nbt.getInt("BurnTime", 0);
-        this.fuelTime = nbt.getInt("FuelTime", 0);
+        this.burnTime = view.getInt("BurnTime", 0);
+        this.fuelTime = view.getInt("FuelTime", 0);
     }
 
     public EnergyStorage getEnergyStorage() {

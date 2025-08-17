@@ -35,6 +35,7 @@ import dev.turtywurty.industria.recipe.ShakingTableRecipe;
 import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
 import dev.turtywurty.industria.screenhandler.ShakingTableScreenHandler;
 import dev.turtywurty.industria.util.TransferUtils;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -52,19 +53,17 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Nullable;
@@ -81,13 +80,8 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
+    private final Box shakeBox;
     private int progress, maxProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
-    private int recipeFrequency;
-    private ItemStack outputItemStack = ItemStack.EMPTY;
-    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
-
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -111,8 +105,10 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
             return 2;
         }
     };
-
-    private final Box shakeBox;
+    private RegistryKey<Recipe<?>> currentRecipeId;
+    private int recipeFrequency;
+    private ItemStack outputItemStack = ItemStack.EMPTY;
+    private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     public ShakingTableBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.SHAKING_TABLE, BlockEntityTypeInit.SHAKING_TABLE, pos, state);
@@ -380,85 +376,46 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
 
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipe", nbtElement));
+            view.put("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE), this.currentRecipeId);
         }
 
-        nbt.putInt("RecipeFrequency", this.recipeFrequency);
-
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("SlurryTank", this.wrappedSlurryStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
-
+        view.putInt("RecipeFrequency", this.recipeFrequency);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "SlurryTank", this.wrappedSlurryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         if (!this.outputItemStack.isEmpty()) {
-            nbt.put("OutputStack", this.outputItemStack.toNbt(registries));
+            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-            nbt.put("OutputSlurry", SlurryStack.CODEC.codec()
-                    .encodeStart(NbtOps.INSTANCE, this.outputSlurryStack)
-                    .getOrThrow());
+            view.put("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
         }
 
-        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
+        Multiblockable.write(this, view);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        this.progress = view.getInt("Progress", 0);
+        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE)).orElse(null);
+        this.recipeFrequency = view.getInt("RecipeFrequency", 0);
 
-        if (nbt.contains("Progress")) {
-            this.progress = nbt.getInt("Progress", 0);
-        }
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
 
-        if (nbt.contains("MaxProgress")) {
-            this.maxProgress = nbt.getInt("MaxProgress", 0);
-        }
-
-        if (nbt.contains("CurrentRecipe")) {
-            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
-        }
-
-        if (nbt.contains("RecipeFrequency")) {
-            this.recipeFrequency = nbt.getInt("RecipeFrequency", 0);
-        }
-
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
-
-        if (nbt.contains("FluidTank"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-
-        if (nbt.contains("SlurryTank"))
-            this.wrappedSlurryStorage.readNbt(nbt.getListOrEmpty("SlurryTank"), registries);
-
-        if (nbt.contains("Energy"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
-
-        if (nbt.contains("OutputStack")) {
-            this.outputItemStack = ItemStack.fromNbt(registries, nbt.get("OutputStack"))
-                    .orElse(ItemStack.EMPTY);
-        }
-
-        if (nbt.contains("OutputSlurry")) {
-            this.outputSlurryStack = nbt.get("OutputSlurry", SlurryStack.CODEC.codec())
-                    .orElse(SlurryStack.EMPTY);
-        }
-
-        if (nbt.contains("MachinePositions")) {
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
-        }
+        this.outputItemStack = view.read("OutputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+        this.outputSlurryStack = view.read("OutputSlurry", SlurryStack.CODEC.codec()).orElse(SlurryStack.EMPTY);
+        Multiblockable.read(this, view);
     }
 
     @Override

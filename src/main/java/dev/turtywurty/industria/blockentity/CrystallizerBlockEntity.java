@@ -23,6 +23,7 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
 import dev.turtywurty.industria.screenhandler.CrystallizerScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -32,16 +33,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -73,9 +74,6 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     private ItemStack byproductItemStack = ItemStack.EMPTY;
     private int catalystUsesLeft;
     private int maxCatalystUses;
-
-    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
-
     private final PropertyDelegate properties = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -104,6 +102,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
             return 4;
         }
     };
+    private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
 
     public CrystallizerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CRYSTALLIZER, BlockEntityTypeInit.CRYSTALLIZER, pos, state);
@@ -255,69 +254,55 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            nbt.put("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE), this.currentRecipeId);
+            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (!this.outputItemStack.isEmpty()) {
-            nbt.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
+            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.byproductItemStack.isEmpty()) {
-            nbt.put("ByproductStack", ItemStack.CODEC, this.byproductItemStack);
+            view.put("ByproductStack", ItemStack.CODEC, this.byproductItemStack);
         }
 
-        nbt.putInt("CatalystUsesLeft", this.catalystUsesLeft);
-        nbt.putInt("MaxCatalystUses", this.maxCatalystUses);
+        view.putInt("CatalystUsesLeft", this.catalystUsesLeft);
+        view.putInt("MaxCatalystUses", this.maxCatalystUses);
 
         if (!this.nextOutputItemStack.isEmpty()) {
-            nbt.put("NextOutputStack", ItemStack.CODEC, this.nextOutputItemStack);
+            view.put("NextOutputStack", ItemStack.CODEC, this.nextOutputItemStack);
         }
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
 
-        if (nbt.contains("FluidTank"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
+        this.progress = view.getInt("Progress", 0);
+        this.maxProgress = view.getInt("MaxProgress", 0);
 
-        if (nbt.contains("Inventory"))
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
+        this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC)
+                .orElse(null);
 
-        this.progress = nbt.getInt("Progress", 0);
-        this.maxProgress = nbt.getInt("MaxProgress", 0);
+        this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
+                .orElse(ItemStack.EMPTY);
 
-        if (nbt.contains("CurrentRecipe")) {
-            this.currentRecipeId = nbt.get("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
-        }
+        this.byproductItemStack = view.read("ByproductItemStack", ItemStack.CODEC)
+                .orElse(ItemStack.EMPTY);
 
-        if (nbt.contains("OutputStack")) {
-            this.outputItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("OutputStack"))
-                    .orElse(ItemStack.EMPTY);
-        }
+        this.catalystUsesLeft = view.getInt("CatalystUsesLeft", 0);
+        this.maxCatalystUses = view.getInt("MaxCatalystUses", 0);
 
-        if (nbt.contains("ByproductStack")) {
-            this.byproductItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("ByproductStack"))
-                    .orElse(ItemStack.EMPTY);
-        }
-
-        this.catalystUsesLeft = nbt.getInt("CatalystUsesLeft", 0);
-        this.maxCatalystUses = nbt.getInt("MaxCatalystUses", 0);
-
-        if (nbt.contains("NextOutputStack")) {
-            this.nextOutputItemStack = ItemStack.fromNbt(registries, nbt.getCompoundOrEmpty("NextOutputStack"))
-                    .orElse(ItemStack.EMPTY);
-        }
+        this.nextOutputItemStack = view.read("NextOutputStack", ItemStack.CODEC)
+                .orElse(ItemStack.EMPTY);
     }
 
     private Optional<RecipeEntry<CrystallizerRecipe>> getCurrentRecipe(CrystallizerRecipeInput recipeInput) {

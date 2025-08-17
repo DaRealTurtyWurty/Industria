@@ -29,8 +29,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity> {
-
-
     private static final int NUM_SPINNING_ITEMS = 5;
 
     private final CentrifugalConcentratorModel model;
