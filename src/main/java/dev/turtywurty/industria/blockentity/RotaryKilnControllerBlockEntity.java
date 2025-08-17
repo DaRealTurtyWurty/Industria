@@ -58,7 +58,6 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
     private final List<InputRecipeEntry> recipes = new ArrayList<>();
-
     private int ticks = 0;
 
     public RotaryKilnControllerBlockEntity(BlockPos pos, BlockState state) {
@@ -67,6 +66,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
                 Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
         this.wrappedHeatStorage.addStorage(new InputHeatStorage(this, 2000, 2000));
+
     }
 
     public static ServerRecipeManager getRecipeManager(World world) {
@@ -186,7 +186,10 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             return;
 
         if (this.recipes.stream().noneMatch(r -> r.progress <= 100)) {
-            this.recipes.add(new InputRecipeEntry(recipeEntry.get().id(), inputStack));
+            InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(recipeEntry.get().id(), inputStack);
+
+            this.recipes.add(inputRecipeEntry);
+
             inventory.removeStack(0, recipe.input().stackData().count());
             update();
         }

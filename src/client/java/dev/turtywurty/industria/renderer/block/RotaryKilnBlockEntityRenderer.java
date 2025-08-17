@@ -77,7 +77,6 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
         long now = System.nanoTime();
         float deltaTime = (now - rendererData.lastRenderTime) / 1_000_000_000f; // seconds
-        System.out.println(deltaTime);
         rendererData.lastRenderTime = now;
         box2dWorld.step(deltaTime, 6, 2);
 
@@ -109,8 +108,6 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             matrices.multiply(Direction.WEST.getRotationQuaternion());
             matrices.multiply(RotationAxis.POSITIVE_X.rotation(body.getAngle()));
             this.context.getItemRenderer().renderItem(itemStack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
-            matrices.pop();
-
             matrices.pop();
         }
     }
