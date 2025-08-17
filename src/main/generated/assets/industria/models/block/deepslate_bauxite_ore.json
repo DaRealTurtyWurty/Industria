@@ -2,6 +2,6 @@
   "parent": "industria:block/parent/ore",
   "textures": {
     "base": "minecraft:block/deepslate",
-    "ore": "industria:block/deepslate_bauxite_ore"
+    "ore": "industria:block/bauxite_ore"
   }
 }
