@@ -1,14 +1,10 @@
 package dev.turtywurty.industria.renderer.block;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.texture.Sprite;
@@ -17,16 +13,9 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.TriState;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import org.jbox2d.common.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 // TODO: Finish OBJLoader and use that for rendering
 public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity> {
@@ -64,7 +53,6 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
     private void renderInputFluid(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         SyncingFluidStorage fluidTank = entity.getInputFluidTank();
         if (fluidTank.isResourceBlank() || fluidTank.amount <= 0) return;
-
 
         FluidVariant fluidVariant = fluidTank.variant;
         Sprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
@@ -122,20 +110,13 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             this.context.getItemRenderer().renderItem(stackInSlot, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
 
 
-            Vector3f pos = localToWorldPosition(matrices);
+            Vector3f pos = matrixStackToWorldPosition(matrices);
             entity.getWorld().addParticleClient(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
 
             matrices.pop();
         }
 
         matrices.pop();
-    }
-
-    private Vector3f localToWorldPosition(MatrixStack matrices) {
-        Vector3f pos = matrices.peek().getPositionMatrix().transformPosition(0, 0, 0, new Vector3f());
-        Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
-
-        return new Vector3f((float) (pos.x() + cameraPos.x), (float) (pos.y() + cameraPos.y), (float) (pos.z() + cameraPos.z));
     }
 
     private void angledFluidVertex(VertexConsumer vc, MatrixStack matrixStack, Sprite sprite, int fluidColor, float angle, float radius, float uvSize, int light, int overlay) {

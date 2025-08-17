@@ -98,6 +98,19 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
+    /**
+     * Converts a MatrixStack to a world Position
+     *
+     * @param matrices The current MatrixStack
+     * @return The world Position stored in a {@link Vector3f}
+     */
+    protected Vector3f matrixStackToWorldPosition(MatrixStack matrices) {
+        Vector3f pos = matrices.peek().getPositionMatrix().transformPosition(0, 0, 0, new Vector3f());
+        Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+
+        return new Vector3f((float) (pos.x() + cameraPos.x), (float) (pos.y() + cameraPos.y), (float) (pos.z() + cameraPos.z));
+    }
+
     private static boolean isHighContrast() {
         return MinecraftClient.getInstance().options.getHighContrastBlockOutline().getValue();
     }
