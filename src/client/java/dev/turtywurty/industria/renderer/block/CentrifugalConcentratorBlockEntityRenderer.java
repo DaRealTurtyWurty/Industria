@@ -28,6 +28,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+// TODO: Finish OBJLoader and use that for rendering
 public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity> {
     private static final int NUM_SPINNING_ITEMS = 5;
 

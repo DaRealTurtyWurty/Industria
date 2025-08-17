@@ -6,6 +6,7 @@ import dev.turtywurty.gasapi.api.GasVariantAttributes;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
 import dev.turtywurty.gasapi.handler.GasRenderHandler;
 import dev.turtywurty.gasapi.handler.GasRenderHandlerRegistry;
+import dev.turtywurty.industria.screen.widget.util.Orientation;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -24,25 +25,25 @@ import java.util.function.Supplier;
 public class GasWidget implements Drawable, Widget {
     private final SingleGasStorage gasTank;
     private final Supplier<BlockPos> posSupplier;
+    private final Orientation orientation;
 
     private final int width, height;
     private int x, y;
 
-    public GasWidget(SingleGasStorage gasTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier) {
+    public GasWidget(SingleGasStorage gasTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier, Orientation orientation) {
         this.gasTank = gasTank;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.posSupplier = posSupplier;
+        this.orientation = orientation;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Gas gas = this.gasTank.variant.getGas();
         long gasAmount = this.gasTank.getAmount();
-        long gasCapacity = this.gasTank.getCapacity();
-        int gasBarHeight = Math.round((float) gasAmount / gasCapacity * this.height);
 
         GasRenderHandler gasRenderHandler = GasRenderHandlerRegistry.get(gas);
         if (gasRenderHandler == null || gasAmount <= 0)
@@ -52,9 +53,20 @@ public class GasWidget implements Drawable, Widget {
         World world = MinecraftClient.getInstance().world;
 
         int color = gasRenderHandler.getColor(world, pos);
-        context.fill(this.x, this.y, this.x + this.width, this.y + gasBarHeight, color);
 
-        if (isPointWithinBounds(this.x, this.y, this.width, gasBarHeight, mouseX, mouseY)) {
+        long gasCapacity = this.gasTank.getCapacity();
+        float percentage = (float) gasAmount / gasCapacity;
+        int fillX = this.x, fillY = this.y, fillWidth = this.width, fillHeight = this.height;
+        if (this.orientation == Orientation.VERTICAL) {
+            fillY = this.y + (int) ((1 - percentage) * this.height);
+            fillHeight = (int) (this.height * percentage);
+        } else { // HORIZONTAL
+            fillWidth = (int) (this.width * percentage);
+        }
+
+        context.fill(fillX, fillY, fillX + fillWidth, fillY + fillHeight, color);
+
+        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
@@ -124,6 +136,7 @@ public class GasWidget implements Drawable, Widget {
         private Supplier<BlockPos> posSupplier = () -> null;
         private int x, y;
         private int width, height;
+        private Orientation orientation = Orientation.VERTICAL;
 
         public Builder(SingleGasStorage gasTank) {
             this.gasTank = gasTank;
@@ -174,8 +187,13 @@ public class GasWidget implements Drawable, Widget {
             return this;
         }
 
+        public Builder orientation(Orientation orientation) {
+            this.orientation = orientation;
+            return this;
+        }
+
         public GasWidget build() {
-            return new GasWidget(gasTank, x, y, width, height, this.posSupplier);
+            return new GasWidget(gasTank, x, y, width, height, posSupplier, orientation);
         }
     }
 }

@@ -125,6 +125,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(CentrifugalConcentratorBlockEntity::new, BlockInit.CENTRIFUGAL_CONCENTRATOR)
                     .build());
 
+    public static final BlockEntityType<ArcFurnaceBlockEntity> ARC_FURNACE = register("arc_furnace",
+            FabricBlockEntityTypeBuilder.create(ArcFurnaceBlockEntity::new, BlockInit.ARC_FURNACE)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

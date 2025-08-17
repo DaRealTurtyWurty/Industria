@@ -21,5 +21,6 @@ public class BlockEntityRendererInit {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.FLUID_TANK, FluidTankBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.SHAKING_TABLE, ShakingTableBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
     }
 }

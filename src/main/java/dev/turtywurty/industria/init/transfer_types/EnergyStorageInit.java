@@ -27,6 +27,7 @@ public class EnergyStorageInit {
         EnergyStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getEnergyProvider, BlockEntityTypeInit.DIGESTER);
         EnergyStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getEnergyProvider, BlockEntityTypeInit.SHAKING_TABLE);
         EnergyStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getEnergyProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
+        EnergyStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ARC_FURNACE);
 
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerWorld serverWorld) {
