@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "industria:block/parent/stone_ore"
+    "model": "industria:block/bauxite_ore"
   }
 }

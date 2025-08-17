@@ -18,6 +18,7 @@ import net.minecraft.client.render.model.json.BlockModelDefinition;
 import net.minecraft.client.render.model.json.ModelVariant;
 import net.minecraft.client.render.model.json.MultipartModelConditionBuilder;
 import net.minecraft.client.render.model.json.WeightedVariant;
+import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
@@ -77,6 +78,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
             WoodSetDatagen.generateBlockStateAndModels(woodSet, blockStateModelGenerator);
         }
 
+
         blockStateModelGenerator.registerCooker(BlockInit.ALLOY_FURNACE, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerCooker(BlockInit.THERMAL_GENERATOR, TexturedModel.ORIENTABLE);
         createBattery(blockStateModelGenerator, BlockInit.BASIC_BATTERY);
@@ -128,7 +130,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
         if(!Objects.equals(type, "ore"))
             type += "_ore";
         registerSimpleCubeAll(blockStateModelGenerator,block,type);
-        blockStateModelGenerator.registerParentedItemModel(block,Identifier.of(Industria.MOD_ID, "block/parent/%s".formatted(type)));
     }
 
     public void registerSingleton(BlockStateModelGenerator blockStateModelGenerator,Block block, TexturedModel.Factory modelFactory) {

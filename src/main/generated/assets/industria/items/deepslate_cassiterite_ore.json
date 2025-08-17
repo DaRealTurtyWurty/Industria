@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "industria:block/parent/deepslate_ore"
+    "model": "industria:block/deepslate_cassiterite_ore"
   }
 }
