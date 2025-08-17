@@ -12,6 +12,7 @@ import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.data.*;
 import net.minecraft.client.render.model.json.BlockModelDefinition;
 import net.minecraft.client.render.model.json.ModelVariant;
@@ -31,11 +32,15 @@ import static net.minecraft.client.data.TexturedModel.makeFactory;
 
 public class IndustriaModelProvider extends FabricModelProvider {
     public static final TextureKey ORE_KEY = TextureKey.of("ore");
-    public static final Model ORE_MODEL = block("ore", ORE_KEY);
+    public static final TextureKey BASE_KEY = TextureKey.of("base");
+    public static final Model ORE_MODEL = block("ore", ORE_KEY, BASE_KEY);
     public static final TexturedModel.Factory ORE = makeFactory(IndustriaModelProvider::ore, ORE_MODEL);
+    public static final TexturedModel.Factory STONE = makeFactory(IndustriaModelProvider::stoneOre, ORE_MODEL);
+    public static final TexturedModel.Factory DEEPSLATE = makeFactory(IndustriaModelProvider::deepslateOre, ORE_MODEL);
 
     private static Model block(String parent, TextureKey... requiredTextureKeys) {
-        return new Model(Optional.of(Identifier.of(Industria.MOD_ID,"block/" + parent)), Optional.empty(), requiredTextureKeys);
+        return new Model(Optional.of(Identifier.of(Industria.MOD_ID,"block/parent/" + parent)),
+                Optional.empty(), requiredTextureKeys);
     }
     public static TextureMap ore(Block block) {
         Identifier identifier = TextureMap.getId(block);
@@ -44,6 +49,20 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     public static TextureMap ore(Identifier id) {
         return (new TextureMap()).put(ORE_KEY, id);
+    }
+    public static TextureMap stoneOre(Block block) {
+        Identifier identifier = TextureMap.getId(block);
+        return stoneOre(identifier);
+    }
+    public static TextureMap stoneOre(Identifier id) {
+        return (new TextureMap()).put(BASE_KEY, Identifier.ofVanilla("block/stone")).put(ORE_KEY, id);
+    }
+    public static TextureMap deepslateOre(Block block) {
+        Identifier identifier = TextureMap.getId(block);
+        return deepslateOre(identifier);
+    }
+    public static TextureMap deepslateOre(Identifier id) {
+        return (new TextureMap()).put(BASE_KEY, Identifier.ofVanilla("block/deepslate")).put(ORE_KEY, id);
     }
 
     public IndustriaModelProvider(FabricDataOutput output) {
@@ -87,12 +106,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
 
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.BAUXITE_ORE,"stone","bauxite");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.CASSITERITE_ORE,"stone","cassiterite");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.ZINC_ORE,"stone","zinc");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_BAUXITE_ORE,"deepslate","bauxite");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_CASSITERITE_ORE,"deepslate","cassiterite");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_ZINC_ORE,"deepslate","zinc");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.BAUXITE_ORE,"stone");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.CASSITERITE_ORE,"stone");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.ZINC_ORE,"stone");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_BAUXITE_ORE,"deepslate");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_CASSITERITE_ORE,"deepslate");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_ZINC_ORE,"deepslate");
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ALUMINIUM_BLOCK);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_BLOCK);
@@ -103,20 +122,24 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.RAW_ZINC_BLOCK);
     }
 
-    private void registerSimpleOreBlock(BlockStateModelGenerator blockStateModelGenerator, Block block, String type,String id) {
+    private void registerSimpleOreBlock(BlockStateModelGenerator blockStateModelGenerator, Block block, String type) {
         if(!Objects.equals(type, "ore"))
             type += "_ore";
-        registerSimpleCubeAll(blockStateModelGenerator,block,type,id);
+        registerSimpleCubeAll(blockStateModelGenerator,block,type);
         blockStateModelGenerator.registerParentedItemModel(block,Identifier.of(Industria.MOD_ID, "block/parent/%s".formatted(type)));
     }
 
-    public void registerSingleton(BlockStateModelGenerator blockStateModelGenerator,Block block, TexturedModel.Factory modelFactory,
-                                  String type, String id) {
+    public void registerSingleton(BlockStateModelGenerator blockStateModelGenerator,Block block, TexturedModel.Factory modelFactory) {
         blockStateModelGenerator.blockStateCollector.accept(BlockStateModelGenerator.createSingletonBlockState(block,
                 BlockStateModelGenerator.createWeightedVariant(modelFactory.upload(block, blockStateModelGenerator.modelCollector))));
     }
-    public void registerSimpleCubeAll(BlockStateModelGenerator blockStateModelGenerator, Block block, String type,String id) {
-        registerSingleton(blockStateModelGenerator,block, ORE, type, id);
+    public void registerSimpleCubeAll(BlockStateModelGenerator blockStateModelGenerator, Block block, String type) {
+        switch (type){
+            case "stone_ore" -> registerSingleton(blockStateModelGenerator,block, STONE);
+            case "deepslate_ore" -> registerSingleton(blockStateModelGenerator, block, DEEPSLATE);
+            default -> registerSingleton(blockStateModelGenerator, block, ORE);
+        }
+
     }
 
 
