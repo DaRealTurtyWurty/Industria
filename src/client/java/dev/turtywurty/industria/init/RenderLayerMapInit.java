@@ -11,6 +11,11 @@ public class RenderLayerMapInit {
                 FluidInit.DIRTY_SODIUM_ALUMINATE.still(), FluidInit.DIRTY_SODIUM_ALUMINATE.flowing(),
                 FluidInit.SODIUM_ALUMINATE.still(), FluidInit.SODIUM_ALUMINATE.flowing());
 
+        BlockRenderLayerMap.putBlocks(BlockRenderLayer.TRANSLUCENT,
+                BlockInit.CASSITERITE_ORE, BlockInit.DEEPSLATE_CASSITERITE_ORE,
+                BlockInit.ZINC_ORE, BlockInit.DEEPSLATE_ZINC_ORE,
+                BlockInit.BAUXITE_ORE, BlockInit.DEEPSLATE_BAUXITE_ORE);
+
         BlockRenderLayerMap.putBlocks(BlockRenderLayer.CUTOUT, BlockInit.FLUID_TANK);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
