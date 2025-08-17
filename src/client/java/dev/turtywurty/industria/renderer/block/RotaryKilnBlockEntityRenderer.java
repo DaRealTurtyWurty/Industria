@@ -98,9 +98,6 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             }
         }
 
-
-        System.out.println(rendererData.collidedBodies.size());
-
         for (RotaryKilnControllerBlockEntity.InputRecipeEntry recipe : entity.getRecipes()) {
             ItemStack itemStack = recipe.inputStack();
 
@@ -119,11 +116,8 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             this.context.getItemRenderer().renderItem(itemStack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
 
             if (rendererData.collidedBodies.remove(body)) {
-
-
                 Vector3f position = matrixStackToWorldPosition(matrices);
                 entity.getWorld().addParticleClient(ParticleTypes.SMOKE, position.x, position.y, position.z, 0, 0, 0);
-
             }
 
             matrices.pop();
