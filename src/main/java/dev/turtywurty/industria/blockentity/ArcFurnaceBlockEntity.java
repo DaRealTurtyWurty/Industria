@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
+import com.mojang.serialization.Codec;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
@@ -24,6 +25,7 @@ import dev.turtywurty.industria.multiblock.Multiblockable;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -42,6 +44,8 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
@@ -184,47 +188,38 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements Multi
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
-        nbt.putString("Mode", this.mode.asString());
-        nbt.putInt("Progress", this.progress);
-        nbt.putInt("MaxProgress", this.maxProgress);
+        view.putString("Mode", this.mode.asString());
+        view.putInt("Progress", this.progress);
+        view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            Optional<NbtElement> result = RegistryKey.createCodec(RegistryKeys.RECIPE)
-                    .encodeStart(NbtOps.INSTANCE, this.currentRecipeId)
-                    .result();
-            result.ifPresent(nbtElement -> nbt.put("CurrentRecipeId", nbtElement));
+            view.put("CurrentRecipeId", RECIPE_CODEC, this.currentRecipeId);
         }
 
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("GasTank", this.wrappedGasStorage.writeNbt(registries));
-
-        nbt.put("MachinePositions", Multiblockable.writeMultiblockToNbt(this));
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "GasTank", this.wrappedGasStorage);
+        Multiblockable.write(this, view);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        this.mode = nbt.getString("Mode").flatMap(Mode::fromStringOptional).orElse(Mode.SMELTING);
-        this.progress = nbt.getInt("Progress", 0);
-        this.maxProgress = nbt.getInt("MaxProgress", 0);
+        this.mode = view.read("Mode", Codec.STRING).flatMap(Mode::fromStringOptional).orElse(Mode.SMELTING);
+        this.progress = view.getInt("Progress", 0);
+        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.currentRecipeId = view.read("CurrentRecipeId", RECIPE_CODEC).orElse(null);
 
-        if (nbt.contains("CurrentRecipeId")) {
-            this.currentRecipeId = nbt.get("CurrentRecipeId", RegistryKey.createCodec(RegistryKeys.RECIPE))
-                    .orElse(null);
-        }
-
-        this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
-        this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
-        this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-        this.wrappedGasStorage.readNbt(nbt.getListOrEmpty("GasTank"), registries);
-
-        Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MachinePositions"));
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "GasTank", this.wrappedGasStorage);
+        Multiblockable.read(this, view);
     }
 
     @Override
