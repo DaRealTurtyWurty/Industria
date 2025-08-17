@@ -13,6 +13,8 @@ import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -156,29 +158,13 @@ public interface Multiblockable {
         world.breakBlock(pos, true);
     }
 
-    /**
-     * Writes the multiblock positions to NBT.
-     *
-     * @return An {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
-     */
-    static NbtList writeMultiblockToNbt(Multiblockable multiblockable) {
-        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
-        return (NbtList) BlockPos.CODEC.listOf()
-                .encodeStart(NbtOps.INSTANCE, multiblockPositions)
-                .result().orElseGet(NbtList::new);
+    static void write(Multiblockable multiblockable, WriteView view) {
+        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockable.getMultiblockPositions());
     }
 
-    /**
-     * Reads the multiblock positions from NBT.
-     *
-     * @param multiblockable The multiblock controller to read the positions to.
-     * @param nbt            The {@link NbtList} of type {@link NbtIntArray} that represents the multiblock positions.
-     */
-    static void readMultiblockFromNbt(Multiblockable multiblockable, NbtList nbt) {
-        List<BlockPos> multiblockPositions = multiblockable.getMultiblockPositions();
-        multiblockPositions.clear();
-        BlockPos.CODEC.listOf().decode(NbtOps.INSTANCE, nbt).result().map(Pair::getFirst)
-                .ifPresent(multiblockPositions::addAll);
+    static void read(Multiblockable multiblockable, ReadView view) {
+        multiblockable.getMultiblockPositions().clear();
+        view.read("MachinePositions", BlockPos.CODEC.listOf()).ifPresent(multiblockable.getMultiblockPositions()::addAll);
     }
 
     /**

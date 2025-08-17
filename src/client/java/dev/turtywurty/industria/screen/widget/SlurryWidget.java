@@ -7,6 +7,7 @@ import dev.turtywurty.fabricslurryapi.client.handler.SlurryRenderHandlerRegistry
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -57,7 +58,7 @@ public class SlurryWidget implements Drawable, Widget {
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
         float blue = (tintColor & 0xFF) / 255.0F;
-        context.drawSpriteStretched(RenderLayer::getGuiTextured, stillTexture, this.x, this.y + this.height - barHeight, this.width, barHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+        context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED, stillTexture, this.x, this.y + this.height - barHeight, this.width, barHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
 
         if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);

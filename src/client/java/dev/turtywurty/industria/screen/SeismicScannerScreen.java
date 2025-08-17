@@ -14,7 +14,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,27 +78,24 @@ public class SeismicScannerScreen extends Screen {
             return;
 
 
-        MatrixStack matrixStack = context.getMatrices();
+        Matrix3x2fStack matrixStack = context.getMatrices();
         for (WorldFluidPocketsState.FluidPocket fluidPocket : this.fluidPockets) {
             BlockState blockState = fluidPocket.fluidState().getBlockState();
             Set<BlockPos> positions = fluidPocket.fluidPositions().keySet();
 
             int minX = fluidPocket.minX();
             int minY = fluidPocket.minY();
-            int minZ = fluidPocket.minZ();
             int maxX = fluidPocket.maxX();
             int maxY = fluidPocket.maxY();
-            int maxZ = fluidPocket.maxZ();
 
             int centerX = (minX + maxX) / 2 - minX;
             int centerY = (minY + maxY) / 2 - minY;
-            int centerZ = (minZ + maxZ) / 2 - minZ;
 
-            matrixStack.push();
-            matrixStack.translate(centerX, centerY, centerZ);
-            matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(135));
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-45));
-            matrixStack.translate(-centerX, -centerY, -centerZ);
+            matrixStack.pushMatrix();
+            matrixStack.translate(centerX, centerY);
+            matrixStack.rotate(135 * MathHelper.RADIANS_PER_DEGREE);
+            matrixStack.rotate(-45 * MathHelper.RADIANS_PER_DEGREE);
+            matrixStack.translate(-centerX, -centerY);
             for (BlockPos pos : positions) {
                 int x = pos.getX() - fluidPocket.minX();
                 int y = pos.getY() - fluidPocket.minY();
@@ -108,7 +107,7 @@ public class SeismicScannerScreen extends Screen {
 //                        .pos(this.x + 96, this.y - 550)
 //                        .render(context, mouseX, mouseY, delta);
             }
-            matrixStack.pop();
+            matrixStack.popMatrix();
         }
     }
 

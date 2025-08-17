@@ -19,9 +19,11 @@ import net.minecraft.resource.ResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -49,6 +51,12 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillHeadItem
                 matrices.pop();
             }
         }
+    }
+
+    @Override
+    public void collectVertices(Set<Vector3f> vertices) {
+        MatrixStack matrices = new MatrixStack();
+        this.drillHeadModels.values().forEach(model -> model.getParts().forEach(modelPart -> modelPart.collectVertices(matrices, vertices)));
     }
 
     @Override

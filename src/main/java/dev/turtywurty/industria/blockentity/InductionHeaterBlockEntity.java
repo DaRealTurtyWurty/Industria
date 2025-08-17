@@ -16,6 +16,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.InductionHeaterScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -25,10 +26,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -40,14 +41,12 @@ import java.util.List;
 
 public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("induction_heater");
-
-    private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-    private final WrappedHeatStorage<SimpleHeatStorage> heatStorage = new WrappedHeatStorage<>();
-    private final WrappedFluidStorage<SingleFluidStorage> waterStorage = new WrappedFluidStorage<>();
-
     private static final double HEAT_PER_ENERGY = 0.5D;
     private static final double PASSIVE_COOLING = 0.01D;
     private static final double TRANSFER_COEFFICIENT = 0.25D;
+    private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
+    private final WrappedHeatStorage<SimpleHeatStorage> heatStorage = new WrappedHeatStorage<>();
+    private final WrappedFluidStorage<SingleFluidStorage> waterStorage = new WrappedFluidStorage<>();
 
     public InductionHeaterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.INDUCTION_HEATER, BlockEntityTypeInit.INDUCTION_HEATER, pos, state);
@@ -140,26 +139,17 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-
-        nbt.put("HeatStorage", this.heatStorage.writeNbt(registries));
-        nbt.put("WaterStorage", this.waterStorage.writeNbt(registries));
-        nbt.put("EnergyStorage", this.energyStorage.writeNbt(registries));
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "HeatStorage", this.heatStorage);
+        ViewUtils.putChild(view, "WaterStorage", this.waterStorage);
+        ViewUtils.putChild(view, "EnergyStorage", this.energyStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-
-        if (nbt.contains("HeatStorage"))
-            this.heatStorage.readNbt(nbt.getListOrEmpty("HeatStorage"), registries);
-
-        if (nbt.contains("WaterStorage"))
-            this.waterStorage.readNbt(nbt.getListOrEmpty("WaterStorage"), registries);
-
-        if (nbt.contains("EnergyStorage"))
-            this.energyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "HeatStorage", this.heatStorage);
+        ViewUtils.readChild(view, "WaterStorage", this.waterStorage);
+        ViewUtils.readChild(view, "EnergyStorage", this.energyStorage);
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {

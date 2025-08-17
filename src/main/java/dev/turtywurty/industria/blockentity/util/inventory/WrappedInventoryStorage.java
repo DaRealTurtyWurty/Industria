@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -126,24 +128,16 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
     }
 
     @Override
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var nbt = new NbtList();
+    public void writeData(WriteView view) {
         for (T inventory : this.inventories) {
-            var inventoryNbt = new NbtCompound();
-            nbt.add(Inventories.writeNbt(inventoryNbt, inventory.getHeldStacks(), registryLookup));
+            Inventories.writeData(view, inventory.getHeldStacks());
         }
-
-        return nbt;
     }
 
     @Override
-    public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        for (int index = 0; index < nbt.size(); index++) {
-            var inventoryNbt = nbt.getCompoundOrEmpty(index);
-
-            SimpleInventory inventory = this.inventories.get(index);
-            Inventories.readNbt(inventoryNbt, inventory.getHeldStacks(), registryLookup);
-
+    public void readData(ReadView view) {
+        for (SimpleInventory inventory : this.inventories) {
+            Inventories.readData(view, inventory.getHeldStacks());
         }
     }
 }

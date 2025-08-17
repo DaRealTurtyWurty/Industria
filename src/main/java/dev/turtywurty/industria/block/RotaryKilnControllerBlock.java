@@ -4,6 +4,14 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
+import dev.turtywurty.industria.network.RotaryKilnControllerRemovedPayload;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -11,6 +19,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -150,5 +160,16 @@ public class RotaryKilnControllerBlock extends IndustriaBlock {
         }
 
         return currentShape;
+    }
+
+    @Override
+    public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+        super.afterBreak(world, player, pos, state, blockEntity, tool);
+        if(world instanceof ServerWorld serverWorld) {
+            var payload = new RotaryKilnControllerRemovedPayload(pos);
+            for (ServerPlayerEntity sPlayer : serverWorld.getPlayers()) {
+                ServerPlayNetworking.send(sPlayer, payload);
+            }
+        }
     }
 }
