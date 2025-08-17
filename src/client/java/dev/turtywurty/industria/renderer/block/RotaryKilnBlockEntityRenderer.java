@@ -11,19 +11,24 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.*;
-import org.jbox2d.collision.shapes.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
+import org.jbox2d.collision.shapes.ChainShape;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
-    public static final Map<BlockPos, RendererData> blockEntityPosToDataMap = new ConcurrentHashMap<>();
+    public static final Map<BlockPos, RendererData> BLOCK_POS_RENDERER_DATA_MAP = new ConcurrentHashMap<>();
 
     private static final float BARREL_ANGULAR_VELOCITY = 1.5f;
-
     private static final float MIN_FRICTION = 2f;
     private static final float MAX_FRICTION = 4f;
     private static final float MIN_RESTITUTION = 0.2f;
@@ -44,14 +49,12 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION));
         this.model.renderSegment(0, matrices, vertexConsumer, light, overlay);
 
-        if (entity.getWorld() == null) return;
-
-        if (entity.getKilnSegments().isEmpty())
+        if (entity.getWorld() == null || entity.getKilnSegments().isEmpty())
             return;
 
         this.model.renderSegment(1, matrices, vertexConsumer, light, overlay);
 
-        RendererData rendererData = blockEntityPosToDataMap.computeIfAbsent(entity.getPos(), pos -> new RendererData());
+        RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(entity.getPos(), pos -> new RendererData());
 
         int numKilnSegments = Math.min(entity.getKilnSegments().size(), 15);
         for (int i = 0; i < numKilnSegments - 1; i++) {
@@ -74,6 +77,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
         long now = System.nanoTime();
         float deltaTime = (now - rendererData.lastRenderTime) / 1_000_000_000f; // seconds
+        System.out.println(deltaTime);
         rendererData.lastRenderTime = now;
         box2dWorld.step(deltaTime, 6, 2);
 
@@ -142,12 +146,17 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         return box;
     }
 
-    private static final class RendererData {
-        Map<InputRecipeEntry, Body> recipeToBodyMap = new HashMap<>();
-        World box2dWorld;
-        Body barrelBody;
+    @Override
+    public boolean rendersOutsideBoundingBox() {
+        return true;
+    }
 
-        long lastRenderTime = System.nanoTime();
+    public static final class RendererData {
+        private final Map<InputRecipeEntry, Body> recipeToBodyMap = new HashMap<>();
+        private final World box2dWorld;
+        private final Body barrelBody;
+
+        private long lastRenderTime = System.nanoTime();
 
         public RendererData() {
             box2dWorld = new World(new Vec2(0, GRAVITY));

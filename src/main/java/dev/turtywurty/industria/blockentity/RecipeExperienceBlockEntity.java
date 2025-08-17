@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.util.ViewUtils;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.recipe.Recipe;
@@ -11,14 +11,17 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RecipeExperienceBlockEntity {
+    Codec<Map<RegistryKey<Recipe<?>>, Integer>> RECIPES_USED_CODEC =
+            Codec.unboundedMap(RegistryKey.createCodec(RegistryKeys.RECIPE), Codec.INT);
+
     static void dropExperience(ServerWorld world, Vec3d pos, int multiplier, float experience) {
         int i = MathHelper.floor((float) multiplier * experience);
         float f = MathHelper.fractionalPart((float) multiplier * experience);
@@ -30,18 +33,12 @@ public interface RecipeExperienceBlockEntity {
     }
 
     static void writeRecipesUsed(WriteView view, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
-        var recipesUsedView = view.get(name);
-        recipesUsed.forEach((recipeRegistryKey, count) -> recipesUsedView.putInt(recipeRegistryKey.getValue().toString(), count));
+        view.put(name, RECIPES_USED_CODEC, recipesUsed);
     }
 
     static void readRecipesUsed(ReadView view, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
-        ReadView recipesUsedView = view.getReadView(name);
-
         recipesUsed.clear();
-        for (String key : ViewUtils.getKeys(recipesUsedView)) {
-            RegistryKey<Recipe<?>> recipeKey = RegistryKey.of(RegistryKeys.RECIPE, Identifier.of(key));
-            recipesUsed.put(recipeKey, recipesUsedView.getInt(key, 0));
-        }
+        view.read(name, RECIPES_USED_CODEC).ifPresent(recipesUsed::putAll);
     }
 
     void setLastRecipe(@Nullable RecipeEntry<?> recipe);

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
+import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
@@ -16,8 +17,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
@@ -36,6 +35,9 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     private final Map<BlockPos, Integer> drillTubes = new HashMap<>();
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
+
+    private static final Codec<Map<BlockPos, Integer>> DRILL_TUBES_CODEC =
+            Codec.unboundedMap(BlockPos.CODEC, Codec.INT);
 
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.WELLHEAD, pos, state);
@@ -64,13 +66,10 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         super.readData(view);
 
         this.oilPumpJackPos = view.read("OilPumpJackPos", BlockPos.CODEC).orElse(null);
+
+        Map<BlockPos, Integer> drillTubes = view.read("DrillTubes", DRILL_TUBES_CODEC).orElse(new HashMap<>());
         this.drillTubes.clear();
-        ReadView drillTubesView = view.getReadView("DrillTubes");
-        for (String key : ViewUtils.getKeys(drillTubesView)) {
-            BlockPos pos = BlockPos.fromLong(Long.parseLong(key));
-            int fluidAmount = drillTubesView.getInt(key, 0);
-            this.drillTubes.put(pos, fluidAmount);
-        }
+        this.drillTubes.putAll(drillTubes);
 
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
     }
@@ -83,10 +82,7 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
             view.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
         }
 
-        WriteView drillTubesView = view.get("DrillTubes");
-        for (Map.Entry<BlockPos, Integer> entry : this.drillTubes.entrySet()) {
-            drillTubesView.putLong(String.valueOf(entry.getKey().asLong()), entry.getValue());
-        }
+        view.put("DrillTubes", DRILL_TUBES_CODEC, this.drillTubes);
 
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
     }

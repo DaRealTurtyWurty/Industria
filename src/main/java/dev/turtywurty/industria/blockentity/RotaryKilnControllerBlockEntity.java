@@ -39,8 +39,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -127,16 +127,28 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         handleInputStack();
 
         for (InputRecipeEntry recipe : this.recipes.stream().sorted(Comparator.comparingInt(InputRecipeEntry::getProgress)).toList()) {
-            if (recipe == null)
+            if (recipe == null) {
+                Industria.LOGGER.warn("Found null recipe in Rotary Kiln Controller at {}. Removing it from the list.", this.pos);
+                this.recipes.remove(null);
+                update();
                 continue;
+            }
 
             Optional<RecipeEntry<?>> recipeEntry = getRecipe(recipe.registryKey());
-            if (recipeEntry.isEmpty())
+            if (recipeEntry.isEmpty()) {
+                Industria.LOGGER.warn("Recipe entry for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.pos);
+                this.recipes.remove(recipe);
+                update();
                 continue;
+            }
 
             RotaryKilnRecipe kilnRecipe = (RotaryKilnRecipe) recipeEntry.get().value();
-            if (kilnRecipe == null)
+            if (kilnRecipe == null) {
+                Industria.LOGGER.warn("Recipe for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.pos);
+                this.recipes.remove(recipe);
+                update();
                 continue;
+            }
 
             if (recipe.getProgress() >= this.kilnSegments.size() * 100) {
                 ItemStack outputStack = kilnRecipe.output().createStack(this.world.random);
@@ -175,8 +187,6 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
         if (this.recipes.stream().noneMatch(r -> r.progress <= 100)) {
             this.recipes.add(new InputRecipeEntry(recipeEntry.get().id(), inputStack));
-            InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(recipeEntry.get().id(), inputStack);
-            this.recipes.add(inputRecipeEntry);
             inventory.removeStack(0, recipe.input().stackData().count());
             update();
         }
@@ -264,28 +274,16 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             if (inputRecipeEntry == null)
                 continue;
 
-            var recipeIdx0 = recipesView.add();
-            var recipeIdx1 = recipesView.add();
-            var recipeIdx2 = recipesView.add();
-            var recipeIdx3 = recipesView.add();
+            var recipeView = recipesView.add();
 
-            RegistryKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey();
-            if (registryKey != null) {
-                Identifier identifier = registryKey.getValue();
-                if (identifier == null) {
-                    Industria.LOGGER.error("Failed to encode recipe registry key for Rotary Kiln at {}. This specific case should never happen though. Recipe was {}.", this.pos, registryKey);
-                    continue;
-                }
-
-                recipeIdx0.put("RegistryKey", Identifier.CODEC, identifier);
-            } else {
-                Industria.LOGGER.error("Failed to encode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
-                continue;
+            RegistryKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey;
+            if (registryKey != null && registryKey.getValue() != null) {
+                recipeView.put("RegistryKey", RegistryKey.createCodec(RegistryKeys.RECIPE), registryKey);
             }
 
-            recipeIdx1.put("InputStack", ItemStack.CODEC, inputRecipeEntry.inputStack());
-            recipeIdx2.putInt("Progress", inputRecipeEntry.getProgress());
-            recipeIdx3.putString("UUID", inputRecipeEntry.uuid.toString());
+            recipeView.put("InputStack", ItemStack.OPTIONAL_CODEC, inputRecipeEntry.inputStack);
+            recipeView.putInt("Progress", inputRecipeEntry.progress);
+            recipeView.put("UUID", Uuids.CODEC, inputRecipeEntry.uuid);
         }
     }
 
@@ -298,34 +296,26 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         this.kilnSegments.clear();
         view.read("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
 
+        this.recipes.clear();
         ReadView.ListReadView recipesView = view.getListReadView("Recipes");
         for (ReadView readView : recipesView) {
-            for (int i = 0; i < recipesView.stream().toList().size(); i++) {
-                RegistryKey<Recipe<?>> registryKey = RegistryKey.of(RegistryKeys.RECIPE,
-                        readView.read("RegistryKey", Identifier.CODEC).orElse(null));
+            RegistryKey<Recipe<?>> registryKey = readView.read(
+                            "RegistryKey",
+                            RegistryKey.createCodec(RegistryKeys.RECIPE))
+                    .orElse(null);
 
-                if (registryKey == null && Thread.currentThread().getName().toLowerCase(Locale.ROOT).contains("server")) {
-                    Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
-                    continue;
-                }
-
-                ItemStack inputStack = readView.read("InputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
-                int progress = readView.getInt("Progress", 0);
-                UUID uuid;
-                String uuidStr = readView.getString("UUID", "");
-                if (uuidStr != null && !uuidStr.isEmpty()) {
-                    try {
-                        uuid = UUID.fromString(uuidStr);
-                    } catch (IllegalArgumentException e) {
-                        uuid = UUID.randomUUID();
-                    }
-                } else {
-                    uuid = UUID.randomUUID();
-                }
-
-                InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);
-                this.recipes.add(inputRecipeEntry);
+            if (registryKey == null && Thread.currentThread().getName().toLowerCase(Locale.ROOT).contains("server")) {
+                Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
+                continue;
             }
+
+            ItemStack inputStack = readView.read("InputStack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+            int progress = readView.getInt("Progress", 0);
+            Optional<UUID> uuidOpt = readView.read("UUID", Uuids.CODEC);
+            UUID uuid = uuidOpt.orElseGet(UUID::randomUUID);
+
+            var inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);
+            this.recipes.add(inputRecipeEntry);
         }
     }
 
@@ -474,7 +464,8 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             return "InputRecipeEntry[" +
                     "registryKey=" + registryKey + ", " +
                     "inputStack=" + inputStack + ", " +
-                    "progress=" + progress + ']';
+                    "progress=" + progress + ", " +
+                    "uuid=" + uuid + ']';
         }
     }
 }
