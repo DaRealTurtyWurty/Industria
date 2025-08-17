@@ -27,5 +27,6 @@ public class PayloadTypeInit {
         PayloadTypeRegistry.playS2C().register(AddPipeNetworkPayload.ID, AddPipeNetworkPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(RemovePipeNetworkPayload.ID, RemovePipeNetworkPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ModifyPipeNetworkPayload.ID, ModifyPipeNetworkPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(RotaryKilnControllerRemovedPayload.ID, RotaryKilnControllerRemovedPayload.CODEC);
     }
 }

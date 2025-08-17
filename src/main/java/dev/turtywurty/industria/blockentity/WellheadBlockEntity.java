@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
+import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
@@ -8,6 +9,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -15,9 +17,9 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -33,6 +35,9 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     private final Map<BlockPos, Integer> drillTubes = new HashMap<>();
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
+
+    private static final Codec<Map<BlockPos, Integer>> DRILL_TUBES_CODEC =
+            Codec.unboundedMap(BlockPos.CODEC, Codec.INT);
 
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.WELLHEAD, pos, state);
@@ -57,38 +62,29 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        this.oilPumpJackPos = nbt.get("OilPumpJackPos", BlockPos.CODEC).orElse(null);
+        this.oilPumpJackPos = view.read("OilPumpJackPos", BlockPos.CODEC).orElse(null);
+
+        Map<BlockPos, Integer> drillTubes = view.read("DrillTubes", DRILL_TUBES_CODEC).orElse(new HashMap<>());
         this.drillTubes.clear();
-        NbtCompound drillTubesNbt = nbt.getCompoundOrEmpty("DrillTubes");
-        for (String key : drillTubesNbt.getKeys()) {
-            BlockPos pos = BlockPos.fromLong(Long.parseLong(key));
-            int fluidAmount = drillTubesNbt.getInt(key, 0);
-            this.drillTubes.put(pos, fluidAmount);
-        }
+        this.drillTubes.putAll(drillTubes);
 
-        if (nbt.contains("FluidTank")) {
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-        }
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
         if (this.oilPumpJackPos != null) {
-            nbt.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
+            view.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
         }
 
-        NbtCompound drillTubesNbt = new NbtCompound();
-        for (Map.Entry<BlockPos, Integer> entry : this.drillTubes.entrySet()) {
-            drillTubesNbt.putLong(String.valueOf(entry.getKey().asLong()), entry.getValue());
-        }
+        view.put("DrillTubes", DRILL_TUBES_CODEC, this.drillTubes);
 
-        nbt.put("DrillTubes", drillTubesNbt);
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
     }
 
     @Override

@@ -6,10 +6,8 @@ import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,31 +31,24 @@ public class WrappedGasStorage<T extends Storage<GasVariant>> extends WrappedSto
     }
 
     @Override
-    public NbtList writeNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        var list = new NbtList();
+    public void writeData(WriteView view) {
         for (T tank : this.storages) {
-            if(tank instanceof SingleGasStorage singleGasStorage) {
-                var nbt = new NbtCompound();
-                nbt.putLong("Amount", singleGasStorage.getAmount());
-                nbt.put("Gas", GasVariant.CODEC.encode(singleGasStorage.getResource(), NbtOps.INSTANCE, new NbtCompound()).getOrThrow());
-                list.add(nbt);
+            if (tank instanceof SingleGasStorage singleGasStorage) {
+                view.putLong("Amount", singleGasStorage.getAmount());
+                view.put("Gas", GasVariant.CODEC, singleGasStorage.getResource());
             }
         }
-
-        return list;
     }
 
     @Override
-    public void readNbt(NbtList nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        for (int index = 0; index < nbt.size(); index++) {
-            var compound = nbt.getCompoundOrEmpty(index);
-            T storage = this.storages.get(index);
+    public void readData(ReadView view) {
+        for (T storage : this.storages) {
             if (storage == null)
                 continue;
 
-            if(storage instanceof SingleGasStorage singleGasStorage) {
-                singleGasStorage.amount = compound.getLong("Amount", 0L);
-                singleGasStorage.variant = compound.get("Gas", GasVariant.CODEC)
+            if (storage instanceof SingleGasStorage singleGasStorage) {
+                singleGasStorage.amount = view.getLong("Amount", 0L);
+                singleGasStorage.variant = view.read("Gas", GasVariant.CODEC)
                         .orElse(GasVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read gas storage of type: " + storage.getClass().getName());

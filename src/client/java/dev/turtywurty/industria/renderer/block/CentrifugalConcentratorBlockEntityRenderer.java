@@ -5,10 +5,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
@@ -53,8 +50,8 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         if (fluidSprite == null)
             return;
 
-        RenderLayer fluidLayer = RenderLayers.getFluidLayer(fluidVariant.getFluid().getDefaultState());
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(fluidLayer);
+        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(fluidSprite.getAtlasId());
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
 
         int sides = 16;
         float outerRadius = 19 / 16f;

@@ -22,6 +22,7 @@ import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -29,20 +30,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -60,17 +58,13 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
+    private final List<RegistryKey<Recipe<?>>> availableRecipes = new ArrayList<>();
     @Nullable
     private RegistryKey<Recipe<?>> selectedRecipe;
-    private final List<RegistryKey<Recipe<?>>> availableRecipes = new ArrayList<>();
     private int selectedRecipeIndex = 0;
     private ItemStack previousCenterStack = ItemStack.EMPTY;
 
     private int progress = 0;
-    private boolean isFirstRead = true;
-    private ItemStack overflowStack = ItemStack.EMPTY;
-
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -92,6 +86,8 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
             return 1;
         }
     };
+    private boolean isFirstRead = true;
+    private ItemStack overflowStack = ItemStack.EMPTY;
 
     public UpgradeStationBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.UPGRADE_STATION, pos, state);
@@ -137,6 +133,10 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
 
         this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 1_000, 0));
+    }
+
+    private static RegistryKey<Recipe<?>> getRecipeKey(String string) {
+        return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(string));
     }
 
     @Override
@@ -191,74 +191,45 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-        nbt.put("MultiblockPositions", Multiblockable.writeMultiblockToNbt(this));
-        nbt.put("Inventory", this.wrappedInventoryStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
-
+    protected void writeData(WriteView view) {
+        super.writeData(view);
+        Multiblockable.write(this, view);
+        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         if (this.selectedRecipe != null) {
-            nbt.putString("SelectedRecipe", this.selectedRecipe.getValue().toString());
+            view.putString("SelectedRecipe", this.selectedRecipe.getValue().toString());
         }
 
-        var availableRecipes = new NbtList();
-        for (RegistryKey<Recipe<?>> recipe : this.availableRecipes) {
-            availableRecipes.add(NbtString.of(recipe.getValue().toString()));
-        }
+        var availableRecipes = view.getListAppender("AvailableRecipes", RECIPE_CODEC);
+        this.availableRecipes.forEach(availableRecipes::add);
 
-        nbt.put("AvailableRecipes", availableRecipes);
-        nbt.putInt("SelectedRecipeIndex", this.selectedRecipeIndex);
+        view.putInt("SelectedRecipeIndex", this.selectedRecipeIndex);
 
-        nbt.putInt("Progress", this.progress);
+        view.putInt("Progress", this.progress);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-        if (nbt.contains("MultiblockPositions")) {
-            Multiblockable.readMultiblockFromNbt(this, nbt.getListOrEmpty("MultiblockPositions"));
+    protected void readData(ReadView view) {
+        Multiblockable.read(this, view);
+
+        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
+
+        this.selectedRecipe = getRecipeKey(Objects.requireNonNull(view.getString("SelectedRecipe", "")));
+
+        this.availableRecipes.clear();
+        for (var recipe : view.getTypedListView("AvailableRecipes", RECIPE_CODEC)) {
+            this.availableRecipes.add(recipe);
         }
 
-        if (nbt.contains("Inventory")) {
-            this.wrappedInventoryStorage.readNbt(nbt.getListOrEmpty("Inventory"), registries);
-        }
+        this.selectedRecipeIndex = view.getInt("SelectedRecipeIndex", 0);
 
-        if (nbt.contains("Energy")) {
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
-        }
-
-        if (nbt.contains("SelectedRecipe")) {
-            this.selectedRecipe = getRecipeKey(Objects.requireNonNull(nbt.get("SelectedRecipe")));
-        }
-
-        if (nbt.contains("AvailableRecipes")) {
-            this.availableRecipes.clear();
-            NbtList availableRecipes = nbt.getListOrEmpty("AvailableRecipes");
-            for (NbtElement recipe : availableRecipes) {
-                this.availableRecipes.add(getRecipeKey(recipe));
-            }
-        }
-
-        if (nbt.contains("SelectedRecipeIndex")) {
-            this.selectedRecipeIndex = nbt.getInt("SelectedRecipeIndex", 0);
-        }
-
-        if (nbt.contains("Progress")) {
-            this.progress = nbt.getInt("Progress", 0);
-        }
+        this.progress = view.getInt("Progress", 0);
 
         if (this.isFirstRead) {
             this.isFirstRead = false;
             this.previousCenterStack = getInputInventory().getStack(4);
         }
-    }
-
-    private static RegistryKey<Recipe<?>> getRecipeKey(NbtElement element) {
-        return getRecipeKey(element.asString().orElse(""));
-    }
-
-    private static RegistryKey<Recipe<?>> getRecipeKey(String string) {
-        return RegistryKey.of(RegistryKeys.RECIPE, Identifier.tryParse(string));
     }
 
     @Override

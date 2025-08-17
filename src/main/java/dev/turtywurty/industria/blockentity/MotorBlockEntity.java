@@ -10,13 +10,14 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -31,9 +32,8 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
     public static final Text TITLE = Industria.containerTitle("motor");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
-    private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
-
     public float rodRotation = 0.0F; // Client only
+    private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
 
     public MotorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.MOTOR, BlockEntityTypeInit.MOTOR, pos, state);
@@ -64,7 +64,7 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
         if (energyStorage.getAmount() > 0) {
             long energyRequired = calculateEnergyForRotation(this.currentRotationSpeed, this.targetRotationSpeed);
-            if(energyStorage.getAmount() < energyRequired) {
+            if (energyStorage.getAmount() < energyRequired) {
                 this.currentRotationSpeed = calculateRotationSpeed(energyStorage.getAmount());
                 energyStorage.amount = 0;
             } else {
@@ -95,24 +95,17 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        nbt.putFloat("RotationSpeed", this.currentRotationSpeed);
-        nbt.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
-        nbt.put("EnergyStorage", this.wrappedEnergyStorage.writeNbt(registryLookup));
+    protected void writeData(WriteView view) {
+        view.putFloat("RotationSpeed", this.currentRotationSpeed);
+        view.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
+        ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        if (nbt.contains("RotationSpeed"))
-            this.currentRotationSpeed = nbt.getFloat("RotationSpeed", 0.0F);
-
-        if (nbt.contains("TargetRotationSpeed"))
-            this.targetRotationSpeed = nbt.getFloat("TargetRotationSpeed", 0.0F);
-
-        if (nbt.contains("EnergyStorage"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("EnergyStorage"), registryLookup);
+    protected void readData(ReadView view) {
+        this.currentRotationSpeed = view.getFloat("RotationSpeed", 0.0F);
+        this.targetRotationSpeed = view.getFloat("TargetRotationSpeed", 0.0F);
+        ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
     }
 
     public EnergyStorage getEnergyStorage() {
@@ -123,15 +116,15 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
         return this.wrappedEnergyStorage.getStorage(null);
     }
 
-    public void setTargetRotationSpeed(float targetRotationSpeed) {
-        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
-    }
-
     public float getRotationSpeed() {
         return this.currentRotationSpeed;
     }
 
     public float getTargetRotationSpeed() {
         return this.targetRotationSpeed;
+    }
+
+    public void setTargetRotationSpeed(float targetRotationSpeed) {
+        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
     }
 }

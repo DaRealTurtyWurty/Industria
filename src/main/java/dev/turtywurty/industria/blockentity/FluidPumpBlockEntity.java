@@ -13,6 +13,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.FluidPumpScreenHandler;
 import dev.turtywurty.industria.util.MathUtils;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -23,11 +24,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -51,6 +52,30 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         super(BlockInit.FLUID_PUMP, BlockEntityTypeInit.FLUID_PUMP, pos, state);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.SOUTH);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0), Direction.UP);
+    }
+
+    private static @Nullable FluidState getMostCommon(Map<Direction, FluidState> fluidStateMap) {
+        FluidState mostCommon = null;
+        int mostCommonCount = 0;
+
+        for (FluidState state : fluidStateMap.values()) {
+            int count = 0;
+            for (FluidState value : fluidStateMap.values()) {
+                if (value.getFluid() == state.getFluid())
+                    count++;
+            }
+
+            if (count > mostCommonCount) {
+                mostCommon = state;
+                mostCommonCount = count;
+            }
+        }
+
+        return mostCommon;
+    }
+
+    private static boolean isEmpty(SingleFluidStorage storage) {
+        return storage.amount <= 0 || storage.isResourceBlank();
     }
 
     @Override
@@ -129,30 +154,6 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         }
     }
 
-    private static @Nullable FluidState getMostCommon(Map<Direction, FluidState> fluidStateMap) {
-        FluidState mostCommon = null;
-        int mostCommonCount = 0;
-
-        for (FluidState state : fluidStateMap.values()) {
-            int count = 0;
-            for (FluidState value : fluidStateMap.values()) {
-                if (value.getFluid() == state.getFluid())
-                    count++;
-            }
-
-            if (count > mostCommonCount) {
-                mostCommon = state;
-                mostCommonCount = count;
-            }
-        }
-
-        return mostCommon;
-    }
-
-    private static boolean isEmpty(SingleFluidStorage storage) {
-        return storage.amount <= 0 || storage.isResourceBlank();
-    }
-
     @Override
     public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
         return new BlockPosPayload(this.pos);
@@ -169,19 +170,15 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
-        nbt.put("FluidTank", this.wrappedFluidStorage.writeNbt(registries));
-        nbt.put("Energy", this.wrappedEnergyStorage.writeNbt(registries));
+    protected void writeData(WriteView view) {
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-        if (nbt.contains("FluidTank"))
-            this.wrappedFluidStorage.readNbt(nbt.getListOrEmpty("FluidTank"), registries);
-        if (nbt.contains("Energy"))
-            this.wrappedEnergyStorage.readNbt(nbt.getListOrEmpty("Energy"), registries);
+    protected void readData(ReadView view) {
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {

@@ -17,10 +17,10 @@ public class IndustriaBlockTagProvider extends FabricTagProvider.BlockTagProvide
     @Override
     protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
-            WoodSetDatagen.generateBlockTags(woodSet, this::getOrCreateTagBuilder);
+            WoodSetDatagen.generateBlockTags(woodSet, this::valueLookupBuilder);
         }
 
-        getOrCreateTagBuilder(TagList.Blocks.BATTERY_BLOCKS)
+        valueLookupBuilder(TagList.Blocks.BATTERY_BLOCKS)
                 .add(BlockInit.BASIC_BATTERY)
                 .add(BlockInit.ADVANCED_BATTERY)
                 .add(BlockInit.ELITE_BATTERY)
