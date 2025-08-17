@@ -4,6 +4,8 @@ import dev.turtywurty.fabricslurryapi.api.Slurry;
 import dev.turtywurty.fabricslurryapi.api.storage.SingleSlurryStorage;
 import dev.turtywurty.fabricslurryapi.client.handler.SlurryRenderHandler;
 import dev.turtywurty.fabricslurryapi.client.handler.SlurryRenderHandlerRegistry;
+import dev.turtywurty.industria.screen.widget.util.Orientation;
+import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -12,7 +14,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -25,25 +26,25 @@ import java.util.function.Supplier;
 public class SlurryWidget implements Drawable, Widget {
     private final SingleSlurryStorage slurryTank;
     private final Supplier<BlockPos> posSupplier;
+    private final Orientation orientation;
 
     private final int width, height;
     private int x, y;
 
-    public SlurryWidget(SingleSlurryStorage slurryTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier) {
+    public SlurryWidget(SingleSlurryStorage slurryTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier, Orientation orientation) {
         this.slurryTank = slurryTank;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.posSupplier = posSupplier;
+        this.orientation = orientation;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Slurry slurry = this.slurryTank.variant.getSlurry();
         long amount = this.slurryTank.getAmount();
-        long capacity = this.slurryTank.getCapacity();
-        int barHeight = Math.round((float) amount / capacity * this.height);
 
         SlurryRenderHandler slurryRenderHandler = SlurryRenderHandlerRegistry.get(slurry);
         if (slurryRenderHandler == null || amount <= 0)
@@ -58,9 +59,20 @@ public class SlurryWidget implements Drawable, Widget {
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
         float blue = (tintColor & 0xFF) / 255.0F;
-        context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED, stillTexture, this.x, this.y + this.height - barHeight, this.width, barHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
 
-        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
+        long capacity = this.slurryTank.getCapacity();
+        float percentage = (float) amount / capacity;
+        int fillX = this.x, fillY = this.y, fillWidth = this.width, fillHeight = this.height;
+        if (orientation == Orientation.VERTICAL) {
+            fillHeight = (int) (height * percentage);
+            fillY = y + height - fillHeight;
+        } else { // HORIZONTAL
+            fillWidth = (int) (width * percentage);
+        }
+
+        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+
+        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
@@ -125,6 +137,7 @@ public class SlurryWidget implements Drawable, Widget {
         private Supplier<BlockPos> posSupplier = () -> null;
         private int x, y;
         private int width, height;
+        private Orientation orientation = Orientation.VERTICAL;
 
         public Builder(SingleSlurryStorage slurryTank) {
             this.slurryTank = slurryTank;
@@ -175,8 +188,13 @@ public class SlurryWidget implements Drawable, Widget {
             return this;
         }
 
+        public Builder orientation(Orientation orientation) {
+            this.orientation = orientation;
+            return this;
+        }
+
         public SlurryWidget build() {
-            return new SlurryWidget(slurryTank, x, y, width, height, this.posSupplier);
+            return new SlurryWidget(slurryTank, x, y, width, height, posSupplier, orientation);
         }
     }
 }

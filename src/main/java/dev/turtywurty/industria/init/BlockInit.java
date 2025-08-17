@@ -165,6 +165,9 @@ public class BlockInit {
     public static final CentrifugalConcentratorBlock CENTRIFUGAL_CONCENTRATOR = registerWithItemCopy("centrifugal_concentrator",
             CentrifugalConcentratorBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
+    public static final ArcFurnaceBlock ARC_FURNACE = registerWithItemCopy("arc_furnace",
+            ArcFurnaceBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
+
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(AbstractBlock.Settings.create()

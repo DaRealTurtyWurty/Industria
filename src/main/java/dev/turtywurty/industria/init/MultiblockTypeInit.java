@@ -65,6 +65,11 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true)
                     .shapes(CentrifugalConcentratorBlock.VOXEL_SHAPE));
 
+    public static final MultiblockType<ArcFurnaceBlockEntity> ARC_FURNACE = register("arc_furnace",
+            new MultiblockType.Builder<ArcFurnaceBlockEntity>(79) // 4x4x5
+                    .setHasDirectionProperty(true)
+                    .shapes(ArcFurnaceBlock.VOXEL_SHAPE));
+
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }

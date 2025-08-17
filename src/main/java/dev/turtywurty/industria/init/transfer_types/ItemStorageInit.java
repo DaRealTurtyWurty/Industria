@@ -20,5 +20,6 @@ public class ItemStorageInit {
         ItemStorage.SIDED.registerForBlockEntity(DrillBlockEntity::getInventoryProvider, BlockEntityTypeInit.DRILL);
         ItemStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getInventoryProvider, BlockEntityTypeInit.SHAKING_TABLE);
         ItemStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getInventoryProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
+        ItemStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ARC_FURNACE);
     }
 }

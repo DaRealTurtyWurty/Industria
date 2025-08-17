@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.screen.widget;
 
+import dev.turtywurty.industria.screen.widget.util.Orientation;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -35,23 +36,17 @@ public class EnergyWidget implements Drawable, Widget {
         long energy = Math.min(maxEnergy, Math.max(0, currentEnergy));
         float percentage = (float) energy / maxEnergy;
 
-        int fillX, fillY, fillWidth, fillHeight;
-
+        int fillX = this.x, fillY = this.y, fillWidth = this.width, fillHeight = this.height;
         if (orientation == Orientation.VERTICAL) {
             fillHeight = (int) (height * percentage);
-            fillX = x;
             fillY = y + height - fillHeight;
-            fillWidth = width;
         } else { // HORIZONTAL
             fillWidth = (int) (width * percentage);
-            fillX = x;
-            fillY = y;
-            fillHeight = height;
         }
 
         context.fill(fillX, fillY, fillX + fillWidth, fillY + fillHeight, this.color);
 
-        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
+        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
@@ -175,10 +170,5 @@ public class EnergyWidget implements Drawable, Widget {
         public EnergyWidget build() {
             return new EnergyWidget(energyStorage, x, y, width, height, color, orientation);
         }
-    }
-
-    public enum Orientation {
-        VERTICAL,
-        HORIZONTAL
     }
 }

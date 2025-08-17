@@ -6,19 +6,18 @@ import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 
-// TODO: Update voxel shape
-public class CentrifugalConcentratorBlock extends IndustriaBlock {
+public class ArcFurnaceBlock extends IndustriaBlock {
     public static final VoxelShape VOXEL_SHAPE = VoxelShapes.fullCube();
 
-    public CentrifugalConcentratorBlock(Settings settings) {
+    public ArcFurnaceBlock(Settings settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
+                .hasLitProperty()
                 .hasComparatorOutput()
-                .hasBlockEntityRenderer()
-                .useRotatedShapes(VOXEL_SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR)
+                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.ARC_FURNACE)
+                        .multiblockProperties(MultiblockTypeInit.ARC_FURNACE).build()
                         .shouldTick()
-                        .multiblockProperties(MultiblockTypeInit.CENTRIFUGAL_CONCENTRATOR)
-                        .build()));
+                        .rightClickToOpenGui()
+                        .dropContentsOnBreak()));
     }
 }

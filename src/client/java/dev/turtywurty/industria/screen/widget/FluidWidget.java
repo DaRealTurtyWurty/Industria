@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.screen.widget;
 
+import dev.turtywurty.industria.screen.widget.util.Orientation;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -28,25 +28,25 @@ import java.util.function.Supplier;
 public class FluidWidget implements Drawable, Widget {
     private final SingleFluidStorage fluidTank;
     private final Supplier<BlockPos> posSupplier;
+    private final Orientation orientation;
 
     private final int width, height;
     private int x, y;
 
-    public FluidWidget(SingleFluidStorage fluidTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier) {
+    public FluidWidget(SingleFluidStorage fluidTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier, Orientation orientation) {
         this.fluidTank = fluidTank;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.posSupplier = posSupplier;
+        this.orientation = orientation;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Fluid fluid = this.fluidTank.variant.getFluid();
         long fluidAmount = this.fluidTank.getAmount();
-        long fluidCapacity = this.fluidTank.getCapacity();
-        int fluidBarHeight = Math.round((float) fluidAmount / fluidCapacity * this.height);
 
         FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
         if (fluidRenderHandler == null || fluidAmount <= 0)
@@ -62,9 +62,20 @@ public class FluidWidget implements Drawable, Widget {
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
         float blue = (tintColor & 0xFF) / 255.0F;
-        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, this.x, this.y + this.height - fluidBarHeight, this.width, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
 
-        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
+        long fluidCapacity = this.fluidTank.getCapacity();
+        float percentage = (float) fluidAmount / fluidCapacity;
+        int fillX = this.x, fillY = this.y, fillWidth = this.width, fillHeight = this.height;
+        if (orientation == Orientation.VERTICAL) {
+            fillHeight = (int) (height * percentage);
+            fillY = y + height - fillHeight;
+        } else { // HORIZONTAL
+            fillWidth = (int) (width * percentage);
+        }
+
+        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+
+        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
@@ -131,6 +142,7 @@ public class FluidWidget implements Drawable, Widget {
         private Supplier<BlockPos> posSupplier = () -> null;
         private int x, y;
         private int width, height;
+        private Orientation orientation = Orientation.VERTICAL;
 
         public Builder(SingleFluidStorage fluidTank) {
             this.fluidTank = fluidTank;
@@ -181,8 +193,13 @@ public class FluidWidget implements Drawable, Widget {
             return this;
         }
 
+        public Builder orientation(Orientation orientation) {
+            this.orientation = orientation;
+            return this;
+        }
+
         public FluidWidget build() {
-            return new FluidWidget(fluidTank, x, y, width, height, this.posSupplier);
+            return new FluidWidget(fluidTank, x, y, width, height, posSupplier, orientation);
         }
     }
 }

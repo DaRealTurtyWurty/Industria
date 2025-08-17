@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO: Fix direction of fluid output vs where the pipe thinks a connection is
 public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("fluid_pump");
 
@@ -182,7 +183,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
-        return this.wrappedFluidStorage.getStorage(side);
+            return this.wrappedFluidStorage.getStorage(side);
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {

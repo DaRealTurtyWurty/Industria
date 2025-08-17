@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screen.widget.EnergyWidget;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screen.widget.GasWidget;
+import dev.turtywurty.industria.screen.widget.util.Orientation;
 import dev.turtywurty.industria.screenhandler.ElectrolyzerScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
@@ -31,7 +32,7 @@ public class ElectrolyzerScreen extends HandledScreen<ElectrolyzerScreenHandler>
         addDrawable(new EnergyWidget.Builder(this.handler.getBlockEntity().getEnergyStorage())
                 .bounds(this.x + 8, this.y + 17, 184, 8)
                 .color(0xFFD4AF37)
-                .orientation(EnergyWidget.Orientation.HORIZONTAL)
+                .orientation(Orientation.HORIZONTAL)
                 .build());
 
         addDrawable(new FluidWidget.Builder(this.handler.getBlockEntity().getElectrolyteFluidStorage())
