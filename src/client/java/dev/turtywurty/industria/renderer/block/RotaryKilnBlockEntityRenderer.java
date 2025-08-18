@@ -11,18 +11,23 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import org.jbox2d.callbacks.ContactImpulse;
+import org.jbox2d.callbacks.ContactListener;
+import org.jbox2d.collision.Manifold;
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.contacts.Contact;
+import org.joml.Vector3f;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
@@ -45,7 +50,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     @Override
-    protected void onRender(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION));
         this.model.renderSegment(0, matrices, vertexConsumer, light, overlay);
 
@@ -65,18 +70,21 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             this.model.renderSegment(segmentIndex, matrices, vertexConsumer, light, overlay);
             rotatingSegment.roll = 0;
         }
-
-        matrices.translate(0, -1, 0);
-        renderItems(rendererData, entity, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
-    private void renderItems(RendererData rendererData, RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    @Override
+    protected void onRender(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(entity.getPos(), pos -> new RendererData());
+
         Map<InputRecipeEntry, Body> recipeToBodyMap = rendererData.recipeToBodyMap;
 
         World box2dWorld = rendererData.box2dWorld;
 
         long now = System.nanoTime();
         float deltaTime = (now - rendererData.lastRenderTime) / 1_000_000_000f; // seconds
+
+        deltaTime = MathHelper.clamp(deltaTime, 0.01f, 0.1f);
+
         rendererData.lastRenderTime = now;
         box2dWorld.step(deltaTime, 6, 2);
 
@@ -86,6 +94,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
             if (!entity.getRecipes().contains(entry.getKey())) {
                 box2dWorld.destroyBody(entry.getValue());
+                rendererData.collidedBodies.remove(entry.getValue());
                 iterator.remove();
             }
         }
@@ -102,12 +111,16 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
             matrices.push();
             matrices.translate(body.getPosition().x, body.getPosition().y, z);
-
-            matrices.push();
             matrices.scale(0.5f, 0.5f, 0.5f);
             matrices.multiply(Direction.WEST.getRotationQuaternion());
             matrices.multiply(RotationAxis.POSITIVE_X.rotation(body.getAngle()));
             this.context.getItemRenderer().renderItem(itemStack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+
+            if (rendererData.collidedBodies.remove(body)) {
+                Vector3f position = matrixStackToWorldPosition(matrices);
+                entity.getWorld().addParticleClient(ParticleTypes.SMOKE, position.x, position.y, position.z, 0, 0, 0);
+            }
+
             matrices.pop();
         }
     }
@@ -122,6 +135,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         Body box = box2dWorld.createBody(squareDef);
         box.setGravityScale(1f);
         box.setLinearVelocity(new Vec2(((float) Math.random() - 0.5f) * 2f, ((float) Math.random() - 0.5f) * 2f));
+        box.setUserData("item");
 
         var squareShape = new PolygonShape();
         if (blockItem) {
@@ -154,9 +168,32 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         private final Body barrelBody;
 
         private long lastRenderTime = System.nanoTime();
+        private final Set<Body> collidedBodies = Collections.synchronizedSet(new HashSet<>());
 
         public RendererData() {
             box2dWorld = new World(new Vec2(0, GRAVITY));
+            box2dWorld.setContactListener(new ContactListener() {
+                @Override
+                public void beginContact(Contact contact) {
+                    Body a = contact.getFixtureA().getBody();
+                    Body b = contact.getFixtureB().getBody();
+
+                    if (a.getUserData() != null && a.getUserData().equals("item"))
+                        collidedBodies.add(a);
+
+                    if (b.getUserData() != null && b.getUserData().equals("item"))
+                        collidedBodies.add(b);
+                }
+
+                @Override
+                public void endContact(Contact contact) {}
+
+                @Override
+                public void preSolve(Contact contact, Manifold oldManifold) {}
+
+                @Override
+                public void postSolve(Contact contact, ContactImpulse impulse) {}
+            });
 
             var barrelDef = new BodyDef();
             barrelDef.type = BodyType.KINEMATIC;

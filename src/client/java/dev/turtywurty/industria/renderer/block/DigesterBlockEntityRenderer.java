@@ -16,7 +16,11 @@ public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<Di
     }
 
     @Override
-    protected void onRender(DigesterBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(DigesterBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         this.model.getRootPart().render(matrices, vertexConsumers.getBuffer(this.model.getLayer(DigesterModel.TEXTURE_LOCATION)), light, overlay);
+    }
+
+    @Override
+    protected void onRender(DigesterBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
     }
 }

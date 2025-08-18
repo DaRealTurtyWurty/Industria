@@ -14,31 +14,21 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
-public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPumpJackBlockEntity> {
-    private final BlockEntityRendererFactory.Context context;
+public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer<OilPumpJackBlockEntity> {
+
     private final OilPumpJackModel model;
     private final OilPumpJackModel.OilPumpJackParts parts;
 
     public OilPumpJackBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        this.context = context;
+        super(context);
 
         this.model = new OilPumpJackModel(context.getLayerModelPart(OilPumpJackModel.LAYER_LOCATION));
         this.parts = this.model.getOilPumpJackParts();
     }
 
+
     @Override
-    public void render(OilPumpJackBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
-            case EAST -> 90;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            default -> 0;
-        }));
-
+    protected void renderModel(OilPumpJackBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         float clientRotation = entity.clientRotation;
         if (entity.isRunning()) {
             clientRotation = clientRotation + 0.1f * tickDelta;
@@ -80,16 +70,20 @@ public class OilPumpJackBlockEntityRenderer implements BlockEntityRenderer<OilPu
 
         // Draw bridle
         drawBridle(matrices, vertexConsumers, attachmentBPosition, attachmentCPosition, attachmentDPosition);
-
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(OilPumpJackModel.TEXTURE_LOCATION));
         this.model.render(matrices, vertexConsumer, light, overlay);
-        matrices.pop();
+
 
         // Reset values
         parts.wheel().pitch = previousWheelPitch;
         parts.counterWeights().pitch = previousCounterWeightsPitch;
         parts.pitmanArm().pitch = previousPitmanArmPitch;
         parts.arm().pitch = previousArmPitch;
+    }
+
+    @Override
+    protected void onRender(OilPumpJackBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+
     }
 
     private void drawBridle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vector3f attachmentBPosition, Vector3f attachmentCPosition, Vector3f attachmentDPosition) {
