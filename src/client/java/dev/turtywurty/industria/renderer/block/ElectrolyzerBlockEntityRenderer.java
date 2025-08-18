@@ -15,7 +15,11 @@ public class ElectrolyzerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(ElectrolyzerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(ElectrolyzerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(ElectrolyzerModel.TEXTURE_LOCATION)), light, overlay);
+    }
+
+    @Override
+    protected void onRender(ElectrolyzerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
     }
 }

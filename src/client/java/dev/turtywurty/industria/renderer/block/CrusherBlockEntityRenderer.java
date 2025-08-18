@@ -13,28 +13,18 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
-public class CrusherBlockEntityRenderer implements BlockEntityRenderer<CrusherBlockEntity> {
+public class CrusherBlockEntityRenderer extends IndustriaBlockEntityRenderer<CrusherBlockEntity> {
     private static final Identifier TEXTURE = Industria.id("textures/block/crusher.png");
 
     private final CrusherModel model;
 
     public CrusherBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+        super(context);
         this.model = new CrusherModel(context.getLayerModelPart(CrusherModel.LAYER_LOCATION));
     }
 
     @Override
-    public void render(CrusherBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
-            case EAST -> 90;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            default -> 0;
-        }));
-
+    protected void renderModel(CrusherBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         float prevBottomLeftRoll = this.model.getCrusherParts().bottomLeft().roll;
         float prevBottomRightRoll = this.model.getCrusherParts().bottomRight().roll;
         float prevTopLeftRoll = this.model.getCrusherParts().topLeft().roll;
@@ -54,7 +44,10 @@ public class CrusherBlockEntityRenderer implements BlockEntityRenderer<CrusherBl
         this.model.getCrusherParts().bottomRight().roll = prevBottomRightRoll;
         this.model.getCrusherParts().topLeft().roll = prevTopLeftRoll;
         this.model.getCrusherParts().topRight().roll = prevTopRightRoll;
+    }
 
-        matrices.pop();
+    @Override
+    protected void onRender(CrusherBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+
     }
 }

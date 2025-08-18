@@ -9,11 +9,8 @@ import dev.turtywurty.industria.util.IndeterminateBoolean;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -29,26 +26,34 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         this.model = new ShakingTableModel(context.getLayerModelPart(ShakingTableModel.LAYER_LOCATION));
     }
 
-    @Override
-    protected void onRender(ShakingTableBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    private float getShakeOffset(ShakingTableBlockEntity entity) {
         float shakesPerSecond = entity.getRecipeFrequency();
+
+        float time = entity.getWorld().getTime();
+        float frequency = shakesPerSecond * (float) Math.PI;
+        float shakeAmount = 2f;
+
+        return (float) Math.sin(time * frequency) * shakeAmount;
+    }
+
+    @Override
+    protected void renderModel(ShakingTableBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         int progress = entity.getProgress();
         int maxProgress = entity.getMaxProgress();
 
-        float shakeOffset = 0.0f;
         float previousOriginZ = this.model.getModelParts().table().originZ;
-        if (progress > 0 && progress < maxProgress) {
-            float time = tickDelta + entity.getWorld().getTime();
-            float frequency = shakesPerSecond * (float) Math.PI;
-            float shakeAmount = 2f;
 
-            shakeOffset = (float) Math.sin(time * frequency) * shakeAmount;
-            this.model.getModelParts().table().originZ += shakeOffset;
+        if (progress > 0 && progress < maxProgress) {
+            this.model.getModelParts().table().originZ += getShakeOffset(entity);
         }
 
         this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(ShakingTableModel.TEXTURE_LOCATION)), light, overlay);
         this.model.getModelParts().table().originZ = previousOriginZ;
+    }
 
+    @Override
+    protected void onRender(ShakingTableBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        float shakeOffset = getShakeOffset(entity);
 
         renderGutterFluids(entity, matrices, vertexConsumers, light, overlay, shakeOffset);
 
@@ -65,12 +70,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             shakeBox = shakeBox.offset(-entity.getPos().getX(), -entity.getPos().getY(), -entity.getPos().getZ());
             if (shakeBox != null) {
                 VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
-                VertexRendering.drawBox(
-                        matrices,
-                        vertexConsumer,
-                        shakeBox,
-                        1.0f, 1.0f, 1.0f, 1.0f
-                );
+                VertexRendering.drawBox(matrices, vertexConsumer, shakeBox, 1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
     }
@@ -96,16 +96,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             matrices.translate(x, y, z);
             matrices.scale(0.5f, 0.5f, 0.5f);
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
-            this.context.getItemRenderer().renderItem(
-                    processingStack,
-                    ItemDisplayContext.GROUND,
-                    light,
-                    overlay,
-                    matrices,
-                    vertexConsumers,
-                    entity.getWorld(),
-                    0
-            );
+            this.context.getItemRenderer().renderItem(processingStack, ItemDisplayContext.GROUND, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
             matrices.pop();
         }
 
@@ -120,9 +111,9 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         float totalVolume = 3f;
         float width = 3f;
 
-        float minX = 1 + 1/16f;
+        float minX = 1 + 1 / 16f;
         float startX = minX - 0.4f;
-        float endX = -(1 + 2/16f);
+        float endX = -(1 + 2 / 16f);
 
         float fluidX = MathHelper.lerp(progress, startX, endX);
 
@@ -131,7 +122,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         matrices.push();
         matrices.translate(0, 0.0f, shakeOffset / 16f);
 
-        this.fluidRenderer.render(entity.getInputFluidTank(),
+        this.fluidRenderer.renderFluidTank(entity.getInputFluidTank(),
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),
@@ -155,7 +146,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             float z1 = -1f - 1f / 16f;
             float x2 = 1f + 1f / 16f;
             float z2 = -5f / 16f;
-            this.fluidRenderer.render(entity.getInputFluidTank(),
+            this.fluidRenderer.renderFluidTank(entity.getInputFluidTank(),
                     vertexConsumers, matrices,
                     light, overlay,
                     entity.getWorld(), entity.getPos(),
@@ -170,7 +161,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             float z1 = -1f / 16f;
             float x2 = 1f + 1f / 16f;
             float z2 = 1 + 2f / 16f;
-            this.fluidRenderer.render(entity.getInputFluidTank(),
+            this.fluidRenderer.renderFluidTank(entity.getInputFluidTank(),
                     vertexConsumers, matrices,
                     light, overlay,
                     entity.getWorld(), entity.getPos(),

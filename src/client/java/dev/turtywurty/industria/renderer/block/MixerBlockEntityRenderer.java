@@ -25,10 +25,14 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
     }
 
     @Override
-    protected void onRender(MixerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(MixerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         this.model.getMixerParts().stirring_rods().yaw = entity.stirringRotation;
         this.model.getMixerParts().main().render(matrices, vertexConsumers.getBuffer(this.model.getLayer(MixerModel.TEXTURE_LOCATION)), light, overlay);
         this.model.getMixerParts().stirring_rods().yaw = 0.0F;
+    }
+
+    @Override
+    protected void onRender(MixerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 
         boolean isMixing = entity.isMixing();
         if (isMixing) {
@@ -51,46 +55,46 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         SyncingSimpleInventory inputInventory = entity.getInputInventory();
         for (int index = 0; index < inputInventory.heldStacks.size(); index++) {
             ItemStack stack = inputInventory.heldStacks.get(index);
-            if (!stack.isEmpty()) {
-                matrices.push();
+            if (stack.isEmpty()) continue;
 
-                Vec3d position = entity.mixingItemPositions.get(index);
+            matrices.push();
 
-                if(isMixing) {
-                    // Calculate angle for each item
-                    float angle = (float) (2 * Math.PI * index / inputInventory.heldStacks.size()); // Evenly space items around circle
-                    // Add rotation over time using world time
-                    float rotationSpeed = 0.1f; // Adjust this value to change rotation speed
-                    float timeAngle = (float) entity.getWorld().getTime() * rotationSpeed;
+            Vec3d position = entity.mixingItemPositions.get(index);
 
-                    // Define radius of the circle (you can adjust this value)
-                    float radius = Math.max(width, depth) * 0.5f - 0.375f;
+            if (isMixing) {
+                // Calculate angle for each item
+                float angle = (float) (2 * Math.PI * index / inputInventory.heldStacks.size()); // Evenly space items around circle
+                // Add rotation over time using world time
+                float rotationSpeed = 0.1f; // Adjust this value to change rotation speed
+                float timeAngle = (float) entity.getWorld().getTime() * rotationSpeed;
 
-                    // Calculate offsets using sine and cosine
-                    double xOffset = radius * Math.sin(angle + timeAngle);
-                    double yOffset = Math.sin(angle + index + timeAngle * 0.2f) - 1f;
-                    double zOffset = radius * Math.cos(angle + timeAngle);
+                // Define radius of the circle (you can adjust this value)
+                float radius = Math.max(width, depth) * 0.5f - 0.375f;
 
-                    position = position.add(xOffset, yOffset, zOffset);
-                }
+                // Calculate offsets using sine and cosine
+                double xOffset = radius * Math.sin(angle + timeAngle);
+                double yOffset = Math.sin(angle + index + timeAngle * 0.2f) - 1f;
+                double zOffset = radius * Math.cos(angle + timeAngle);
 
-                matrices.translate(position.x, position.y, position.z);
-                matrices.scale(0.5f, 0.5f, 0.5f);
-
-                if(isMixing) {
-                    matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead (maybe? :3)
-                    matrices.multiply(RotationAxis.POSITIVE_Y.rotation(entity.getWorld().getTime() * 0.25f));
-                    matrices.multiply(RotationAxis.POSITIVE_X.rotation(entity.getWorld().getTime() * 0.25f));
-                    matrices.multiply(RotationAxis.POSITIVE_Z.rotation(entity.getWorld().getTime() * 0.25f));
-                }
-
-                this.context.getItemRenderer().renderItem(stack, ItemDisplayContext.FIXED, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
-                matrices.pop();
+                position = position.add(xOffset, yOffset, zOffset);
             }
+
+            matrices.translate(position.x, position.y, position.z);
+            matrices.scale(0.5f, 0.5f, 0.5f);
+
+            if (isMixing) {
+                matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead (maybe? :3)
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotation(entity.getWorld().getTime() * 0.25f));
+                matrices.multiply(RotationAxis.POSITIVE_X.rotation(entity.getWorld().getTime() * 0.25f));
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotation(entity.getWorld().getTime() * 0.25f));
+            }
+
+            this.context.getItemRenderer().renderItem(stack, ItemDisplayContext.FIXED, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+            matrices.pop();
         }
 
         // TODO: Temperature-based color
-        this.fluidRenderer.render(entity.getInputFluidTank(),
+        this.fluidRenderer.renderFluidTank(entity.getInputFluidTank(),
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),

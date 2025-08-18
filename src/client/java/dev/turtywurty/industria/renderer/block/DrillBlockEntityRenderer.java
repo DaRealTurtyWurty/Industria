@@ -42,41 +42,12 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
     }
 
     @Override
-    public void onRender(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        renderMotor(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+        renderFrame(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+
+
         World world = entity.getWorld();
-
-        { // Render motor
-            if (!entity.getMotorInventory().isEmpty()) {
-                DrillMotorModel.DrillMotorParts parts = this.motorModel.getDrillMotorParts();
-                float prevRodGear = parts.rodGear().pitch;
-                float connectingGear = parts.connectingGear().pitch;
-
-                if (!entity.isDrilling() && !entity.isRetracting()) {
-                    entity.clientMotorRotation = 0;
-                }
-
-                parts.rodGear().pitch += entity.clientMotorRotation += (entity.isDrilling() ? 0.03f : entity.isRetracting() ? -0.03f : 0);
-                parts.connectingGear().pitch = -entity.clientMotorRotation;
-
-                this.motorModel.render(matrices, vertexConsumers.getBuffer(this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION)), light, overlay);
-
-                parts.rodGear().pitch = prevRodGear;
-                parts.connectingGear().pitch = connectingGear;
-            }
-        }
-
-        { // Render frame
-            float prevCableWheelPitch = this.model.getCableWheel().pitch;
-            float prevCableWheelRodPitch = this.model.getCableWheelRod().pitch;
-
-            this.model.getCableWheel().pitch = entity.clientMotorRotation;
-            this.model.getCableWheelRod().pitch = entity.clientMotorRotation;
-
-            this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(DrillFrameModel.TEXTURE_LOCATION)), light, overlay);
-
-            this.model.getCableWheel().pitch = prevCableWheelPitch;
-            this.model.getCableWheelRod().pitch = prevCableWheelRodPitch;
-        }
 
         int worldBottom = world == null ? 0 : world.getBottomY();
         int startY = entity.getPos().getY() + 2;
@@ -84,26 +55,61 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
 
         float progress = 1 - (startY - currentY) / (startY - worldBottom);
 
-        { // Render cable wheel
-            ModelPart cableMain = this.cableModel.getMain();
+        renderCableWheel(entity, tickDelta, matrices, vertexConsumers, light, overlay, progress);
+        renderDrill(entity, tickDelta, matrices, vertexConsumers, light, overlay, progress);
+    }
 
-            float prevCableMainPitch = cableMain.pitch;
+    private void renderMotor(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        if (entity.getMotorInventory().isEmpty()) return;
 
-            cableMain.pitch = entity.clientMotorRotation;
+        DrillMotorModel.DrillMotorParts parts = this.motorModel.getDrillMotorParts();
+        float prevRodGear = parts.rodGear().pitch;
+        float connectingGear = parts.connectingGear().pitch;
 
-            float cableScaleFactor = 0.5f - (progress / 2f);
-
-            cableMain.xScale -= cableScaleFactor;
-            cableMain.yScale -= cableScaleFactor;
-            cableMain.zScale -= cableScaleFactor;
-            this.cableModel.render(matrices, vertexConsumers.getBuffer(this.cableModel.getLayer(DrillCableModel.TEXTURE_LOCATION)), light, overlay);
-            cableMain.xScale += cableScaleFactor;
-            cableMain.yScale += cableScaleFactor;
-            cableMain.zScale += cableScaleFactor;
-
-            cableMain.pitch = prevCableMainPitch;
+        if (!entity.isDrilling() && !entity.isRetracting()) {
+            entity.clientMotorRotation = 0;
         }
 
+        parts.rodGear().pitch += entity.clientMotorRotation += (entity.isDrilling() ? 0.03f : entity.isRetracting() ? -0.03f : 0);
+        parts.connectingGear().pitch = -entity.clientMotorRotation;
+
+        this.motorModel.render(matrices, vertexConsumers.getBuffer(this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION)), light, overlay);
+
+        parts.rodGear().pitch = prevRodGear;
+        parts.connectingGear().pitch = connectingGear;
+    }
+
+    private void renderFrame(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        float prevCableWheelPitch = this.model.getCableWheel().pitch;
+        float prevCableWheelRodPitch = this.model.getCableWheelRod().pitch;
+
+        this.model.getCableWheel().pitch = entity.clientMotorRotation;
+        this.model.getCableWheelRod().pitch = entity.clientMotorRotation;
+
+        this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(DrillFrameModel.TEXTURE_LOCATION)), light, overlay);
+
+        this.model.getCableWheel().pitch = prevCableWheelPitch;
+        this.model.getCableWheelRod().pitch = prevCableWheelRodPitch;
+    }
+
+    private void renderCableWheel(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float progress) {
+        ModelPart cableMain = this.cableModel.getMain();
+
+        float prevCableMainPitch = cableMain.pitch;
+        cableMain.pitch = entity.clientMotorRotation;
+        float cableScaleFactor = 0.5f - (progress / 2f);
+
+        cableMain.xScale -= cableScaleFactor;
+        cableMain.yScale -= cableScaleFactor;
+        cableMain.zScale -= cableScaleFactor;
+        this.cableModel.render(matrices, vertexConsumers.getBuffer(this.cableModel.getLayer(DrillCableModel.TEXTURE_LOCATION)), light, overlay);
+        cableMain.xScale += cableScaleFactor;
+        cableMain.yScale += cableScaleFactor;
+        cableMain.zScale += cableScaleFactor;
+        cableMain.pitch = prevCableMainPitch;
+    }
+
+    private void renderDrill(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, float progress) {
         ItemStack drillHeadStack = entity.getDrillStack();
         if (drillHeadStack.isEmpty() || !(drillHeadStack.getItem() instanceof DrillHeadable drillHeadable))
             return;
@@ -112,51 +118,44 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         if (drillHeadData == null)
             return;
 
-        { // Render drill cable
-            matrices.push();
-            MatrixStack.Entry entry = matrices.peek();
-            VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
+        matrices.push();
+        MatrixStack.Entry entry = matrices.peek();
+        VertexConsumer linesVertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
 
-            float angleOffset = (float) (entity.isRetracting() ?
-                    -entity.clientMotorRotation < 0 ? -Math.PI / 4 : -Math.PI / 4 - Math.PI / 2 :
-                    -entity.clientMotorRotation < 0 ? -3 * Math.PI / 4 + Math.PI / 2 : -3 * Math.PI / 4);
+        float angleOffset = (float) (entity.isRetracting() ?
+                -entity.clientMotorRotation < 0 ? -Math.PI / 4 : -Math.PI / 4 - Math.PI / 2 :
+                -entity.clientMotorRotation < 0 ? -3 * Math.PI / 4 + Math.PI / 2 : -3 * Math.PI / 4);
 
-            float angle = (float) (-entity.clientMotorRotation % (Math.PI / 2f)) + angleOffset;
+        float angle = (float) (-entity.clientMotorRotation % (Math.PI / 2f)) + angleOffset;
 
-            float wheelRadius = (progress / 2f + 0.5f) * 3.5f / 16f;
+        float wheelRadius = (progress / 2f + 0.5f) * 3.5f / 16f;
 
-            float wheelZ = 0.5f;
-            float wheelY = -1.5f + 1.5f / 16f;
+        float wheelZ = 0.5f;
+        float wheelY = -1.5f + 1.5f / 16f;
 
-            double r = Math.sqrt(2) * wheelRadius;
-            float cableZ = wheelZ + (float) (Math.cos(angle) * r);
-            float cableY = wheelY + (float) (Math.sin(angle) * r);
+        double r = Math.sqrt(2) * wheelRadius;
+        float cableZ = wheelZ + (float) (Math.cos(angle) * r);
+        float cableY = wheelY + (float) (Math.sin(angle) * r);
 
-            linesVertexConsumer.vertex(entry, 0f, cableY, cableZ)
-                    .color(70, 70, 70, 255)
-                    .normal(1, 0, 0);
+        linesVertexConsumer.vertex(entry, 0f, cableY, cableZ).color(70, 70, 70, 255).normal(1, 0, 0);
+        linesVertexConsumer.vertex(entry, 0, -1.54f, 0).color(70, 70, 70, 255).normal(1, 0, 0);
+        linesVertexConsumer.vertex(entry, 0, -1.54f, 0).color(70, 70, 70, 255).normal(0, 1, 0);
 
-            linesVertexConsumer.vertex(entry, 0, -1.54f, 0)
-                    .color(70, 70, 70, 255)
-                    .normal(1, 0, 0);
+        matrices.translate(0, -entity.getDrillYOffset(), 0);
+        linesVertexConsumer.vertex(matrices.peek(), 0, 0.5f, 0).color(70, 70, 70, 255).normal(0, 1, 0);
 
-            linesVertexConsumer.vertex(entry, 0, -1.54f, 0)
-                    .color(70, 70, 70, 255)
-                    .normal(0, 1, 0);
+        //drill head
+        Model drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(Either.left(this.context)));
+        Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> drillHeadData.textureLocation());
 
-            matrices.translate(0, -entity.getDrillYOffset(), 0);
-            linesVertexConsumer.vertex(matrices.peek(), 0, 0.5f, 0)
-                    .color(70, 70, 70, 255)
-                    .normal(0, 1, 0);
-        }
+        drillHeadData.onRender().render(entity, drillHeadStack, tickDelta, matrices, vertexConsumers, drillHeadModel, vertexConsumers.getBuffer(drillHeadModel.getLayer(drillHeadTexture)), light, overlay);
+        matrices.pop();
+    }
 
-        { // Render drill head
-            Model drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(Either.left(this.context)));
-            Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> drillHeadData.textureLocation());
 
-            drillHeadData.onRender().render(entity, drillHeadStack, tickDelta, matrices, vertexConsumers, drillHeadModel, vertexConsumers.getBuffer(drillHeadModel.getLayer(drillHeadTexture)), light, overlay);
-            matrices.pop();
-        }
+    @Override
+    public void onRender(DrillBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+
     }
 
     @Override

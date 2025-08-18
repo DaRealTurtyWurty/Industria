@@ -10,30 +10,23 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
-public class UpgradeStationBlockEntityRenderer implements BlockEntityRenderer<UpgradeStationBlockEntity> {
-    private final BlockEntityRendererFactory.Context context;
+public class UpgradeStationBlockEntityRenderer extends IndustriaBlockEntityRenderer<UpgradeStationBlockEntity> {
+
     private final UpgradeStationModel model;
 
     public UpgradeStationBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        this.context = context;
+        super(context);
         this.model = new UpgradeStationModel(context.getLayerModelPart(UpgradeStationModel.LAYER_LOCATION));
     }
 
     @Override
-    public void render(UpgradeStationBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
-            case EAST -> 90;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            default -> 0;
-        }));
-
+    protected void renderModel(UpgradeStationBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(UpgradeStationModel.TEXTURE_LOCATION)), light, overlay);
 
-        matrices.pop();
+    }
+
+    @Override
+    protected void onRender(UpgradeStationBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+
     }
 }

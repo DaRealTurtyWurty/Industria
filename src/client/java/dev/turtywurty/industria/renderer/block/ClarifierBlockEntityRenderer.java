@@ -9,13 +9,16 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
 public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<ClarifierBlockEntity> {
+
     private final ClarifierModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
@@ -50,11 +53,13 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
     }
 
     @Override
-    protected void onRender(ClarifierBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(ClarifierBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         this.model.getRootPart().render(matrices, vertexConsumers.getBuffer(this.model.getLayer(ClarifierModel.TEXTURE_LOCATION)), light, overlay);
+    }
 
-        if (entity.getWorld() == null)
-            return;
+    @Override
+    protected void onRender(ClarifierBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        if (entity.getWorld() == null) return;
 
         renderInputFluid(entity, matrices, vertexConsumers, light, overlay);
         renderOutputFluid(entity, matrices, vertexConsumers, light, overlay);
@@ -64,13 +69,13 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
     }
 
     private void renderOutputStack(ClarifierBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        ItemStack outputStack = entity.getOutputInventory().getStack(0);
+        ItemStack outputStack = new ItemStack(Items.DIAMOND_BLOCK, 64); // Items.DIAMOND.getDefaultStack(); //entity.getOutputInventory().getStack(0);
         if (outputStack.isEmpty())
             return;
 
         float scale = 0.05f;
-        float zOffset = 11f / 16f + 10f / 16f + 2f / 16f;
-        float startY = 0.75f - scale / 2 + 9f / 16f;
+        float zOffset = -(11f / 16f + 10f / 16f + 2f / 16f);
+        float startY = -1.1f + scale / 2;
 
         for (int i = 0; i < MathHelper.clamp(outputStack.getCount(), 1, 64); i++) {
             matrices.push();
@@ -78,6 +83,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
             GridPosition position = OUTPUT_ITEM_POSITIONS[i];
             float xOff = position.x * (scale + (0.0625f * scale)) - 0.345f;
             float yOff = position.y * (scale + (0.0625f * scale));
+
             matrices.translate(xOff, startY - yOff, zOffset);
             matrices.scale(scale, scale, scale);
             this.context.getItemRenderer().renderItem(outputStack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
@@ -87,12 +93,12 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
 
     // Thanks to Basti for the item rendering math
     private void renderCurrentOutputItem(ClarifierBlockEntity blockEntity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        ItemStack nextOutput = blockEntity.getNextOutputItemStack();
+        ItemStack nextOutput = Items.DIAMOND_BLOCK.getDefaultStack(); //blockEntity.getNextOutputItemStack();
 
         if (nextOutput.isEmpty())
             return;
 
-        float itemProgress = (float) blockEntity.getProgress() / blockEntity.getMaxProgress();
+        float itemProgress = (blockEntity.getWorld().getTime() / 100f) % 1; // (float) blockEntity.getProgress() / blockEntity.getMaxProgress();
 
         float scale = 0.15f;
         float firstStretch = 11f / 16f;
@@ -123,7 +129,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         }
 
         matrices.push();
-        matrices.translate(0, 0.75 - scale / 2 - dy, 0 + dz);
+        matrices.translate(0, -0.75 + scale / 2 + dy, -dz);
         matrices.scale(scale, scale, scale);
         matrices.multiply(RotationAxis.POSITIVE_X.rotation(rotation));
         this.context.getItemRenderer().renderItem(nextOutput, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, blockEntity.getWorld(), 0);
@@ -131,58 +137,60 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
     }
 
     private void renderInputFluid(ClarifierBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        SyncingFluidStorage fluidStorage = entity.getInputFluidTank();
-        if (fluidStorage == null || fluidStorage.isResourceBlank() || fluidStorage.amount <= 0)
-            return;
+//        SyncingFluidStorage fluidStorage = entity.getInputFluidTank();
+//        if (fluidStorage == null || fluidStorage.isResourceBlank() || fluidStorage.amount <= 0)
+//            return;
 
-        FluidVariant fluidVariant = fluidStorage.getResource();
+        FluidVariant fluidVariant = FluidVariant.of(Fluids.WATER); // fluidStorage.getResource();
 
-        long amount = fluidStorage.amount;
+        long amount = 10000; //fluidStorage.amount;
         float fluidProgress = (float) amount / (FluidConstants.BUCKET * 5);
-        // fluidProgress = (float) (Math.sin(entity.getWorld().getTime() / 64.0) * 0.5 + 0.5);
-        float fluidHeight = -0.625f + (fluidProgress * 1 + 1.999f/16f);
+        fluidProgress = (float) (Math.sin(entity.getWorld().getTime() / 64.0) * 0.5 + 0.5);
+
+        float fluidHeight = 0.625f - (fluidProgress * 1 + 1.999f / 16f);
 
         float size = 1.25f;
-        if (fluidHeight < 0f)
+        if (fluidHeight > 0f)
             size = 0.5f;
 
-        this.fluidRenderer.renderTopFaceOnly(fluidVariant,
-                vertexConsumers, matrices,
-                light, overlay,
-                entity.getWorld(), entity.getPos(),
-                -size, fluidHeight, -size,
-                size, size);
+//        this.fluidRenderer.renderTopFaceOnly(fluidVariant,
+//                vertexConsumers, matrices,
+//                light, overlay,
+//                entity.getWorld(), entity.getPos(),
+//                -size, fluidHeight, -size,
+//                size, size);
     }
 
     private void renderOutputFluid(ClarifierBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        SyncingFluidStorage fluidStorage = entity.getOutputFluidTank();
-        if (fluidStorage == null || fluidStorage.isResourceBlank() || fluidStorage.amount <= 0)
-            return;
+//        SyncingFluidStorage fluidStorage = entity.getOutputFluidTank();
+//        if (fluidStorage == null || fluidStorage.isResourceBlank() || fluidStorage.amount <= 0)
+//            return;
+//
+//        FluidVariant fluidVariant = fluidStorage.getResource();
+//
+//        long amount = fluidStorage.amount;
 
-        FluidVariant fluidVariant = fluidStorage.getResource();
 
-        long amount = fluidStorage.amount;
+        FluidVariant fluidVariant = FluidVariant.of(Fluids.WATER);
+        long amount = 10000;
+
         float fluidProgress = (float) amount / (FluidConstants.BUCKET * 5);
-        // fluidProgress = (float) (Math.sin(entity.getWorld().getTime() / 64.0) * 0.5 + 0.5);
-        float fluidHeight = -1.375f + (fluidProgress * 0.5f);
+         fluidProgress = (float) (Math.sin(entity.getWorld().getTime() / 64.0) * 0.5 + 0.5);
+        float fluidHeight = 1.375f - (fluidProgress * 0.5f);
 
-        this.fluidRenderer.renderTopFaceOnly(fluidVariant,
-                vertexConsumers, matrices,
-                light, overlay,
-                entity.getWorld(), entity.getPos(),
-                -0.375f, fluidHeight, -0.5f,
-                0.375f, 1.4375f);
-
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
-        this.fluidRenderer.drawTiledXYQuadOnly(fluidVariant,
-                vertexConsumers, matrices,
-                light, overlay,
-                entity.getWorld(), entity.getPos(),
-                -0.375f, -1.375f, -1.4375f,
-                0.375f, fluidHeight, -1.4375f);
-
-        matrices.pop();
+//        this.fluidRenderer.renderTopFaceOnly(fluidVariant,
+//                vertexConsumers, matrices,
+//                light, overlay,
+//                entity.getWorld(), entity.getPos(),
+//                0.375f, fluidHeight, 0.5f,
+//                -0.375f, -1.4375f);
+//
+//        this.fluidRenderer.drawTiledXYQuadOnly(fluidVariant,
+//                vertexConsumers, matrices,
+//                light, overlay,
+//                entity.getWorld(), entity.getPos(),
+//                -0.375f, 1.375f, -1.4375f,
+//                0.375f, fluidHeight, -1.4375f);
     }
 
     private record GridPosition(int x, int y) {

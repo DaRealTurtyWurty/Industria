@@ -50,7 +50,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     @Override
-    protected void onRender(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION));
         this.model.renderSegment(0, matrices, vertexConsumer, light, overlay);
 
@@ -70,12 +70,12 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             this.model.renderSegment(segmentIndex, matrices, vertexConsumer, light, overlay);
             rotatingSegment.roll = 0;
         }
-
-        matrices.translate(0, -1, 0);
-        renderItems(rendererData, entity, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
-    private void renderItems(RendererData rendererData, RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    @Override
+    protected void onRender(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(entity.getPos(), pos -> new RendererData());
+
         Map<InputRecipeEntry, Body> recipeToBodyMap = rendererData.recipeToBodyMap;
 
         World box2dWorld = rendererData.box2dWorld;
@@ -94,6 +94,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
             if (!entity.getRecipes().contains(entry.getKey())) {
                 box2dWorld.destroyBody(entry.getValue());
+                rendererData.collidedBodies.remove(entry.getValue());
                 iterator.remove();
             }
         }

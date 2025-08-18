@@ -66,9 +66,12 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(CrystallizerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void renderModel(CrystallizerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(CrystallizerModel.TEXTURE_LOCATION)), light, overlay);
+    }
 
+    @Override
+    protected void onRender(CrystallizerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         renderNextOutputItem(entity, matrices, vertexConsumers, light, overlay);
         renderFluids(entity, matrices, vertexConsumers, light, overlay);
     }
@@ -99,14 +102,14 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     private void renderFluids(CrystallizerBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        this.fluidRenderer.render(entity.getCrystalFluidStorage(),
+        this.fluidRenderer.renderFluidTank(entity.getCrystalFluidStorage(),
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),
                 -18f/16f, -0.5001f, -18f/16f,
                 18f/16f, 46f, 18f/16f - 0.001f, 0x40000000, ColorMode.SUBTRACTION);
 
-        this.fluidRenderer.render(entity.getWaterFluidStorage(),
+        this.fluidRenderer.renderFluidTank(entity.getWaterFluidStorage(),
                 vertexConsumers, matrices,
                 light, overlay,
                 entity.getWorld(), entity.getPos(),

@@ -56,6 +56,33 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         this.context = context;
     }
 
+
+    @Override
+    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
+        matrices.push();
+        setupBlockEntityTransformations(matrices, entity);
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        renderModel(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+        matrices.pop();
+
+        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+
+        if (isPlayerLookingAt(entity.getPos())) {
+            List<ModelPart> wireframe = getModelParts();
+            if (!wireframe.isEmpty()) {
+                boolean isHighContrast = isHighContrast();
+                renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
+            }
+        }
+
+        matrices.pop();
+        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+    }
+
+    protected abstract void renderModel(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
+
     /**
      * Called to render the block entity.
      *
@@ -79,24 +106,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
      * @param overlay         The overlay
      */
     protected void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {}
-
-    @Override
-    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        setupBlockEntityTransformations(matrices, entity);
-        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-
-        if (isPlayerLookingAt(entity.getPos())) {
-            List<ModelPart> wireframe = getModelParts();
-            if (!wireframe.isEmpty()) {
-                boolean isHighContrast = isHighContrast();
-                renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
-            }
-        }
-
-       matrices.pop();
-
-        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-    }
 
     /**
      * Converts a MatrixStack to a world Position
@@ -174,16 +183,16 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
     /**
      * Visits a model part and renders its wireframe.
      *
-     * @param modelPart            The model part to visit
-     * @param matrices             The matrix stack
-     * @param vertexConsumer       The vertex consumer
-     * @param color                The color of the wireframe
-     * @param v0                   The first vertex
-     * @param v1                   The second vertex
-     * @param v2                   The third vertex
-     * @param v3                   The fourth vertex
-     * @param pos                  The position of the vertex
-     * @param normal               The normal of the vertex
+     * @param modelPart      The model part to visit
+     * @param matrices       The matrix stack
+     * @param vertexConsumer The vertex consumer
+     * @param color          The color of the wireframe
+     * @param v0             The first vertex
+     * @param v1             The second vertex
+     * @param v2             The third vertex
+     * @param v3             The fourth vertex
+     * @param pos            The position of the vertex
+     * @param normal         The normal of the vertex
      */
     private static void visitPart(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
         if (!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
@@ -289,9 +298,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
     }
 
     protected void setupBlockEntityTransformations(MatrixStack matrices, T entity) {
-        matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
 
         BlockState state = entity.getCachedState();
         if (!state.getProperties().contains(Properties.HORIZONTAL_FACING))

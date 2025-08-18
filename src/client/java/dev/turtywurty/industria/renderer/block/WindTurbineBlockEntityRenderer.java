@@ -12,29 +12,18 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
-public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindTurbineBlockEntity> {
-    private final BlockEntityRendererFactory.Context context;
+public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer<WindTurbineBlockEntity> {
+
     private final WindTurbineModel model;
 
     public WindTurbineBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        this.context = context;
+        super(context);
 
         this.model = new WindTurbineModel(context.getLayerModelPart(WindTurbineModel.LAYER_LOCATION));
     }
 
     @Override
-    public void render(WindTurbineBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
-            case EAST -> 90;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            default -> 0;
-        }));
-
+    protected void renderModel(WindTurbineBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         float outputPercentage = getEnergyPerTickPercent(entity);
         entity.setPropellerRotation(entity.getPropellerRotation() + (outputPercentage * 0.25f));
         model.getWindTurbineParts().propellers().roll = entity.getPropellerRotation();
@@ -42,7 +31,11 @@ public class WindTurbineBlockEntityRenderer implements BlockEntityRenderer<WindT
         VertexConsumer consumer = vertexConsumers.getBuffer(this.model.getLayer(WindTurbineModel.TEXTURE_LOCATION));
         this.model.render(matrices, consumer, light, overlay);
         this.model.getWindTurbineParts().propellers().roll = 0.0F;
-        matrices.pop();
+    }
+
+    @Override
+    protected void onRender(WindTurbineBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+
     }
 
     public int getEnergyPerTick(WindTurbineBlockEntity blockEntity) {

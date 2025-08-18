@@ -53,7 +53,7 @@ public class WrappedFluidStorage<T extends Storage<FluidVariant>> extends Wrappe
 
             if (storage instanceof SingleFluidStorage singleFluidStorage) {
                 singleFluidStorage.amount = view.getLong("Amount", 0L);
-                singleFluidStorage.variant = view.read("Fluid", FluidVariant.CODEC).orElseThrow();
+                singleFluidStorage.variant = view.read("Fluid", FluidVariant.CODEC).orElse(FluidVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read fluid storage of type: " + storage.getClass().getName());
             }

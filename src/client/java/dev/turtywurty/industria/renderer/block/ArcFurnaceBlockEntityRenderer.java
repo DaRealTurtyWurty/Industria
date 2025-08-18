@@ -11,6 +11,11 @@ public class ArcFurnaceBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     @Override
+    protected void renderModel(ArcFurnaceBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+
+    }
+
+    @Override
     protected void onRender(ArcFurnaceBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 
     }
