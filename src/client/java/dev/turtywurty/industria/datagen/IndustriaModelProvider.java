@@ -40,7 +40,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     private static final TexturedModel.Factory DEEPSLATE = makeFactory(IndustriaModelProvider::deepslateOre, ORE_MODEL);
 
     private static Model block(String parent, TextureKey... requiredTextureKeys) {
-        return new Model(Optional.of(Identifier.of(Industria.MOD_ID,"block/parent/" + parent)),
+        return new Model(Optional.of(Identifier.of(Industria.MOD_ID, "block/parent/" + parent)),
                 Optional.empty(), requiredTextureKeys);
     }
     public static TextureMap ore(Block block) {
