@@ -74,7 +74,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> Multiblockable.isCenterColumn(p) && p.y() == 2)
+            PortRule.when(p -> p.isCenterColumn() && p.y() == 2)
                     .on(LocalDirection.DOWN)
                     .types(PortType.input(TransferType.ENERGY))
                     .build()

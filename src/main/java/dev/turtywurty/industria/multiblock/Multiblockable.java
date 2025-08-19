@@ -26,18 +26,6 @@ import java.util.*;
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Multiblockable {
-    static boolean isCenterColumn(int x, int z) {
-        return x == 0 && z == 0;
-    }
-
-    static boolean isCenterColumn(LocalPos localPos) {
-        return isCenterColumn(localPos.x(), localPos.z());
-    }
-
-    static boolean isCenterColumn(Vec3i offset) {
-        return isCenterColumn(offset.getX(), offset.getZ());
-    }
-
     static Map<Direction, Port> toIOPortMap(Map<Direction, List<PortType>> portTypes) {
         Map<Direction, Port> ports = new EnumMap<>(Direction.class);
         portTypes.forEach((dir, types) -> ports.put(dir, new Port(dir, types)));

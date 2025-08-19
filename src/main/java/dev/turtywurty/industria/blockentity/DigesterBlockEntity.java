@@ -71,7 +71,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     public static final Text TITLE = Industria.containerTitle("digester");
 
     private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 4 && Multiblockable.isCenterColumn(p))
+            PortRule.when(p -> p.y() == 4 && p.isCenterColumn())
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.SLURRY))
                     .build(),

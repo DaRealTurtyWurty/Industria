@@ -52,8 +52,6 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         this.model.getCylinderTop().hidden = false;
 
         renderInputFluid(entity, tickDelta, matrices, vertexConsumers, light, overlay);
-
-        System.out.println(entity.getInputInventory().getStackInSlot(0));
     }
 
     private void renderInputFluid(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {

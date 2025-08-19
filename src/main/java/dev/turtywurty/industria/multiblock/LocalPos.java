@@ -20,6 +20,6 @@ public record LocalPos(int x, int y, int z) {
     }
 
     public boolean isCenterColumn() {
-        return Multiblockable.isCenterColumn(this);
+        return x == 0 && z == 0;
     }
 }
