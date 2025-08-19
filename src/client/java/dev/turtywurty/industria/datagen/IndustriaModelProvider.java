@@ -51,6 +51,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     public static TextureMap ore(Identifier id) {
         return (new TextureMap()).put(ORE_KEY, id);
     }
+    
     public static TextureMap stoneOre(Block block) {
         Identifier identifier = TextureMap.getId(block);
         return stoneOre(identifier);
