@@ -129,7 +129,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     private void registerSimpleOreBlock(BlockStateModelGenerator blockStateModelGenerator, Block block, String type) {
         if(!Objects.equals(type, "ore"))
             type += "_ore";
-        registerSimpleCubeAll(blockStateModelGenerator,block,type);
+        registerSimpleCubeAll(blockStateModelGenerator, block, type);
     }
 
     public void registerSingleton(BlockStateModelGenerator blockStateModelGenerator,Block block, TexturedModel.Factory modelFactory) {
