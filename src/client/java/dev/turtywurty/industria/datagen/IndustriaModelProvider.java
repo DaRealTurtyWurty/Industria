@@ -142,7 +142,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
             case "deepslate_ore" -> registerSingleton(blockStateModelGenerator, block, DEEPSLATE);
             default -> registerSingleton(blockStateModelGenerator, block, ORE);
         }
-
     }
 
 
