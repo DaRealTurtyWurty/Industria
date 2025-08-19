@@ -144,7 +144,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
         }
     }
 
-
     private static void registerPipe(BlockStateModelGenerator blockStateModelGenerator, Block block, String name) {
         BlockModelDefinitionCreator pipeSupplier = createPipeBlockModelDefinitionCreator(block, name);
         blockStateModelGenerator.blockStateCollector.accept(pipeSupplier);
