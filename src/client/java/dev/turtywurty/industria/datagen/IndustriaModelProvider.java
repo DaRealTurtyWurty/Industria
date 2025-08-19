@@ -43,6 +43,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         return new Model(Optional.of(Identifier.of(Industria.MOD_ID, "block/parent/" + parent)),
                 Optional.empty(), requiredTextureKeys);
     }
+    
     public static TextureMap ore(Block block) {
         Identifier identifier = TextureMap.getId(block);
         return ore(identifier);
