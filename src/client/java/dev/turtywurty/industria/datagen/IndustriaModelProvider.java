@@ -79,7 +79,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
             WoodSetDatagen.generateBlockStateAndModels(woodSet, blockStateModelGenerator);
         }
 
-
         blockStateModelGenerator.registerCooker(BlockInit.ALLOY_FURNACE, TexturedModel.ORIENTABLE);
         blockStateModelGenerator.registerCooker(BlockInit.THERMAL_GENERATOR, TexturedModel.ORIENTABLE);
         createBattery(blockStateModelGenerator, BlockInit.BASIC_BATTERY);
