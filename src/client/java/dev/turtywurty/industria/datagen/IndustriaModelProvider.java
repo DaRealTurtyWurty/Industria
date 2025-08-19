@@ -32,12 +32,12 @@ import static net.minecraft.client.data.Models.*;
 import static net.minecraft.client.data.TexturedModel.makeFactory;
 
 public class IndustriaModelProvider extends FabricModelProvider {
-    public static final TextureKey ORE_KEY = TextureKey.of("ore");
-    public static final TextureKey BASE_KEY = TextureKey.of("base");
-    public static final Model ORE_MODEL = block("ore", ORE_KEY, BASE_KEY);
-    public static final TexturedModel.Factory ORE = makeFactory(IndustriaModelProvider::ore, ORE_MODEL);
-    public static final TexturedModel.Factory STONE = makeFactory(IndustriaModelProvider::stoneOre, ORE_MODEL);
-    public static final TexturedModel.Factory DEEPSLATE = makeFactory(IndustriaModelProvider::deepslateOre, ORE_MODEL);
+    private static final TextureKey ORE_KEY = TextureKey.of("ore");
+    private static final TextureKey BASE_KEY = TextureKey.of("base");
+    private static final Model ORE_MODEL = block("ore", ORE_KEY, BASE_KEY);
+    private static final TexturedModel.Factory ORE = makeFactory(IndustriaModelProvider::ore, ORE_MODEL);
+    private static final TexturedModel.Factory STONE = makeFactory(IndustriaModelProvider::stoneOre, ORE_MODEL);
+    private static final TexturedModel.Factory DEEPSLATE = makeFactory(IndustriaModelProvider::deepslateOre, ORE_MODEL);
 
     private static Model block(String parent, TextureKey... requiredTextureKeys) {
         return new Model(Optional.of(Identifier.of(Industria.MOD_ID,"block/parent/" + parent)),
