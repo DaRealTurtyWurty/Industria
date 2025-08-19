@@ -13,10 +13,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -43,6 +40,13 @@ import java.util.*;
 public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, WrappedInventoryStorageHolder {
     public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.z() == -4 && p.y() == 0 && p.x() >= -1 && p.x() <= 2)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.input(TransferType.ENERGY))
+                    .build()
+    );
+
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedInventoryStorage<?> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final List<BlockPos> machinePositions = new ArrayList<>();
@@ -59,7 +63,11 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     private static boolean isValidPosition(World world, BlockPos position) {
-        return true;
+        if (world == null || position == null || !world.isPosLoaded(position))
+            return false;
+
+        BlockState state = world.getBlockState(position);
+        return state.isReplaceable();
     }
 
     @Override
@@ -69,18 +77,6 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
 
     public EnergyStorage getEnergyProvider(Direction direction) {
         return this.wrappedEnergyStorage.getStorage(direction);
-    }
-
-    @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-
-        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
-        Direction back = facing.getOpposite();
-        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 0 && direction == back)
-            transferTypes.put(back, List.of(TransferType.ENERGY));
-
-        return Multiblockable.toIOPortMap(transferTypes);
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
@@ -318,6 +314,11 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
         }
 
         return incorrectPositions.isEmpty() ? correctPositions : incorrectPositions;
+    }
+
+    @Override
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     public void removeWellhead() {

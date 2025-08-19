@@ -25,10 +25,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.list.TagList;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
@@ -56,20 +53,62 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("electrolyzer");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 1)
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.ITEM), PortType.input(TransferType.ENERGY))
+                    .build(),
+
+            PortRule.when(p -> p.z() == 0)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.x() == -1)
+                    .on(LocalDirection.LEFT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.x() == 1)
+                    .on(LocalDirection.RIGHT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.z() == -1)
+                    .on(LocalDirection.FRONT)
+                    .types(PortType.io(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0)
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.io(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.z() == -1)
+                    .on(LocalDirection.FRONT)
+                    .types(PortType.input(TransferType.FLUID))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0)
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.output(TransferType.GAS), PortType.input(TransferType.HEAT))
+                    .build()
+    );
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -118,7 +157,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.SOUTH);
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1, (stack, integer) -> stack.isIn(TagList.Items.ELECTROLYSIS_RODS)), Direction.WEST);
+        this.wrappedInventoryStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1,
+                (stack, integer) -> stack.isIn(TagList.Items.ELECTROLYSIS_RODS)), Direction.WEST);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createFluidPredicate(() -> {
@@ -491,29 +531,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        Direction left = getCachedState().get(Properties.HORIZONTAL_FACING).rotateYCounterclockwise();
-        Direction right = left.getOpposite();
-
-        if (offsetFromPrimary.getX() * left.getOffsetX() + offsetFromPrimary.getZ() * left.getOffsetZ() > 0 && direction == left) {
-            List<TransferType<?, ?, ?>> types = transferTypes.computeIfAbsent(direction, k -> new ArrayList<>());
-            types.add(TransferType.ITEM);
-            types.add(TransferType.FLUID);
-            types.add(TransferType.ENERGY);
-            types.add(TransferType.HEAT);
-        }
-
-        if (offsetFromPrimary.getX() * right.getOffsetX() + offsetFromPrimary.getZ() * right.getOffsetZ() > 0 && direction == right) {
-            List<TransferType<?, ?, ?>> types = transferTypes.computeIfAbsent(direction, k -> new ArrayList<>());
-            types.add(TransferType.FLUID);
-            types.add(TransferType.GAS);
-        }
-
-        if (offsetFromPrimary.getY() == 1 && direction == Direction.UP) {
-            transferTypes.computeIfAbsent(Direction.UP, k -> new ArrayList<>()).add(TransferType.ITEM);
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 }

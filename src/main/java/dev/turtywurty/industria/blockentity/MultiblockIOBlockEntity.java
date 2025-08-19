@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.block.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
 import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.multiblock.Port;
 import dev.turtywurty.industria.multiblock.TransferType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -20,7 +20,6 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
     private BlockEntity primary = null;
     private Multiblockable multiblock = null;
     private Vec3i offsetFromPrimary = null;
-    private boolean waitingForPlayer = true;
 
     public MultiblockIOBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.MULTIBLOCK_IO, pos, state);
@@ -48,11 +47,11 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
             return;
 
         for (Direction direction : Direction.values()) {
-            Map<Direction, MultiblockIOPort> ports = getPorts(direction);
+            Map<Direction, Port> ports = getPorts(direction);
             if(ports == null)
                 continue;
 
-            MultiblockIOPort port = ports.get(direction);
+            Port port = ports.get(direction);
             if(port == null)
                 continue;
 
@@ -60,7 +59,7 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
         }
     }
 
-    public Map<Direction, MultiblockIOPort> getPorts(Direction direction) {
+    public Map<Direction, Port> getPorts(Direction direction) {
         if(this.multiblock == null)
             return null;
 
@@ -71,11 +70,11 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
         if(this.multiblock == null)
             return null;
 
-        Map<Direction, MultiblockIOPort> ports = this.multiblock.getPorts(offsetFromPrimary, direction);
+        Map<Direction, Port> ports = this.multiblock.getPorts(offsetFromPrimary, direction);
         if(ports == null)
             return null;
 
-        MultiblockIOPort port = ports.get(direction);
+        Port port = ports.get(direction);
         if(port == null)
             return null;
 

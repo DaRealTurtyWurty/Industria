@@ -15,10 +15,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
@@ -36,7 +33,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -46,10 +42,11 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 // input:
 // water (fluid)
@@ -61,6 +58,33 @@ import java.util.*;
 // sodium carbonate (item) - by-product
 public class CrystallizerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
     public static final Text TITLE = Industria.containerTitle("crystallizer");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 3 && p.isCenterColumn())
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.FLUID))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 3 && p.z() == 1)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.input(TransferType.FLUID))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.x() == -1)
+                    .on(LocalDirection.LEFT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.z() == -1)
+                    .on(LocalDirection.FRONT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.x() == 1)
+                    .on(LocalDirection.RIGHT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build()
+    );
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -323,30 +347,8 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-
-        // south - water input
-        // up - crystal input
-        if (offsetFromPrimary.getY() == 3 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.FLUID);
-
-        if (offsetFromPrimary.getY() == 3 && offsetFromPrimary.getZ() == 1 && direction == Direction.SOUTH)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.FLUID);
-
-        // west - catalyst input
-        // north - output
-        // east - byproduct
-        if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getX() == -1 && direction == Direction.WEST)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.ITEM);
-
-        if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == -1 && direction == Direction.NORTH)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.ITEM);
-
-        if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getX() == 1 && direction == Direction.EAST)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.ITEM);
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     @Override

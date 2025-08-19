@@ -19,10 +19,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -34,13 +31,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -50,13 +42,32 @@ import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements Multiblockable, SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("arc_furnace");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.x() == 3)
+                    .on(LocalDirection.LEFT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.z() == 3)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.output(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.x() == 0)
+                    .on(LocalDirection.RIGHT)
+                    .types(PortType.input(TransferType.ENERGY), PortType.input(TransferType.FLUID), PortType.input(TransferType.GAS))
+                    .build()
+    );
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -223,18 +234,8 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements Multi
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-
-        if(offsetFromPrimary.getX() == 3 && direction == Direction.WEST) {
-            transferTypes.put(Direction.WEST, List.of(TransferType.ITEM));
-        } else if(offsetFromPrimary.getZ() == 3 && direction == Direction.SOUTH) {
-            transferTypes.put(Direction.SOUTH, List.of(TransferType.ITEM));
-        } else if(offsetFromPrimary.getX() == 0 && direction == Direction.EAST) {
-            transferTypes.put(Direction.EAST, List.of(TransferType.ENERGY, TransferType.FLUID, TransferType.GAS));
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     public InventoryStorage getInventoryProvider(Direction side) {
@@ -274,7 +275,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements Multi
     }
 
     public void setMode(Mode mode) {
-        if(this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient)
             return;
 
         this.mode = mode;

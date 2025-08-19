@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.init;
 
-import dev.turtywurty.industria.block.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.MultiblockBlock;
 import dev.turtywurty.industria.renderer.block.RotaryKilnBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.world.FluidPocketWorldRenderer;
 import dev.turtywurty.industria.renderer.world.PipeNetworkWorldRenderer;

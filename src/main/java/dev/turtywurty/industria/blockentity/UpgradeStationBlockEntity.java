@@ -14,10 +14,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
@@ -45,7 +42,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -54,6 +50,13 @@ import java.util.*;
 
 public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("upgrade_station");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> true)
+                    .on(LocalDirection.values())
+                    .types(PortType.input(TransferType.ENERGY))
+                    .build()
+    );
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -386,11 +389,8 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
-        ports.put(direction, new MultiblockIOPort(direction, TransferType.ENERGY));
-
-        return ports;
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     @Override

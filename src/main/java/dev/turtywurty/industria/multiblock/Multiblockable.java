@@ -1,7 +1,5 @@
 package dev.turtywurty.industria.multiblock;
 
-import com.mojang.datafixers.util.Pair;
-import dev.turtywurty.industria.block.MultiblockBlock;
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import net.minecraft.block.Block;
@@ -9,9 +7,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtIntArray;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
@@ -31,14 +26,31 @@ import java.util.*;
  */
 @SuppressWarnings("UnstableApiUsage")
 public interface Multiblockable {
-    static boolean isCenterColumn(Vec3i offset) {
-        return offset.getX() == 0 && offset.getZ() == 0;
+    static boolean isCenterColumn(int x, int z) {
+        return x == 0 && z == 0;
     }
 
-    static Map<Direction, MultiblockIOPort> toIOPortMap(Map<Direction, List<TransferType<?, ?, ?>>> transferTypes) {
-        Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
-        transferTypes.forEach((dir, types) -> ports.put(dir, new MultiblockIOPort(dir, types)));
+    static boolean isCenterColumn(LocalPos localPos) {
+        return isCenterColumn(localPos.x(), localPos.z());
+    }
+
+    static boolean isCenterColumn(Vec3i offset) {
+        return isCenterColumn(offset.getX(), offset.getZ());
+    }
+
+    static Map<Direction, Port> toIOPortMap(Map<Direction, List<PortType>> portTypes) {
+        Map<Direction, Port> ports = new EnumMap<>(Direction.class);
+        portTypes.forEach((dir, types) -> ports.put(dir, new Port(dir, types)));
         return ports;
+    }
+
+    static void write(Multiblockable multiblockable, WriteView view) {
+        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockable.getMultiblockPositions());
+    }
+
+    static void read(Multiblockable multiblockable, ReadView view) {
+        multiblockable.getMultiblockPositions().clear();
+        view.read("MachinePositions", BlockPos.CODEC.listOf()).ifPresent(multiblockable.getMultiblockPositions()::addAll);
     }
 
     /**
@@ -97,8 +109,8 @@ public interface Multiblockable {
         for (BlockPos position : checkPositions) {
             Vec3i offset = MultiblockBlock.getOffsetFromPrimary(pos, position, facing);
             Block toSet = BlockInit.MULTIBLOCK_BLOCK;
-            for(Direction direction : Direction.values()) {
-                Map<Direction, MultiblockIOPort> ports = getPorts(offset, direction);
+            for (Direction direction : Direction.values()) {
+                Map<Direction, Port> ports = getPorts(offset, direction);
                 if (ports.isEmpty())
                     continue;
 
@@ -158,15 +170,6 @@ public interface Multiblockable {
         world.breakBlock(pos, true);
     }
 
-    static void write(Multiblockable multiblockable, WriteView view) {
-        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockable.getMultiblockPositions());
-    }
-
-    static void read(Multiblockable multiblockable, ReadView view) {
-        multiblockable.getMultiblockPositions().clear();
-        view.read("MachinePositions", BlockPos.CODEC.listOf()).ifPresent(multiblockable.getMultiblockPositions()::addAll);
-    }
-
     /**
      * Gets the ports of the multiblock.
      *
@@ -174,7 +177,32 @@ public interface Multiblockable {
      * @param direction         The direction the ports are in.
      * @return A map of ports that are in the specified direction.
      */
-    default Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        return Collections.emptyMap();
+    default Map<Direction, Port> getPorts(Vec3i offsetFromPrimary, Direction direction) {
+        Map<Direction, List<PortType>> output = new EnumMap<>(Direction.class);
+        Direction facing = getFacing();
+        var localPos = LocalPos.from(offsetFromPrimary);
+
+        for (PortRule rule : getPortRules()) {
+            if (!rule.positionMatch().test(localPos))
+                continue;
+
+            for (LocalDirection localSide : rule.sides()) {
+                Direction worldSide = localSide.toWorld(facing);
+                if (worldSide != direction)
+                    continue;
+
+                output.computeIfAbsent(worldSide, k -> new ArrayList<>()).addAll(rule.types());
+            }
+        }
+
+        return toIOPortMap(output);
+    }
+
+    default Direction getFacing() {
+        return Direction.NORTH;
+    }
+
+    default List<PortRule> getPortRules() {
+        return Collections.emptyList();
     }
 }

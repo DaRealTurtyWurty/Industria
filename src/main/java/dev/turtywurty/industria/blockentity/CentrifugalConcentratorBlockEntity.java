@@ -26,10 +26,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CentrifugalConcentratorRecipe;
 import dev.turtywurty.industria.recipe.input.CentrifugalConcentratorRecipeInput;
@@ -64,14 +61,27 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("centrifugal_concentrator");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 0)
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.input(TransferType.ENERGY), PortType.output(TransferType.SLURRY), PortType.output(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 2)
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.FLUID), PortType.output(TransferType.ITEM))
+                    .build()
+    );
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -392,20 +402,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ENERGY);
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.SLURRY);
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-        }
-
-        if (offsetFromPrimary.getY() == 2 && direction == Direction.UP) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.FLUID);
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     @Override

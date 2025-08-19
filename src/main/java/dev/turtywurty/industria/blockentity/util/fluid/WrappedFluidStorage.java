@@ -1,16 +1,11 @@
 package dev.turtywurty.industria.blockentity.util.fluid;
 
-import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 
@@ -53,7 +48,7 @@ public class WrappedFluidStorage<T extends Storage<FluidVariant>> extends Wrappe
 
             if (storage instanceof SingleFluidStorage singleFluidStorage) {
                 singleFluidStorage.amount = view.getLong("Amount", 0L);
-                singleFluidStorage.variant = view.read("Fluid", FluidVariant.CODEC).orElseThrow();
+                singleFluidStorage.variant = view.read("Fluid", FluidVariant.CODEC).orElse(FluidVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read fluid storage of type: " + storage.getClass().getName());
             }

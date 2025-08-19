@@ -26,10 +26,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ShakingTableRecipe;
 import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
@@ -65,14 +62,30 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class ShakingTableBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("shaking_table");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 0)
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.input(TransferType.ENERGY), PortType.output(TransferType.SLURRY), PortType.input(TransferType.ITEM))
+                    .build(),
+            PortRule.when(p -> p.y() == 1)
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.FLUID), PortType.input(TransferType.ITEM))
+                    .build()
+    );
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -457,20 +470,8 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ENERGY);
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.SLURRY);
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-        }
-
-        if (offsetFromPrimary.getY() == 1 && direction == Direction.UP) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.FLUID);
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     @Override

@@ -14,10 +14,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -44,13 +41,19 @@ import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable {
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.isCenterColumn() && p.y() == 4)
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build()
+    );
+
     private final List<BlockPos> kilnSegments = new ArrayList<>();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
@@ -265,7 +268,6 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
     @Override
     protected void writeData(WriteView view) {
-
         ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
         ViewUtils.putChild(view, "Heat", this.wrappedHeatStorage);
         Multiblockable.write(this, view);
@@ -389,13 +391,8 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 4 && direction == Direction.UP) {
-            transferTypes.put(direction, List.of(TransferType.ITEM));
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     public InventoryStorage getInventoryProvider(Direction side) {

@@ -31,13 +31,11 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
 
     @Override
     protected void writeData(WriteView view) {
-
         Multiblockable.write(this, view);
     }
 
     @Override
     protected void readData(ReadView view) {
-
         Multiblockable.read(this, view);
     }
 

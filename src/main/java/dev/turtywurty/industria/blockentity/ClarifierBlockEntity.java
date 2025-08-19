@@ -13,10 +13,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ClarifierRecipe;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
@@ -44,13 +41,31 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class ClarifierBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("clarifier");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.isCenterColumn() && p.y() == 1)
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.FLUID))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.z() == -1 && p.x() == 0)
+                    .on(LocalDirection.FRONT)
+                    .types(PortType.output(TransferType.FLUID))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.z() == 1 && p.x() == 0)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.output(TransferType.ITEM))
+                    .build()
+    );
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -234,16 +249,8 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 1 && direction == Direction.UP)
-            transferTypes.put(Direction.UP, List.of(TransferType.FLUID));
-        else if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == -1 && offsetFromPrimary.getX() == 0 && direction == Direction.NORTH)
-            transferTypes.put(Direction.NORTH, List.of(TransferType.FLUID));
-        else if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == 1 && offsetFromPrimary.getX() == 0 && direction == Direction.SOUTH)
-            transferTypes.put(Direction.SOUTH, List.of(TransferType.ITEM));
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     @Override

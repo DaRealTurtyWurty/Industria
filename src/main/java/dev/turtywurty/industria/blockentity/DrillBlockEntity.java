@@ -16,10 +16,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.DamageTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
@@ -55,6 +52,33 @@ import java.util.*;
 
 public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("drill");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 2)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && (p.x() != 0 || p.z() != 0))
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.output(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 1 && p.x() == -1 && p.z() == 0)
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 1 && p.x() == 1 && p.z() == 0)
+                    .on(LocalDirection.FRONT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> Multiblockable.isCenterColumn(p) && p.y() == 2)
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.input(TransferType.ENERGY))
+                    .build()
+    );
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
@@ -282,23 +306,8 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, MultiblockIOPort> ports = new EnumMap<>(Direction.class);
-        if (offsetFromPrimary.getY() == 2) {
-            ports.put(Direction.SOUTH, new MultiblockIOPort(Direction.SOUTH, TransferType.ITEM));
-        } else if (offsetFromPrimary.getY() == 0 && (offsetFromPrimary.getX() != 0 || offsetFromPrimary.getZ() != 0)) {
-            ports.put(Direction.DOWN, new MultiblockIOPort(Direction.DOWN, TransferType.ITEM));
-        } else if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == -1 && offsetFromPrimary.getZ() == 0) {
-            ports.put(Direction.UP, new MultiblockIOPort(Direction.UP, TransferType.ITEM));
-        } else if (offsetFromPrimary.getY() == 1 && offsetFromPrimary.getX() == 1 && offsetFromPrimary.getZ() == 0) {
-            ports.put(Direction.NORTH, new MultiblockIOPort(Direction.NORTH, TransferType.ITEM));
-        }
-
-        if (Multiblockable.isCenterColumn(offsetFromPrimary) && offsetFromPrimary.getY() == 2) {
-            ports.put(Direction.DOWN, new MultiblockIOPort(Direction.DOWN, TransferType.ENERGY));
-        }
-
-        return ports;
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     // 3x3x3 Multiblock

@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.block;
+package dev.turtywurty.industria.multiblock;
 
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;

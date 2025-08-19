@@ -25,10 +25,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
@@ -62,15 +59,33 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 // TODO: Make this work with temperature and pressure
 public class DigesterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("digester");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 4 && Multiblockable.isCenterColumn(p))
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.SLURRY))
+                    .build(),
+
+            PortRule.when(p -> p.z() == -1)
+                    .on(LocalDirection.FRONT)
+                    .types(PortType.input(TransferType.ENERGY))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.z() == 1)
+                    .on(LocalDirection.BACK)
+                    .types(PortType.output(TransferType.FLUID))
+                    .build()
+    );
 
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -157,18 +172,8 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (offsetFromPrimary.getY() == 4 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.SLURRY);
-
-        if (offsetFromPrimary.getZ() == -1 && direction == Direction.NORTH)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.ENERGY);
-
-        if (offsetFromPrimary.getY() == 0 && offsetFromPrimary.getZ() == 1 && direction == Direction.SOUTH)
-            transferTypes.computeIfAbsent(direction, d -> new ArrayList<>()).add(TransferType.FLUID);
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     @Override

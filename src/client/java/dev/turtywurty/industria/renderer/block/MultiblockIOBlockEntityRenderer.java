@@ -1,7 +1,8 @@
 package dev.turtywurty.industria.renderer.block;
 
 import dev.turtywurty.industria.blockentity.MultiblockIOBlockEntity;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
+import dev.turtywurty.industria.multiblock.Port;
+import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.multiblock.TransferType;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -28,13 +29,13 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
 
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
         for (Direction direction : Direction.values()) {
-            Map<Direction, MultiblockIOPort> ports = entity.getPorts(direction);
+            Map<Direction, Port> ports = entity.getPorts(direction);
             if (ports == null)
                 continue;
 
-            for (MultiblockIOPort port : ports.values()) {
+            for (Port port : ports.values()) {
                 double size = 0.5;
-                for (TransferType<?, ?, ?> transferType : port.getTransferTypes()) {
+                for (TransferType<?, ?, ?> transferType : port.portTypes().stream().map(PortType::transferType).toList()) {
                     float[] color = getColor(transferType);
 
                     VertexRendering.drawBox(
@@ -82,7 +83,7 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
 
     private static float[] getColor(TransferType<?, ?, ?> type) {
         if(type == TransferType.ITEM) {
-            return new float[]{0.0F, 0.0F, 0.0F};
+            return new float[]{0.0F, 0.75F, 0.30F};
         } else if (type == TransferType.ENERGY) {
             return new float[]{1.0F, 1.0F, 51/255F};
         } else if (type == TransferType.FLUID) {

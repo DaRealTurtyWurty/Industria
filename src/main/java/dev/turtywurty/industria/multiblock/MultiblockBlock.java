@@ -1,7 +1,6 @@
-package dev.turtywurty.industria.block;
+package dev.turtywurty.industria.multiblock;
 
 import dev.turtywurty.industria.init.AttachmentTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockData;
 import dev.turtywurty.industria.util.CachedVoxelShapes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;

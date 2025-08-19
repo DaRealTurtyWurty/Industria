@@ -36,7 +36,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
-import team.reborn.energy.api.base.InfiniteEnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.ArrayList;
@@ -57,10 +56,10 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         this.batteryLevel = block.getLevel();
 
         this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
-        if (this.batteryLevel != BatteryBlock.BatteryLevel.CREATIVE)
-            this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(), this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer()));
-        else
-            this.wrappedEnergyStorage.addStorage(new InfiniteEnergyStorage());
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(), this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer()));
+        if (this.batteryLevel == BatteryBlock.BatteryLevel.CREATIVE)
+            ((SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null)).amount = Long.MAX_VALUE;
+
     }
 
     @Override

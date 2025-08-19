@@ -2,6 +2,8 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
+import dev.turtywurty.industria.multiblock.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.MultiblockIOBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;

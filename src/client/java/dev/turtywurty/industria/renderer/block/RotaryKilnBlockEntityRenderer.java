@@ -102,8 +102,6 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
             matrices.push();
             matrices.translate(body.getPosition().x, body.getPosition().y, z);
-
-            matrices.push();
             matrices.scale(0.5f, 0.5f, 0.5f);
             matrices.multiply(Direction.WEST.getRotationQuaternion());
             matrices.multiply(RotationAxis.POSITIVE_X.rotation(body.getAngle()));

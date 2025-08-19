@@ -26,10 +26,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockIOPort;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
@@ -66,11 +63,12 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 // Leaving this here as an example, just in case I decide to make this system in the future
 // public TickBuilder createTickBuilder() {
@@ -99,6 +97,38 @@ import java.util.*;
 //    }
 public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("mixer");
+
+    private static final List<PortRule> PORT_RULES = List.of(
+            PortRule.when(p -> p.y() == 2 && p.isCenterColumn())
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.FLUID))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.output(TransferType.SLURRY))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
+                    .on(LocalDirection.RIGHT)
+                    .types(PortType.input(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
+                    .on(LocalDirection.LEFT)
+                    .types(PortType.output(TransferType.ITEM))
+                    .build(),
+
+            PortRule.when(p -> p.y() == 2 && !p.isCenterColumn())
+                    .on(LocalDirection.UP)
+                    .types(PortType.input(TransferType.ENERGY))
+                    .build(),
+            PortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
+                    .on(LocalDirection.DOWN)
+                    .types(PortType.input(TransferType.ENERGY))
+                    .build()
+    );
+
     public final List<Vec3d> mixingItemPositions = DefaultedList.ofSize(6, new Vec3d(0, 1, 0));
     private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -398,29 +428,8 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    public Map<Direction, MultiblockIOPort> getPorts(Vec3i offsetFromPrimary, Direction direction) {
-        Map<Direction, List<TransferType<?, ?, ?>>> transferTypes = new EnumMap<>(Direction.class);
-        if (offsetFromPrimary.getY() == 2 && Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.UP) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.FLUID);
-        }
-
-        if (offsetFromPrimary.getY() == 0 && !Multiblockable.isCenterColumn(offsetFromPrimary) && direction == Direction.DOWN) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.SLURRY);
-        }
-
-        if (offsetFromPrimary.getX() != 0 && offsetFromPrimary.getZ() == 0 && offsetFromPrimary.getY() == 0) {
-            if (offsetFromPrimary.getX() == 1 && direction == Direction.EAST) {
-                transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-            } else if (offsetFromPrimary.getX() == -1 && direction == Direction.WEST) {
-                transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ITEM);
-            }
-        }
-
-        if (((offsetFromPrimary.getY() == 2 && direction == Direction.UP) || (offsetFromPrimary.getY() == 0 && direction == Direction.DOWN)) && !Multiblockable.isCenterColumn(offsetFromPrimary)) {
-            transferTypes.computeIfAbsent(direction, k -> new ArrayList<>()).add(TransferType.ENERGY);
-        }
-
-        return Multiblockable.toIOPortMap(transferTypes);
+    public List<PortRule> getPortRules() {
+        return PORT_RULES;
     }
 
     public SyncingSimpleInventory getInputInventory() {
