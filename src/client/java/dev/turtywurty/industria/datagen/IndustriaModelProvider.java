@@ -61,8 +61,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
     public static TextureMap stoneOre(Identifier id) {
         return (new TextureMap()).put(BASE_KEY, Identifier.ofVanilla("block/stone")).put(ORE_KEY, id);
     }
-    public static TextureMap deepslateOre(Block block) {
-    }
     
     public static TextureMap deepslateOre(Block block) {
         String namespace = identifier.getNamespace();
