@@ -138,7 +138,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
     public void registerSimpleCubeAll(BlockStateModelGenerator blockStateModelGenerator, Block block, String type) {
         switch (type){
-            case "stone_ore" -> registerSingleton(blockStateModelGenerator,block, STONE);
+            case "stone_ore" -> registerSingleton(blockStateModelGenerator, block, STONE);
             case "deepslate_ore" -> registerSingleton(blockStateModelGenerator, block, DEEPSLATE);
             default -> registerSingleton(blockStateModelGenerator, block, ORE);
         }
