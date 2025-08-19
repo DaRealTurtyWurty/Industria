@@ -111,12 +111,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
 
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.BAUXITE_ORE,"stone");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.CASSITERITE_ORE,"stone");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.ZINC_ORE,"stone");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_BAUXITE_ORE,"deepslate");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_CASSITERITE_ORE,"deepslate");
-        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_ZINC_ORE,"deepslate");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.BAUXITE_ORE, "stone");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.CASSITERITE_ORE, "stone");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.ZINC_ORE, "stone");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_BAUXITE_ORE, "deepslate");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_CASSITERITE_ORE, "deepslate");
+        registerSimpleOreBlock(blockStateModelGenerator, BlockInit.DEEPSLATE_ZINC_ORE, "deepslate");
 
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.ALUMINIUM_BLOCK);
         blockStateModelGenerator.registerSimpleCubeAll(BlockInit.TIN_BLOCK);
