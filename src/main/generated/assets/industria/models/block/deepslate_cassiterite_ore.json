@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "industria:block/parent/ore",
   "textures": {
-    "all": "industria:block/deepslate_cassiterite_ore"
+    "base": "minecraft:block/deepslate",
+    "ore": "industria:block/cassiterite_ore"
   }
 }

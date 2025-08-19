@@ -1,0 +1,30 @@
+{
+  "parent": "block/cube_all",
+  "render_type": "translucent",
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north":  { "texture": "#base", "tintindex": 0 },
+        "east":   { "texture": "#base", "tintindex": 0 },
+        "south":  { "texture": "#base", "tintindex": 0 },
+        "west":   { "texture": "#base", "tintindex": 0 },
+        "up":     { "texture": "#base", "tintindex": 0 },
+        "down":   { "texture": "#base", "tintindex": 0 }
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north":  { "texture": "#ore", "tintindex": 1 },
+        "east":   { "texture": "#ore", "tintindex": 1 },
+        "south":  { "texture": "#ore", "tintindex": 1 },
+        "west":   { "texture": "#ore", "tintindex": 1 },
+        "up":     { "texture": "#ore", "tintindex": 1 },
+        "down":   { "texture": "#ore", "tintindex": 1 }
+      }
+    }
+  ]
+}

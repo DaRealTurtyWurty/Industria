@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "industria:block/deepslate_bauxite_ore"
+  }
+}
