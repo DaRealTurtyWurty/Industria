@@ -114,13 +114,6 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
         return BlockEntityUpdateS2CPacket.create(this);
     }
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        NbtWriteView view = NbtWriteView.create(ErrorReporter.EMPTY, registries);
-        writeData(view);
-        return view.getNbt();
-    }
-
     public boolean addTower(BlockPos pos) {
         if (this.towers.contains(pos) ||
                 getTowerCount() >= 8 ||
