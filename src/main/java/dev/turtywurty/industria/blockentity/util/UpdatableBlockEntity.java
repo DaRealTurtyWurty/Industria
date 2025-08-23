@@ -28,9 +28,7 @@ public class UpdatableBlockEntity extends BlockEntity {
 
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        NbtWriteView view = NbtWriteView.create(ErrorReporter.EMPTY, registryLookup);
-        writeData(view);
-        return view.getNbt();
+        return createNbt(registryLookup);
     }
 
     public void update() {
