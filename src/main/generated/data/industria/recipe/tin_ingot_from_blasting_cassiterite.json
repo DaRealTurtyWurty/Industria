@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "group": "tin_ingot",
+  "ingredient": "industria:cassiterite",
+  "result": {
+    "id": "industria:tin_ingot"
+  }
+}

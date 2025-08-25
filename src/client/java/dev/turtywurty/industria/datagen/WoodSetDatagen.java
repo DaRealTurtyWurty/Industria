@@ -3,13 +3,9 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricProvidedTagBuilder;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.block.Block;
 import net.minecraft.client.data.BlockStateModelGenerator;
-import net.minecraft.client.data.ItemModelGenerator;
-import net.minecraft.client.data.Models;
 import net.minecraft.client.data.TexturedModel;
 import net.minecraft.data.loottable.BlockLootTableGenerator;
 import net.minecraft.data.recipe.RecipeExporter;
@@ -41,7 +37,7 @@ public class WoodSetDatagen {
         provider.addDrop(woodSet.wood);
         provider.addDrop(woodSet.sapling);
         provider.addDrop(woodSet.stairs);
-        provider.addDrop(woodSet.slab);
+        provider.addDrop(woodSet.slab, provider::slabDrops);
         provider.addDrop(woodSet.fence);
         provider.addDrop(woodSet.fenceGate);
         provider.addDrop(woodSet.door);
@@ -53,7 +49,8 @@ public class WoodSetDatagen {
         provider.addDrop(woodSet.hangingSign, woodSet.hangingSignItem);
         provider.addDrop(woodSet.wallHangingSign, woodSet.hangingSignItem);
 
-        provider.leavesDrops(woodSet.leaves, woodSet.sapling, BlockLootTableGenerator.SAPLING_DROP_CHANCE);
+        provider.addDrop(woodSet.leaves,
+                leavesBlock -> provider.leavesDrops(leavesBlock, woodSet.sapling, BlockLootTableGenerator.SAPLING_DROP_CHANCE));
     }
 
     public static void generateEnglishLanguage(WoodRegistrySet woodSet, FabricLanguageProvider.TranslationBuilder translationBuilder) {
@@ -97,11 +94,6 @@ public class WoodSetDatagen {
         blockStateModelGenerator.registerHangingSign(woodSet.strippedLog, woodSet.hangingSign, woodSet.wallHangingSign);
         blockStateModelGenerator.registerCubeAllModelTexturePool(woodSet.planks)
                 .family(woodSet.createBlockFamily());
-    }
-
-    public static void generateItemModels(WoodRegistrySet woodSet, ItemModelGenerator itemModelGenerator) {
-        itemModelGenerator.register(woodSet.boatItem, Models.GENERATED);
-        itemModelGenerator.register(woodSet.chestBoatItem, Models.GENERATED);
     }
 
     public static void generateRecipes(WoodRegistrySet woodSet, RecipeGenerator generator, RecipeExporter exporter, RegistryEntryLookup<Item> registries) {

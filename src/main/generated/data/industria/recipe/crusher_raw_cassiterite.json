@@ -1,7 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": "industria:raw_cassiterite"
+    "ingredients": "industria:cassiterite"
   },
   "output_a": {
     "chance": 1.0,

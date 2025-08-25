@@ -9,6 +9,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
@@ -161,9 +162,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
     public static class Serializer implements RecipeSerializer<UpgradeStationRecipe> {
         public static final Serializer INSTANCE = new Serializer();
 
-        public static final Codec<Character> CHAR_CODEC = Codec.STRING.xmap(s -> s.charAt(0), String::valueOf);
-
-        private static final Codec<Map<Character, IndustriaIngredient>> KEY_CODEC = Codec.unboundedMap(CHAR_CODEC, IndustriaIngredient.CODEC);
+        private static final Codec<Map<Character, IndustriaIngredient>> KEY_CODEC = Codec.unboundedMap(ExtraCodecs.CHAR_CODEC, IndustriaIngredient.CODEC);
         private static final PacketCodec<RegistryByteBuf, Map<Character, IndustriaIngredient>> KEY_PACKET_CODEC = PacketCodec.of(
                 (value, buf) -> buf.writeMap(value, (buf1, value1) -> buf.writeChar(value1),
                         (buf1, value1) -> IndustriaIngredient.PACKET_CODEC.encode((RegistryByteBuf) buf1, value1)),

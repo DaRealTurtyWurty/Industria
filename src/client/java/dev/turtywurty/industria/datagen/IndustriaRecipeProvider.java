@@ -202,13 +202,13 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.TIN_NUGGET, RecipeCategory.MISC, ItemInit.TIN_INGOT, "tin_nugget_to_ingot", null, "tin_ingot_to_nugget", null);
                 offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.ZINC_NUGGET, RecipeCategory.MISC, ItemInit.ZINC_INGOT, "zinc_nugget_to_ingot", null, "zinc_ingot_to_nugget", null);
 
-                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.RAW_BAUXITE, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_BAUXITE_BLOCK);
-                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.RAW_CASSITERITE, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_CASSITERITE_BLOCK);
-                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.RAW_ZINC, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_ZINC_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.BAUXITE, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_BAUXITE_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.CASSITERITE, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_CASSITERITE_BLOCK);
+                offerReversibleCompactingRecipes(RecipeCategory.MISC, ItemInit.SPHALERITE, RecipeCategory.BUILDING_BLOCKS, BlockInit.RAW_SPHALERITE_BLOCK);
 
-                List<ItemConvertible> aluminiumOres = List.of(BlockInit.BAUXITE_ORE, BlockInit.DEEPSLATE_BAUXITE_ORE, ItemInit.RAW_BAUXITE);
-                List<ItemConvertible> tinOres = List.of(BlockInit.CASSITERITE_ORE, BlockInit.DEEPSLATE_CASSITERITE_ORE, ItemInit.RAW_CASSITERITE);
-                List<ItemConvertible> zincOres = List.of(BlockInit.ZINC_ORE, BlockInit.DEEPSLATE_ZINC_ORE, ItemInit.RAW_ZINC);
+                List<ItemConvertible> aluminiumOres = List.of(BlockInit.BAUXITE_ORE, BlockInit.DEEPSLATE_BAUXITE_ORE, ItemInit.BAUXITE);
+                List<ItemConvertible> tinOres = List.of(BlockInit.CASSITERITE_ORE, BlockInit.DEEPSLATE_CASSITERITE_ORE, ItemInit.CASSITERITE);
+                List<ItemConvertible> zincOres = List.of(BlockInit.SPHALERITE_ORE, BlockInit.DEEPSLATE_SPHALERITE_ORE, ItemInit.SPHALERITE);
 
                 offerSmelting(aluminiumOres, RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 200, "aluminium_ingot");
                 offerSmelting(tinOres, RecipeCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 200, "tin_ingot");
@@ -219,7 +219,7 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 offerBlasting(zincOres, RecipeCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 100, "zinc_ingot");
 
                 offerMixer(exporter, RecipeCategory.MISC, List.of(
-                                new IndustriaIngredient(4, ItemInit.RAW_BAUXITE),
+                                new IndustriaIngredient(4, ItemInit.BAUXITE),
                                 new IndustriaIngredient(1, ItemInit.SODIUM_HYDROXIDE)),
                         new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET),
                         170, 180,
@@ -259,7 +259,7 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         2_000, 10_000, 1_000);
 
                 offerCrusher(exporter, RecipeCategory.MISC,
-                        new IndustriaIngredient(1, ItemInit.RAW_CASSITERITE),
+                        new IndustriaIngredient(1, ItemInit.CASSITERITE),
                         new OutputItemStack(ItemInit.CRUSHED_CASSITERITE, 2, 1),
                         new OutputItemStack(ItemInit.CRUSHED_CASSITERITE, 1, (3 / 10F)),
                         100, "raw_cassiterite");

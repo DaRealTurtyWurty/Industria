@@ -56,8 +56,8 @@ public class ConfiguredFeatureInit {
                 OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_CASSITERITE_ORE.getDefaultState()));
 
         List<OreFeatureConfig.Target> zincTargets = List.of(
-                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.ZINC_ORE.getDefaultState()),
-                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_ZINC_ORE.getDefaultState()));
+                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.SPHALERITE_ORE.getDefaultState()),
+                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_SPHALERITE_ORE.getDefaultState()));
 
         register(context, BAUXITE_ORE, Feature.ORE, new OreFeatureConfig(bauxiteTargets, 8, 0.25f));
         register(context, CASSITERITE_ORE, Feature.ORE, new OreFeatureConfig(tinTargets, 14));

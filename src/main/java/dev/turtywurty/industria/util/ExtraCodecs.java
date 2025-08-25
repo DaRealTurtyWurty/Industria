@@ -51,12 +51,17 @@ public class ExtraCodecs {
                 }
             },
             blockPos -> blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ());
+    public static final Codec<Character> CHAR_CODEC = Codec.STRING.xmap(s -> s.charAt(0), String::valueOf);
 
     public static <T> Codec<Set<T>> setOf(Codec<T> codec) {
         return Codec.list(codec).xmap(Sets::newHashSet, Lists::newArrayList);
     }
 
     public static <T> Codec<Set<T>> setOf(MapCodec<T> codec) {
-        return Codec.list(codec.codec()).xmap(Sets::newHashSet, Lists::newArrayList);
+        return setOf(codec.codec());
+    }
+
+    public static <T> Codec<List<T>> listOf(MapCodec<T> codec) {
+        return Codec.list(codec.codec());
     }
 }

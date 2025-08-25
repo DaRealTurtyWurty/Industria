@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.7,
+  "group": "tin_ingot",
+  "ingredient": "industria:cassiterite",
+  "result": {
+    "id": "industria:tin_ingot"
+  }
+}

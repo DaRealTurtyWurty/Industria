@@ -13,8 +13,18 @@ public class RenderLayerMapInit {
 
         BlockRenderLayerMap.putBlocks(BlockRenderLayer.TRANSLUCENT,
                 BlockInit.CASSITERITE_ORE, BlockInit.DEEPSLATE_CASSITERITE_ORE,
-                BlockInit.ZINC_ORE, BlockInit.DEEPSLATE_ZINC_ORE,
-                BlockInit.BAUXITE_ORE, BlockInit.DEEPSLATE_BAUXITE_ORE);
+                BlockInit.SPHALERITE_ORE, BlockInit.DEEPSLATE_SPHALERITE_ORE,
+                BlockInit.BAUXITE_ORE, BlockInit.DEEPSLATE_BAUXITE_ORE,
+                BlockInit.ARGENTITE_ORE, BlockInit.DEEPSLATE_ARGENTITE_ORE,
+                BlockInit.GALENA_ORE, BlockInit.DEEPSLATE_GALENA_ORE,
+                BlockInit.CASSITERITE_ORE, BlockInit.DEEPSLATE_CASSITERITE_ORE,
+                BlockInit.SPHALERITE_ORE, BlockInit.DEEPSLATE_SPHALERITE_ORE,
+                BlockInit.COBALTITE_ORE, BlockInit.DEEPSLATE_COBALTITE_ORE,
+                BlockInit.PENTLANDITE_ORE, BlockInit.DEEPSLATE_PENTLANDITE_ORE,
+                BlockInit.NETHER_PYRITE_ORE, BlockInit.END_PYRITE_ORE,
+                BlockInit.QUARTZ_ORE, BlockInit.DEEPSLATE_QUARTZ_ORE,
+                BlockInit.ILMENITE_ORE, BlockInit.DEEPSLATE_ILMENITE_ORE,
+                BlockInit.IRIDIUM_ORE, BlockInit.DEEPSLATE_IRIDIUM_ORE);
 
         BlockRenderLayerMap.putBlocks(BlockRenderLayer.CUTOUT, BlockInit.FLUID_TANK);
 

@@ -6,7 +6,7 @@
     "targets": [
       {
         "state": {
-          "Name": "industria:zinc_ore"
+          "Name": "industria:sphalerite_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",
@@ -15,7 +15,7 @@
       },
       {
         "state": {
-          "Name": "industria:deepslate_zinc_ore"
+          "Name": "industria:deepslate_sphalerite_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",

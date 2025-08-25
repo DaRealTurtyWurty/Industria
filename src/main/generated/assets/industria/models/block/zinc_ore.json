@@ -1,7 +1,0 @@
-{
-  "parent": "industria:block/parent/ore",
-  "textures": {
-    "base": "minecraft:block/stone",
-    "ore": "industria:block/zinc_ore"
-  }
-}

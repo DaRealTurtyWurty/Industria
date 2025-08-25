@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_raw_bauxite": {
+    "has_bauxite": {
       "conditions": {
         "items": [
           {
-            "items": "industria:raw_bauxite"
+            "items": "industria:bauxite"
           }
         ]
       },
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_raw_bauxite"
+      "has_bauxite"
     ]
   ],
   "rewards": {
