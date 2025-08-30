@@ -16,6 +16,10 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
+import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
+import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
@@ -56,31 +60,31 @@ import java.util.Optional;
 // output:
 // aluminium hydroxide (gibbsite) (item)
 // sodium carbonate (item) - by-product
-public class CrystallizerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
+public class CrystallizerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, AutoMultiblockable {
     public static final Text TITLE = Industria.containerTitle("crystallizer");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 3 && p.isCenterColumn())
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 3 && p.isCenterColumn())
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.FLUID))
                     .build(),
 
-            PortRule.when(p -> p.y() == 3 && p.z() == 1)
+            PositionedPortRule.when(p -> p.y() == 3 && p.z() == 1)
                     .on(LocalDirection.BACK)
                     .types(PortType.input(TransferType.FLUID))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.x() == -1)
+            PositionedPortRule.when(p -> p.y() == 0 && p.x() == -1)
                     .on(LocalDirection.LEFT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.z() == -1)
+            PositionedPortRule.when(p -> p.y() == 0 && p.z() == -1)
                     .on(LocalDirection.FRONT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.x() == 1)
+            PositionedPortRule.when(p -> p.y() == 0 && p.x() == 1)
                     .on(LocalDirection.RIGHT)
                     .types(PortType.input(TransferType.ITEM))
                     .build()
@@ -347,7 +351,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

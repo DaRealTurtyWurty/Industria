@@ -2,8 +2,8 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
-import dev.turtywurty.industria.multiblock.MultiblockBlock;
-import dev.turtywurty.industria.multiblock.MultiblockIOBlock;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
+import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
 import net.minecraft.block.*;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -228,8 +228,8 @@ public class BlockInit {
     public static final DigesterBlock DIGESTER = registerWithItemCopy("digester",
             DigesterBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
-    public static final MultiblockIOBlock MULTIBLOCK_IO = registerWithCopy("multiblock_io",
-            MultiblockIOBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+    public static final AutoMultiblockIOBlock AUTO_MULTIBLOCK_IO = registerWithCopy("multiblock_io",
+            AutoMultiblockIOBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static final ClarifierBlock CLARIFIER = registerWithItemCopy("clarifier",
             ClarifierBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
@@ -260,6 +260,9 @@ public class BlockInit {
 
     public static final ArcFurnaceBlock ARC_FURNACE = registerWithItemCopy("arc_furnace",
             ArcFurnaceBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
+
+    public static final ExampleMultiblockControllerBlock EXAMPLE_MULTIBLOCK_CONTROLLER = registerWithItemCopy("example_multiblock_controller",
+            ExampleMultiblockControllerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(

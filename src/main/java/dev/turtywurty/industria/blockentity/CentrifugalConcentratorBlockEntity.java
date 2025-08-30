@@ -27,6 +27,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CentrifugalConcentratorRecipe;
 import dev.turtywurty.industria.recipe.input.CentrifugalConcentratorRecipeInput;
@@ -68,16 +69,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("centrifugal_concentrator");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 0)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 0)
                     .on(LocalDirection.DOWN)
                     .types(PortType.input(TransferType.ENERGY), PortType.output(TransferType.SLURRY), PortType.output(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 2)
+            PositionedPortRule.when(p -> p.y() == 2)
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.FLUID), PortType.output(TransferType.ITEM))
                     .build()
@@ -402,7 +403,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

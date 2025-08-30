@@ -182,7 +182,7 @@ public class TransferType<S, V, A extends Number> {
     }
 
     public void registerForMultiblockIo() {
-        this.blockLookup.registerForBlockEntity((blockEntity, direction) -> blockEntity.getProvider(this, direction), BlockEntityTypeInit.MULTIBLOCK_IO);
+        this.blockLookup.registerForBlockEntity((blockEntity, direction) -> blockEntity.getProvider(this, direction), BlockEntityTypeInit.AUTO_MULTIBLOCK_IO);
     }
 
     public void pushTo(World world, BlockPos primaryPos, BlockPos secondaryPos, Direction side) {

@@ -14,6 +14,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ClarifierRecipe;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
@@ -47,21 +48,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ClarifierBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable, BlockEntityWithGui<BlockPosPayload> {
+public class ClarifierBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, AutoMultiblockable, BlockEntityWithGui<BlockPosPayload> {
     public static final Text TITLE = Industria.containerTitle("clarifier");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.isCenterColumn() && p.y() == 1)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 1)
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.FLUID))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.z() == -1 && p.x() == 0)
+            PositionedPortRule.when(p -> p.y() == 0 && p.z() == -1 && p.x() == 0)
                     .on(LocalDirection.FRONT)
                     .types(PortType.output(TransferType.FLUID))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.z() == 1 && p.x() == 0)
+            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 1 && p.x() == 0)
                     .on(LocalDirection.BACK)
                     .types(PortType.output(TransferType.ITEM))
                     .build()
@@ -249,7 +250,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

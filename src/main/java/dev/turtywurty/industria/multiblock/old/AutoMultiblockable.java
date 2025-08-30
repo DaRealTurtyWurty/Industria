@@ -1,15 +1,16 @@
-package dev.turtywurty.industria.multiblock;
+package dev.turtywurty.industria.multiblock.old;
 
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.LocalDirection;
+import dev.turtywurty.industria.multiblock.LocalPos;
+import dev.turtywurty.industria.multiblock.PortType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -25,30 +26,12 @@ import java.util.*;
  * @apiNote This interface is designed to be implemented on a {@link BlockEntity} instance.
  */
 @SuppressWarnings("UnstableApiUsage")
-public interface Multiblockable {
+public interface AutoMultiblockable extends Multiblockable {
     static Map<Direction, Port> toIOPortMap(Map<Direction, List<PortType>> portTypes) {
         Map<Direction, Port> ports = new EnumMap<>(Direction.class);
         portTypes.forEach((dir, types) -> ports.put(dir, new Port(dir, types)));
         return ports;
     }
-
-    static void write(Multiblockable multiblockable, WriteView view) {
-        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockable.getMultiblockPositions());
-    }
-
-    static void read(Multiblockable multiblockable, ReadView view) {
-        multiblockable.getMultiblockPositions().clear();
-        view.read("MachinePositions", BlockPos.CODEC.listOf()).ifPresent(multiblockable.getMultiblockPositions()::addAll);
-    }
-
-    /**
-     * Gets the type of multiblock this controller is.
-     *
-     * @return The type of multiblock this controller is.
-     * @apiNote This method should return the same value every time it is called.
-     * @see MultiblockType
-     */
-    MultiblockType<?> type();
 
     /**
      * Finds the positions of the blocks that make up the multiblock.
@@ -60,14 +43,6 @@ public interface Multiblockable {
      * @see MultiblockType#numBlocks()
      */
     List<BlockPos> findPositions(@Nullable Direction facing);
-
-    /**
-     * Gets the positions of the blocks that make up the multiblock.
-     *
-     * @return A list of positions that make up the multiblock.
-     * @apiNote This method should return a mutable list.
-     */
-    List<BlockPos> getMultiblockPositions();
 
     /**
      * Builds the multiblock in the world.
@@ -102,7 +77,7 @@ public interface Multiblockable {
                 if (ports.isEmpty())
                     continue;
 
-                toSet = BlockInit.MULTIBLOCK_IO;
+                toSet = BlockInit.AUTO_MULTIBLOCK_IO;
             }
 
             world.setBlockState(position, toSet.getDefaultState());
@@ -123,20 +98,14 @@ public interface Multiblockable {
         System.out.println("Total time: " + (endTime - startTime) + "ns");
     }
 
-    /**
-     * Breaks the multiblock in the world.
-     *
-     * @param world The world the multiblock is being broken in.
-     * @param pos   The position of the block that is being used to break the multiblock.
-     * @apiNote This method should only be called on the server side.
-     */
-    default void breakMultiblock(World world, BlockPos pos) {
+    @Override
+    default void onMultiblockBreak(World world, BlockPos pos) {
         if (world == null)
             return;
 
         for (BlockPos machinePos : getMultiblockPositions()) {
             BlockState blockState = world.getBlockState(machinePos);
-            if (!blockState.isOf(BlockInit.MULTIBLOCK_BLOCK) && !blockState.isOf(BlockInit.MULTIBLOCK_IO))
+            if (!blockState.isOf(BlockInit.MULTIBLOCK_BLOCK) && !blockState.isOf(BlockInit.AUTO_MULTIBLOCK_IO))
                 continue;
 
             world.breakBlock(machinePos, false);
@@ -170,7 +139,7 @@ public interface Multiblockable {
         Direction facing = getFacing();
         var localPos = LocalPos.from(offsetFromPrimary);
 
-        for (PortRule rule : getPortRules()) {
+        for (PositionedPortRule rule : getPortRules()) {
             if (!rule.positionMatch().test(localPos))
                 continue;
 
@@ -186,11 +155,7 @@ public interface Multiblockable {
         return toIOPortMap(output);
     }
 
-    default Direction getFacing() {
-        return Direction.NORTH;
-    }
-
-    default List<PortRule> getPortRules() {
+    default List<PositionedPortRule> getPortRules() {
         return Collections.emptyList();
     }
 }

@@ -2,7 +2,7 @@ package dev.turtywurty.industria.init;
 
 import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.multiblock.MultiblockData;
+import dev.turtywurty.industria.multiblock.old.MultiblockData;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;

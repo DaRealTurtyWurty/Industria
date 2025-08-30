@@ -3,8 +3,8 @@ package dev.turtywurty.industria.block.abstraction;
 import dev.turtywurty.industria.block.abstraction.state.StateProperties;
 import dev.turtywurty.industria.block.abstraction.state.StateProperty;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -215,7 +215,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         if (this.multiblockType != null) {
             if (!world.isClient) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
-                if (blockEntity instanceof Multiblockable multiblockable) {
+                if (blockEntity instanceof AutoMultiblockable multiblockable) {
                     multiblockable.buildMultiblock(world, pos, state, placer, itemStack, blockEntity::markDirty);
                 }
             }

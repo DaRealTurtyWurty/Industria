@@ -13,7 +13,7 @@ public class BlockEntityRendererInit {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.UPGRADE_STATION, UpgradeStationBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.MIXER, MixerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.DIGESTER, DigesterBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.AUTO_MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CLARIFIER, ClarifierBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CRYSTALLIZER, CrystallizerBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, RotaryKilnBlockEntityRenderer::new);
@@ -22,5 +22,6 @@ public class BlockEntityRendererInit {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.SHAKING_TABLE, ShakingTableBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.EXAMPLE_MULTIBLOCK_CONTROLLER, ExampleMultiblockControllerBlockEntityRenderer::new);
     }
 }

@@ -25,6 +25,7 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		pack.addProvider(IndustriaEntityTypeTagProvider::new);
 		pack.addProvider(IndustriaWorldGenerator::new);
 		pack.addProvider(IndustriaDamageTypeGenerator::new);
+        //pack.addProvider((output, registriesFuture) -> new MultiblockDefinitionProvider(output, registriesFuture, Industria.MOD_ID));
 	}
 
 	@Override
@@ -32,5 +33,6 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		registryBuilder.addRegistry(RegistryKeys.CONFIGURED_FEATURE, ConfiguredFeatureInit::bootstrap);
 		registryBuilder.addRegistry(RegistryKeys.PLACED_FEATURE, PlacedFeatureInit::bootstrap);
 		registryBuilder.addRegistry(RegistryKeys.DAMAGE_TYPE, DamageTypeInit::bootstrap);
+        //registryBuilder.addRegistry(IndustriaRegistries.MULTIBLOCK_DEFINITION_KEY, MultiblockDefinitionInit::bootstrap);
 	}
 }

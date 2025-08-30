@@ -14,6 +14,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -37,11 +38,11 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, WrappedInventoryStorageHolder {
+public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, WrappedInventoryStorageHolder {
     public static final Text TITLE = Industria.containerTitle("oil_pump_jack");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.z() == -4 && p.y() == 0 && p.x() >= -1 && p.x() <= 2)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.z() == -4 && p.y() == 0 && p.x() >= -1 && p.x() <= 2)
                     .on(LocalDirection.BACK)
                     .types(PortType.input(TransferType.ENERGY))
                     .build()
@@ -317,7 +318,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

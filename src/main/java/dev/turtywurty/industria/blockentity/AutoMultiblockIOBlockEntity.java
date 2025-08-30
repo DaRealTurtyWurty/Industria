@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.multiblock.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.multiblock.Multiblockable;
-import dev.turtywurty.industria.multiblock.Port;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
+import dev.turtywurty.industria.multiblock.old.Port;
 import dev.turtywurty.industria.multiblock.TransferType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -16,13 +16,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class MultiblockIOBlockEntity extends BlockEntity implements TickableBlockEntity {
+public class AutoMultiblockIOBlockEntity extends BlockEntity implements TickableBlockEntity {
     private BlockEntity primary = null;
-    private Multiblockable multiblock = null;
+    private AutoMultiblockable multiblock = null;
     private Vec3i offsetFromPrimary = null;
 
-    public MultiblockIOBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockEntityTypeInit.MULTIBLOCK_IO, pos, state);
+    public AutoMultiblockIOBlockEntity(BlockPos pos, BlockState state) {
+        super(BlockEntityTypeInit.AUTO_MULTIBLOCK_IO, pos, state);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
                 return;
 
             BlockEntity blockEntity = this.world.getBlockEntity(primaryPos);
-            if(blockEntity instanceof Multiblockable multiblockable) {
+            if(blockEntity instanceof AutoMultiblockable multiblockable) {
                 this.primary = blockEntity;
                 this.multiblock = multiblockable;
                 this.offsetFromPrimary = MultiblockBlock.getOffsetFromPrimary(primaryPos, this.pos, blockEntity.getCachedState().get(Properties.HORIZONTAL_FACING));

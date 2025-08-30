@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.multiblock;
+package dev.turtywurty.industria.multiblock.old;
 
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.util.CachedVoxelShapes;

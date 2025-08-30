@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.multiblock.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
 import dev.turtywurty.industria.command.ConfigCommand;
 import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.config.ServerConfig;

@@ -26,6 +26,10 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
+import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
+import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
@@ -65,46 +69,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, Multiblockable {
+public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, AutoMultiblockable {
     public static final Text TITLE = Industria.containerTitle("electrolyzer");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 1)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 1)
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.ITEM), PortType.input(TransferType.ENERGY))
                     .build(),
 
-            PortRule.when(p -> p.z() == 0)
+            PositionedPortRule.when(p -> p.z() == 0)
                     .on(LocalDirection.BACK)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.x() == -1)
+            PositionedPortRule.when(p -> p.x() == -1)
                     .on(LocalDirection.LEFT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.x() == 1)
+            PositionedPortRule.when(p -> p.x() == 1)
                     .on(LocalDirection.RIGHT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.z() == -1)
+            PositionedPortRule.when(p -> p.z() == -1)
                     .on(LocalDirection.FRONT)
                     .types(PortType.io(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0)
+            PositionedPortRule.when(p -> p.y() == 0)
                     .on(LocalDirection.DOWN)
                     .types(PortType.io(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.z() == -1)
+            PositionedPortRule.when(p -> p.z() == -1)
                     .on(LocalDirection.FRONT)
                     .types(PortType.input(TransferType.FLUID))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0)
+            PositionedPortRule.when(p -> p.y() == 0)
                     .on(LocalDirection.DOWN)
                     .types(PortType.output(TransferType.GAS), PortType.input(TransferType.HEAT))
                     .build()
@@ -531,7 +535,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 }

@@ -26,6 +26,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
@@ -67,21 +68,21 @@ import java.util.List;
 import java.util.Optional;
 
 // TODO: Make this work with temperature and pressure
-public class DigesterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+public class DigesterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("digester");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 4 && p.isCenterColumn())
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 4 && p.isCenterColumn())
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.SLURRY))
                     .build(),
 
-            PortRule.when(p -> p.z() == -1)
+            PositionedPortRule.when(p -> p.z() == -1)
                     .on(LocalDirection.FRONT)
                     .types(PortType.input(TransferType.ENERGY))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.z() == 1)
+            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 1)
                     .on(LocalDirection.BACK)
                     .types(PortType.output(TransferType.FLUID))
                     .build()
@@ -172,7 +173,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.multiblock;
+package dev.turtywurty.industria.multiblock.old;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

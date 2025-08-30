@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.multiblock;
+package dev.turtywurty.industria.multiblock.old;
 
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
@@ -11,14 +11,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class MultiblockIOBlock extends MultiblockBlock implements BlockEntityProvider {
-    public MultiblockIOBlock(Settings settings) {
+public class AutoMultiblockIOBlock extends MultiblockBlock implements BlockEntityProvider {
+    public AutoMultiblockIOBlock(Settings settings) {
         super(settings);
     }
 
     @Override
     public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return BlockEntityTypeInit.MULTIBLOCK_IO.instantiate(pos, state);
+        return BlockEntityTypeInit.AUTO_MULTIBLOCK_IO.instantiate(pos, state);
     }
 
     @Override

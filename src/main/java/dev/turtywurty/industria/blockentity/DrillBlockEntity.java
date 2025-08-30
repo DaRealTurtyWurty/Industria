@@ -17,6 +17,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.DamageTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
@@ -50,31 +51,31 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
+public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, AutoMultiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("drill");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 2)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 2)
                     .on(LocalDirection.BACK)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && (p.x() != 0 || p.z() != 0))
+            PositionedPortRule.when(p -> p.y() == 0 && (p.x() != 0 || p.z() != 0))
                     .on(LocalDirection.DOWN)
                     .types(PortType.output(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 1 && p.x() == -1 && p.z() == 0)
+            PositionedPortRule.when(p -> p.y() == 1 && p.x() == -1 && p.z() == 0)
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 1 && p.x() == 1 && p.z() == 0)
+            PositionedPortRule.when(p -> p.y() == 1 && p.x() == 1 && p.z() == 0)
                     .on(LocalDirection.FRONT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.isCenterColumn() && p.y() == 2)
+            PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 2)
                     .on(LocalDirection.DOWN)
                     .types(PortType.input(TransferType.ENERGY))
                     .build()
@@ -306,7 +307,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

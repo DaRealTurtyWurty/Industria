@@ -15,6 +15,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -46,9 +47,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, Multiblockable {
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.isCenterColumn() && p.y() == 4)
+public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, AutoMultiblockable {
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 4)
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.ITEM))
                     .build()
@@ -391,7 +392,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

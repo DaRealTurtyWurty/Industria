@@ -51,6 +51,7 @@ public class Industria implements ModInitializer {
         EntityTypeInit.init();
         RecipeBookCategoryInit.init();
         MultiblockTypeInit.init();
+        MultiblockDefinitionInit.init();
         SlurryInit.init();
         GasInit.init();
         WoodSetInit.init();

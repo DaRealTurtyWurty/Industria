@@ -1,37 +1,68 @@
 package dev.turtywurty.industria.multiblock;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.function.Predicate;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.turtywurty.industria.util.ExtraCodecs;
 
-public record PortRule(Predicate<LocalPos> positionMatch, EnumSet<LocalDirection> sides, List<PortType> types) {
-    public static Builder when(Predicate<LocalPos> positionMatch) {
-        return new Builder(positionMatch);
+import java.util.*;
+
+/**
+ * Represents a rule for matching ports in a multiblock structure.
+ *
+ * @param sides a set of LocalDirection representing the sides on which the port can be located
+ * @param types a list of PortType that defines the types of ports that can be matched by this rule
+ */
+public record PortRule(Set<LocalDirection> sides, List<PortType> types) {
+    public static final MapCodec<PortRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            ExtraCodecs.setOf(LocalDirection.CODEC).fieldOf("sides").forGetter(PortRule::sides),
+            ExtraCodecs.listOf(PortType.CODEC).fieldOf("types").forGetter(PortRule::types)
+    ).apply(instance, PortRule::new));
+
+    /**
+     * Creates a new PortRule builder.
+     *
+     * @return a new Builder instance
+     */
+    public static PortRule.Builder of() {
+        return new PortRule.Builder();
     }
 
+    /**
+     * Builder class for constructing PortRule instances.
+     */
     public static class Builder {
-        private final Predicate<LocalPos> positionMatch;
         private final EnumSet<LocalDirection> sides = EnumSet.noneOf(LocalDirection.class);
         private final List<PortType> types = new ArrayList<>();
 
-        public Builder(Predicate<LocalPos> positionMatch) {
-            this.positionMatch = positionMatch;
-        }
-
-        public Builder on(LocalDirection... sides) {
+        /**
+         * Adds the specified sides to the rule.
+         *
+         * @param sides the LocalDirection sides to add
+         * @return this Builder instance for chaining
+         */
+        public PortRule.Builder on(LocalDirection... sides) {
             this.sides.addAll(Arrays.asList(sides));
             return this;
         }
 
-        public Builder types(PortType... types) {
+        /**
+         * Adds the specified PortType(s) to the rule.
+         *
+         * @param types the PortType(s) to add
+         * @return this Builder instance for chaining
+         */
+        public PortRule.Builder types(PortType... types) {
             this.types.addAll(Arrays.asList(types));
             return this;
         }
 
+        /**
+         * Builds and returns a new PortRule instance with the specified parameters.
+         *
+         * @return a new PortRule instance
+         */
         public PortRule build() {
-            return new PortRule(positionMatch, EnumSet.copyOf(sides), List.copyOf(types));
+            return new PortRule(EnumSet.copyOf(sides), List.copyOf(types));
         }
     }
 }

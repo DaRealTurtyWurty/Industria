@@ -3,7 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.blockentity.*;
-import dev.turtywurty.industria.multiblock.MultiblockType;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.registry.Registry;
 

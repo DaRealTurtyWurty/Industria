@@ -27,6 +27,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
@@ -95,35 +96,35 @@ import java.util.Optional;
 //                        .incrementProgress()
 //                        .build());
 //    }
-public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("mixer");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 2 && p.isCenterColumn())
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 2 && p.isCenterColumn())
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.FLUID))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
+            PositionedPortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
                     .on(LocalDirection.DOWN)
                     .types(PortType.output(TransferType.SLURRY))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
+            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
                     .on(LocalDirection.RIGHT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
+            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
                     .on(LocalDirection.LEFT)
                     .types(PortType.output(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.y() == 2 && !p.isCenterColumn())
+            PositionedPortRule.when(p -> p.y() == 2 && !p.isCenterColumn())
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.ENERGY))
                     .build(),
-            PortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
+            PositionedPortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
                     .on(LocalDirection.DOWN)
                     .types(PortType.input(TransferType.ENERGY))
                     .build()
@@ -428,7 +429,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

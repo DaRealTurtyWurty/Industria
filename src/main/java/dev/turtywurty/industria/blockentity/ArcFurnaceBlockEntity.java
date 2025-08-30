@@ -20,6 +20,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -49,21 +50,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements Multiblockable, SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoMultiblockable, SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("arc_furnace");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.x() == 3)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.x() == 3)
                     .on(LocalDirection.LEFT)
                     .types(PortType.input(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.z() == 3)
+            PositionedPortRule.when(p -> p.z() == 3)
                     .on(LocalDirection.BACK)
                     .types(PortType.output(TransferType.ITEM))
                     .build(),
 
-            PortRule.when(p -> p.x() == 0)
+            PositionedPortRule.when(p -> p.x() == 0)
                     .on(LocalDirection.RIGHT)
                     .types(PortType.input(TransferType.ENERGY), PortType.input(TransferType.FLUID), PortType.input(TransferType.GAS))
                     .build()
@@ -234,7 +235,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements Multi
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

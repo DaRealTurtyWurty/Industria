@@ -15,6 +15,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
@@ -48,11 +49,11 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, Multiblockable, BlockEntityContentsDropper {
+public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, AutoMultiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("upgrade_station");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> true)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> true)
                     .on(LocalDirection.values())
                     .types(PortType.input(TransferType.ENERGY))
                     .build()
@@ -389,7 +390,7 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

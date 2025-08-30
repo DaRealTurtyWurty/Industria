@@ -27,6 +27,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.multiblock.*;
+import dev.turtywurty.industria.multiblock.old.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ShakingTableRecipe;
 import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
@@ -73,15 +74,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ShakingTableBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, Multiblockable, BlockEntityContentsDropper {
+public class ShakingTableBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
     public static final Text TITLE = Industria.containerTitle("shaking_table");
 
-    private static final List<PortRule> PORT_RULES = List.of(
-            PortRule.when(p -> p.y() == 0)
+    private static final List<PositionedPortRule> PORT_RULES = List.of(
+            PositionedPortRule.when(p -> p.y() == 0)
                     .on(LocalDirection.DOWN)
                     .types(PortType.input(TransferType.ENERGY), PortType.output(TransferType.SLURRY), PortType.input(TransferType.ITEM))
                     .build(),
-            PortRule.when(p -> p.y() == 1)
+            PositionedPortRule.when(p -> p.y() == 1)
                     .on(LocalDirection.UP)
                     .types(PortType.input(TransferType.FLUID), PortType.input(TransferType.ITEM))
                     .build()
@@ -470,7 +471,7 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public List<PortRule> getPortRules() {
+    public List<PositionedPortRule> getPortRules() {
         return PORT_RULES;
     }
 

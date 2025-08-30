@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.blockentity.MultiblockIOBlockEntity;
-import dev.turtywurty.industria.multiblock.Port;
+import dev.turtywurty.industria.blockentity.AutoMultiblockIOBlockEntity;
+import dev.turtywurty.industria.multiblock.old.Port;
 import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.multiblock.TransferType;
 import net.minecraft.client.render.RenderLayer;
@@ -14,13 +14,13 @@ import net.minecraft.util.math.Direction;
 
 import java.util.Map;
 
-public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRenderer<MultiblockIOBlockEntity> {
+public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRenderer<AutoMultiblockIOBlockEntity> {
     public MultiblockIOBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         super(context);
     }
 
     @Override
-    protected void onRender(MultiblockIOBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void onRender(AutoMultiblockIOBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         if(!this.context.getEntityRenderDispatcher().shouldRenderHitboxes())
             return;
 

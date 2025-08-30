@@ -3,8 +3,9 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.MultiblockType;
-import dev.turtywurty.industria.multiblock.Multiblockable;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
+import dev.turtywurty.industria.multiblock.old.Multiblockable;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multiblockable {
+public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements AutoMultiblockable {
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     public RotaryKilnBlockEntity(BlockPos pos, BlockState state) {
@@ -107,8 +108,8 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements Multi
     }
 
     @Override
-    public void breakMultiblock(World world, BlockPos pos) {
-        Multiblockable.super.breakMultiblock(world, pos);
+    public void onMultiblockBreak(World world, BlockPos pos) {
+        AutoMultiblockable.super.onMultiblockBreak(world, pos);
 
         Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
         BlockPos offsetPos = pos.offset(facing);

@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.multiblock.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.util.WireframeExtractor;
 import net.minecraft.block.BlockState;
