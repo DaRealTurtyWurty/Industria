@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
-import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.util.ExtraCodecs;
 
@@ -13,7 +13,7 @@ import java.util.*;
  * @param types a list of PortType that defines the types of ports that can be matched by this rule
  */
 public record PortRule(Set<LocalDirection> sides, List<PortType> types) {
-    public static final MapCodec<PortRule> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    public static final Codec<PortRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.setOf(LocalDirection.CODEC).fieldOf("sides").forGetter(PortRule::sides),
             ExtraCodecs.listOf(PortType.CODEC).fieldOf("types").forGetter(PortRule::types)
     ).apply(instance, PortRule::new));

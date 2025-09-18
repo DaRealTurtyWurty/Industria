@@ -23,5 +23,6 @@ public class BlockEntityRendererInit {
         BlockEntityRendererFactories.register(BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
         BlockEntityRendererFactories.register(BlockEntityTypeInit.EXAMPLE_MULTIBLOCK_CONTROLLER, ExampleMultiblockControllerBlockEntityRenderer::new);
+        BlockEntityRendererFactories.register(BlockEntityTypeInit.MULTIBLOCK_DESIGNER, MultiblockDesignerBlockEntityRenderer::new);
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class AutoMultiblockIOBlock extends MultiblockBlock implements BlockEntityProvider {
+public class AutoMultiblockIOBlock extends AutoMultiblockBlock implements BlockEntityProvider {
     public AutoMultiblockIOBlock(Settings settings) {
         super(settings);
     }

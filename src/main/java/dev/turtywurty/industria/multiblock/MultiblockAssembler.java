@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
+import dev.turtywurty.industria.blockentity.MultiblockIOBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import net.minecraft.block.Block;
 import net.minecraft.server.world.ServerWorld;
@@ -13,16 +14,24 @@ public record MultiblockAssembler(MultiblockDefinition definition, MultiblockMat
             if(Objects.equals(cell.position(), matchResult.controllerPos()))
                 continue;
 
+            boolean placedPort = false;
             for (MultiblockMatcher.MatchResult.ResolvedPort port : matchResult.ports()) {
                 if(port.localX() == cell.localX() && port.localY() == cell.localY() && port.localZ() == cell.localZ()) {
-//                    world.setBlockState(cell.position(), BlockInit.AUTO_MULTIBLOCK_IO.getDefaultState());
-                    // TODO: Create a new multiblock io block that can be set to have certain port types
+                    BlockPos pos = cell.position();
+                    world.setBlockState(pos, BlockInit.AUTO_MULTIBLOCK_IO.getDefaultState());
+                    if(world.getBlockEntity(pos) instanceof MultiblockIOBlockEntity io) {
+                        //io.setPortData(port.something()?);
+                    }
+
+                    placedPort = true;
                     break;
                 }
             }
 
-            BlockPos pos = cell.position();
-            world.setBlockState(pos, BlockInit.MULTIBLOCK_BLOCK.getDefaultState());
+            if(!placedPort) {
+                BlockPos pos = cell.position();
+                world.setBlockState(pos, BlockInit.AUTO_MULTIBLOCK_BLOCK.getDefaultState());
+            }
         }
 
         Block controllerBlock = world.getBlockState(matchResult.controllerPos()).getBlock();

@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.blockentity.ExampleMultiblockControllerBlockEntity;
+import dev.turtywurty.industria.blockentity.MultiblockControllerBlockEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -9,13 +9,13 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 
-public class ExampleMultiblockControllerBlockEntityRenderer extends IndustriaBlockEntityRenderer<ExampleMultiblockControllerBlockEntity> {
+public class ExampleMultiblockControllerBlockEntityRenderer extends IndustriaBlockEntityRenderer<MultiblockControllerBlockEntity> {
     public ExampleMultiblockControllerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         super(context);
     }
 
     @Override
-    protected void onRender(ExampleMultiblockControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void onRender(MultiblockControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
         matrices.translate(0, 1, 0);
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getDebugFilledBox());

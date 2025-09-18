@@ -31,18 +31,18 @@ public record MultiblockDefinition(Identifier id, Vec3i size, Vec3i anchor, Set<
                                    Set<MirrorMode> allowedMirrors, Char2ObjectMap<BlockPredicate> palette,
                                    List<List<String>> pattern, Char2ObjectMap<PortRule> portRules,
                                    boolean replaceAirBlocks, boolean replaceReplaceableBlocks) {
-    private static final Codec<Set<AxisRotation>> ROTATIONS_CODEC = ExtraCodecs.setOf(AxisRotation.CODEC);
-    private static final Codec<Set<MirrorMode>> MIRROR_MODE_CODEC = ExtraCodecs.setOf(MirrorMode.CODEC);
-    private static final Codec<Char2ObjectMap<BlockPredicate>> PALETTE_CODEC = Codec.unboundedMap(
+    public static final Codec<Set<AxisRotation>> ROTATIONS_CODEC = ExtraCodecs.setOf(AxisRotation.CODEC);
+    public static final Codec<Set<MirrorMode>> MIRROR_MODE_CODEC = ExtraCodecs.setOf(MirrorMode.CODEC);
+    public static final Codec<Char2ObjectMap<BlockPredicate>> PALETTE_CODEC = Codec.unboundedMap(
             ExtraCodecs.CHAR_CODEC,
             BlockPredicate.BASE_CODEC
     ).xmap(Char2ObjectOpenHashMap::new, Char2ObjectOpenHashMap::new);
-    private static final Codec<List<List<String>>> PATTERN_CODEC = Codec.list(
+    public static final Codec<List<List<String>>> PATTERN_CODEC = Codec.list(
             Codec.list(Codec.STRING)
     ).xmap(List::copyOf, List::copyOf);
-    private static final Codec<Char2ObjectMap<PortRule>> PORT_RULES_CODEC = Codec.unboundedMap(
+    public static final Codec<Char2ObjectMap<PortRule>> PORT_RULES_CODEC = Codec.unboundedMap(
             ExtraCodecs.CHAR_CODEC,
-            PortRule.CODEC.codec()
+            PortRule.CODEC
     ).xmap(Char2ObjectOpenHashMap::new, Char2ObjectOpenHashMap::new);
 
     public static final MapCodec<MultiblockDefinition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(

@@ -29,5 +29,6 @@ public class ScreenInit {
         HandledScreens.register(ScreenHandlerTypeInit.SHAKING_TABLE, ShakingTableScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorScreen::new);
         HandledScreens.register(ScreenHandlerTypeInit.ARC_FURNACE, ArcFurnaceScreen::new);
+        HandledScreens.register(ScreenHandlerTypeInit.MULTIBLOCK_DESIGNER, MultiblockDesignerScreen::new);
     }
 }

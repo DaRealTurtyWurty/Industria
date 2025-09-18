@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.util.WireframeExtractor;
 import net.minecraft.block.BlockState;
@@ -248,10 +248,10 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
             return false;
 
         BlockState state = world.getBlockState(hitPos);
-        if (state.isAir() || !state.isOf(BlockInit.MULTIBLOCK_BLOCK) || !world.getWorldBorder().contains(hitPos))
+        if (state.isAir() || !state.isOf(BlockInit.AUTO_MULTIBLOCK_BLOCK) || !world.getWorldBorder().contains(hitPos))
             return false;
 
-        BlockPos primaryPos = MultiblockBlock.getPrimaryPos(world, hitPos);
+        BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(world, hitPos);
         return Objects.equals(primaryPos, bePos);
     }
 

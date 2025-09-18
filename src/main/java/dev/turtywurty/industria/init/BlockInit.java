@@ -2,8 +2,8 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
-import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
 import net.minecraft.block.*;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -180,9 +180,6 @@ public class BlockInit {
     public static final OilPumpJackBlock OIL_PUMP_JACK = registerWithItemCopy("oil_pump_jack",
             OilPumpJackBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
-    public static final MultiblockBlock MULTIBLOCK_BLOCK = registerWithCopy("multiblock",
-            MultiblockBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
-
     public static final DrillBlock DRILL = registerWithItemCopy("drill",
             DrillBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
@@ -228,7 +225,10 @@ public class BlockInit {
     public static final DigesterBlock DIGESTER = registerWithItemCopy("digester",
             DigesterBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
-    public static final AutoMultiblockIOBlock AUTO_MULTIBLOCK_IO = registerWithCopy("multiblock_io",
+    public static final AutoMultiblockBlock AUTO_MULTIBLOCK_BLOCK = registerWithCopy("auto_multiblock",
+            AutoMultiblockBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final AutoMultiblockIOBlock AUTO_MULTIBLOCK_IO = registerWithCopy("auto_multiblock_io",
             AutoMultiblockIOBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static final ClarifierBlock CLARIFIER = registerWithItemCopy("clarifier",
@@ -263,6 +263,12 @@ public class BlockInit {
 
     public static final ExampleMultiblockControllerBlock EXAMPLE_MULTIBLOCK_CONTROLLER = registerWithItemCopy("example_multiblock_controller",
             ExampleMultiblockControllerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final MultiblockDesignerBlock MULTIBLOCK_DESIGNER = registerWithItemCopy("multiblock_designer",
+            MultiblockDesignerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+
+    public static final MultiblockPieceBlock MULTIBLOCK_PIECE = registerWithItemCopy("multiblock_piece",
+            MultiblockPieceBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
 
     public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
         return registerBlock(name, constructor.apply(

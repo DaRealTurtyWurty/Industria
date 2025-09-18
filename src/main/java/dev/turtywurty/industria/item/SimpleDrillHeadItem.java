@@ -47,7 +47,7 @@ public class SimpleDrillHeadItem extends Item implements DrillHeadable {
         }
 
         boolean isThis = false;
-        if (state.isOf(BlockInit.MULTIBLOCK_BLOCK) || state.isOf(BlockInit.DRILL)) {
+        if (state.isOf(BlockInit.AUTO_MULTIBLOCK_BLOCK) || state.isOf(BlockInit.DRILL)) {
             drillYOffset -= 0.1F;
             isThis = true;
         }

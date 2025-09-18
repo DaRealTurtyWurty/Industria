@@ -70,8 +70,8 @@ public interface AutoMultiblockable extends Multiblockable {
         }
 
         for (BlockPos position : checkPositions) {
-            Vec3i offset = MultiblockBlock.getOffsetFromPrimary(pos, position, facing);
-            Block toSet = BlockInit.MULTIBLOCK_BLOCK;
+            Vec3i offset = AutoMultiblockBlock.getOffsetFromPrimary(pos, position, facing);
+            Block toSet = BlockInit.AUTO_MULTIBLOCK_BLOCK;
             for (Direction direction : Direction.values()) {
                 Map<Direction, Port> ports = getPorts(offset, direction);
                 if (ports.isEmpty())
@@ -105,7 +105,7 @@ public interface AutoMultiblockable extends Multiblockable {
 
         for (BlockPos machinePos : getMultiblockPositions()) {
             BlockState blockState = world.getBlockState(machinePos);
-            if (!blockState.isOf(BlockInit.MULTIBLOCK_BLOCK) && !blockState.isOf(BlockInit.AUTO_MULTIBLOCK_IO))
+            if (!blockState.isOf(BlockInit.AUTO_MULTIBLOCK_BLOCK) && !blockState.isOf(BlockInit.AUTO_MULTIBLOCK_IO))
                 continue;
 
             world.breakBlock(machinePos, false);

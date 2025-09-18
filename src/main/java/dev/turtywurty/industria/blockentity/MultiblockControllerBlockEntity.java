@@ -12,10 +12,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ExampleMultiblockControllerBlockEntity extends UpdatableBlockEntity {
+public class MultiblockControllerBlockEntity extends UpdatableBlockEntity {
     private final Set<BlockPos> positions = new HashSet<>();
 
-    public ExampleMultiblockControllerBlockEntity(BlockPos pos, BlockState state) {
+    public MultiblockControllerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.EXAMPLE_MULTIBLOCK_CONTROLLER, pos, state);
     }
 
@@ -33,7 +33,7 @@ public class ExampleMultiblockControllerBlockEntity extends UpdatableBlockEntity
     }
 
     public void addPositions(Collection<BlockPos> positions) {
-        if (!hasWorld() || world.isClient())
+        if (this.world == null || this.world.isClient())
             return;
 
         this.positions.addAll(positions);

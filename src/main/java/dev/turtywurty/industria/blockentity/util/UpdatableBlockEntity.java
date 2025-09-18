@@ -9,8 +9,6 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,11 +32,7 @@ public class UpdatableBlockEntity extends BlockEntity {
     public void update() {
         this.isDirty = true;
         if (!shouldWaitForEndTick()) {
-            markDirty();
-
-            if (this.world != null && !this.world.isClient) {
-                this.world.updateListeners(this.pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
-            }
+            forceUpdate();
         }
     }
 
@@ -48,13 +42,16 @@ public class UpdatableBlockEntity extends BlockEntity {
 
     public void endTick() {
         if (this.isDirty) {
-            this.isDirty = false;
+            forceUpdate();
+        }
+    }
 
-            markDirty();
+    public void forceUpdate() {
+        this.isDirty = false;
+        markDirty();
 
-            if (this.world != null) {
-                this.world.updateListeners(this.pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
-            }
+        if (this.world != null && !this.world.isClient) {
+            this.world.updateListeners(this.pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
         }
     }
 }

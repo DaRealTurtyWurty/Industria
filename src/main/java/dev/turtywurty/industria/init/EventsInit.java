@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.command.ConfigCommand;
 import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.config.ServerConfig;
@@ -57,7 +57,7 @@ public class EventsInit {
         });
 
         ServerTickEvents.START_WORLD_TICK.register(world -> {
-            MultiblockBlock.SHAPE_CACHE.clear();
+            AutoMultiblockBlock.SHAPE_CACHE.clear();
 
             for (PipeNetworkManager<?, ?> manager : WorldPipeNetworks.getOrCreate(world).getPipeNetworkManagers()) {
                 manager.tick(world);

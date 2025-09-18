@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.multiblock.old.MultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
@@ -16,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class AutoMultiblockIOBlockEntity extends BlockEntity implements TickableBlockEntity {
+public class MultiblockIOBlockEntity extends BlockEntity implements TickableBlockEntity {
     private BlockEntity primary = null;
     private AutoMultiblockable multiblock = null;
     private Vec3i offsetFromPrimary = null;
 
-    public AutoMultiblockIOBlockEntity(BlockPos pos, BlockState state) {
+    public MultiblockIOBlockEntity(BlockPos pos, BlockState state) {
         super(BlockEntityTypeInit.AUTO_MULTIBLOCK_IO, pos, state);
     }
 
@@ -31,7 +31,7 @@ public class AutoMultiblockIOBlockEntity extends BlockEntity implements Tickable
             return;
 
         if(this.multiblock == null) {
-            BlockPos primaryPos = MultiblockBlock.getPrimaryPos(this.world, this.pos);
+            BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(this.world, this.pos);
             if(primaryPos == null)
                 return;
 
@@ -39,7 +39,7 @@ public class AutoMultiblockIOBlockEntity extends BlockEntity implements Tickable
             if(blockEntity instanceof AutoMultiblockable multiblockable) {
                 this.primary = blockEntity;
                 this.multiblock = multiblockable;
-                this.offsetFromPrimary = MultiblockBlock.getOffsetFromPrimary(primaryPos, this.pos, blockEntity.getCachedState().get(Properties.HORIZONTAL_FACING));
+                this.offsetFromPrimary = AutoMultiblockBlock.getOffsetFromPrimary(primaryPos, this.pos, blockEntity.getCachedState().get(Properties.HORIZONTAL_FACING));
             }
         }
 

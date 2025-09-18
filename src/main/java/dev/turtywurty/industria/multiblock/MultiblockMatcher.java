@@ -1,9 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
@@ -25,6 +22,9 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
     }
 
     public Optional<MatchResult> tryMatch(ServerWorld world, BlockPos controllerPos, boolean skipControllerCheck) {
+        MatchResult bestResult = null;
+        int smallestProblemCount = Integer.MAX_VALUE;
+
         for (AxisRotation rotation : definition.rotations()) {
             for (MirrorMode mirrorMode : definition.allowedMirrors()) {
                 var transform = new MultiblockTransform(rotation, mirrorMode);
@@ -32,50 +32,27 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                 Vec3i anchor = definition.anchor();
 
                 BlockPos originPos = controllerPos.subtract(transform.applyToLocal(size, anchor));
-                if (matches(world, originPos, transform)) {
-                    return Optional.of(createResult(world, controllerPos, originPos, transform));
+                MatchResult result = createResult(world, controllerPos, originPos, transform, skipControllerCheck);
+                int problemCount = result.problems().size();
+                if (problemCount < smallestProblemCount) {
+                    smallestProblemCount = problemCount;
+                    bestResult = result;
                 }
+
+                if (problemCount == 0)
+                    return Optional.of(result);
             }
         }
 
-        return Optional.empty();
-    }
-
-    private boolean matches(ServerWorld world, BlockPos originPos, MultiblockTransform transform) {
-        Vec3i size = definition.size();
-
-        boolean failed = false;
-        for (int y = 0; y < size.getY(); y++) {
-            for (int z = 0; z < size.getZ(); z++) {
-                for (int x = 0; x < size.getX(); x++) {
-                    char character = definition.getCharAt(x, (size.getY() - 1) - y, z);
-                    BlockPredicate predicate = definition.palette().get(character);
-                    if (predicate == null || predicate == BlockPredicate.alwaysTrue())
-                        continue;
-
-                    Vec3i localPos = transform.applyToLocal(size, x, y, z);
-                    BlockPos pos = originPos.add(localPos);
-
-                    if (!predicate.test(world, pos)) {
-//                        for (ServerPlayerEntity player : world.getPlayers()) {
-//                            player.sendMessage((Text.literal("Expected '" + character + "' at " + pos + ", but found '" + world.getBlockState(pos).getBlock().getTranslationKey() + "'")));
-//                        }
-
-                        world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, Blocks.BARRIER.getDefaultState()), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0, 0, 0.1);
-                        failed = true;
-                    }
-                }
-            }
-        }
-
-        return !failed;
+        return Optional.ofNullable(bestResult);
     }
 
     private MatchResult createResult(
             StructureWorldAccess world,
             BlockPos controllerPos,
             BlockPos originPos,
-            MultiblockTransform transform) {
+            MultiblockTransform transform,
+            boolean skipControllerCheck) {
         var builder = new MatchResult.Builder()
                 .definitionId(definition.id())
                 .controllerPos(controllerPos)
@@ -83,11 +60,10 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                 .origin(originPos)
                 .size(definition.size());
 
-        List<MatchResult.Problem> problems = new ArrayList<>();
         for (int y = 0; y < definition.size().getY(); y++) {
             for (int z = 0; z < definition.size().getZ(); z++) {
                 for (int x = 0; x < definition.size().getX(); x++) {
-                    char character = definition.getCharAt(x, y, z);
+                    char character = definition.getCharAt(x, (definition.size().getY() - 1) - y, z);
                     BlockPredicate predicate = definition.palette().get(character);
                     if (predicate == null || predicate == BlockPredicate.alwaysTrue())
                         continue;
@@ -98,10 +74,16 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
 
                     builder.addCell(worldPos, localPos.getX(), localPos.getY(), localPos.getZ(), character, state);
 
+                    boolean skipCheck = skipControllerCheck && worldPos.equals(controllerPos);
+                    if (!skipCheck && !predicate.test(world, worldPos)) {
+                        builder.addProblem(new MatchResult.MismatchProblem(worldPos, character, state));
+                    }
+
                     PortRule portRule = definition.portRules().get(character);
                     if (portRule != null) {
                         for (LocalDirection face : portRule.sides()) {
-                            Direction absoluteFace = face.toWorld(face);
+                            Direction baseDir = face.toWorld(Direction.NORTH);
+                            Direction absoluteFace = transform.applyToFace(baseDir);
                             List<PortType> portTypes = portRule.types();
                             if (portTypes.isEmpty())
                                 continue;
@@ -129,8 +111,6 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                 }
             }
         }
-
-        problems.forEach(builder::addProblem);
 
         return builder.build();
     }

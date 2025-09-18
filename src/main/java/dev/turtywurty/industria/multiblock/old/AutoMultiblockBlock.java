@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MultiblockBlock extends Block {
+public class AutoMultiblockBlock extends Block {
     public static final CachedVoxelShapes SHAPE_CACHE = new CachedVoxelShapes((world, pos) -> {
         MultiblockData data = getMultiblockData(world, pos);
         if (data == null || data.primaryPos() == null)
@@ -38,7 +38,7 @@ public class MultiblockBlock extends Block {
         return shape != null ? shape.offset(-offset.getX(), -offset.getY(), -offset.getZ()) : VoxelShapes.empty();
     });
 
-    public MultiblockBlock(Settings settings) {
+    public AutoMultiblockBlock(Settings settings) {
         super(settings);
     }
 

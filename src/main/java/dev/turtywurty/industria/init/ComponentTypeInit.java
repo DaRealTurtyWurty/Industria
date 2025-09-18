@@ -5,6 +5,7 @@ import dev.turtywurty.industria.component.FluidPocketsComponent;
 import net.minecraft.component.ComponentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.function.UnaryOperator;
 
@@ -14,6 +15,11 @@ public class ComponentTypeInit {
                     .codec(FluidPocketsComponent.CODEC)
                     .packetCodec(FluidPocketsComponent.PACKET_CODEC)
                     .cache());
+
+    public static final ComponentType<BlockPos> MULTIBLOCK_PIECE_POS =
+            register("multiblock_piece_pos", listBuilder -> listBuilder
+                    .codec(BlockPos.CODEC)
+                    .packetCodec(BlockPos.PACKET_CODEC));
 
     public static <T> ComponentType<T> register(String name, UnaryOperator<ComponentType.Builder<T>> builder) {
         return Registry.register(Registries.DATA_COMPONENT_TYPE, Industria.id(name), builder.apply(ComponentType.builder()).build());
