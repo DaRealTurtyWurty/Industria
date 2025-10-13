@@ -125,7 +125,6 @@
   "death.attack.industria.drill": "%1$s was drilled to death",
   "entity.industria.rubber_boat": "Rubber Boat",
   "entity.industria.rubber_chest_boat": "Rubber Chest Boat",
-  "error.industria.multiblock.no_valid_combination": "No valid multiblock combination found",
   "gui.industria.battery.charge_mode_button.tooltip": "Charge/Discharge",
   "industria.overflow_method.pause": "Pause",
   "industria.overflow_method.spillage": "Spillage",

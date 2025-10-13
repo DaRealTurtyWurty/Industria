@@ -6,7 +6,6 @@ import dev.turtywurty.fabricslurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
-import dev.turtywurty.industria.multiblock.MultiblockController;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -29,7 +28,6 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder translationBuilder) {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
-        addText(translationBuilder, MultiblockController.NO_VALID_COMBINATION, "No valid multiblock combination found");
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             WoodSetDatagen.generateEnglishLanguage(woodSet, translationBuilder);

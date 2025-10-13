@@ -6,6 +6,8 @@ import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.init.transfer_types.TransferTypesInit;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.init.worldgen.FeatureInit;
+import dev.turtywurty.industria.init.worldgen.StructurePieceTypeInit;
+import dev.turtywurty.industria.init.worldgen.StructureTypeInit;
 import dev.turtywurty.industria.init.worldgen.TrunkPlacerTypeInit;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
@@ -65,6 +67,8 @@ public class Industria implements ModInitializer {
         FluidAttributesInit.init();
         FluidDataInit.init();
         GasAttributesInit.init();
+        StructurePieceTypeInit.init();
+        StructureTypeInit.init();
 
         LOGGER.info("Industria has finished loading!");
     }

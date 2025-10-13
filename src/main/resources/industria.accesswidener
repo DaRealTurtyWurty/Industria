@@ -21,3 +21,4 @@ accessible    method    net/minecraft/client/gui/DrawContext    drawSpriteNineSl
 accessible    method    net/minecraft/client/gui/DrawContext    drawInnerSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Scaling$NineSlice;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
 accessible    method    net/minecraft/client/gui/DrawContext    drawTexturedQuad    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
 accessible field net/minecraft/data/loottable/BlockLootTableGenerator SAPLING_DROP_CHANCE [F
+accessible method net/minecraft/world/gen/densityfunction/DensityFunctions createSurfaceNoiseRouter (Lnet/minecraft/registry/RegistryEntryLookup;Lnet/minecraft/registry/RegistryEntryLookup;ZZ)Lnet/minecraft/world/gen/noise/NoiseRouter;

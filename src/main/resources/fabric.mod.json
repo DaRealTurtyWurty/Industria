@@ -38,6 +38,8 @@
 		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*",
-		"heatapi": ">=1.0.1"
+		"heatapi": ">=1.1.0",
+        "gasapi": ">=1.1.0",
+        "slurryapi": ">=1.1.0"
 	}
 }

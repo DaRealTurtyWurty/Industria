@@ -4,8 +4,7 @@ import dev.turtywurty.industria.datagen.*;
 import dev.turtywurty.industria.datagen.generator.IndustriaDamageTypeGenerator;
 import dev.turtywurty.industria.datagen.generator.IndustriaWorldGenerator;
 import dev.turtywurty.industria.init.DamageTypeInit;
-import dev.turtywurty.industria.init.worldgen.ConfiguredFeatureInit;
-import dev.turtywurty.industria.init.worldgen.PlacedFeatureInit;
+import dev.turtywurty.industria.init.worldgen.*;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.minecraft.registry.RegistryBuilder;
@@ -32,5 +31,7 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		registryBuilder.addRegistry(RegistryKeys.CONFIGURED_FEATURE, ConfiguredFeatureInit::bootstrap);
 		registryBuilder.addRegistry(RegistryKeys.PLACED_FEATURE, PlacedFeatureInit::bootstrap);
 		registryBuilder.addRegistry(RegistryKeys.DAMAGE_TYPE, DamageTypeInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.DIMENSION_TYPE, DimensionTypeInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.BIOME, BiomeInit::bootstrap);
 	}
 }

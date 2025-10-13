@@ -1,10 +1,11 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.multiblock.MultiblockBlock;
 import dev.turtywurty.industria.command.ConfigCommand;
 import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
+import dev.turtywurty.industria.command.TpDimCommand;
 import dev.turtywurty.industria.config.ServerConfig;
+import dev.turtywurty.industria.multiblock.MultiblockBlock;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -53,6 +55,12 @@ public class EventsInit {
                     CommandManager.literal(Industria.MOD_ID)
                             .requires(source -> source.hasPermissionLevel(3))
                             .then(CommandManager.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
+            );
+
+            dispatcher.register(
+                    CommandManager.literal(Industria.MOD_ID)
+                            .requires(source -> source.hasPermissionLevel(3) && FabricLoader.getInstance().isDevelopmentEnvironment())
+                            .then(TpDimCommand.register())
             );
         });
 
