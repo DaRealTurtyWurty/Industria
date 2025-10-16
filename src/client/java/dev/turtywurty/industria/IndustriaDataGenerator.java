@@ -22,6 +22,7 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		pack.addProvider(IndustriaItemTagProvider::new);
 		pack.addProvider(IndustriaFluidTagProvider::new);
 		pack.addProvider(IndustriaEntityTypeTagProvider::new);
+		pack.addProvider(IndustriaBiomeTagProvider::new);
 		pack.addProvider(IndustriaWorldGenerator::new);
 		pack.addProvider(IndustriaDamageTypeGenerator::new);
 	}
@@ -33,5 +34,8 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 		registryBuilder.addRegistry(RegistryKeys.DAMAGE_TYPE, DamageTypeInit::bootstrap);
         registryBuilder.addRegistry(RegistryKeys.DIMENSION_TYPE, DimensionTypeInit::bootstrap);
         registryBuilder.addRegistry(RegistryKeys.BIOME, BiomeInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.STRUCTURE, StructureInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.STRUCTURE_SET, StructureSetInit::bootstrap);
+        registryBuilder.addRegistry(RegistryKeys.CHUNK_GENERATOR_SETTINGS, ChunkGeneratorSettingsInit::bootstrap);
 	}
 }

@@ -22,3 +22,9 @@ accessible    method    net/minecraft/client/gui/DrawContext    drawInnerSprite 
 accessible    method    net/minecraft/client/gui/DrawContext    drawTexturedQuad    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
 accessible field net/minecraft/data/loottable/BlockLootTableGenerator SAPLING_DROP_CHANCE [F
 accessible method net/minecraft/world/gen/densityfunction/DensityFunctions createSurfaceNoiseRouter (Lnet/minecraft/registry/RegistryEntryLookup;Lnet/minecraft/registry/RegistryEntryLookup;ZZ)Lnet/minecraft/world/gen/noise/NoiseRouter;
+accessible class net/minecraft/world/biome/source/MultiNoiseBiomeSourceParameterList$Preset$BiomeSourceFunction
+accessible field net/minecraft/world/gen/densityfunction/DensityFunctions SHIFT_X Lnet/minecraft/registry/RegistryKey;
+accessible field net/minecraft/world/gen/densityfunction/DensityFunctions SHIFT_Z Lnet/minecraft/registry/RegistryKey;
+accessible field net/minecraft/world/gen/densityfunction/DensityFunctions Y Lnet/minecraft/registry/RegistryKey;
+accessible class net/minecraft/world/gen/densityfunction/DensityFunctionTypes$ShiftedNoise
+accessible field net/minecraft/world/biome/source/MultiNoiseBiomeSourceParameterList$Preset BY_IDENTIFIER Ljava/util/Map;

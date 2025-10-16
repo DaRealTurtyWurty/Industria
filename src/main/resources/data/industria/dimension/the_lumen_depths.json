@@ -9,8 +9,32 @@
         {
           "biome": "industria:the_lumen_depths",
           "parameters": {
-            "temperature": 0,
-            "humidity": 0,
+            "temperature": -0.5,
+            "humidity": 0.6,
+            "continentalness": 0,
+            "erosion": 0,
+            "weirdness": 0,
+            "depth": -0.1,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "industria:reactor_basin",
+          "parameters": {
+            "temperature": 0.7,
+            "humidity": 0.4,
+            "continentalness": 0,
+            "erosion": 0.1,
+            "weirdness": 0.0375,
+            "depth": 0.015,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "industria:luminous_grove",
+          "parameters": {
+            "temperature": -0.3,
+            "humidity": 0.125,
             "continentalness": 0,
             "erosion": 0,
             "weirdness": 0,

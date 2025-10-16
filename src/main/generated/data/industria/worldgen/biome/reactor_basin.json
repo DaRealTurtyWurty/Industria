@@ -1,14 +1,14 @@
 {
   "carvers": [],
-  "downfall": 0.8,
+  "downfall": 0.6,
   "effects": {
-    "fog_color": 12638463,
-    "foliage_color": 8960853,
-    "grass_color": 8960853,
+    "fog_color": 4881572,
+    "foliage_color": 2841666,
+    "grass_color": 4161376,
     "mood_sound": {
       "block_search_extent": 8,
-      "offset": 2.0,
-      "sound": "minecraft:entity.goat.screaming.ambient",
+      "offset": 1.5,
+      "sound": "minecraft:entity.elder_guardian.ambient",
       "tick_delay": 6000
     },
     "music": [
@@ -17,7 +17,7 @@
           "max_delay": 24000,
           "min_delay": 12000,
           "replace_current_music": false,
-          "sound": "minecraft:entity.cat.purreow"
+          "sound": "minecraft:music_disc.otherside"
         },
         "weight": 1
       }
@@ -26,34 +26,34 @@
     "particle": {
       "options": {
         "type": "minecraft:dust",
-        "color": 255,
+        "color": 3123360,
         "scale": 1.0
       },
-      "probability": 0.002
+      "probability": 0.0015
     },
-    "sky_color": 7843327,
-    "water_color": 4159204,
-    "water_fog_color": 329011
+    "sky_color": 5272480,
+    "water_color": 1916255,
+    "water_fog_color": 1057331
   },
   "features": [],
-  "has_precipitation": false,
+  "has_precipitation": true,
   "spawn_costs": {},
   "spawners": {
     "ambient": [],
-    "axolotls": [
-      {
-        "type": "minecraft:axolotl",
-        "maxCount": 2,
-        "minCount": 1,
-        "weight": 8
-      }
-    ],
+    "axolotls": [],
     "creature": [],
     "misc": [],
     "monster": [],
     "underground_water_creature": [],
     "water_ambient": [],
-    "water_creature": []
+    "water_creature": [
+      {
+        "type": "minecraft:glow_squid",
+        "maxCount": 4,
+        "minCount": 2,
+        "weight": 8
+      }
+    ]
   },
-  "temperature": 0.3
+  "temperature": 1.5
 }

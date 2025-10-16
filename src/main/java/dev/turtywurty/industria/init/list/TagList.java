@@ -7,6 +7,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.biome.Biome;
 
 @SuppressWarnings("UnstableApiUsage")
 public class TagList {
@@ -34,6 +35,14 @@ public class TagList {
 
         public static TagKey<Fluid> of(String id) {
             return TagKey.of(RegistryKeys.FLUID, Industria.id(id));
+        }
+    }
+
+    public static class Biomes {
+        public static final TagKey<Biome> FLOATING_ORB_BIOMES = of("has_structure/floating_orb");
+
+        public static TagKey<Biome> of(String id) {
+            return TagKey.of(RegistryKeys.BIOME, Industria.id(id));
         }
     }
 }

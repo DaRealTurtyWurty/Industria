@@ -5,6 +5,7 @@
   "mixins": [
     "AbstractBlockStateMixin",
     "BlockEntityTypeAccessor",
+    "ShiftedNoiseInvoker",
     "fluid.AbstractBoatEntityMixin",
     "fluid.BoatDispenserBehaviorMixin",
     "fluid.BucketItemMixin",

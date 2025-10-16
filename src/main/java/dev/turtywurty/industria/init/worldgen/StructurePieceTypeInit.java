@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.init.worldgen;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.worldgen.feature.FloatingOrbStructure;
+import dev.turtywurty.industria.worldgen.structure.FloatingOrbStructure;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.structure.StructurePieceType;

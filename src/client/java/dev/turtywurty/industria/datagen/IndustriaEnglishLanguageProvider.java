@@ -5,6 +5,7 @@ import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.init.worldgen.BiomeInit;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
@@ -17,6 +18,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.world.biome.Biome;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,6 +30,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder translationBuilder) {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
+        addBiome(translationBuilder, BiomeInit.LUMEN_DEPTHS, "The Lumen Depths");
+        addBiome(translationBuilder, BiomeInit.REACTOR_BASIN, "The Reactor Basin");
+        addBiome(translationBuilder, BiomeInit.LUMINOUS_GROVE, "The Luminous Grove");
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             WoodSetDatagen.generateEnglishLanguage(woodSet, translationBuilder);
@@ -314,5 +319,9 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         } else {
             throw new IllegalArgumentException("Slurry name must be translatable! " + name);
         }
+    }
+
+    private static void addBiome(TranslationBuilder translationBuilder, RegistryKey<Biome> key, String value) {
+        translationBuilder.add(key.getValue().toTranslationKey("biome"), value);
     }
 }

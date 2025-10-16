@@ -1,9 +1,14 @@
 {
   "type": "industria:floating_orb",
   "biomes": "#industria:has_structure/floating_orb",
+  "chance_of_second_block": 0.5,
+  "hollow_chance": 0.75,
+  "radius": {
+    "type": "minecraft:uniform",
+    "max_inclusive": 20,
+    "min_inclusive": 5
+  },
   "spawn_overrides": {},
-  "step": "surface_structures",
-  "terrain_adaptation": "none",
   "state1": {
     "type": "minecraft:simple_state_provider",
     "state": {
@@ -16,28 +21,7 @@
       "Name": "minecraft:cobblestone"
     }
   },
-  "radius": {
-    "type": "minecraft:uniform",
-    "min_inclusive": 5,
-    "max_inclusive": 40
-  },
-  "y_offset": {
-    "type": "minecraft:uniform",
-    "min_inclusive": {
-      "absolute": 5
-    },
-    "max_inclusive": {
-      "absolute": 20
-    }
-  },
-  "chance_of_second_block": 0.1,
-  "hollow_chance": 0.75,
-  "vine_chance": 0.6,
-  "vine_length": {
-    "type": "minecraft:uniform",
-    "min_inclusive": 5,
-    "max_inclusive": 50
-  },
+  "step": "surface_structures",
   "vine_block": {
     "type": "minecraft:simple_state_provider",
     "state": {
@@ -49,6 +33,21 @@
         "up": "false",
         "west": "false"
       }
+    }
+  },
+  "vine_chance": 0.6,
+  "vine_length": {
+    "type": "minecraft:uniform",
+    "max_inclusive": 50,
+    "min_inclusive": 5
+  },
+  "y_offset": {
+    "type": "minecraft:uniform",
+    "max_inclusive": {
+      "absolute": 20
+    },
+    "min_inclusive": {
+      "absolute": 5
     }
   }
 }

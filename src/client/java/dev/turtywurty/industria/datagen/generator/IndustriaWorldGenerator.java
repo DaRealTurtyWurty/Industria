@@ -18,6 +18,9 @@ public class IndustriaWorldGenerator extends FabricDynamicRegistryProvider {
         entries.addAll(registries.getOrThrow(RegistryKeys.PLACED_FEATURE));
         entries.addAll(registries.getOrThrow(RegistryKeys.DIMENSION_TYPE));
         entries.addAll(registries.getOrThrow(RegistryKeys.BIOME));
+        entries.addAll(registries.getOrThrow(RegistryKeys.STRUCTURE));
+        entries.addAll(registries.getOrThrow(RegistryKeys.STRUCTURE_SET));
+        entries.addAll(registries.getOrThrow(RegistryKeys.CHUNK_GENERATOR_SETTINGS));
     }
 
     @Override

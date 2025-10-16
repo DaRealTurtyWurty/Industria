@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.worldgen.feature;
+package dev.turtywurty.industria.worldgen.structure;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -19,15 +19,17 @@ import net.minecraft.util.math.floatprovider.FloatProvider;
 import net.minecraft.util.math.intprovider.IntProvider;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.HeightLimitView;
-import net.minecraft.world.Heightmap;
 import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.gen.HeightContext;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.chunk.VerticalBlockSample;
 import net.minecraft.world.gen.heightprovider.HeightProvider;
+import net.minecraft.world.gen.noise.NoiseConfig;
 import net.minecraft.world.gen.stateprovider.BlockStateProvider;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.StructureType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class FloatingOrbStructure extends Structure {
@@ -70,57 +72,119 @@ public class FloatingOrbStructure extends Structure {
         this.vineState = vineState;
     }
 
+    private record AirPocket(int minY, int maxY) {
+    }
+
+    private AirPocket findLargeOpenPocket(Structure.Context context, int x, int z, int minPocketHeight) {
+        VerticalBlockSample column = context.chunkGenerator().getColumnSample(x, z, context.world(), context.noiseConfig());
+        int bottomY = context.world().getBottomY();
+        int topY = context.world().getTopYInclusive() - 1;
+
+        List<AirPocket> pockets = new ArrayList<>();
+        int continuousAir = 0;
+        int pocketStart = -1;
+
+        for (int y = topY; y >= bottomY; y--) {
+            BlockState state = column.getState(y);
+
+            if (state.isReplaceable()) {
+                if (continuousAir == 0) {
+                    pocketStart = y;
+                }
+
+                continuousAir++;
+            } else {
+                if (continuousAir >= minPocketHeight) {
+                    pockets.add(new AirPocket(pocketStart, pocketStart + continuousAir - 1));
+                }
+                continuousAir = 0;
+            }
+        }
+
+        // Check for pocket at the very bottom
+        if (continuousAir >= minPocketHeight) {
+            pockets.add(new AirPocket(pocketStart, pocketStart + continuousAir - 1));
+        }
+
+        if (pockets.isEmpty())
+            return null;
+
+        Random random = context.random();
+        return pockets.get(random.nextInt(pockets.size()));
+    }
+
+    private boolean isPocketWideEnough(Structure.Context context, int centerX, int centerZ, int pocketMinY, int pocketMaxY, int radius) {
+        ChunkGenerator generator = context.chunkGenerator();
+        HeightLimitView world = context.world();
+        NoiseConfig noise = context.noiseConfig();
+
+        // How far out to sample (radius + a small buffer)
+        int checkDistance = radius + 1;
+        int step = Math.max(1, checkDistance / 4); // sample at least 4 points in each direction
+        for (int dx = -checkDistance; dx <= checkDistance; dx += step) {
+            for (int dz = -checkDistance; dz <= checkDistance; dz += step) {
+                if (dx * dx + dz * dz > checkDistance * checkDistance)
+                    continue; // outside sphere bounds
+
+                VerticalBlockSample col = generator.getColumnSample(centerX + dx, centerZ + dz, world, noise);
+                if (!isColumnAirBetween(col, pocketMinY, pocketMaxY))
+                    return false; // touches a wall
+            }
+        }
+
+        return true; // all surrounding columns are mostly air
+    }
+
+    private boolean isColumnAirBetween(VerticalBlockSample col, int minY, int maxY) {
+        for (int y = minY; y <= maxY; y++) {
+            // We only care if it's NOT air. If it's fluid (water/lava) it'll still generate in it.
+            BlockState state = col.getState(y);
+            if (!state.isAir() && !state.isReplaceable())
+                return false; // Found a solid wall block in the pocket's range
+        }
+
+        return true;
+    }
+
     @Override
     protected Optional<StructurePosition> getStructurePosition(Context context) {
-        ChunkGenerator chunkGenerator = context.chunkGenerator();
         ChunkPos chunkPos = context.chunkPos();
-        HeightLimitView worldView = context.world();
         Random random = context.random();
+        int chunkStartX = chunkPos.getStartX();
+        int chunkStartZ = chunkPos.getStartZ();
 
         int sampledRadius = Math.max(1, this.radius.get(random));
-        int vineLengthValue = Math.max(0, this.vineLength.get(random));
+        for (int attempt = 0; attempt < 10; attempt++) {
+            int centerX = chunkStartX + random.nextInt(16);
+            int centerZ = chunkStartZ + random.nextInt(16);
 
-        int centerX = chunkPos.getStartX() + 8;
-        int centerZ = chunkPos.getStartZ() + 8;
+            AirPocket pocket = findLargeOpenPocket(context, centerX, centerZ, sampledRadius * 2);
+            if (pocket == null)
+                continue;
 
-        int surfaceY = chunkGenerator.getHeightInGround(centerX, centerZ, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, worldView, context.noiseConfig());
-        HeightContext heightContext = new HeightContext(chunkGenerator, worldView);
-        int offset = this.yOffset.get(random, heightContext);
+            if (!isPocketWideEnough(context, centerX, centerZ, pocket.minY, pocket.maxY, sampledRadius))
+                continue;
 
-        int bottomY = worldView.getBottomY();
-        int topY = worldView.getTopYInclusive() - 1;
+            int centerY = pocket.minY + pocket.maxY >> 1;
+            var center = new BlockPos(centerX, centerY, centerZ);
+            System.out.println("Placing floating orb at " + center);
 
-        int minCenterY = bottomY + sampledRadius + vineLengthValue + 1;
-        int maxCenterY = topY - sampledRadius - 1;
-        if (minCenterY > maxCenterY)
-            return Optional.empty();
+            return Optional.of(new Structure.StructurePosition(center, collector ->
+                    addPieces(
+                            collector,
+                            center,
+                            sampledRadius,
+                            random.nextFloat() < this.hollowChance.get(random),
+                            MathHelper.clamp(this.chanceOfSecondBlock.get(random), 0, 1),
+                            random.nextFloat() < this.vineChance.get(random),
+                            vineLength,
+                            random.nextLong(),
+                            MathHelper.clamp(this.vineChance.get(random), 0, 1)
+                    )
+            ));
+        }
 
-        int desiredCenterY = surfaceY + offset + sampledRadius;
-        int centerY = MathHelper.clamp(desiredCenterY, minCenterY, maxCenterY);
-        if (centerY - sampledRadius <= surfaceY)
-            return Optional.empty();
-
-        float secondBlockChanceValue = MathHelper.clamp(this.chanceOfSecondBlock.get(random), 0.0F, 1.0F);
-        float hollowChanceValue = MathHelper.clamp(this.hollowChance.get(random), 0.0F, 1.0F);
-        float vineChanceValue = MathHelper.clamp(this.vineChance.get(random), 0.0F, 1.0F);
-
-        boolean hollow = random.nextFloat() < hollowChanceValue;
-        boolean hasVines = random.nextFloat() < vineChanceValue;
-
-        BlockPos center = new BlockPos(centerX, centerY, centerZ);
-        long seed = random.nextLong();
-
-        return Optional.of(new Structure.StructurePosition(center, collector -> addPieces(
-                collector,
-                center,
-                sampledRadius,
-                hollow,
-                secondBlockChanceValue,
-                hasVines,
-                vineLength,
-                seed,
-                vineChanceValue
-        )));
+        return Optional.empty();
     }
 
     private void addPieces(StructurePiecesCollector collector, BlockPos center, int radius, boolean hollow,
@@ -286,7 +350,7 @@ public class FloatingOrbStructure extends Structure {
                 }
             }
 
-            if(this.hasVines) {
+            if (this.hasVines) {
                 generateVines(world, chunkBox);
             }
         }
