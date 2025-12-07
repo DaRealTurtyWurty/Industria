@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.client.fakeworld;
+package dev.turtywurty.industria.fakeworld;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
@@ -85,6 +85,7 @@ public final class FakeWorldBuilder {
                 Random.create().nextLong(),
                 63
         );
+        worldRenderer.setWorld(world);
 
         ClientPlayerEntity player = new ClientPlayerEntity(
                 client,

@@ -1,8 +1,12 @@
-package dev.turtywurty.industria.client.fakeworld;
+package dev.turtywurty.industria.fakeworld;
 
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gl.SimpleFramebuffer;
@@ -10,19 +14,19 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
+import net.minecraft.world.chunk.WorldChunk;
 import org.joml.*;
 
 import java.lang.Math;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -43,6 +47,8 @@ public class FakeWorldScene {
     private int anchorTargetX;
     private int anchorTargetY;
     private final Consumer<FakeWorldSceneBuilder.SceneTickContext> tickHandler;
+    private final Map<RenderStage, List<Consumer<RenderContext>>> beforeRenderCallbacks = new EnumMap<>(RenderStage.class);
+    private final Map<RenderStage, List<Consumer<RenderContext>>> afterRenderCallbacks = new EnumMap<>(RenderStage.class);
 
     public FakeWorldScene(FakeWorldSceneBuilder.BuiltScene builtScene) {
         this(builtScene, builtScene.tickHandler());
@@ -52,25 +58,33 @@ public class FakeWorldScene {
         this.world = builtScene.result().world();
         this.cameraEntity = builtScene.result().player();
         this.blockRenderManager = this.client.getBlockRenderManager();
-        this.blocks = builtScene.blocks();
-        this.fluids = builtScene.fluids();
-        this.entities = builtScene.entities();
+        this.blocks = new ArrayList<>(builtScene.blocks());
+        this.fluids = new ArrayList<>(builtScene.fluids());
+        this.entities = new ArrayList<>(builtScene.entities());
         this.tickHandler = tickHandler;
 
         this.cameraEntity.setPos(builtScene.cameraPos().x, builtScene.cameraPos().y, builtScene.cameraPos().z);
         this.cameraEntity.setYaw(builtScene.cameraYaw());
         this.cameraEntity.setPitch(builtScene.cameraPitch());
+        this.cameraEntity.resetPosition();
 
-        // Register custom entities into the fake world.
         for (Entity entity : this.entities) {
             this.world.addEntity(entity);
+            entity.resetPosition();
         }
+
+        for (RenderStage stage : RenderStage.values()) {
+            this.beforeRenderCallbacks.put(stage, new ArrayList<>());
+            this.afterRenderCallbacks.put(stage, new ArrayList<>());
+        }
+
+        markUsedChunksForTicking();
     }
 
     public void tick() {
         this.world.tick(() -> true);
         this.world.tickEntities();
-        this.tickHandler.accept(new FakeWorldSceneBuilder.SceneTickContext(this.world, this.entities));
+        this.tickHandler.accept(new FakeWorldSceneBuilder.SceneTickContext(this.world, List.copyOf(this.entities)));
     }
 
     public void close() {
@@ -128,7 +142,11 @@ public class FakeWorldScene {
         matrices.translate((float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
 
         VertexConsumerProvider.Immediate consumers = this.client.getBufferBuilders().getEntityVertexConsumers();
-        for (PlacedBlock placedBlock : this.blocks) {
+        RenderContext renderContext = new RenderContext(context, matrices, consumers, tickDelta, framebufferWidth, framebufferHeight);
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.SCENE, renderContext);
+
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.BLOCKS, renderContext);
+        for (PlacedBlock placedBlock : List.copyOf(this.blocks)) {
             matrices.push();
             BlockPos pos = placedBlock.pos();
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
@@ -137,12 +155,16 @@ public class FakeWorldScene {
                     matrices,
                     consumers,
                     LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                    OverlayTexture.DEFAULT_UV
+                    OverlayTexture.DEFAULT_UV,
+                    this.world,
+                    pos
             );
             matrices.pop();
         }
+        runCallbacks(this.afterRenderCallbacks, RenderStage.BLOCKS, renderContext);
 
-        for (PlacedFluid placedFluid : this.fluids) {
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.FLUIDS, renderContext);
+        for (PlacedFluid placedFluid : List.copyOf(this.fluids)) {
             BlockPos pos = placedFluid.pos();
             // FluidRenderer writes vertices in chunk-local (0-15) coordinates, so add the
             // chunk origin back in to get world-space positions that match the other
@@ -159,26 +181,56 @@ public class FakeWorldScene {
             this.blockRenderManager.renderFluid(BlockPos.ORIGIN, this.world, transformedConsumer, this.world.getBlockState(pos), placedFluid.state());
             matrices.pop();
         }
+        runCallbacks(this.afterRenderCallbacks, RenderStage.FLUIDS, renderContext);
 
-        for (Entity entity : this.entities) {
+        BlockEntityRenderDispatcher blockEntityRenderDispatcher = this.client.getBlockEntityRenderDispatcher();
+        blockEntityRenderDispatcher.configure(this.world, this.camera, null);
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.BLOCK_ENTITIES, renderContext);
+        for (PlacedBlock placedBlock : List.copyOf(this.blocks)) {
+            if (!placedBlock.state().hasBlockEntity()) {
+                continue;
+            }
+
+            BlockEntity blockEntity = this.world.getBlockEntity(placedBlock.pos());
+            if (blockEntity == null) {
+                continue;
+            }
+
+            matrices.push();
+            BlockPos pos = placedBlock.pos();
+            matrices.translate(pos.getX(), pos.getY(), pos.getZ());
+            blockEntityRenderDispatcher.render(blockEntity, tickDelta, matrices, consumers);
+            matrices.pop();
+        }
+        runCallbacks(this.afterRenderCallbacks, RenderStage.BLOCK_ENTITIES, renderContext);
+
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.ENTITIES, renderContext);
+        for (Entity entity : List.copyOf(this.entities)) {
+            matrices.push();
             Vec3d entityPos = entity.getLerpedPos(tickDelta);
+            matrices.translate(entityPos.x, entityPos.y, entityPos.z);
             this.client.getEntityRenderDispatcher().render(
                     entity,
-                    entityPos.x - cameraPos.x,
-                    entityPos.y - cameraPos.y,
-                    entityPos.z - cameraPos.z,
-                    tickDelta,
+                    0,
+                    0,
+                    0,
+                    1.0f,
                     matrices,
                     consumers,
                     LightmapTextureManager.MAX_LIGHT_COORDINATE
             );
+            matrices.pop();
         }
+        runCallbacks(this.afterRenderCallbacks, RenderStage.ENTITIES, renderContext);
         consumers.draw();
+
+        runCallbacks(this.afterRenderCallbacks, RenderStage.SCENE, renderContext);
 
         RenderSystem.restoreProjectionMatrix();
         RenderSystem.outputColorTextureOverride = null;
         RenderSystem.outputDepthTextureOverride = null;
 
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.FINALIZE, renderContext);
         Matrix3x2f pose = new Matrix3x2f(context.getMatrices());
         context.state.addSimpleElement(
                 new TexturedQuadGuiElementRenderState(
@@ -197,6 +249,7 @@ public class FakeWorldScene {
                         context.scissorStack.peekLast()
                 )
         );
+        runCallbacks(this.afterRenderCallbacks, RenderStage.FINALIZE, renderContext);
     }
 
     private void ensureFramebuffer(int width, int height) {
@@ -226,6 +279,95 @@ public class FakeWorldScene {
         float pitch = MathHelper.clamp(this.cameraEntity.getPitch() + deltaPitch, -89.0F, 89.0F);
         this.cameraEntity.setYaw(yaw);
         this.cameraEntity.setPitch(pitch);
+        updateChunkCenter(BlockPos.ofFloored(this.cameraEntity.getPos()));
+    }
+
+    public void setCameraPosition(Vec3d position) {
+        this.cameraEntity.setPos(position.x, position.y, position.z);
+        this.cameraEntity.resetPosition();
+        updateChunkCenter(BlockPos.ofFloored(position));
+    }
+
+    public void setCameraRotation(float yaw, float pitch) {
+        this.cameraEntity.setYaw(yaw);
+        this.cameraEntity.setPitch(MathHelper.clamp(pitch, -89.0F, 89.0F));
+    }
+
+    public void setCamera(Vec3d position, float yaw, float pitch) {
+        setCameraPosition(position);
+        setCameraRotation(yaw, pitch);
+    }
+
+    public void moveCamera(Vec3d delta) {
+        setCameraPosition(this.cameraEntity.getPos().add(delta));
+    }
+
+    public Vec3d getCameraPosition() {
+        return this.cameraEntity.getPos();
+    }
+
+    public void addBlock(BlockPos pos, BlockState state) {
+        ensureChunk(pos);
+        replaceBlock(pos, state);
+        this.fluids.removeIf(fluid -> fluid.pos().equals(pos));
+        this.world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
+        if (state.hasBlockEntity() && state.getBlock() instanceof BlockEntityProvider provider) {
+            BlockEntity blockEntity = provider.createBlockEntity(pos, state);
+            if (blockEntity != null) {
+                this.world.addBlockEntity(blockEntity);
+            }
+        } else {
+            this.world.removeBlockEntity(pos);
+        }
+        this.world.resetChunkColor(new ChunkPos(pos));
+    }
+
+    public void removeBlock(BlockPos pos) {
+        ensureChunk(pos);
+        this.world.removeBlockEntity(pos);
+        this.world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+        this.blocks.removeIf(placedBlock -> placedBlock.pos().equals(pos));
+        this.fluids.removeIf(fluid -> fluid.pos().equals(pos));
+        this.world.resetChunkColor(new ChunkPos(pos));
+    }
+
+    public void addFluid(BlockPos pos, FluidState state) {
+        ensureChunk(pos);
+        replaceFluid(pos, state);
+        this.blocks.removeIf(block -> block.pos().equals(pos));
+        this.world.setBlockState(pos, state.getBlockState(), Block.NOTIFY_LISTENERS);
+        this.world.resetChunkColor(new ChunkPos(pos));
+    }
+
+    public void removeFluid(BlockPos pos) {
+        ensureChunk(pos);
+        this.fluids.removeIf(fluid -> fluid.pos().equals(pos));
+        this.world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+        this.world.resetChunkColor(new ChunkPos(pos));
+    }
+
+    public void addEntity(Entity entity) {
+        this.entities.add(entity);
+        this.world.addEntity(entity);
+        entity.resetPosition();
+    }
+
+    public boolean removeEntity(Entity entity) {
+        this.world.removeEntity(entity.getId(), RemovalReason.DISCARDED);
+        return this.entities.remove(entity);
+    }
+
+    public void onBeforeRender(RenderStage stage, Consumer<RenderContext> callback) {
+        this.beforeRenderCallbacks.get(stage).add(callback);
+    }
+
+    public void onAfterRender(RenderStage stage, Consumer<RenderContext> callback) {
+        this.afterRenderCallbacks.get(stage).add(callback);
+    }
+
+    public void clearRenderCallbacks(RenderStage stage) {
+        this.beforeRenderCallbacks.get(stage).clear();
+        this.afterRenderCallbacks.get(stage).clear();
     }
 
     private static Vec2f projectToScreen(Vec3d worldPos, Matrix4f modelView, Matrix4f projection, int framebufferWidth, int framebufferHeight) {
@@ -238,6 +380,75 @@ public class FakeWorldScene {
         float screenX = (ndcX * 0.5F + 0.5F) * framebufferWidth;
         float screenY = (1.0F - (ndcY * 0.5F + 0.5F)) * framebufferHeight;
         return new Vec2f(screenX, screenY);
+    }
+
+    private void markUsedChunksForTicking() {
+        Set<ChunkPos> chunks = new HashSet<>();
+        for (PlacedBlock placedBlock : this.blocks) {
+            chunks.add(new ChunkPos(placedBlock.pos()));
+        }
+        for (PlacedFluid placedFluid : this.fluids) {
+            chunks.add(new ChunkPos(placedFluid.pos()));
+        }
+        for (Entity entity : this.entities) {
+            chunks.add(new ChunkPos(BlockPos.ofFloored(entity.getPos())));
+        }
+        chunks.add(new ChunkPos(BlockPos.ofFloored(this.cameraEntity.getPos())));
+
+        for (ChunkPos chunkPos : chunks) {
+            this.world.resetChunkColor(chunkPos);
+        }
+    }
+
+    private WorldChunk ensureChunk(BlockPos pos) {
+        int chunkX = pos.getX() >> 4;
+        int chunkZ = pos.getZ() >> 4;
+        var chunkManager = this.world.getChunkManager();
+        chunkManager.setChunkMapCenter(chunkX, chunkZ);
+        var chunkMap = chunkManager.chunks;
+        int index = chunkMap.getIndex(chunkX, chunkZ);
+        WorldChunk chunk = chunkMap.getChunk(index);
+        if (chunk == null || chunk.getPos().x != chunkX || chunk.getPos().z != chunkZ) {
+            chunk = new WorldChunk(this.world, new ChunkPos(chunkX, chunkZ));
+            chunkMap.set(index, chunk);
+            this.world.resetChunkColor(new ChunkPos(chunkX, chunkZ));
+        }
+        return chunk;
+    }
+
+    private void replaceBlock(BlockPos pos, BlockState state) {
+        for (int i = 0; i < this.blocks.size(); i++) {
+            if (this.blocks.get(i).pos().equals(pos)) {
+                this.blocks.set(i, new PlacedBlock(pos, state));
+                return;
+            }
+        }
+        this.blocks.add(new PlacedBlock(pos, state));
+    }
+
+    private void replaceFluid(BlockPos pos, FluidState state) {
+        for (int i = 0; i < this.fluids.size(); i++) {
+            if (this.fluids.get(i).pos().equals(pos)) {
+                this.fluids.set(i, new PlacedFluid(pos, state));
+                return;
+            }
+        }
+        this.fluids.add(new PlacedFluid(pos, state));
+    }
+
+    private void runCallbacks(Map<RenderStage, List<Consumer<RenderContext>>> callbacks, RenderStage stage, RenderContext context) {
+        List<Consumer<RenderContext>> stageCallbacks = callbacks.get(stage);
+        if (stageCallbacks == null) {
+            return;
+        }
+
+        for (Consumer<RenderContext> callback : List.copyOf(stageCallbacks)) {
+            callback.accept(context);
+        }
+    }
+
+    private void updateChunkCenter(BlockPos focus) {
+        this.world.getChunkManager().setChunkMapCenter(focus.getX() >> 4, focus.getZ() >> 4);
     }
 
     private static RenderLayer mapBlockLayer(BlockRenderLayer layer) {
@@ -316,5 +527,24 @@ public class FakeWorldScene {
     }
 
     protected record PlacedFluid(BlockPos pos, FluidState state) {
+    }
+
+    public enum RenderStage {
+        SCENE,
+        BLOCKS,
+        FLUIDS,
+        BLOCK_ENTITIES,
+        ENTITIES,
+        FINALIZE
+    }
+
+    public record RenderContext(
+            DrawContext guiContext,
+            MatrixStack matrices,
+            VertexConsumerProvider.Immediate consumers,
+            float tickDelta,
+            int framebufferWidth,
+            int framebufferHeight
+    ) {
     }
 }

@@ -1,15 +1,21 @@
-package dev.turtywurty.industria.client.fakeworld;
+package dev.turtywurty.industria.fakeworld;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -20,8 +26,10 @@ public final class FakeWorldSceneBuilder {
     private Vec3d cameraPos = new Vec3d(2.5, 65.0, 4.0);
     private float cameraYaw = 200.0F;
     private float cameraPitch = -15.0F;
-    private Consumer<SceneContext> populator = ctx -> {};
-    private Consumer<SceneTickContext> tickHandler = ctx -> {};
+    private Consumer<SceneContext> populator = ctx -> {
+    };
+    private Consumer<SceneTickContext> tickHandler = ctx -> {
+    };
 
     public static FakeWorldSceneBuilder create() {
         return new FakeWorldSceneBuilder();
@@ -48,6 +56,37 @@ public final class FakeWorldSceneBuilder {
         FakeWorldBuilder.Result result = FakeWorldBuilder.create(this.client);
         SceneContext context = new SceneContext(result.world());
         this.populator.accept(context);
+
+        ChunkPos cameraChunk = new ChunkPos(BlockPos.ofFloored(this.cameraPos));
+        result.world().getChunkManager().setChunkMapCenter(cameraChunk.x, cameraChunk.z);
+
+        Set<BlockPos> allPositions = new HashSet<>();
+        for (FakeWorldScene.PlacedBlock placed : context.blocks) {
+            allPositions.add(placed.pos());
+        }
+
+        for (FakeWorldScene.PlacedFluid placed : context.fluids) {
+            allPositions.add(placed.pos());
+        }
+
+        for (Entity entity : context.entities) {
+            allPositions.add(entity.getBlockPos());
+        }
+
+        List<ChunkPos> allChunks = new ArrayList<>();
+        allPositions.stream()
+                .map(ChunkPos::new)
+                .distinct()
+                .forEach(allChunks::add);
+
+        for (ChunkPos chunkPos : allChunks) {
+            int index = result.world().getChunkManager().chunks.getIndex(chunkPos.x, chunkPos.z);
+            result.world().getChunkManager().chunks.set(index, new WorldChunk(
+                    result.world(),
+                    chunkPos
+            ));
+        }
+
         // Place blocks into the fake world so renderers (fluids, lighting) have proper context.
         context.applyToWorld(result.world());
         BuiltScene builtScene = new BuiltScene(
@@ -114,10 +153,16 @@ public final class FakeWorldSceneBuilder {
 
         void applyToWorld(ClientWorld world) {
             for (FakeWorldScene.PlacedBlock placed : this.blocks) {
-                world.setBlockState(placed.pos(), placed.state());
+                BlockState state = placed.state();
+                BlockPos pos = placed.pos();
+                world.setBlockState(pos, state);
+                if (state.hasBlockEntity()) {
+                    world.addBlockEntity(((BlockEntityProvider) state.getBlock()).createBlockEntity(pos, state));
+                }
             }
+
             for (FakeWorldScene.PlacedFluid placed : this.fluids) {
-                world.setBlockState(placed.pos(), placed.state().getBlockState(), 2);
+                world.setBlockState(placed.pos(), placed.state().getBlockState(), Block.NOTIFY_LISTENERS);
             }
         }
     }

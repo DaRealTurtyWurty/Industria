@@ -22,3 +22,12 @@ accessible    method    net/minecraft/client/gui/DrawContext    drawInnerSprite 
 accessible    method    net/minecraft/client/gui/DrawContext    drawTexturedQuad    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
 accessible field net/minecraft/data/loottable/BlockLootTableGenerator SAPLING_DROP_CHANCE [F
 accessible field net/minecraft/client/particle/ParticleManager world Lnet/minecraft/client/world/ClientWorld;
+accessible field net/minecraft/client/world/ClientChunkManager chunks Lnet/minecraft/client/world/ClientChunkManager$ClientChunkMap;
+accessible class net/minecraft/client/world/ClientChunkManager$ClientChunkMap
+accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap set (ILnet/minecraft/world/chunk/WorldChunk;)V
+accessible field net/minecraft/client/world/ClientWorld worldRenderer Lnet/minecraft/client/render/WorldRenderer;
+accessible field net/minecraft/client/render/WorldRenderer chunks Lnet/minecraft/client/render/BuiltChunkStorage;
+accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap getIndex (II)I
+accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap getChunk (I)Lnet/minecraft/world/chunk/WorldChunk;
+accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap isInRadius (II)Z
+accessible field net/minecraft/client/world/ClientChunkManager$ClientChunkMap chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;

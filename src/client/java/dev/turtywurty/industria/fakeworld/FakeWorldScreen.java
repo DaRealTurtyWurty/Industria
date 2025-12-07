@@ -1,9 +1,10 @@
-package dev.turtywurty.industria.client.fakeworld;
+package dev.turtywurty.industria.fakeworld;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -39,24 +40,26 @@ public class FakeWorldScreen extends Screen {
                         ctx.addBlock(new BlockPos(2, y + 1, i), Blocks.LIGHT_BLUE_STAINED_GLASS.getDefaultState());
                         ctx.addBlock(new BlockPos(i, y + 1, 2), Blocks.LIGHT_BLUE_STAINED_GLASS.getDefaultState());
                     }
-                    ctx.addFluid(new BlockPos(2, y + 1, 2), Fluids.WATER.getDefaultState());
+                    ctx.addFluid(new BlockPos(3, y + 1, 1), Fluids.WATER.getDefaultState());
 
                     ctx.addBlock(new BlockPos(1, y + 1, 1), Blocks.DARK_OAK_FENCE.getDefaultState());
                     ctx.addBlock(new BlockPos(3, y + 1, 3), Blocks.DARK_OAK_FENCE.getDefaultState());
                     ctx.addBlock(new BlockPos(1, y + 2, 1), Blocks.LANTERN.getDefaultState());
                     ctx.addBlock(new BlockPos(3, y + 2, 3), Blocks.SOUL_LANTERN.getDefaultState());
+                    ctx.addBlock(new BlockPos(2, y + 3, 2), Blocks.ENCHANTING_TABLE.getDefaultState());
 
                     var world = ctx.world();
-                    var armorStand = new ArmorStandEntity(world, 2.5, y + 1.0, 2.5);
-                    armorStand.setCustomName(Text.literal("Client-only entity"));
-                    armorStand.setNoGravity(true);
-                    armorStand.setInvisible(false);
-                    ctx.addEntity(armorStand);
+                    var enderDragon = new EnderDragonEntity(EntityType.ENDER_DRAGON, world);
+                    enderDragon.refreshPositionAndAngles(2.5, y + 5.0, 2.5, 0.0F, 0.0F);
+                    enderDragon.setCustomName(Text.literal("Client-only entity"));
+                    enderDragon.setNoGravity(true);
+                    enderDragon.setInvisible(false);
+                    ctx.addEntity(enderDragon);
                 })
                 .onTick(tick -> tick.entities().forEach(entity -> {
-                    if (entity instanceof ArmorStandEntity armorStand) {
-                        armorStand.setYaw(armorStand.getYaw() + 1.5F);
-                        armorStand.setHeadYaw(armorStand.getYaw());
+                    if (entity instanceof EnderDragonEntity enderDragon) {
+                        enderDragon.setYaw(enderDragon.getYaw() + 1.5F);
+                        enderDragon.setHeadYaw(enderDragon.getYaw());
                     }
                 }))
                 .build();
