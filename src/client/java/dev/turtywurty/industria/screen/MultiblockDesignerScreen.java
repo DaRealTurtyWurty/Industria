@@ -5,32 +5,35 @@ import dev.turtywurty.industria.multiblock.PieceData;
 import dev.turtywurty.industria.network.SetMultiblockPieceCharPayload;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
+import dev.turtywurty.industria.screen.widget.CharTextFieldWidget;
 import dev.turtywurty.industria.screen.widget.FakeWorldWidget;
 import dev.turtywurty.industria.screenhandler.MultiblockDesignerScreenHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.predicate.BlockPredicate;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 // TODO: Do not sync the scene every tick, only when there are changes.
 public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerScreenHandler> {
-    private FakeWorldWidget fakeWorldWidget;
+    private MultiblockDesignerWorldWidget fakeWorldWidget;
     private FakeWorldScene scene;
     private Map<BlockPos, BlockPredicate> cachedPredicates = Map.of();
     private Map<BlockPos, FakeWorldScene.Nameplate> predicateNameplates = Map.of();
     private Set<BlockPos> cachedResolvedPositions = Set.of();
     private BlockPos selectedPiece;
-    private TextFieldWidget paletteCharField;
+    private CharTextFieldWidget paletteCharField;
     private ButtonWidget confirmPaletteButton;
 
     public MultiblockDesignerScreen(MultiblockDesignerScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -52,12 +55,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         this.scene = FakeWorldSceneBuilder.create()
                 .camera(new Vec3d(2.5, 66.0, 7.0), 200.0F, -18.0F)
                 .build();
-        this.fakeWorldWidget = addDrawableChild(new FakeWorldWidget.Builder()
-                .position(this.x + 7, this.y + 16)
-                .size(162, 162)
-                .scene(this.scene)
-                .enableInteraction(true)
-                .build());
+        this.fakeWorldWidget = addDrawableChild(new MultiblockDesignerWorldWidget(this.x + 7, this.y + 16));
+
         initPaletteInputs();
         this.cachedPredicates = Map.of();
         this.predicateNameplates = Map.of();
@@ -85,6 +84,16 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && this.fakeWorldWidget != null && this.scene != null) {
+            if (this.fakeWorldWidget.handleClick(mouseX, mouseY))
+                return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (this.scene != null && button == 0) {
             float sensitivity = 0.35F;
@@ -106,21 +115,6 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         if (this.paletteCharField != null && this.paletteCharField.isVisible()) {
             context.drawTextWithShadow(this.textRenderer, Text.literal("Palette Key"), this.paletteCharField.getX(), this.paletteCharField.getY() - 10, 0xFFFFFF);
         }
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1 && this.fakeWorldWidget != null && this.scene != null) {
-            if (isInsideWidget(mouseX, mouseY)) {
-                BlockPos clicked = findClosestPiece(mouseX, mouseY);
-                if (clicked != null) {
-                    selectPiece(clicked);
-                    return true;
-                }
-            }
-        }
-
-        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     private void syncPreview() {
@@ -191,18 +185,11 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     private void initPaletteInputs() {
         int fieldX = this.fakeWorldWidget.getX() + this.fakeWorldWidget.getWidth() + 10;
         int fieldY = this.fakeWorldWidget.getY();
-        this.paletteCharField = addDrawableChild(new TextFieldWidget(this.textRenderer, fieldX, fieldY, 30, 20, Text.literal("Palette Key")));
-        this.paletteCharField.setMaxLength(1);
+        this.paletteCharField = addDrawableChild(new CharTextFieldWidget(this.textRenderer, fieldX, fieldY, 30, 20, Text.literal("Palette Key")));
         this.paletteCharField.setVisible(false);
-        this.paletteCharField.setChangedListener(value -> {
-            if (value.length() > 1) {
-                this.paletteCharField.setText(value.substring(0, 1));
-            }
-        });
 
-        this.confirmPaletteButton = addDrawableChild(ButtonWidget.builder(Text.literal("Set"), button -> confirmPaletteChar())
-                .dimensions(fieldX - 4, fieldY + 24, 60, 20)
-                .build());
+        int buttonX = fieldX + this.paletteCharField.getWidth() + 4;
+        this.confirmPaletteButton = addDrawableChild(new ConfirmPaletteButton(buttonX, fieldY));
         this.confirmPaletteButton.visible = false;
         this.confirmPaletteButton.active = false;
 
@@ -211,36 +198,12 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         }
     }
 
-    private boolean isInsideWidget(double mouseX, double mouseY) {
-        int widgetX = this.fakeWorldWidget.getX();
-        int widgetY = this.fakeWorldWidget.getY();
-        return mouseX >= widgetX && mouseX <= widgetX + this.fakeWorldWidget.getWidth()
-                && mouseY >= widgetY && mouseY <= widgetY + this.fakeWorldWidget.getHeight();
-    }
-
-    private BlockPos findClosestPiece(double mouseX, double mouseY) {
-        double closestDistanceSq = 100.0;
-        BlockPos closest = null;
-        for (BlockPos pos : this.cachedPredicates.keySet()) {
-            Optional<Vec2f> projected = this.scene.projectToWidget(Vec3d.ofCenter(pos));
-            if (projected.isEmpty())
-                continue;
-
-            Vec2f screenPos = projected.get();
-            double dx = screenPos.x - mouseX;
-            double dy = screenPos.y - mouseY;
-            double distanceSq = dx * dx + dy * dy;
-            if (distanceSq < closestDistanceSq) {
-                closestDistanceSq = distanceSq;
-                closest = pos;
-            }
-        }
-
-        return closest;
-    }
-
     private void selectPiece(BlockPos relativePos) {
         this.selectedPiece = relativePos;
+        if (this.scene != null) {
+            this.scene.highlightBlock(relativePos, 0xFF2ECC71, 0.03F);
+        }
+
         populatePaletteInput();
         if (this.paletteCharField != null) {
             this.paletteCharField.setFocused(true);
@@ -268,6 +231,9 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
 
     private void clearSelection() {
         this.selectedPiece = null;
+        if (this.scene != null) {
+            this.scene.clearHighlights();
+        }
         if (this.paletteCharField != null) {
             this.paletteCharField.setText("");
             this.paletteCharField.setVisible(false);
@@ -317,6 +283,73 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         String paletteText = data.paletteChar == ' ' ? "" : String.valueOf(data.paletteChar);
         if (!Objects.equals(this.paletteCharField.getText(), paletteText)) {
             this.paletteCharField.setText(paletteText);
+        }
+    }
+
+    public class MultiblockDesignerWorldWidget extends FakeWorldWidget {
+        public MultiblockDesignerWorldWidget(int x, int y) {
+            super(MultiblockDesignerScreen.this.scene, x, y, 162, 162, true, 0.35F);
+        }
+
+        public boolean handleClick(double mouseX, double mouseY) {
+            if (isInsideWidget(mouseX, mouseY)) {
+                BlockPos closest = findClosestPiece(mouseX, mouseY);
+                if (closest != null) {
+                    MultiblockDesignerScreen.this.selectPiece(closest);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private boolean isInsideWidget(double mouseX, double mouseY) {
+            return mouseX >= this.x && mouseX < this.x + this.width
+                    && mouseY >= this.y && mouseY < this.y + this.height;
+        }
+
+        private BlockPos findClosestPiece(double mouseX, double mouseY) {
+            double closestDistanceSq = 100.0;
+            BlockPos closest = null;
+            for (BlockPos pos : MultiblockDesignerScreen.this.cachedPredicates.keySet()) {
+                Optional<Vec2f> projected = this.scene.projectToWidget(Vec3d.ofCenter(pos));
+                if (projected.isEmpty())
+                    continue;
+
+                Vec2f screenPos = projected.get();
+                double dx = screenPos.x - mouseX;
+                double dy = screenPos.y - mouseY;
+                double distanceSq = dx * dx + dy * dy;
+                if (distanceSq < closestDistanceSq) {
+                    closestDistanceSq = distanceSq;
+                    closest = pos;
+                }
+            }
+
+            return closest;
+        }
+    }
+
+    private class ConfirmPaletteButton extends ButtonWidget {
+        private static final Identifier CHECKMARK_TEXTURE = Identifier.ofVanilla("icon/checkmark");
+
+        public ConfirmPaletteButton(int x, int y) {
+            super(x, y, 18, 18, Text.empty(), button -> MultiblockDesignerScreen.this.confirmPaletteChar(), Supplier::get);
+        }
+
+        @Override
+        protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            super.renderWidget(context, mouseX, mouseY, delta);
+            int x = getX();
+            int y = getY();
+            int w = getWidth();
+            int h = getHeight();
+
+            int texW = 9;
+            int texH = 8;
+            int drawX = x + (w - texW) / 2;
+            int drawY = y + (h - texH) / 2;
+            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, CHECKMARK_TEXTURE, drawX, drawY, texW, texH);
         }
     }
 }

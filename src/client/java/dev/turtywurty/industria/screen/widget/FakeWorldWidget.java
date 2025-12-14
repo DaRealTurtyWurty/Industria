@@ -11,16 +11,16 @@ import org.lwjgl.glfw.GLFW;
 import java.util.function.Consumer;
 
 public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
-    private final int width;
-    private final int height;
-    private final FakeWorldScene scene;
-    private int x;
-    private int y;
-    private boolean focused;
-    private final boolean enableInteraction;
-    private final float dragSensitivity;
+    protected final int width;
+    protected final int height;
+    protected final FakeWorldScene scene;
+    protected int x;
+    protected int y;
+    protected boolean focused;
+    protected final boolean enableInteraction;
+    protected final float dragSensitivity;
 
-    private FakeWorldWidget(@NotNull FakeWorldScene scene, int x, int y, int width, int height, boolean enableInteraction, float dragSensitivity) {
+    protected FakeWorldWidget(@NotNull FakeWorldScene scene, int x, int y, int width, int height, boolean enableInteraction, float dragSensitivity) {
         this.scene = scene;
         this.x = x;
         this.y = y;

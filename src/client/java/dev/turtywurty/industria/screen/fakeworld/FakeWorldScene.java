@@ -54,6 +54,7 @@ public class FakeWorldScene implements AutoCloseable {
     private final Map<RenderStage, List<Consumer<RenderContext>>> beforeRenderCallbacks = new EnumMap<>(RenderStage.class);
     private final Map<RenderStage, List<Consumer<RenderContext>>> afterRenderCallbacks = new EnumMap<>(RenderStage.class);
     private final Map<SceneElement, TransformProvider> transforms = new HashMap<>();
+    private final List<SelectionBox> selectionBoxes = new ArrayList<>();
     private Matrix4f lastModelView;
     private Matrix4f lastProjection;
     private int lastFramebufferWidth = -1;
@@ -299,6 +300,8 @@ public class FakeWorldScene implements AutoCloseable {
         }
 
         runCallbacks(this.afterRenderCallbacks, RenderStage.ENTITIES, renderContext);
+
+        drawSelectionBoxes(renderContext);
 
         runCallbacks(this.beforeRenderCallbacks, RenderStage.NAMEPLATES, renderContext);
         for (Nameplate nameplate : List.copyOf(this.nameplates)) {
@@ -748,6 +751,16 @@ public class FakeWorldScene implements AutoCloseable {
         setCamera(cameraPos, yaw, pitch);
     }
 
+    public void highlightBlock(BlockPos pos, int color, float expand) {
+        ensureChunk(pos);
+        this.selectionBoxes.clear();
+        this.selectionBoxes.add(new SelectionBox(pos, color, expand));
+    }
+
+    public void clearHighlights() {
+        this.selectionBoxes.clear();
+    }
+
     public Optional<Vec2f> projectToWidget(Vec3d worldPos) {
         if (this.lastModelView == null || this.lastProjection == null || this.lastFramebufferWidth <= 0 || this.lastFramebufferHeight <= 0)
             return Optional.empty();
@@ -766,6 +779,30 @@ public class FakeWorldScene implements AutoCloseable {
         boolean insideWidget = this.lastWidgetX <= guiX && guiX <= this.lastWidgetX + this.lastWidgetWidth
                 && this.lastWidgetY <= guiY && guiY <= this.lastWidgetY + this.lastWidgetHeight;
         return insideWidget ? Optional.of(new Vec2f(guiX, guiY)) : Optional.empty();
+    }
+
+    private void drawSelectionBoxes(RenderContext context) {
+        if (this.selectionBoxes.isEmpty())
+            return;
+
+        MatrixStack matrices = context.matrices();
+        VertexConsumerProvider consumers = context.consumers();
+        for (SelectionBox selection : List.copyOf(this.selectionBoxes)) {
+            matrices.push();
+            BlockPos pos = selection.pos();
+            double expansion = selection.expand() + 0.0025;
+            var box = new Box(pos).expand(expansion);
+
+            int color = selection.color();
+            float a = ((color >> 24) & 0xFF) / 255.0F;
+            float r = ((color >> 16) & 0xFF) / 255.0F;
+            float g = ((color >> 8) & 0xFF) / 255.0F;
+            float b = (color & 0xFF) / 255.0F;
+
+            VertexConsumer outline = consumers.getBuffer(RenderLayer.getLines());
+            VertexRendering.drawBox(matrices, outline, box, r, g, b, Math.max(a, 0.6F));
+            matrices.pop();
+        }
     }
 
     public interface SceneElement {
@@ -822,5 +859,8 @@ public class FakeWorldScene implements AutoCloseable {
                 position = Vec3d.ZERO;
             }
         }
+    }
+
+    private record SelectionBox(BlockPos pos, int color, float expand) {
     }
 }
