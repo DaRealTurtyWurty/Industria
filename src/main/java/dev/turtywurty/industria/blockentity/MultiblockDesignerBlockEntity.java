@@ -89,6 +89,19 @@ public class MultiblockDesignerBlockEntity extends UpdatableBlockEntity implemen
         }
     }
 
+    public void setPaletteChar(BlockPos position, char paletteChar) {
+        PieceData pieceData = this.pieces.get(position);
+        if (pieceData == null || pieceData.paletteChar == paletteChar)
+            return;
+
+        pieceData.paletteChar = paletteChar;
+        if (this.world != null && this.world.getBlockEntity(position) instanceof MultiblockPieceBlockEntity piece) {
+            piece.setKey(paletteChar);
+        }
+
+        update();
+    }
+
     public Map<BlockPos, PieceData> getPieces() {
         return ImmutableMap.copyOf(this.pieces);
     }

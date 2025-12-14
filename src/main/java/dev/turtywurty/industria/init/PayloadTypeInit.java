@@ -17,6 +17,7 @@ public class PayloadTypeInit {
         PayloadTypeRegistry.playC2S().register(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SetMultiblockPieceCharPayload.ID, SetMultiblockPieceCharPayload.CODEC);
     }
 
     private static void registerS2C() {

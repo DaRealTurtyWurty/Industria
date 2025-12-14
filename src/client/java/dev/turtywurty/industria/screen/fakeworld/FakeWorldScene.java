@@ -54,6 +54,15 @@ public class FakeWorldScene implements AutoCloseable {
     private final Map<RenderStage, List<Consumer<RenderContext>>> beforeRenderCallbacks = new EnumMap<>(RenderStage.class);
     private final Map<RenderStage, List<Consumer<RenderContext>>> afterRenderCallbacks = new EnumMap<>(RenderStage.class);
     private final Map<SceneElement, TransformProvider> transforms = new HashMap<>();
+    private Matrix4f lastModelView;
+    private Matrix4f lastProjection;
+    private int lastFramebufferWidth = -1;
+    private int lastFramebufferHeight = -1;
+    private int lastWidgetX = -1;
+    private int lastWidgetY = -1;
+    private int lastWidgetWidth = -1;
+    private int lastWidgetHeight = -1;
+    private float lastScaleFactor = 1.0F;
     protected SimpleFramebuffer framebuffer;
     private BlockPos anchorBlock;
     private int anchorTargetX;
@@ -174,6 +183,15 @@ public class FakeWorldScene implements AutoCloseable {
         matrices.scale(scaleFactor, -scaleFactor, scaleFactor);
         matrices.multiply(rotation);
         matrices.translate((float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
+        this.lastModelView = new Matrix4f(matrices.peek().getPositionMatrix());
+        this.lastProjection = new Matrix4f().setOrtho(0.0F, framebufferWidth, framebufferHeight, 0.0F, -1000.0F, 1000.0F);
+        this.lastFramebufferWidth = framebufferWidth;
+        this.lastFramebufferHeight = framebufferHeight;
+        this.lastWidgetX = x;
+        this.lastWidgetY = y;
+        this.lastWidgetWidth = width;
+        this.lastWidgetHeight = height;
+        this.lastScaleFactor = (float) scale;
 
         VertexConsumerProvider.Immediate consumers = this.client.getBufferBuilders().getEntityVertexConsumers();
         RenderContext renderContext = new RenderContext(context, matrices, consumers, tickDelta, framebufferWidth, framebufferHeight, this.world);
@@ -728,6 +746,26 @@ public class FakeWorldScene implements AutoCloseable {
         float yaw = (float) (Math.toDegrees(Math.atan2(toCenter.z, toCenter.x)) + 90.0);
         float pitch = (float) -Math.toDegrees(Math.asin(toCenter.y));
         setCamera(cameraPos, yaw, pitch);
+    }
+
+    public Optional<Vec2f> projectToWidget(Vec3d worldPos) {
+        if (this.lastModelView == null || this.lastProjection == null || this.lastFramebufferWidth <= 0 || this.lastFramebufferHeight <= 0)
+            return Optional.empty();
+
+        Vec2f framebufferPos = projectToScreen(
+                worldPos,
+                this.lastModelView,
+                this.lastProjection,
+                this.lastFramebufferWidth,
+                this.lastFramebufferHeight
+        );
+
+        float guiX = this.lastWidgetX + framebufferPos.x / this.lastScaleFactor;
+        float guiY = this.lastWidgetY + framebufferPos.y / this.lastScaleFactor;
+
+        boolean insideWidget = this.lastWidgetX <= guiX && guiX <= this.lastWidgetX + this.lastWidgetWidth
+                && this.lastWidgetY <= guiY && guiY <= this.lastWidgetY + this.lastWidgetHeight;
+        return insideWidget ? Optional.of(new Vec2f(guiX, guiY)) : Optional.empty();
     }
 
     public interface SceneElement {

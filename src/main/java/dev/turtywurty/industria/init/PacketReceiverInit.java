@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.MotorBlockEntity;
+import dev.turtywurty.industria.blockentity.MultiblockDesignerBlockEntity;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.screenhandler.*;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -71,6 +72,14 @@ public class PacketReceiverInit {
             ServerPlayerEntity player = context.player();
             if(player.currentScreenHandler instanceof OilPumpJackScreenHandler handler) {
                 handler.getBlockEntity().setRunning(payload.isRunning());
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(SetMultiblockPieceCharPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+                MultiblockDesignerBlockEntity blockEntity = handler.getBlockEntity();
+                blockEntity.setPaletteChar(payload.piecePos(), payload.paletteChar());
             }
         });
     }
