@@ -1,38 +1,28 @@
 package dev.turtywurty.industria.screen;
 
-import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.MultiblockDesignerBlockEntity;
-import dev.turtywurty.industria.fakeworld.FakeWorldScene;
-import dev.turtywurty.industria.fakeworld.FakeWorldSceneBuilder;
 import dev.turtywurty.industria.multiblock.PieceData;
+import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
+import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
 import dev.turtywurty.industria.screen.widget.FakeWorldWidget;
 import dev.turtywurty.industria.screenhandler.MultiblockDesignerScreenHandler;
-import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.predicate.BlockPredicate;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-// TODO: Rewrite the rendering of the blocks to actually render all the blocks in the predicate.
 // TODO: Do not sync the scene every tick, only when there are changes.
 public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerScreenHandler> {
-    private static final Identifier TEXTURE = Industria.id("textures/gui/container/multiblock_designer.png");
-
     private FakeWorldWidget fakeWorldWidget;
     private FakeWorldScene scene;
-    private Map<BlockPos, BlockState> cachedPieces = Map.of();
+    private Map<BlockPos, BlockPredicate> cachedPredicates = Map.of();
+    private Map<BlockPos, FakeWorldScene.Nameplate> predicateNameplates = Map.of();
+    private Set<BlockPos> cachedResolvedPositions = Set.of();
 
     public MultiblockDesignerScreen(MultiblockDesignerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -41,15 +31,27 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     @Override
     protected void init() {
         super.init();
+        this.playerInventoryTitleX = -10000;
+        this.titleX = -10000;
+
+        if (this.fakeWorldWidget != null) {
+            this.fakeWorldWidget.onClose();
+            this.fakeWorldWidget = null;
+            this.scene = null;
+        }
+
         this.scene = FakeWorldSceneBuilder.create()
                 .camera(new Vec3d(2.5, 66.0, 7.0), 200.0F, -18.0F)
                 .build();
-        this.fakeWorldWidget = new FakeWorldWidget.Builder()
+        this.fakeWorldWidget = addDrawableChild(new FakeWorldWidget.Builder()
                 .position(this.x + 7, this.y + 16)
                 .size(162, 162)
                 .scene(this.scene)
-                .build();
-        addDrawableChild(this.fakeWorldWidget);
+                .enableInteraction(true)
+                .build());
+        this.cachedPredicates = Map.of();
+        this.predicateNameplates = Map.of();
+        this.cachedResolvedPositions = Set.of();
         syncPreview();
     }
 
@@ -71,94 +73,82 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (this.scene != null && button == 0) {
+            float sensitivity = 0.35F;
+            this.scene.rotateCamera((float) (deltaX * sensitivity), (float) (deltaY * sensitivity));
+            return true;
+        }
+
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    @Override
     protected void drawBackground(DrawContext context, float deltaTicks, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
-        drawMouseoverTooltip(context, mouseX, mouseY);
     }
 
     private void syncPreview() {
-        if (this.scene == null) {
+        if (this.scene == null)
             return;
-        }
 
         MultiblockDesignerBlockEntity blockEntity = this.handler.getBlockEntity();
+        BlockPos origin = blockEntity.getPos();
         Map<BlockPos, PieceData> pieces = blockEntity.getPieces();
-        Map<BlockPos, BlockState> resolved = new HashMap<>();
+        Set<BlockPos> resolved = new HashSet<>();
+        Map<BlockPos, BlockPredicate> predicates = new HashMap<>();
+        Map<BlockPos, FakeWorldScene.Nameplate> nameplates = new HashMap<>();
         for (Map.Entry<BlockPos, PieceData> entry : pieces.entrySet()) {
-            resolved.put(entry.getKey(), resolveState(entry.getValue()));
-        }
+            BlockPos relative = entry.getKey().subtract(origin);
+            resolved.add(relative);
+            PieceData data = entry.getValue();
+            predicates.put(relative, data.predicate);
 
-        for (BlockPos removed : this.cachedPieces.keySet()) {
-            if (!resolved.containsKey(removed)) {
-                this.scene.removeBlock(removed);
+            String paletteText = "beans";
+            FakeWorldScene.Nameplate existing = this.predicateNameplates.get(relative);
+            boolean paletteChanged = existing == null || !existing.text().getString().equals(paletteText);
+            if (paletteChanged && existing != null) {
+                this.scene.removeNameplate(existing);
+            }
+
+            FakeWorldScene.Nameplate nameplate = paletteChanged
+                    ? this.scene.addNameplate(Vec3d.ofCenter(relative), Text.literal(paletteText), 0.75F)
+                    : existing;
+            if (nameplate != null) {
+                nameplates.put(relative, nameplate);
             }
         }
 
-        for (Map.Entry<BlockPos, BlockState> entry : resolved.entrySet()) {
-            BlockState previous = this.cachedPieces.get(entry.getKey());
+        for (BlockPos removed : this.cachedPredicates.keySet()) {
+            if (!predicates.containsKey(removed)) {
+                this.scene.removePredicate(removed);
+                FakeWorldScene.Nameplate removedNameplate = this.predicateNameplates.get(removed);
+                if (removedNameplate != null) {
+                    this.scene.removeNameplate(removedNameplate);
+                }
+            }
+        }
+
+        for (Map.Entry<BlockPos, BlockPredicate> entry : predicates.entrySet()) {
+            BlockPredicate previous = this.cachedPredicates.get(entry.getKey());
             if (!Objects.equals(previous, entry.getValue())) {
-                this.scene.addBlock(entry.getKey(), entry.getValue());
+                this.scene.addPredicate(entry.getKey(), entry.getValue());
             }
         }
 
-        this.cachedPieces = resolved;
-        updateAnchor(resolved.keySet());
-    }
+        this.cachedPredicates = predicates;
+        this.predicateNameplates = nameplates;
 
-    private BlockState resolveState(PieceData pieceData) {
-        return pieceData.predicate.blocks()
-                .flatMap(list -> list.stream().findFirst())
-                .map(RegistryEntry::value)
-                .map(Block::getDefaultState)
-                .orElse(Blocks.STRUCTURE_VOID.getDefaultState());
-    }
-
-    private void updateAnchor(Collection<BlockPos> positions) {
-        if (this.scene == null || this.fakeWorldWidget == null) {
-            return;
+        boolean resolvedChanged = !resolved.equals(this.cachedResolvedPositions);
+        this.cachedResolvedPositions = Set.copyOf(resolved);
+        if (resolvedChanged) {
+            int targetX = this.fakeWorldWidget.getWidth() / 2;
+            int targetY = this.fakeWorldWidget.getHeight() / 2;
+            this.scene.updateAnchor(resolved, targetX, targetY);
         }
-
-        if (positions.isEmpty()) {
-            this.scene.clearAnchor();
-            return;
-        }
-
-        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
-        for (BlockPos pos : positions) {
-            minX = Math.min(minX, pos.getX());
-            minY = Math.min(minY, pos.getY());
-            minZ = Math.min(minZ, pos.getZ());
-            maxX = Math.max(maxX, pos.getX());
-            maxY = Math.max(maxY, pos.getY());
-            maxZ = Math.max(maxZ, pos.getZ());
-        }
-
-        double centerX = (minX + maxX) / 2.0;
-        double centerY = (minY + maxY) / 2.0;
-        double centerZ = (minZ + maxZ) / 2.0;
-        BlockPos anchorPos = BlockPos.ofFloored(centerX, centerY, centerZ);
-
-        int targetX = this.fakeWorldWidget.getX() + this.fakeWorldWidget.getWidth() / 2;
-        int targetY = this.fakeWorldWidget.getY() + this.fakeWorldWidget.getHeight() / 2;
-        this.scene.setAnchor(anchorPos, targetX, targetY);
-
-        double spanX = maxX - minX + 1;
-        double spanY = maxY - minY + 1;
-        double spanZ = maxZ - minZ + 1;
-        double maxSpan = Math.max(spanX, Math.max(spanY, spanZ));
-        double distance = Math.max(6.0, maxSpan + 4.0);
-
-        Vec3d center = new Vec3d(centerX + 0.5, centerY + 0.5, centerZ + 0.5);
-        Vec3d cameraPos = center.add(distance, distance, distance);
-        Vec3d toCenter = center.subtract(cameraPos).normalize();
-        float yaw = (float) (Math.toDegrees(Math.atan2(toCenter.z, toCenter.x)) + 90.0);
-        float pitch = (float) -Math.toDegrees(Math.asin(toCenter.y));
-        this.scene.setCamera(cameraPos, yaw, pitch);
     }
 }

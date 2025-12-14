@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.screen.widget;
 
-import dev.turtywurty.industria.fakeworld.FakeWorldScene;
+import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;

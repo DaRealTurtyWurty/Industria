@@ -1,9 +1,10 @@
-package dev.turtywurty.industria.fakeworld;
+package dev.turtywurty.industria.screen.fakeworld;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientConnectionState;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.session.telemetry.TelemetrySender;
@@ -11,6 +12,10 @@ import net.minecraft.client.session.telemetry.WorldSession;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.ServerLinks;
 import net.minecraft.stat.StatHandler;
@@ -20,11 +25,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.client.network.ClientConnectionState;
 
 import java.util.Map;
 
@@ -35,16 +35,13 @@ public final class FakeWorldBuilder {
     private FakeWorldBuilder() {
     }
 
-    public record Result(ClientWorld world, ClientPlayNetworkHandler networkHandler, ClientPlayerEntity player) {
-    }
-
     public static Result create(MinecraftClient client) {
-        GameProfile profile = new GameProfile(client.getSession().getUuidOrNull(), client.getSession().getUsername());
+        var profile = new GameProfile(client.getSession().getUuidOrNull(), client.getSession().getUsername());
         DynamicRegistryManager.Immutable registryManager = client.world != null
                 ? client.world.getRegistryManager().toImmutable()
                 : DynamicRegistryManager.of(Registries.REGISTRIES);
 
-        ClientConnectionState connectionState = new ClientConnectionState(
+        var connectionState = new ClientConnectionState(
                 profile,
                 new WorldSession(TelemetrySender.NOOP, true, null, "fake_world"),
                 registryManager,
@@ -58,22 +55,22 @@ public final class FakeWorldBuilder {
                 ServerLinks.EMPTY
         );
 
-        ClientConnection connection = new ClientConnection(NetworkSide.CLIENTBOUND);
+        var connection = new ClientConnection(NetworkSide.CLIENTBOUND);
         ClientPlayNetworkHandler networkHandler = new ClientPlayNetworkHandler(client, connection, connectionState);
 
         RegistryEntry<DimensionType> dimensionType = connectionState
                 .receivedRegistries()
                 .getOrThrow(RegistryKeys.DIMENSION_TYPE)
                 .getOrThrow(DimensionTypes.OVERWORLD);
-        WorldRenderer worldRenderer = new WorldRenderer(
+        var worldRenderer = new WorldRenderer(
                 client,
                 client.getEntityRenderDispatcher(),
                 client.getBlockEntityRenderDispatcher(),
                 client.getBufferBuilders()
         );
 
-        ClientWorld.Properties properties = new ClientWorld.Properties(Difficulty.NORMAL, false, false);
-        ClientWorld world = new ClientWorld(
+        var properties = new ClientWorld.Properties(Difficulty.NORMAL, false, false);
+        var world = new ClientWorld(
                 networkHandler,
                 properties,
                 World.OVERWORLD,
@@ -87,7 +84,7 @@ public final class FakeWorldBuilder {
         );
         worldRenderer.setWorld(world);
 
-        ClientPlayerEntity player = new ClientPlayerEntity(
+        var player = new ClientPlayerEntity(
                 client,
                 world,
                 networkHandler,
@@ -102,5 +99,8 @@ public final class FakeWorldBuilder {
         world.addEntity(player);
 
         return new Result(world, networkHandler, player);
+    }
+
+    public record Result(ClientWorld world, ClientPlayNetworkHandler networkHandler, ClientPlayerEntity player) {
     }
 }

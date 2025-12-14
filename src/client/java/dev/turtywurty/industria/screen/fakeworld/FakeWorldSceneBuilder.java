@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.fakeworld;
+package dev.turtywurty.industria.screen.fakeworld;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -7,6 +7,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.predicate.BlockPredicate;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
@@ -54,10 +56,10 @@ public final class FakeWorldSceneBuilder {
 
     public FakeWorldScene build() {
         FakeWorldBuilder.Result result = FakeWorldBuilder.create(this.client);
-        SceneContext context = new SceneContext(result.world());
+        var context = new SceneContext(result.world());
         this.populator.accept(context);
 
-        ChunkPos cameraChunk = new ChunkPos(BlockPos.ofFloored(this.cameraPos));
+        var cameraChunk = new ChunkPos(BlockPos.ofFloored(this.cameraPos));
         result.world().getChunkManager().setChunkMapCenter(cameraChunk.x, cameraChunk.z);
 
         Set<BlockPos> allPositions = new HashSet<>();
@@ -66,6 +68,10 @@ public final class FakeWorldSceneBuilder {
         }
 
         for (FakeWorldScene.PlacedFluid placed : context.fluids) {
+            allPositions.add(placed.pos());
+        }
+
+        for (FakeWorldScene.PredicatedBlock placed : context.predicates) {
             allPositions.add(placed.pos());
         }
 
@@ -89,11 +95,13 @@ public final class FakeWorldSceneBuilder {
 
         // Place blocks into the fake world so renderers (fluids, lighting) have proper context.
         context.applyToWorld(result.world());
-        BuiltScene builtScene = new BuiltScene(
+        var builtScene = new BuiltScene(
                 result,
                 List.copyOf(context.blocks),
                 List.copyOf(context.fluids),
+                List.copyOf(context.predicates),
                 List.copyOf(context.entities),
+                List.copyOf(context.nameplates),
                 this.cameraPos,
                 this.cameraYaw,
                 this.cameraPitch,
@@ -110,7 +118,9 @@ public final class FakeWorldSceneBuilder {
             FakeWorldBuilder.Result result,
             List<FakeWorldScene.PlacedBlock> blocks,
             List<FakeWorldScene.PlacedFluid> fluids,
+            List<FakeWorldScene.PredicatedBlock> predicates,
             List<Entity> entities,
+            List<FakeWorldScene.Nameplate> nameplates,
             Vec3d cameraPos,
             float cameraYaw,
             float cameraPitch,
@@ -126,6 +136,8 @@ public final class FakeWorldSceneBuilder {
         private final List<FakeWorldScene.PlacedBlock> blocks = new ArrayList<>();
         private final List<Entity> entities = new ArrayList<>();
         private final List<FakeWorldScene.PlacedFluid> fluids = new ArrayList<>();
+        private final List<FakeWorldScene.PredicatedBlock> predicates = new ArrayList<>();
+        private final List<FakeWorldScene.Nameplate> nameplates = new ArrayList<>();
 
         SceneContext(ClientWorld world) {
             this.world = world;
@@ -143,8 +155,20 @@ public final class FakeWorldSceneBuilder {
             this.fluids.add(new FakeWorldScene.PlacedFluid(pos, state));
         }
 
+        public void addPredicate(BlockPos pos, BlockPredicate predicate) {
+            this.predicates.add(new FakeWorldScene.PredicatedBlock(pos, predicate));
+        }
+
         public void addEntity(Entity entity) {
             this.entities.add(entity);
+        }
+
+        public void addNameplate(Vec3d position, Text text, float yOffset) {
+            this.nameplates.add(new FakeWorldScene.Nameplate(position, text, yOffset));
+        }
+
+        public void addNameplate(Vec3d position, Text text) {
+            addNameplate(position, text, 0.0F);
         }
 
         public SceneTickContext tickContext() {

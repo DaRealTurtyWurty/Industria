@@ -4,7 +4,7 @@ import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.renderer.block.RotaryKilnBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.world.FluidPocketWorldRenderer;
 import dev.turtywurty.industria.renderer.world.PipeNetworkWorldRenderer;
-import dev.turtywurty.industria.fakeworld.FakeWorldScreen;
+import dev.turtywurty.industria.screen.fakeworld.FakeWorldScreen;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;

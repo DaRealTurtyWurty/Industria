@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.fakeworld;
+package dev.turtywurty.industria.screen.fakeworld;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.DrawContext;
@@ -6,6 +6,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.predicate.BlockPredicate;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -36,10 +39,11 @@ public class FakeWorldScreen extends Screen {
 
                     ctx.addBlock(new BlockPos(2, y, 2), Blocks.SEA_LANTERN.getDefaultState());
                     for (int i = 1; i <= 3; i++) {
-                        if(i == 2) continue;
+                        if (i == 2) continue;
                         ctx.addBlock(new BlockPos(2, y + 1, i), Blocks.LIGHT_BLUE_STAINED_GLASS.getDefaultState());
                         ctx.addBlock(new BlockPos(i, y + 1, 2), Blocks.LIGHT_BLUE_STAINED_GLASS.getDefaultState());
                     }
+
                     ctx.addFluid(new BlockPos(3, y + 1, 1), Fluids.WATER.getDefaultState());
 
                     ctx.addBlock(new BlockPos(1, y + 1, 1), Blocks.DARK_OAK_FENCE.getDefaultState());
@@ -47,6 +51,10 @@ public class FakeWorldScreen extends Screen {
                     ctx.addBlock(new BlockPos(1, y + 2, 1), Blocks.LANTERN.getDefaultState());
                     ctx.addBlock(new BlockPos(3, y + 2, 3), Blocks.SOUL_LANTERN.getDefaultState());
                     ctx.addBlock(new BlockPos(2, y + 3, 2), Blocks.ENCHANTING_TABLE.getDefaultState());
+
+                    ctx.addPredicate(new BlockPos(2, y - 1, 2), BlockPredicate.Builder.create()
+                            .tag(ctx.world().getRegistryManager().getOrThrow(RegistryKeys.BLOCK), BlockTags.TERRACOTTA)
+                            .build());
 
                     var world = ctx.world();
                     var enderDragon = new EnderDragonEntity(EntityType.ENDER_DRAGON, world);
@@ -77,6 +85,7 @@ public class FakeWorldScreen extends Screen {
         if (this.scene != null) {
             this.scene.close();
         }
+
         super.close();
         this.scene = null;
     }
