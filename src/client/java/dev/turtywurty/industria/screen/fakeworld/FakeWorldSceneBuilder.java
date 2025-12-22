@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.screen.fakeworld;
 
+import dev.turtywurty.industria.multiblock.VariedBlockList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -7,7 +8,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.predicate.BlockPredicate;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -71,7 +71,7 @@ public final class FakeWorldSceneBuilder {
             allPositions.add(placed.pos());
         }
 
-        for (FakeWorldScene.PredicatedBlock placed : context.predicates) {
+        for (FakeWorldScene.PlacedVariedBlockList placed : context.variedBlockLists) {
             allPositions.add(placed.pos());
         }
 
@@ -99,7 +99,7 @@ public final class FakeWorldSceneBuilder {
                 result,
                 List.copyOf(context.blocks),
                 List.copyOf(context.fluids),
-                List.copyOf(context.predicates),
+                List.copyOf(context.variedBlockLists),
                 List.copyOf(context.entities),
                 List.copyOf(context.nameplates),
                 this.cameraPos,
@@ -118,7 +118,7 @@ public final class FakeWorldSceneBuilder {
             FakeWorldBuilder.Result result,
             List<FakeWorldScene.PlacedBlock> blocks,
             List<FakeWorldScene.PlacedFluid> fluids,
-            List<FakeWorldScene.PredicatedBlock> predicates,
+            List<FakeWorldScene.PlacedVariedBlockList> variedBlockLists,
             List<Entity> entities,
             List<FakeWorldScene.Nameplate> nameplates,
             Vec3d cameraPos,
@@ -136,7 +136,7 @@ public final class FakeWorldSceneBuilder {
         private final List<FakeWorldScene.PlacedBlock> blocks = new ArrayList<>();
         private final List<Entity> entities = new ArrayList<>();
         private final List<FakeWorldScene.PlacedFluid> fluids = new ArrayList<>();
-        private final List<FakeWorldScene.PredicatedBlock> predicates = new ArrayList<>();
+        private final List<FakeWorldScene.PlacedVariedBlockList> variedBlockLists = new ArrayList<>();
         private final List<FakeWorldScene.Nameplate> nameplates = new ArrayList<>();
 
         SceneContext(ClientWorld world) {
@@ -155,8 +155,8 @@ public final class FakeWorldSceneBuilder {
             this.fluids.add(new FakeWorldScene.PlacedFluid(pos, state));
         }
 
-        public void addPredicate(BlockPos pos, BlockPredicate predicate) {
-            this.predicates.add(new FakeWorldScene.PredicatedBlock(pos, predicate));
+        public void addVariedBlockList(BlockPos pos, VariedBlockList blockList) {
+            this.variedBlockLists.add(new FakeWorldScene.PlacedVariedBlockList(pos, blockList));
         }
 
         public void addEntity(Entity entity) {
@@ -181,7 +181,12 @@ public final class FakeWorldSceneBuilder {
                 BlockPos pos = placed.pos();
                 world.setBlockState(pos, state);
                 if (state.hasBlockEntity()) {
-                    world.addBlockEntity(((BlockEntityProvider) state.getBlock()).createBlockEntity(pos, state));
+                    if (state.getBlock() instanceof BlockEntityProvider provider) {
+                        var blockEntity = provider.createBlockEntity(pos, state);
+                        if (blockEntity != null) {
+                            world.addBlockEntity(blockEntity);
+                        }
+                    }
                 }
             }
 

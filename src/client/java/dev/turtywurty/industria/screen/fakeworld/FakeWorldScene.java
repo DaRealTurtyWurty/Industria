@@ -2,9 +2,11 @@ package dev.turtywurty.industria.screen.fakeworld;
 
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.turtywurty.industria.util.BlockPredicateRenderer;
+import dev.turtywurty.industria.multiblock.VariedBlockList;
+import dev.turtywurty.industria.util.VariedBlockListRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -23,7 +25,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.predicate.BlockPredicate;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.WorldChunk;
@@ -46,7 +47,7 @@ public class FakeWorldScene implements AutoCloseable {
     protected final List<PlacedBlock> blocks;
     protected final List<PlacedFluid> fluids;
     protected final List<Entity> entities;
-    protected final List<PredicatedBlock> predicates;
+    protected final List<PlacedVariedBlockList> variedBlockLists;
     protected final List<Nameplate> nameplates;
     protected final Camera camera = new Camera();
     protected final ProjectionMatrix2 projectionMatrix = new ProjectionMatrix2("FakeWorldScene", -1000.0F, 1000.0F, true);
@@ -64,11 +65,12 @@ public class FakeWorldScene implements AutoCloseable {
     private int lastWidgetWidth = -1;
     private int lastWidgetHeight = -1;
     private float lastScaleFactor = 1.0F;
+    private float scaleMultiplier = 1.0F;
     protected SimpleFramebuffer framebuffer;
     private BlockPos anchorBlock;
     private int anchorTargetX;
     private int anchorTargetY;
-    private Vec3d predicateOffset = Vec3d.ZERO;
+    private Vec3d variedBlockListOffset = Vec3d.ZERO;
 
     public FakeWorldScene(FakeWorldSceneBuilder.BuiltScene builtScene) {
         this(builtScene, builtScene.tickHandler());
@@ -81,7 +83,7 @@ public class FakeWorldScene implements AutoCloseable {
         this.blocks = new ArrayList<>(builtScene.blocks());
         this.fluids = new ArrayList<>(builtScene.fluids());
         this.entities = new ArrayList<>(builtScene.entities());
-        this.predicates = new ArrayList<>(builtScene.predicates());
+        this.variedBlockLists = new ArrayList<>(builtScene.variedBlockLists());
         this.nameplates = new ArrayList<>(builtScene.nameplates());
         this.tickHandler = tickHandler;
 
@@ -156,7 +158,7 @@ public class FakeWorldScene implements AutoCloseable {
         float anchorOffsetY = 0.0F;
         if (this.anchorBlock != null) {
             MatrixStack anchorMatrices = new MatrixStack();
-            float scaleFactor = Math.min(framebufferWidth, framebufferHeight) / 6.0F;
+            float scaleFactor = Math.min(framebufferWidth, framebufferHeight) / 6.0F * this.scaleMultiplier;
             anchorMatrices.translate(framebufferWidth / 2.0F, framebufferHeight * 0.8F, 0);
             anchorMatrices.scale(scaleFactor, -scaleFactor, scaleFactor);
             anchorMatrices.multiply(rotation);
@@ -179,7 +181,7 @@ public class FakeWorldScene implements AutoCloseable {
         RenderSystem.setProjectionMatrix(this.projectionMatrix.set(framebufferWidth, framebufferHeight), ProjectionType.ORTHOGRAPHIC);
 
         MatrixStack matrices = new MatrixStack();
-        float scaleFactor = Math.min(framebufferWidth, framebufferHeight) / 6.0F;
+        float scaleFactor = Math.min(framebufferWidth, framebufferHeight) / 6.0F * this.scaleMultiplier;
         matrices.translate(framebufferWidth / 2.0F + anchorOffsetX, framebufferHeight * 0.8F + anchorOffsetY, 0);
         matrices.scale(scaleFactor, -scaleFactor, scaleFactor);
         matrices.multiply(rotation);
@@ -200,6 +202,9 @@ public class FakeWorldScene implements AutoCloseable {
 
         runCallbacks(this.beforeRenderCallbacks, RenderStage.BLOCKS, renderContext);
         for (PlacedBlock placedBlock : List.copyOf(this.blocks)) {
+            if (placedBlock.state().getRenderType() != BlockRenderType.MODEL)
+                continue;
+
             matrices.push();
             BlockPos pos = placedBlock.pos();
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
@@ -218,14 +223,14 @@ public class FakeWorldScene implements AutoCloseable {
 
         runCallbacks(this.afterRenderCallbacks, RenderStage.BLOCKS, renderContext);
 
-        runCallbacks(this.beforeRenderCallbacks, RenderStage.PREDICATES, renderContext);
-        for (PredicatedBlock predicate : List.copyOf(this.predicates)) {
+        runCallbacks(this.beforeRenderCallbacks, RenderStage.VARIED_BLOCK_LISTS, renderContext);
+        for (PlacedVariedBlockList placedVariedBlockList : List.copyOf(this.variedBlockLists)) {
             matrices.push();
-            BlockPos pos = predicate.pos();
-            matrices.translate(pos.getX() + this.predicateOffset.x, pos.getY() + this.predicateOffset.y, pos.getZ() + this.predicateOffset.z);
-            applyTransform(matrices, predicate, renderContext.world(), tickDelta);
-            BlockPredicateRenderer.renderInWorld(
-                    predicate.predicate(),
+            BlockPos pos = placedVariedBlockList.pos();
+            matrices.translate(pos.getX() + this.variedBlockListOffset.x, pos.getY() + this.variedBlockListOffset.y, pos.getZ() + this.variedBlockListOffset.z);
+            applyTransform(matrices, placedVariedBlockList, renderContext.world(), tickDelta);
+            VariedBlockListRenderer.renderInWorld(
+                    placedVariedBlockList.variedBlockList(),
                     pos,
                     this.world,
                     matrices,
@@ -237,7 +242,7 @@ public class FakeWorldScene implements AutoCloseable {
             matrices.pop();
         }
 
-        runCallbacks(this.afterRenderCallbacks, RenderStage.PREDICATES, renderContext);
+        runCallbacks(this.afterRenderCallbacks, RenderStage.VARIED_BLOCK_LISTS, renderContext);
 
         runCallbacks(this.beforeRenderCallbacks, RenderStage.FLUIDS, renderContext);
         for (PlacedFluid placedFluid : List.copyOf(this.fluids)) {
@@ -417,9 +422,8 @@ public class FakeWorldScene implements AutoCloseable {
     }
 
     private void ensureFramebuffer(int width, int height) {
-        if (this.framebuffer != null && this.framebuffer.textureWidth == width && this.framebuffer.textureHeight == height) {
+        if (this.framebuffer != null && this.framebuffer.textureWidth == width && this.framebuffer.textureHeight == height)
             return;
-        }
 
         if (this.framebuffer != null) {
             this.framebuffer.delete();
@@ -436,6 +440,10 @@ public class FakeWorldScene implements AutoCloseable {
 
     public void clearAnchor() {
         this.anchorBlock = null;
+    }
+
+    public void setScaleMultiplier(float scaleMultiplier) {
+        this.scaleMultiplier = MathHelper.clamp(scaleMultiplier, 0.1F, 20.0F);
     }
 
     public void rotateCamera(float deltaYaw, float deltaPitch) {
@@ -496,23 +504,23 @@ public class FakeWorldScene implements AutoCloseable {
         this.world.resetChunkColor(new ChunkPos(pos));
     }
 
-    public void addPredicate(BlockPos pos, BlockPredicate predicate) {
+    public void addVariedBlockList(BlockPos pos, VariedBlockList variedBlockList) {
         ensureChunk(pos);
-        replacePredicate(pos, predicate);
+        replaceVariedBlockList(pos, variedBlockList);
     }
 
-    public void removePredicate(BlockPos pos) {
+    public void removeVariedBlockList(BlockPos pos) {
         ensureChunk(pos);
-        removeElementsAtPos(this.predicates, pos);
+        removeElementsAtPos(this.variedBlockLists, pos);
     }
 
-    public void clearPredicates() {
-        this.predicates.forEach(this::clearTransform);
-        this.predicates.clear();
+    public void clearVariedBlockLists() {
+        this.variedBlockLists.forEach(this::clearTransform);
+        this.variedBlockLists.clear();
     }
 
-    public void setPredicateOffset(Vec3d offset) {
-        this.predicateOffset = offset;
+    public void setVariedBlockListOffset(Vec3d offset) {
+        this.variedBlockListOffset = offset;
     }
 
     public void addFluid(BlockPos pos, FluidState state) {
@@ -627,7 +635,7 @@ public class FakeWorldScene implements AutoCloseable {
         Set<ChunkPos> chunks = new HashSet<>();
         addChunksFor(chunks, this.blocks);
         addChunksFor(chunks, this.fluids);
-        addChunksFor(chunks, this.predicates);
+        addChunksFor(chunks, this.variedBlockLists);
         addChunksFor(chunks, this.nameplates);
 
         for (Entity entity : this.entities) {
@@ -686,17 +694,17 @@ public class FakeWorldScene implements AutoCloseable {
         this.fluids.add(new PlacedFluid(pos, state));
     }
 
-    private void replacePredicate(BlockPos pos, BlockPredicate predicate) {
-        for (int i = 0; i < this.predicates.size(); i++) {
-            if (this.predicates.get(i).pos().equals(pos)) {
-                PredicatedBlock newPredicate = new PredicatedBlock(pos, predicate);
-                transferTransform(this.predicates.get(i), newPredicate);
-                this.predicates.set(i, newPredicate);
+    private void replaceVariedBlockList(BlockPos pos, VariedBlockList variedBlockList) {
+        for (int i = 0; i < this.variedBlockLists.size(); i++) {
+            if (this.variedBlockLists.get(i).pos().equals(pos)) {
+                PlacedVariedBlockList newVariedBlockList = new PlacedVariedBlockList(pos, variedBlockList);
+                transferTransform(this.variedBlockLists.get(i), newVariedBlockList);
+                this.variedBlockLists.set(i, newVariedBlockList);
                 return;
             }
         }
 
-        this.predicates.add(new PredicatedBlock(pos, predicate));
+        this.variedBlockLists.add(new PlacedVariedBlockList(pos, variedBlockList));
     }
 
     private void runCallbacks(Map<RenderStage, List<Consumer<RenderContext>>> callbacks, RenderStage stage, RenderContext context) {
@@ -762,6 +770,14 @@ public class FakeWorldScene implements AutoCloseable {
     }
 
     public Optional<Vec2f> projectToWidget(Vec3d worldPos) {
+        return projectToWidget(worldPos, true);
+    }
+
+    public Optional<Vec2f> projectToWidgetUnclamped(Vec3d worldPos) {
+        return projectToWidget(worldPos, false);
+    }
+
+    private Optional<Vec2f> projectToWidget(Vec3d worldPos, boolean clampToWidget) {
         if (this.lastModelView == null || this.lastProjection == null || this.lastFramebufferWidth <= 0 || this.lastFramebufferHeight <= 0)
             return Optional.empty();
 
@@ -775,6 +791,9 @@ public class FakeWorldScene implements AutoCloseable {
 
         float guiX = this.lastWidgetX + framebufferPos.x / this.lastScaleFactor;
         float guiY = this.lastWidgetY + framebufferPos.y / this.lastScaleFactor;
+
+        if (!clampToWidget)
+            return Optional.of(new Vec2f(guiX, guiY));
 
         boolean insideWidget = this.lastWidgetX <= guiX && guiX <= this.lastWidgetX + this.lastWidgetWidth
                 && this.lastWidgetY <= guiY && guiY <= this.lastWidgetY + this.lastWidgetHeight;
@@ -841,7 +860,7 @@ public class FakeWorldScene implements AutoCloseable {
         }
     }
 
-    protected record PredicatedBlock(BlockPos pos, BlockPredicate predicate) implements SceneElement {
+    protected record PlacedVariedBlockList(BlockPos pos, VariedBlockList variedBlockList) implements SceneElement {
         @Override
         public Vec3d position() {
             return new Vec3d(this.pos.getX(), this.pos.getY(), this.pos.getZ());

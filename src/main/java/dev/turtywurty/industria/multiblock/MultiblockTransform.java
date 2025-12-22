@@ -5,6 +5,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 
 public record MultiblockTransform(AxisRotation rotation, MirrorMode mirrorMode) {
+    public Vec3i applyToSize(Vec3i size) {
+        return switch (rotation) {
+            case R90, R270 -> new Vec3i(size.getZ(), size.getY(), size.getX());
+            default -> size;
+        };
+    }
+
     public Vec3i applyToLocal(Vec3i size, int anchorX, int anchorY, int anchorZ) {
         return applyToLocal(size.getX(), size.getZ(), anchorX, anchorY, anchorZ);
     }
@@ -39,6 +46,39 @@ public record MultiblockTransform(AxisRotation rotation, MirrorMode mirrorMode) 
         }
 
         return new Vec3i(rotatedX, anchorY, rotatedZ);
+    }
+
+    public Vec3i applyInverseToLocal(Vec3i size, Vec3i pos) {
+        return applyInverseToLocal(size, pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public Vec3i applyInverseToLocal(Vec3i size, int x, int y, int z) {
+        int localX = x;
+        int localZ = z;
+
+        switch (rotation) {
+            case R0 -> {}
+            case R90 -> {
+                localX = z;
+                localZ = size.getZ() - 1 - x;
+            }
+            case R180 -> {
+                localX = size.getX() - 1 - x;
+                localZ = size.getZ() - 1 - z;
+            }
+            case R270 -> {
+                localX = size.getX() - 1 - z;
+                localZ = x;
+            }
+        }
+
+        if (mirrorMode == MirrorMode.X) {
+            localX = size.getX() - 1 - localX;
+        } else if (mirrorMode == MirrorMode.Z) {
+            localZ = size.getZ() - 1 - localZ;
+        }
+
+        return new Vec3i(localX, y, localZ);
     }
 
     public Direction applyToFace(Direction face) {

@@ -30,9 +30,10 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                 var transform = new MultiblockTransform(rotation, mirrorMode);
                 Vec3i size = definition.size();
                 Vec3i anchor = definition.anchor();
+                Vec3i rotatedSize = transform.applyToSize(size);
 
                 BlockPos originPos = controllerPos.subtract(transform.applyToLocal(size, anchor));
-                MatchResult result = createResult(world, controllerPos, originPos, transform, skipControllerCheck);
+                MatchResult result = createResult(world, controllerPos, originPos, transform, rotatedSize, skipControllerCheck);
                 int problemCount = result.problems().size();
                 if (problemCount < smallestProblemCount) {
                     smallestProblemCount = problemCount;
@@ -52,27 +53,31 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
             BlockPos controllerPos,
             BlockPos originPos,
             MultiblockTransform transform,
+            Vec3i rotatedSize,
             boolean skipControllerCheck) {
         var builder = new MatchResult.Builder()
                 .definitionId(definition.id())
                 .controllerPos(controllerPos)
                 .transform(transform)
                 .origin(originPos)
-                .size(definition.size());
+                .size(rotatedSize);
 
-        for (int y = 0; y < definition.size().getY(); y++) {
-            for (int z = 0; z < definition.size().getZ(); z++) {
-                for (int x = 0; x < definition.size().getX(); x++) {
-                    char character = definition.getCharAt(x, (definition.size().getY() - 1) - y, z);
+        for (int y = 0; y < rotatedSize.getY(); y++) {
+            for (int z = 0; z < rotatedSize.getZ(); z++) {
+                for (int x = 0; x < rotatedSize.getX(); x++) {
+                    Vec3i patternPos = transform.applyInverseToLocal(definition.size(), x, y, z);
+                    char character = definition.getCharAt(
+                            patternPos.getX(),
+                            (definition.size().getY() - 1) - y,
+                            patternPos.getZ());
                     BlockPredicate predicate = definition.palette().get(character);
                     if (predicate == null || predicate == BlockPredicate.alwaysTrue())
                         continue;
 
-                    Vec3i localPos = transform.applyToLocal(definition.size(), x, y, z);
-                    BlockPos worldPos = originPos.add(localPos);
+                    BlockPos worldPos = originPos.add(x, y, z);
                     BlockState state = world.getBlockState(worldPos);
 
-                    builder.addCell(worldPos, localPos.getX(), localPos.getY(), localPos.getZ(), character, state);
+                    builder.addCell(worldPos, x, y, z, character, state);
 
                     boolean skipCheck = skipControllerCheck && worldPos.equals(controllerPos);
                     if (!skipCheck && !predicate.test(world, worldPos)) {
@@ -101,9 +106,9 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                                     absoluteFace,
                                     modes,
                                     Set.copyOf(portTypes),
-                                    localPos.getX(),
-                                    localPos.getY(),
-                                    localPos.getZ(),
+                                    x,
+                                    y,
+                                    z,
                                     character
                             );
                         }

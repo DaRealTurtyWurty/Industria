@@ -17,10 +17,9 @@ public class MultiblockDefinitionInit {
 
     public static final MultiblockDefinition EXAMPLE = register("example",
             new MultiblockDefinition.Builder()
-                    .size(3, 3, 3)
-                    .addPatternRow(List.of("GGG", "GBG", "GGG"))
-                    .addPatternRow(List.of("OGG", "GPG", "GGG"))
-                    .addPatternRow(List.of("CGG", "GBG", "GGG"))
+                    .size(4, 2, 3)
+                    .addPatternRow(List.of("GGGG", "GBGG", "GGGG"))
+                    .addPatternRow(List.of("CGGG", "GPGG", "OGGG"))
                     .anchor(0, 0, 0)
                     .addPaletteEntry('G', BlockPredicate.matchingBlocks(Blocks.GLASS))
                     .addPaletteEntry('B', BlockPredicate.matchingBlocks(Blocks.BLUE_STAINED_GLASS))

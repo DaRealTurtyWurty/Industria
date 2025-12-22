@@ -3,7 +3,7 @@ package dev.turtywurty.industria.screen.fakeworld;
 public enum RenderStage {
     SCENE,
     BLOCKS,
-    PREDICATES,
+    VARIED_BLOCK_LISTS,
     FLUIDS,
     BLOCK_ENTITIES,
     ENTITIES,

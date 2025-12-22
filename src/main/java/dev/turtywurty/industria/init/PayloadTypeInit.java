@@ -18,6 +18,9 @@ public class PayloadTypeInit {
         PayloadTypeRegistry.playC2S().register(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SetMultiblockPieceCharPayload.ID, SetMultiblockPieceCharPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(UpdatePaletteEntryNamePayload.ID, UpdatePaletteEntryNamePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(DeletePaletteEntryPayload.ID, DeletePaletteEntryPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(UpdatePaletteEntryVariedBlockListPayload.ID, UpdatePaletteEntryVariedBlockListPayload.CODEC);
     }
 
     private static void registerS2C() {

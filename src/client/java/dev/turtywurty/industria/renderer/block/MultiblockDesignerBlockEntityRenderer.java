@@ -2,12 +2,13 @@ package dev.turtywurty.industria.renderer.block;
 
 import dev.turtywurty.industria.blockentity.MultiblockDesignerBlockEntity;
 import dev.turtywurty.industria.multiblock.PieceData;
-import dev.turtywurty.industria.util.BlockPredicateRenderer;
+import dev.turtywurty.industria.multiblock.VariedBlockList;
+import dev.turtywurty.industria.util.VariedBlockListRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.predicate.BlockPredicate;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RotationAxis;
 
 import java.util.Map;
 
@@ -31,9 +32,11 @@ public class MultiblockDesignerBlockEntityRenderer extends IndustriaBlockEntityR
 
             matrices.push();
             matrices.translate(-position.getX(), position.getY(), position.getZ());
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+            matrices.translate(0, -1, -1);
 
-            BlockPredicate predicate = piece.predicate;
-            BlockPredicateRenderer.renderInWorld(predicate, position, entity.getWorld(), matrices, vertexConsumers, light, overlay, tickDelta);
+            VariedBlockList blockList = piece.variedBlockList;
+            VariedBlockListRenderer.renderInWorld(blockList, position, entity.getWorld(), matrices, vertexConsumers, light, overlay, tickDelta);
 
             matrices.pop();
         }

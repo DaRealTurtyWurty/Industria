@@ -5,6 +5,9 @@ import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.block.Block;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
@@ -52,6 +55,10 @@ public class ExtraCodecs {
             },
             blockPos -> blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ());
     public static final Codec<Character> CHAR_CODEC = Codec.STRING.xmap(s -> s.charAt(0), String::valueOf);
+    public static final Codec<Block> BLOCK_CODEC = Codec.STRING.xmap(
+            id -> Registries.BLOCK.get(Identifier.of(id)),
+            block -> Registries.BLOCK.getId(block).toString()
+    );
 
     public static <T> Codec<Set<T>> setOf(Codec<T> codec) {
         return Codec.list(codec).xmap(Sets::newHashSet, Lists::newArrayList);

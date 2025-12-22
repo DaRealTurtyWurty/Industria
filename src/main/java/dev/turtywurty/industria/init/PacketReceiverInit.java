@@ -82,5 +82,26 @@ public class PacketReceiverInit {
                 blockEntity.setPaletteChar(payload.piecePos(), payload.paletteChar());
             }
         });
+
+        ServerPlayNetworking.registerGlobalReceiver(UpdatePaletteEntryNamePayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+                handler.getBlockEntity().setPaletteName(payload.paletteChar(), payload.name());
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(DeletePaletteEntryPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+                handler.getBlockEntity().removePiecesWithChar(payload.paletteChar());
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(UpdatePaletteEntryVariedBlockListPayload.ID, (payload, context) -> {
+            ServerPlayerEntity player = context.player();
+            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+                handler.getBlockEntity().setPaletteVariedBlockList(payload.paletteChar(), payload.variedBlockList());
+            }
+        });
     }
 }

@@ -1,13 +1,12 @@
 package dev.turtywurty.industria.screen.fakeworld;
 
+import dev.turtywurty.industria.multiblock.VariedBlockList;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.predicate.BlockPredicate;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -52,8 +51,8 @@ public class FakeWorldScreen extends Screen {
                     ctx.addBlock(new BlockPos(3, y + 2, 3), Blocks.SOUL_LANTERN.getDefaultState());
                     ctx.addBlock(new BlockPos(2, y + 3, 2), Blocks.ENCHANTING_TABLE.getDefaultState());
 
-                    ctx.addPredicate(new BlockPos(2, y - 1, 2), BlockPredicate.Builder.create()
-                            .tag(ctx.world().getRegistryManager().getOrThrow(RegistryKeys.BLOCK), BlockTags.TERRACOTTA)
+                    ctx.addVariedBlockList(new BlockPos(2, y - 1, 2), VariedBlockList.Builder.create()
+                            .addTag(BlockTags.TERRACOTTA)
                             .build());
 
                     var world = ctx.world();

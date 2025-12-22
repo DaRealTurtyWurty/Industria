@@ -11,8 +11,8 @@ import org.lwjgl.glfw.GLFW;
 import java.util.function.Consumer;
 
 public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
-    protected final int width;
-    protected final int height;
+    protected int width;
+    protected int height;
     protected final FakeWorldScene scene;
     protected int x;
     protected int y;
@@ -95,6 +95,11 @@ public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
 
     @Override
     public void forEachChild(Consumer<ClickableWidget> consumer) {
+    }
+
+    public void setSize(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
     @Override

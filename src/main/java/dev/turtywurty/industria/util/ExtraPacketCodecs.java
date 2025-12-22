@@ -12,10 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.floatprovider.*;
 import net.minecraft.util.math.intprovider.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
@@ -29,6 +26,10 @@ public class ExtraPacketCodecs {
 
     public static <B extends ByteBuf, V> PacketCodec<B, Set<V>> setOf(PacketCodec<? super B, V> codec) {
         return PacketCodecs.collection(HashSet::new, codec);
+    }
+
+    public static <B extends ByteBuf, V> PacketCodec<B, List<V>> listOf(PacketCodec<? super B, V> codec) {
+        return PacketCodecs.collection(ArrayList::new, codec);
     }
 
     /**
