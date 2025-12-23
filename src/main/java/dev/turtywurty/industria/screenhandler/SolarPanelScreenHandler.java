@@ -17,7 +17,7 @@ public class SolarPanelScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
 
     public SolarPanelScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (SolarPanelBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, playerInv, (SolarPanelBlockEntity) playerInv.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     public SolarPanelScreenHandler(int syncId, PlayerInventory playerInv, SolarPanelBlockEntity blockEntity) {

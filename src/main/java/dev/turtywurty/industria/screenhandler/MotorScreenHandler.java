@@ -17,7 +17,7 @@ public class MotorScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
 
     public MotorScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, (MotorBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, (MotorBlockEntity) playerInv.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     public MotorScreenHandler(int syncId, MotorBlockEntity blockEntity) {

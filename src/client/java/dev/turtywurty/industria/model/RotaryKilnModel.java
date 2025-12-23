@@ -3,12 +3,10 @@ package dev.turtywurty.industria.model;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
-public class RotaryKilnModel extends Model {
+public class RotaryKilnModel extends Model<RotaryKilnModel.RotaryKilnModelRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/rotary_kiln.png");
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("rotary_kiln"), "main");
 
@@ -196,7 +194,7 @@ public class RotaryKilnModel extends Model {
                 .uv(689, 37).cuboid(22.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
                 .uv(689, 111).cuboid(-24.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
 
-         rotate_seg12.addChild("octagon_r11", ModelPartBuilder.create().uv(689, 74).cuboid(-24.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
+        rotate_seg12.addChild("octagon_r11", ModelPartBuilder.create().uv(689, 74).cuboid(-24.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
                 .uv(687, 0).cuboid(22.0F, -9.9411F, -8.0F, 2.0F, 19.8823F, 16.0F, new Dilation(0.0F))
                 .uv(73, 624).cuboid(-9.9411F, -24.0F, -8.0F, 19.8823F, 2.0F, 16.0F, new Dilation(0.0F))
                 .uv(617, 565).cuboid(-9.9411F, 22.0F, -8.0F, 19.8823F, 2.0F, 16.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.7854F));
@@ -249,11 +247,25 @@ public class RotaryKilnModel extends Model {
         return TexturedModelData.of(modelData, 1024, 1024);
     }
 
-    public void renderSegment(int index, MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay) {
-        this.root.getChild("seg" + index).render(matrices, vertexConsumer, light, overlay);
+    @Override
+    public void setAngles(RotaryKilnModelRenderState state) {
+        super.setAngles(state);
+        for (int i = 1; i < 16; i++) {
+            ModelPart segment = getSegment(i);
+            if (i <= state.segmentCount()) {
+                if (i != 1) {
+                    segment.getChild("rotate_seg" + i).roll = state.rotationAngle();
+                }
+            } else {
+                segment.hidden = true;
+            }
+        }
     }
 
-    public ModelPart getRotatingSegment(int index) {
-        return this.root.getChild("seg" + index).getChild("rotate_seg" + index);
+    public ModelPart getSegment(int index) {
+        return this.root.getChild("seg" + index);
+    }
+
+    public record RotaryKilnModelRenderState(int segmentCount, float rotationAngle) {
     }
 }

@@ -77,7 +77,7 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();

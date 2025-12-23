@@ -56,7 +56,7 @@ public class RotaryKilnBlock extends IndustriaBlock {
     @Override
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
         BlockState newState = world.getBlockState(pos);
-        if (!state.isOf(newState.getBlock()) && !world.isClient) {
+        if (!state.isOf(newState.getBlock()) && !world.isClient()) {
             BlockPos controllerPos = pos.offset(state.get(Properties.HORIZONTAL_FACING).getOpposite());
             BlockState controllerState = world.getBlockState(controllerPos);
 

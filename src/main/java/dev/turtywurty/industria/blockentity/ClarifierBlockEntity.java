@@ -134,7 +134,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         if (!this.outputItemStack.isEmpty()) {

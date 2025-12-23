@@ -31,7 +31,7 @@ public class SyncingGasStorage extends SingleGasStorage implements SyncableStora
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient) {
+        if (this.isDirty && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient()) {
             this.isDirty = false;
 
             if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {

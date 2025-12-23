@@ -1,12 +1,13 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.state.DrillRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class DrillCableModel extends Model {
+public class DrillCableModel extends Model<DrillRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("drill_cable"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_cable.png");
 

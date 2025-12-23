@@ -57,7 +57,7 @@ public interface AutoMultiblockable extends Multiblockable {
      */
     // TODO: Validate that the positions are valid before building the multiblock
     default void buildMultiblock(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack, Runnable onSuccessfulBuild) {
-        if (world == null || world.isClient)
+        if (world == null || world.isClient())
             return;
 
         long startTime = System.nanoTime();

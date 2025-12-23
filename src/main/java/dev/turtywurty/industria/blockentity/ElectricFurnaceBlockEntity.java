@@ -69,7 +69,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
@@ -122,7 +122,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
     public void endTick() {
         super.endTick();
 
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         boolean running = this.progress > 0;
@@ -177,7 +177,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
 
     @Override
     public void dropExperienceForRecipesUsed(ServerPlayerEntity player) {
-        List<RecipeEntry<?>> list = getRecipesUsedAndDropExperience(player.getWorld(), player.getPos());
+        List<RecipeEntry<?>> list = getRecipesUsedAndDropExperience(player.getEntityWorld(), player.getEntityPos());
         player.unlockRecipes(list);
 
         for (RecipeEntry<?> recipeEntry : list) {

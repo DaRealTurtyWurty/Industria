@@ -86,7 +86,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(Direction.SOUTH);

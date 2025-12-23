@@ -1,12 +1,13 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.state.ShakingTableRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class ShakingTableModel extends Model {
+public class ShakingTableModel extends Model<ShakingTableRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/shaking_table.png");
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("shaking_table"), "main");
 

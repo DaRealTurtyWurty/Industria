@@ -35,7 +35,7 @@ public class SeismicScannerItem extends Item {
 
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        if (world.isClient)
+        if (world.isClient())
             return super.use(world, user, hand);
 
         ItemStack stack = user.getStackInHand(hand);

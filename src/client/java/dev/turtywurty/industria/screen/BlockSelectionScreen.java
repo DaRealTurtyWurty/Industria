@@ -6,6 +6,7 @@ import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.WallBannerBlock;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -18,6 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -184,8 +186,11 @@ public class BlockSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
+        if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (isMouseOverScrollbar(mouseX, mouseY)) {
                 this.scrolling = true;
                 updateScrollFromMouse(mouseY);
@@ -203,27 +208,27 @@ public class BlockSelectionScreen extends Screen {
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0 && this.scrolling) {
+    public boolean mouseReleased(Click click) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1 && this.scrolling) {
             this.scrolling = false;
             return true;
         }
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.scrolling && button == 0) {
-            updateScrollFromMouse(mouseY);
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+        if (this.scrolling && click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            updateScrollFromMouse(click.y());
             return true;
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
     @Override
@@ -282,7 +287,7 @@ public class BlockSelectionScreen extends Screen {
 
     private void drawPanel(DrawContext context) {
         context.fill(this.panelX, this.panelY, this.panelX + this.panelWidth, this.panelY + this.panelHeight, 0xAA101010);
-        context.drawBorder(this.panelX, this.panelY, this.panelWidth, this.panelHeight, 0xFF404040);
+        context.drawStrokedRectangle(this.panelX, this.panelY, this.panelWidth, this.panelHeight, 0xFF404040);
     }
 
     private void drawSlot(DrawContext context, int x, int y, boolean hovered, boolean selected) {
@@ -293,7 +298,7 @@ public class BlockSelectionScreen extends Screen {
         }
 
         if (selected) {
-            context.drawBorder(x, y, SLOT_SIZE, SLOT_SIZE, 0xFF2FA9FF);
+            context.drawStrokedRectangle(x, y, SLOT_SIZE, SLOT_SIZE, 0xFF2FA9FF);
         }
     }
 

@@ -73,7 +73,7 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         extractLavaFromInventory();

@@ -1,10 +1,11 @@
 package dev.turtywurty.industria.block.abstraction;
 
+import com.mojang.datafixers.util.Function4;
 import dev.turtywurty.industria.block.abstraction.state.StateProperties;
 import dev.turtywurty.industria.block.abstraction.state.StateProperty;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -34,7 +35,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
-import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     public final BlockEntityFactory<?> blockEntityFactory;
     public final BlockEntityTickerFactory<?> blockEntityTicker;
     public final boolean hasComparatorOutput;
-    public final TriFunction<BlockState, World, BlockPos, Integer> comparatorOutput;
+    public final Function4<BlockState, World, BlockPos, Direction, Integer> comparatorOutput;
     public final BlockRenderType renderType;
     public final ShapeFactory shapeFactory;
     public final MultiblockType<?> multiblockType;
@@ -73,7 +73,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         this.canExistAt = properties.canExistAt;
         this.cachedDirectionalShapes = properties.cachedDirectionalShapes;
 
-        if(properties.blockEntityProperties != null) {
+        if (properties.blockEntityProperties != null) {
             this.blockEntityTypeSupplier = (Supplier<BlockEntityType<?>>) (Object) properties.blockEntityProperties.blockEntityTypeSupplier;
             this.shouldTick = properties.blockEntityProperties.shouldTick;
             this.blockEntityFactory = properties.blockEntityProperties.blockEntityFactory;
@@ -172,8 +172,8 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    protected int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-        return this.hasComparatorOutput ? this.comparatorOutput.apply(state, world, pos) : super.getComparatorOutput(state, world, pos);
+    protected int getComparatorOutput(BlockState state, World world, BlockPos pos, Direction direction) {
+        return this.hasComparatorOutput ? this.comparatorOutput.apply(state, world, pos, direction) : super.getComparatorOutput(state, world, pos, direction);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (this.multiblockType != null) {
-            if (!world.isClient) {
+            if (!world.isClient()) {
                 this.multiblockType.onPrimaryBlockUse(world, player, hit, pos);
             }
 
@@ -197,7 +197,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         }
 
         if (this.rightClickToOpenGui) {
-            if (!world.isClient) {
+            if (!world.isClient()) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
                 if (player instanceof ServerPlayerEntity sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
                     sPlayer.openHandledScreen(blockEntityWithGui);
@@ -213,7 +213,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     @Override
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (this.multiblockType != null) {
-            if (!world.isClient) {
+            if (!world.isClient()) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
                 if (blockEntity instanceof AutoMultiblockable multiblockable) {
                     multiblockable.buildMultiblock(world, pos, state, placer, itemStack, blockEntity::markDirty);
@@ -240,9 +240,11 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         private boolean placeFacingOpposite = true;
         private BlockBlockEntityProperties<?> blockEntityProperties;
         private boolean hasComparatorOutput = false;
-        private TriFunction<BlockState, World, BlockPos, Integer> comparatorOutput = (state, world, pos) -> ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
+        private Function4<BlockState, World, BlockPos, Direction, Integer> comparatorOutput =
+                (state, world, pos, direction) -> ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
         private BlockRenderType renderType = BlockRenderType.MODEL;
-        private ShapeFactory shapeFactory = (state, world, pos, context) -> VoxelShapes.fullCube();
+        private ShapeFactory shapeFactory =
+                (state, world, pos, context) -> VoxelShapes.fullCube();
         private final StateProperties stateProperties = new StateProperties();
         private BiPredicate<WorldView, BlockPos> canExistAt = (world, pos) -> true;
         private final Map<Direction, VoxelShape> cachedDirectionalShapes = new HashMap<>();
@@ -358,7 +360,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
             return this;
         }
 
-        public BlockProperties comparatorOutput(TriFunction<BlockState, World, BlockPos, Integer> comparatorOutput) {
+        public BlockProperties comparatorOutput(Function4<BlockState, World, BlockPos, Direction, Integer> comparatorOutput) {
             this.comparatorOutput = comparatorOutput;
             return this;
         }

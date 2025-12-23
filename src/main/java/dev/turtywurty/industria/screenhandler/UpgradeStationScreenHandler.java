@@ -34,8 +34,8 @@ public class UpgradeStationScreenHandler extends ScreenHandler {
     public UpgradeStationScreenHandler(int syncId, PlayerInventory inventory, UpgradeStationOpenPayload payload) {
         this(syncId,
                 inventory,
-                (UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos()),
-                ClientWrappedInventoryStorage.copyOf(((UpgradeStationBlockEntity) inventory.player.getWorld().getBlockEntity(payload.pos())).getWrappedInventoryStorage()),
+                (UpgradeStationBlockEntity) inventory.player.getEntityWorld().getBlockEntity(payload.pos()),
+                ClientWrappedInventoryStorage.copyOf(((UpgradeStationBlockEntity) inventory.player.getEntityWorld().getBlockEntity(payload.pos())).getWrappedInventoryStorage()),
                 new ArrayPropertyDelegate(1),
                 payload.recipes());
     }

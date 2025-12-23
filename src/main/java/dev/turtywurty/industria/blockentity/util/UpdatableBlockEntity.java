@@ -50,7 +50,7 @@ public class UpdatableBlockEntity extends BlockEntity {
         this.isDirty = false;
         markDirty();
 
-        if (this.world != null && !this.world.isClient) {
+        if (this.world != null && !this.world.isClient()) {
             this.world.updateListeners(this.pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL);
         }
     }

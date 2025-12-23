@@ -53,7 +53,7 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
             this.propertyDelegate = new ArrayPropertyDelegate(0);
         }
 
-        this.context = ScreenHandlerContext.create(playerInventory.player.getWorld(), blockEntity.getPos());
+        this.context = ScreenHandlerContext.create(playerInventory.player.getEntityWorld(), blockEntity.getPos());
         this.blockEntity = blockEntity;
         this.wrappedInventoryStorage = wrappedInventoryStorage;
         this.wrappedInventoryStorage.checkSize(getInventorySize());
@@ -149,7 +149,7 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
                 return cache.get(pos);
             }
 
-            BlockEntity blockEntity = playerInventory.player.getWorld().getBlockEntity(pos);
+            BlockEntity blockEntity = playerInventory.player.getEntityWorld().getBlockEntity(pos);
             if (blockEntityClass.isInstance(blockEntity)) {
                 T castedBlockEntity = blockEntityClass.cast(blockEntity);
                 cache.put(pos, castedBlockEntity);

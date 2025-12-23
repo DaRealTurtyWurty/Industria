@@ -5,12 +5,11 @@ import dev.turtywurty.industria.util.IndustriaIngredient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.text.Text;
@@ -22,11 +21,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Widget, Drawable {
+public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends ClickableWidget {
     private final int slotIndex;
     private final Function<T, IndustriaIngredient> ingredientGetter;
 
-    private int x, y;
     private @Nullable T recipe;
     private long cycleTimeMs;
     private boolean shouldRender = true;
@@ -39,15 +37,14 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
     }
 
     public IndustriaIngredientPreviewWidget(int x, int y, int slotIndex, long cycleTimeMs, @NotNull Function<T, IndustriaIngredient> ingredientGetter) {
-        this.x = x;
-        this.y = y;
+        super(x, y, 16, 16, Text.empty());
         this.slotIndex = slotIndex;
         this.cycleTimeMs = cycleTimeMs;
         this.ingredientGetter = ingredientGetter;
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         if (!this.shouldRender || this.recipe == null)
             return;
 
@@ -63,14 +60,14 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
             if (stack.isEmpty())
                 return;
 
-            context.drawItem(stack, this.x, this.y);
-            context.drawStackOverlay(this.textRenderer, stack, this.x, this.y);
-            context.fill(this.x, this.y, this.x + 16, this.y + 16, 0x8808080);
+            context.drawItem(stack, getX(), getY());
+            context.drawStackOverlay(this.textRenderer, stack, getX(), getY());
+            context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x8808080);
 
-            if (!isPointWithinBounds(this.x, this.y, 16, 16, mouseX, mouseY))
+            if (!isPointWithinBounds(getX(), getY(), getWidth(), getHeight(), mouseX, mouseY))
                 return;
 
-            if (!Screen.hasShiftDown()) {
+            if (!this.client.isShiftPressed()) {
                 context.drawItemTooltip(this.textRenderer, stack, mouseX, mouseY);
                 return;
             }
@@ -119,33 +116,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> implements Wi
     }
 
     @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    @Override
-    public int getX() {
-        return this.x;
-    }
-
-    @Override
-    public int getY() {
-        return this.y;
-    }
-
-    @Override
-    public int getWidth() {
-        return 16;
-    }
-
-    @Override
-    public int getHeight() {
-        return 16;
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
     }
 
     @Override

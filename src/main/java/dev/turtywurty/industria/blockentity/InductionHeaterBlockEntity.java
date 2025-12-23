@@ -67,7 +67,7 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         OutputHeatStorage heatStorage = getHeatStorage();

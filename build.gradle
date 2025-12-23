@@ -56,7 +56,6 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-//    modImplementation "org.ladysnake:satin:${satin_version}"
 
 	include modApi("teamreborn:energy:${project.tech_reborn_energy_version}")
 	include modApi("dev.turtywurty:heatapi:${project.heat_api_version}")

@@ -7,6 +7,7 @@ import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
 import dev.turtywurty.industria.screen.widget.FakeWorldWidget;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -17,7 +18,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -40,8 +40,8 @@ public class PortRulesScreen extends Screen {
     public static final Text SIDE_DOWN = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_down");
 
     private int leftPos, topPos;
-    private int imgWidth = 176, imgHeight = 166;
-    private int titleX = 8, titleY = 6;
+    private final int imgWidth = 176, imgHeight = 166;
+    private final int titleX = 8, titleY = 6;
     private final Screen parent;
     private final PieceData pieceData;
     private final Runnable onClose;
@@ -195,16 +195,16 @@ public class PortRulesScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+        if (click.isLeft()) {
             if (this.scene != null) {
                 float sensitivity = 0.35F;
-                this.scene.rotateCamera((float) (deltaX * sensitivity), (float) (deltaY * sensitivity));
+                this.scene.rotateCamera((float) (offsetX * sensitivity), (float) (offsetY * sensitivity));
                 return true;
             }
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class InductionHeaterScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
 
     public InductionHeaterScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, (InductionHeaterBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, (InductionHeaterBlockEntity) playerInv.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     public InductionHeaterScreenHandler(int syncId, InductionHeaterBlockEntity blockEntity) {

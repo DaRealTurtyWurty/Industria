@@ -25,7 +25,7 @@ public abstract class FallingBlockEntityMixin extends Entity {
         if(original)
             return true;
 
-        FluidState fluidState = getWorld().getFluidState(blockPos);
+        FluidState fluidState = getEntityWorld().getFluidState(blockPos);
         FluidData fluidData = FluidData.FLUID_DATA.get(fluidState.getFluid());
         return fluidData != null && fluidData.applyWaterMovement();
     }

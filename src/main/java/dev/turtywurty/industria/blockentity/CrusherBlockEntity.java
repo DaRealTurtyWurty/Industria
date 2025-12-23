@@ -106,7 +106,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         listenForItemEntities();

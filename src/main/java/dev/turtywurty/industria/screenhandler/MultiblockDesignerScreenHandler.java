@@ -21,7 +21,7 @@ public class MultiblockDesignerScreenHandler extends ScreenHandler {
     }
 
     public MultiblockDesignerScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (MultiblockDesignerBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, playerInv, (MultiblockDesignerBlockEntity) playerInv.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     @Override

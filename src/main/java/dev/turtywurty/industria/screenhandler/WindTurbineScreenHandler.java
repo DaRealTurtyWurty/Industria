@@ -17,7 +17,7 @@ public class WindTurbineScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
 
     public WindTurbineScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (WindTurbineBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, playerInv, (WindTurbineBlockEntity) playerInv.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     public WindTurbineScreenHandler(int syncId, PlayerInventory playerInv, WindTurbineBlockEntity blockEntity) {

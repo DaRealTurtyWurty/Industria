@@ -246,7 +246,7 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         if (!this.overflowStack.isEmpty()) {
@@ -377,7 +377,7 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     }
 
     public void setSelectedRecipeIndex(int index) {
-        if (this.world == null || this.world.isClient || index < 0 || index >= this.availableRecipes.size() || this.selectedRecipeIndex == index)
+        if (this.world == null || this.world.isClient() || index < 0 || index >= this.availableRecipes.size() || this.selectedRecipeIndex == index)
             return;
 
         this.selectedRecipeIndex = index;

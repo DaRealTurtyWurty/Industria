@@ -62,7 +62,7 @@ public abstract class AbstractBoatEntityMixin extends VehicleEntity {
         if (original)
             return true;
 
-        FluidState fluidState = getWorld().getFluidState(getBlockPos().down());
+        FluidState fluidState = getEntityWorld().getFluidState(getBlockPos().down());
         return FluidData.FLUID_DATA.values().stream()
                 .filter(FluidData::canBoatsWork)
                 .noneMatch(data -> fluidState.isIn(data.fluidTag()));

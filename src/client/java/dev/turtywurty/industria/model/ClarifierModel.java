@@ -6,7 +6,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class ClarifierModel extends Model {
+public class ClarifierModel extends Model<Void> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/clarifier.png");
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("clarifier"), "main");
 

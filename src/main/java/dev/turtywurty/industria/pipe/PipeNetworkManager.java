@@ -147,14 +147,14 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     }
 
     public void placePipe(ServerWorld world, BlockPos pos) {
-        if (world.isClient)
+        if (world.isClient())
             return;
 
         onPlacePipe(world, pos);
     }
 
     public void removePipe(ServerWorld world, BlockPos pos) {
-        if (world.isClient)
+        if (world.isClient())
             return;
 
         onRemovePipe(world, pos);

@@ -117,7 +117,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 3, (stack, slot) -> stack.getItem() instanceof BlockItem), Direction.SOUTH);
 
         getDrillHeadInventory().addListener(inv -> {
-            if (this.world != null && this.world.isClient) {
+            if (this.world != null && this.world.isClient()) {
                 ItemStack stack = inv.getStack(0);
                 setRenderData(stack.getItem() instanceof DrillHeadable drillHeadable ? drillHeadable.createRenderData() : null);
             }
@@ -138,7 +138,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         if (this.ticks++ == 0)
@@ -254,7 +254,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
         this.drillHeadAABB = view.read("DrillHeadAABB", ExtraCodecs.BOX_CODEC)
                 .orElseGet(() -> Box.from(Vec3d.of(this.pos)));
 
-        if (this.world != null && this.world.isClient && this.renderData == null && getDrillStack().getItem() instanceof DrillHeadable drillHeadable) {
+        if (this.world != null && this.world.isClient() && this.renderData == null && getDrillStack().getItem() instanceof DrillHeadable drillHeadable) {
             setRenderData(drillHeadable.createRenderData());
         }
     }
@@ -412,7 +412,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     }
 
     public void setRenderData(DrillRenderData renderData) {
-        if (this.world == null || !this.world.isClient)
+        if (this.world == null || !this.world.isClient())
             return;
 
         this.renderData = renderData;

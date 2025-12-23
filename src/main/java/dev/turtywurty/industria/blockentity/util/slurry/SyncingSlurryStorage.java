@@ -31,7 +31,7 @@ public class SyncingSlurryStorage extends SingleSlurryStorage implements Syncabl
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient) {
+        if (this.isDirty && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient()) {
             this.isDirty = false;
 
             if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {

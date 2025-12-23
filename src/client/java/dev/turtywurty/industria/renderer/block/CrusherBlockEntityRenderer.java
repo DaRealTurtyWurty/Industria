@@ -1,60 +1,39 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.CrusherBlockEntity;
 import dev.turtywurty.industria.model.CrusherModel;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
+import dev.turtywurty.industria.state.CrusherRenderState;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
-public class CrusherBlockEntityRenderer implements BlockEntityRenderer<CrusherBlockEntity> {
-    private static final Identifier TEXTURE = Industria.id("textures/block/crusher.png");
-
+public class CrusherBlockEntityRenderer extends IndustriaBlockEntityRenderer<CrusherBlockEntity, CrusherRenderState> {
     private final CrusherModel model;
 
     public CrusherBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+        super(context);
         this.model = new CrusherModel(context.getLayerModelPart(CrusherModel.LAYER_LOCATION));
     }
 
     @Override
-    public void render(CrusherBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+    public CrusherRenderState createRenderState() {
+        return new CrusherRenderState();
+    }
 
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (entity.getCachedState().get(Properties.HORIZONTAL_FACING)) {
-            case EAST -> 90;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            default -> 0;
-        }));
+    @Override
+    public void updateRenderState(CrusherBlockEntity blockEntity, CrusherRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
+        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        state.progress = blockEntity.getProgress();
+    }
 
-        float prevBottomLeftRoll = this.model.getCrusherParts().bottomLeft().roll;
-        float prevBottomRightRoll = this.model.getCrusherParts().bottomRight().roll;
-        float prevTopLeftRoll = this.model.getCrusherParts().topLeft().roll;
-        float prevTopRightRoll = this.model.getCrusherParts().topRight().roll;
-
-        if (entity.getProgress() > 0) {
-            this.model.getCrusherParts().bottomLeft().roll = entity.getProgress() / 100.0F;
-            this.model.getCrusherParts().bottomRight().roll = entity.getProgress() / 100.0F;
-            this.model.getCrusherParts().topLeft().roll = entity.getProgress() / 100.0F;
-            this.model.getCrusherParts().topRight().roll = entity.getProgress() / 100.0F;
-        }
-
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(TEXTURE));
-        this.model.render(matrices, vertexConsumer, light, overlay);
-
-        this.model.getCrusherParts().bottomLeft().roll = prevBottomLeftRoll;
-        this.model.getCrusherParts().bottomRight().roll = prevBottomRightRoll;
-        this.model.getCrusherParts().topLeft().roll = prevTopLeftRoll;
-        this.model.getCrusherParts().topRight().roll = prevTopRightRoll;
-
-        matrices.pop();
+    @Override
+    public void onRender(CrusherRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+        queue.submitModel(this.model,
+                state.progress > 0 ? state.progress / 100.0F : 0F,
+                matrices, this.model.getLayer(CrusherModel.TEXTURE),
+                light, overlay, 0, state.crumblingOverlay);
     }
 }

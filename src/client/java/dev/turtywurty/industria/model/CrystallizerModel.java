@@ -6,7 +6,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class CrystallizerModel extends Model {
+public class CrystallizerModel extends Model<Void> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("crystallizer"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/crystallizer.png");
 
@@ -19,7 +19,7 @@ public class CrystallizerModel extends Model {
     }
 
     public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
+        var modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
         modelPartData.addChild("main", ModelPartBuilder.create().uv(0, 0).cuboid(-28.0F, -64.0F, -12.0F, 40.0F, 2.0F, 40.0F, new Dilation(0.0F))
                 .uv(0, 43).cuboid(-28.0F, -2.0F, -12.0F, 40.0F, 2.0F, 40.0F, new Dilation(0.0F))

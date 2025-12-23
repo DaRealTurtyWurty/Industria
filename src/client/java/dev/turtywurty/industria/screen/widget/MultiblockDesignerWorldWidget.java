@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.MultiblockDesignerScreen;
+import net.minecraft.client.gui.Click;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -16,9 +17,9 @@ public class MultiblockDesignerWorldWidget extends FakeWorldWidget {
         this.multiblockDesignerScreen = multiblockDesignerScreen;
     }
 
-    public boolean handleClick(double mouseX, double mouseY) {
-        if (isInsideWidget(mouseX, mouseY)) {
-            BlockPos closest = findClosestPiece(mouseX, mouseY);
+    public boolean handleClick(Click click, boolean doubled) {
+        if (isInsideWidget(click.x(), click.y())) {
+            BlockPos closest = findClosestPiece(click.x(), click.y());
             if (closest != null) {
                 multiblockDesignerScreen.selectPiece(closest);
                 return true;

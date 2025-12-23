@@ -233,7 +233,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         createBattery(blockStateModelGenerator, BlockInit.ULTIMATE_BATTERY);
         createBattery(blockStateModelGenerator, BlockInit.CREATIVE_BATTERY);
         blockStateModelGenerator.registerCooker(BlockInit.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE);
-        blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.SOLAR_PANEL);
+        blockStateModelGenerator.registerNorthDefaultHorizontalRotatable(BlockInit.SOLAR_PANEL);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
         blockStateModelGenerator.registerSimpleState(FluidInit.CRUDE_OIL.block());
         blockStateModelGenerator.registerSimpleState(FluidInit.DIRTY_SODIUM_ALUMINATE.block());
@@ -243,9 +243,9 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleState(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
         blockStateModelGenerator.registerCooker(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE);
-        blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER);
+        blockStateModelGenerator.registerNorthDefaultHorizontalRotatable(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER, Industria.id("block/fractional_distillation_controller"));
-        blockStateModelGenerator.registerNorthDefaultHorizontalRotation(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
+        blockStateModelGenerator.registerNorthDefaultHorizontalRotatable(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
         blockStateModelGenerator.registerParentedItemModel(BlockInit.FRACTIONAL_DISTILLATION_TOWER, Industria.id("block/fractional_distillation_tower"));
         blockStateModelGenerator.registerSimpleState(BlockInit.INDUCTION_HEATER);
         blockStateModelGenerator.registerSimpleState(BlockInit.FLUID_PUMP);

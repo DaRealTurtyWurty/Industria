@@ -179,7 +179,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         SyncingSimpleInventory bucketInputInventory = getInputSlurryInventory();

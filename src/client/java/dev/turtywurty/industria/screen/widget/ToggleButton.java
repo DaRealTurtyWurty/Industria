@@ -5,6 +5,7 @@ import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.input.AbstractInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 
@@ -29,14 +30,15 @@ public class ToggleButton extends ButtonWidget {
     private boolean toggled;
 
     protected ToggleButton(int x, int y, BiConsumer<ToggleButton, Boolean> onPressed, NarrationSupplier narrationSupplier, boolean defaultToggle, ButtonTextures textures) {
-        super(x, y, 32, 16, Text.empty(), $ -> {}, narrationSupplier);
+        super(x, y, 32, 16, Text.empty(), $ -> {
+        }, narrationSupplier);
         this.toggled = defaultToggle;
         this.textures = textures;
         this.onPressed = onPressed;
     }
 
     @Override
-    public void onPress() {
+    public void onPress(AbstractInput input) {
         toggle();
         this.onPressed.accept(this, this.toggled);
     }
@@ -74,7 +76,8 @@ public class ToggleButton extends ButtonWidget {
 
     public static class Builder {
         private final int x, y;
-        private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {};
+        private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {
+        };
         private NarrationSupplier narrationSupplier = textSupplier -> Text.empty();
         private boolean defaultToggled;
         private ButtonTextures textures = ToggleButton.DEFAULT_TEXTURES;

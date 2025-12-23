@@ -68,7 +68,7 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.energyStorage.getStorage(null);

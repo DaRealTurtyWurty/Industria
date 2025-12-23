@@ -4,22 +4,24 @@ import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.util.Identifier;
 
-public class CrusherModel extends Model {
-    public static final EntityModelLayer LAYER_LOCATION =
-            new EntityModelLayer(Industria.id("crusher"), "main");
+public class CrusherModel extends Model<Float> {
+    public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("crusher"), "main");
+    public static final Identifier TEXTURE = Industria.id("textures/block/crusher.png");
 
-    private final CrusherParts parts;
+    private final ModelPart bottomLeft;
+    private final ModelPart topLeft;
+    private final ModelPart bottomRight;
+    private final ModelPart topRight;
 
     public CrusherModel(ModelPart root) {
         super(root, RenderLayer::getEntityCutoutNoCull);
         ModelPart main = root.getChild("main");
-        ModelPart structure = main.getChild("structure");
-        ModelPart left = main.getChild("left");
-        ModelPart right = main.getChild("right");
-        this.parts = new CrusherParts(main, structure, left, right, left.getChild("bottomLeft"),
-                right.getChild("bottomRight"), left.getChild("topLeft"), right.getChild("topRight"),
-                structure.getChild("feet"), structure.getChild("funnel"), structure.getChild("bars"));
+        this.bottomLeft = main.getChild("left").getChild("bottomLeft");
+        this.topLeft = main.getChild("left").getChild("topLeft");
+        this.bottomRight = main.getChild("right").getChild("bottomRight");
+        this.topRight = main.getChild("right").getChild("topRight");
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -110,12 +112,12 @@ public class CrusherModel extends Model {
         return TexturedModelData.of(modelData, 128, 128);
     }
 
-    public CrusherParts getCrusherParts() {
-        return this.parts;
-    }
-
-    public record CrusherParts(ModelPart main, ModelPart structure, ModelPart left, ModelPart right,
-                               ModelPart bottomLeft, ModelPart topLeft, ModelPart bottomRight, ModelPart topRight,
-                               ModelPart feet, ModelPart funnel, ModelPart bars) {
+    @Override
+    public void setAngles(Float rotation) {
+        super.setAngles(rotation);
+        this.bottomLeft.roll = rotation;
+        this.topLeft.roll = rotation;
+        this.bottomRight.roll = -rotation;
+        this.topRight.roll = -rotation;
     }
 }

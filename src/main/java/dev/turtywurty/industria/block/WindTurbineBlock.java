@@ -58,7 +58,7 @@ public class WindTurbineBlock extends IndustriaBlock {
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient) {
+        if (!world.isClient()) {
             BlockPos blockEntityPos = pos;
             if (state.get(PART) != 0) {
                 blockEntityPos = pos.down(state.get(PART));

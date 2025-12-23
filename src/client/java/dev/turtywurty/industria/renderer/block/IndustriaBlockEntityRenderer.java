@@ -1,17 +1,24 @@
 package dev.turtywurty.industria.renderer.block;
 
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
+import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.hud.debug.DebugHudEntries;
+import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Colors;
@@ -20,6 +27,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -38,11 +46,11 @@ import java.util.*;
  *
  * @param <T> The block entity type
  * @see WireframeExtractor
- * @see IndustriaBlockEntityRenderer#onRender(BlockEntity, float, MatrixStack, VertexConsumerProvider, int, int)
- * @see IndustriaBlockEntityRenderer#postRender(BlockEntity, float, MatrixStack, VertexConsumerProvider, int, int)
- * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(MatrixStack, BlockEntity)
+ * @see IndustriaBlockEntityRenderer#onRender(IndustriaBlockEntityRenderState, MatrixStack, OrderedRenderCommandQueue, int, int)
+ * @see IndustriaBlockEntityRenderer#postRender(IndustriaBlockEntityRenderState, MatrixStack, OrderedRenderCommandQueue, int, int)
+ * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(MatrixStack, IndustriaBlockEntityRenderState)
  */
-public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
+public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S extends IndustriaBlockEntityRenderState> implements BlockEntityRenderer<T, S> {
     protected static final List<ModelPart> EMPTY_WIREFRAME = Collections.emptyList();
 
     protected final BlockEntityRendererFactory.Context context;
@@ -59,43 +67,58 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
     /**
      * Called to render the block entity.
      *
-     * @param entity          The block entity
-     * @param tickDelta       The partial tick
-     * @param matrices        The matrix stack
-     * @param vertexConsumers The vertex consumer provider
-     * @param light           The light level
-     * @param overlay         The overlay
+     * @param state    The block entity render state
+     * @param matrices The matrix stack
+     * @param queue    The vertex consumer provider
      */
-    protected abstract void onRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
+    protected abstract void onRender(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay);
 
     /**
      * Called after the block entity and wireframe have been rendered.
      *
-     * @param entity          The block entity
-     * @param tickDelta       The partial tick
-     * @param matrices        The matrix stack
-     * @param vertexConsumers The vertex consumer provider
-     * @param light           The light level
-     * @param overlay         The overlay
+     * @param state    The block entity render state
+     * @param matrices The matrix stack
+     * @param queue    The vertex consumer provider
      */
-    protected void postRender(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {}
+    protected void postRender(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    }
 
     @Override
-    public final void render(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
-        setupBlockEntityTransformations(matrices, entity);
-        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+    public void render(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+        setupBlockEntityTransformations(matrices, state);
+        onRender(state, matrices, queue, state.lightmapCoordinates, OverlayTexture.DEFAULT_UV);
 
-        if (isPlayerLookingAt(entity.getPos())) {
+        if (isPlayerLookingAt(state.pos)) {
             List<ModelPart> wireframe = getModelParts();
             if (!wireframe.isEmpty()) {
                 boolean isHighContrast = isHighContrast();
-                renderWireframe(wireframe, matrices, vertexConsumers, isHighContrast);
+                renderWireframe(wireframe, matrices, queue, isHighContrast);
             }
         }
 
-       matrices.pop();
+        matrices.pop();
 
-        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+        postRender(state, matrices, queue, state.lightmapCoordinates, OverlayTexture.DEFAULT_UV);
+    }
+
+    public ItemModelManager getItemModelManager() {
+        return this.context.itemModelManager();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public S createRenderState() {
+        return (S) new IndustriaBlockEntityRenderState(0);
+    }
+
+    @Override
+    public void updateRenderState(T blockEntity, S state, float tickProgress, Vec3d cameraPos, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
+        BlockEntityRenderer.super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        state.tickProgress = tickProgress;
+    }
+
+    public static boolean shouldRenderHitboxes() {
+        return MinecraftClient.getInstance().debugHudEntryList.isEntryVisible(DebugHudEntries.ENTITY_HITBOXES);
     }
 
     private static boolean isHighContrast() {
@@ -135,12 +158,12 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
     /**
      * Renders the wireframe of the model parts.
      *
-     * @param modelParts      The model parts to render
-     * @param matrices        The matrix stack
-     * @param vertexConsumers The vertex consumer provider
-     * @param isHighContrast  If the wireframe should be high contrast
+     * @param modelParts     The model parts to render
+     * @param matrices       The matrix stack
+     * @param queue          The vertex consumer provider
+     * @param isHighContrast If the wireframe should be high contrast
      */
-    public static void renderWireframe(List<ModelPart> modelParts, MatrixStack matrices, VertexConsumerProvider vertexConsumers, boolean isHighContrast) {
+    public static void renderWireframe(List<ModelPart> modelParts, MatrixStack matrices, OrderedRenderCommandQueue queue, boolean isHighContrast) {
         var v0 = new Vector3f();
         var v1 = new Vector3f();
         var v2 = new Vector3f();
@@ -150,27 +173,27 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
 
         int color = getWireframeColor(isHighContrast);
         for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
-            VertexConsumer vertexConsumer = iteration == 0 && isHighContrast ? getHighContrastWireframeVertexConsumer(vertexConsumers) : getWireframeVertexConsumer(vertexConsumers);
-
-            for (ModelPart modelPart : modelParts) {
-                visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
-            }
+            queue.submitCustom(matrices, isHighContrast ? RenderLayer.getSecondaryBlockOutline() : RenderLayer.getLines(), (entry, vertexConsumer) -> {
+                for (ModelPart modelPart : modelParts) {
+                    visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
+                }
+            });
         }
     }
 
     /**
      * Visits a model part and renders its wireframe.
      *
-     * @param modelPart            The model part to visit
-     * @param matrices             The matrix stack
-     * @param vertexConsumer       The vertex consumer
-     * @param color                The color of the wireframe
-     * @param v0                   The first vertex
-     * @param v1                   The second vertex
-     * @param v2                   The third vertex
-     * @param v3                   The fourth vertex
-     * @param pos                  The position of the vertex
-     * @param normal               The normal of the vertex
+     * @param modelPart      The model part to visit
+     * @param matrices       The matrix stack
+     * @param vertexConsumer The vertex consumer
+     * @param color          The color of the wireframe
+     * @param v0             The first vertex
+     * @param v1             The second vertex
+     * @param v2             The third vertex
+     * @param v3             The fourth vertex
+     * @param pos            The position of the vertex
+     * @param normal         The normal of the vertex
      */
     private static void visitPart(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
         if (!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
@@ -186,10 +209,11 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
             Set<WireframeExtractor.Line> lines = new HashSet<>();
             for (ModelPart.Cuboid cuboid : modelPart.cuboids) {
                 for (ModelPart.Quad quad : cuboid.sides) {
-                    quad.vertices()[0].pos().div(16, v0);
-                    quad.vertices()[1].pos().div(16, v1);
-                    quad.vertices()[2].pos().div(16, v2);
-                    quad.vertices()[3].pos().div(16, v3);
+                    ModelPart.Vertex[] vertices = quad.vertices();
+                    v0.set(vertices[0].worldX(), vertices[0].worldY(), vertices[0].worldZ());
+                    v1.set(vertices[1].worldX(), vertices[1].worldY(), vertices[1].worldZ());
+                    v2.set(vertices[2].worldX(), vertices[2].worldY(), vertices[2].worldZ());
+                    v3.set(vertices[3].worldX(), vertices[3].worldY(), vertices[3].worldZ());
                     lines.add(WireframeExtractor.Line.from(v0, v1));
                     lines.add(WireframeExtractor.Line.from(v1, v2));
                     lines.add(WireframeExtractor.Line.from(v2, v3));
@@ -266,25 +290,24 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity> implem
         return EMPTY_WIREFRAME;
     }
 
-    public final void renderForItem(T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        setupBlockEntityTransformations(matrices, entity);
-        onRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+    public final void renderForItem(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+        setupBlockEntityTransformations(matrices, state);
+        onRender(state, matrices, queue, light, overlay);
 
         matrices.pop();
 
-        postRender(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+        postRender(state, matrices, queue, light, overlay);
     }
 
-    protected void setupBlockEntityTransformations(MatrixStack matrices, T entity) {
+    protected void setupBlockEntityTransformations(MatrixStack matrices, S state) {
         matrices.push();
         matrices.translate(0.5f, 1.5f, 0.5f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
 
-        BlockState state = entity.getCachedState();
-        if (!state.getProperties().contains(Properties.HORIZONTAL_FACING))
+        if (!state.blockState.getProperties().contains(Properties.HORIZONTAL_FACING))
             return;
 
-        Direction facing = state.get(Properties.HORIZONTAL_FACING);
+        Direction facing = state.blockState.get(Properties.HORIZONTAL_FACING);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (facing) {
             case EAST -> 90;
             case SOUTH -> 180;

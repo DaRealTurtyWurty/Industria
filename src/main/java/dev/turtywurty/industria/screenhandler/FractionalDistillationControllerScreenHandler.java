@@ -15,7 +15,7 @@ public class FractionalDistillationControllerScreenHandler extends ScreenHandler
     private final ScreenHandlerContext context;
 
     public FractionalDistillationControllerScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
-        this(syncId, playerInv, (FractionalDistillationControllerBlockEntity) playerInv.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, playerInv, (FractionalDistillationControllerBlockEntity) playerInv.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     public FractionalDistillationControllerScreenHandler(int syncId, PlayerInventory playerInv, FractionalDistillationControllerBlockEntity blockEntity) {

@@ -5,10 +5,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientConnectionState;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.state.WorldRenderState;
 import net.minecraft.client.session.telemetry.TelemetrySender;
 import net.minecraft.client.session.telemetry.WorldSession;
+import net.minecraft.client.world.ClientChunkLoadProgress;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
@@ -27,6 +30,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Creates a stand-alone {@link ClientWorld} that never talks to a server.
@@ -41,7 +45,10 @@ public final class FakeWorldBuilder {
                 ? client.world.getRegistryManager().toImmutable()
                 : DynamicRegistryManager.of(Registries.REGISTRIES);
 
+        UUID playerUUID = profile.id() == null ? UUID.randomUUID() : profile.id();
+
         var connectionState = new ClientConnectionState(
+                new ClientChunkLoadProgress(),
                 profile,
                 new WorldSession(TelemetrySender.NOOP, true, null, "fake_world"),
                 registryManager,
@@ -52,7 +59,9 @@ public final class FakeWorldBuilder {
                 Map.of(),
                 null,
                 Map.of(),
-                ServerLinks.EMPTY
+                ServerLinks.EMPTY,
+                Map.of(playerUUID, new PlayerListEntry(profile, false)),
+                false
         );
 
         var connection = new ClientConnection(NetworkSide.CLIENTBOUND);
@@ -66,7 +75,9 @@ public final class FakeWorldBuilder {
                 client,
                 client.getEntityRenderDispatcher(),
                 client.getBlockEntityRenderDispatcher(),
-                client.getBufferBuilders()
+                client.getBufferBuilders(),
+                new WorldRenderState(),
+                client.gameRenderer.getEntityRenderDispatcher()
         );
 
         var properties = new ClientWorld.Properties(Difficulty.NORMAL, false, false);
@@ -93,6 +104,7 @@ public final class FakeWorldBuilder {
                 PlayerInput.DEFAULT,
                 false
         );
+        player.setUuid(playerUUID);
         player.setYaw(180.0F);
         player.setPitch(15.0F);
         player.setNoGravity(true);

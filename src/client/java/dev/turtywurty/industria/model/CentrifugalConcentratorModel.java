@@ -6,7 +6,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class CentrifugalConcentratorModel extends Model {
+public class CentrifugalConcentratorModel extends Model<Float> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/centrifugal_concentrator.png");
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("centrifugal_concentrator"), "main");
 
@@ -246,11 +246,10 @@ public class CentrifugalConcentratorModel extends Model {
         return TexturedModelData.of(modelData, 256, 256);
     }
 
-    public ModelPart getCylinderTop() {
-        return cylinderTop;
-    }
-
-    public ModelPart getBowl() {
-        return bowl;
+    @Override
+    public void setAngles(Float bowlRotation) {
+        super.setAngles(bowlRotation);
+        this.cylinderTop.hidden = true;
+        this.bowl.yaw = bowlRotation;
     }
 }

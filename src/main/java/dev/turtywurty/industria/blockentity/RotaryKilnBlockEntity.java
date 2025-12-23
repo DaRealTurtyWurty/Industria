@@ -42,7 +42,7 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements AutoM
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return List.of();
 
         // 5x5x1 structure

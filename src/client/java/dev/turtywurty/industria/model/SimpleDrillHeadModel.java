@@ -1,17 +1,14 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.util.DrillRenderData;
+import dev.turtywurty.industria.state.DrillRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
 
-public class SimpleDrillHeadModel extends Model {
+public class SimpleDrillHeadModel extends Model<DrillRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("simple_drill_head"), "main");
 
     private final DrillHeadParts parts;
@@ -52,38 +49,34 @@ public class SimpleDrillHeadModel extends Model {
         return TexturedModelData.of(modelData, 128, 128);
     }
 
-    public static void onRender(DrillBlockEntity blockEntity, ItemStack headStack, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Model pModel, VertexConsumer vertexConsumer, int light, int overlay) {
+    public static void onRender(DrillRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Model<?> pModel, RenderLayer renderLayer, int light, int overlay) {
         SimpleDrillHeadModel model = (SimpleDrillHeadModel) pModel;
-        Object renderData = blockEntity.getRenderData();
-        if(!(renderData instanceof DrillRenderData rotationData))
-            return;
 
         DrillHeadParts parts = model.getDrillHeadParts();
         float previousClockwiseYaw = parts.clockwise().yaw;
         float previousCounterClockwiseYaw = parts.counterClockwise().yaw;
 
-        if(blockEntity.isDrilling() && !blockEntity.isPaused()) {
-            parts.clockwise().yaw = rotationData.clockwiseRotation += 0.1F;
-            parts.counterClockwise().yaw = rotationData.counterClockwiseRotation -= 0.125F;
+        if (state.isDrilling && !state.isPaused) {
+            parts.clockwise().yaw = state.clockwiseRotation += 0.1F;
+            parts.counterClockwise().yaw = state.counterClockwiseRotation -= 0.125F;
         } else {
-            parts.clockwise().yaw = (float) Math.clamp(rotationData.clockwiseRotation -= 0.1F, 0, Math.PI * 2);
-            parts.counterClockwise().yaw = (float) Math.clamp(rotationData.counterClockwiseRotation += 0.125F, 0, Math.PI * 2);
+            parts.clockwise().yaw = (float) Math.clamp(state.clockwiseRotation -= 0.1F, 0, Math.PI * 2);
+            parts.counterClockwise().yaw = (float) Math.clamp(state.counterClockwiseRotation += 0.125F, 0, Math.PI * 2);
         }
 
         matrices.push();
         matrices.scale(0.9F, 0.9F, 0.9F);
-        model.render(matrices, vertexConsumer, light, overlay);
+        queue.submitModel(model, state, matrices, renderLayer, light, overlay, -1, state.crumblingOverlay);
         matrices.pop();
 
         parts.clockwise().yaw = previousClockwiseYaw;
         parts.counterClockwise().yaw = previousCounterClockwiseYaw;
-
-        blockEntity.update();
     }
 
     public DrillHeadParts getDrillHeadParts() {
         return this.parts;
     }
 
-    public record DrillHeadParts(ModelPart main, ModelPart clockwise, ModelPart counterClockwise) {}
+    public record DrillHeadParts(ModelPart main, ModelPart clockwise, ModelPart counterClockwise) {
+    }
 }

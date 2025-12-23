@@ -7,7 +7,7 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -62,15 +62,15 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
         if(consumers == null)
             return;
 
-        MatrixStack matrices = context.matrixStack();
+        MatrixStack matrices = context.matrices();
         if(matrices == null)
             return;
 
-        Entity cameraEntity = context.camera().getFocusedEntity();
+        Entity cameraEntity = context.gameRenderer().getCamera().getFocusedEntity();
         if(cameraEntity == null)
             return;
 
-        RegistryKey<World> dimension = cameraEntity.getWorld().getRegistryKey();
+        RegistryKey<World> dimension = cameraEntity.getEntityWorld().getRegistryKey();
         for (PipeNetworkManager<?, ?> manager : ClientPipeNetworks.get(dimension)) {
             TransferType<?, ?, ?> transferType = manager.getTransferType();
             float[] color = COLOR_MAP.get(transferType);
@@ -83,7 +83,7 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
 
                     VertexConsumer vertexConsumer = consumers.getBuffer(RenderLayer.getLines());
                     VertexRendering.drawBox(
-                            matrices,
+                            matrices.peek(),
                             vertexConsumer,
                             new Box(pos, pos).expand(0.25),
                             color[0],
@@ -110,7 +110,7 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
 
                     matrices.push();
                     matrices.translate(pos.x, pos.y + 0.5, pos.z);
-                    matrices.multiply(client.getEntityRenderDispatcher().getRotation());
+                    matrices.multiply(client.getEntityRenderDispatcher().camera.getRotation());
                     matrices.scale(0.025F, -0.025F, 0.025F);
                     Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 

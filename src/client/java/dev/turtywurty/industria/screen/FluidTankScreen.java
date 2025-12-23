@@ -6,6 +6,7 @@ import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
@@ -36,9 +37,9 @@ public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
 
         this.toggleButton = addDrawableChild(new ToggleButtonWidget(this.x + 8, this.y + 14, 20, 20, this.handler.getBlockEntity().isExtractMode()) {
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                boolean mouseClicked = super.mouseClicked(mouseX, mouseY, button);
-                if(mouseClicked) {
+            public boolean mouseClicked(Click click, boolean doubled) {
+                boolean mouseClicked = super.mouseClicked(click, doubled);
+                if (mouseClicked) {
                     this.toggled = !this.toggled;
                 }
 
@@ -46,14 +47,14 @@ public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
             }
 
             @Override
-            public void onClick(double mouseX, double mouseY) {
-                super.onClick(mouseX, mouseY);
+            public void onClick(Click click, boolean doubled) {
+                super.onClick(click, doubled);
                 ClientPlayNetworking.send(new FluidTankChangeExtractModePayload(!this.toggled));
             }
 
             @Override
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-                if(this.toggled) {
+                if (this.toggled) {
                     ScreenUtils.drawTexture(context, TEXTURE, getX(), getY(), 176, 0, 20, 20);
                 } else {
                     ScreenUtils.drawTexture(context, TEXTURE, getX(), getY(), 176, 20, 20, 20);
@@ -65,7 +66,7 @@ public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
     @Override
     protected void handledScreenTick() {
         super.handledScreenTick();
-        if(this.toggleButton != null)
+        if (this.toggleButton != null)
             this.toggleButton.setToggled(this.handler.getBlockEntity().isExtractMode());
     }
 

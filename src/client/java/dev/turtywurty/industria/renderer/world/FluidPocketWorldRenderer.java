@@ -2,7 +2,7 @@ package dev.turtywurty.industria.renderer.world;
 
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,15 +29,15 @@ public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
         if (player == null)
             return;
 
-        if (!FLUID_POCKETS.containsKey(player.getWorld().getRegistryKey()))
+        if (!FLUID_POCKETS.containsKey(player.getEntityWorld().getRegistryKey()))
             return;
 
-        List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getWorld().getRegistryKey())
+        List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getEntityWorld().getRegistryKey())
                 .stream()
                 .filter(fluidPocket -> fluidPocket.isWithinDistance(player.getBlockPos(), 64))
                 .toList();
 
-        MatrixStack matrixStack = context.matrixStack();
+        MatrixStack matrixStack = context.matrices();
         if (matrixStack == null)
             return;
 
@@ -45,7 +45,7 @@ public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
         if (provider == null)
             return;
 
-        World world = player.getWorld();
+        World world = player.getEntityWorld();
         if (world == null)
             return;
 

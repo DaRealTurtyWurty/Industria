@@ -31,3 +31,4 @@ accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap g
 accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap getChunk (I)Lnet/minecraft/world/chunk/WorldChunk;
 accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap isInRadius (II)Z
 accessible field net/minecraft/client/world/ClientChunkManager$ClientChunkMap chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
+accessible field net/minecraft/client/render/command/RenderDispatcher vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;

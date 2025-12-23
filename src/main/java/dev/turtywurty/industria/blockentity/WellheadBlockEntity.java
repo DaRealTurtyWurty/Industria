@@ -89,7 +89,7 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient || this.oilPumpJackPos == null)
+        if (this.world == null || this.world.isClient() || this.oilPumpJackPos == null)
             return;
 
         distributeFluid();

@@ -4,13 +4,13 @@ import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -113,19 +113,14 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
     }
 
     @Override
-    public boolean removeEntry(Entry entry) {
-        boolean removed = super.removeEntry(entry);
-        if (removed) {
-            this.entriesByChar.remove(entry.getPaletteChar(), entry);
-        }
-
-        return removed;
+    public void removeEntry(Entry entry) {
+        this.entriesByChar.remove(entry.getPaletteChar(), entry);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
-            Entry entry = getEntryAtPosition(mouseX, mouseY);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.isLeft()) {
+            Entry entry = getEntryAtPosition(click.x(), click.y());
             if (entry != null) {
                 setSelected(entry);
                 setFocused(entry);
@@ -133,7 +128,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
@@ -177,20 +172,20 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            int previewSize = Math.max(22, entryHeight - PREVIEW_PADDING * 2);
-            int previewX = x + PREVIEW_PADDING + 6;
-            int previewY = y + (entryHeight - previewSize) / 2;
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+            int previewSize = Math.max(22, getHeight() - PREVIEW_PADDING * 2);
+            int previewX = getX() + PREVIEW_PADDING + 6;
+            int previewY = getY() + (getHeight() - previewSize) / 2;
             this.scene.setAnchor(BlockPos.ORIGIN, previewSize / 2, previewSize / 2);
-            this.scene.render(context, previewX, previewY, previewSize, previewSize, tickProgress);
+            this.scene.render(context, previewX, previewY, previewSize, previewSize, deltaTicks);
 
             String charText = this.paletteChar == ' ' ? "_" : String.valueOf(this.paletteChar);
             int charX = previewX + previewSize + 2;
-            int textY = y + (entryHeight - this.client.textRenderer.fontHeight) / 2 + 2;
+            int textY = getY() + (getHeight() - this.client.textRenderer.fontHeight) / 2 + 2;
             context.drawText(this.client.textRenderer, charText, charX, textY, 0xFFFFFFFF, false);
 
             int nameX = charX + this.client.textRenderer.getWidth(charText) + 6;
-            int maxNameWidth = Math.max(0, x + entryWidth - nameX - 4);
+            int maxNameWidth = Math.max(0, getX() + getWidth() - nameX - 4);
             String displayName = this.name.getString();
             if (this.client.textRenderer.getWidth(displayName) > maxNameWidth && maxNameWidth > this.client.textRenderer.getWidth("...")) {
                 int ellipsisWidth = this.client.textRenderer.getWidth("...");
@@ -234,17 +229,18 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
             this.scene.close();
         }
 
-        @Override
-        public void drawBorder(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            int left = x + 7;
-            int right = x + entryWidth + 6;
-            int top = y - 2;
-            int bottom = y + entryHeight + 2;
-            int hoverColor = 0x66000000;
-
-            if (hovered) {
-                context.fill(left, top, right, bottom, hoverColor);
-            }
-        }
+        // TODO: Not sure that this is still needed
+//        @Override
+//        public void drawBorder(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+//            int left = x + 7;
+//            int right = x + entryWidth + 6;
+//            int top = y - 2;
+//            int bottom = y + entryHeight + 2;
+//            int hoverColor = 0x66000000;
+//
+//            if (hovered) {
+//                context.fill(left, top, right, bottom, hoverColor);
+//            }
+//        }
     }
 }

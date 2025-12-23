@@ -1,12 +1,13 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.state.OilPumpJackRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class OilPumpJackModel extends Model {
+public class OilPumpJackModel extends Model<OilPumpJackRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("oil_pump_jack"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/oil_pump_jack.png");
 

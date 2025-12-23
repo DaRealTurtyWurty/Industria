@@ -15,7 +15,7 @@ public class FluidPumpScreenHandler extends ScreenHandler {
     private final ScreenHandlerContext context;
 
     public FluidPumpScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, (FluidPumpBlockEntity) playerInventory.player.getWorld().getBlockEntity(payload.pos()));
+        this(syncId, (FluidPumpBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(payload.pos()));
     }
 
     public FluidPumpScreenHandler(int syncId, FluidPumpBlockEntity blockEntity) {

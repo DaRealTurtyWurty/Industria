@@ -1,28 +1,29 @@
 package dev.turtywurty.industria.renderer.block;
 
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
-import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
+import dev.turtywurty.industria.state.CentrifugalConcentratorRenderState;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 // TODO: Finish OBJLoader and use that for rendering
-public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity> {
+public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity, CentrifugalConcentratorRenderState> {
     private static final int NUM_SPINNING_ITEMS = 5;
 
     private final CentrifugalConcentratorModel model;
@@ -33,31 +34,41 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
     }
 
     @Override
-    protected void onRender(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        this.model.getCylinderTop().hidden = true;
-
-        int rpm = entity.getRecipeRPM();
-        float progress = entity.getProgress() / (float) entity.getMaxProgress();
-        float prevBowlYRot = this.model.getBowl().yaw;
-        if (progress == 0 || Double.isNaN(progress)) {
-            entity.bowlRotation = 0f;
-        } else {
-            entity.bowlRotation = (entity.bowlRotation + (rpm / 60f / 20f) * tickDelta) % 360f;
-        }
-
-        this.model.getBowl().yaw = prevBowlYRot + entity.bowlRotation;
-        this.model.render(matrices, vertexConsumers.getBuffer(this.model.getLayer(CentrifugalConcentratorModel.TEXTURE_LOCATION)), light, overlay);
-        this.model.getBowl().yaw = prevBowlYRot;
-
-        this.model.getCylinderTop().hidden = false;
-
-        renderInputFluid(entity, tickDelta, matrices, vertexConsumers, light, overlay);
+    public CentrifugalConcentratorRenderState createRenderState() {
+        return new CentrifugalConcentratorRenderState();
     }
 
-    private void renderInputFluid(CentrifugalConcentratorBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        SyncingFluidStorage fluidTank = entity.getInputFluidTank();
-        if (fluidTank.isResourceBlank() || fluidTank.amount <= 0) return;
+    @Override
+    public void updateRenderState(CentrifugalConcentratorBlockEntity blockEntity, CentrifugalConcentratorRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
+        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        state.recipeRPM = blockEntity.getRecipeRPM();
+        state.progress = blockEntity.getProgress();
+        state.maxProgress = blockEntity.getMaxProgress();
+        state.inputFluidTank = blockEntity.getInputFluidTank();
+        state.updateItemRenderState(0, this, blockEntity, blockEntity.getInputInventory().getStackInSlot(0));
+    }
 
+    @Override
+    protected void onRender(CentrifugalConcentratorRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+        float progress = state.progress / (float) state.maxProgress;
+        if (progress == 0 || Double.isNaN(progress)) {
+            state.bowlRotation = 0f;
+        } else {
+            state.bowlRotation = (state.bowlRotation + (state.recipeRPM / 60f / 20f) * state.tickProgress) % 360f;
+        }
+
+        queue.submitModel(this.model,
+                state.bowlRotation,
+                matrices, this.model.getLayer(CentrifugalConcentratorModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.crumblingOverlay);
+
+        renderInputFluid(state, matrices, queue, light, overlay);
+    }
+
+    private void renderInputFluid(CentrifugalConcentratorRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+        SingleFluidStorage fluidTank = state.inputFluidTank;
+        if (fluidTank.isResourceBlank() || fluidTank.amount <= 0)
+            return;
 
         FluidVariant fluidVariant = fluidTank.variant;
         Sprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
@@ -65,19 +76,21 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             return;
 
         RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(fluidSprite.getAtlasId());
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderLayer);
+        World world = MinecraftClient.getInstance().world;
 
         int sides = 16;
         float outerRadius = 19 / 16f;
-        float innerRadius = 4 / 16f;
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, entity.getWorld(), entity.getPos());
+        float innerRadius;
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, state.pos);
 
         float fillPercent = fluidTank.amount / (float) fluidTank.getCapacity();
 
-        // fillPercent = (float) (Math.sin(entity.getWorld().getTime() / entity.getWorld().getTickManager().getTickRate()) * 0.5f + 0.5f);
+        // fillPercent = (float) (Math.sin(world.getTime() / world.getTickManager().getTickRate()) * 0.5f + 0.5f);
 
         if (fillPercent <= 7 / 16f) {
             innerRadius = 0;
+        } else {
+            innerRadius = 4 / 16f;
         }
 
         float yMin = 1 / 16f;
@@ -91,17 +104,18 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             float angle0 = angleOffset + (float) (2.0 * Math.PI * i / sides);
             float angle1 = angleOffset + (float) (2.0 * Math.PI * (i + 1) / sides);
 
-            angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle0, innerRadius, outerRadius, light, overlay);
-            angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle0, outerRadius, outerRadius, light, overlay);
-            angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle1, outerRadius, outerRadius, light, overlay);
-            angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle1, innerRadius, outerRadius, light, overlay);
+            queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
+                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle0, innerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle0, outerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle1, outerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle1, innerRadius, outerRadius, light, overlay);
+            });
         }
 
-        ItemStack stackInSlot = Items.DIAMOND.getDefaultStack(); //entity.getInputInventory().getStackInSlot(0);
         float radius = 1.1f;
 
         for (int i = 0; i < NUM_SPINNING_ITEMS; i++) {
-            float angle = -entity.bowlRotation + (float) Math.TAU / NUM_SPINNING_ITEMS * i;
+            float angle = -state.bowlRotation + (float) Math.TAU / NUM_SPINNING_ITEMS * i;
 
             float x = (float) Math.cos(angle) * radius;
             float y = (float) Math.sin(angle * 3) * 0.02f + 0.225f;
@@ -112,11 +126,10 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
             matrices.multiply(RotationAxis.POSITIVE_Y.rotation(angle + (float) Math.PI / 2f));
             matrices.scale(0.5f, 0.5f, 0.5f);
-            this.context.getItemRenderer().renderItem(stackInSlot, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
-
+            state.renderItemRenderState(0, matrices, queue);
 
             Vector3f pos = localToWorldPosition(matrices);
-            entity.getWorld().addParticleClient(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
+            world.addParticleClient(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
 
             matrices.pop();
         }

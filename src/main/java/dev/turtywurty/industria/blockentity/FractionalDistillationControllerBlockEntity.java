@@ -61,7 +61,7 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         //Industria.LOGGER.debug("Controller at {} has {} towers.", this.pos, getTowerCount());

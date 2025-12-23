@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.entity.model.LoadedEntityModels;
 import net.minecraft.client.render.item.model.special.SpecialModelRenderer;
@@ -19,10 +19,10 @@ import org.joml.Vector3f;
 
 import java.util.Set;
 
-public record IndustriaBlockEntityItemRenderer(ModelPart modelPart,
-                                               Identifier texture) implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
+public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
+        implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
-    public void render(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, ItemDisplayContext displayContext, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, boolean glint) {
+    public void render(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, ItemDisplayContext displayContext, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay, boolean glint, int i) {
         if (data == null)
             return;
 
@@ -30,7 +30,9 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart,
         if (stack.isEmpty() || this.modelPart == null)
             return;
 
-        this.modelPart.render(matrices, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(this.texture)), light, overlay);
+        RenderLayer renderLayer = RenderLayer.getEntityTranslucent(this.texture);
+        queue.submitCustom(matrices, renderLayer, (matricesEntry, vertexConsumer) ->
+                this.modelPart.render(matrices, vertexConsumer, light, overlay));
     }
 
     @Override
@@ -63,7 +65,8 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart,
         }
 
         @Override
-        public SpecialModelRenderer<?> bake(LoadedEntityModels entityModels) {
+        public SpecialModelRenderer<?> bake(BakeContext context) {
+            LoadedEntityModels entityModels = context.entityModelSet();
             return new IndustriaBlockEntityItemRenderer(entityModels.getModelPart(this.modelLayer), this.texture);
         }
     }

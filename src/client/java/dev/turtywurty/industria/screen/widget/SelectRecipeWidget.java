@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.util.ScreenUtils;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -179,10 +180,11 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         this.mouseClicked = false;
         if (this.canCraft) {
             int xPos = getX();
@@ -191,8 +193,8 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
 
             for (int index = this.scrollOffset; index < scrollY; index++) {
                 int column = index - this.scrollOffset;
-                double x = mouseX - (double) (xPos + column % this.columnCount * 16);
-                double y = mouseY - (double) (yPos + column / this.columnCount * 18);
+                double x = click.x() - (double) (xPos + column % this.columnCount * 16);
+                double y = click.y() - (double) (yPos + column / this.columnCount * 18);
                 if (x >= 0 && y >= 0 && x < 16 && y < 18 && isValidRecipeIndex(index)) {
                     this.onRecipeSelected.accept(this, index);
                     return true;
@@ -201,12 +203,12 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
 
             xPos = this.scrollBarX;
             yPos = this.scrollBarY - this.scrollBarHandleHeight / 2;
-            if (mouseX >= (double) xPos && mouseX < (double) (xPos + this.scrollBarWidth) && mouseY >= (double) yPos && mouseY < (double) (yPos + this.height)) {
+            if (click.x() >= (double) xPos && click.x() < (double) (xPos + this.scrollBarWidth) && click.y() >= (double) yPos && click.y() < (double) (yPos + this.height)) {
                 this.mouseClicked = true;
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     private boolean isValidRecipeIndex(int index) {
@@ -214,16 +216,16 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
         if (this.mouseClicked && shouldScroll()) {
             int startY = this.scrollBarY - 1;
             int endY = startY + this.height;
-            this.scrollAmount = ((float) mouseY - (float) startY - 7.5F) / ((float) (endY - startY) - this.scrollBarHandleHeight);
+            this.scrollAmount = ((float) offsetY - (float) startY - 7.5F) / ((float) (endY - startY) - this.scrollBarHandleHeight);
             this.scrollAmount = MathHelper.clamp(this.scrollAmount, 0.0F, 1.0F);
             this.scrollOffset = (int) ((double) (this.scrollAmount * (float) getMaxScroll()) + 0.5) * this.columnCount;
             return true;
         } else {
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return super.mouseDragged(click, offsetX, offsetY);
         }
     }
 
@@ -253,7 +255,8 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         private final List<T> recipes = new ArrayList<>();
         private int selectedRecipeIndex = 0;
         private Function<T, ItemStack> outputFunction = recipe -> ItemStack.EMPTY;
-        private BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected = (widget, index) -> {};
+        private BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected = (widget, index) -> {
+        };
         private boolean canCraft = false;
         private int scrollBarX;
         private int scrollBarY;

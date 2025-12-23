@@ -137,7 +137,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
 
     @Override
     public void onTick() {
-        if (world == null || world.isClient)
+        if (world == null || world.isClient())
             return;
 
 
@@ -276,7 +276,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     public void setMode(Mode mode) {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         this.mode = mode;

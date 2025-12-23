@@ -123,7 +123,7 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         if (!this.bufferedStack.isEmpty()) {
@@ -226,7 +226,6 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     protected void writeData(WriteView view) {
-
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
         view.putInt("BurnTime", this.burnTime);

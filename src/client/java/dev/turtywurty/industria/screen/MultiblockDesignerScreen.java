@@ -17,10 +17,12 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.registry.tag.TagKey;
@@ -357,46 +359,46 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
-            if (this.fakeWorldWidget != null && this.scene != null && this.fakeWorldWidget.handleClick(mouseX, mouseY))
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.isLeft()) {
+            if (this.fakeWorldWidget != null && this.scene != null && this.fakeWorldWidget.handleClick(click, doubled))
                 return true;
 
-            if (this.paletteEntryListWidget.isMouseOver(mouseX, mouseY))
-                return this.paletteEntryListWidget.mouseClicked(mouseX, mouseY, button);
-            if (this.blockEntryListWidget.isMouseOver(mouseX, mouseY))
-                return this.blockEntryListWidget.mouseClicked(mouseX, mouseY, button);
+            if (this.paletteEntryListWidget.isMouseOver(click.x(), click.y()))
+                return this.paletteEntryListWidget.mouseClicked(click, doubled);
+            if (this.blockEntryListWidget.isMouseOver(click.x(), click.y()))
+                return this.blockEntryListWidget.mouseClicked(click, doubled);
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_1) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+        if (click.isLeft()) {
             if (this.scene != null) {
                 float sensitivity = 0.35F;
-                this.scene.rotateCamera((float) (deltaX * sensitivity), (float) (deltaY * sensitivity));
+                this.scene.rotateCamera((float) (offsetX * sensitivity), (float) (offsetY * sensitivity));
                 return true;
             }
 
-            if (this.paletteEntryListWidget.isMouseOver(mouseX, mouseY))
-                return this.paletteEntryListWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-            if (this.blockEntryListWidget.isMouseOver(mouseX, mouseY))
-                return this.blockEntryListWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            if (this.paletteEntryListWidget.isMouseOver(click.x(), click.y()))
+                return this.paletteEntryListWidget.mouseDragged(click, offsetX, offsetY);
+            if (this.blockEntryListWidget.isMouseOver(click.x(), click.y()))
+                return this.blockEntryListWidget.mouseDragged(click, offsetX, offsetY);
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         boolean textFocused = (this.paletteNameField != null && this.paletteNameField.isFocused())
                 || (this.selectedPieceCharField != null && this.selectedPieceCharField.isFocused());
-        if (textFocused && this.client != null && this.client.options.inventoryKey.matchesKey(keyCode, scanCode))
+        if (textFocused && this.client != null && this.client.options.inventoryKey.matchesKey(input))
             return true;
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
@@ -483,7 +485,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         updateSelectedPiecePanelWidgets();
         super.render(context, mouseX, mouseY, deltaTicks);
         if (this.fakeWorldWidget != null) {
-            context.drawBorder(this.fakeWorldWidget.getX(), this.fakeWorldWidget.getY(),
+            context.drawStrokedRectangle(this.fakeWorldWidget.getX(), this.fakeWorldWidget.getY(),
                     this.fakeWorldWidget.getWidth(), this.fakeWorldWidget.getHeight(), 0xAAFF4040);
         }
         context.drawText(this.textRenderer, this.title, this.width / 2 - this.titleWidth / 2, 4, 0xFF404040, false);

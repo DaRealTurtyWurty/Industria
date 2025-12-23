@@ -3,29 +3,30 @@ package dev.turtywurty.industria.renderer.block;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity.InputRecipeEntry;
 import dev.turtywurty.industria.model.RotaryKilnModel;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import dev.turtywurty.industria.state.RotaryKilnControllerRenderState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.*;
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity> {
+public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity, RotaryKilnControllerRenderState> {
     public static final Map<BlockPos, RendererData> BLOCK_POS_RENDERER_DATA_MAP = new ConcurrentHashMap<>();
 
     private static final float BARREL_ANGULAR_VELOCITY = 1.5f;
@@ -45,32 +46,46 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     @Override
-    protected void onRender(RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION));
-        this.model.renderSegment(0, matrices, vertexConsumer, light, overlay);
-
-        if (entity.getWorld() == null || entity.getKilnSegments().isEmpty())
-            return;
-
-        this.model.renderSegment(1, matrices, vertexConsumer, light, overlay);
-
-        RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(entity.getPos(), pos -> new RendererData());
-
-        int numKilnSegments = Math.min(entity.getKilnSegments().size(), 15);
-        for (int i = 0; i < numKilnSegments - 1; i++) {
-            int segmentIndex = i + 2;
-
-            ModelPart rotatingSegment = this.model.getRotatingSegment(segmentIndex);
-            rotatingSegment.roll = rendererData.barrelBody.getAngle() + (float) Math.PI / 8f;
-            this.model.renderSegment(segmentIndex, matrices, vertexConsumer, light, overlay);
-            rotatingSegment.roll = 0;
-        }
-
-        matrices.translate(0, -1, 0);
-        renderItems(rendererData, entity, tickDelta, matrices, vertexConsumers, light, overlay);
+    public RotaryKilnControllerRenderState createRenderState() {
+        return new RotaryKilnControllerRenderState();
     }
 
-    private void renderItems(RendererData rendererData, RotaryKilnControllerBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    @Override
+    public void updateRenderState(RotaryKilnControllerBlockEntity blockEntity, RotaryKilnControllerRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
+        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        state.kilnSegments.clear();
+        state.kilnSegments.addAll(blockEntity.getKilnSegments());
+
+        state.recipes.clear();
+        state.recipes.addAll(blockEntity.getRecipes());
+
+        for (int i = 0; i < state.recipes.size(); i++) {
+            state.updateItemRenderState(i, this, blockEntity, state.recipes.get(i).inputStack());
+        }
+    }
+
+    @Override
+    protected void onRender(RotaryKilnControllerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+        RenderLayer renderLayer = this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION);
+
+        ClientWorld clientWorld = MinecraftClient.getInstance().world;
+        if (clientWorld == null || state.kilnSegments.isEmpty())
+            return;
+
+        RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(state.pos, pos -> new RendererData());
+
+        queue.submitModel(this.model,
+                new RotaryKilnModel.RotaryKilnModelRenderState(
+                        state.kilnSegments.size(),
+                        rendererData.barrelBody.getAngle() + (float) Math.PI / 8f),
+                matrices, renderLayer,
+                light, overlay, 0, state.crumblingOverlay);
+
+        matrices.translate(0, -1, 0);
+        renderItems(rendererData, state, state.tickProgress, matrices, queue, light, overlay);
+    }
+
+    private void renderItems(RendererData rendererData, RotaryKilnControllerRenderState state, float tickDelta, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
         Map<InputRecipeEntry, Body> recipeToBodyMap = rendererData.recipeToBodyMap;
 
         World box2dWorld = rendererData.box2dWorld;
@@ -84,20 +99,22 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         while (iterator.hasNext()) {
             Map.Entry<InputRecipeEntry, Body> entry = iterator.next();
 
-            if (!entity.getRecipes().contains(entry.getKey())) {
+            if (!state.recipes.contains(entry.getKey())) {
                 box2dWorld.destroyBody(entry.getValue());
                 iterator.remove();
             }
         }
 
-        for (RotaryKilnControllerBlockEntity.InputRecipeEntry recipe : entity.getRecipes()) {
+        List<InputRecipeEntry> recipes = state.recipes;
+        for (int i = 0; i < recipes.size(); i++) {
+            InputRecipeEntry recipe = recipes.get(i);
             ItemStack itemStack = recipe.inputStack();
 
             Body body = recipeToBodyMap.computeIfAbsent(recipe, r -> createNewItemBody(box2dWorld, itemStack));
 
             float rawProgress = recipe.getProgress() + tickDelta;
 
-            int numKilnSegments = Math.min(entity.getKilnSegments().size(), 15);
+            int numKilnSegments = Math.min(state.kilnSegments.size(), 15);
             float z = MathHelper.map(rawProgress / 100f / numKilnSegments, 0, 1, ITEM_START_Z, -numKilnSegments + ITEM_END_OFFSET_Z);
 
             matrices.push();
@@ -105,7 +122,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             matrices.scale(0.5f, 0.5f, 0.5f);
             matrices.multiply(Direction.WEST.getRotationQuaternion());
             matrices.multiply(RotationAxis.POSITIVE_X.rotation(body.getAngle()));
-            this.context.getItemRenderer().renderItem(itemStack, ItemDisplayContext.NONE, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
+            state.renderItemRenderState(i, matrices, queue);
             matrices.pop();
         }
     }

@@ -10,9 +10,10 @@ import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.industria.util.enums.TraversableEnum;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.input.AbstractInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
@@ -81,8 +82,8 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    public void onPress() {
-        if (Screen.hasShiftDown())
+    public void onPress(AbstractInput input) {
+        if (input.hasShift())
             this.value = findPreviousEnabled(this.value);
         else
             this.value = findNextEnabled(this.value);
@@ -91,9 +92,9 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isMouseOverSelectionArea(mouseX, mouseY) && this.hoveredLastFrame) {
-            int ordinal = getOrdinal((int) mouseX, (int) mouseY);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (isMouseOverSelectionArea(click.x(), click.y()) && this.hoveredLastFrame) {
+            int ordinal = getOrdinal((int) click.x(), (int) click.y());
 
             T current = this.value.getValues()[ordinal];
             if (current != this.value && !this.disabledValues.contains(current)) {
@@ -103,7 +104,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override

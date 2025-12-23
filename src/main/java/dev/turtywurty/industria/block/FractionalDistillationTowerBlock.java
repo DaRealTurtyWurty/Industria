@@ -26,7 +26,7 @@ public class FractionalDistillationTowerBlock extends IndustriaBlock {
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient && world.getBlockEntity(pos) instanceof FractionalDistillationTowerBlockEntity blockEntity) {
+        if (!world.isClient() && world.getBlockEntity(pos) instanceof FractionalDistillationTowerBlockEntity blockEntity) {
             BlockPos controllerPos = blockEntity.getControllerPos();
             if (controllerPos != null && world.getBlockEntity(controllerPos) instanceof FractionalDistillationControllerBlockEntity controller) {
                 player.openHandledScreen(controller);

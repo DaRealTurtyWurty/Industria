@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.renderer.world;
 
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 
 @FunctionalInterface
 public interface IndustriaWorldRenderer {

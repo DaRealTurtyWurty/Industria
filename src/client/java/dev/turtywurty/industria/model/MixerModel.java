@@ -1,12 +1,13 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.state.MixerRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class MixerModel extends Model {
+public class MixerModel extends Model<MixerRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("mixer"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/mixer.png");
 

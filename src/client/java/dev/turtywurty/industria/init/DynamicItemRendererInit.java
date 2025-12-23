@@ -17,6 +17,12 @@ public class DynamicItemRendererInit {
 
     public static void init() {
         SpecialModelTypes.ID_MAPPER.put(Industria.id("drill_head"), DrillHeadItemRenderer.Unbaked.CODEC);
+//        ResourceLoader.get(ResourceType.CLIENT_RESOURCES).registerReloader(Industria.id("drill_head_item_renderer"),
+//                (store, prepareExecutor, reloadSynchronizer, applyExecutor) ->
+//                        CompletableFuture.runAsync(() -> {
+//                            DrillHeadItemRenderer.INSTANCE.drillHeadModels.clear();
+//                            DrillHeadItemRenderer.INSTANCE.drillHeadTextures.clear();
+//                        }, applyExecutor));
 
         registerItemRenderer(BlockInit.WIND_TURBINE,
                 new IndustriaBlockEntityItemRenderer.Unbaked(WindTurbineModel.LAYER_LOCATION, WindTurbineModel.TEXTURE_LOCATION));

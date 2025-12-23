@@ -4,11 +4,7 @@ import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.util.VariedBlockListRenderer;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -18,7 +14,14 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
+import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
+import net.minecraft.client.render.command.RenderDispatcher;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
@@ -55,6 +58,8 @@ public class FakeWorldScene implements AutoCloseable {
     private final Map<RenderStage, List<Consumer<RenderContext>>> beforeRenderCallbacks = new EnumMap<>(RenderStage.class);
     private final Map<RenderStage, List<Consumer<RenderContext>>> afterRenderCallbacks = new EnumMap<>(RenderStage.class);
     private final Map<SceneElement, TransformProvider> transforms = new HashMap<>();
+    private final OrderedRenderCommandQueueImpl commandQueue = new OrderedRenderCommandQueueImpl();
+    private final RenderDispatcher renderDispatcher;
     private final List<SelectionBox> selectionBoxes = new ArrayList<>();
     private Matrix4f lastModelView;
     private Matrix4f lastProjection;
@@ -86,6 +91,15 @@ public class FakeWorldScene implements AutoCloseable {
         this.variedBlockLists = new ArrayList<>(builtScene.variedBlockLists());
         this.nameplates = new ArrayList<>(builtScene.nameplates());
         this.tickHandler = tickHandler;
+        this.renderDispatcher = new RenderDispatcher(
+                this.commandQueue,
+                this.blockRenderManager,
+                this.client.getBufferBuilders().getEntityVertexConsumers(),
+                this.client.getAtlasManager(),
+                this.client.getBufferBuilders().getOutlineVertexConsumers(),
+                this.client.getBufferBuilders().getEffectVertexConsumers(),
+                this.client.textRenderer
+        );
 
         this.cameraEntity.setPos(builtScene.cameraPos().x, builtScene.cameraPos().y, builtScene.cameraPos().z);
         this.cameraEntity.setYaw(builtScene.cameraYaw());
@@ -138,12 +152,19 @@ public class FakeWorldScene implements AutoCloseable {
             this.framebuffer.delete();
             this.framebuffer = null;
         }
+        this.renderDispatcher.close();
     }
 
     public void render(DrawContext context, int x, int y, int width, int height, float tickDelta) {
         this.camera.update(this.world, this.cameraEntity, false, false, tickDelta);
         Vec3d cameraPos = this.camera.getPos();
         Quaternionf rotation = this.camera.getRotation().conjugate(new Quaternionf());
+        CameraRenderState cameraRenderState = new CameraRenderState();
+        cameraRenderState.initialized = this.camera.isReady();
+        cameraRenderState.pos = cameraPos;
+        cameraRenderState.blockPos = this.camera.getBlockPos();
+        cameraRenderState.entityPos = this.cameraEntity.getLerpedPos(tickDelta);
+        cameraRenderState.orientation = new Quaternionf(this.camera.getRotation());
 
         var window = this.client.getWindow();
         double scale = window.getScaleFactor();
@@ -151,13 +172,12 @@ public class FakeWorldScene implements AutoCloseable {
         int framebufferHeight = Math.max(1, (int) Math.round(height * scale));
         ensureFramebuffer(framebufferWidth, framebufferHeight);
 
-        this.client.getEntityRenderDispatcher().configure(this.world, this.camera, this.cameraEntity);
-        this.client.getEntityRenderDispatcher().setRenderShadows(false);
+        this.client.getEntityRenderDispatcher().configure(this.camera, this.cameraEntity);
 
         float anchorOffsetX = 0.0F;
         float anchorOffsetY = 0.0F;
         if (this.anchorBlock != null) {
-            MatrixStack anchorMatrices = new MatrixStack();
+            var anchorMatrices = new MatrixStack();
             float scaleFactor = Math.min(framebufferWidth, framebufferHeight) / 6.0F * this.scaleMultiplier;
             anchorMatrices.translate(framebufferWidth / 2.0F, framebufferHeight * 0.8F, 0);
             anchorMatrices.scale(scaleFactor, -scaleFactor, scaleFactor);
@@ -180,7 +200,7 @@ public class FakeWorldScene implements AutoCloseable {
                 .clearColorAndDepthTextures(this.framebuffer.getColorAttachment(), 0, this.framebuffer.getDepthAttachment(), 1.0);
         RenderSystem.setProjectionMatrix(this.projectionMatrix.set(framebufferWidth, framebufferHeight), ProjectionType.ORTHOGRAPHIC);
 
-        MatrixStack matrices = new MatrixStack();
+        var matrices = new MatrixStack();
         float scaleFactor = Math.min(framebufferWidth, framebufferHeight) / 6.0F * this.scaleMultiplier;
         matrices.translate(framebufferWidth / 2.0F + anchorOffsetX, framebufferHeight * 0.8F + anchorOffsetY, 0);
         matrices.scale(scaleFactor, -scaleFactor, scaleFactor);
@@ -196,7 +216,8 @@ public class FakeWorldScene implements AutoCloseable {
         this.lastWidgetHeight = height;
         this.lastScaleFactor = (float) scale;
 
-        VertexConsumerProvider.Immediate consumers = this.client.getBufferBuilders().getEntityVertexConsumers();
+        VertexConsumerProvider.Immediate consumers = this.renderDispatcher.vertexConsumers;
+        this.commandQueue.clear();
         RenderContext renderContext = new RenderContext(context, matrices, consumers, tickDelta, framebufferWidth, framebufferHeight, this.world);
         runCallbacks(this.beforeRenderCallbacks, RenderStage.SCENE, renderContext);
 
@@ -214,9 +235,7 @@ public class FakeWorldScene implements AutoCloseable {
                     matrices,
                     consumers,
                     LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                    OverlayTexture.DEFAULT_UV,
-                    this.world,
-                    pos
+                    OverlayTexture.DEFAULT_UV
             );
             matrices.pop();
         }
@@ -234,10 +253,9 @@ public class FakeWorldScene implements AutoCloseable {
                     pos,
                     this.world,
                     matrices,
-                    consumers,
+                    this.commandQueue,
                     LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                    OverlayTexture.DEFAULT_UV,
-                    tickDelta
+                    OverlayTexture.DEFAULT_UV
             );
             matrices.pop();
         }
@@ -256,7 +274,7 @@ public class FakeWorldScene implements AutoCloseable {
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
             applyTransform(matrices, placedFluid, renderContext.world(), tickDelta);
 
-            VertexConsumer transformedConsumer = new TransformedVertexConsumer(
+            var transformedConsumer = new TransformedVertexConsumer(
                     base,
                     matrices.peek()
             );
@@ -266,8 +284,8 @@ public class FakeWorldScene implements AutoCloseable {
 
         runCallbacks(this.afterRenderCallbacks, RenderStage.FLUIDS, renderContext);
 
-        BlockEntityRenderDispatcher blockEntityRenderDispatcher = this.client.getBlockEntityRenderDispatcher();
-        blockEntityRenderDispatcher.configure(this.world, this.camera, null);
+        BlockEntityRenderManager blockEntityRenderManager = this.client.getBlockEntityRenderDispatcher();
+        blockEntityRenderManager.configure(this.camera);
         runCallbacks(this.beforeRenderCallbacks, RenderStage.BLOCK_ENTITIES, renderContext);
         for (PlacedBlock placedBlock : List.copyOf(this.blocks)) {
             if (!placedBlock.state().hasBlockEntity())
@@ -280,28 +298,30 @@ public class FakeWorldScene implements AutoCloseable {
             matrices.push();
             BlockPos pos = placedBlock.pos();
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
-            blockEntityRenderDispatcher.render(blockEntity, tickDelta, matrices, consumers);
+
+            var crumblingOverlay = new ModelCommandRenderer.CrumblingOverlayCommand(0, matrices.peek());
+            BlockEntityRenderState state = blockEntityRenderManager.getRenderState(blockEntity, tickDelta, crumblingOverlay);
+            if (state != null) {
+                blockEntityRenderManager.render(state, matrices, this.commandQueue, cameraRenderState);
+            }
             matrices.pop();
         }
 
         runCallbacks(this.afterRenderCallbacks, RenderStage.BLOCK_ENTITIES, renderContext);
 
         runCallbacks(this.beforeRenderCallbacks, RenderStage.ENTITIES, renderContext);
+        var entityRenderManager = this.client.getEntityRenderDispatcher();
         for (Entity entity : List.copyOf(this.entities)) {
-            matrices.push();
-            Vec3d entityPos = entity.getLerpedPos(tickDelta);
-            matrices.translate(entityPos.x, entityPos.y, entityPos.z);
-            this.client.getEntityRenderDispatcher().render(
-                    entity,
-                    0,
-                    0,
-                    0,
-                    1.0f,
+            EntityRenderState renderState = entityRenderManager.getAndUpdateRenderState(entity, tickDelta);
+            entityRenderManager.render(
+                    renderState,
+                    cameraRenderState,
+                    renderState.x,
+                    renderState.y,
+                    renderState.z,
                     matrices,
-                    consumers,
-                    LightmapTextureManager.MAX_LIGHT_COORDINATE
+                    this.commandQueue
             );
-            matrices.pop();
         }
 
         runCallbacks(this.afterRenderCallbacks, RenderStage.ENTITIES, renderContext);
@@ -321,7 +341,10 @@ public class FakeWorldScene implements AutoCloseable {
 
         runCallbacks(this.beforeRenderCallbacks, RenderStage.CUSTOM, renderContext);
         runCallbacks(this.afterRenderCallbacks, RenderStage.CUSTOM, renderContext);
+        this.renderDispatcher.render();
         consumers.draw();
+        this.commandQueue.onNextFrame();
+        this.renderDispatcher.endLayeredCustoms();
 
         runCallbacks(this.afterRenderCallbacks, RenderStage.SCENE, renderContext);
 
@@ -369,7 +392,7 @@ public class FakeWorldScene implements AutoCloseable {
 
     private void renderBillboardedText(MatrixStack matrices, VertexConsumerProvider consumers, Text text, boolean seeThrough, float scale) {
         matrices.push();
-        matrices.multiply(this.client.getEntityRenderDispatcher().getRotation());
+        matrices.multiply(this.client.getEntityRenderDispatcher().camera.getRotation());
         matrices.scale(scale, -scale, scale);
 
         TextRenderer textRenderer = this.client.textRenderer;
@@ -451,7 +474,7 @@ public class FakeWorldScene implements AutoCloseable {
         float pitch = MathHelper.clamp(this.cameraEntity.getPitch() + deltaPitch, -89.0F, 89.0F);
         this.cameraEntity.setYaw(yaw);
         this.cameraEntity.setPitch(pitch);
-        updateChunkCenter(BlockPos.ofFloored(this.cameraEntity.getPos()));
+        updateChunkCenter(BlockPos.ofFloored(this.cameraEntity.getEntityPos()));
     }
 
     public void setCameraRotation(float yaw, float pitch) {
@@ -465,11 +488,11 @@ public class FakeWorldScene implements AutoCloseable {
     }
 
     public void moveCamera(Vec3d delta) {
-        setCameraPosition(this.cameraEntity.getPos().add(delta));
+        setCameraPosition(this.cameraEntity.getEntityPos().add(delta));
     }
 
     public Vec3d getCameraPosition() {
-        return this.cameraEntity.getPos();
+        return this.cameraEntity.getEntityPos();
     }
 
     public void setCameraPosition(Vec3d position) {
@@ -639,10 +662,10 @@ public class FakeWorldScene implements AutoCloseable {
         addChunksFor(chunks, this.nameplates);
 
         for (Entity entity : this.entities) {
-            chunks.add(new ChunkPos(BlockPos.ofFloored(entity.getPos())));
+            chunks.add(new ChunkPos(BlockPos.ofFloored(entity.getEntityPos())));
         }
 
-        chunks.add(new ChunkPos(BlockPos.ofFloored(this.cameraEntity.getPos())));
+        chunks.add(new ChunkPos(BlockPos.ofFloored(this.cameraEntity.getEntityPos())));
 
         for (ChunkPos chunkPos : chunks) {
             this.world.resetChunkColor(chunkPos);
@@ -819,7 +842,7 @@ public class FakeWorldScene implements AutoCloseable {
             float b = (color & 0xFF) / 255.0F;
 
             VertexConsumer outline = consumers.getBuffer(RenderLayer.getLines());
-            VertexRendering.drawBox(matrices, outline, box, r, g, b, Math.max(a, 0.6F));
+            VertexRendering.drawBox(matrices.peek(), outline, box, r, g, b, Math.max(a, 0.6F));
             matrices.pop();
         }
     }

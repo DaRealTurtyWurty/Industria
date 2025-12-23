@@ -161,7 +161,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient)
+        if (this.world == null || this.world.isClient())
             return;
 
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();

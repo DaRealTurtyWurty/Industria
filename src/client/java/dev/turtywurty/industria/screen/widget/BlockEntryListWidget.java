@@ -7,6 +7,7 @@ import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
@@ -18,6 +19,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 import java.util.Optional;
@@ -60,9 +62,9 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            Entry entry = getEntryAtPosition(mouseX, mouseY);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            Entry entry = getEntryAtPosition(click.x(), click.y());
             if (entry != null) {
                 setSelected(entry);
                 setFocused(entry);
@@ -70,22 +72,20 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean removeEntry(Entry entry) {
-        boolean removed = super.removeEntry(entry);
-        if (removed && entry == getSelectedOrNull()) {
+    public void removeEntry(Entry entry) {
+        if (entry == getSelectedOrNull()) {
             setSelected(null);
         }
-
-        return removed;
     }
 
     public void setSelectionListener(Consumer<Entry> selectionListener) {
-        this.selectionListener = selectionListener == null ? entry -> {
-        } : selectionListener;
+        this.selectionListener = selectionListener == null
+                ? entry -> {}
+                : selectionListener;
     }
 
     @Override
@@ -137,39 +137,42 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            int renderSize = Math.max(20, Math.min(entryHeight - 2, ICON_SIZE + 14));
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+            int renderSize = Math.max(20, Math.min(getHeight() - 2, ICON_SIZE + 14));
             this.scene.setAnchor(BlockPos.ORIGIN, renderSize / 2, renderSize / 2);
-            int previewX = x + 6;
-            int previewY = y + (entryHeight - renderSize) / 2;
-            this.scene.render(context, previewX, previewY, renderSize, renderSize, tickDelta);
+            int previewX = getX() + 6;
+            int previewY = getY() + (getHeight() - renderSize) / 2;
+            this.scene.render(context, previewX, previewY, renderSize, renderSize, deltaTicks);
 
             int textX = previewX + renderSize + 2;
-            int primaryY = y + 2;
+            int primaryY = getY() + 2;
             int secondaryY = primaryY + this.client.textRenderer.fontHeight + 2;
 
-            ScreenUtils.drawTextTruncated(context, this.primaryText, textX, primaryY, entryWidth - ICON_SIZE, 0xFFFFFFFF, false);
+            ScreenUtils.drawTextTruncated(context, this.primaryText, textX, primaryY, getWidth() - ICON_SIZE, 0xFFFFFFFF, false);
             if (!this.secondaryText.getString().isEmpty()) {
                 context.getMatrices().pushMatrix();
                 context.getMatrices().translate(textX, secondaryY);
                 context.getMatrices().scale(0.875F, 0.875F);
-                ScreenUtils.drawTextTruncated(context, this.secondaryText, 0, 0, (int) ((entryWidth - ICON_SIZE) / 0.875f), 0xFFAAAAAA, false);
+                ScreenUtils.drawTextTruncated(context, this.secondaryText, 0, 0, (int) ((getWidth() - ICON_SIZE) / 0.875f), 0xFFAAAAAA, false);
                 context.getMatrices().popMatrix();
             }
         }
 
-        @Override
-        public void drawBorder(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            int left = x + 7;
-            int right = x + entryWidth + 6;
-            int top = y - 2;
-            int bottom = y + entryHeight + 2;
-            int hoverColor = 0x66000000;
 
-            if (hovered) {
-                context.fill(left, top, right, bottom, hoverColor);
-            }
-        }
+
+        // TODO: Unsure if this is needed anymore
+//        @Override
+//        public void drawBorder(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+//            int left = x + 7;
+//            int right = x + entryWidth + 6;
+//            int top = y - 2;
+//            int bottom = y + entryHeight + 2;
+//            int hoverColor = 0x66000000;
+//
+//            if (hovered) {
+//                context.fill(left, top, right, bottom, hoverColor);
+//            }
+//        }
 
         public void tick() {
             this.scene.tick();

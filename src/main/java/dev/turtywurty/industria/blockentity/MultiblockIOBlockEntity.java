@@ -43,7 +43,7 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
             }
         }
 
-        if(this.multiblock == null || this.world.isClient)
+        if(this.multiblock == null || this.world.isClient())
             return;
 
         for (Direction direction : Direction.values()) {

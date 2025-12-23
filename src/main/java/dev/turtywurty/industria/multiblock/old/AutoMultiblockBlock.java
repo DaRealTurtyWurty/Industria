@@ -75,7 +75,7 @@ public class AutoMultiblockBlock extends Block {
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient) {
+        if (!world.isClient()) {
             MultiblockData data = getMultiblockData(world, pos);
             if (data == null)
                 return ActionResult.FAIL;
@@ -93,7 +93,7 @@ public class AutoMultiblockBlock extends Block {
     @Override
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
         BlockState newState = world.getBlockState(pos);
-        if (!world.isClient && !state.isOf(newState.getBlock())) {
+        if (!world.isClient() && !state.isOf(newState.getBlock())) {
             MultiblockData data = getMultiblockData(world, pos);
             if (data == null)
                 return;

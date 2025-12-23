@@ -19,7 +19,7 @@ public class ClientPacketsInit {
                         context.client().setScreen(new SeismicScannerScreen(payload.stack()))));
 
         ClientPlayNetworking.registerGlobalReceiver(SyncFluidPocketsPayload.ID, (payload, context) -> {
-            RegistryKey<World> worldKey = context.player().getWorld().getRegistryKey();
+            RegistryKey<World> worldKey = context.player().getEntityWorld().getRegistryKey();
             FluidPocketWorldRenderer.FLUID_POCKETS.put(worldKey, payload.fluidPockets());
         });
 

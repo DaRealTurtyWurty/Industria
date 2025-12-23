@@ -32,7 +32,7 @@ public class FluidTankScreenHandler extends ScreenHandler implements TickableScr
     private final SimpleInventory inventory;
 
     public FluidTankScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory, (FluidTankBlockEntity) playerInventory.player.getWorld().getBlockEntity(payload.pos()), new SimpleInventory(1));
+        this(syncId, playerInventory, (FluidTankBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(payload.pos()), new SimpleInventory(1));
     }
 
     public FluidTankScreenHandler(int syncId, PlayerInventory playerInventory, FluidTankBlockEntity blockEntity) {

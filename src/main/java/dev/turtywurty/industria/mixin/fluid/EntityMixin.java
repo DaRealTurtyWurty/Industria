@@ -28,7 +28,7 @@ import java.util.Objects;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
     @Shadow
-    public abstract World getWorld();
+    public abstract World getEntityWorld();
 
     @Shadow
     private BlockPos blockPos;
@@ -67,7 +67,7 @@ public abstract class EntityMixin {
         if (original)
             return true;
 
-        FluidState state = getWorld().getFluidState(this.blockPos);
+        FluidState state = getEntityWorld().getFluidState(this.blockPos);
         FluidData data = FluidData.FLUID_DATA.get(state.getFluid());
         return data != null && data.canSwim();
     }
@@ -147,7 +147,7 @@ public abstract class EntityMixin {
         for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
             double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
             double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getWorld().addParticleClient(fluidData.bubbleParticle(),
+            thisEntity.getEntityWorld().addParticleClient(fluidData.bubbleParticle(),
                     thisEntity.getX() + xOffset,
                     yPos + 1.0F,
                     thisEntity.getZ() + yOffset,
@@ -159,7 +159,7 @@ public abstract class EntityMixin {
         for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
             double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
             double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getWorld().addParticleClient(fluidData.splashParticle(),
+            thisEntity.getEntityWorld().addParticleClient(fluidData.splashParticle(),
                     thisEntity.getX() + xOffset,
                     yPos + 1.0F,
                     thisEntity.getZ() + yOffset,

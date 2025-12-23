@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen.fakeworld;
 
 import dev.turtywurty.industria.multiblock.VariedBlockList;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EntityType;
@@ -101,7 +102,7 @@ public class FakeWorldScreen extends Screen {
             // Keep the centerpiece aligned.
             this.scene.setAnchor(new BlockPos(2, 64, 2), areaWidth / 2, areaHeight / 2);
             this.scene.render(context, areaX, areaY, areaWidth, areaHeight, delta);
-            context.drawBorder(areaX, areaY, areaWidth, areaHeight, 0xAAFFFFFF);
+            context.drawStrokedRectangle(areaX, areaY, areaWidth, areaHeight, 0xAAFFFFFF);
             context.drawTextWithShadow(this.textRenderer, Text.literal("Client-only world preview"), areaX + 4, areaY + 4, 0xFFFFFFFF);
             context.drawTextWithShadow(this.textRenderer, Text.literal("Press ESC to return"), areaX + 4, areaY + 16, 0xFFCCCCCC);
         }
@@ -110,13 +111,13 @@ public class FakeWorldScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.scene != null && button == 0) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+        if (this.scene != null && click.isLeft()) {
             float sensitivity = 0.35F;
-            this.scene.rotateCamera((float) (deltaX * sensitivity), (float) (deltaY * sensitivity));
+            this.scene.rotateCamera((float) (offsetX * sensitivity), (float) (offsetY * sensitivity));
             return true;
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 }
