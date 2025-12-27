@@ -360,7 +360,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
 
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
-        if (click.isLeft()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (this.fakeWorldWidget != null && this.scene != null && this.fakeWorldWidget.handleClick(click, doubled))
                 return true;
 
@@ -375,7 +375,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
 
     @Override
     public boolean mouseDragged(Click click, double offsetX, double offsetY) {
-        if (click.isLeft()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (this.scene != null) {
                 float sensitivity = 0.35F;
                 this.scene.rotateCamera((float) (offsetX * sensitivity), (float) (offsetY * sensitivity));

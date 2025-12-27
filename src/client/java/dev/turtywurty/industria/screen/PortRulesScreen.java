@@ -18,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -196,7 +197,7 @@ public class PortRulesScreen extends Screen {
 
     @Override
     public boolean mouseDragged(Click click, double offsetX, double offsetY) {
-        if (click.isLeft()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (this.scene != null) {
                 float sensitivity = 0.35F;
                 this.scene.rotateCamera((float) (offsetX * sensitivity), (float) (offsetY * sensitivity));

@@ -27,12 +27,13 @@ public class CrusherBlockEntityRenderer extends IndustriaBlockEntityRenderer<Cru
     public void updateRenderState(CrusherBlockEntity blockEntity, CrusherRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
         super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
+        state.maxProgress = blockEntity.getMaxProgress();
     }
 
     @Override
     public void onRender(CrusherRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
         queue.submitModel(this.model,
-                state.progress > 0 ? state.progress / 100.0F : 0F,
+                state.progress > 0 ? (float) (((double) state.progress / state.maxProgress) * Math.PI) : 0F,
                 matrices, this.model.getLayer(CrusherModel.TEXTURE),
                 light, overlay, 0, state.crumblingOverlay);
     }

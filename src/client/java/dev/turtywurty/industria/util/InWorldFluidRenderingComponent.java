@@ -59,21 +59,21 @@ public class InWorldFluidRenderingComponent {
 
         RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
 
+        float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
+
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        int newLight = (light & 0xF00000) | (luminosity << 4);
+
         float finalFillPercentage = fillPercentage;
         queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
-            float y2 = ((finalFillPercentage * maxHeightPixels) / 16f) + y1;
-
-            matrices.push();
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-            if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-            }
-
-            int blockLight = (light >> 4) & 0xF;
-            int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
-            int newLight = (light & 0xF00000) | (luminosity << 4);
-
             // Front (XY plane, z constant)
             drawTiledXYQuad(vertexConsumer, entry,
                     x1, y1, z1 + 0.001F,
@@ -101,9 +101,9 @@ public class InWorldFluidRenderingComponent {
             if (drawTopFace.evaluate(finalFillPercentage < 1.0F)) {
                 drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, newLight, overlay);
             }
-
-            matrices.pop();
         });
+
+        matrices.pop();
     }
 
     public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, UnaryOperator<RenderLayer> wrapRenderLayer) {
@@ -132,24 +132,22 @@ public class InWorldFluidRenderingComponent {
         RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
         renderLayer = wrapRenderLayer.apply(renderLayer);
 
-        queue.submitCustom(matrices, renderLayer, (matricesEntry, vertexConsumer) -> {
-            matrices.push();
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
 
-            if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-            }
-
-            MatrixStack.Entry entry = matrices.peek();
-
+        queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
             int blockLight = (light >> 4) & 0xF;
             int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
             int newLight = (light & 0xF00000) | (luminosity << 4);
 
             drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, newFluidColor, newLight, overlay);
-
-            matrices.pop();
         });
+
+        matrices.pop();
     }
 
     public static void drawTiledTopQuad(VertexConsumer vertexConsumer,
@@ -232,22 +230,21 @@ public class InWorldFluidRenderingComponent {
 
         RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
 
-        queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
-            matrices.push();
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        }
 
-            if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-            }
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        int newLight = (light & 0xF00000) | (luminosity << 4);
 
-            int blockLight = (light >> 4) & 0xF;
-            int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
-            int newLight = (light & 0xF00000) | (luminosity << 4);
+        queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) ->
+                drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F));
 
-            drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
-
-            matrices.pop();
-        });
+        matrices.pop();
     }
 
     // For front and back (XY plane)

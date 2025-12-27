@@ -11,6 +11,7 @@ import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -119,7 +120,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
 
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
-        if (click.isLeft()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             Entry entry = getEntryAtPosition(click.x(), click.y());
             if (entry != null) {
                 setSelected(entry);

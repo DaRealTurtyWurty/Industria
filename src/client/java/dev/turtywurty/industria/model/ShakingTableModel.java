@@ -1,17 +1,17 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.state.ShakingTableRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class ShakingTableModel extends Model<ShakingTableRenderState> {
+public class ShakingTableModel extends Model<ShakingTableModel.ShakingTableModelRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/shaking_table.png");
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("shaking_table"), "main");
 
     private final ModelParts modelParts;
+    private final float tableOriginZ;
 
     public ShakingTableModel(ModelPart root) {
         super(root, RenderLayer::getEntityCutout);
@@ -30,10 +30,16 @@ public class ShakingTableModel extends Model<ShakingTableRenderState> {
         ModelPart springs = motor.getChild("springs");
 
         this.modelParts = new ModelParts(main, table, waterChannels, motorConnection, supports, baseSupports, legsSupports, leg1, leg2, motor, motorLegs, springs);
+        this.tableOriginZ = table.originZ;
     }
 
-    public ModelParts getModelParts() {
-        return modelParts;
+    @Override
+    public void setAngles(ShakingTableModelRenderState state) {
+        super.setAngles(state);
+        this.modelParts.table().originZ = this.tableOriginZ + state.shakeOffset;
+    }
+
+    public record ShakingTableModelRenderState(float shakeOffset) {
     }
 
     public static TexturedModelData getTexturedModelData() {

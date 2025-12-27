@@ -1,13 +1,12 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.state.DrillRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class DrillMotorModel extends Model<DrillRenderState> {
+public class DrillMotorModel extends Model<DrillMotorModel.DrillMotorModelRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("drill_motor"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_motor.png");
 
@@ -62,8 +61,14 @@ public class DrillMotorModel extends Model<DrillRenderState> {
         return TexturedModelData.of(modelData, 64, 64);
     }
 
-    public DrillMotorParts getDrillMotorParts() {
-        return this.parts;
+    @Override
+    public void setAngles(DrillMotorModelRenderState state) {
+        super.setAngles(state);
+        this.parts.rodGear().pitch = state.clientMotorRotation;
+        this.parts.connectingGear().pitch = -state.clientMotorRotation;
+    }
+
+    public record DrillMotorModelRenderState(float clientMotorRotation) {
     }
 
     public record DrillMotorParts(ModelPart main, ModelPart spinRod, ModelPart rodGear, ModelPart connectingGear) {

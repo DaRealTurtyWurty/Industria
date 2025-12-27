@@ -11,6 +11,7 @@ public class ShakingTableRenderState extends IndustriaBlockEntityRenderState {
     public Box shakeBox;
     public ItemStack processingStack = ItemStack.EMPTY;
     public SingleFluidStorage inputFluidTank;
+    public float shakeOffset = 0.0f;
 
     public ShakingTableRenderState() {
         super(1);

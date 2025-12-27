@@ -26,8 +26,13 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.*;
-import dev.turtywurty.industria.multiblock.old.*;
+import dev.turtywurty.industria.multiblock.LocalDirection;
+import dev.turtywurty.industria.multiblock.PortType;
+import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
+import dev.turtywurty.industria.multiblock.old.MultiblockType;
+import dev.turtywurty.industria.multiblock.old.Multiblockable;
+import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
@@ -136,7 +141,6 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
-    public float stirringRotation = 0.0F;
     private int temperature = 175;
     private int progress, maxProgress;
     private final PropertyDelegate properties = new PropertyDelegate() {
@@ -338,7 +342,6 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     @Override
     protected void writeData(WriteView view) {
-
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
         view.putInt("Temperature", this.temperature);

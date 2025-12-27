@@ -40,6 +40,6 @@
     "fabric-api": "*",
     "heatapi": ">=1.2.0",
     "gasapi": ">=1.2.0",
-    "slurryapi": ">=1.2.0"
+    "slurryapi": ">=1.2.1"
   }
 }

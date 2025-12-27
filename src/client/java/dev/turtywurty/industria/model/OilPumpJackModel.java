@@ -1,13 +1,12 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.state.OilPumpJackRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class OilPumpJackModel extends Model<OilPumpJackRenderState> {
+public class OilPumpJackModel extends Model<OilPumpJackModel.OilPumpJackModelRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("oil_pump_jack"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/oil_pump_jack.png");
 
@@ -334,8 +333,21 @@ public class OilPumpJackModel extends Model<OilPumpJackRenderState> {
         return TexturedModelData.of(modelData, 512, 512);
     }
 
+    @Override
+    public void setAngles(OilPumpJackModelRenderState state) {
+        super.setAngles(state);
+        this.parts.wheel().pitch = state.wheelPitch;
+        this.parts.counterWeights().pitch = state.counterWeightsPitch;
+        this.parts.pitmanArm().pitch = state.pitmanArmPitch;
+        this.parts.arm().pitch = state.armPitch;
+    }
+
     public OilPumpJackParts getOilPumpJackParts() {
         return this.parts;
+    }
+
+    public record OilPumpJackModelRenderState(float wheelPitch, float counterWeightsPitch, float pitmanArmPitch,
+                                              float armPitch) {
     }
 
     public record OilPumpJackParts(ModelPart main, ModelPart wheel, ModelPart counterWeights, ModelPart pitmanArm, ModelPart arm,

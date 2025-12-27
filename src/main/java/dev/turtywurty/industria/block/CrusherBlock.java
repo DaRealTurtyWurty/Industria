@@ -46,6 +46,9 @@ public class CrusherBlock extends IndustriaBlock {
                 return;
 
             ItemStack stack = blockEntity.getWrappedInventoryStorage().getInventory(CrusherBlockEntity.INPUT_SLOT).getStack(0);
+            if(stack.isEmpty())
+                return;
+
             var particle = new ItemStackParticleEffect(ParticleTypes.ITEM, stack);
             for (float[] offset : PARTICLE_OFFSETS) {
                 for (int i = 0; i < random.nextInt(2) + 1; i++) {

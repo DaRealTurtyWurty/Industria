@@ -21,10 +21,10 @@ public class IndustriaItemTagProvider extends FabricTagProvider.ItemTagProvider 
             WoodSetDatagen.generateItemTags(woodSet, this::valueLookupBuilder);
         }
 
-        valueLookupBuilder(TagList.Items.STEEL_INGOTS)
+        valueLookupBuilder(ConventionalItemTags.INGOTS)
                 .add(ItemInit.STEEL_INGOT);
 
-        valueLookupBuilder(ConventionalItemTags.INGOTS)
-                .addTag(TagList.Items.STEEL_INGOTS);
+        valueLookupBuilder(TagList.Items.ELECTROLYSIS_RODS)
+                .add(ItemInit.CARBON_ROD);
     }
 }

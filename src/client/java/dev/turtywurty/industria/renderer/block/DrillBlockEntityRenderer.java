@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<DrillBlockEntity, DrillRenderState> {
-    private final Map<DrillHeadable, Model<DrillRenderState>> drillHeadModels = new HashMap<>();
+    private final Map<DrillHeadable, Model<?>> drillHeadModels = new HashMap<>();
     private final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
     private final DrillFrameModel model;
@@ -60,7 +60,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         state.clientMotorRotation = blockEntity.clientMotorRotation;
 
         DrillRenderData renderData = blockEntity.getRenderData();
-        if(renderData == null)
+        if (renderData == null)
             return;
 
         state.clockwiseRotation = renderData.clockwiseRotation;
@@ -73,36 +73,24 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
 
         { // Render motor
             if (!state.motorInventory.isEmpty()) {
-                DrillMotorModel.DrillMotorParts parts = this.motorModel.getDrillMotorParts();
-                float prevRodGear = parts.rodGear().pitch;
-                float connectingGear = parts.connectingGear().pitch;
-
                 if (!state.isDrilling && !state.isRetracting) {
                     state.clientMotorRotation = 0;
                 }
 
-                parts.rodGear().pitch += state.clientMotorRotation += (state.isDrilling ? 0.03f : state.isRetracting ? -0.03f : 0);
-                parts.connectingGear().pitch = -state.clientMotorRotation;
+                state.clientMotorRotation += (state.isDrilling ? 0.03f : state.isRetracting ? -0.03f : 0);
 
-                RenderLayer renderLayer = this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION);
-                queue.submitModel(this.motorModel, state, matrices, renderLayer, light, overlay, 0, state.crumblingOverlay);
-
-                parts.rodGear().pitch = prevRodGear;
-                parts.connectingGear().pitch = connectingGear;
+                queue.submitModel(this.motorModel,
+                        new DrillMotorModel.DrillMotorModelRenderState(state.clientMotorRotation),
+                        matrices, this.motorModel.getLayer(DrillMotorModel.TEXTURE_LOCATION),
+                        light, overlay, 0, state.crumblingOverlay);
             }
         }
 
         { // Render frame
-            float prevCableWheelPitch = this.model.getCableWheel().pitch;
-            float prevCableWheelRodPitch = this.model.getCableWheelRod().pitch;
-
-            this.model.getCableWheel().pitch = state.clientMotorRotation;
-            this.model.getCableWheelRod().pitch = state.clientMotorRotation;
-
-            queue.submitModel(this.model, state, matrices, this.model.getLayer(DrillFrameModel.TEXTURE_LOCATION), light, overlay, 0, state.crumblingOverlay);
-
-            this.model.getCableWheel().pitch = prevCableWheelPitch;
-            this.model.getCableWheelRod().pitch = prevCableWheelRodPitch;
+            queue.submitModel(this.model,
+                    new DrillFrameModel.DrillFrameModelRenderState(state.clientMotorRotation),
+                    matrices, this.model.getLayer(DrillFrameModel.TEXTURE_LOCATION),
+                    light, overlay, 0, state.crumblingOverlay);
         }
 
         int worldBottom = world == null ? 0 : world.getBottomY();
@@ -112,23 +100,11 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         float progress = 1 - (startY - currentY) / (startY - worldBottom);
 
         { // Render cable wheel
-            ModelPart cableMain = this.cableModel.getMain();
-
-            float prevCableMainPitch = cableMain.pitch;
-
-            cableMain.pitch = state.clientMotorRotation;
-
-            float cableScaleFactor = 0.5f - (progress / 2f);
-
-            cableMain.xScale -= cableScaleFactor;
-            cableMain.yScale -= cableScaleFactor;
-            cableMain.zScale -= cableScaleFactor;
-            queue.submitModel(this.cableModel, state, matrices, this.cableModel.getLayer(DrillCableModel.TEXTURE_LOCATION), light, overlay, 0, state.crumblingOverlay);
-            cableMain.xScale += cableScaleFactor;
-            cableMain.yScale += cableScaleFactor;
-            cableMain.zScale += cableScaleFactor;
-
-            cableMain.pitch = prevCableMainPitch;
+            state.cableScaleFactor = 0.5f - (progress / 2f);
+            queue.submitModel(this.cableModel,
+                    new DrillCableModel.DrillCableModelRenderState(state.clientMotorRotation, state.cableScaleFactor),
+                    matrices, this.cableModel.getLayer(DrillCableModel.TEXTURE_LOCATION),
+                    light, overlay, 0, state.crumblingOverlay);
         }
 
         if (state.drillHeadItemStack.isEmpty() || !(state.drillHeadItemStack.getItem() instanceof DrillHeadable drillHeadable))
@@ -178,7 +154,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         }
 
         { // Render drill head
-            Model<DrillRenderState> drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(Either.left(this.context)));
+            Model<?> drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(Either.left(this.context)));
             Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> drillHeadData.textureLocation());
 
             drillHeadData.onRender().render(state, matrices, queue, drillHeadModel, drillHeadModel.getLayer(drillHeadTexture), light, overlay);

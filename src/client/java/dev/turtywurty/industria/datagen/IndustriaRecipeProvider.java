@@ -87,77 +87,77 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new IndustriaIngredient(1, Items.STONE),
                         new OutputItemStack(Items.COBBLESTONE, 1, 1),
                         new OutputItemStack(Items.GRAVEL, 1, 0.25F),
-                        10,
+                        100,
                         "stone");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.COBBLESTONE),
                         new OutputItemStack(Items.GRAVEL, 1, 1),
                         new OutputItemStack(Items.FLINT, 1, 0.1F),
-                        10,
+                        100,
                         "cobblestone");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.GRAVEL),
                         new OutputItemStack(Items.SAND, 1, 1),
                         new OutputItemStack(Items.FLINT, 1, 0.1F),
-                        10,
+                        100,
                         "gravel");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.SAND),
                         new OutputItemStack(Items.GUNPOWDER, 1, 0.35F),
                         OutputItemStack.EMPTY,
-                        10,
+                        100,
                         "sand");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.COAL_ORE, Items.DEEPSLATE_COAL_ORE),
                         new OutputItemStack(Items.COAL, 1, 1),
                         new OutputItemStack(Items.COAL, 1, 0.15F),
-                        10,
+                        100,
                         "coal_ore");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE),
                         new OutputItemStack(Items.REDSTONE, UniformIntProvider.create(2, 5), 1),
                         new OutputItemStack(Items.REDSTONE, 1, 0.15F),
-                        10,
+                        100,
                         "redstone_ore");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.LAPIS_ORE, Items.DEEPSLATE_LAPIS_ORE),
                         new OutputItemStack(Items.LAPIS_LAZULI, UniformIntProvider.create(1, 4), 1),
                         new OutputItemStack(Items.LAPIS_LAZULI, UniformIntProvider.create(1, 2), 0.15F),
-                        10,
+                        100,
                         "lapis_ore");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.DIAMOND_ORE, Items.DEEPSLATE_DIAMOND_ORE),
                         new OutputItemStack(Items.DIAMOND, 1, 1),
                         new OutputItemStack(Items.DIAMOND, 1, 0.15F),
-                        10,
+                        100,
                         "diamond_ore");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE),
                         new OutputItemStack(Items.EMERALD, 1, 1),
                         new OutputItemStack(Items.EMERALD, 1, 0.15F),
-                        10,
+                        100,
                         "emerald_ore");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.QUARTZ_ORES), 1),
                         new OutputItemStack(Items.QUARTZ, 1, 1),
                         new OutputItemStack(Items.QUARTZ, UniformIntProvider.create(1, 3), 0.15F),
-                        10,
+                        100,
                         "quartz_ore");
 
                 offerCrusher(exporter, RecipeCategory.MISC,
                         new IndustriaIngredient(1, Items.NETHER_GOLD_ORE),
                         new OutputItemStack(Items.GOLD_NUGGET, UniformIntProvider.create(2, 6), 1),
                         new OutputItemStack(Items.GOLD_NUGGET, UniformIntProvider.create(1, 3), 0.15F),
-                        10,
+                        100,
                         "nether_gold_ore");
 
 //        offerCrusher(exporter, RecipeCategory.MISC,
@@ -255,7 +255,7 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new IndustriaIngredient(9, ItemInit.CRYOLITE),
                         new FluidStack(FluidVariant.of(FluidInit.MOLTEN_CRYOLITE.still()), FluidConstants.BUCKET),
                         new FluidStack(FluidVariant.of(FluidInit.MOLTEN_ALUMINIUM.still()), FluidConstants.BUCKET * 2),
-                        new GasStack(GasInit.CARBON_DIOXIDE, FluidConstants.INGOT),
+                        new GasStack(GasInit.CARBON_DIOXIDE, FluidConstants.NUGGET),
                         2_000, 10_000, 1_000);
 
                 offerCrusher(exporter, RecipeCategory.MISC,

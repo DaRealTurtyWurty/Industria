@@ -1,22 +1,27 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.state.DrillRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class DrillCableModel extends Model<DrillRenderState> {
+public class DrillCableModel extends Model<DrillCableModel.DrillCableModelRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("drill_cable"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_cable.png");
 
     private final ModelPart main;
+    private final float baseXScale;
+    private final float baseYScale;
+    private final float baseZScale;
 
     public DrillCableModel(ModelPart root) {
         super(root, RenderLayer::getEntitySolid);
 
         this.main = root.getChild("main");
+        this.baseXScale = this.main.xScale;
+        this.baseYScale = this.main.yScale;
+        this.baseZScale = this.main.zScale;
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -31,7 +36,16 @@ public class DrillCableModel extends Model<DrillRenderState> {
         return TexturedModelData.of(modelData, 32, 32);
     }
 
-    public ModelPart getMain() {
-        return this.main;
+    @Override
+    public void setAngles(DrillCableModelRenderState state) {
+        super.setAngles(state);
+        float scale = 1.0f - state.cableScaleFactor;
+        this.main.pitch = state.clientMotorRotation;
+        this.main.xScale = this.baseXScale * scale;
+        this.main.yScale = this.baseYScale * scale;
+        this.main.zScale = this.baseZScale * scale;
+    }
+
+    public record DrillCableModelRenderState(float clientMotorRotation, float cableScaleFactor) {
     }
 }

@@ -7,12 +7,14 @@ import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -64,6 +66,22 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     public CrystallizerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
         super(context);
         this.model = new CrystallizerModel(context.getLayerModelPart(CrystallizerModel.LAYER_LOCATION));
+    }
+
+    @Override
+    public CrystallizerRenderState createRenderState() {
+        return new CrystallizerRenderState();
+    }
+
+    @Override
+    public void updateRenderState(CrystallizerBlockEntity blockEntity, CrystallizerRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
+        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        state.progress = blockEntity.getProgress();
+        state.maxProgress = blockEntity.getMaxProgress();
+        state.nextOutputItemStack = blockEntity.getNextOutputItemStack();
+        state.crystalFluidStorage = blockEntity.getCrystalFluidStorage();
+        state.waterFluidStorage = blockEntity.getWaterFluidStorage();
+        state.updateItemRenderState(0, this, blockEntity, state.nextOutputItemStack);
     }
 
     @Override

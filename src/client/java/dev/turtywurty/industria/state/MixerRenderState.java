@@ -7,7 +7,6 @@ import net.minecraft.util.math.Vec3d;
 import java.util.List;
 
 public class MixerRenderState extends IndustriaBlockEntityRenderState {
-    public float stirringRotation = 0.0f;
     public boolean isMixing = false;
     public int progress = 0;
     public int maxProgress = 0;
@@ -16,6 +15,6 @@ public class MixerRenderState extends IndustriaBlockEntityRenderState {
     public SingleFluidStorage fluidTank;
 
     public MixerRenderState() {
-        super(1);
+        super(6);
     }
 }

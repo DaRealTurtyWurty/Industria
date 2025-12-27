@@ -1,13 +1,12 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.state.WindTurbineRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class WindTurbineModel extends Model<WindTurbineRenderState> {
+public class WindTurbineModel extends Model<WindTurbineModel.WindTurbineModelRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("wind_turbine"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/wind_turbine.png");
 
@@ -50,8 +49,13 @@ public class WindTurbineModel extends Model<WindTurbineRenderState> {
         return TexturedModelData.of(modelData, 128, 128);
     }
 
-    public WindTurbineParts getWindTurbineParts() {
-        return this.parts;
+    @Override
+    public void setAngles(WindTurbineModelRenderState state) {
+        super.setAngles(state);
+        this.parts.propellers().roll = state.propellerRotation;
+    }
+
+    public record WindTurbineModelRenderState(float propellerRotation) {
     }
 
     public record WindTurbineParts(ModelPart core, ModelPart propellers, ModelPart propeller0, ModelPart propeller1,

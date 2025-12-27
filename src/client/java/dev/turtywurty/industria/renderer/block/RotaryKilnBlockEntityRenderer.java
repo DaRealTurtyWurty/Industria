@@ -69,7 +69,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
         RenderLayer renderLayer = this.model.getLayer(RotaryKilnModel.TEXTURE_LOCATION);
 
         ClientWorld clientWorld = MinecraftClient.getInstance().world;
-        if (clientWorld == null || state.kilnSegments.isEmpty())
+        if (clientWorld == null)
             return;
 
         RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(state.pos, pos -> new RendererData());

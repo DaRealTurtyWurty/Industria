@@ -1,13 +1,12 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.state.MixerRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
-public class MixerModel extends Model<MixerRenderState> {
+public class MixerModel extends Model<MixerModel.MixerModelRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("mixer"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/mixer.png");
 
@@ -19,9 +18,9 @@ public class MixerModel extends Model<MixerRenderState> {
         ModelPart main = root.getChild("main");
         ModelPart glass = main.getChild("glass");
         ModelPart supports = main.getChild("supports");
-        ModelPart stirring_rods = main.getChild("stirring_rods");
+        ModelPart stirringRods = main.getChild("stirring_rods");
 
-        this.parts = new MixerModelParts(main, glass, supports, stirring_rods);
+        this.parts = new MixerModelParts(main, glass, supports, stirringRods);
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -56,10 +55,15 @@ public class MixerModel extends Model<MixerRenderState> {
         return TexturedModelData.of(modelData, 256, 256);
     }
 
-    public MixerModelParts getMixerParts() {
-        return parts;
+    @Override
+    public void setAngles(MixerModelRenderState state) {
+        super.setAngles(state);
+        this.parts.stirringRods().yaw = state.stirringRotation;
     }
 
-    public record MixerModelParts(ModelPart main, ModelPart glass, ModelPart supports, ModelPart stirring_rods) {
+    public record MixerModelRenderState(float stirringRotation) {
+    }
+
+    public record MixerModelParts(ModelPart main, ModelPart glass, ModelPart supports, ModelPart stirringRods) {
     }
 }

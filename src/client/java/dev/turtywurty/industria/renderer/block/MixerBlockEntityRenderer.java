@@ -6,7 +6,6 @@ import dev.turtywurty.industria.state.MixerRenderState;
 import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
@@ -39,22 +38,25 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         state.isMixing = blockEntity.isMixing();
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
-        state.stirringRotation = blockEntity.stirringRotation;
         state.inputInventory = blockEntity.getInputInventory();
         state.fluidTank = blockEntity.getInputFluidTank();
         state.mixingItemPositions = blockEntity.mixingItemPositions;
+        for (int i = 0; i < 6; i++) {
+            state.updateItemRenderState(i, this, blockEntity, state.inputInventory.heldStacks.get(i));
+        }
     }
 
     @Override
     protected void onRender(MixerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
-        this.model.getMixerParts().stirring_rods().yaw = state.stirringRotation;
-        RenderLayer renderLayer = this.model.getLayer(MixerModel.TEXTURE_LOCATION);
-        queue.submitModel(this.model, state, matrices, renderLayer, light, overlay, 0, state.crumblingOverlay);
-        this.model.getMixerParts().stirring_rods().yaw = 0.0F;
-
-        if (state.isMixing) {
-            state.stirringRotation = (state.stirringRotation + 0.1f) % 360;
+        float stirringRotation = 0f;
+        if(state.isMixing) {
+            stirringRotation = (state.progress / (float) state.maxProgress) * (float) Math.PI * 2f * 4f;
         }
+
+        queue.submitModel(this.model,
+                new MixerModel.MixerModelRenderState(stirringRotation),
+                matrices, this.model.getLayer(MixerModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.crumblingOverlay);
 
         float widthReduction = 2f / 16f;
         float x1 = -1f + widthReduction;
@@ -101,7 +103,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                     matrices.multiply(RotationAxis.POSITIVE_Z.rotation(world.getTime() * 0.25f));
                 }
 
-                state.renderItemRenderState(0, matrices, queue);
+                state.renderItemRenderState(index, matrices, queue);
                 matrices.pop();
             }
         }

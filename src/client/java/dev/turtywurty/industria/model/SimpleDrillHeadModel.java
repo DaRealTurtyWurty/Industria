@@ -8,7 +8,7 @@ import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class SimpleDrillHeadModel extends Model<DrillRenderState> {
+public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModel.SimpleDrillHeadModelRenderState> {
     public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("simple_drill_head"), "main");
 
     private final DrillHeadParts parts;
@@ -49,32 +49,39 @@ public class SimpleDrillHeadModel extends Model<DrillRenderState> {
         return TexturedModelData.of(modelData, 128, 128);
     }
 
+    @Override
+    public void setAngles(SimpleDrillHeadModelRenderState state) {
+        super.setAngles(state);
+        this.parts.clockwise().yaw = state.clockwiseYaw;
+        this.parts.counterClockwise().yaw = state.counterClockwiseYaw;
+    }
+
     public static void onRender(DrillRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Model<?> pModel, RenderLayer renderLayer, int light, int overlay) {
         SimpleDrillHeadModel model = (SimpleDrillHeadModel) pModel;
 
-        DrillHeadParts parts = model.getDrillHeadParts();
-        float previousClockwiseYaw = parts.clockwise().yaw;
-        float previousCounterClockwiseYaw = parts.counterClockwise().yaw;
-
+        float clockwiseYaw;
+        float counterClockwiseYaw;
         if (state.isDrilling && !state.isPaused) {
-            parts.clockwise().yaw = state.clockwiseRotation += 0.1F;
-            parts.counterClockwise().yaw = state.counterClockwiseRotation -= 0.125F;
+            state.clockwiseRotation += 0.1F;
+            state.counterClockwiseRotation -= 0.125F;
         } else {
-            parts.clockwise().yaw = (float) Math.clamp(state.clockwiseRotation -= 0.1F, 0, Math.PI * 2);
-            parts.counterClockwise().yaw = (float) Math.clamp(state.counterClockwiseRotation += 0.125F, 0, Math.PI * 2);
+            state.clockwiseRotation = (float) Math.clamp(state.clockwiseRotation - 0.1F, 0, Math.PI * 2);
+            state.counterClockwiseRotation = (float) Math.clamp(state.counterClockwiseRotation + 0.125F, 0, Math.PI * 2);
         }
+        clockwiseYaw = state.clockwiseRotation;
+        counterClockwiseYaw = state.counterClockwiseRotation;
 
         matrices.push();
         matrices.scale(0.9F, 0.9F, 0.9F);
-        queue.submitModel(model, state, matrices, renderLayer, light, overlay, -1, state.crumblingOverlay);
+        queue.submitModel(model, new SimpleDrillHeadModelRenderState(clockwiseYaw, counterClockwiseYaw), matrices, renderLayer, light, overlay, -1, state.crumblingOverlay);
         matrices.pop();
-
-        parts.clockwise().yaw = previousClockwiseYaw;
-        parts.counterClockwise().yaw = previousCounterClockwiseYaw;
     }
 
     public DrillHeadParts getDrillHeadParts() {
         return this.parts;
+    }
+
+    public record SimpleDrillHeadModelRenderState(float clockwiseYaw, float counterClockwiseYaw) {
     }
 
     public record DrillHeadParts(ModelPart main, ModelPart clockwise, ModelPart counterClockwise) {

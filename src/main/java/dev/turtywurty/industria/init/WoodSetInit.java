@@ -2,7 +2,6 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.block.RubberLeavesBlock;
 import dev.turtywurty.industria.block.RubberLogBlock;
-import dev.turtywurty.industria.block.RubberWoodBlock;
 import dev.turtywurty.industria.init.list.SaplingGeneratorList;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 

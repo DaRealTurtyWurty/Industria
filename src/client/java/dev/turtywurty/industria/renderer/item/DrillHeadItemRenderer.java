@@ -26,7 +26,7 @@ import java.util.Set;
 public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderState> {
     public static final DrillHeadItemRenderer INSTANCE = new DrillHeadItemRenderer();
 
-    public final Map<DrillHeadable, Model<DrillRenderState>> drillHeadModels = new HashMap<>();
+    public final Map<DrillHeadable, Model<?>> drillHeadModels = new HashMap<>();
     public final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
     @Override
@@ -38,14 +38,14 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
             LoadedEntityModels loadedEntityModels = MinecraftClient.getInstance().getLoadedEntityModels();
             DrillHeadRegistry.DrillHeadClientData clientData = DrillHeadRegistry.getClientData(drillHeadable);
             if (clientData != null && clientData.renderDynamicItem()) {
-                Model<DrillRenderState> model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(Either.right(loadedEntityModels)));
+                Model<?> model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(Either.right(loadedEntityModels)));
                 Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
                 matrices.push();
                 matrices.translate(0.5f, 0.75f, 0.5f);
                 matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
                 matrices.scale(0.5F, 0.5F, 0.5F);
                 RenderLayer renderLayer = model.getLayer(textureLocation);
-                queue.submitModel(model, state, matrices, renderLayer, light, overlay, 0, state.crumblingOverlay);
+                clientData.onRender().render(state, matrices, queue, model, renderLayer, light, overlay);
                 matrices.pop();
             }
         }

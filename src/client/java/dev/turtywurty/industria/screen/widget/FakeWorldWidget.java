@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.Widget;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
@@ -36,7 +37,7 @@ public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
 
     @Override
     public boolean mouseDragged(Click click, double offsetX, double offsetY) {
-        if (enableInteraction && click.isLeft()) {
+        if (enableInteraction && click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             this.scene.rotateCamera((float) (offsetX * this.dragSensitivity), (float) (offsetY * this.dragSensitivity));
             return true;
         }

@@ -12,6 +12,7 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * Simple GUI that draws the client-only world into a boxed area.
@@ -112,7 +113,7 @@ public class FakeWorldScreen extends Screen {
 
     @Override
     public boolean mouseDragged(Click click, double offsetX, double offsetY) {
-        if (this.scene != null && click.isLeft()) {
+        if (this.scene != null && click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             float sensitivity = 0.35F;
             this.scene.rotateCamera((float) (offsetX * sensitivity), (float) (offsetY * sensitivity));
             return true;

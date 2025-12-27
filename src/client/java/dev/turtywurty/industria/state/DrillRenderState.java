@@ -16,6 +16,7 @@ public class DrillRenderState extends IndustriaBlockEntityRenderState {
     public float clientMotorRotation;
     public float clockwiseRotation;
     public float counterClockwiseRotation;
+    public float cableScaleFactor;
 
     public DrillRenderState() {
         super(0);

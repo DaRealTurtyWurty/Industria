@@ -105,10 +105,10 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             float angle1 = angleOffset + (float) (2.0 * Math.PI * (i + 1) / sides);
 
             queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
-                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle0, innerRadius, outerRadius, light, overlay);
-                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle0, outerRadius, outerRadius, light, overlay);
-                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle1, outerRadius, outerRadius, light, overlay);
-                angledFluidVertex(vertexConsumer, matrices, fluidSprite, fluidColor, angle1, innerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle0, innerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle0, outerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle1, outerRadius, outerRadius, light, overlay);
+                angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle1, innerRadius, outerRadius, light, overlay);
             });
         }
 
@@ -144,14 +144,14 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         return new Vector3f((float) (pos.x() + cameraPos.x), (float) (pos.y() + cameraPos.y), (float) (pos.z() + cameraPos.z));
     }
 
-    private void angledFluidVertex(VertexConsumer vc, MatrixStack matrixStack, Sprite sprite, int fluidColor, float angle, float radius, float uvSize, int light, int overlay) {
+    private void angledFluidVertex(VertexConsumer vc, MatrixStack.Entry entry, Sprite sprite, int fluidColor, float angle, float radius, float uvSize, int light, int overlay) {
         float x = radius * MathHelper.cos(angle);
         float z = radius * MathHelper.sin(angle);
 
         float u = MathHelper.map(x, -uvSize, uvSize, sprite.getMinU(), sprite.getMaxU());
         float v = MathHelper.map(z, -uvSize, uvSize, sprite.getMinV(), sprite.getMaxV());
 
-        vc.vertex(matrixStack.peek(), x, 0, z)
+        vc.vertex(entry, x, 0, z)
                 .color(fluidColor)
                 .texture(u, v)
                 .overlay(overlay)

@@ -28,7 +28,7 @@ public class DrillHeadRegistry {
         return DRILL_HEADS.get(drillHeadable);
     }
 
-    public static Stream<Pair<DrillHeadable, Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<DrillRenderState>>>> getModelResolvers() {
+    public static Stream<Pair<DrillHeadable, Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>>>> getModelResolvers() {
         return DRILL_HEADS.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue().modelResolver));
     }
 
@@ -40,18 +40,18 @@ public class DrillHeadRegistry {
     }
 
     public record DrillHeadClientData(
-            Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<DrillRenderState>> modelResolver,
+            Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>> modelResolver,
             boolean renderDynamicItem,
             RenderFunction onRender,
             Identifier textureLocation) {
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<DrillRenderState>> modelResolver,
+        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>> modelResolver,
                                                  boolean renderDynamicItem,
                                                  RenderFunction onRender,
                                                  Identifier textureLocation) {
             return new DrillHeadClientData(modelResolver, renderDynamicItem, onRender, textureLocation);
         }
 
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<DrillRenderState>> modelResolver,
+        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>> modelResolver,
                                                  RenderFunction onRender,
                                                  Identifier textureLocation) {
             return create(modelResolver, true, onRender, textureLocation);
@@ -59,7 +59,7 @@ public class DrillHeadRegistry {
 
         @FunctionalInterface
         public interface RenderFunction {
-            void render(DrillRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Model<DrillRenderState> model, RenderLayer renderLayer, int light, int overlay);
+            void render(DrillRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Model<?> model, RenderLayer renderLayer, int light, int overlay);
         }
     }
 }

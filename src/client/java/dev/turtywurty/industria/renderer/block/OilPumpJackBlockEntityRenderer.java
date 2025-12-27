@@ -9,7 +9,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -41,17 +40,6 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
 
     @Override
     public void onRender(OilPumpJackRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
-        matrices.push();
-        matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (state.blockState.get(Properties.HORIZONTAL_FACING)) {
-            case EAST -> 90;
-            case SOUTH -> 180;
-            case WEST -> 270;
-            default -> 0;
-        }));
-
         float clientRotation = state.clientRotation;
         if (state.isRunning) {
             clientRotation = clientRotation + 0.1f * state.tickProgress;
@@ -62,12 +50,6 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
 
             state.clientRotation = clientRotation;
         }
-
-        // Save previous values
-        float previousWheelPitch = parts.wheel().pitch;
-        float previousCounterWeightsPitch = parts.counterWeights().pitch;
-        float previousPitmanArmPitch = parts.pitmanArm().pitch;
-        float previousArmPitch = parts.arm().pitch;
 
         Vector3f attachmentAPosition = getAttachmentPosition(parts.attachmentA());
         Vector3f attachmentBPosition = getAttachmentPosition(parts.attachmentB());
@@ -80,38 +62,31 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
                 .add(1, 1, 1)
                 .div(16f);
 
-        Vector3f attachmentEPosition = getAttachmentPosition(parts.attachmentE());
-
-        parts.wheel().pitch = -clientRotation;
-        parts.counterWeights().pitch = parts.wheel().pitch;
-        parts.pitmanArm().pitch = -parts.counterWeights().pitch - (state.reverseCounterWeights ?
+        state.wheelPitch = -clientRotation;
+        state.counterWeightsPitch = state.wheelPitch;
+        state.pitmanArmPitch = -state.counterWeightsPitch - (state.reverseCounterWeights ?
                 map(clientRotation, 0, (float) Math.PI * 2f, 0, (float) -Math.PI / 8f) :
                 map(clientRotation, 0, (float) Math.PI * 2f, (float) -Math.PI / 8f, 0));
 
         // Calculate arm pitch
-        calculateArmPitch(attachmentAPosition, attachmentBPosition);
+        state.armPitch = calculateArmPitch(state.counterWeightsPitch, state.pitmanArmPitch, attachmentAPosition, attachmentBPosition);
 
         // Draw bridle
-        drawBridle(matrices, queue, attachmentBPosition, attachmentCPosition, attachmentDPosition);
+        drawBridle(state, matrices, queue, attachmentBPosition, attachmentCPosition, attachmentDPosition);
 
-        RenderLayer renderLayer = this.model.getLayer(OilPumpJackModel.TEXTURE_LOCATION);
-        queue.submitModel(this.model, state, matrices, renderLayer, light, overlay, 0, state.crumblingOverlay);
-        matrices.pop();
-
-        // Reset values
-        parts.wheel().pitch = previousWheelPitch;
-        parts.counterWeights().pitch = previousCounterWeightsPitch;
-        parts.pitmanArm().pitch = previousPitmanArmPitch;
-        parts.arm().pitch = previousArmPitch;
+        queue.submitModel(this.model,
+                new OilPumpJackModel.OilPumpJackModelRenderState(state.wheelPitch, state.counterWeightsPitch, state.pitmanArmPitch, state.armPitch),
+                matrices, this.model.getLayer(OilPumpJackModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.crumblingOverlay);
     }
 
-    private void drawBridle(MatrixStack matrices, OrderedRenderCommandQueue queue, Vector3f attachmentBPosition, Vector3f attachmentCPosition, Vector3f attachmentDPosition) {
+    private void drawBridle(OilPumpJackRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Vector3f attachmentBPosition, Vector3f attachmentCPosition, Vector3f attachmentDPosition) {
         matrices.push();
         matrices.translate(0, 1.5f, 0);
 
         matrices.push();
         matrices.translate((attachmentBPosition.x - attachmentCPosition.x) / 16f, (attachmentBPosition.y - attachmentCPosition.y) / 16f, (attachmentBPosition.z - attachmentCPosition.z) / 16f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation(parts.arm().pitch));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotation(state.armPitch));
         matrices.translate((attachmentCPosition.x - attachmentBPosition.x) / 16f, (attachmentCPosition.y - attachmentBPosition.y) / 16f, (attachmentCPosition.z - attachmentBPosition.z) / 16f);
         queue.submitCustom(matrices, RenderLayer.getLines(), (matricesEntry, vertexConsumer) ->
                 vertexConsumer.vertex(matrices.peek(), attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
@@ -128,12 +103,12 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
         matrices.pop();
     }
 
-    private void calculateArmPitch(Vector3f attachmentAPosition, Vector3f attachmentBPosition) {
-        float a = (float) (11 * Math.sin(parts.counterWeights().pitch));
-        float b = (float) (11 * Math.cos(parts.counterWeights().pitch));
+    private float calculateArmPitch(float counterWeightsPitch, float pitmanArmPitch, Vector3f attachmentAPosition, Vector3f attachmentBPosition) {
+        float a = (float) (11 * Math.sin(counterWeightsPitch));
+        float b = (float) (11 * Math.cos(counterWeightsPitch));
         attachmentAPosition = attachmentAPosition.add(0, a, -b);
 
-        double pitch = Math.toDegrees(parts.counterWeights().pitch + parts.pitmanArm().pitch);
+        double pitch = Math.toDegrees(counterWeightsPitch + pitmanArmPitch);
         double angle = Math.toRadians(Math.abs(90 - pitch));
         float c = (float) (44 * Math.cos(angle));
         float d = (float) (44 * Math.sin(angle));
@@ -143,7 +118,7 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
 
         Vector3f difference = attachmentAPosition.sub(attachmentBPosition);
         float angleX = (float) Math.atan2(difference.y, Math.sqrt(difference.x * difference.x + difference.z * difference.z));
-        parts.arm().pitch = -angleX;
+        return -angleX;
     }
 
     private static Vector3f getAttachmentPosition(ModelPart part) {

@@ -256,8 +256,16 @@ public class RotaryKilnModel extends Model<RotaryKilnModel.RotaryKilnModelRender
                 if (i != 1) {
                     segment.getChild("rotate_seg" + i).roll = state.rotationAngle();
                 }
+
+                segment.hidden = false;
+                for (ModelPart part : segment.traverse()) {
+                    part.hidden = false;
+                }
             } else {
                 segment.hidden = true;
+                for (ModelPart part : segment.traverse()) {
+                    part.hidden = true;
+                }
             }
         }
     }

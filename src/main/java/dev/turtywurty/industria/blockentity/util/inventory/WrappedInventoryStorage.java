@@ -1,6 +1,8 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
+import dev.turtywurty.industria.util.ViewSerializable;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
@@ -9,9 +11,6 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.ItemScatterer;
@@ -129,15 +128,29 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     @Override
     public void writeData(WriteView view) {
-        for (T inventory : this.inventories) {
-            Inventories.writeData(view, inventory.getHeldStacks());
+        for (int i = 0; i < this.inventories.size(); i++) {
+            T inventory = this.inventories.get(i);
+            ViewUtils.putChild(view, "Inventory_" + i, new SimpleInventorySerializer<>(inventory));
         }
     }
 
     @Override
     public void readData(ReadView view) {
-        for (SimpleInventory inventory : this.inventories) {
-            Inventories.readData(view, inventory.getHeldStacks());
+        for (int i = 0; i < this.inventories.size(); i++) {
+            T inventory = this.inventories.get(i);
+            ViewUtils.readChild(view, "Inventory_" + i, new SimpleInventorySerializer<>(inventory));
+        }
+    }
+
+    public record SimpleInventorySerializer<T extends SimpleInventory>(T inventory) implements ViewSerializable {
+        @Override
+        public void writeData(WriteView view) {
+            Inventories.writeData(view, this.inventory.getHeldStacks());
+        }
+
+        @Override
+        public void readData(ReadView view) {
+            Inventories.readData(view, this.inventory.getHeldStacks());
         }
     }
 }

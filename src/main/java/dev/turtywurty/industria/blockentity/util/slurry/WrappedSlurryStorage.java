@@ -3,6 +3,8 @@ package dev.turtywurty.industria.blockentity.util.slurry;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SingleSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
+import dev.turtywurty.industria.util.ViewSerializable;
+import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
@@ -32,24 +34,42 @@ public class WrappedSlurryStorage<T extends Storage<SlurryVariant>> extends Wrap
 
     @Override
     public void writeData(WriteView view) {
-        for (T tank : this.storages) {
-            if(tank instanceof SingleSlurryStorage singleSlurryStorage) {
-                view.putLong("Amount", singleSlurryStorage.getAmount());
-                view.put("Slurry", SlurryVariant.CODEC, singleSlurryStorage.getResource());
-            }
+        for (int i = 0; i < this.storages.size(); i++) {
+            T storage = this.storages.get(i);
+            if (storage == null)
+                continue;
+
+            ViewUtils.putChild(view, "SlurryTank_" + i, new SlurryStorageSerializer<>(storage));
         }
     }
 
     @Override
     public void readData(ReadView view) {
-        for (T storage : this.storages) {
+        for (int i = 0; i < this.storages.size(); i++) {
+            T storage = this.storages.get(i);
             if (storage == null)
                 continue;
 
+            ViewUtils.readChild(view, "SlurryTank_" + i, new SlurryStorageSerializer<>(storage));
+        }
+    }
+
+    public record SlurryStorageSerializer<T extends Storage<SlurryVariant>>(T storage) implements ViewSerializable {
+        @Override
+        public void writeData(WriteView view) {
+            if (storage instanceof SingleSlurryStorage singleSlurryStorage) {
+                view.putLong("Amount", singleSlurryStorage.getAmount());
+                view.put("Slurry", SlurryVariant.CODEC, singleSlurryStorage.getResource());
+            } else {
+                throw new UnsupportedOperationException("Cannot write slurry storage of type: " + storage.getClass().getName());
+            }
+        }
+
+        @Override
+        public void readData(ReadView view) {
             if (storage instanceof SingleSlurryStorage singleSlurryStorage) {
                 singleSlurryStorage.amount = view.getLong("Amount", 0L);
-                singleSlurryStorage.variant = view.read("Slurry", SlurryVariant.CODEC)
-                        .orElse(SlurryVariant.blank());
+                singleSlurryStorage.variant = view.read("Slurry", SlurryVariant.CODEC).orElse(SlurryVariant.blank());
             } else {
                 throw new UnsupportedOperationException("Cannot read slurry storage of type: " + storage.getClass().getName());
             }

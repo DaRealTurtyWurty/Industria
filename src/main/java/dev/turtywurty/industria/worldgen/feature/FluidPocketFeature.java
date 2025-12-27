@@ -13,7 +13,10 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class FluidPocketFeature extends Feature<FluidPocketConfig> {
     public FluidPocketFeature() {

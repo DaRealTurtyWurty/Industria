@@ -51,19 +51,20 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         World world = MinecraftClient.getInstance().world;
 
         float shakeOffset = 0.0f;
-        float previousOriginZ = this.model.getModelParts().table().originZ;
         if (state.progress > 0 && state.progress < state.maxProgress) {
             float time = state.tickProgress + world.getTime();
             float frequency = state.recipeFrequency * (float) Math.PI;
             float shakeAmount = 2f;
 
             shakeOffset = (float) Math.sin(time * frequency) * shakeAmount;
-            this.model.getModelParts().table().originZ += shakeOffset;
         }
 
-        RenderLayer renderLayer = this.model.getLayer(ShakingTableModel.TEXTURE_LOCATION);
-        queue.submitModel(this.model, state, matrices, renderLayer, light, overlay, 0, state.crumblingOverlay);
-        this.model.getModelParts().table().originZ = previousOriginZ;
+        state.shakeOffset = shakeOffset;
+
+        queue.submitModel(this.model,
+                new ShakingTableModel.ShakingTableModelRenderState(state.shakeOffset),
+                matrices, this.model.getLayer(ShakingTableModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.crumblingOverlay);
 
         renderGutterFluids(state, matrices, queue, light, overlay, shakeOffset);
         Vec2f fluidEnd = renderSurfaceFluid(state, matrices, queue, light, overlay, shakeOffset);

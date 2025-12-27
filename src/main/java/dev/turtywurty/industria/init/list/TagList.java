@@ -1,17 +1,14 @@
 package dev.turtywurty.industria.init.list;
 
 import dev.turtywurty.industria.Industria;
-import net.fabricmc.fabric.impl.tag.convention.v2.TagRegistration;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 
-@SuppressWarnings("UnstableApiUsage")
 public class TagList {
     public static class Items {
-        public static final TagKey<Item> STEEL_INGOTS = TagRegistration.ITEM_TAG.registerC("ingots/steel");
         public static final TagKey<Item> ELECTROLYSIS_RODS = of("electrolysis_rods");
 
         public static TagKey<Item> of(String id) {

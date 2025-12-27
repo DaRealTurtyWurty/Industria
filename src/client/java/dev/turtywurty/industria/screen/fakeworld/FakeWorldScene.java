@@ -15,9 +15,9 @@ import net.minecraft.client.gui.render.state.TexturedQuadGuiElementRenderState;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
 import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
 import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.entity.state.EntityRenderState;
@@ -255,7 +255,10 @@ public class FakeWorldScene implements AutoCloseable {
                     matrices,
                     this.commandQueue,
                     LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                    OverlayTexture.DEFAULT_UV
+                    OverlayTexture.DEFAULT_UV,
+                    this.camera,
+                    cameraRenderState,
+                    tickDelta
             );
             matrices.pop();
         }
@@ -300,7 +303,13 @@ public class FakeWorldScene implements AutoCloseable {
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
 
             var crumblingOverlay = new ModelCommandRenderer.CrumblingOverlayCommand(0, matrices.peek());
-            BlockEntityRenderState state = blockEntityRenderManager.getRenderState(blockEntity, tickDelta, crumblingOverlay);
+            BlockEntityRenderState state = getBlockEntityRenderState(
+                    blockEntityRenderManager,
+                    blockEntity,
+                    tickDelta,
+                    crumblingOverlay,
+                    cameraPos
+            );
             if (state != null) {
                 blockEntityRenderManager.render(state, matrices, this.commandQueue, cameraRenderState);
             }
@@ -453,6 +462,27 @@ public class FakeWorldScene implements AutoCloseable {
         }
 
         this.framebuffer = new SimpleFramebuffer("FakeWorldScene", width, height, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static BlockEntityRenderState getBlockEntityRenderState(
+            BlockEntityRenderManager blockEntityRenderManager,
+            BlockEntity blockEntity,
+            float tickDelta,
+            ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay,
+            Vec3d cameraPos
+    ) {
+        BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer =
+                (BlockEntityRenderer<BlockEntity, BlockEntityRenderState>) blockEntityRenderManager.get(blockEntity);
+        if (renderer == null)
+            return null;
+
+        if (!blockEntity.hasWorld() || !blockEntity.getType().supports(blockEntity.getCachedState()))
+            return null;
+
+        BlockEntityRenderState state = renderer.createRenderState();
+        renderer.updateRenderState(blockEntity, state, tickDelta, cameraPos, crumblingOverlay);
+        return state;
     }
 
     public void setAnchor(BlockPos blockPos, int screenX, int screenY) {
