@@ -10,4 +10,12 @@ public interface TickableBlockEntity {
     static <T extends BlockEntity> BlockEntityTicker<T> createTicker(World world) {
         return !world.isClient() ? (world0, blockPos, blockState, blockEntity) -> ((TickableBlockEntity) blockEntity).tick() : null;
     }
+
+    static <T extends BlockEntity> BlockEntityTicker<T> createTicker(World world, boolean allowClient) {
+        if (allowClient) {
+            return (world0, blockPos, blockState, blockEntity) -> ((TickableBlockEntity) blockEntity).tick();
+        } else {
+            return createTicker(world);
+        }
+    }
 }

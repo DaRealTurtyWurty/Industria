@@ -72,6 +72,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
@@ -99,6 +100,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     public float bowlRotation = 0.0f;
     private int progress, maxProgress;
     private RegistryKey<Recipe<?>> currentRecipeId;
+    private boolean isProcessing = false;
     private int recipeRPM;
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
@@ -166,7 +168,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.world == null)
             return;
 
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
@@ -216,21 +218,22 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
                 update();
             }
 
+            this.isProcessing = false;
             return;
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-//            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
-//            if (Objects.equals(outputSlurryTank.variant, this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.amount >= 0) {
-//                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
-//                outputSlurryTank.variant = this.outputSlurryStack.variant();
-//                outputSlurryTank.amount += inserted;
-//                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
-//                update();
-//            }
-//
-//            return;
-            this.outputSlurryStack = this.outputSlurryStack.withAmount(0); // TODO: Remove after slurry pipes are fixed
+            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
+            if (Objects.equals(outputSlurryTank.variant, this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.amount >= 0) {
+                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
+                outputSlurryTank.variant = this.outputSlurryStack.variant();
+                outputSlurryTank.amount += inserted;
+                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
+                update();
+            }
+
+            this.isProcessing = false;
+            return;
         }
 
         CentrifugalConcentratorRecipeInput recipeInput = createRecipeInput();
@@ -247,6 +250,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
                 update();
             }
 
+            this.isProcessing = false;
             return;
         }
 
@@ -256,6 +260,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
             this.recipeRPM = 0;
             this.maxProgress = 0;
             this.progress = 0;
+            this.isProcessing = false;
             update();
             return;
         }
@@ -299,10 +304,19 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         } else {
             if (hasEnergy(recipe)) {
                 this.progress++;
+                this.isProcessing = true;
                 extractEnergy(recipe);
                 update();
             }
         }
+    }
+
+    @Override
+    public void onClientTick() {
+        if (this.world == null || !this.isProcessing)
+            return;
+
+        this.bowlRotation += (this.recipeRPM / 60f / 20f);
     }
 
     private Optional<RecipeEntry<CentrifugalConcentratorRecipe>> getCurrentRecipe(CentrifugalConcentratorRecipeInput recipeInput) {
@@ -331,7 +345,6 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     @Override
     protected void writeData(WriteView view) {
-
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
@@ -340,6 +353,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         }
 
         view.putInt("RecipeRPM", this.recipeRPM);
+        view.putBoolean("IsProcessing", this.isProcessing);
 
         ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
@@ -363,6 +377,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         this.maxProgress = view.getInt("MaxProgress", 0);
         this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC).orElse(null);
         this.recipeRPM = view.getInt("RecipeRPM", 0);
+        this.isProcessing = view.getBoolean("IsProcessing", false);
         ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);

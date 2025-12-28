@@ -17,7 +17,7 @@ public class CentrifugalConcentratorBlock extends IndustriaBlock {
                 .hasBlockEntityRenderer()
                 .useRotatedShapes(VOXEL_SHAPE)
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR)
-                        .shouldTick()
+                        .shouldTickAllowClient(true)
                         .multiblockProperties(MultiblockTypeInit.CENTRIFUGAL_CONCENTRATOR)
                         .build()));
     }

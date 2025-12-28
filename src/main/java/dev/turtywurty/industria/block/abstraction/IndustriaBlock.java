@@ -448,6 +448,12 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
                 return this;
             }
 
+            public BlockBlockEntityProperties<T> shouldTickAllowClient(boolean allowClient) {
+                this.shouldTick = true;
+                this.blockEntityTicker = (world, state, type) -> TickableBlockEntity.createTicker(world, allowClient);
+                return this;
+            }
+
             public BlockBlockEntityProperties<T> blockEntityFactory(BlockEntityFactory<T> blockEntityFactory) {
                 this.blockEntityFactory = blockEntityFactory;
                 return this;

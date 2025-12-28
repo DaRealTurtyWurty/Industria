@@ -46,17 +46,17 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         state.maxProgress = blockEntity.getMaxProgress();
         state.inputFluidTank = blockEntity.getInputFluidTank();
         state.updateItemRenderState(0, this, blockEntity, blockEntity.getInputInventory().getStackInSlot(0));
-    }
 
-    @Override
-    protected void onRender(CentrifugalConcentratorRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
         float progress = state.progress / (float) state.maxProgress;
         if (progress == 0 || Double.isNaN(progress)) {
             state.bowlRotation = 0f;
         } else {
-            state.bowlRotation = (state.bowlRotation + (state.recipeRPM / 60f / 20f) * state.tickProgress) % 360f;
+            state.bowlRotation = (blockEntity.bowlRotation * state.tickProgress) % 360f;
         }
+    }
 
+    @Override
+    protected void onRender(CentrifugalConcentratorRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
         queue.submitModel(this.model,
                 state.bowlRotation,
                 matrices, this.model.getLayer(CentrifugalConcentratorModel.TEXTURE_LOCATION),
