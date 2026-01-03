@@ -6,11 +6,9 @@ import dev.turtywurty.industria.network.BatteryChargeModePayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ToggleButtonWidget;
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -30,16 +28,11 @@ public class BatteryScreen extends HandledScreen<BatteryScreenHandler> {
 
         BatteryBlockEntity blockEntity = this.handler.getBlockEntity();
 
-        var toggle = addDrawableChild(new ToggleButtonWidget(this.x + 144, this.y + 10, 20, 20,
-                blockEntity.getChargeMode() == BatteryBlockEntity.ChargeMode.CHARGE) {
-            @Override
-            public void onClick(Click click, boolean doubled) {
-                super.onClick(click, doubled);
-                ClientPlayNetworking.send(new BatteryChargeModePayload(BatteryScreen.this.handler.getChargeMode().next()));
-            }
-        });
-
-        toggle.setTooltip(Tooltip.of(BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT));
+        addDrawableChild(CyclingButtonWidget.onOffBuilder(blockEntity.getChargeMode() == BatteryBlockEntity.ChargeMode.CHARGE)
+                .omitKeyText()
+                .build(this.x + 144, this.y + 10, 20, 20, BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT,
+                        (button, value) ->
+                                ClientPlayNetworking.send(new BatteryChargeModePayload(BatteryScreen.this.handler.getChargeMode().next()))));
     }
 
     @Override

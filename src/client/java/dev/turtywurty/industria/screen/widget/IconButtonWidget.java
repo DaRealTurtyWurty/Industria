@@ -3,7 +3,6 @@ package dev.turtywurty.industria.screen.widget;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 
@@ -15,7 +14,7 @@ public class IconButtonWidget extends ButtonWidget {
     public IconButtonWidget(int x, int y, int width, int height, PressAction onPress, Identifier iconTexture,
                             int u, int vNormal, int vHover, int vDisabled, int iconW, int iconH, int texW, int texH,
                             boolean drawBackground) {
-        super(x, y, width, height, Text.empty(), onPress, DEFAULT_NARRATION_SUPPLIER);
+        super(x, y, width, height, net.minecraft.text.Text.empty(), onPress, DEFAULT_NARRATION_SUPPLIER);
         this.iconTexture = iconTexture;
         this.u = u;
         this.vNormal = vNormal;
@@ -29,7 +28,7 @@ public class IconButtonWidget extends ButtonWidget {
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         if (this.drawBackground) {
             ScreenUtils.drawGuiTexture(
                     context,

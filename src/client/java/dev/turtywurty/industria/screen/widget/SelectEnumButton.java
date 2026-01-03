@@ -14,7 +14,6 @@ import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.input.AbstractInput;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
@@ -42,7 +41,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     @SafeVarargs
     public SelectEnumButton(T startValue, Consumer<T> onNewValue, int columns, int x, int y, int width, int height, Map<T, Identifier> textureMap, T... disabledValues) {
-        super(x, y, width, height, Text.empty(), null, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
+        super(x, y, width, height, net.minecraft.text.Text.empty(), null, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.value = startValue;
         this.onNewValue = onNewValue;
         this.columns = columns;
@@ -108,7 +107,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
         int color = ColorHelper.getWhite(this.alpha);
         GlStateManager._enableBlend(); // TODO: Come back and check if this is okay?
         GlStateManager._enableDepthTest();

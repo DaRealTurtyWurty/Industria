@@ -2,7 +2,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -13,7 +13,7 @@ public class WindTurbineModel extends Model<WindTurbineModel.WindTurbineModelRen
     private final WindTurbineParts parts;
 
     public WindTurbineModel(ModelPart root) {
-        super(root, RenderLayer::getEntitySolid);
+        super(root, RenderLayers::entitySolid);
         ModelPart core = root.getChild("core");
         ModelPart propellers = root.getChild("propellers");
         ModelPart propeller0 = propellers.getChild("propeller0");

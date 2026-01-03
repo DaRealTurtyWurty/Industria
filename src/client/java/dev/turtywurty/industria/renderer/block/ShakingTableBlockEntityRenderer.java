@@ -8,15 +8,18 @@ import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import dev.turtywurty.industria.util.IndeterminateBoolean;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.render.DrawStyle;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.debug.gizmo.GizmoDrawing;
 import org.jetbrains.annotations.Nullable;
 
 public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<ShakingTableBlockEntity, ShakingTableRenderState> {
@@ -74,9 +77,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     @Override
     protected void postRender(ShakingTableRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
         if (DebugRenderingRegistry.debugRendering && state.shakeBox != null) {
-            Box shakeBox = state.shakeBox.offset(-state.pos.getX(), -state.pos.getY(), -state.pos.getZ());
-            queue.submitCustom(matrices, RenderLayer.getLines(), (matricesEntry, vertexConsumer) ->
-                    VertexRendering.drawBox(matricesEntry, vertexConsumer, shakeBox, 1.0f, 1.0f, 1.0f, 1.0f));
+            GizmoDrawing.box(state.shakeBox, DrawStyle.stroked(0xFFFF0000));
         }
     }
 

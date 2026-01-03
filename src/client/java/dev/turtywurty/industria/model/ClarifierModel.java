@@ -2,7 +2,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -20,7 +20,7 @@ public class ClarifierModel extends Model<Void> {
     private final ModelPart bone6;
 
     public ClarifierModel(ModelPart root) {
-        super(root, RenderLayer::getEntityCutout);
+        super(root, RenderLayers::entityCutout);
         this.main = root.getChild("main");
         this.fluid_ramp = main.getChild("fluid_ramp");
         this.bone = main.getChild("bone");

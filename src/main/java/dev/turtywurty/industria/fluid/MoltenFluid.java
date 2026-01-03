@@ -14,9 +14,9 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+import net.minecraft.world.rule.GameRules;
 
 import java.util.function.Supplier;
 
@@ -39,12 +39,12 @@ public abstract class MoltenFluid extends IndustriaFluid {
     }
 
     public void onRandomTick(ServerWorld world, BlockPos pos, FluidState state, Random random) {
-        if (world.getGameRules().getBoolean(GameRules.DO_FIRE_TICK)) {
+        if (world.getGameRules().getValue(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER) != -1) {
             int fireChance = random.nextInt(2);
             if (fireChance > 0) {
                 BlockPos blockPos = pos;
 
-                for(int j = 0; j < fireChance; ++j) {
+                for (int j = 0; j < fireChance; ++j) {
                     blockPos = blockPos.add(random.nextInt(2) - 1, 1, random.nextInt(2) - 1);
                     if (!world.isPosLoaded(blockPos)) {
                         return;
@@ -61,7 +61,7 @@ public abstract class MoltenFluid extends IndustriaFluid {
                     }
                 }
             } else {
-                for(int k = 0; k < 2; ++k) {
+                for (int k = 0; k < 2; ++k) {
                     BlockPos blockPos2 = pos.add(random.nextInt(2) - 1, 0, random.nextInt(2) - 1);
                     if (!world.isPosLoaded(blockPos2)) {
                         return;

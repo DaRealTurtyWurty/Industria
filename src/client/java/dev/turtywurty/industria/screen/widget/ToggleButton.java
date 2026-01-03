@@ -6,7 +6,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.input.AbstractInput;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 
 import java.util.function.BiConsumer;
@@ -30,7 +29,7 @@ public class ToggleButton extends ButtonWidget {
     private boolean toggled;
 
     protected ToggleButton(int x, int y, BiConsumer<ToggleButton, Boolean> onPressed, NarrationSupplier narrationSupplier, boolean defaultToggle, ButtonTextures textures) {
-        super(x, y, 32, 16, Text.empty(), $ -> {
+        super(x, y, 32, 16, net.minecraft.text.Text.empty(), $ -> {
         }, narrationSupplier);
         this.toggled = defaultToggle;
         this.textures = textures;
@@ -48,7 +47,7 @@ public class ToggleButton extends ButtonWidget {
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         ScreenUtils.drawTexture(
                 context,
                 this.textures.get(this.toggled, isHovered()),
@@ -78,7 +77,7 @@ public class ToggleButton extends ButtonWidget {
         private final int x, y;
         private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {
         };
-        private NarrationSupplier narrationSupplier = textSupplier -> Text.empty();
+        private NarrationSupplier narrationSupplier = textSupplier -> net.minecraft.text.Text.empty();
         private boolean defaultToggled;
         private ButtonTextures textures = ToggleButton.DEFAULT_TEXTURES;
 

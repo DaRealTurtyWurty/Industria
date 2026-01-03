@@ -5,7 +5,7 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Math;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,19 +29,14 @@ public interface WireframeExtractor {
     }
 
     private static void extractVerticesFromBakedQuad(Set<Line> lines, BakedQuad quad) {
-        int[] vertices = quad.vertexData();
         for (int vIndex = 0; vIndex < 4; vIndex++) {
             int offset = calculateOffset(vIndex);
-            float x1 = Float.intBitsToFloat(vertices[offset]);
-            float y1 = Float.intBitsToFloat(vertices[offset + 1]);
-            float z1 = Float.intBitsToFloat(vertices[offset + 2]);
+            Vector3fc startVertices = quad.getPosition(offset);
 
             offset = calculateOffset((vIndex + 1) % 4);
-            float x2 = Float.intBitsToFloat(vertices[offset]);
-            float y2 = Float.intBitsToFloat(vertices[offset + 1]);
-            float z2 = Float.intBitsToFloat(vertices[offset + 2]);
+            Vector3fc endVertices = quad.getPosition(offset);
 
-            lines.add(Line.from(x1, y1, z1, x2, y2, z2));
+            lines.add(Line.from(startVertices, endVertices));
         }
     }
 
@@ -50,9 +45,9 @@ public interface WireframeExtractor {
     }
 
     record Line(float x1, float y1, float z1,
-                       float x2, float y2, float z2,
-                       float normalX, float normalY, float normalZ,
-                       int hash) {
+                float x2, float y2, float z2,
+                float normalX, float normalY, float normalZ,
+                int hash) {
         /**
          * Creates a line from two points.
          * The normal of the line is calculated by normalizing the vector from the first point to the second point.
@@ -77,8 +72,8 @@ public interface WireframeExtractor {
             return new Line(x1, y1, z1, x2, y2, z2, nX, nY, nZ, hash(x1, y1, z1, x2, y2, z2));
         }
 
-        public static Line from(Vector3f start, Vector3f end) {
-            return from(start.x, start.y, start.z, end.x, end.y, end.z);
+        public static Line from(Vector3fc start, Vector3fc end) {
+            return from(start.x(), start.y(), start.z(), end.x(), end.y(), end.z());
         }
 
         private static int hash(float x1, float y1, float z1, float x2, float y2, float z2) {

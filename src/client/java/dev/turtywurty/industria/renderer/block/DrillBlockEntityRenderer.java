@@ -12,15 +12,18 @@ import dev.turtywurty.industria.util.DrillRenderData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.DrawStyle;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.debug.gizmo.GizmoDrawing;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -115,7 +118,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
             return;
 
         { // Render drill cable
-            RenderLayer renderLayer = RenderLayer.getLines();
+            RenderLayer renderLayer = RenderLayers.lines();
             matrices.push();
 
             queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
@@ -172,8 +175,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
             double maxY = state.drillHeadAABB.maxY - state.pos.getY();
             double maxZ = state.drillHeadAABB.maxZ - state.pos.getZ();
 
-            queue.submitCustom(matrices, RenderLayer.getLines(), (entry, vertexConsumer) ->
-                    VertexRendering.drawBox(entry, vertexConsumer, minX, minY, minZ, maxX, maxY, maxZ, 1, 0, 0, 1));
+            GizmoDrawing.box(new Box(minX, minY, minZ, maxX, maxY, maxZ), DrawStyle.stroked(0xFF0000FF));
         }
     }
 

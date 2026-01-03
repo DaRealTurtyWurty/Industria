@@ -2,7 +2,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -14,7 +14,7 @@ public class DrillFrameModel extends Model<DrillFrameModel.DrillFrameModelRender
     private final ModelPart cableWheelRod;
 
     public DrillFrameModel(ModelPart root) {
-        super(root, RenderLayer::getEntityCutout);
+        super(root, RenderLayers::entityCutout);
         ModelPart main = root.getChild("main");
         this.cableWheel = main.getChild("cableWheel");
         this.cableWheelRod = main.getChild("cableWheelRod");

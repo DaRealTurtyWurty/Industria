@@ -370,7 +370,7 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
 
             for (LivingEntity livingEntity : this.world.getEntitiesByClass(LivingEntity.class, this.shakeBox, entity -> true)) {
                 livingEntity.addVelocity(shakeDirection);
-                livingEntity.velocityModified = true;
+                livingEntity.velocityDirty = true;
             }
         }
     }

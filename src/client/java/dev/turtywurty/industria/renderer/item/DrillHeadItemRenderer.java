@@ -17,11 +17,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 
 public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderState> {
     public static final DrillHeadItemRenderer INSTANCE = new DrillHeadItemRenderer();
@@ -52,8 +52,8 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
     }
 
     @Override
-    public void collectVertices(Set<Vector3f> vertices) {
-        MatrixStack matrices = new MatrixStack();
+    public void collectVertices(Consumer<Vector3fc> vertices) {
+        var matrices = new MatrixStack();
         this.drillHeadModels.values().forEach(model -> model.getParts().forEach(modelPart -> modelPart.collectVertices(matrices, vertices)));
     }
 

@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.texture.Sprite;
@@ -57,7 +58,7 @@ public class InWorldFluidRenderingComponent {
         if (stillSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(stillSprite.getAtlasId());
 
         float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
 
@@ -129,7 +130,7 @@ public class InWorldFluidRenderingComponent {
         if (stillSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(stillSprite.getAtlasId());
         renderLayer = wrapRenderLayer.apply(renderLayer);
 
         matrices.push();
@@ -228,7 +229,7 @@ public class InWorldFluidRenderingComponent {
         if (stillSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(stillSprite.getAtlasId());
+        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(stillSprite.getAtlasId());
 
         matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));

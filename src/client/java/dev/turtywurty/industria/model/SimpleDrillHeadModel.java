@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.state.DrillRenderState;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -14,7 +15,7 @@ public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModel.SimpleDrill
     private final DrillHeadParts parts;
 
     public SimpleDrillHeadModel(ModelPart root) {
-        super(root, RenderLayer::getEntitySolid);
+        super(root, RenderLayers::entityCutout);
 
         ModelPart main = root.getChild("main");
         ModelPart clockwise = main.getChild("clockwise");

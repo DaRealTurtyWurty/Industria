@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.command.ModelCommandRenderer;
@@ -75,7 +76,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         if (fluidSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayer.getItemEntityTranslucentCull(fluidSprite.getAtlasId());
+        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(fluidSprite.getAtlasId());
         World world = MinecraftClient.getInstance().world;
 
         int sides = 16;
@@ -139,7 +140,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
     private Vector3f localToWorldPosition(MatrixStack matrices) {
         Vector3f pos = matrices.peek().getPositionMatrix().transformPosition(0, 0, 0, new Vector3f());
-        Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+        Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getCameraPos();
 
         return new Vector3f((float) (pos.x() + cameraPos.x), (float) (pos.y() + cameraPos.y), (float) (pos.z() + cameraPos.z));
     }

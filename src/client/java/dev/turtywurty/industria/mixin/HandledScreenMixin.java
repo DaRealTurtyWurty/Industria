@@ -18,8 +18,8 @@ public abstract class HandledScreenMixin extends Screen {
     }
 
     @Inject(method = "drawSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;disablesDynamicDisplay()Z"))
-    private void industria$drawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
-        if(DebugRenderingRegistry.debugRendering) {
+    private void industria$drawSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        if (DebugRenderingRegistry.debugRendering) {
             String text = String.valueOf(slot.id);
             context.drawText(this.textRenderer,
                     text,

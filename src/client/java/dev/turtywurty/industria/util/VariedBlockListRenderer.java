@@ -90,7 +90,7 @@ public class VariedBlockListRenderer {
     private static CameraRenderState buildCameraRenderState(Camera camera, float tickDelta) {
         CameraRenderState cameraRenderState = new CameraRenderState();
         cameraRenderState.initialized = camera.isReady();
-        cameraRenderState.pos = camera.getPos();
+        cameraRenderState.pos = camera.getCameraPos();
         cameraRenderState.blockPos = camera.getBlockPos();
         Vec3d entityPos = cameraRenderState.pos;
         if (camera.getFocusedEntity() != null) {

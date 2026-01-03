@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.entity.model.LoadedEntityModels;
@@ -15,9 +16,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import java.util.Set;
+import java.util.function.Consumer;
 
 public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
         implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
@@ -30,14 +31,14 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         if (stack.isEmpty() || this.modelPart == null)
             return;
 
-        RenderLayer renderLayer = RenderLayer.getEntityTranslucent(this.texture);
+        RenderLayer renderLayer = RenderLayers.entityTranslucent(this.texture);
         queue.submitCustom(matrices, renderLayer, (matricesEntry, vertexConsumer) ->
                 this.modelPart.render(matrices, vertexConsumer, light, overlay));
     }
 
     @Override
-    public void collectVertices(Set<Vector3f> vertices) {
-        MatrixStack matrices = new MatrixStack();
+    public void collectVertices(Consumer<Vector3fc> vertices) {
+        var matrices = new MatrixStack();
         this.modelPart.collectVertices(matrices, vertices);
     }
 

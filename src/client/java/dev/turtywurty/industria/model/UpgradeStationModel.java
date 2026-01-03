@@ -6,7 +6,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -15,7 +15,7 @@ public class UpgradeStationModel extends Model<Void> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/upgrade_station.png");
 
     public UpgradeStationModel(ModelPart root) {
-        super(root, RenderLayer::getEntitySolid);
+        super(root, RenderLayers::entityCutout);
     }
 
     public static TexturedModelData getTexturedModelData() {

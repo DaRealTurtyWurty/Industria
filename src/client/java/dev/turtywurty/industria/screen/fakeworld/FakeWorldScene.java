@@ -2,6 +2,7 @@ package dev.turtywurty.industria.screen.fakeworld;
 
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.util.VariedBlockListRenderer;
 import net.minecraft.block.*;
@@ -31,6 +32,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.debug.gizmo.GizmoDrawing;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -133,10 +135,9 @@ public class FakeWorldScene implements AutoCloseable {
 
     private static RenderLayer mapBlockLayer(BlockRenderLayer layer) {
         return switch (layer) {
-            case SOLID -> RenderLayer.getSolid();
-            case CUTOUT_MIPPED -> RenderLayer.getCutoutMipped();
-            case CUTOUT, TRIPWIRE -> RenderLayer.getCutout();
-            case TRANSLUCENT -> RenderLayer.getTranslucentMovingBlock();
+            case SOLID -> RenderLayers.solid();
+            case CUTOUT, TRIPWIRE -> RenderLayers.cutout();
+            case TRANSLUCENT -> RenderLayers.translucentMovingBlock();
         };
     }
 
@@ -157,9 +158,9 @@ public class FakeWorldScene implements AutoCloseable {
 
     public void render(DrawContext context, int x, int y, int width, int height, float tickDelta) {
         this.camera.update(this.world, this.cameraEntity, false, false, tickDelta);
-        Vec3d cameraPos = this.camera.getPos();
+        Vec3d cameraPos = this.camera.getCameraPos();
         Quaternionf rotation = this.camera.getRotation().conjugate(new Quaternionf());
-        CameraRenderState cameraRenderState = new CameraRenderState();
+        var cameraRenderState = new CameraRenderState();
         cameraRenderState.initialized = this.camera.isReady();
         cameraRenderState.pos = cameraPos;
         cameraRenderState.blockPos = this.camera.getBlockPos();
@@ -184,7 +185,7 @@ public class FakeWorldScene implements AutoCloseable {
             anchorMatrices.multiply(rotation);
             anchorMatrices.translate((float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
 
-            Matrix4f projection = new Matrix4f().setOrtho(0.0F, framebufferWidth, framebufferHeight, 0.0F, -1000.0F, 1000.0F);
+            var projection = new Matrix4f().setOrtho(0.0F, framebufferWidth, framebufferHeight, 0.0F, -1000.0F, 1000.0F);
             Vec2f projected = projectToScreen(Vec3d.ofCenter(this.anchorBlock), anchorMatrices.peek().getPositionMatrix(), projection, framebufferWidth, framebufferHeight);
             float targetX = (float) (this.anchorTargetX * scale);
             float targetY = (float) (this.anchorTargetY * scale);
@@ -271,7 +272,7 @@ public class FakeWorldScene implements AutoCloseable {
             // FluidRenderer writes vertices in chunk-local (0-15) coordinates, so add the
             // chunk origin back in to get world-space positions that match the other
             // geometry in this scene.
-            RenderLayer fluidLayer = mapBlockLayer(RenderLayers.getFluidLayer(placedFluid.state()));
+            RenderLayer fluidLayer = mapBlockLayer(BlockRenderLayers.getFluidLayer(placedFluid.state()));
             VertexConsumer base = consumers.getBuffer(fluidLayer);
             matrices.push();
             matrices.translate(pos.getX(), pos.getY(), pos.getZ());
@@ -362,11 +363,14 @@ public class FakeWorldScene implements AutoCloseable {
         RenderSystem.outputDepthTextureOverride = null;
 
         runCallbacks(this.beforeRenderCallbacks, RenderStage.FINALIZE, renderContext);
-        Matrix3x2f pose = new Matrix3x2f(context.getMatrices());
+        var pose = new Matrix3x2f(context.getMatrices());
         context.state.addSimpleElement(
                 new TexturedQuadGuiElementRenderState(
                         RenderPipelines.GUI_TEXTURED,
-                        TextureSetup.withoutGlTexture(this.framebuffer.getColorAttachmentView()),
+                        TextureSetup.of(
+                                this.framebuffer.getColorAttachmentView(),
+                                RenderSystem.getSamplerCache().getRepeated(FilterMode.NEAREST)
+                        ),
                         pose,
                         x,
                         y,
@@ -464,7 +468,6 @@ public class FakeWorldScene implements AutoCloseable {
         this.framebuffer = new SimpleFramebuffer("FakeWorldScene", width, height, true);
     }
 
-    @SuppressWarnings("unchecked")
     private static BlockEntityRenderState getBlockEntityRenderState(
             BlockEntityRenderManager blockEntityRenderManager,
             BlockEntity blockEntity,
@@ -472,8 +475,7 @@ public class FakeWorldScene implements AutoCloseable {
             ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay,
             Vec3d cameraPos
     ) {
-        BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer =
-                (BlockEntityRenderer<BlockEntity, BlockEntityRenderState>) blockEntityRenderManager.get(blockEntity);
+        BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = blockEntityRenderManager.get(blockEntity);
         if (renderer == null)
             return null;
 
@@ -866,13 +868,8 @@ public class FakeWorldScene implements AutoCloseable {
             var box = new Box(pos).expand(expansion);
 
             int color = selection.color();
-            float a = ((color >> 24) & 0xFF) / 255.0F;
-            float r = ((color >> 16) & 0xFF) / 255.0F;
-            float g = ((color >> 8) & 0xFF) / 255.0F;
-            float b = (color & 0xFF) / 255.0F;
 
-            VertexConsumer outline = consumers.getBuffer(RenderLayer.getLines());
-            VertexRendering.drawBox(matrices.peek(), outline, box, r, g, b, Math.max(a, 0.6F));
+            GizmoDrawing.box(box, DrawStyle.stroked(color));
             matrices.pop();
         }
     }

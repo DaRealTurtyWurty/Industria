@@ -2,7 +2,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -27,7 +27,7 @@ public class CentrifugalConcentratorModel extends Model<Float> {
     private final ModelPart bowl;
 
     public CentrifugalConcentratorModel(ModelPart root) {
-        super(root, RenderLayer::getEntityCutout);
+        super(root, RenderLayers::entityCutout);
 
         this.main = root.getChild("main");
         this.legs = main.getChild("legs");

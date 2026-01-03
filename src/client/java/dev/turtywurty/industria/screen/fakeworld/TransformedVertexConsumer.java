@@ -30,6 +30,16 @@ final class TransformedVertexConsumer implements VertexConsumer {
     }
 
     @Override
+    public VertexConsumer color(int argb) {
+        return this.delegate.color(argb);
+    }
+
+    @Override
+    public VertexConsumer lineWidth(float width) {
+        return this.delegate.lineWidth(width);
+    }
+
+    @Override
     public VertexConsumer texture(float u, float v) {
         return this.delegate.texture(u, v);
     }

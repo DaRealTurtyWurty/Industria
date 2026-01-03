@@ -11,7 +11,7 @@ import net.minecraft.client.gui.hud.debug.DebugHudEntries;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -132,7 +132,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @return The vertex consumer for the high contrast wireframe
      */
     public static VertexConsumer getHighContrastWireframeVertexConsumer(VertexConsumerProvider vertexConsumers) {
-        return vertexConsumers.getBuffer(RenderLayer.getSecondaryBlockOutline());
+        return vertexConsumers.getBuffer(RenderLayers.secondaryBlockOutline());
     }
 
     /**
@@ -142,7 +142,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @return The vertex consumer for the wireframe
      */
     public static VertexConsumer getWireframeVertexConsumer(VertexConsumerProvider vertexConsumers) {
-        return vertexConsumers.getBuffer(RenderLayer.getLines());
+        return vertexConsumers.getBuffer(RenderLayers.lines());
     }
 
     /**
@@ -173,7 +173,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
 
         int color = getWireframeColor(isHighContrast);
         for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
-            queue.submitCustom(matrices, isHighContrast ? RenderLayer.getSecondaryBlockOutline() : RenderLayer.getLines(), (entry, vertexConsumer) -> {
+            queue.submitCustom(matrices, isHighContrast ? RenderLayers.secondaryBlockOutline() : RenderLayers.lines(), (entry, vertexConsumer) -> {
                 for (ModelPart modelPart : modelParts) {
                     visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
                 }
@@ -330,7 +330,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             float blue,
             float alpha
     ) {
-        drawFilledBox(entry, vertexConsumers, (float)minX, (float)minY, (float)minZ, (float)maxX, (float)maxY, (float)maxZ, red, green, blue, alpha);
+        drawFilledBox(entry, vertexConsumers, (float) minX, (float) minY, (float) minZ, (float) maxX, (float) maxY, (float) maxZ, red, green, blue, alpha);
     }
 
     public static void drawFilledBox(

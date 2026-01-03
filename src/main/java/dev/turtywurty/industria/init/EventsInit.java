@@ -45,13 +45,13 @@ public class EventsInit {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(
                     CommandManager.literal(Industria.MOD_ID)
-                            .requires(source -> source.hasPermissionLevel(3))
+                            .requires(CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK))
                             .then(CommandManager.literal("config").then(ConfigCommand.register()))
             );
 
             dispatcher.register(
                     CommandManager.literal(Industria.MOD_ID)
-                            .requires(source -> source.hasPermissionLevel(3))
+                            .requires(CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK))
                             .then(CommandManager.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
             );
         });

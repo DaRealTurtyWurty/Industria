@@ -4,7 +4,7 @@ import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.model.OilPumpJackModel;
 import dev.turtywurty.industria.state.OilPumpJackRenderState;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
@@ -88,14 +88,14 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
         matrices.translate((attachmentBPosition.x - attachmentCPosition.x) / 16f, (attachmentBPosition.y - attachmentCPosition.y) / 16f, (attachmentBPosition.z - attachmentCPosition.z) / 16f);
         matrices.multiply(RotationAxis.POSITIVE_X.rotation(state.armPitch));
         matrices.translate((attachmentCPosition.x - attachmentBPosition.x) / 16f, (attachmentCPosition.y - attachmentBPosition.y) / 16f, (attachmentCPosition.z - attachmentBPosition.z) / 16f);
-        queue.submitCustom(matrices, RenderLayer.getLines(), (matricesEntry, vertexConsumer) ->
+        queue.submitCustom(matrices, RenderLayers.lines(), (matricesEntry, vertexConsumer) ->
                 vertexConsumer.vertex(matrices.peek(), attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
                         .color(20, 20, 20, 255)
                         .normal(0, 0, 0));
 
         matrices.pop();
 
-        queue.submitCustom(matrices, RenderLayer.getLines(), (matricesEntry, vertexConsumer) ->
+        queue.submitCustom(matrices, RenderLayers.lines(), (matricesEntry, vertexConsumer) ->
                 vertexConsumer.vertex(matrices.peek(), attachmentDPosition.x, attachmentDPosition.y, attachmentDPosition.z)
                         .color(20, 20, 20, 255)
                         .normal(0, 0, 0));

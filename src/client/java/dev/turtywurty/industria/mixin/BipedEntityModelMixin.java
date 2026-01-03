@@ -26,7 +26,7 @@ public class BipedEntityModelMixin {
     public ModelPart rightArm;
 
     @Inject(method = "setAngles(Lnet/minecraft/client/render/entity/state/BipedEntityRenderState;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/BipedEntityModel;animateArms(Lnet/minecraft/client/render/entity/state/BipedEntityRenderState;F)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/BipedEntityModel;animateArms(Lnet/minecraft/client/render/entity/state/BipedEntityRenderState;)V"))
     private void industria$setAngles(BipedEntityRenderState bipedEntityRenderState, CallbackInfo callback) {
         List<ArmPositionRegistry.DynamicArmPosition> positions = ArmPositionRegistry.getArmPosition(MinecraftClient.getInstance().player.getStackInHand(bipedEntityRenderState.activeHand));
         for (ArmPositionRegistry.DynamicArmPosition position : positions) {

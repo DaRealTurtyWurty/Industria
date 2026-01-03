@@ -2,7 +2,7 @@ package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -16,7 +16,7 @@ public class CrusherModel extends Model<Float> {
     private final ModelPart topRight;
 
     public CrusherModel(ModelPart root) {
-        super(root, RenderLayer::getEntityCutoutNoCull);
+        super(root, RenderLayers::entityCutoutNoCull);
         ModelPart main = root.getChild("main");
         this.bottomLeft = main.getChild("left").getChild("bottomLeft");
         this.topLeft = main.getChild("left").getChild("topLeft");
