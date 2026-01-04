@@ -19,17 +19,13 @@ public class DrownedMixin {
             target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z",
             ordinal = 0))
     private static boolean industria$canSpawn$0(boolean original, EntityType<?> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
+        if (original)
+            return true;
+
         FluidState fluidState = world.getFluidState(pos.below());
-
-        boolean result = original;
-        for (FluidData fluidData : FluidData.FLUID_DATA.values()) {
-            if(fluidData.canDrownedSpawn())
-                continue;
-
-            result = original || !fluidState.is(fluidData.fluidTag());
-        }
-
-        return result;
+        return FluidData.FLUID_DATA.values().stream()
+                .filter(FluidData::canDrownedSpawn)
+                .anyMatch(fluidData -> fluidState.is(fluidData.fluidTag()));
     }
 
     @ModifyExpressionValue(method = "checkDrownedSpawnRules(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/entity/EntitySpawnReason;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)Z",
@@ -37,7 +33,7 @@ public class DrownedMixin {
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z",
                     ordinal = 1))
     private static boolean industria$canSpawn$1(boolean original, EntityType<?> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
-        FluidState fluidState = world.getFluidState(pos.below());
+        FluidState fluidState = world.getFluidState(pos);
 
         return original || FluidData.FLUID_DATA.values().stream()
                 .filter(FluidData::canDrownedSpawn)

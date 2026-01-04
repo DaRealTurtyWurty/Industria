@@ -15,7 +15,7 @@ public class SpreadingSnowyDirtBlockMixin {
     @ModifyExpressionValue(method = "canPropagate",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private static boolean industria$canSpread(boolean original, BlockState state, LevelReader world, BlockPos pos, @Local(ordinal = 1) BlockPos upPos) {
+    private static boolean industria$canSpread(boolean original, BlockState state, LevelReader world, BlockPos pos, @Local BlockPos upPos) {
         if (original)
             return true;
 

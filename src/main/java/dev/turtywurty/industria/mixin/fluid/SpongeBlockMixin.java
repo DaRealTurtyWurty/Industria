@@ -12,14 +12,14 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(SpongeBlock.class)
 public class SpongeBlockMixin {
-    @ModifyExpressionValue(method = "tryAbsorbWater",
+    @ModifyExpressionValue(method = "removeWaterBreadthFirstSearch",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private static boolean industria$absorbWater(boolean original, BlockPos pos, Level world, BlockPos currentPos, @Local FluidState fluidState) {
+    private static boolean industria$absorbWater(boolean original, Level world, BlockPos startPos, @Local FluidState fluidState) {
         if (original)
             return true;
 
         FluidData data = FluidData.FLUID_DATA.get(fluidState.getType());
-        return data == null || !data.canSpongeAbsorb();
+        return data != null && data.canSpongeAbsorb();
     }
 }

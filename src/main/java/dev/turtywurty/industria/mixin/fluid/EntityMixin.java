@@ -75,14 +75,14 @@ public abstract class EntityMixin {
     @ModifyExpressionValue(method = "updateInWaterStateAndDoFluidPushing",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/Entity;updateFluidHeightAndDoFluidPushing(Lnet/minecraft/tags/TagKey;D)Z"))
-    private boolean industria$updateWaterState(boolean original, @Local double ultrawarmModifier) {
+    private boolean industria$updateWaterState(boolean original, @Local double lavaFlowScale) {
         if (original)
             return true;
 
         Entity entity = (Entity) (Object) this;
 
         for (FluidData fluidDatum : FluidData.FLUID_DATA.values()) {
-            if (updateFluidHeightAndDoFluidPushing(fluidDatum.fluidTag(), fluidDatum.fluidMovementSpeed().apply(entity, ultrawarmModifier))) {
+            if (updateFluidHeightAndDoFluidPushing(fluidDatum.fluidTag(), fluidDatum.fluidMovementSpeed().apply(entity, lavaFlowScale))) {
                 return true;
             }
         }

@@ -46,7 +46,7 @@ public class RespawnAnchorBlockMixin {
         if (original)
             return true;
 
-        FluidData fluidData = FluidData.FLUID_DATA.get(state.getFluidState().getType());
+        FluidData fluidData = FluidData.FLUID_DATA.get(world.getFluidState(explodedPos.above()).getType());
         return fluidData != null && fluidData.affectsRespawnAnchor();
     }
 }

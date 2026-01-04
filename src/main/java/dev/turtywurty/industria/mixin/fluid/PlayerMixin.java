@@ -17,7 +17,7 @@ public abstract class PlayerMixin extends LivingEntity {
 
     @ModifyExpressionValue(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/player/Player;isInEyeFluid(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$updateTurtleHelmet(boolean original) {
         if(original)
             return true;
@@ -29,7 +29,7 @@ public abstract class PlayerMixin extends LivingEntity {
 
     @ModifyExpressionValue(method = "getDestroySpeed",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/player/Player;isInEyeFluid(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$getBlockBreakingSpeed(boolean original) {
         if(original)
             return true;

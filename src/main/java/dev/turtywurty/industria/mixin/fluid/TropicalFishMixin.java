@@ -29,7 +29,7 @@ public class TropicalFishMixin {
 
     @ModifyExpressionValue(method = "checkTropicalFishSpawnRules",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockState;isOf(Lnet/minecraft/world/level/block/Block;)Z"))
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z"))
     private static boolean industria$canTropicalFishSpawn$1(boolean original, EntityType<TropicalFish> type, LevelAccessor world, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
         if(original)
             return true;

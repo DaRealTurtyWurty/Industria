@@ -70,7 +70,7 @@ public abstract class AbstractBoatMixin extends VehicleEntity {
 
     @ModifyExpressionValue(method = "canAddPassenger",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/vehicle/boat/AbstractBoat;isSubmergedIn(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$canAddPassenger(boolean original) {
         if (original)
             return true;
