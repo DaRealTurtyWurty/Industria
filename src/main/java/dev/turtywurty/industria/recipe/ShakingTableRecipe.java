@@ -13,20 +13,16 @@ import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,14 +30,14 @@ import java.util.concurrent.ThreadLocalRandom;
 public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack output, SlurryStack outputSlurry,
                                  int processTime, int frequency) implements Recipe<ShakingTableRecipeInput> {
     @Override
-    public boolean matches(ShakingTableRecipeInput input, World world) {
-        return this.input.testForRecipe(input.recipeInventory().getStackInSlot(0)) &&
+    public boolean matches(ShakingTableRecipeInput input, Level world) {
+        return this.input.testForRecipe(input.recipeInventory().getItem(0)) &&
                 input.waterAmount() >= FluidConstants.BUCKET * 2;
     }
 
     @Override
-    public ItemStack craft(ShakingTableRecipeInput input, RegistryWrapper.WrapperLookup registries) {
-        return this.output.createStack(new LocalRandom(ThreadLocalRandom.current().nextLong()));
+    public ItemStack assemble(ShakingTableRecipeInput input, HolderLookup.Provider registries) {
+        return this.output.createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
     @Override
@@ -55,12 +51,12 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(new ShakingTableRecipeDisplay(
                 this.input, new SlotDisplay.ItemSlotDisplay(BlockInit.SHAKING_TABLE.asItem()),
                 this.output, this.outputSlurry,
@@ -68,17 +64,17 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.SHAKING_TABLE;
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("shaking_table").toString();
     }
 
@@ -108,12 +104,12 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
                 Codec.INT.fieldOf("frequency").forGetter(ShakingTableRecipe::frequency)
         ).apply(instance, ShakingTableRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, ShakingTableRecipe> PACKET_CODEC =
-                PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, ShakingTableRecipe::input,
-                        OutputItemStack.PACKET_CODEC, ShakingTableRecipe::output,
-                        SlurryStack.PACKET_CODEC, ShakingTableRecipe::outputSlurry,
-                        PacketCodecs.INTEGER, ShakingTableRecipe::processTime,
-                        PacketCodecs.INTEGER, ShakingTableRecipe::frequency,
+        private static final StreamCodec<RegistryFriendlyByteBuf, ShakingTableRecipe> STREAM_CODEC =
+                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, ShakingTableRecipe::input,
+                        OutputItemStack.STREAM_CODEC, ShakingTableRecipe::output,
+                        SlurryStack.STREAM_CODEC, ShakingTableRecipe::outputSlurry,
+                        ByteBufCodecs.INT, ShakingTableRecipe::processTime,
+                        ByteBufCodecs.INT, ShakingTableRecipe::frequency,
                         ShakingTableRecipe::new);
 
         @Override
@@ -122,8 +118,8 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, ShakingTableRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, ShakingTableRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -139,16 +135,16 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
                 Codec.INT.fieldOf("frequency").forGetter(ShakingTableRecipeDisplay::frequency)
         ).apply(instance, ShakingTableRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, ShakingTableRecipeDisplay> PACKET_CODEC =
-                PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, ShakingTableRecipeDisplay::input,
-                        SlotDisplay.PACKET_CODEC, ShakingTableRecipeDisplay::craftingStation,
-                        OutputItemStack.PACKET_CODEC, ShakingTableRecipeDisplay::output,
-                        SlurryStack.PACKET_CODEC, ShakingTableRecipeDisplay::outputSlurry,
-                        PacketCodecs.INTEGER, ShakingTableRecipeDisplay::processTime,
-                        PacketCodecs.INTEGER, ShakingTableRecipeDisplay::frequency,
+        public static final StreamCodec<RegistryFriendlyByteBuf, ShakingTableRecipeDisplay> STREAM_CODEC =
+                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, ShakingTableRecipeDisplay::input,
+                        SlotDisplay.STREAM_CODEC, ShakingTableRecipeDisplay::craftingStation,
+                        OutputItemStack.STREAM_CODEC, ShakingTableRecipeDisplay::output,
+                        SlurryStack.STREAM_CODEC, ShakingTableRecipeDisplay::outputSlurry,
+                        ByteBufCodecs.INT, ShakingTableRecipeDisplay::processTime,
+                        ByteBufCodecs.INT, ShakingTableRecipeDisplay::frequency,
                         ShakingTableRecipeDisplay::new);
 
-        public static final Serializer<ShakingTableRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -156,7 +152,7 @@ public record ShakingTableRecipe(IndustriaIngredient input, OutputItemStack outp
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

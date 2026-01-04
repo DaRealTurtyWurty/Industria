@@ -6,13 +6,13 @@ import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.multiblock.old.MultiblockType;
 import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,18 +31,18 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         Multiblockable.write(this, view);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         Multiblockable.read(this, view);
     }
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return List.of();
 
         // 5x5x1 structure
@@ -85,12 +85,12 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements AutoM
                     if (w == 0 && h == 0 && d == 0)
                         continue;
 
-                    BlockPos pos = this.pos
-                            .offset(right, w)
-                            .offset(Direction.UP, h)
-                            .offset(forward, d);
+                    BlockPos pos = this.worldPosition
+                            .relative(right, w)
+                            .relative(Direction.UP, h)
+                            .relative(forward, d);
 
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -108,14 +108,14 @@ public class RotaryKilnBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     @Override
-    public void onMultiblockBreak(World world, BlockPos pos) {
+    public void onMultiblockBreak(Level world, BlockPos pos) {
         AutoMultiblockable.super.onMultiblockBreak(world, pos);
 
-        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
-        BlockPos offsetPos = pos.offset(facing);
+        Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+        BlockPos offsetPos = pos.relative(facing);
         BlockState offsetState = world.getBlockState(offsetPos);
-        if (offsetState.isOf(BlockInit.ROTARY_KILN)) {
-            world.setBlockState(offsetPos, BlockInit.ROTARY_KILN_CONTROLLER.getDefaultState().with(Properties.HORIZONTAL_FACING, facing));
+        if (offsetState.is(BlockInit.ROTARY_KILN)) {
+            world.setBlockAndUpdate(offsetPos, BlockInit.ROTARY_KILN_CONTROLLER.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, facing));
         }
     }
 }

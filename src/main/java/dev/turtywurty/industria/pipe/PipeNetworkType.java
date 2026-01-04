@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.pipe;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public record PipeNetworkType<S, N extends PipeNetwork<S>>(
         MapCodec<? extends N> codec,
-        PacketCodec<RegistryByteBuf, ? extends N> packetCodec) {
+        StreamCodec<RegistryFriendlyByteBuf, ? extends N> packetCodec) {
 }

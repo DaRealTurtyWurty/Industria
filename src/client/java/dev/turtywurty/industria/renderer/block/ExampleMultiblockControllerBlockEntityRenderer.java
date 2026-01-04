@@ -1,19 +1,19 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.MultiblockControllerBlockEntity;
 import dev.turtywurty.industria.state.ExampleMultiblockControllerRenderState;
-import net.minecraft.client.render.DrawStyle;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.debug.gizmo.GizmoDrawing;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gizmos.GizmoStyle;
+import net.minecraft.gizmos.Gizmos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class ExampleMultiblockControllerBlockEntityRenderer extends IndustriaBlockEntityRenderer<MultiblockControllerBlockEntity, ExampleMultiblockControllerRenderState> {
-    public ExampleMultiblockControllerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public ExampleMultiblockControllerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
 
@@ -23,21 +23,21 @@ public class ExampleMultiblockControllerBlockEntityRenderer extends IndustriaBlo
     }
 
     @Override
-    public void updateRenderState(MultiblockControllerBlockEntity blockEntity, ExampleMultiblockControllerRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(MultiblockControllerBlockEntity blockEntity, ExampleMultiblockControllerRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.positions.clear();
         state.positions.addAll(blockEntity.getPositions());
     }
 
     @Override
-    protected void onRender(ExampleMultiblockControllerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
-        matrices.push();
+    protected void onRender(ExampleMultiblockControllerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+        matrices.pushPose();
         matrices.translate(0, 1, 0);
 
         for (BlockPos position : state.positions) {
-            GizmoDrawing.box(position, DrawStyle.filledAndStroked(0x7700FF00, 5.0f, 0x5500EE00));
+            Gizmos.cuboid(position, GizmoStyle.strokeAndFill(0x7700FF00, 5.0f, 0x5500EE00));
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 }

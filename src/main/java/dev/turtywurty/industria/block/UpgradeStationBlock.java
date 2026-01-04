@@ -5,7 +5,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 
 public class UpgradeStationBlock extends IndustriaBlock {
-    public UpgradeStationBlock(Settings settings) {
+    public UpgradeStationBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasComparatorOutput()

@@ -4,9 +4,9 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
 
 public class CrystallizerRecipeBuilder {
     private final FluidStack waterFluid, crystalFluid;
@@ -27,7 +27,7 @@ public class CrystallizerRecipeBuilder {
         this.processTime = processTime;
     }
 
-    public void offerTo(RecipeExporter exporter, RegistryKey<Recipe<?>> recipeKey) {
+    public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
                 new CrystallizerRecipe(this.waterFluid, this.crystalFluid, this.catalyst, this.output, this.byproduct, this.requiresCatalyst, this.catalystUses, this.processTime),
                 null);

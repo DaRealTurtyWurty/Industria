@@ -4,8 +4,8 @@ import dev.turtywurty.industria.Industria;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
-import net.minecraft.client.render.model.BlockStateModel;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.resources.Identifier;
 
 public class ModelInit {
     public static final Identifier SEISMIC_SCANNER_MODEL_ID = Industria.id("item/seismic_scanner_model");

@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.abstraction;
 
 import dev.turtywurty.industria.blockentity.abstraction.component.*;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class InventoryBuilder {
         var inventory = new IndustriaSimpleInventory(this.size);
         if (this.stacks != null) {
             for (int index = 0; index < this.stacks.length; index++) {
-                inventory.setStack(index, this.stacks[index]);
+                inventory.setItem(index, this.stacks[index]);
             }
         }
 

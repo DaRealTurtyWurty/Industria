@@ -5,21 +5,21 @@ import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 import java.util.Set;
 
 public class ExtraCodecs {
     public static final Codec<Set<BlockPos>> BLOCK_POS_SET_CODEC = setOf(BlockPos.CODEC);
-    public static final Codec<Box> BOX_CODEC = Codec.DOUBLE
+    public static final Codec<AABB> BOX_CODEC = Codec.DOUBLE
             .listOf()
             .xmap(
-                    list -> new Box(
+                    list -> new AABB(
                             list.get(0),
                             list.get(1),
                             list.get(2),
@@ -56,8 +56,8 @@ public class ExtraCodecs {
             blockPos -> blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ());
     public static final Codec<Character> CHAR_CODEC = Codec.STRING.xmap(s -> s.charAt(0), String::valueOf);
     public static final Codec<Block> BLOCK_CODEC = Codec.STRING.xmap(
-            id -> Registries.BLOCK.get(Identifier.of(id)),
-            block -> Registries.BLOCK.getId(block).toString()
+            id -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(id)),
+            block -> BuiltInRegistries.BLOCK.getKey(block).toString()
     );
 
     public static <T> Codec<Set<T>> setOf(Codec<T> codec) {

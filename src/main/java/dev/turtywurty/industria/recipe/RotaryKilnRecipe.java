@@ -11,20 +11,16 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,22 +28,22 @@ import java.util.concurrent.ThreadLocalRandom;
 public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output,
                                int requiredTemperature) implements Recipe<SingleItemStackRecipeInput> {
     @Override
-    public boolean matches(SingleItemStackRecipeInput input, World world) {
+    public boolean matches(SingleItemStackRecipeInput input, Level world) {
         return this.input.testForRecipe(input.stack());
     }
 
     @Override
-    public ItemStack craft(SingleItemStackRecipeInput input, RegistryWrapper.WrapperLookup registries) {
-        return this.output.createStack(new LocalRandom(ThreadLocalRandom.current().nextLong()));
+    public ItemStack assemble(SingleItemStackRecipeInput input, HolderLookup.Provider registries) {
+        return this.output.createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("rotary_kiln").toString();
     }
 
@@ -62,12 +58,12 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(
                 new RotaryKilnRecipeDisplay(
                         input.toDisplay(),
@@ -78,7 +74,7 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.ROTARY_KILN;
     }
 
@@ -91,10 +87,10 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
                 Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipe::requiredTemperature)
         ).apply(instance, RotaryKilnRecipe::new));
 
-        public static final PacketCodec<RegistryByteBuf, RotaryKilnRecipe> PACKET_CODEC = PacketCodec.tuple(
-                IndustriaIngredient.PACKET_CODEC, RotaryKilnRecipe::input,
-                OutputItemStack.PACKET_CODEC, RotaryKilnRecipe::output,
-                PacketCodecs.INTEGER, RotaryKilnRecipe::requiredTemperature,
+        public static final StreamCodec<RegistryFriendlyByteBuf, RotaryKilnRecipe> STREAM_CODEC = StreamCodec.composite(
+                IndustriaIngredient.STREAM_CODEC, RotaryKilnRecipe::input,
+                OutputItemStack.STREAM_CODEC, RotaryKilnRecipe::output,
+                ByteBufCodecs.INT, RotaryKilnRecipe::requiredTemperature,
                 RotaryKilnRecipe::new);
 
         @Override
@@ -103,8 +99,8 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, RotaryKilnRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, RotaryKilnRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -129,17 +125,17 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
                 Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipeDisplay::requiredTemperature)
         ).apply(instance, RotaryKilnRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, RotaryKilnRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
-                SlotDisplay.PACKET_CODEC, RotaryKilnRecipeDisplay::input,
-                SlotDisplay.PACKET_CODEC, RotaryKilnRecipeDisplay::craftingStation,
-                SlotDisplay.PACKET_CODEC, RotaryKilnRecipeDisplay::result,
-                PacketCodecs.INTEGER, RotaryKilnRecipeDisplay::requiredTemperature,
+        public static final StreamCodec<RegistryFriendlyByteBuf, RotaryKilnRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+                SlotDisplay.STREAM_CODEC, RotaryKilnRecipeDisplay::input,
+                SlotDisplay.STREAM_CODEC, RotaryKilnRecipeDisplay::craftingStation,
+                SlotDisplay.STREAM_CODEC, RotaryKilnRecipeDisplay::result,
+                ByteBufCodecs.INT, RotaryKilnRecipeDisplay::requiredTemperature,
                 RotaryKilnRecipeDisplay::new);
 
-        private static final Serializer<RotaryKilnRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        private static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

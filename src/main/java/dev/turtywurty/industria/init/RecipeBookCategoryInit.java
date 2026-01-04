@@ -1,9 +1,9 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
 
 public class RecipeBookCategoryInit {
     public static final RecipeBookCategory ALLOY_FURNACE = register("alloy_furnace");
@@ -19,7 +19,7 @@ public class RecipeBookCategoryInit {
     public static final RecipeBookCategory CENTRIFUGAL_CONCENTRATOR = register("centrifugal_concentrator");
 
     public static RecipeBookCategory register(String name) {
-        return Registry.register(Registries.RECIPE_BOOK_CATEGORY, Industria.id(name), new RecipeBookCategory());
+        return Registry.register(BuiltInRegistries.RECIPE_BOOK_CATEGORY, Industria.id(name), new RecipeBookCategory());
     }
 
     public static void init() {}

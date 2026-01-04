@@ -2,48 +2,48 @@ package dev.turtywurty.industria.blockentity;
 
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 
 public interface RecipeExperienceBlockEntity {
-    Codec<Map<RegistryKey<Recipe<?>>, Integer>> RECIPES_USED_CODEC =
-            Codec.unboundedMap(RegistryKey.createCodec(RegistryKeys.RECIPE), Codec.INT);
+    Codec<Map<ResourceKey<Recipe<?>>, Integer>> RECIPES_USED_CODEC =
+            Codec.unboundedMap(ResourceKey.codec(Registries.RECIPE), Codec.INT);
 
-    static void dropExperience(ServerWorld world, Vec3d pos, int multiplier, float experience) {
-        int i = MathHelper.floor((float) multiplier * experience);
-        float f = MathHelper.fractionalPart((float) multiplier * experience);
+    static void dropExperience(ServerLevel world, Vec3 pos, int multiplier, float experience) {
+        int i = Mth.floor((float) multiplier * experience);
+        float f = Mth.frac((float) multiplier * experience);
         if (f != 0.0F && Math.random() < (double) f) {
             i++;
         }
 
-        ExperienceOrbEntity.spawn(world, pos, i);
+        ExperienceOrb.award(world, pos, i);
     }
 
-    static void writeRecipesUsed(WriteView view, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
-        view.put(name, RECIPES_USED_CODEC, recipesUsed);
+    static void writeRecipesUsed(ValueOutput view, String name, Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed) {
+        view.store(name, RECIPES_USED_CODEC, recipesUsed);
     }
 
-    static void readRecipesUsed(ReadView view, String name, Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed) {
+    static void readRecipesUsed(ValueInput view, String name, Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed) {
         recipesUsed.clear();
         view.read(name, RECIPES_USED_CODEC).ifPresent(recipesUsed::putAll);
     }
 
-    void setLastRecipe(@Nullable RecipeEntry<?> recipe);
+    void setLastRecipe(@Nullable RecipeHolder<?> recipe);
 
-    void dropExperienceForRecipesUsed(ServerPlayerEntity player);
+    void dropExperienceForRecipesUsed(ServerPlayer player);
 
-    List<RecipeEntry<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos);
+    List<RecipeHolder<?>> getRecipesUsedAndDropExperience(ServerLevel world, Vec3 pos);
 }

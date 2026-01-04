@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.state;
 
 import dev.turtywurty.industria.multiblock.old.Port;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 
 import java.util.HashMap;
 import java.util.Map;

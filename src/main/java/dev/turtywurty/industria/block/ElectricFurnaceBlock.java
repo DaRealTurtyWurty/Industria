@@ -4,7 +4,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 
 public class ElectricFurnaceBlock extends IndustriaBlock {
-    public ElectricFurnaceBlock(Settings settings) {
+    public ElectricFurnaceBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasLitProperty()

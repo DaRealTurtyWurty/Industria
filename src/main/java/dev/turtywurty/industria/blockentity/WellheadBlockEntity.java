@@ -16,13 +16,13 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -43,7 +43,7 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.WELLHEAD, pos, state);
 
         OutputFluidStorage storage = new OutputFluidStorage(this, FluidConstants.BUCKET);
-        Direction.Type.HORIZONTAL.stream().forEach(direction ->
+        Direction.Plane.HORIZONTAL.stream().forEach(direction ->
                 this.wrappedFluidStorage.addStorage(storage, direction));
         this.wrappedFluidStorage.addStorage(storage, Direction.UP);
     }
@@ -62,8 +62,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    protected void readData(ReadView view) {
-        super.readData(view);
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
 
         this.oilPumpJackPos = view.read("OilPumpJackPos", BlockPos.CODEC).orElse(null);
 
@@ -75,26 +75,26 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
 
         if (this.oilPumpJackPos != null) {
-            view.put("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
+            view.store("OilPumpJackPos", BlockPos.CODEC, this.oilPumpJackPos);
         }
 
-        view.put("DrillTubes", DRILL_TUBES_CODEC, this.drillTubes);
+        view.store("DrillTubes", DRILL_TUBES_CODEC, this.drillTubes);
 
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
     }
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient() || this.oilPumpJackPos == null)
+        if (this.level == null || this.level.isClientSide() || this.oilPumpJackPos == null)
             return;
 
         distributeFluid();
 
-        if (!(this.world.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity)
+        if (!(this.level.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity)
                 || !oilPumpJackBlockEntity.isRunning())
             return;
 
@@ -104,8 +104,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         if (bottomOfTubes == null)
             return;
 
-        bottomOfTubes = bottomOfTubes.down();
-        WorldFluidPocketsState fluidPocketsState = WorldFluidPocketsState.getServerState(((ServerWorld) this.world));
+        bottomOfTubes = bottomOfTubes.below();
+        WorldFluidPocketsState fluidPocketsState = WorldFluidPocketsState.getServerState(((ServerLevel) this.level));
         if (fluidPocketsState == null)
             return;
 
@@ -119,7 +119,7 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         if (fluidPocket.isEmpty())
             return;
 
-        int inBottomTube = this.drillTubes.get(bottomOfTubes.up());
+        int inBottomTube = this.drillTubes.get(bottomOfTubes.above());
         if (inBottomTube >= FluidConstants.BUCKET)
             return;
 
@@ -131,8 +131,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
             return;
         }
 
-        this.drillTubes.put(bottomOfTubes.up(), inBottomTube + (int) extracted);
-        fluidPocketsState.markDirty();
+        this.drillTubes.put(bottomOfTubes.above(), inBottomTube + (int) extracted);
+        fluidPocketsState.setDirty();
     }
 
     private void distributeFluid() {
@@ -142,7 +142,7 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
 
         Map<Storage<FluidVariant>, Long> storages = new HashMap<>();
         for (Direction direction : Direction.values()) {
-            Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.world, this.pos.offset(direction), direction.getOpposite());
+            Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.level, this.worldPosition.relative(direction), direction.getOpposite());
             if (fluidStorage == null || !fluidStorage.supportsInsertion())
                 continue;
 
@@ -195,10 +195,10 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    public void markRemoved() {
-        super.markRemoved();
-        if (this.oilPumpJackPos != null && this.world != null) {
-            if (this.world.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity) {
+    public void setRemoved() {
+        super.setRemoved();
+        if (this.oilPumpJackPos != null && this.level != null) {
+            if (this.level.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity) {
                 oilPumpJackBlockEntity.removeWellhead();
             }
         }

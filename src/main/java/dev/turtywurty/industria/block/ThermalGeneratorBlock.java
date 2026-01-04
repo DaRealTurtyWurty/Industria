@@ -4,7 +4,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 
 public class ThermalGeneratorBlock extends IndustriaBlock {
-    public ThermalGeneratorBlock(Settings settings) {
+    public ThermalGeneratorBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasLitProperty()

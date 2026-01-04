@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.multiblock;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 
 /**
  * Represents a local direction relative to a multiblock structure.
@@ -27,8 +27,8 @@ public enum LocalDirection {
             case DOWN  -> Direction.DOWN;
             case FRONT -> facing;
             case BACK  -> facing.getOpposite();
-            case LEFT  -> facing.rotateYCounterclockwise();
-            case RIGHT -> facing.rotateYClockwise();
+            case LEFT  -> facing.getCounterClockWise();
+            case RIGHT -> facing.getClockWise();
         };
     }
 

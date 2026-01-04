@@ -4,35 +4,35 @@ import dev.turtywurty.industria.blockentity.FluidPumpBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.ItemStack;
 
-public class FluidPumpScreenHandler extends ScreenHandler {
+public class FluidPumpScreenHandler extends AbstractContainerMenu {
     private final FluidPumpBlockEntity blockEntity;
-    private final ScreenHandlerContext context;
+    private final ContainerLevelAccess context;
 
-    public FluidPumpScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, (FluidPumpBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(payload.pos()));
+    public FluidPumpScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
+        this(syncId, (FluidPumpBlockEntity) playerInventory.player.level().getBlockEntity(payload.pos()));
     }
 
     public FluidPumpScreenHandler(int syncId, FluidPumpBlockEntity blockEntity) {
         super(ScreenHandlerTypeInit.FLUID_PUMP, syncId);
 
         this.blockEntity = blockEntity;
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
+        this.context = ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos());
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
+    public ItemStack quickMoveStack(Player player, int slot) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, BlockInit.FLUID_PUMP);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, BlockInit.FLUID_PUMP);
     }
 
     public FluidPumpBlockEntity getBlockEntity() {

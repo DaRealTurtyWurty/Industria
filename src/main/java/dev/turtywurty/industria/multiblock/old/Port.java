@@ -2,10 +2,10 @@ package dev.turtywurty.industria.multiblock.old;
 
 import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.multiblock.TransferType;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.List;
 
@@ -35,10 +35,10 @@ public record Port(Direction side, List<PortType> portTypes) {
      * @param pos        the position of the port in the world
      * @param controller the position of the multiblock controller
      */
-    public void tick(World world, BlockPos pos, BlockPos controller) {
+    public void tick(Level world, BlockPos pos, BlockPos controller) {
         for (PortType portType : this.portTypes) {
             if (portType.isOutput()) {
-                portType.transferType().pushTo(world, controller, pos.offset(this.side), this.side);
+                portType.transferType().pushTo(world, controller, pos.relative(this.side), this.side);
             }
         }
     }
@@ -55,7 +55,7 @@ public record Port(Direction side, List<PortType> portTypes) {
      * @return an instance of the provider for the specified transfer type
 
      */
-    public <T> T getProvider(TransferType<T, ?, ?> transferType, World world, BlockPos pos, BlockEntity controller) {
-        return transferType.lookup(world, pos, controller.getCachedState(), controller, this.side);
+    public <T> T getProvider(TransferType<T, ?, ?> transferType, Level world, BlockPos pos, BlockEntity controller) {
+        return transferType.lookup(world, pos, controller.getBlockState(), controller, this.side);
     }
 }

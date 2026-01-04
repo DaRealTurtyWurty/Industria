@@ -1,25 +1,25 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.CrusherBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.Slot;
 
 public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEntity, BlockPosPayload> {
-    public CrusherScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
+    public CrusherScreenHandler(int syncId, Inventory playerInv, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.CRUSHER, 2, syncId, playerInv, payload, CrusherBlockEntity.class);
     }
 
-    public CrusherScreenHandler(int syncId, PlayerInventory playerInv, CrusherBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
-        super(ScreenHandlerTypeInit.CRUSHER, syncId, playerInv, blockEntity, wrappedInventoryStorage, propertyDelegate);
+    public CrusherScreenHandler(int syncId, Inventory playerInv, CrusherBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
+        super(ScreenHandlerTypeInit.CRUSHER, syncId, playerInv, blockEntity, wrappedContainerStorage, propertyDelegate);
     }
 
     @Override
@@ -28,16 +28,16 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
-        WrappedInventoryStorage<?> wrappedStorage = this.wrappedInventoryStorage;
+    protected void addBlockEntitySlots(Inventory playerInventory) {
+        WrappedContainerStorage<?> wrappedStorage = this.wrappedContainerStorage;
         addSlot(new Slot(wrappedStorage.getInventory(CrusherBlockEntity.INPUT_SLOT), 0, 44, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 0, 98, 35));
         addSlot(new OutputSlot(wrappedStorage.getInventory(CrusherBlockEntity.OUTPUT_SLOT), 1, 116, 35));
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, BlockInit.CRUSHER);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, BlockInit.CRUSHER);
     }
 
     public int getProgress() {
@@ -55,7 +55,7 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
             return 0.0f;
         }
 
-        return MathHelper.clamp(progress / maxProgress, 0.0f, 1.0f);
+        return Mth.clamp(progress / maxProgress, 0.0f, 1.0f);
     }
 
     public long getEnergy() {
@@ -73,6 +73,6 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
             return 0.0f;
         }
 
-        return MathHelper.clamp(energy / (float) maxEnergy, 0.0f, 1.0f);
+        return Mth.clamp(energy / (float) maxEnergy, 0.0f, 1.0f);
     }
 }

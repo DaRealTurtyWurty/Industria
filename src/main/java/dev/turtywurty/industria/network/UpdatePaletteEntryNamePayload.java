@@ -1,21 +1,21 @@
 package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record UpdatePaletteEntryNamePayload(char paletteChar, String name) implements CustomPayload {
-    public static final Id<UpdatePaletteEntryNamePayload> ID = new Id<>(Industria.id("update_palette_entry_name"));
-    public static final PacketCodec<RegistryByteBuf, UpdatePaletteEntryNamePayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.INTEGER, payload -> (int) payload.paletteChar(),
-            PacketCodecs.STRING, UpdatePaletteEntryNamePayload::name,
+public record UpdatePaletteEntryNamePayload(char paletteChar, String name) implements CustomPacketPayload {
+    public static final Type<UpdatePaletteEntryNamePayload> ID = new Type<>(Industria.id("update_palette_entry_name"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, UpdatePaletteEntryNamePayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, payload -> (int) payload.paletteChar(),
+            ByteBufCodecs.STRING_UTF8, UpdatePaletteEntryNamePayload::name,
             (character, name) -> new UpdatePaletteEntryNamePayload((char) (int) character, name)
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

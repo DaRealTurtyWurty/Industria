@@ -6,7 +6,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 public class BatteryBlock extends IndustriaBlock {
     private final BatteryLevel level;
 
-    public BatteryBlock(Settings settings, BatteryLevel level) {
+    public BatteryBlock(Properties settings, BatteryLevel level) {
         super(settings, new BlockProperties()
                 .hasAxisProperty()
                 .hasComparatorOutput()

@@ -18,15 +18,15 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
@@ -99,8 +99,8 @@ public class TransferType<S, V, A extends Number> {
     //public static final TransferType<?> PRESSURE = new TransferType<>(null, null);
 
     public static final Codec<TransferType<?, ?, ?>> CODEC = Codec.STRING.xmap(TransferType::getByName, TransferType::getName);
-    public static final PacketCodec<RegistryByteBuf, TransferType<?, ?, ?>> PACKET_CODEC =
-            PacketCodec.tuple(PacketCodecs.STRING, TransferType::getName, TransferType::getByName);
+    public static final StreamCodec<RegistryFriendlyByteBuf, TransferType<?, ?, ?>> STREAM_CODEC =
+            StreamCodec.composite(ByteBufCodecs.STRING_UTF8, TransferType::getName, TransferType::getByName);
 
     public static List<TransferType<?, ?, ?>> getValues() {
         return List.copyOf(VALUES);
@@ -185,9 +185,9 @@ public class TransferType<S, V, A extends Number> {
         this.blockLookup.registerForBlockEntity((blockEntity, direction) -> blockEntity.getProvider(this, direction), BlockEntityTypeInit.AUTO_MULTIBLOCK_IO);
     }
 
-    public void pushTo(World world, BlockPos primaryPos, BlockPos secondaryPos, Direction side) {
+    public void pushTo(Level world, BlockPos primaryPos, BlockPos secondaryPos, Direction side) {
         BlockEntity primaryBlockEntity = world.getBlockEntity(primaryPos);
-        BlockState primaryState = primaryBlockEntity != null ? primaryBlockEntity.getCachedState() : world.getBlockState(primaryPos);
+        BlockState primaryState = primaryBlockEntity != null ? primaryBlockEntity.getBlockState() : world.getBlockState(primaryPos);
         S primaryStorage = lookup(world, primaryPos, primaryState, primaryBlockEntity, side);
         if (primaryStorage == null || !supportsExtract.test(primaryStorage))
             return;
@@ -220,11 +220,11 @@ public class TransferType<S, V, A extends Number> {
         }
     }
 
-    public S lookup(World world, BlockPos pos, Direction direction) {
+    public S lookup(Level world, BlockPos pos, Direction direction) {
         return lookup(world, pos, null, null, direction);
     }
 
-    public S lookup(World world, BlockPos pos, @Nullable BlockState state, @Nullable BlockEntity blockEntity, Direction direction) {
+    public S lookup(Level world, BlockPos pos, @Nullable BlockState state, @Nullable BlockEntity blockEntity, Direction direction) {
         return this.blockLookup.find(world, pos, state, blockEntity, direction);
     }
 
@@ -267,7 +267,7 @@ public class TransferType<S, V, A extends Number> {
         transferFraction(storage, storage1, 1);
     }
 
-    public A getAmount(World world, BlockPos pos) {
+    public A getAmount(Level world, BlockPos pos) {
         try(Transaction transaction = Transaction.openOuter()) {
             S storage = lookup(world, pos, null);
             V value = this.valueGetter.apply(storage);

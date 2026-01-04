@@ -9,8 +9,8 @@ import dev.turtywurty.industria.init.worldgen.FeatureInit;
 import dev.turtywurty.industria.init.worldgen.TrunkPlacerTypeInit;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +23,11 @@ public class Industria implements ModInitializer {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public static Identifier id(String path) {
-        return Identifier.of(MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    public static Text containerTitle(String name) {
-        return Text.translatable("container." + MOD_ID + "." + name);
+    public static Component containerTitle(String name) {
+        return Component.translatable("container." + MOD_ID + "." + name);
     }
 
     @Override

@@ -2,27 +2,27 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.component.FluidPocketsComponent;
-import net.minecraft.component.ComponentType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.function.UnaryOperator;
 
 public class ComponentTypeInit {
-    public static final ComponentType<FluidPocketsComponent> FLUID_POCKETS =
+    public static final DataComponentType<FluidPocketsComponent> FLUID_POCKETS =
             register("fluid_pockets", listBuilder -> listBuilder
-                    .codec(FluidPocketsComponent.CODEC)
-                    .packetCodec(FluidPocketsComponent.PACKET_CODEC)
-                    .cache());
+                    .persistent(FluidPocketsComponent.CODEC)
+                    .networkSynchronized(FluidPocketsComponent.STREAM_CODEC)
+                    .cacheEncoding());
 
-    public static final ComponentType<BlockPos> MULTIBLOCK_PIECE_POS =
+    public static final DataComponentType<BlockPos> MULTIBLOCK_PIECE_POS =
             register("multiblock_piece_pos", listBuilder -> listBuilder
-                    .codec(BlockPos.CODEC)
-                    .packetCodec(BlockPos.PACKET_CODEC));
+                    .persistent(BlockPos.CODEC)
+                    .networkSynchronized(BlockPos.STREAM_CODEC));
 
-    public static <T> ComponentType<T> register(String name, UnaryOperator<ComponentType.Builder<T>> builder) {
-        return Registry.register(Registries.DATA_COMPONENT_TYPE, Industria.id(name), builder.apply(ComponentType.builder()).build());
+    public static <T> DataComponentType<T> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
+        return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Industria.id(name), builder.apply(DataComponentType.builder()).build());
     }
 
     public static void init() {}

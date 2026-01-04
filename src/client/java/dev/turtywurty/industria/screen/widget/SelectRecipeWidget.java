@@ -1,15 +1,15 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,12 +21,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
-    private static final Identifier SCROLLER_TEXTURE = Identifier.ofVanilla("container/stonecutter/scroller");
-    private static final Identifier SCROLLER_DISABLED_TEXTURE = Identifier.ofVanilla("container/stonecutter/scroller_disabled");
-    private static final Identifier RECIPE_SELECTED_TEXTURE = Identifier.ofVanilla("container/stonecutter/recipe_selected");
-    private static final Identifier RECIPE_HIGHLIGHTED_TEXTURE = Identifier.ofVanilla("container/stonecutter/recipe_highlighted");
-    private static final Identifier RECIPE_TEXTURE = Identifier.ofVanilla("container/stonecutter/recipe");
+public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
+    private static final Identifier SCROLLER_TEXTURE = Identifier.withDefaultNamespace("container/stonecutter/scroller");
+    private static final Identifier SCROLLER_DISABLED_TEXTURE = Identifier.withDefaultNamespace("container/stonecutter/scroller_disabled");
+    private static final Identifier RECIPE_SELECTED_TEXTURE = Identifier.withDefaultNamespace("container/stonecutter/recipe_selected");
+    private static final Identifier RECIPE_HIGHLIGHTED_TEXTURE = Identifier.withDefaultNamespace("container/stonecutter/recipe_highlighted");
+    private static final Identifier RECIPE_TEXTURE = Identifier.withDefaultNamespace("container/stonecutter/recipe");
 
     private final int scrollBarX, scrollBarY, scrollBarWidth, scrollBarHandleHeight;
 
@@ -46,7 +46,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     private boolean isRecipeLocked;
 
     public SelectRecipeWidget(int x, int y, int width, int height, List<T> recipes, int selectedRecipeIndex, Function<T, ItemStack> outputFunction, BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected, boolean canCraft, int scrollBarX, int scrollBarY, int scrollBarWidth, int scrollBarHandleHeight, int columnCount, int rowCount, boolean lockable) {
-        super(x, y, width, height, Text.empty());
+        super(x, y, width, height, Component.empty());
 
         setRecipes(recipes);
         setSelectedRecipeIndex(selectedRecipeIndex);
@@ -75,7 +75,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     public void setSelectedRecipeIndex(int selectedRecipeIndex) {
-        setSelectedRecipe(selectedRecipeIndex >= this.recipes.size() ? null : this.recipes.get(MathHelper.clamp(selectedRecipeIndex, 0, this.recipes.isEmpty() ? 0 : this.recipes.size() - 1)));
+        setSelectedRecipe(selectedRecipeIndex >= this.recipes.size() ? null : this.recipes.get(Mth.clamp(selectedRecipeIndex, 0, this.recipes.isEmpty() ? 0 : this.recipes.size() - 1)));
     }
 
     public int getSelectedRecipeIndex() {
@@ -126,7 +126,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int scrollBarOffset = (int) (41.0F * this.scrollAmount);
         ScreenUtils.drawGuiTexture(context,
                 shouldScroll() ? SCROLLER_TEXTURE : SCROLLER_DISABLED_TEXTURE,
@@ -144,7 +144,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         return this.canCraft && this.recipes.size() > this.columnCount * this.rowCount;
     }
 
-    private void renderRecipeBackground(DrawContext context, int mouseX, int mouseY, int x, int y, int scrollOffset) {
+    private void renderRecipeBackground(GuiGraphics context, int mouseX, int mouseY, int x, int y, int scrollOffset) {
         for (int index = this.scrollOffset; index < scrollOffset && index < this.recipes.size(); index++) {
             int column = index - this.scrollOffset;
             int xPos = x + column % this.columnCount * 16;
@@ -165,7 +165,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
         }
     }
 
-    private void renderRecipeIcons(DrawContext context, int x, int y, int scrollOffset) {
+    private void renderRecipeIcons(GuiGraphics context, int x, int y, int scrollOffset) {
         for (int index = this.scrollOffset; index < scrollOffset && index < this.recipes.size(); index++) {
             int column = index - this.scrollOffset;
             int xPos = x + column % this.columnCount * 16;
@@ -175,16 +175,16 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
 
             T recipe = this.recipes.get(index);
             ItemStack output = this.outputFunction.apply(recipe);
-            context.drawItem(output, xPos, yPos);
+            context.renderItem(output, xPos, yPos);
         }
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         this.mouseClicked = false;
         if (this.canCraft) {
             int xPos = getX();
@@ -216,12 +216,12 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (this.mouseClicked && shouldScroll()) {
             int startY = this.scrollBarY - 1;
             int endY = startY + this.height;
             this.scrollAmount = ((float) offsetY - (float) startY - 7.5F) / ((float) (endY - startY) - this.scrollBarHandleHeight);
-            this.scrollAmount = MathHelper.clamp(this.scrollAmount, 0.0F, 1.0F);
+            this.scrollAmount = Mth.clamp(this.scrollAmount, 0.0F, 1.0F);
             this.scrollOffset = (int) ((double) (this.scrollAmount * (float) getMaxScroll()) + 0.5) * this.columnCount;
             return true;
         } else {
@@ -239,7 +239,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends ClickableWidget {
             if (shouldScroll()) {
                 int maxScroll = getMaxScroll();
                 float scrollFactor = (float) verticalAmount / (float) maxScroll;
-                this.scrollAmount = MathHelper.clamp(this.scrollAmount - scrollFactor, 0.0F, 1.0F);
+                this.scrollAmount = Mth.clamp(this.scrollAmount - scrollFactor, 0.0F, 1.0F);
                 this.scrollOffset = (int) ((double) (this.scrollAmount * (float) maxScroll) + 0.5) * this.columnCount;
             }
         }

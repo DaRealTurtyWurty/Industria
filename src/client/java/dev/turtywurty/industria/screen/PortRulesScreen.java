@@ -6,18 +6,18 @@ import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
 import dev.turtywurty.industria.screen.widget.FakeWorldWidget;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.EnumMap;
@@ -31,14 +31,14 @@ public class PortRulesScreen extends Screen {
     private static final double CAMERA_SNAP_DISTANCE_SQ = 0.0001;
     private static final float CAMERA_LERP = 0.2F;
 
-    public static final Text TITLE = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.title");
-    public static final Text SIDES_TITLE = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.sides_title");
-    public static final Text SIDE_NORTH = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_north");
-    public static final Text SIDE_SOUTH = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_south");
-    public static final Text SIDE_WEST = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_west");
-    public static final Text SIDE_EAST = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_east");
-    public static final Text SIDE_UP = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_up");
-    public static final Text SIDE_DOWN = Text.translatable("screen." + Industria.MOD_ID + ".port_rules.side_down");
+    public static final Component TITLE = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.title");
+    public static final Component SIDES_TITLE = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.sides_title");
+    public static final Component SIDE_NORTH = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.side_north");
+    public static final Component SIDE_SOUTH = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.side_south");
+    public static final Component SIDE_WEST = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.side_west");
+    public static final Component SIDE_EAST = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.side_east");
+    public static final Component SIDE_UP = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.side_up");
+    public static final Component SIDE_DOWN = Component.translatable("screen." + Industria.MOD_ID + ".port_rules.side_down");
 
     private int leftPos, topPos;
     private final int imgWidth = 176, imgHeight = 166;
@@ -48,9 +48,9 @@ public class PortRulesScreen extends Screen {
     private final Runnable onClose;
     private FakeWorldScene scene;
     private FakeWorldWidget fakeWorldWidget;
-    private Vec3d cameraTarget;
+    private Vec3 cameraTarget;
     private Direction selectedSide = Direction.NORTH;
-    private final Map<Direction, ButtonWidget> sideButtons = new EnumMap<>(Direction.class);
+    private final Map<Direction, Button> sideButtons = new EnumMap<>(Direction.class);
 
     public PortRulesScreen(Screen parent, PieceData pieceData, Runnable onClose) {
         super(TITLE);
@@ -73,22 +73,22 @@ public class PortRulesScreen extends Screen {
         CameraPose initialPose = computeCameraPose(this.selectedSide);
         this.scene = FakeWorldSceneBuilder.create()
                 .camera(initialPose.position(), initialPose.yaw(), initialPose.pitch())
-                .populate(ctx -> ctx.addVariedBlockList(BlockPos.ORIGIN, this.pieceData.variedBlockList))
+                .populate(ctx -> ctx.addVariedBlockList(BlockPos.ZERO, this.pieceData.variedBlockList))
                 .build();
 
-        this.fakeWorldWidget = addDrawableChild(new FakeWorldWidget.Builder()
+        this.fakeWorldWidget = addRenderableWidget(new FakeWorldWidget.Builder()
                 .scene(this.scene)
                 .position(this.leftPos + 8, this.topPos + 18)
                 .size(PREVIEW_SIZE, PREVIEW_SIZE)
                 .enableInteraction(true)
                 .build());
-        this.scene.setAnchor(BlockPos.ORIGIN, PREVIEW_SIZE / 2, PREVIEW_SIZE / 2);
+        this.scene.setAnchor(BlockPos.ZERO, PREVIEW_SIZE / 2, PREVIEW_SIZE / 2);
         this.scene.setScaleMultiplier(5f);
 
         initSideButtons();
 
-        addDrawableChild(ButtonWidget.builder(ScreenTexts.BACK, button -> close())
-                .dimensions(this.leftPos + this.imgWidth / 2 - 50, this.topPos + this.imgHeight - 30, 100, 20)
+        addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> onClose())
+                .bounds(this.leftPos + this.imgWidth / 2 - 50, this.topPos + this.imgHeight - 30, 100, 20)
                 .build());
     }
 
@@ -109,9 +109,9 @@ public class PortRulesScreen extends Screen {
         updateSideButtons();
     }
 
-    private void addSideButton(Direction direction, Text label, int x, int y, int width, int height) {
-        ButtonWidget button = addDrawableChild(ButtonWidget.builder(label, btn -> selectSide(direction))
-                .dimensions(x, y, width, height)
+    private void addSideButton(Direction direction, Component label, int x, int y, int width, int height) {
+        Button button = addRenderableWidget(Button.builder(label, btn -> selectSide(direction))
+                .bounds(x, y, width, height)
                 .build());
         this.sideButtons.put(direction, button);
     }
@@ -126,7 +126,7 @@ public class PortRulesScreen extends Screen {
     }
 
     private void updateSideButtons() {
-        for (Map.Entry<Direction, ButtonWidget> entry : this.sideButtons.entrySet()) {
+        for (Map.Entry<Direction, Button> entry : this.sideButtons.entrySet()) {
             entry.getValue().active = entry.getKey() != this.selectedSide;
         }
     }
@@ -143,51 +143,51 @@ public class PortRulesScreen extends Screen {
         if (this.cameraTarget == null || this.scene == null)
             return;
 
-        Vec3d current = this.scene.getCameraPosition();
-        if (current.squaredDistanceTo(this.cameraTarget) <= CAMERA_SNAP_DISTANCE_SQ) {
+        Vec3 current = this.scene.getCameraPosition();
+        if (current.distanceToSqr(this.cameraTarget) <= CAMERA_SNAP_DISTANCE_SQ) {
             setCameraAt(this.cameraTarget);
             return;
         }
 
-        var next = new Vec3d(
-                MathHelper.lerp(CAMERA_LERP, current.x, this.cameraTarget.x),
-                MathHelper.lerp(CAMERA_LERP, current.y, this.cameraTarget.y),
-                MathHelper.lerp(CAMERA_LERP, current.z, this.cameraTarget.z)
+        var next = new Vec3(
+                Mth.lerp(CAMERA_LERP, current.x, this.cameraTarget.x),
+                Mth.lerp(CAMERA_LERP, current.y, this.cameraTarget.y),
+                Mth.lerp(CAMERA_LERP, current.z, this.cameraTarget.z)
         );
         setCameraAt(next);
     }
 
-    private void setCameraAt(Vec3d position) {
-        var center = new Vec3d(0.5, 0.5, 0.5);
-        Vec3d toCenter = center.subtract(position).normalize();
+    private void setCameraAt(Vec3 position) {
+        var center = new Vec3(0.5, 0.5, 0.5);
+        Vec3 toCenter = center.subtract(position).normalize();
         float yaw = (float) (Math.toDegrees(Math.atan2(toCenter.z, toCenter.x)) + 90.0);
         float pitch = (float) -Math.toDegrees(Math.asin(toCenter.y));
         this.scene.setCamera(position, yaw, pitch);
     }
 
     private static CameraPose computeCameraPose(Direction direction) {
-        var center = new Vec3d(0.5, 0.5, 0.5);
-        var offset = new Vec3d(direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ())
-                .multiply(CAMERA_DISTANCE);
-        Vec3d position = center.add(offset);
-        Vec3d toCenter = center.subtract(position).normalize();
+        var center = new Vec3(0.5, 0.5, 0.5);
+        var offset = new Vec3(direction.getStepX(), direction.getStepY(), direction.getStepZ())
+                .scale(CAMERA_DISTANCE);
+        Vec3 position = center.add(offset);
+        Vec3 toCenter = center.subtract(position).normalize();
         float yaw = (float) (Math.toDegrees(Math.atan2(toCenter.z, toCenter.x)) + 90.0);
         float pitch = (float) -Math.toDegrees(Math.asin(toCenter.y));
         return new CameraPose(position, yaw, pitch);
     }
 
-    private record CameraPose(Vec3d position, float yaw, float pitch) {
+    private record CameraPose(Vec3 position, float yaw, float pitch) {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         if (this.fakeWorldWidget != null && this.scene != null) {
             this.scene.close();
             this.fakeWorldWidget = null;
             this.scene = null;
         }
 
-        MinecraftClient client = this.client;
+        Minecraft client = this.minecraft;
         if (client != null) {
             client.setScreen(this.parent);
         }
@@ -196,7 +196,7 @@ public class PortRulesScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (this.scene != null) {
                 float sensitivity = 0.35F;
@@ -209,7 +209,7 @@ public class PortRulesScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         super.renderBackground(context, mouseX, mouseY, deltaTicks);
         ScreenUtils.drawNineSlicedTexture(context, GUI_BORDER_TEXTURE,
                 this.leftPos, this.topPos,
@@ -223,13 +223,13 @@ public class PortRulesScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
-        context.drawText(this.textRenderer, this.title,
+        context.drawString(this.font, this.title,
                 this.leftPos + this.titleX,
                 this.topPos + this.titleY,
                 0xFF404040, false);
-        context.drawText(this.textRenderer, SIDES_TITLE,
+        context.drawString(this.font, SIDES_TITLE,
                 this.leftPos + this.imgWidth + BORDER_SLICE,
                 this.topPos + 10,
                 0xFF404040, false);

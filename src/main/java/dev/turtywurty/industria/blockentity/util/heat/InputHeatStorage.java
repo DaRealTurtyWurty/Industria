@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity.util.heat;
 
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class InputHeatStorage extends SyncingHeatStorage {

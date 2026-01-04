@@ -5,22 +5,21 @@ import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementCriterion;
-import net.minecraft.advancement.AdvancementRequirements;
-import net.minecraft.advancement.AdvancementRewards;
-import net.minecraft.advancement.criterion.RecipeUnlockedCriterion;
-import net.minecraft.data.recipe.CraftingRecipeJsonBuilder;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.item.Item;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRequirements;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
+public class MixerRecipeBuilder implements RecipeBuilder {
     private final List<IndustriaIngredient> inputs = new ArrayList<>();
     private final FluidStack inputFluid;
     private final int minTemperature, maxTemperature;
@@ -29,7 +28,7 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
     private final int processTime;
 
     private final RecipeCategory category;
-    private final Map<String, AdvancementCriterion<?>> criteria = new HashMap<>();
+    private final Map<String, Criterion<?>> criteria = new HashMap<>();
 
     public MixerRecipeBuilder(Collection<IndustriaIngredient> inputs, @Nullable FluidStack inputFluid,
                               int minTemperature, int maxTemperature,
@@ -51,7 +50,7 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
     }
 
     @Override
-    public MixerRecipeBuilder criterion(String name, AdvancementCriterion<?> criterion) {
+    public MixerRecipeBuilder unlockedBy(String name, Criterion<?> criterion) {
         this.criteria.put(name, criterion);
         return this;
     }
@@ -62,20 +61,20 @@ public class MixerRecipeBuilder implements CraftingRecipeJsonBuilder {
     }
 
     @Override
-    public Item getOutputItem() {
+    public Item getResult() {
         return this.output.item();
     }
 
     @Override
-    public void offerTo(RecipeExporter exporter, RegistryKey<Recipe<?>> recipeKey) {
-        Advancement.Builder builder = exporter.getAdvancementBuilder()
-                .criterion("has_the_recipe", RecipeUnlockedCriterion.create(recipeKey))
-                .rewards(AdvancementRewards.Builder.recipe(recipeKey))
-                .criteriaMerger(AdvancementRequirements.CriterionMerger.OR);
-        this.criteria.forEach(builder::criterion);
+    public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
+        Advancement.Builder builder = exporter.advancement()
+                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeKey))
+                .rewards(net.minecraft.advancements.AdvancementRewards.Builder.recipe(recipeKey))
+                .requirements(AdvancementRequirements.Strategy.OR);
+        this.criteria.forEach(builder::addCriterion);
 
         exporter.accept(recipeKey,
                 new MixerRecipe(this.inputs, this.inputFluid, this.minTemperature, this.maxTemperature, this.output, this.outputSlurry, this.processTime),
-                builder.build(recipeKey.getValue().withPrefixedPath("recipes/" + this.category.getName() + "/")));
+                builder.build(recipeKey.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 }

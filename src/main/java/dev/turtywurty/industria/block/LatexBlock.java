@@ -1,24 +1,24 @@
 package dev.turtywurty.industria.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public interface LatexBlock {
-    IntProperty LATEX_LEVEL = IntProperty.of("latex_level", 0, 5);
+    IntegerProperty LATEX_LEVEL = IntegerProperty.create("latex_level", 0, 5);
 
-    default BlockState withRandomLatex(ItemPlacementContext ctx, BlockState superState, Block block) {
-        BlockState state = superState == null ? block.getDefaultState() : superState;
-        return state.with(LATEX_LEVEL, ctx.getWorld().random.nextBetween(1, 5));
+    default BlockState withRandomLatex(BlockPlaceContext ctx, BlockState superState, Block block) {
+        BlockState state = superState == null ? block.defaultBlockState() : superState;
+        return state.setValue(LATEX_LEVEL, ctx.getLevel().getRandom().nextIntBetweenInclusive(1, 5));
     }
 
-    default void tickLatex(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    default void tickLatex(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if(random.nextInt(10) == 0){
-            world.setBlockState(pos, state.with(LATEX_LEVEL, state.get(LATEX_LEVEL) - 1));
+            world.setBlockAndUpdate(pos, state.setValue(LATEX_LEVEL, state.getValue(LATEX_LEVEL) - 1));
         }
     }
 }

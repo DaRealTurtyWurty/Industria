@@ -18,16 +18,16 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FluidTankBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("fluid_tank");
+    public static final Component TITLE = Industria.containerTitle("fluid_tank");
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private boolean isExtractMode = false;
@@ -58,7 +58,7 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         if (this.isExtractMode) {
@@ -68,7 +68,7 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
 
             Map<Storage<FluidVariant>, Long> storages = new HashMap<>();
             for (Direction direction : Direction.values()) {
-                Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.world, this.pos.offset(direction), direction.getOpposite());
+                Storage<FluidVariant> fluidStorage = FluidStorage.SIDED.find(this.level, this.worldPosition.relative(direction), direction.getOpposite());
                 if (fluidStorage == null || !fluidStorage.supportsInsertion())
                     continue;
 
@@ -116,14 +116,14 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         view.putBoolean("ExtractMode", this.isExtractMode);
         ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        this.isExtractMode = view.getBoolean("ExtractMode", false);
+    protected void loadAdditional(ValueInput view) {
+        this.isExtractMode = view.getBooleanOr("ExtractMode", false);
         ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
     }
 
@@ -136,17 +136,17 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new FluidTankScreenHandler(syncId, playerInventory, this);
     }
 }

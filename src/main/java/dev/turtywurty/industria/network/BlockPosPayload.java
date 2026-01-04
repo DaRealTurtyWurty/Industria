@@ -1,18 +1,18 @@
 package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record BlockPosPayload(BlockPos pos) implements HasPositionPayload {
-    public static final Id<BlockPosPayload> ID = new Id<>(Industria.id("block_pos"));
-    public static final PacketCodec<RegistryByteBuf, BlockPosPayload> CODEC =
-            PacketCodec.tuple(BlockPos.PACKET_CODEC, BlockPosPayload::pos, BlockPosPayload::new);
+    public static final Type<BlockPosPayload> ID = new Type<>(Industria.id("block_pos"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, BlockPosPayload> CODEC =
+            StreamCodec.composite(BlockPos.STREAM_CODEC, BlockPosPayload::pos, BlockPosPayload::new);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

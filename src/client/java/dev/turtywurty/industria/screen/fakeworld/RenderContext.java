@@ -1,17 +1,17 @@
 package dev.turtywurty.industria.screen.fakeworld;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 public record RenderContext(
-        DrawContext guiContext,
-        MatrixStack matrices,
-        VertexConsumerProvider.Immediate consumers,
+        GuiGraphics guiContext,
+        PoseStack matrices,
+        MultiBufferSource.BufferSource consumers,
         float tickDelta,
         int framebufferWidth,
         int framebufferHeight,
-        ClientWorld world
+        ClientLevel world
 ) {
 }

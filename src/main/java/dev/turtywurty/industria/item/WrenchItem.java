@@ -1,34 +1,34 @@
 package dev.turtywurty.industria.item;
 
 import dev.turtywurty.industria.block.abstraction.Wrenchable;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class WrenchItem extends Item {
-    public WrenchItem(Settings settings) {
+    public WrenchItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
-        if (!(world instanceof ServerWorld serverWorld))
-            return ActionResult.PASS;
+    public InteractionResult useOn(UseOnContext context) {
+        Level world = context.getLevel();
+        if (!(world instanceof ServerLevel serverWorld))
+            return InteractionResult.PASS;
 
-        PlayerEntity player = context.getPlayer();
+        Player player = context.getPlayer();
         if (player == null)
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
 
-        BlockPos pos = context.getBlockPos();
+        BlockPos pos = context.getClickedPos();
         BlockState state = world.getBlockState(pos);
         if (!(state.getBlock() instanceof Wrenchable wrenchable))
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
 
         return wrenchable.onWrenched(serverWorld, pos, player, context);
     }

@@ -6,7 +6,7 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 
 public class FluidStorageInit {
     public static void init() {
@@ -27,7 +27,7 @@ public class FluidStorageInit {
         FluidStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getFluidProvider, BlockEntityTypeInit.ARC_FURNACE);
 
         FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            if (world instanceof ServerWorld serverWorld) {
+            if (world instanceof ServerLevel serverWorld) {
                 return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.FLUID, pos);
             }
 

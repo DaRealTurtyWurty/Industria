@@ -2,10 +2,10 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.recipe.*;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 
 public class RecipeTypeInit {
     public static final RecipeType<AlloyFurnaceRecipe> ALLOY_FURNACE =
@@ -42,7 +42,7 @@ public class RecipeTypeInit {
             register("centrifugal_concentrator", CentrifugalConcentratorRecipe.Type.INSTANCE);
 
     public static <T extends Recipe<?>> RecipeType<T> register(String name, RecipeType<T> type) {
-        return Registry.register(Registries.RECIPE_TYPE, Industria.id(name), type);
+        return Registry.register(BuiltInRegistries.RECIPE_TYPE, Industria.id(name), type);
     }
 
     public static void init() {}

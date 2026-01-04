@@ -1,18 +1,18 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.widget.util.Orientation;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.network.chat.Component;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.function.Consumer;
 
 // TODO: Use texture for the energy bar instead of a solid color fill
-public class EnergyWidget implements Drawable, Widget {
+public class EnergyWidget implements Renderable, LayoutElement {
     private final EnergyStorage energyStorage;
     private final int width, height;
     private int x, y;
@@ -30,7 +30,7 @@ public class EnergyWidget implements Drawable, Widget {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         long currentEnergy = this.energyStorage.getAmount();
         long maxEnergy = this.energyStorage.getCapacity();
         long energy = Math.min(maxEnergy, Math.max(0, currentEnergy));
@@ -51,9 +51,9 @@ public class EnergyWidget implements Drawable, Widget {
         }
     }
 
-    protected void drawTooltip(DrawContext context, int mouseX, int mouseY) {
-        context.drawTooltip(MinecraftClient.getInstance().textRenderer,
-                Text.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"),
+    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
+        context.setTooltipForNextFrame(Minecraft.getInstance().font,
+                Component.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"),
                 mouseX, mouseY);
     }
 
@@ -100,7 +100,7 @@ public class EnergyWidget implements Drawable, Widget {
     }
 
     @Override
-    public void forEachChild(Consumer<ClickableWidget> consumer) {}
+    public void visitWidgets(Consumer<AbstractWidget> consumer) {}
 
     private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
         return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;

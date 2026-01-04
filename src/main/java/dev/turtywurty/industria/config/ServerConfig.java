@@ -3,7 +3,7 @@ package dev.turtywurty.industria.config;
 import com.google.gson.JsonObject;
 import dev.turtywurty.industria.Industria;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,8 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 public class ServerConfig {
-    private static final WorldSavePath CONFIG_PATH = new WorldSavePath("config/" + Industria.MOD_ID + ".json");
-    private static final WorldSavePath BACKUP_PATH = new WorldSavePath("config/" + Industria.MOD_ID + ".json.bak");
+    private static final LevelResource CONFIG_PATH = new LevelResource("config/" + Industria.MOD_ID + ".json");
+    private static final LevelResource BACKUP_PATH = new LevelResource("config/" + Industria.MOD_ID + ".json.bak");
 
     private static ServerConfig currentConfig;
 
@@ -33,7 +33,7 @@ public class ServerConfig {
     }
 
     private static ServerConfig readConfig(MinecraftServer server) {
-        Path configPath = server.getSavePath(CONFIG_PATH);
+        Path configPath = server.getWorldPath(CONFIG_PATH);
         try {
             var config = new ServerConfig();
             if (Files.notExists(configPath)) {
@@ -58,7 +58,7 @@ public class ServerConfig {
     }
 
     private static void writeConfig(ServerConfig config, MinecraftServer server) {
-        Path configPath = server.getSavePath(CONFIG_PATH);
+        Path configPath = server.getWorldPath(CONFIG_PATH);
         try {
             Files.createDirectories(configPath.getParent());
             JsonObject json = config.serialize();
@@ -69,11 +69,11 @@ public class ServerConfig {
     }
 
     private static void backupConfig(MinecraftServer server) {
-        Path configPath = server.getSavePath(CONFIG_PATH);
+        Path configPath = server.getWorldPath(CONFIG_PATH);
         if (Files.notExists(configPath))
             return;
 
-        Path backupPath = server.getSavePath(BACKUP_PATH);
+        Path backupPath = server.getWorldPath(BACKUP_PATH);
         try {
             Files.createDirectories(backupPath.getParent());
             Files.move(configPath, backupPath, StandardCopyOption.REPLACE_EXISTING);

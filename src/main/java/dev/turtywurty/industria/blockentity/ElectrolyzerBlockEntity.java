@@ -20,7 +20,7 @@ import dev.turtywurty.industria.blockentity.util.heat.SyncingHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -41,28 +41,28 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -71,7 +71,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, AutoMultiblockable {
-    public static final Text TITLE = Industria.containerTitle("electrolyzer");
+    public static final Component TITLE = Industria.containerTitle("electrolyzer");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.y() == 1)
@@ -115,7 +115,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                     .build()
     );
 
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedGasStorage<SingleGasStorage> wrappedGasStorage = new WrappedGasStorage<>();
@@ -125,7 +125,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     private int progress, maxProgress;
     private int electrolyteConversionProgress, maxElectrolyteConversionProgress;
-    private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
+    private final ContainerData propertyDelegate = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -133,7 +133,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 case 1 -> maxProgress;
                 case 2 -> electrolyteConversionProgress;
                 case 3 -> maxElectrolyteConversionProgress;
-                default -> throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + size());
+                default -> throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + getCount());
             };
         }
 
@@ -144,33 +144,33 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 case 1 -> maxProgress = value;
                 case 2 -> electrolyteConversionProgress = value;
                 case 3 -> maxElectrolyteConversionProgress = value;
-                default -> throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + size());
+                default -> throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + getCount());
             }
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 4;
         }
     };
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
     private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
     private GasStack leftoverOutputGas = GasStack.EMPTY;
 
     public ElectrolyzerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.ELECTROLYZER, BlockEntityTypeInit.ELECTROLYZER, pos, state);
 
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.SOUTH);
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1,
-                (stack, integer) -> stack.isIn(TagList.Items.ELECTROLYSIS_RODS)), Direction.WEST);
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
+        this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.SOUTH);
+        this.wrappedContainerStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1,
+                (stack, integer) -> stack.is(TagList.Items.ELECTROLYSIS_RODS)), Direction.WEST);
+        this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createFluidPredicate(() -> {
                     SyncingFluidStorage outputFluidTank = getOutputFluidStorage();
                     return new FluidStack(outputFluidTank.variant, outputFluidTank.amount);
                 })), Direction.NORTH);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createGasPredicate(() -> {
                     SyncingGasStorage outputGasTank = getOutputGasStorage();
                     return new GasStack(outputGasTank.variant, outputGasTank.amount);
@@ -187,7 +187,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     @Override
@@ -206,7 +206,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         processOutputs();
@@ -228,7 +228,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 electrolyteFluidStorage
         );
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<ElectrolyzerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+            Optional<RecipeHolder<ElectrolyzerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
@@ -239,7 +239,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
             return;
         }
 
-        Optional<RecipeEntry<ElectrolyzerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+        Optional<RecipeHolder<ElectrolyzerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
             this.maxProgress = 0;
@@ -249,7 +249,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         ElectrolyzerRecipe recipe = recipeEntry.get().value();
-        if (recipe.electrolyteItem().testForRecipe(electrolyteInventory.getStack(0))) {
+        if (recipe.electrolyteItem().testForRecipe(electrolyteInventory.getItem(0))) {
             FluidStack fluidStack = recipe.electrolyteFluid();
             if (electrolyteFluidStorage.canInsert(fluidStack)) {
                 if (this.electrolyteConversionProgress >= this.maxElectrolyteConversionProgress) {
@@ -280,8 +280,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 this.leftoverOutputGas = recipe.outputGas();
             }
 
-            inputInventory.getStack(0).decrement(recipe.input().stackData().count());
-            anodeInventory.getStack(0).damage(1, (ServerWorld) this.world, null, item -> {
+            inputInventory.getItem(0).shrink(recipe.input().stackData().count());
+            anodeInventory.getItem(0).hurtAndBreak(1, (ServerLevel) this.level, null, item -> {
             });
 
             this.progress = 0;
@@ -321,7 +321,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     private void handleOutputSlots() {
         PredicateSimpleInventory outputFluidInv = getOutputFluidInventory();
         if (!outputFluidInv.isEmpty()) {
-            ItemStack stack = outputFluidInv.getStack(0);
+            ItemStack stack = outputFluidInv.getItem(0);
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
             if (storage != null && storage.supportsInsertion()) {
                 SyncingFluidStorage outputFluid = getOutputFluidStorage();
@@ -340,7 +340,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
         PredicateSimpleInventory outputGasInv = getOutputGasInventory();
         if (!outputGasInv.isEmpty()) {
-            ItemStack stack = outputGasInv.getStack(0);
+            ItemStack stack = outputGasInv.getItem(0);
             Storage<GasVariant> storage = GasStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
             if (storage != null && storage.supportsInsertion()) {
                 SyncingGasStorage gasStorage = getOutputGasStorage();
@@ -362,16 +362,16 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         return !this.leftoverOutputFluid.isEmpty() || !this.leftoverOutputGas.isEmpty();
     }
 
-    private Optional<RecipeEntry<ElectrolyzerRecipe>> getCurrentRecipe(ElectrolyzerRecipeInput recipeInput) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<ElectrolyzerRecipe>> getCurrentRecipe(ElectrolyzerRecipeInput recipeInput) {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.getRecipeManager().getFirstMatch(ElectrolyzerRecipe.Type.INSTANCE, recipeInput, serverWorld);
+        return serverWorld.recipeAccess().getRecipeFor(ElectrolyzerRecipe.Type.INSTANCE, recipeInput, serverWorld);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void saveAdditional(ValueOutput view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "GasStorage", this.wrappedGasStorage);
@@ -380,30 +380,30 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (!this.leftoverOutputFluid.isEmpty()) {
-            view.put("LeftoverOutputFluid", FluidStack.CODEC.codec(), this.leftoverOutputFluid);
+            view.store("LeftoverOutputFluid", FluidStack.CODEC.codec(), this.leftoverOutputFluid);
         }
 
         if (!this.leftoverOutputGas.isEmpty()) {
-            view.put("LeftoverOutputGas", GasStack.CODEC.codec(), this.leftoverOutputGas);
+            view.store("LeftoverOutputGas", GasStack.CODEC.codec(), this.leftoverOutputGas);
         }
     }
 
     @Override
-    protected void readData(ReadView view) {
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void loadAdditional(ValueInput view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "GasStorage", this.wrappedGasStorage);
         ViewUtils.readChild(view, "HeatStorage", this.wrappedHeatStorage);
 
-        this.progress = view.getInt("Progress", 0);
-        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.progress = view.getIntOr("Progress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
 
-        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+        this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
                 .orElse(null);
 
         this.leftoverOutputFluid = view.read("LeftoverOutputFluid", FluidStack.CODEC.codec())
@@ -414,47 +414,47 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ElectrolyzerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.propertyDelegate);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new ElectrolyzerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate);
     }
 
     public SyncingSimpleInventory getInputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public SyncingSimpleInventory getElectrolyteInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
     }
 
     public PredicateSimpleInventory getAnodeInventory() {
-        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
+        return (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(2);
     }
 
     public SyncingSimpleInventory getCathodeInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(3);
     }
 
     public PredicateSimpleInventory getOutputFluidInventory() {
-        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(4);
+        return (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(4);
     }
 
     public PredicateSimpleInventory getOutputGasInventory() {
-        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(5);
+        return (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(5);
     }
 
     public InputFluidStorage getElectrolyteFluidStorage() {
@@ -477,8 +477,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
         return (SyncingHeatStorage) this.wrappedHeatStorage.getStorage(0);
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
@@ -506,7 +506,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     // 3 2 2
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -517,8 +517,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                     if (x == 0 && z == 0 && y == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);

@@ -1,21 +1,21 @@
 package dev.turtywurty.industria.state;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.renderer.block.IndustriaBlockEntityRenderer;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.HeldItemContext;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.entity.ItemOwner;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class IndustriaBlockEntityRenderState extends BlockEntityRenderState {
-    public final List<ItemRenderState> itemRenderStates = new ArrayList<>();
+    public final List<ItemStackRenderState> itemRenderStates = new ArrayList<>();
     public float tickProgress;
 
     public IndustriaBlockEntityRenderState(int itemRenderStateCount) {
@@ -26,11 +26,11 @@ public class IndustriaBlockEntityRenderState extends BlockEntityRenderState {
     }
 
     public void addItemRenderState() {
-        this.itemRenderStates.add(new ItemRenderState());
+        this.itemRenderStates.add(new ItemStackRenderState());
     }
 
-    public void updateItemRenderState(int index, IndustriaBlockEntityRenderer<?, ?> renderer, BlockEntity blockEntity, ItemStack stack, ItemDisplayContext displayContext, HeldItemContext heldItemContext, int seed) {
-        renderer.getItemModelManager().clearAndUpdate(this.itemRenderStates.get(index), stack, displayContext, blockEntity.getWorld(), heldItemContext, seed);
+    public void updateItemRenderState(int index, IndustriaBlockEntityRenderer<?, ?> renderer, BlockEntity blockEntity, ItemStack stack, ItemDisplayContext displayContext, ItemOwner heldItemContext, int seed) {
+        renderer.getItemModelManager().updateForTopItem(this.itemRenderStates.get(index), stack, displayContext, blockEntity.getLevel(), heldItemContext, seed);
     }
 
     public void updateItemRenderState(int index, IndustriaBlockEntityRenderer<?, ?> renderer, BlockEntity blockEntity, ItemStack stack, ItemDisplayContext displayContext) {
@@ -41,7 +41,7 @@ public class IndustriaBlockEntityRenderState extends BlockEntityRenderState {
         updateItemRenderState(index, renderer, blockEntity, stack, ItemDisplayContext.NONE);
     }
 
-    public void renderItemRenderState(int index, MatrixStack matrices, OrderedRenderCommandQueue queue) {
-        this.itemRenderStates.get(index).render(matrices, queue, this.lightmapCoordinates, OverlayTexture.DEFAULT_UV, 0);
+    public void renderItemRenderState(int index, PoseStack matrices, SubmitNodeCollector queue) {
+        this.itemRenderStates.get(index).submit(matrices, queue, this.lightCoords, OverlayTexture.NO_OVERLAY, 0);
     }
 }

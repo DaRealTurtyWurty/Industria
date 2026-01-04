@@ -6,51 +6,51 @@ import dev.turtywurty.industria.network.BatteryChargeModePayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 
-public class BatteryScreen extends HandledScreen<BatteryScreenHandler> {
+public class BatteryScreen extends AbstractContainerScreen<BatteryScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/battery.png");
 
-    public BatteryScreen(BatteryScreenHandler handler, PlayerInventory inventory, Text title) {
+    public BatteryScreen(BatteryScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
-        BatteryBlockEntity blockEntity = this.handler.getBlockEntity();
+        BatteryBlockEntity blockEntity = this.menu.getBlockEntity();
 
-        addDrawableChild(CyclingButtonWidget.onOffBuilder(blockEntity.getChargeMode() == BatteryBlockEntity.ChargeMode.CHARGE)
-                .omitKeyText()
-                .build(this.x + 144, this.y + 10, 20, 20, BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT,
+        addRenderableWidget(CycleButton.onOffBuilder(blockEntity.getChargeMode() == BatteryBlockEntity.ChargeMode.CHARGE)
+                .displayOnlyValue()
+                .create(this.leftPos + 144, this.topPos + 10, 20, 20, BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT,
                         (button, value) ->
-                                ClientPlayNetworking.send(new BatteryChargeModePayload(BatteryScreen.this.handler.getChargeMode().next()))));
+                                ClientPlayNetworking.send(new BatteryChargeModePayload(BatteryScreen.this.menu.getChargeMode().next()))));
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        int energy = MathHelper.ceil(this.handler.getEnergyPercent() * 66);
-        context.fill(this.x + 144, this.y + 10 + 66 - energy, this.x + 144 + 20, this.y + 10 + 66, 0xFFD4AF37);
+        int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66, 0xFFD4AF37);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
 
-        int energy = MathHelper.ceil(this.handler.getEnergyPercent() * 66);
-        if (isPointWithinBounds(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {
-            context.drawTooltip(this.textRenderer, Text.literal(this.handler.getEnergy() + " / " + this.handler.getMaxEnergy() + " FE"), mouseX, mouseY);
+        int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
+        if (isHovering(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {
+            context.setTooltipForNextFrame(this.font, Component.literal(this.menu.getEnergy() + " / " + this.menu.getMaxEnergy() + " FE"), mouseX, mouseY);
         }
     }
 }

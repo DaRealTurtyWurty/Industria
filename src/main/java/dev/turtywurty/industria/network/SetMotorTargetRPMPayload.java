@@ -2,17 +2,17 @@ package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record SetMotorTargetRPMPayload(float targetRPM) implements CustomPayload {
-    public static final Id<SetMotorTargetRPMPayload> ID = new Id<>(Industria.id("set_motor_target_rpm"));
-    public static final PacketCodec<ByteBuf, SetMotorTargetRPMPayload> CODEC =
-            PacketCodec.tuple(PacketCodecs.FLOAT, SetMotorTargetRPMPayload::targetRPM, SetMotorTargetRPMPayload::new);
+public record SetMotorTargetRPMPayload(float targetRPM) implements CustomPacketPayload {
+    public static final Type<SetMotorTargetRPMPayload> ID = new Type<>(Industria.id("set_motor_target_rpm"));
+    public static final StreamCodec<ByteBuf, SetMotorTargetRPMPayload> CODEC =
+            StreamCodec.composite(ByteBufCodecs.FLOAT, SetMotorTargetRPMPayload::targetRPM, SetMotorTargetRPMPayload::new);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

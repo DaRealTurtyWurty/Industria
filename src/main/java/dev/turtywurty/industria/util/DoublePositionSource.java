@@ -5,13 +5,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.init.PositionSourceTypeInit;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.event.PositionSource;
-import net.minecraft.world.event.PositionSourceType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.level.gameevent.PositionSourceType;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
@@ -25,15 +25,15 @@ public record DoublePositionSource(double x, double y, double z) implements Posi
             Codec.DOUBLE.fieldOf("z").forGetter(DoublePositionSource::z)
     ).apply(instance, DoublePositionSource::new));
 
-    public static final PacketCodec<ByteBuf, DoublePositionSource> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.DOUBLE, DoublePositionSource::x,
-            PacketCodecs.DOUBLE, DoublePositionSource::y,
-            PacketCodecs.DOUBLE, DoublePositionSource::z,
+    public static final StreamCodec<ByteBuf, DoublePositionSource> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.DOUBLE, DoublePositionSource::x,
+            ByteBufCodecs.DOUBLE, DoublePositionSource::y,
+            ByteBufCodecs.DOUBLE, DoublePositionSource::z,
             DoublePositionSource::new);
 
     @Override
-    public Optional<Vec3d> getPos(World world) {
-        return Optional.of(new Vec3d(this.x, this.y, this.z));
+    public Optional<Vec3> getPosition(Level world) {
+        return Optional.of(new Vec3(this.x, this.y, this.z));
     }
 
     @Override
@@ -43,13 +43,13 @@ public record DoublePositionSource(double x, double y, double z) implements Posi
 
     public static class Type implements PositionSourceType<DoublePositionSource> {
         @Override
-        public MapCodec<DoublePositionSource> getCodec() {
+        public MapCodec<DoublePositionSource> codec() {
             return CODEC;
         }
 
         @Override
-        public PacketCodec<? super RegistryByteBuf, DoublePositionSource> getPacketCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<? super RegistryFriendlyByteBuf, DoublePositionSource> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 }

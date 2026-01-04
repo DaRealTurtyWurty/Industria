@@ -5,7 +5,7 @@ import dev.turtywurty.industria.pipe.impl.network.CableNetwork;
 import team.reborn.energy.api.EnergyStorage;
 
 public class CableBlock extends PipeBlock<EnergyStorage, CableNetwork, Long> {
-    public CableBlock(Settings settings) {
+    public CableBlock(Properties settings) {
         super(settings, 6, TransferType.ENERGY);
     }
 

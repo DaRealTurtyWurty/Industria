@@ -2,15 +2,15 @@ package dev.turtywurty.industria.multiblock.old;
 
 import com.mojang.datafixers.util.Function3;
 import dev.turtywurty.industria.util.QuadConsumer;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -27,9 +27,9 @@ import java.util.function.BiConsumer;
  * </ul>
  */
 public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty, int numBlocks,
-                                                    QuadConsumer<World, PlayerEntity, BlockHitResult, BlockPos> onPrimaryBlockUse,
-                                                    BiConsumer<World, BlockPos> onMultiblockBreak,
-                                                    Function3<WorldView, BlockPos, Direction, VoxelShape> shapeFactory) {
+                                                    QuadConsumer<Level, Player, BlockHitResult, BlockPos> onPrimaryBlockUse,
+                                                    BiConsumer<Level, BlockPos> onMultiblockBreak,
+                                                    Function3<LevelReader, BlockPos, Direction, VoxelShape> shapeFactory) {
     /**
      * @param hasDirectionProperty Whether the multiblock has a direction property
      * @param numBlocks            The number of blocks in the multiblock
@@ -47,7 +47,7 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
      * @param hitResult The result of the block hit
      * @param pos       The position of the block
      */
-    public void onPrimaryBlockUse(World world, PlayerEntity player, BlockHitResult hitResult, BlockPos pos) {
+    public void onPrimaryBlockUse(Level world, Player player, BlockHitResult hitResult, BlockPos pos) {
         this.onPrimaryBlockUse.accept(world, player, hitResult, pos);
     }
 
@@ -57,7 +57,7 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
      * @param world The world in which the block is located
      * @param pos   The position of the block
      */
-    public void onMultiblockBreak(World world, BlockPos pos) {
+    public void onMultiblockBreak(Level world, BlockPos pos) {
         this.onMultiblockBreak.accept(world, pos);
     }
 
@@ -90,7 +90,7 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
      * @param direction The direction of the block
      * @return The shape of the multiblock at the specified position and direction
      */
-    public VoxelShape getShape(WorldView world, BlockPos pos, Direction direction) {
+    public VoxelShape getShape(LevelReader world, BlockPos pos, Direction direction) {
         return this.shapeFactory.apply(world, pos, direction);
     }
 
@@ -102,20 +102,20 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
     public static class Builder<T extends BlockEntity> {
         private final int numBlocks;
         private boolean hasDirectionProperty = true;
-        private QuadConsumer<World, PlayerEntity, BlockHitResult, BlockPos> onPrimaryBlockUse = (world, player, hitResult, pos) -> {
-            if (world.getBlockEntity(pos) instanceof NamedScreenHandlerFactory blockEntity) {
-                player.openHandledScreen(blockEntity);
+        private QuadConsumer<Level, Player, BlockHitResult, BlockPos> onPrimaryBlockUse = (world, player, hitResult, pos) -> {
+            if (world.getBlockEntity(pos) instanceof MenuProvider blockEntity) {
+                player.openMenu(blockEntity);
             }
         };
 
-        private BiConsumer<World, BlockPos> onMultiblockBreak = (world, pos) -> {
+        private BiConsumer<Level, BlockPos> onMultiblockBreak = (world, pos) -> {
             if (world.getBlockEntity(pos) instanceof Multiblockable blockEntity) {
                 blockEntity.onMultiblockBreak(world, pos);
             }
         };
 
         private final Map<Direction, VoxelShape> shapes = new HashMap<>();
-        private Function3<WorldView, BlockPos, Direction, VoxelShape> shapeFactory =
+        private Function3<LevelReader, BlockPos, Direction, VoxelShape> shapeFactory =
                 (world, pos, direction) -> shapes.get(direction);
 
         /**
@@ -144,7 +144,7 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
          * @param onPrimaryBlockUse The action to perform when the primary block is used.
          * @return This Builder instance for method chaining.
          */
-        public Builder<T> setOnPrimaryBlockUse(@NotNull QuadConsumer<World, PlayerEntity, BlockHitResult, BlockPos> onPrimaryBlockUse) {
+        public Builder<T> setOnPrimaryBlockUse(@NotNull QuadConsumer<Level, Player, BlockHitResult, BlockPos> onPrimaryBlockUse) {
             this.onPrimaryBlockUse = onPrimaryBlockUse;
             return this;
         }
@@ -155,7 +155,7 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
          * @param onMultiblockBreak The action to perform when the multiblock is broken.
          * @return This Builder instance for method chaining.
          */
-        public Builder<T> setOnMultiblockBreak(@NotNull BiConsumer<World, BlockPos> onMultiblockBreak) {
+        public Builder<T> setOnMultiblockBreak(@NotNull BiConsumer<Level, BlockPos> onMultiblockBreak) {
             this.onMultiblockBreak = onMultiblockBreak;
             return this;
         }
@@ -192,7 +192,7 @@ public record MultiblockType<T extends BlockEntity>(boolean hasDirectionProperty
          * @param shapeFactory A function that takes a WorldView, BlockPos, and Direction and returns a VoxelShape.
          * @return This Builder instance for method chaining.
          */
-        public Builder<T> shapeFactory(Function3<WorldView, BlockPos, Direction, VoxelShape> shapeFactory) {
+        public Builder<T> shapeFactory(Function3<LevelReader, BlockPos, Direction, VoxelShape> shapeFactory) {
             this.shapeFactory = shapeFactory;
             return this;
         }

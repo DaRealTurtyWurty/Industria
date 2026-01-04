@@ -10,33 +10,33 @@ import dev.turtywurty.industria.network.SyncPipeNetworkManagerPayload;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.PersistentStateType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorldPipeNetworks extends PersistentState {
+public class WorldPipeNetworks extends SavedData {
     public static final Codec<WorldPipeNetworks> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Data.CODEC.fieldOf("data").forGetter(WorldPipeNetworks::getData)
     ).apply(instance, WorldPipeNetworks::new));
 
-    private static final PersistentStateType<WorldPipeNetworks> TYPE = new PersistentStateType<>(
+    private static final SavedDataType<WorldPipeNetworks> TYPE = new SavedDataType<>(
             Industria.MOD_ID + ".pipe_networks",
             WorldPipeNetworks::new,
             CODEC,
             null
     );
 
-    public static WorldPipeNetworks getOrCreate(ServerWorld serverWorld) {
-        PersistentStateManager persistentStateManager = serverWorld.getPersistentStateManager();
-        return persistentStateManager.getOrCreate(TYPE);
+    public static WorldPipeNetworks getOrCreate(ServerLevel serverWorld) {
+        DimensionDataStorage persistentStateManager = serverWorld.getDataStorage();
+        return persistentStateManager.computeIfAbsent(TYPE);
     }
 
     private final Data data;
@@ -49,12 +49,12 @@ public class WorldPipeNetworks extends PersistentState {
         this.data = data;
     }
 
-    public static void syncToClient(PacketSender sender, ServerWorld serverWorld) {
+    public static void syncToClient(PacketSender sender, ServerLevel serverWorld) {
         WorldPipeNetworks worldPipeNetworks = getOrCreate(serverWorld);
         for (PipeNetworkManager<?, ?> manager : worldPipeNetworks.getPipeNetworkManagers()) {
-            sender.sendPacket(new SyncPipeNetworkManagerPayload(manager.getTransferType(), serverWorld.getRegistryKey(), manager.getPipeToNetworkId()));
+            sender.sendPacket(new SyncPipeNetworkManagerPayload(manager.getTransferType(), serverWorld.dimension(), manager.getPipeToNetworkId()));
             for (PipeNetwork<?> network : manager.getNetworks()) {
-                sender.sendPacket(new AddPipeNetworkPayload(serverWorld.getRegistryKey(), manager.getTransferType(), network));
+                sender.sendPacket(new AddPipeNetworkPayload(serverWorld.dimension(), manager.getTransferType(), network));
             }
         }
     }
@@ -107,7 +107,7 @@ public class WorldPipeNetworks extends PersistentState {
                 PipeNetworkManager.LIST_CODEC.fieldOf("pipeNetworkManagers").forGetter(Data::pipeNetworkManagers)
         ).apply(instance, Data::new));
 
-        public static final PacketCodec<RegistryByteBuf, Data> PACKET_CODEC =
-                PacketCodec.tuple(PipeNetworkManager.LIST_PACKET_CODEC, Data::pipeNetworkManagers, Data::new);
+        public static final StreamCodec<RegistryFriendlyByteBuf, Data> STREAM_CODEC =
+                StreamCodec.composite(PipeNetworkManager.LIST_STREAM_CODEC, Data::pipeNetworkManagers, Data::new);
     }
 }

@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Objects;
 
@@ -20,9 +20,9 @@ public record SlurryStack(SlurryVariant variant, long amount) {
             ).apply(instance, SlurryStack::new)
     );
 
-    public static final PacketCodec<RegistryByteBuf, SlurryStack> PACKET_CODEC = PacketCodec.tuple(
-            SlurryVariant.PACKET_CODEC, SlurryStack::variant,
-            PacketCodecs.LONG, SlurryStack::amount,
+    public static final StreamCodec<RegistryFriendlyByteBuf, SlurryStack> STREAM_CODEC = StreamCodec.composite(
+            SlurryVariant.STREAM_CODEC, SlurryStack::variant,
+            ByteBufCodecs.LONG, SlurryStack::amount,
             SlurryStack::new
     );
 

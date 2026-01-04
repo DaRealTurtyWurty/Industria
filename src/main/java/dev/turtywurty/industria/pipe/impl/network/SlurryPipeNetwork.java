@@ -13,8 +13,8 @@ import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Set;
 import java.util.UUID;
@@ -32,9 +32,9 @@ public class SlurryPipeNetwork extends PipeNetwork<Storage<SlurryVariant>> {
             },
             SlurryPipeNetwork::new);
 
-    public static final PacketCodec<RegistryByteBuf, SlurryPipeNetwork> PACKET_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, SlurryPipeNetwork> STREAM_CODEC =
             PipeNetwork.createPacketCodec(
-                    SlurryStack.PACKET_CODEC,
+                    SlurryStack.STREAM_CODEC,
                     network -> {
                         SingleSlurryStorage slurryStorage = (SingleSlurryStorage) network.storage;
                         return new SlurryStack(slurryStorage.getResource(), slurryStorage.getAmount());
@@ -47,8 +47,8 @@ public class SlurryPipeNetwork extends PipeNetwork<Storage<SlurryVariant>> {
                     SlurryPipeNetwork::new);
 
     public static final Codec<Set<SlurryPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final PacketCodec<RegistryByteBuf, Set<SlurryPipeNetwork>> SET_PACKET_CODEC =
-            ExtraPacketCodecs.setOf(PACKET_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<SlurryPipeNetwork>> SET_STREAM_CODEC =
+            ExtraPacketCodecs.setOf(STREAM_CODEC);
 
     public SlurryPipeNetwork(UUID id) {
         super(id, TransferType.SLURRY);

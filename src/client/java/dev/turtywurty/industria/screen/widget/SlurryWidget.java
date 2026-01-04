@@ -7,23 +7,23 @@ import dev.turtywurty.fabricslurryapi.client.handler.SlurryRenderHandlerRegistry
 import dev.turtywurty.industria.screen.widget.util.Orientation;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class SlurryWidget implements Drawable, Widget {
+public class SlurryWidget implements Renderable, LayoutElement {
     private final SingleSlurryStorage slurryTank;
     private final Supplier<BlockPos> posSupplier;
     private final Orientation orientation;
@@ -42,7 +42,7 @@ public class SlurryWidget implements Drawable, Widget {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         Slurry slurry = this.slurryTank.variant.getSlurry();
         long amount = this.slurryTank.getAmount();
 
@@ -51,9 +51,9 @@ public class SlurryWidget implements Drawable, Widget {
             return;
 
         BlockPos pos = this.posSupplier.get();
-        World world = MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
 
-        Sprite stillTexture = slurryRenderHandler.getSprite(world, pos);
+        TextureAtlasSprite stillTexture = slurryRenderHandler.getSprite(world, pos);
         int tintColor = slurryRenderHandler.getColor(world, pos);
 
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
@@ -70,23 +70,23 @@ public class SlurryWidget implements Drawable, Widget {
             fillWidth = (int) (width * percentage);
         }
 
-        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
 
         if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
 
-    protected void drawTooltip(DrawContext context, int mouseX, int mouseY) {
+    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
         Slurry slurry = this.slurryTank.variant.getSlurry();
 
         long amount = this.slurryTank.getAmount();
         long capacity = this.slurryTank.getCapacity();
 
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        Font textRenderer = Minecraft.getInstance().font;
         if (slurry != null && amount > 0) {
-            context.drawTooltip(textRenderer, Text.translatable("slurry." + slurry.id().split(":")[0] + "." + slurry.id().split(":")[1]), mouseX, mouseY);
-            context.drawTooltip(textRenderer, Text.literal(((int) (((float) amount / FluidConstants.BUCKET) * 1000)) + " / " + ((int) (((float) capacity / FluidConstants.BUCKET) * 1000)) + " mB"), mouseX, mouseY + 10);
+            context.setTooltipForNextFrame(textRenderer, Component.translatable("slurry." + slurry.id().split(":")[0] + "." + slurry.id().split(":")[1]), mouseX, mouseY);
+            context.setTooltipForNextFrame(textRenderer, Component.literal(((int) (((float) amount / FluidConstants.BUCKET) * 1000)) + " / " + ((int) (((float) capacity / FluidConstants.BUCKET) * 1000)) + " mB"), mouseX, mouseY + 10);
         }
     }
 
@@ -125,7 +125,7 @@ public class SlurryWidget implements Drawable, Widget {
     }
 
     @Override
-    public void forEachChild(Consumer<ClickableWidget> consumer) {
+    public void visitWidgets(Consumer<AbstractWidget> consumer) {
     }
 
     private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {

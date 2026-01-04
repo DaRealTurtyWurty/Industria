@@ -10,7 +10,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -28,25 +28,25 @@ import dev.turtywurty.industria.screenhandler.CrystallizerScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ import java.util.Optional;
 // aluminium hydroxide (gibbsite) (item)
 // sodium carbonate (item) - by-product
 public class CrystallizerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, AutoMultiblockable {
-    public static final Text TITLE = Industria.containerTitle("crystallizer");
+    public static final Component TITLE = Industria.containerTitle("crystallizer");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.y() == 3 && p.isCenterColumn())
@@ -92,18 +92,18 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     );
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private int progress;
     private int maxProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private ItemStack byproductItemStack = ItemStack.EMPTY;
     private int catalystUsesLeft;
     private int maxCatalystUses;
-    private final PropertyDelegate properties = new PropertyDelegate() {
+    private final ContainerData properties = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -127,7 +127,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 4;
         }
     };
@@ -138,9 +138,9 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
 
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 5, $ -> !isRunning()), Direction.SOUTH);
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET, $ -> !isRunning()), Direction.UP);
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.NORTH);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.EAST);
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
+        this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.NORTH);
+        this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.EAST);
     }
 
     public boolean isRunning() {
@@ -148,13 +148,13 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     @Override
@@ -170,13 +170,13 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         if (!this.outputItemStack.isEmpty()) {
             SyncingSimpleInventory outputInventory = getOutputInventory();
-            if (outputInventory.canInsert(this.outputItemStack)) {
-                this.outputItemStack = outputInventory.addStack(this.outputItemStack);
+            if (outputInventory.canAddItem(this.outputItemStack)) {
+                this.outputItemStack = outputInventory.addItem(this.outputItemStack);
                 update();
             }
 
@@ -185,8 +185,8 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
 
         if (!this.byproductItemStack.isEmpty()) {
             SyncingSimpleInventory byproductInventory = getByproductInventory();
-            if (byproductInventory.canInsert(this.byproductItemStack)) {
-                this.byproductItemStack = byproductInventory.addStack(this.byproductItemStack);
+            if (byproductInventory.canAddItem(this.byproductItemStack)) {
+                this.byproductItemStack = byproductInventory.addItem(this.byproductItemStack);
                 update();
             }
 
@@ -199,10 +199,10 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
 
         var waterFluidStack = new FluidStack(waterFluidStorage.variant, waterFluidStorage.amount);
         var crystalFluidStack = new FluidStack(crystalFluidStorage.variant, crystalFluidStorage.amount);
-        ItemStack catalystItemStack = catalystInventory.getStack(0);
+        ItemStack catalystItemStack = catalystInventory.getItem(0);
         var recipeInput = new CrystallizerRecipeInput(waterFluidStack, crystalFluidStack, catalystItemStack);
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<CrystallizerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+            Optional<RecipeHolder<CrystallizerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
@@ -245,8 +245,8 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         if (this.progress >= this.maxProgress) {
-            ItemStack output = recipe.createOutput(this.world.random);
-            ItemStack byproduct = recipe.createByProduct(this.world.random);
+            ItemStack output = recipe.createOutput(this.level.getRandom());
+            ItemStack byproduct = recipe.createByProduct(this.level.getRandom());
 
             if (catalystItemStack.isEmpty()) {
                 this.catalystUsesLeft = 0;
@@ -254,7 +254,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
             } else {
                 this.catalystUsesLeft--;
                 if (this.catalystUsesLeft <= 0) {
-                    catalystInventory.removeStack(0, 1);
+                    catalystInventory.removeItem(0, 1);
                 }
             }
 
@@ -276,47 +276,47 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
             waterFluidStorage.amount = Math.max(0, waterFluidStorage.amount - waterToRemove);
             crystalFluidStorage.amount = Math.max(0, crystalFluidStorage.amount - crystalToRemove);
 
-            this.nextOutputItemStack = recipe.createOutput(this.world.random);
+            this.nextOutputItemStack = recipe.createOutput(this.level.getRandom());
 
             update();
         }
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (!this.outputItemStack.isEmpty()) {
-            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
+            view.store("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.byproductItemStack.isEmpty()) {
-            view.put("ByproductStack", ItemStack.CODEC, this.byproductItemStack);
+            view.store("ByproductStack", ItemStack.CODEC, this.byproductItemStack);
         }
 
         view.putInt("CatalystUsesLeft", this.catalystUsesLeft);
         view.putInt("MaxCatalystUses", this.maxCatalystUses);
 
         if (!this.nextOutputItemStack.isEmpty()) {
-            view.put("NextOutputStack", ItemStack.CODEC, this.nextOutputItemStack);
+            view.store("NextOutputStack", ItemStack.CODEC, this.nextOutputItemStack);
         }
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
 
-        this.progress = view.getInt("Progress", 0);
-        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.progress = view.getIntOr("Progress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
 
         this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC)
                 .orElse(null);
@@ -327,27 +327,27 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
         this.byproductItemStack = view.read("ByproductItemStack", ItemStack.CODEC)
                 .orElse(ItemStack.EMPTY);
 
-        this.catalystUsesLeft = view.getInt("CatalystUsesLeft", 0);
-        this.maxCatalystUses = view.getInt("MaxCatalystUses", 0);
+        this.catalystUsesLeft = view.getIntOr("CatalystUsesLeft", 0);
+        this.maxCatalystUses = view.getIntOr("MaxCatalystUses", 0);
 
         this.nextOutputItemStack = view.read("NextOutputStack", ItemStack.CODEC)
                 .orElse(ItemStack.EMPTY);
     }
 
-    private Optional<RecipeEntry<CrystallizerRecipe>> getCurrentRecipe(CrystallizerRecipeInput recipeInput) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<CrystallizerRecipe>> getCurrentRecipe(CrystallizerRecipeInput recipeInput) {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.CRYSTALLIZER, recipeInput, this.world);
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.CRYSTALLIZER, recipeInput, this.level);
     }
 
-    private @Nullable CrystallizerRecipe getRecipeById(RegistryKey<Recipe<?>> recipeId) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private @Nullable CrystallizerRecipe getRecipeById(ResourceKey<Recipe<?>> recipeId) {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return null;
 
-        return (CrystallizerRecipe) serverWorld.getRecipeManager()
-                .get(recipeId)
-                .map(RecipeEntry::value)
+        return (CrystallizerRecipe) serverWorld.recipeAccess()
+                .byKey(recipeId)
+                .map(RecipeHolder::value)
                 .orElse(null);
     }
 
@@ -364,7 +364,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
         // 3x3x4 (3 wide, 3 long, 4 high)
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -376,8 +376,8 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -395,26 +395,26 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new CrystallizerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new CrystallizerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
         return this.wrappedFluidStorage.getStorage(side);
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public InputFluidStorage getWaterFluidStorage() {
@@ -426,15 +426,15 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     public SyncingSimpleInventory getCatalystInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public OutputSimpleInventory getOutputInventory() {
-        return (OutputSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        return (OutputSimpleInventory) this.wrappedContainerStorage.getInventory(1);
     }
 
     public OutputSimpleInventory getByproductInventory() {
-        return (OutputSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
+        return (OutputSimpleInventory) this.wrappedContainerStorage.getInventory(2);
     }
 
     public ItemStack getNextOutputItemStack() {

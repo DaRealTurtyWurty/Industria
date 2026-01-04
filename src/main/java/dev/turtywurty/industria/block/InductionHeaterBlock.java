@@ -4,7 +4,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 
 public class InductionHeaterBlock extends IndustriaBlock {
-    public InductionHeaterBlock(Settings settings) {
+    public InductionHeaterBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.INDUCTION_HEATER)

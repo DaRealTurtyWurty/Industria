@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 
 public class SlurryPipeBlock extends PipeBlock<Storage<SlurryVariant>, SlurryPipeNetwork, Long> {
-    public SlurryPipeBlock(Settings settings) {
+    public SlurryPipeBlock(Properties settings) {
         super(settings, 6, TransferType.SLURRY);
     }
 

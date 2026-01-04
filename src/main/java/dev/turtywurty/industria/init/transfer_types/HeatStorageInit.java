@@ -8,7 +8,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 
 public class HeatStorageInit {
     public static void init() {
@@ -17,7 +17,7 @@ public class HeatStorageInit {
         HeatStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getHeatProvider, BlockEntityTypeInit.ELECTROLYZER);
 
         HeatStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            if (world instanceof ServerWorld serverWorld) {
+            if (world instanceof ServerLevel serverWorld) {
                 return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.HEAT, pos);
             }
 

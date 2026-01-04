@@ -11,25 +11,25 @@ import dev.turtywurty.industria.multiblock.MultiblockController;
 import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageType;
 
 import java.util.concurrent.CompletableFuture;
 
 public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
-    public IndustriaEnglishLanguageProvider(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+    public IndustriaEnglishLanguageProvider(FabricPackOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
         super(dataOutput, registryLookup);
     }
 
     @Override
-    public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder translationBuilder) {
+    public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
         addText(translationBuilder, MultiblockController.NO_VALID_COMBINATION, "No valid multiblock combination found");
 
@@ -325,8 +325,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(ItemInit.CARBON_ROD, "Carbon Rod");
     }
 
-    private static void addText(TranslationBuilder translationBuilder, Text text, String value) {
-        if (text.getContent() instanceof TranslatableTextContent translatableTextContent) {
+    private static void addText(TranslationBuilder translationBuilder, Component text, String value) {
+        if (text.getContents() instanceof TranslatableContents translatableTextContent) {
             translationBuilder.add(translatableTextContent.getKey(), value);
         } else {
             throw new IllegalArgumentException("Text must be translatable! " + text);
@@ -337,15 +337,15 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, textEnum.getAsText(), value);
     }
 
-    private static void addDamageType(TranslationBuilder translationBuilder, RegistryWrapper.WrapperLookup regLookup, RegistryKey<DamageType> key, String value) {
-        RegistryEntryLookup<DamageType> lookup = regLookup.getOrThrow(RegistryKeys.DAMAGE_TYPE);
+    private static void addDamageType(TranslationBuilder translationBuilder, HolderLookup.Provider regLookup, ResourceKey<DamageType> key, String value) {
+        HolderGetter<DamageType> lookup = regLookup.lookupOrThrow(Registries.DAMAGE_TYPE);
         DamageType damageType = lookup.getOrThrow(key).value();
         translationBuilder.add("death.attack." + damageType.msgId(), value);
     }
 
     private static void addSlurry(TranslationBuilder translationBuilder, Slurry slurry, String value) {
-        Text name = SlurryVariantAttributes.getName(SlurryVariant.of(slurry));
-        if (name.getContent() instanceof TranslatableTextContent translatableTextContent) {
+        Component name = SlurryVariantAttributes.getName(SlurryVariant.of(slurry));
+        if (name.getContents() instanceof TranslatableContents translatableTextContent) {
             translationBuilder.add(translatableTextContent.getKey(), value);
         } else {
             throw new IllegalArgumentException("Slurry name must be translatable! " + name);

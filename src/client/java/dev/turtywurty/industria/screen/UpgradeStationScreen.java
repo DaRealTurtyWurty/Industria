@@ -7,53 +7,50 @@ import dev.turtywurty.industria.screen.widget.IndustriaIngredientPreviewWidget;
 import dev.turtywurty.industria.screen.widget.SelectRecipeWidget;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHandler> {
+public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStationScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/upgrade_station.png");
 
     private SelectRecipeWidget<UpgradeStationRecipe> recipeSelector;
     private final List<IndustriaIngredientPreviewWidget<UpgradeStationRecipe>> ingredientWidgets = new ArrayList<>();
     private boolean isDirty = false;
 
-    public UpgradeStationScreen(UpgradeStationScreenHandler handler, PlayerInventory inventory, Text title) {
-        super(handler, inventory, title);
+    public UpgradeStationScreen(UpgradeStationScreenHandler handler, Inventory inventory, Component title) {
+        super(handler, inventory, title, 196, 186);
         handler.setContentsChangedListener(() -> this.isDirty = true);
-
-        this.backgroundWidth = 196;
-        this.backgroundHeight = 186;
-        this.playerInventoryTitleY = this.backgroundHeight - 94;
+        this.inventoryLabelY = this.imageHeight - 94;
     }
 
     @Override
     protected void init() {
         super.init();
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
-        addDrawable(new EnergyWidget.Builder(this.handler.getBlockEntity().getEnergyStorage())
-                .bounds(this.x + 168, this.y + 10, 20, 66)
+        addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
+                .bounds(this.leftPos + 168, this.topPos + 10, 20, 66)
                 .color(0xFFD4AF37)
                 .build());
 
-        this.recipeSelector = addDrawableChild(new SelectRecipeWidget.Builder<UpgradeStationRecipe>()
-                .position(this.x + 65, this.y + 15)
-                .scrollBarPosition(this.x + 132, this.y + 15)
-                .recipes(this.handler.getAvailableRecipes())
-                .canCraft(this.handler.canCraft())
-                .selectedRecipeIndex(this.handler.getSelectedRecipeIndex())
+        this.recipeSelector = addRenderableWidget(new SelectRecipeWidget.Builder<UpgradeStationRecipe>()
+                .position(this.leftPos + 65, this.topPos + 15)
+                .scrollBarPosition(this.leftPos + 132, this.topPos + 15)
+                .recipes(this.menu.getAvailableRecipes())
+                .canCraft(this.menu.canCraft())
+                .selectedRecipeIndex(this.menu.getSelectedRecipeIndex())
                 .onRecipeSelected((widget, index) -> {
-                    if (this.client == null || this.client.interactionManager == null)
+                    if (this.minecraft == null || this.minecraft.gameMode == null)
                         return;
 
-                    this.client.interactionManager.clickButton(this.handler.syncId, index);
+                    this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, index);
                     widget.setSelectedRecipeIndex(index);
                 })
                 .outputFunction(UpgradeStationRecipe::output)
@@ -73,40 +70,40 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
             if (index == 4)
                 continue;
 
-            final int xPos = this.x + 8 + (index % 3 * 18);
-            final int yPos = this.y + 17 + (index / 3 * 18);
+            final int xPos = this.leftPos + 8 + (index % 3 * 18);
+            final int yPos = this.topPos + 17 + (index / 3 * 18);
 
             final int finalIndex = index;
             this.ingredientWidgets.add(
-                    addDrawable(new IndustriaIngredientPreviewWidget<>(xPos, yPos,
+                    addRenderableOnly(new IndustriaIngredientPreviewWidget<>(xPos, yPos,
                             finalIndex,
                             theRecipe -> theRecipe.getIngredient(finalIndex))));
         }
 
         int selectedRecipeIndex = this.recipeSelector.getSelectedRecipeIndex();
-        if (selectedRecipeIndex >= 0 && selectedRecipeIndex < this.handler.getAvailableRecipeCount()) {
+        if (selectedRecipeIndex >= 0 && selectedRecipeIndex < this.menu.getAvailableRecipeCount()) {
             UpgradeStationRecipe recipe = this.recipeSelector.getSelectedRecipe();
             for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
                 widget.setRecipe(recipe);
-                widget.setShouldRender(!this.handler.getSlot(36 + widget.getSlotIndex()).hasStack());
+                widget.setShouldRender(!this.menu.getSlot(36 + widget.getSlotIndex()).hasItem());
             }
         }
     }
 
     @Override
-    protected void handledScreenTick() {
+    protected void containerTick() {
         if(this.isDirty) {
             if (this.recipeSelector != null) {
-                this.recipeSelector.setCanCraft(this.handler.canCraft());
+                this.recipeSelector.setCanCraft(this.menu.canCraft());
                 if (!this.recipeSelector.canCraft()) {
                     this.recipeSelector.resetScroll();
                 }
 
-                this.recipeSelector.setRecipes(this.handler.getAvailableRecipes());
+                this.recipeSelector.setRecipes(this.menu.getAvailableRecipes());
 
                 for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
                     widget.setRecipe(this.recipeSelector.getSelectedRecipe());
-                    widget.setShouldRender(!this.handler.getSlot(36 + widget.getSlotIndex()).hasStack());
+                    widget.setShouldRender(!this.menu.getSlot(36 + widget.getSlotIndex()).hasItem());
                 }
             }
 
@@ -115,23 +112,23 @@ public class UpgradeStationScreen extends HandledScreen<UpgradeStationScreenHand
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        int progress = MathHelper.ceil((this.handler.getProgress() / 500f) * 147);
-        ScreenUtils.drawTexture(context, TEXTURE, this.x + 25, this.y + 77, 0, 186, progress, 17);
+        int progress = Mth.ceil((this.menu.getProgress() / 500f) * 147);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 25, this.topPos + 77, 0, 186, progress, 17);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if(!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
-            return hoveredElement(mouseX, mouseY).filter(element -> element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)).isPresent();
+            return getChildAt(mouseX, mouseY).filter(element -> element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)).isPresent();
         }
 
         return true;

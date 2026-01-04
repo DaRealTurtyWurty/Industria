@@ -4,16 +4,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,27 +31,27 @@ public record VariedBlockList(
     public static final Codec<VariedBlockList> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.BLOCK_CODEC.listOf().fieldOf("blocks").forGetter(VariedBlockList::blockList),
             BlockState.CODEC.listOf().fieldOf("states").forGetter(VariedBlockList::stateList),
-            TagKey.codec(RegistryKeys.BLOCK).listOf().fieldOf("tags").forGetter(VariedBlockList::tagList)
+            TagKey.hashedCodec(Registries.BLOCK).listOf().fieldOf("tags").forGetter(VariedBlockList::tagList)
     ).apply(instance, VariedBlockList::new));
 
-    public static final PacketCodec<RegistryByteBuf, VariedBlockList> PACKET_CODEC = PacketCodec.tuple(
-            ExtraPacketCodecs.listOf(PacketCodecs.codec(ExtraCodecs.BLOCK_CODEC)), VariedBlockList::blockList,
-            ExtraPacketCodecs.listOf(PacketCodecs.codec(BlockState.CODEC)), VariedBlockList::stateList,
-            ExtraPacketCodecs.listOf(TagKey.packetCodec(RegistryKeys.BLOCK)), VariedBlockList::tagList,
+    public static final StreamCodec<RegistryFriendlyByteBuf, VariedBlockList> STREAM_CODEC = StreamCodec.composite(
+            ExtraPacketCodecs.listOf(ByteBufCodecs.fromCodec(ExtraCodecs.BLOCK_CODEC)), VariedBlockList::blockList,
+            ExtraPacketCodecs.listOf(ByteBufCodecs.fromCodec(BlockState.CODEC)), VariedBlockList::stateList,
+            ExtraPacketCodecs.listOf(TagKey.streamCodec(Registries.BLOCK)), VariedBlockList::tagList,
             VariedBlockList::new
     );
 
-    public List<BlockState> allStates(RegistryEntryLookup<Block> blockLookup) {
+    public List<BlockState> allStates(HolderGetter<Block> blockLookup) {
         List<BlockState> allStates = new ArrayList<>(this.stateList);
         for (Block block : this.blockList) {
-            allStates.add(block.getDefaultState());
+            allStates.add(block.defaultBlockState());
         }
 
         for (TagKey<Block> tag : this.tagList) {
-            RegistryEntryList.Named<Block> entries = blockLookup.getOrThrow(tag);
-            for (RegistryEntry<Block> entry : entries) {
+            HolderSet.Named<Block> entries = blockLookup.getOrThrow(tag);
+            for (Holder<Block> entry : entries) {
                 Block block = entry.value();
-                allStates.add(block.getDefaultState());
+                allStates.add(block.defaultBlockState());
             }
         }
 

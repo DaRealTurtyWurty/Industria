@@ -3,13 +3,13 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ArcFurnaceBlock extends IndustriaBlock {
-    public static final VoxelShape VOXEL_SHAPE = VoxelShapes.fullCube();
+    public static final VoxelShape VOXEL_SHAPE = Shapes.block();
 
-    public ArcFurnaceBlock(Settings settings) {
+    public ArcFurnaceBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasLitProperty()

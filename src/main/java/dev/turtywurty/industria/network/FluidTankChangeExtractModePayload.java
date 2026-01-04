@@ -1,18 +1,18 @@
 package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record FluidTankChangeExtractModePayload(boolean extractMode) implements CustomPayload {
-    public static final Id<FluidTankChangeExtractModePayload> ID = new Id<>(Industria.id("fluid_tank_change_extract_mode"));
-    public static final PacketCodec<RegistryByteBuf, FluidTankChangeExtractModePayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.BOOLEAN, FluidTankChangeExtractModePayload::extractMode, FluidTankChangeExtractModePayload::new);
+public record FluidTankChangeExtractModePayload(boolean extractMode) implements CustomPacketPayload {
+    public static final Type<FluidTankChangeExtractModePayload> ID = new Type<>(Industria.id("fluid_tank_change_extract_mode"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidTankChangeExtractModePayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL, FluidTankChangeExtractModePayload::extractMode, FluidTankChangeExtractModePayload::new);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

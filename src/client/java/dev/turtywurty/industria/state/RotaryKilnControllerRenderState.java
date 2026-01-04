@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.state;
 
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;

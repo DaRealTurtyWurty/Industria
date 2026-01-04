@@ -15,7 +15,7 @@ import dev.turtywurty.industria.blockentity.util.gas.InputGasStorage;
 import dev.turtywurty.industria.blockentity.util.gas.WrappedGasStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -31,23 +31,23 @@ import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoMultiblockable, SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("arc_furnace");
+    public static final Component TITLE = Industria.containerTitle("arc_furnace");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.x() == 3)
@@ -75,7 +75,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
                     .build()
     );
 
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedGasStorage<SingleGasStorage> wrappedGasStorage = new WrappedGasStorage<>();
@@ -83,13 +83,13 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private Mode mode = Mode.SMELTING;
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
 
     private int progress, maxProgress;
 
-    private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
+    private final ContainerData propertyDelegate = new ContainerData() {
         @Override
-        public int size() {
+        public int getCount() {
             return 3; // mode, progress, maxProgress
         }
 
@@ -117,8 +117,8 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     public ArcFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.ARC_FURNACE, BlockEntityTypeInit.ARC_FURNACE, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 9), Direction.WEST);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.SOUTH);
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 9), Direction.WEST);
+        this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.SOUTH);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000_000, 1_000_000, 0), Direction.EAST);
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.EAST);
         this.wrappedGasStorage.addStorage(new InputGasStorage(this, FluidConstants.BUCKET * 5), Direction.EAST);
@@ -142,15 +142,15 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
 
     @Override
     public void onTick() {
-        if (world == null || world.isClient())
+        if (level == null || level.isClientSide())
             return;
 
 
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
@@ -160,7 +160,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -171,8 +171,8 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -190,33 +190,33 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ArcFurnaceScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.propertyDelegate);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new ArcFurnaceScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
 
-        view.putString("Mode", this.mode.asString());
+        view.putString("Mode", this.mode.getSerializedName());
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipeId", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipeId", RECIPE_CODEC, this.currentRecipeId);
         }
 
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "GasTank", this.wrappedGasStorage);
@@ -224,15 +224,15 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     @Override
-    protected void readData(ReadView view) {
-        super.readData(view);
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
 
         this.mode = view.read("Mode", Codec.STRING).flatMap(Mode::fromStringOptional).orElse(Mode.SMELTING);
-        this.progress = view.getInt("Progress", 0);
-        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.progress = view.getIntOr("Progress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
         this.currentRecipeId = view.read("CurrentRecipeId", RECIPE_CODEC).orElse(null);
 
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "GasTank", this.wrappedGasStorage);
@@ -244,8 +244,8 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
         return PORT_RULES;
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public SyncingEnergyStorage getEnergyProvider(Direction side) {
@@ -261,11 +261,11 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     public SyncingSimpleInventory getInputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(Direction.WEST);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(Direction.WEST);
     }
 
     public OutputSimpleInventory getOutputInventory() {
-        return (OutputSimpleInventory) this.wrappedInventoryStorage.getInventory(Direction.SOUTH);
+        return (OutputSimpleInventory) this.wrappedContainerStorage.getInventory(Direction.SOUTH);
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
@@ -281,14 +281,14 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     public void setMode(Mode mode) {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         this.mode = mode;
         update();
     }
 
-    public enum Mode implements StringIdentifiable {
+    public enum Mode implements StringRepresentable {
         SMELTING,
         ALLOYING,
         RECYCLING;
@@ -304,7 +304,7 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
         }
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return this.name;
         }
 

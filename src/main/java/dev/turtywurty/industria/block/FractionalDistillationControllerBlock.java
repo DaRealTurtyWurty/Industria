@@ -4,7 +4,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 
 public class FractionalDistillationControllerBlock extends IndustriaBlock {
-    public FractionalDistillationControllerBlock(Settings settings) {
+    public FractionalDistillationControllerBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER)

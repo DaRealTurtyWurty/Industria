@@ -1,31 +1,35 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.debug.DebugHudEntries;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Colors;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
@@ -46,21 +50,21 @@ import java.util.*;
  *
  * @param <T> The block entity type
  * @see WireframeExtractor
- * @see IndustriaBlockEntityRenderer#onRender(IndustriaBlockEntityRenderState, MatrixStack, OrderedRenderCommandQueue, int, int)
- * @see IndustriaBlockEntityRenderer#postRender(IndustriaBlockEntityRenderState, MatrixStack, OrderedRenderCommandQueue, int, int)
- * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(MatrixStack, IndustriaBlockEntityRenderState)
+ * @see IndustriaBlockEntityRenderer#onRender(IndustriaBlockEntityRenderState, PoseStack, SubmitNodeCollector, int, int)
+ * @see IndustriaBlockEntityRenderer#postRender(IndustriaBlockEntityRenderState, PoseStack, SubmitNodeCollector, int, int)
+ * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(PoseStack, IndustriaBlockEntityRenderState)
  */
 public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S extends IndustriaBlockEntityRenderState> implements BlockEntityRenderer<T, S> {
     protected static final List<ModelPart> EMPTY_WIREFRAME = Collections.emptyList();
 
-    protected final BlockEntityRendererFactory.Context context;
+    protected final BlockEntityRendererProvider.Context context;
 
     /**
      * Creates a new block entity renderer.
      *
      * @param context The block entity renderer factory context
      */
-    public IndustriaBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public IndustriaBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         this.context = context;
     }
 
@@ -71,7 +75,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @param matrices The matrix stack
      * @param queue    The vertex consumer provider
      */
-    protected abstract void onRender(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay);
+    protected abstract void onRender(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay);
 
     /**
      * Called after the block entity and wireframe have been rendered.
@@ -80,15 +84,15 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @param matrices The matrix stack
      * @param queue    The vertex consumer provider
      */
-    protected void postRender(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    protected void postRender(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
     }
 
     @Override
-    public void render(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+    public void submit(S state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
         setupBlockEntityTransformations(matrices, state);
-        onRender(state, matrices, queue, state.lightmapCoordinates, OverlayTexture.DEFAULT_UV);
+        onRender(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
 
-        if (isPlayerLookingAt(state.pos)) {
+        if (isPlayerLookingAt(state.blockPos)) {
             List<ModelPart> wireframe = getModelParts();
             if (!wireframe.isEmpty()) {
                 boolean isHighContrast = isHighContrast();
@@ -96,13 +100,13 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             }
         }
 
-        matrices.pop();
+        matrices.popPose();
 
-        postRender(state, matrices, queue, state.lightmapCoordinates, OverlayTexture.DEFAULT_UV);
+        postRender(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
     }
 
-    public ItemModelManager getItemModelManager() {
-        return this.context.itemModelManager();
+    public ItemModelResolver getItemModelManager() {
+        return this.context.itemModelResolver();
     }
 
     @SuppressWarnings("unchecked")
@@ -112,17 +116,17 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     @Override
-    public void updateRenderState(T blockEntity, S state, float tickProgress, Vec3d cameraPos, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
-        BlockEntityRenderer.super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(T blockEntity, S state, float tickProgress, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+        BlockEntityRenderer.super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.tickProgress = tickProgress;
     }
 
     public static boolean shouldRenderHitboxes() {
-        return MinecraftClient.getInstance().debugHudEntryList.isEntryVisible(DebugHudEntries.ENTITY_HITBOXES);
+        return Minecraft.getInstance().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES);
     }
 
     private static boolean isHighContrast() {
-        return MinecraftClient.getInstance().options.getHighContrastBlockOutline().getValue();
+        return Minecraft.getInstance().options.highContrastBlockOutline().get();
     }
 
     /**
@@ -131,8 +135,8 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @param vertexConsumers The vertex consumer provider
      * @return The vertex consumer for the high contrast wireframe
      */
-    public static VertexConsumer getHighContrastWireframeVertexConsumer(VertexConsumerProvider vertexConsumers) {
-        return vertexConsumers.getBuffer(RenderLayers.secondaryBlockOutline());
+    public static VertexConsumer getHighContrastWireframeVertexConsumer(MultiBufferSource vertexConsumers) {
+        return vertexConsumers.getBuffer(RenderTypes.secondaryBlockOutline());
     }
 
     /**
@@ -141,8 +145,8 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @param vertexConsumers The vertex consumer provider
      * @return The vertex consumer for the wireframe
      */
-    public static VertexConsumer getWireframeVertexConsumer(VertexConsumerProvider vertexConsumers) {
-        return vertexConsumers.getBuffer(RenderLayers.lines());
+    public static VertexConsumer getWireframeVertexConsumer(MultiBufferSource vertexConsumers) {
+        return vertexConsumers.getBuffer(RenderTypes.lines());
     }
 
     /**
@@ -152,7 +156,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @return The color of the wireframe
      */
     public static int getWireframeColor(boolean isHighContrast) {
-        return isHighContrast ? Colors.CYAN : ColorHelper.withAlpha(102, Colors.BLACK);
+        return isHighContrast ? CommonColors.HIGH_CONTRAST_DIAMOND : ARGB.color(102, CommonColors.BLACK);
     }
 
     /**
@@ -163,7 +167,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @param queue          The vertex consumer provider
      * @param isHighContrast If the wireframe should be high contrast
      */
-    public static void renderWireframe(List<ModelPart> modelParts, MatrixStack matrices, OrderedRenderCommandQueue queue, boolean isHighContrast) {
+    public static void renderWireframe(List<ModelPart> modelParts, PoseStack matrices, SubmitNodeCollector queue, boolean isHighContrast) {
         var v0 = new Vector3f();
         var v1 = new Vector3f();
         var v2 = new Vector3f();
@@ -173,7 +177,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
 
         int color = getWireframeColor(isHighContrast);
         for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
-            queue.submitCustom(matrices, isHighContrast ? RenderLayers.secondaryBlockOutline() : RenderLayers.lines(), (entry, vertexConsumer) -> {
+            queue.submitCustomGeometry(matrices, isHighContrast ? RenderTypes.secondaryBlockOutline() : RenderTypes.lines(), (entry, vertexConsumer) -> {
                 for (ModelPart modelPart : modelParts) {
                     visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
                 }
@@ -195,20 +199,20 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @param pos            The position of the vertex
      * @param normal         The normal of the vertex
      */
-    private static void visitPart(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
+    private static void visitPart(ModelPart modelPart, PoseStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
         if (!modelPart.visible || (modelPart.isEmpty() && modelPart.children.isEmpty()))
             return;
 
-        matrices.push();
-        modelPart.applyTransform(matrices);
+        matrices.pushPose();
+        modelPart.translateAndRotate(matrices);
 
         {
-            MatrixStack.Entry entry = matrices.peek();
-            Matrix4f pose = entry.getPositionMatrix();
-            Matrix3f poseNormal = entry.getNormalMatrix();
+            PoseStack.Pose entry = matrices.last();
+            Matrix4f pose = entry.pose();
+            Matrix3f poseNormal = entry.normal();
             Set<WireframeExtractor.Line> lines = new HashSet<>();
-            for (ModelPart.Cuboid cuboid : modelPart.cuboids) {
-                for (ModelPart.Quad quad : cuboid.sides) {
+            for (ModelPart.Cube cuboid : modelPart.cubes) {
+                for (ModelPart.Polygon quad : cuboid.polygons) {
                     ModelPart.Vertex[] vertices = quad.vertices();
                     v0.set(vertices[0].worldX(), vertices[0].worldY(), vertices[0].worldZ());
                     v1.set(vertices[1].worldX(), vertices[1].worldY(), vertices[1].worldZ());
@@ -225,14 +229,14 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
                 poseNormal.transform(line.normalX(), line.normalY(), line.normalZ(), normal);
 
                 pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
-                vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
-                        .color(color)
-                        .normal(normal.x, normal.y, normal.z);
+                vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
+                        .setColor(color)
+                        .setNormal(normal.x, normal.y, normal.z);
 
                 pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
-                vertexConsumer.vertex(pos.x(), pos.y(), pos.z())
-                        .color(color)
-                        .normal(normal.x, normal.y, normal.z);
+                vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
+                        .setColor(color)
+                        .setNormal(normal.x, normal.y, normal.z);
             }
         }
 
@@ -240,7 +244,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             visitPart(part, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     /**
@@ -257,7 +261,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * @return If the player is looking at the block entity or a multiblock block
      */
     public static boolean isPlayerLookingAt(BlockPos bePos) {
-        if (!(MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult hitResult))
+        if (!(Minecraft.getInstance().hitResult instanceof BlockHitResult hitResult))
             return false;
 
         if (hitResult.getType() == HitResult.Type.MISS)
@@ -267,12 +271,12 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         if (Objects.equals(hitPos, bePos))
             return true;
 
-        World world = MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
         if (world == null)
             return false;
 
         BlockState state = world.getBlockState(hitPos);
-        if (state.isAir() || !state.isOf(BlockInit.AUTO_MULTIBLOCK_BLOCK) || !world.getWorldBorder().contains(hitPos))
+        if (state.isAir() || !state.is(BlockInit.AUTO_MULTIBLOCK_BLOCK) || !world.getWorldBorder().isWithinBounds(hitPos))
             return false;
 
         BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(world, hitPos);
@@ -290,25 +294,25 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         return EMPTY_WIREFRAME;
     }
 
-    public final void renderForItem(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    public final void renderForItem(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         setupBlockEntityTransformations(matrices, state);
         onRender(state, matrices, queue, light, overlay);
 
-        matrices.pop();
+        matrices.popPose();
 
         postRender(state, matrices, queue, light, overlay);
     }
 
-    protected void setupBlockEntityTransformations(MatrixStack matrices, S state) {
-        matrices.push();
+    protected void setupBlockEntityTransformations(PoseStack matrices, S state) {
+        matrices.pushPose();
         matrices.translate(0.5f, 1.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
 
-        if (!state.blockState.getProperties().contains(Properties.HORIZONTAL_FACING))
+        if (!state.blockState.getProperties().contains(BlockStateProperties.HORIZONTAL_FACING))
             return;
 
-        Direction facing = state.blockState.get(Properties.HORIZONTAL_FACING);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 + switch (facing) {
+        Direction facing = state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        matrices.mulPose(Axis.YP.rotationDegrees(180 + switch (facing) {
             case EAST -> 90;
             case SOUTH -> 180;
             case WEST -> 270;
@@ -317,7 +321,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     public static void drawFilledBox(
-            MatrixStack.Entry entry,
+            PoseStack.Pose entry,
             VertexConsumer vertexConsumers,
             double minX,
             double minY,
@@ -334,7 +338,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     public static void drawFilledBox(
-            MatrixStack.Entry entry,
+            PoseStack.Pose entry,
             VertexConsumer vertexConsumers,
             float minX,
             float minY,
@@ -347,36 +351,36 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             float blue,
             float alpha
     ) {
-        Matrix4f matrix4f = entry.getPositionMatrix();
-        vertexConsumers.vertex(matrix4f, minX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, minY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, minX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, minZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, maxZ).color(red, green, blue, alpha);
-        vertexConsumers.vertex(matrix4f, maxX, maxY, maxZ).color(red, green, blue, alpha);
+        Matrix4f matrix4f = entry.pose();
+        vertexConsumers.addVertex(matrix4f, minX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, minY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, minX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, minZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
+        vertexConsumers.addVertex(matrix4f, maxX, maxY, maxZ).setColor(red, green, blue, alpha);
     }
 }

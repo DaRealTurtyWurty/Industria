@@ -4,7 +4,7 @@ import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SingleSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class SyncingSlurryStorage extends SingleSlurryStorage implements SyncableStorage {
@@ -31,13 +31,13 @@ public class SyncingSlurryStorage extends SingleSlurryStorage implements Syncabl
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient()) {
+        if (this.isDirty && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
             if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {
                 updatableBlockEntity.update();
             } else {
-                this.blockEntity.markDirty();
+                this.blockEntity.setChanged();
             }
         }
     }

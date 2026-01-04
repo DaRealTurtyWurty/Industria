@@ -1,34 +1,34 @@
-accessWidener v2 named
+accessWidener v2 official
 
-accessible field net/minecraft/util/math/intprovider/ClampedNormalIntProvider mean F
-accessible field net/minecraft/util/math/intprovider/ClampedNormalIntProvider deviation F
-accessible field net/minecraft/util/math/intprovider/ClampedIntProvider source Lnet/minecraft/util/math/intprovider/IntProvider;
-accessible field net/minecraft/util/math/intprovider/WeightedListIntProvider weightedList Lnet/minecraft/util/collection/Pool;
-accessible method net/minecraft/util/collection/Pool <init> (Ljava/util/List;)V
-accessible field net/minecraft/util/math/floatprovider/ClampedNormalFloatProvider mean F
-accessible field net/minecraft/util/math/floatprovider/ClampedNormalFloatProvider deviation F
-accessible field net/minecraft/util/math/floatprovider/TrapezoidFloatProvider plateau F
-accessible field net/minecraft/client/model/ModelPart children Ljava/util/Map;
-accessible field net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
-accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V
-accessible field net/minecraft/client/gui/widget/PressableWidget TEXTURES Lnet/minecraft/client/gui/screen/ButtonTextures;
-accessible    method    net/minecraft/client/gui/DrawContext    drawTooltip    (Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;Lnet/minecraft/util/Identifier;Z)V
-mutable field net/minecraft/block/Block stateManager Lnet/minecraft/state/StateManager;
-accessible field net/minecraft/block/AbstractBlock$Settings luminance Ljava/util/function/ToIntFunction;
-accessible field net/minecraft/state/State propertyMap Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
-accessible    method    net/minecraft/client/gui/DrawContext    drawSpriteTiled    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
-accessible    method    net/minecraft/client/gui/DrawContext    drawSpriteNineSliced    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Sprite;Lnet/minecraft/client/texture/Scaling$NineSlice;IIIII)V
-accessible    method    net/minecraft/client/gui/DrawContext    drawInnerSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/texture/Scaling$NineSlice;Lnet/minecraft/client/texture/Sprite;IIIIIIIIIII)V
-accessible    method    net/minecraft/client/gui/DrawContext    drawTexturedQuad    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/util/Identifier;IIIIFFFFI)V
-accessible field net/minecraft/data/loottable/BlockLootTableGenerator SAPLING_DROP_CHANCE [F
-accessible field net/minecraft/client/particle/ParticleManager world Lnet/minecraft/client/world/ClientWorld;
-accessible field net/minecraft/client/world/ClientChunkManager chunks Lnet/minecraft/client/world/ClientChunkManager$ClientChunkMap;
-accessible class net/minecraft/client/world/ClientChunkManager$ClientChunkMap
-accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap set (ILnet/minecraft/world/chunk/WorldChunk;)V
-accessible field net/minecraft/client/world/ClientWorld worldRenderer Lnet/minecraft/client/render/WorldRenderer;
-accessible field net/minecraft/client/render/WorldRenderer chunks Lnet/minecraft/client/render/BuiltChunkStorage;
-accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap getIndex (II)I
-accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap getChunk (I)Lnet/minecraft/world/chunk/WorldChunk;
-accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap isInRadius (II)Z
-accessible field net/minecraft/client/world/ClientChunkManager$ClientChunkMap chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
-accessible field net/minecraft/client/render/command/RenderDispatcher vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
+accessible field net/minecraft/util/valueproviders/ClampedNormalInt mean F
+accessible field net/minecraft/util/valueproviders/ClampedNormalInt deviation F
+accessible field net/minecraft/util/valueproviders/ClampedInt source Lnet/minecraft/util/valueproviders/IntProvider;
+accessible field net/minecraft/util/valueproviders/WeightedListInt distribution Lnet/minecraft/util/random/WeightedList;
+accessible method net/minecraft/util/random/WeightedList <init> (Ljava/util/List;)V
+accessible field net/minecraft/util/valueproviders/ClampedNormalFloat mean F
+accessible field net/minecraft/util/valueproviders/ClampedNormalFloat deviation F
+accessible field net/minecraft/util/valueproviders/TrapezoidFloat plateau F
+accessible field net/minecraft/client/model/geom/ModelPart children Ljava/util/Map;
+accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
+accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
+accessible field net/minecraft/client/gui/components/AbstractButton SPRITES Lnet/minecraft/client/gui/components/WidgetSprites;
+accessible    method    net/minecraft/client/gui/GuiGraphics    setTooltipForNextFrameInternal    (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/Identifier;Z)V
+mutable field net/minecraft/world/level/block/Block stateDefinition Lnet/minecraft/world/level/block/state/StateDefinition;
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction;
+accessible field net/minecraft/world/level/block/state/StateHolder values Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
+accessible    method    net/minecraft/client/gui/GuiGraphics    blitTiledSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIIIIIIIII)V
+accessible    method    net/minecraft/client/gui/GuiGraphics    blitNineSlicedSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lnet/minecraft/client/resources/metadata/gui/GuiSpriteScaling$NineSlice;IIIII)V
+accessible    method    net/minecraft/client/gui/GuiGraphics    blitNineSliceInnerSegment    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/resources/metadata/gui/GuiSpriteScaling$NineSlice;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIIIIIIIII)V
+accessible    method    net/minecraft/client/gui/GuiGraphics    innerBlit    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
+accessible field net/minecraft/data/loot/BlockLootSubProvider NORMAL_LEAVES_SAPLING_CHANCES [F
+accessible field net/minecraft/client/particle/ParticleEngine level Lnet/minecraft/client/multiplayer/ClientLevel;
+accessible field net/minecraft/client/multiplayer/ClientChunkCache storage Lnet/minecraft/client/multiplayer/ClientChunkCache$Storage;
+accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage replace (ILnet/minecraft/world/level/chunk/LevelChunk;)V
+accessible field net/minecraft/client/multiplayer/ClientLevel levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;
+accessible field net/minecraft/client/renderer/LevelRenderer viewArea Lnet/minecraft/client/renderer/ViewArea;
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage getIndex (II)I
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage getChunk (I)Lnet/minecraft/world/level/chunk/LevelChunk;
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage inRange (II)Z
+accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
+accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;

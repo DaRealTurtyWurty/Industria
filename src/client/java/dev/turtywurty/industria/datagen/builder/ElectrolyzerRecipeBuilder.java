@@ -4,9 +4,9 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
 
 public class ElectrolyzerRecipeBuilder {
     private final IndustriaIngredient input, anode, cathode, electrolyteItem;
@@ -30,7 +30,7 @@ public class ElectrolyzerRecipeBuilder {
         this.temperature = temperature;
     }
 
-    public void offerTo(RecipeExporter exporter, RegistryKey<Recipe<?>> recipeKey) {
+    public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
                 new ElectrolyzerRecipe(this.input, this.anode, this.cathode, this.electrolyteItem,
                         this.electrolyteFluid, this.outputFluid, this.outputGas,

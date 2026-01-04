@@ -11,17 +11,17 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -29,7 +29,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.List;
 
 public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("motor");
+    public static final Component TITLE = Industria.containerTitle("motor");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     public float rodRotation = 0.0F; // Client only
@@ -56,7 +56,7 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
@@ -72,7 +72,7 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 this.currentRotationSpeed = this.targetRotationSpeed;
             }
         } else {
-            this.currentRotationSpeed = MathHelper.clamp(this.currentRotationSpeed - 0.01F, 0.0F, this.targetRotationSpeed);
+            this.currentRotationSpeed = Mth.clamp(this.currentRotationSpeed - 0.01F, 0.0F, this.targetRotationSpeed);
         }
 
         if (previousRotationSpeed != this.currentRotationSpeed)
@@ -80,31 +80,31 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new MotorScreenHandler(syncId, this);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         view.putFloat("RotationSpeed", this.currentRotationSpeed);
         view.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
         ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        this.currentRotationSpeed = view.getFloat("RotationSpeed", 0.0F);
-        this.targetRotationSpeed = view.getFloat("TargetRotationSpeed", 0.0F);
+    protected void loadAdditional(ValueInput view) {
+        this.currentRotationSpeed = view.getFloatOr("RotationSpeed", 0.0F);
+        this.targetRotationSpeed = view.getFloatOr("TargetRotationSpeed", 0.0F);
         ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
     }
 
@@ -125,6 +125,6 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     public void setTargetRotationSpeed(float targetRotationSpeed) {
-        this.targetRotationSpeed = MathHelper.clamp(targetRotationSpeed, 0.0F, 1.0F);
+        this.targetRotationSpeed = Mth.clamp(targetRotationSpeed, 0.0F, 1.0F);
     }
 }

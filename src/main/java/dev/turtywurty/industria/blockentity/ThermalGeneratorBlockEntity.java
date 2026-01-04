@@ -11,7 +11,7 @@ import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -22,24 +22,24 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -47,39 +47,39 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.List;
 
 public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("thermal_generator");
+    public static final Component TITLE = Industria.containerTitle("thermal_generator");
 
     private static final int CONSUME_RATE = 500;
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
     public ThermalGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.THERMAL_GENERATOR, BlockEntityTypeInit.THERMAL_GENERATOR, pos, state);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
         this.wrappedFluidStorage.addStorage(new SyncingFluidStorage(this, FluidConstants.BUCKET * 10));
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
         var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         var fluid = (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         return List.of(energy, fluid, inventory);
     }
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         extractLavaFromInventory();
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
-        spread(this.world, this.pos, energyStorage);
+        spread(this.level, this.worldPosition, energyStorage);
 
         if (energyStorage.getAmount() >= energyStorage.getCapacity())
             return;
@@ -91,14 +91,14 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
         long storedLava = fluidStorage.getAmount();
 
         fluidStorage.amount -= CONSUME_RATE;
-        energyStorage.amount += MathHelper.clamp(storedLava, 0, energyStorage.getCapacity() - energyStorage.getAmount());
+        energyStorage.amount += Mth.clamp(storedLava, 0, energyStorage.getCapacity() - energyStorage.getAmount());
         if (energyStorage.getAmount() > energyStorage.getCapacity())
             energyStorage.amount = energyStorage.getCapacity();
         update();
     }
 
     private void extractLavaFromInventory() {
-        Storage<FluidVariant> storage = ContainerItemContext.ofSingleSlot(this.wrappedInventoryStorage.getStorage(null).getSlot(0)).find(FluidStorage.ITEM);
+        Storage<FluidVariant> storage = ContainerItemContext.ofSingleSlot(this.wrappedContainerStorage.getStorage(null).getSlot(0)).find(FluidStorage.ITEM);
         if (storage == null || !storage.supportsExtraction())
             return;
 
@@ -131,37 +131,37 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Nullable
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ThermalGeneratorScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
+    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new ThermalGeneratorScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
 
         ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        super.readData(view);
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
 
         ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
     }
 
     public EnergyStorage getWrappedEnergyStorage() {
@@ -173,13 +173,13 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
     }
 
     @Override
-    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<SimpleContainer> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
@@ -190,7 +190,7 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
         return this.wrappedFluidStorage.getStorage(direction);
     }
 
-    public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.wrappedInventoryStorage.getStorage(direction);
+    public ContainerStorage getInventoryProvider(Direction direction) {
+        return this.wrappedContainerStorage.getStorage(direction);
     }
 }

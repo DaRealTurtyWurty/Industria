@@ -1,28 +1,28 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
 import dev.turtywurty.industria.model.MixerModel;
 import dev.turtywurty.industria.state.MixerRenderState;
 import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<MixerBlockEntity, MixerRenderState> {
     private final MixerModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
-    public MixerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public MixerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
-        this.model = new MixerModel(context.getLayerModelPart(MixerModel.LAYER_LOCATION));
+        this.model = new MixerModel(context.bakeLayer(MixerModel.LAYER_LOCATION));
 
         //this.fluidRenderer.setShouldDebugAmount(true);
     }
@@ -33,8 +33,8 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
     }
 
     @Override
-    public void updateRenderState(MixerBlockEntity blockEntity, MixerRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(MixerBlockEntity blockEntity, MixerRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.isMixing = blockEntity.isMixing();
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
@@ -42,12 +42,12 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         state.fluidTank = blockEntity.getInputFluidTank();
         state.mixingItemPositions = blockEntity.mixingItemPositions;
         for (int i = 0; i < 6; i++) {
-            state.updateItemRenderState(i, this, blockEntity, state.inputInventory.heldStacks.get(i));
+            state.updateItemRenderState(i, this, blockEntity, state.inputInventory.items.get(i));
         }
     }
 
     @Override
-    protected void onRender(MixerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    protected void onRender(MixerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         float stirringRotation = 0f;
         if(state.isMixing) {
             stirringRotation = (state.progress / (float) state.maxProgress) * (float) Math.PI * 2f * 4f;
@@ -55,8 +55,8 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
 
         queue.submitModel(this.model,
                 new MixerModel.MixerModelRenderState(stirringRotation),
-                matrices, this.model.getLayer(MixerModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.crumblingOverlay);
+                matrices, this.model.renderType(MixerModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
 
         float widthReduction = 2f / 16f;
         float x1 = -1f + widthReduction;
@@ -71,18 +71,18 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
 
         float progress = (float) state.progress / state.maxProgress;
 
-        World world = MinecraftClient.getInstance().world;
-        for (int index = 0; index < state.inputInventory.heldStacks.size(); index++) {
-            ItemStack stack = state.inputInventory.heldStacks.get(index);
+        Level world = Minecraft.getInstance().level;
+        for (int index = 0; index < state.inputInventory.items.size(); index++) {
+            ItemStack stack = state.inputInventory.items.get(index);
             if (!stack.isEmpty()) {
-                matrices.push();
+                matrices.pushPose();
 
-                Vec3d position = state.mixingItemPositions.get(index);
+                Vec3 position = state.mixingItemPositions.get(index);
 
                 if (state.isMixing) {
-                    float angle = (float) (2 * Math.PI * index / state.inputInventory.heldStacks.size()); // Evenly space items around circle
+                    float angle = (float) (2 * Math.PI * index / state.inputInventory.items.size()); // Evenly space items around circle
                     float rotationSpeed = 0.1f;
-                    float timeAngle = (float) world.getTime() * rotationSpeed;
+                    float timeAngle = (float) world.getGameTime() * rotationSpeed;
 
                     float radius = Math.max(width, depth) * 0.5f - 0.375f;
 
@@ -98,13 +98,13 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
 
                 if (state.isMixing) {
                     matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead (maybe? :3)
-                    matrices.multiply(RotationAxis.POSITIVE_Y.rotation(world.getTime() * 0.25f));
-                    matrices.multiply(RotationAxis.POSITIVE_X.rotation(world.getTime() * 0.25f));
-                    matrices.multiply(RotationAxis.POSITIVE_Z.rotation(world.getTime() * 0.25f));
+                    matrices.mulPose(Axis.YP.rotation(world.getGameTime() * 0.25f));
+                    matrices.mulPose(Axis.XP.rotation(world.getGameTime() * 0.25f));
+                    matrices.mulPose(Axis.ZP.rotation(world.getGameTime() * 0.25f));
                 }
 
                 state.renderItemRenderState(index, matrices, queue);
-                matrices.pop();
+                matrices.popPose();
             }
         }
 
@@ -112,7 +112,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         this.fluidRenderer.render(state.fluidTank,
                 queue, matrices,
                 light, overlay,
-                world, state.pos,
+                world, state.blockPos,
                 x1, y1, z1,
                 x2, maxHeightPixels, z2,
                 0xFFFFFFFF, ColorMode.MULTIPLICATION);

@@ -8,11 +8,11 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.block.BlockState;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,15 +34,15 @@ public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity
     }
 
     @Override
-    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
-        super.onBlockReplaced(pos, oldState);
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
 
-        if (this.world == null || pos == null || oldState == null)
+        if (this.level == null || pos == null || oldState == null)
             return;
 
-        BlockState newState = world.getBlockState(pos);
-        if (!oldState.isOf(newState.getBlock())) {
-            if (this.controllerPos != null && world.getBlockEntity(this.controllerPos) instanceof FractionalDistillationControllerBlockEntity controller) {
+        BlockState newState = level.getBlockState(pos);
+        if (!oldState.is(newState.getBlock())) {
+            if (this.controllerPos != null && level.getBlockEntity(this.controllerPos) instanceof FractionalDistillationControllerBlockEntity controller) {
                 controller.removeTower(pos);
             }
         }
@@ -50,13 +50,13 @@ public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         if (this.ticks++ == 0) {
             this.controllerPos = searchForController();
             if (this.controllerPos == null) {
-                this.world.breakBlock(this.pos, true);
+                this.level.destroyBlock(this.worldPosition, true);
             }
         } else if (this.ticks > Integer.MAX_VALUE - 1) {
             this.ticks = 1;
@@ -65,9 +65,9 @@ public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity
 
     private BlockPos searchForController() {
         for (int i = 1; i <= 8; i++) {
-            BlockPos pos = this.pos.down(i);
-            if (this.world.getBlockEntity(pos) instanceof FractionalDistillationControllerBlockEntity blockEntity) {
-                if (!blockEntity.addTower(this.pos))
+            BlockPos pos = this.worldPosition.below(i);
+            if (this.level.getBlockEntity(pos) instanceof FractionalDistillationControllerBlockEntity blockEntity) {
+                if (!blockEntity.addTower(this.worldPosition))
                     return null;
 
                 return pos;
@@ -78,13 +78,13 @@ public class FractionalDistillationTowerBlockEntity extends IndustriaBlockEntity
     }
 
     @Override
-    protected void readData(ReadView view) {
-        this.controllerPos = BlockPos.fromLong(view.getLong("ControllerPos", 0L));
-        this.ticks = view.getInt("Ticks", 0);
+    protected void loadAdditional(ValueInput view) {
+        this.controllerPos = BlockPos.of(view.getLongOr("ControllerPos", 0L));
+        this.ticks = view.getIntOr("Ticks", 0);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         if (this.controllerPos != null)
             view.putLong("ControllerPos", this.controllerPos.asLong());
 

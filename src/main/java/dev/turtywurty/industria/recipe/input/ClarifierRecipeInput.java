@@ -1,12 +1,12 @@
 package dev.turtywurty.industria.recipe.input;
 
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 public record ClarifierRecipeInput(FluidStack fluidStack) implements RecipeInput {
     @Override
-    public ItemStack getStackInSlot(int slot) {
+    public ItemStack getItem(int slot) {
         return ItemStack.EMPTY;
     }
 

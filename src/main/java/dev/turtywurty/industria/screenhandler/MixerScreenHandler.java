@@ -1,42 +1,42 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.Slot;
 
 public class MixerScreenHandler extends IndustriaScreenHandler<MixerBlockEntity, BlockPosPayload> {
-    public MixerScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
+    public MixerScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.MIXER, 2, syncId, playerInventory, payload, MixerBlockEntity.class);
     }
 
-    public MixerScreenHandler(int syncId, PlayerInventory playerInventory, MixerBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate propertyDelegate) {
-        super(ScreenHandlerTypeInit.MIXER, syncId, playerInventory, blockEntity, wrappedInventoryStorage, propertyDelegate);
+    public MixerScreenHandler(int syncId, Inventory playerInventory, MixerBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
+        super(ScreenHandlerTypeInit.MIXER, syncId, playerInventory, blockEntity, wrappedContainerStorage, propertyDelegate);
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
-        SimpleInventory inputInventory = this.wrappedInventoryStorage.getInventory(0);
+    protected void addBlockEntitySlots(Inventory playerInventory) {
+        SimpleContainer inputInventory = this.wrappedContainerStorage.getInventory(0);
         for (int row = 0; row < 2; row++) {
             for (int column = 0; column < 3; column++) {
                 addSlot(new Slot(inputInventory, column + (row * 3), 58 + column * 18, 26 + row * 18));
             }
         }
 
-        addSlot(new OutputSlot(this.wrappedInventoryStorage.getInventory(1), 0, 143, 35));
+        addSlot(new OutputSlot(this.wrappedContainerStorage.getInventory(1), 0, 143, 35));
 
-        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(2), 0, 36, 83));
-        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(3), 0, 170, 83));
+        addSlot(new PredicateSlot(this.wrappedContainerStorage.getInventory(2), 0, 36, 83));
+        addSlot(new PredicateSlot(this.wrappedContainerStorage.getInventory(3), 0, 170, 83));
     }
 
     @Override
@@ -55,8 +55,8 @@ public class MixerScreenHandler extends IndustriaScreenHandler<MixerBlockEntity,
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, BlockInit.MIXER);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, BlockInit.MIXER);
     }
 
     public int getProgress() {
@@ -73,10 +73,10 @@ public class MixerScreenHandler extends IndustriaScreenHandler<MixerBlockEntity,
         if (maxProgress == 0 || progress == 0)
             return 0.0F;
 
-        return MathHelper.clamp(progress / maxProgress, 0.0F, 1.0F);
+        return Mth.clamp(progress / maxProgress, 0.0F, 1.0F);
     }
 
     public int getProgressScaled() {
-        return MathHelper.ceil(getProgressPercent() * 24);
+        return Mth.ceil(getProgressPercent() * 24);
     }
 }

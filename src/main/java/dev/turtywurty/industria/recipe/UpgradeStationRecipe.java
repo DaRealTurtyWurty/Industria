@@ -12,19 +12,15 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,13 +31,13 @@ import java.util.Map;
 public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, String[] pattern,
                                    ItemStack output) implements Recipe<RecipeSimpleInventory> {
     @Override
-    public boolean matches(RecipeSimpleInventory input, World world) {
+    public boolean matches(RecipeSimpleInventory input, Level world) {
         ItemStack[][] grid = new ItemStack[3][3];
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 int index = i * 3 + j;
-                grid[i][j] = input.getStackInSlot(index);
+                grid[i][j] = input.getItem(index);
             }
         }
 
@@ -99,7 +95,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
     }
 
     @Override
-    public ItemStack craft(RecipeSimpleInventory input, RegistryWrapper.WrapperLookup registries) {
+    public ItemStack assemble(RecipeSimpleInventory input, HolderLookup.Provider registries) {
         return this.output.copy();
     }
 
@@ -114,33 +110,33 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         List<SlotDisplay> inputs = Arrays.stream(this.pattern)
                 .map(s -> s.chars()
                         .mapToObj(c -> this.key.getOrDefault((char) c, IndustriaIngredient.EMPTY).toDisplay())
                         .toList())
-                .map(SlotDisplay.CompositeSlotDisplay::new)
+                .map(SlotDisplay.Composite::new)
                 .map(SlotDisplay.class::cast)
                 .toList();
 
         return List.of(new UpgradeStationRecipeDisplay(
                 inputs,
-                new SlotDisplay.StackSlotDisplay(this.output),
+                new SlotDisplay.ItemStackSlotDisplay(this.output),
                 new SlotDisplay.ItemSlotDisplay(BlockInit.UPGRADE_STATION.asItem())));
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.UPGRADE_STATION;
     }
 
@@ -163,23 +159,23 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         public static final Serializer INSTANCE = new Serializer();
 
         private static final Codec<Map<Character, IndustriaIngredient>> KEY_CODEC = Codec.unboundedMap(ExtraCodecs.CHAR_CODEC, IndustriaIngredient.CODEC);
-        private static final PacketCodec<RegistryByteBuf, Map<Character, IndustriaIngredient>> KEY_PACKET_CODEC = PacketCodec.of(
+        private static final StreamCodec<RegistryFriendlyByteBuf, Map<Character, IndustriaIngredient>> KEY_STREAM_CODEC = StreamCodec.ofMember(
                 (value, buf) -> buf.writeMap(value, (buf1, value1) -> buf.writeChar(value1),
-                        (buf1, value1) -> IndustriaIngredient.PACKET_CODEC.encode((RegistryByteBuf) buf1, value1)),
+                        (buf1, value1) -> IndustriaIngredient.STREAM_CODEC.encode((RegistryFriendlyByteBuf) buf1, value1)),
                 buf -> buf.readMap(ByteBuf::readChar,
-                        buf1 -> IndustriaIngredient.PACKET_CODEC.decode((RegistryByteBuf) buf1)));
+                        buf1 -> IndustriaIngredient.STREAM_CODEC.decode((RegistryFriendlyByteBuf) buf1)));
 
         public static final MapCodec<UpgradeStationRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
                         KEY_CODEC.fieldOf("key").forGetter(UpgradeStationRecipe::key),
                         Codec.STRING.listOf().fieldOf("pattern").forGetter(recipe -> Arrays.asList(recipe.pattern)),
-                        ItemStack.VALIDATED_CODEC.fieldOf("output").forGetter(UpgradeStationRecipe::output)
+                        ItemStack.STRICT_CODEC.fieldOf("output").forGetter(UpgradeStationRecipe::output)
                 ).apply(instance, (keys, pattern, output) -> new UpgradeStationRecipe(keys, pattern.toArray(new String[0]), output)));
 
-        public static final PacketCodec<RegistryByteBuf, UpgradeStationRecipe> PACKET_CODEC = PacketCodec.tuple(
-                KEY_PACKET_CODEC, UpgradeStationRecipe::key,
-                PacketCodecs.collection(ArrayList::new, PacketCodecs.STRING), recipe -> Arrays.asList(recipe.pattern),
-                ItemStack.PACKET_CODEC, UpgradeStationRecipe::output,
+        public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeStationRecipe> STREAM_CODEC = StreamCodec.composite(
+                KEY_STREAM_CODEC, UpgradeStationRecipe::key,
+                ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8), recipe -> Arrays.asList(recipe.pattern),
+                ItemStack.STREAM_CODEC, UpgradeStationRecipe::output,
                 (key, pattern, output) -> new UpgradeStationRecipe(key, pattern.toArray(new String[0]), output));
 
         @Override
@@ -188,8 +184,8 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, UpgradeStationRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, UpgradeStationRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -202,13 +198,13 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
                         SlotDisplay.CODEC.fieldOf("craftingStation").forGetter(UpgradeStationRecipeDisplay::craftingStation)
                 ).apply(instance, UpgradeStationRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, UpgradeStationRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
-                PacketCodecs.collection(ArrayList::new, SlotDisplay.PACKET_CODEC), UpgradeStationRecipeDisplay::inputs,
-                SlotDisplay.PACKET_CODEC, UpgradeStationRecipeDisplay::output,
-                SlotDisplay.PACKET_CODEC, UpgradeStationRecipeDisplay::craftingStation,
+        public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeStationRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.collection(ArrayList::new, SlotDisplay.STREAM_CODEC), UpgradeStationRecipeDisplay::inputs,
+                SlotDisplay.STREAM_CODEC, UpgradeStationRecipeDisplay::output,
+                SlotDisplay.STREAM_CODEC, UpgradeStationRecipeDisplay::craftingStation,
                 UpgradeStationRecipeDisplay::new);
 
-        public static final Serializer<UpgradeStationRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -221,7 +217,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

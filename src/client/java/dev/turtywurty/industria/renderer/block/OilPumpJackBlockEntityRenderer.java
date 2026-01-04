@@ -1,16 +1,16 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.model.OilPumpJackModel;
 import dev.turtywurty.industria.state.OilPumpJackRenderState;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -18,10 +18,10 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
     private final OilPumpJackModel model;
     private final OilPumpJackModel.OilPumpJackParts parts;
 
-    public OilPumpJackBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public OilPumpJackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
 
-        this.model = new OilPumpJackModel(context.getLayerModelPart(OilPumpJackModel.LAYER_LOCATION));
+        this.model = new OilPumpJackModel(context.bakeLayer(OilPumpJackModel.LAYER_LOCATION));
         this.parts = this.model.getOilPumpJackParts();
     }
 
@@ -31,15 +31,15 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
     }
 
     @Override
-    public void updateRenderState(OilPumpJackBlockEntity blockEntity, OilPumpJackRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(OilPumpJackBlockEntity blockEntity, OilPumpJackRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.clientRotation = blockEntity.clientRotation;
         state.isRunning = blockEntity.isRunning();
         state.reverseCounterWeights = blockEntity.reverseCounterWeights;
     }
 
     @Override
-    public void onRender(OilPumpJackRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    public void onRender(OilPumpJackRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         float clientRotation = state.clientRotation;
         if (state.isRunning) {
             clientRotation = clientRotation + 0.1f * state.tickProgress;
@@ -76,31 +76,31 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
 
         queue.submitModel(this.model,
                 new OilPumpJackModel.OilPumpJackModelRenderState(state.wheelPitch, state.counterWeightsPitch, state.pitmanArmPitch, state.armPitch),
-                matrices, this.model.getLayer(OilPumpJackModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.crumblingOverlay);
+                matrices, this.model.renderType(OilPumpJackModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
     }
 
-    private void drawBridle(OilPumpJackRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Vector3f attachmentBPosition, Vector3f attachmentCPosition, Vector3f attachmentDPosition) {
-        matrices.push();
+    private void drawBridle(OilPumpJackRenderState state, PoseStack matrices, SubmitNodeCollector queue, Vector3f attachmentBPosition, Vector3f attachmentCPosition, Vector3f attachmentDPosition) {
+        matrices.pushPose();
         matrices.translate(0, 1.5f, 0);
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate((attachmentBPosition.x - attachmentCPosition.x) / 16f, (attachmentBPosition.y - attachmentCPosition.y) / 16f, (attachmentBPosition.z - attachmentCPosition.z) / 16f);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation(state.armPitch));
+        matrices.mulPose(Axis.XP.rotation(state.armPitch));
         matrices.translate((attachmentCPosition.x - attachmentBPosition.x) / 16f, (attachmentCPosition.y - attachmentBPosition.y) / 16f, (attachmentCPosition.z - attachmentBPosition.z) / 16f);
-        queue.submitCustom(matrices, RenderLayers.lines(), (matricesEntry, vertexConsumer) ->
-                vertexConsumer.vertex(matrices.peek(), attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
-                        .color(20, 20, 20, 255)
-                        .normal(0, 0, 0));
+        queue.submitCustomGeometry(matrices, RenderTypes.lines(), (matricesEntry, vertexConsumer) ->
+                vertexConsumer.addVertex(matrices.last(), attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
+                        .setColor(20, 20, 20, 255)
+                        .setNormal(0, 0, 0));
 
-        matrices.pop();
+        matrices.popPose();
 
-        queue.submitCustom(matrices, RenderLayers.lines(), (matricesEntry, vertexConsumer) ->
-                vertexConsumer.vertex(matrices.peek(), attachmentDPosition.x, attachmentDPosition.y, attachmentDPosition.z)
-                        .color(20, 20, 20, 255)
-                        .normal(0, 0, 0));
+        queue.submitCustomGeometry(matrices, RenderTypes.lines(), (matricesEntry, vertexConsumer) ->
+                vertexConsumer.addVertex(matrices.last(), attachmentDPosition.x, attachmentDPosition.y, attachmentDPosition.z)
+                        .setColor(20, 20, 20, 255)
+                        .setNormal(0, 0, 0));
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     private float calculateArmPitch(float counterWeightsPitch, float pitmanArmPitch, Vector3f attachmentAPosition, Vector3f attachmentBPosition) {
@@ -122,7 +122,7 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
     }
 
     private static Vector3f getAttachmentPosition(ModelPart part) {
-        ModelPart.Cuboid cuboid = part.cuboids.getFirst();
+        ModelPart.Cube cuboid = part.cubes.getFirst();
         return new Vector3f(cuboid.minX, cuboid.minY, cuboid.minZ);
     }
 

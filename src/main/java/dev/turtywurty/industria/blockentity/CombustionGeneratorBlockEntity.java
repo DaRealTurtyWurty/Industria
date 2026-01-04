@@ -9,26 +9,26 @@ import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -36,10 +36,10 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.List;
 
 public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("combustion_generator");
+    public static final Component TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
     private int burnTime = 0;
     private int fuelTime = 0;
@@ -48,32 +48,32 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
         super(BlockInit.COMBUSTION_GENERATOR, BlockEntityTypeInit.COMBUSTION_GENERATOR, pos, state);
 
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 0, 5000));
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1));
     }
 
     public boolean isFuel(ItemStack stack) {
-        return this.world.getFuelRegistry().isFuel(stack);
+        return this.level.fuelValues().isFuel(stack);
     }
 
     public int getFuelTime(ItemStack stack) {
-        return this.world.getFuelRegistry().getFuelTicks(stack);
+        return this.level.fuelValues().burnDuration(stack);
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
         var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         return List.of(energy, inventory);
     }
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.energyStorage.getStorage(null);
 
-        spread(this.world, this.pos, energyStorage);
+        spread(this.level, this.worldPosition, energyStorage);
 
         if (energyStorage.getAmount() > energyStorage.getCapacity() - 20)
             return;
@@ -83,12 +83,12 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
             energyStorage.amount += 20;
             update();
         } else {
-            SimpleInventory inventory = this.wrappedInventoryStorage.getInventory(0);
-            ItemStack stack = inventory.getStack(0);
+            SimpleContainer inventory = this.wrappedContainerStorage.getInventory(0);
+            ItemStack stack = inventory.getItem(0);
             if (isFuel(stack)) {
                 this.fuelTime = getFuelTime(stack);
                 this.burnTime = getFuelTime(stack);
-                stack.decrement(1);
+                stack.shrink(1);
                 update();
             }
         }
@@ -99,37 +99,37 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Nullable
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new CombustionGeneratorScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
+    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new CombustionGeneratorScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         ViewUtils.putChild(view, "EnergyStorage", this.energyStorage);
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
 
         view.putInt("BurnTime", this.burnTime);
         view.putInt("FuelTime", this.fuelTime);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         ViewUtils.readChild(view, "EnergyStorage", this.energyStorage);
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
 
-        this.burnTime = view.getInt("BurnTime", 0);
-        this.fuelTime = view.getInt("FuelTime", 0);
+        this.burnTime = view.getIntOr("BurnTime", 0);
+        this.fuelTime = view.getIntOr("FuelTime", 0);
     }
 
     public EnergyStorage getEnergyStorage() {
@@ -137,21 +137,21 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
     }
 
     @Override
-    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<SimpleContainer> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     public EnergyStorage getEnergyProvider(Direction direction) {
         return this.energyStorage.getStorage(direction);
     }
 
-    public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.wrappedInventoryStorage.getStorage(direction);
+    public ContainerStorage getInventoryProvider(Direction direction) {
+        return this.wrappedContainerStorage.getStorage(direction);
     }
 
     public int getBurnTime() {

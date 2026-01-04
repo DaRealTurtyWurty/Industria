@@ -1,127 +1,124 @@
 package dev.turtywurty.industria.block;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.*;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.ParticleUtil;
-import net.minecraft.particle.TintedParticleEffect;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ParticleUtils;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.OptionalInt;
 
-public class RubberLeavesBlock extends Block implements Waterloggable {
-    public static final MapCodec<RubberLeavesBlock> CODEC = createCodec(RubberLeavesBlock::new);
+public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
+    public static final MapCodec<RubberLeavesBlock> CODEC = simpleCodec(RubberLeavesBlock::new);
 
     public static final int DECAY_DISTANCE = 13;
-    public static final IntProperty DISTANCE = IntProperty.of("distance", 1, DECAY_DISTANCE);
-    public static final BooleanProperty PERSISTENT = Properties.PERSISTENT;
-    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    public static final IntegerProperty DISTANCE = IntegerProperty.create("distance", 1, DECAY_DISTANCE);
+    public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     private static final int TICK_DELAY = 1;
 
-    public RubberLeavesBlock(Settings settings) {
-        super(settings.mapColor(MapColor.DARK_GREEN)
+    public RubberLeavesBlock(Properties settings) {
+        super(settings.mapColor(MapColor.PLANT)
                 .strength(0.2F)
-                .ticksRandomly()
-                .sounds(BlockSoundGroup.GRASS)
-                .nonOpaque()
-                .allowsSpawning(Blocks::canSpawnOnLeaves)
-                .suffocates(Blocks::never)
-                .blockVision(Blocks::never)
-                .burnable()
-                .pistonBehavior(PistonBehavior.DESTROY)
-                .solidBlock(Blocks::never));
+                .randomTicks()
+                .sound(SoundType.GRASS)
+                .noOcclusion()
+                .isValidSpawn(Blocks::ocelotOrParrot)
+                .isSuffocating(Blocks::never)
+                .isViewBlocking(Blocks::never)
+                .ignitedByLava()
+                .pushReaction(PushReaction.DESTROY)
+                .isRedstoneConductor(Blocks::never));
 
-        setDefaultState(this.stateManager.getDefaultState()
-                .with(DISTANCE, DECAY_DISTANCE)
-                .with(PERSISTENT, Boolean.FALSE)
-                .with(WATERLOGGED, Boolean.FALSE));
+        registerDefaultState(this.stateDefinition.any()
+                .setValue(DISTANCE, DECAY_DISTANCE)
+                .setValue(PERSISTENT, Boolean.FALSE)
+                .setValue(WATERLOGGED, Boolean.FALSE));
     }
 
     @Override
-    public MapCodec<? extends RubberLeavesBlock> getCodec() {
+    public MapCodec<? extends RubberLeavesBlock> codec() {
         return CODEC;
     }
 
     @Override
-    protected VoxelShape getSidesShape(BlockState state, BlockView world, BlockPos pos) {
-        return VoxelShapes.empty();
+    protected VoxelShape getBlockSupportShape(BlockState state, BlockGetter world, BlockPos pos) {
+        return Shapes.empty();
     }
 
     @Override
-    protected boolean hasRandomTicks(BlockState state) {
-        return state.get(DISTANCE) == DECAY_DISTANCE && !state.get(PERSISTENT);
+    protected boolean isRandomlyTicking(BlockState state) {
+        return state.getValue(DISTANCE) == DECAY_DISTANCE && !state.getValue(PERSISTENT);
     }
 
     @Override
-    protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (this.shouldDecay(state)) {
-            dropStacks(state, world, pos);
+            dropResources(state, world, pos);
             world.removeBlock(pos, false);
         }
     }
 
     protected boolean shouldDecay(BlockState state) {
-        return !state.get(PERSISTENT) && state.get(DISTANCE) == DECAY_DISTANCE;
+        return !state.getValue(PERSISTENT) && state.getValue(DISTANCE) == DECAY_DISTANCE;
     }
 
     @Override
-    protected int getOpacity(BlockState state) {
+    protected int getLightBlock(BlockState state) {
         return 1;
     }
 
     @Override
-    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        world.setBlockState(pos, updateDistanceFromLogs(state, world, pos), Block.NOTIFY_ALL);
+    protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        world.setBlock(pos, updateDistanceFromLogs(state, world, pos), Block.UPDATE_ALL);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView,
-                                                   BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        if (state.get(WATERLOGGED)) {
-            tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView,
+                                     BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+        if (state.getValue(WATERLOGGED)) {
+            tickView.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
 
         int distance = getDistanceFromLog(neighborState) + 1;
-        if (distance != 1 || state.get(DISTANCE) != distance) {
-            tickView.scheduleBlockTick(pos, this, TICK_DELAY);
+        if (distance != 1 || state.getValue(DISTANCE) != distance) {
+            tickView.scheduleTick(pos, this, TICK_DELAY);
         }
 
         return state;
     }
 
-    private static BlockState updateDistanceFromLogs(BlockState state, WorldAccess world, BlockPos pos) {
+    private static BlockState updateDistanceFromLogs(BlockState state, LevelAccessor world, BlockPos pos) {
         int distance = DECAY_DISTANCE;
-        var mutable = new BlockPos.Mutable();
+        var mutable = new BlockPos.MutableBlockPos();
 
         for (Direction direction : Direction.values()) {
-            mutable.set(pos, direction);
+            mutable.setWithOffset(pos, direction);
             distance = Math.min(distance, getDistanceFromLog(world.getBlockState(mutable)) + 1);
             if (distance == 1) {
                 break;
             }
         }
 
-        return state.with(DISTANCE, distance);
+        return state.setValue(DISTANCE, distance);
     }
 
     private static int getDistanceFromLog(BlockState state) {
@@ -129,59 +126,59 @@ public class RubberLeavesBlock extends Block implements Waterloggable {
     }
 
     public static OptionalInt getOptionalDistanceFromLog(BlockState state) {
-        if (state.isIn(BlockTags.LOGS)) {
+        if (state.is(BlockTags.LOGS)) {
             return OptionalInt.of(0);
-        } else if (state.contains(DISTANCE)) {
-            return OptionalInt.of(state.get(DISTANCE));
-        } else if (state.contains(LeavesBlock.DISTANCE)) {
-            return OptionalInt.of(state.get(LeavesBlock.DISTANCE));
+        } else if (state.hasProperty(DISTANCE)) {
+            return OptionalInt.of(state.getValue(DISTANCE));
+        } else if (state.hasProperty(LeavesBlock.DISTANCE)) {
+            return OptionalInt.of(state.getValue(LeavesBlock.DISTANCE));
         } else {
             return OptionalInt.empty();
         }
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(DISTANCE, PERSISTENT, WATERLOGGED);
     }
 
     @Override
     protected FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
-        BlockState blockState = getDefaultState()
-                .with(PERSISTENT, Boolean.TRUE)
-                .with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
-        return updateDistanceFromLogs(blockState, ctx.getWorld(), ctx.getBlockPos());
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        FluidState fluidState = ctx.getLevel().getFluidState(ctx.getClickedPos());
+        BlockState blockState = defaultBlockState()
+                .setValue(PERSISTENT, Boolean.TRUE)
+                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+        return updateDistanceFromLogs(blockState, ctx.getLevel(), ctx.getClickedPos());
     }
 
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        if (world.hasRain(pos.up())) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
+        if (world.isRainingAt(pos.above())) {
             if (random.nextInt(15) == 1) {
-                BlockPos blockPos = pos.down();
+                BlockPos blockPos = pos.below();
                 BlockState blockState = world.getBlockState(blockPos);
-                if (!blockState.isOpaque() || !blockState.isSideSolidFullSquare(world, blockPos, Direction.UP)) {
-                    ParticleUtil.spawnParticle(world, pos, random, ParticleTypes.DRIPPING_WATER);
+                if (!blockState.canOcclude() || !blockState.isFaceSturdy(world, blockPos, Direction.UP)) {
+                    ParticleUtils.spawnParticleBelow(world, pos, random, ParticleTypes.DRIPPING_WATER);
                 }
             }
         }
     }
 
-    private void spawnLeafParticle(World world, BlockPos pos, Random random, BlockState state, BlockPos posBelow) {
+    private void spawnLeafParticle(Level world, BlockPos pos, RandomSource random, BlockState state, BlockPos posBelow) {
         if (!(random.nextFloat() >= 0.01F)) {
-            if (!isFaceFullSquare(state.getCollisionShape(world, posBelow), Direction.UP)) {
+            if (!isFaceFull(state.getCollisionShape(world, posBelow), Direction.UP)) {
                 this.spawnLeafParticle(world, pos, random);
             }
         }
     }
 
-    protected void spawnLeafParticle(World world, BlockPos pos, Random random) {
-        var tintedParticleEffect = TintedParticleEffect.create(ParticleTypes.TINTED_LEAVES, world.getBlockColor(pos));
-        ParticleUtil.spawnParticle(world, pos, random, tintedParticleEffect);
+    protected void spawnLeafParticle(Level world, BlockPos pos, RandomSource random) {
+        var tintedParticleEffect = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, world.getClientLeafTintColor(pos));
+        ParticleUtils.spawnParticleBelow(world, pos, random, tintedParticleEffect);
     }
 }

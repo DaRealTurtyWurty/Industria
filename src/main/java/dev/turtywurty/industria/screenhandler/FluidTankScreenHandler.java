@@ -14,78 +14,78 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ItemScatterer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
-public class FluidTankScreenHandler extends ScreenHandler implements TickableScreenHandler {
+public class FluidTankScreenHandler extends AbstractContainerMenu implements TickableScreenHandler {
     private final FluidTankBlockEntity blockEntity;
-    private final ScreenHandlerContext context;
-    private final SimpleInventory inventory;
+    private final ContainerLevelAccess context;
+    private final SimpleContainer inventory;
 
-    public FluidTankScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory, (FluidTankBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(payload.pos()), new SimpleInventory(1));
+    public FluidTankScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
+        this(syncId, playerInventory, (FluidTankBlockEntity) playerInventory.player.level().getBlockEntity(payload.pos()), new SimpleContainer(1));
     }
 
-    public FluidTankScreenHandler(int syncId, PlayerInventory playerInventory, FluidTankBlockEntity blockEntity) {
+    public FluidTankScreenHandler(int syncId, Inventory playerInventory, FluidTankBlockEntity blockEntity) {
         this(syncId, playerInventory, blockEntity, new PredicateSimpleInventory(
                 blockEntity,
                 1,
                 PredicateSimpleInventory.createEmptyFluidPredicate(() -> blockEntity.getFluidTank().variant)));
     }
 
-    public FluidTankScreenHandler(int syncId, PlayerInventory playerInventory, FluidTankBlockEntity blockEntity, SimpleInventory inventory) {
+    public FluidTankScreenHandler(int syncId, Inventory playerInventory, FluidTankBlockEntity blockEntity, SimpleContainer inventory) {
         super(ScreenHandlerTypeInit.FLUID_TANK, syncId);
 
         this.blockEntity = blockEntity;
-        this.context = ScreenHandlerContext.create(blockEntity.getWorld(), blockEntity.getPos());
+        this.context = ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos());
         this.inventory = inventory;
 
         addSlot(new PredicateSlot(this.inventory, 0, 81, 64));
-        addPlayerSlots(playerInventory, 8, 92);
+        addStandardInventorySlots(playerInventory, 8, 92);
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        ItemScatterer.spawn(this.blockEntity.getWorld(), this.blockEntity.getPos(), this.inventory);
+    public void removed(Player player) {
+        super.removed(player);
+        Containers.dropContents(this.blockEntity.getLevel(), this.blockEntity.getBlockPos(), this.inventory);
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasStack()) {
+        if (!slot.hasItem()) {
             return stack;
         }
 
-        ItemStack stackInSlot = slot.getStack();
+        ItemStack stackInSlot = slot.getItem();
         stack = stackInSlot.copy();
 
         if (slotIndex < 1) {
-            if (!insertItem(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
-                if (!insertItem(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
+            if (!moveItemStackTo(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
+                if (!moveItemStackTo(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
                     return ItemStack.EMPTY;
                 }
             }
         } else {
-            if (!insertItem(stackInSlot, 0, 1, false)) {
+            if (!moveItemStackTo(stackInSlot, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
         }
 
         if (stackInSlot.isEmpty()) {
-            slot.setStack(ItemStack.EMPTY);
+            slot.setByPlayer(ItemStack.EMPTY);
         } else {
-            slot.markDirty();
+            slot.setChanged();
         }
 
         return stack;
@@ -96,19 +96,19 @@ public class FluidTankScreenHandler extends ScreenHandler implements TickableScr
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, BlockInit.FLUID_TANK);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, BlockInit.FLUID_TANK);
     }
 
     @Override
-    public void tick(ServerPlayerEntity player) {
-        if (this.blockEntity == null || !this.blockEntity.hasWorld())
+    public void tick(ServerPlayer player) {
+        if (this.blockEntity == null || !this.blockEntity.hasLevel())
             return;
 
         boolean extractMode = this.blockEntity.isExtractMode();
         SyncingFluidStorage fluidTank = this.blockEntity.getFluidTank();
         if (fluidTank.amount > 0 && extractMode) {
-            ItemStack stack = this.inventory.getStack(0);
+            ItemStack stack = this.inventory.getItem(0);
             if(stack.isEmpty())
                 return;
 
@@ -125,7 +125,7 @@ public class FluidTankScreenHandler extends ScreenHandler implements TickableScr
                 }
             }
         } else if(fluidTank.amount <= 0 && !extractMode) {
-            ItemStack stack = this.inventory.getStack(0);
+            ItemStack stack = this.inventory.getItem(0);
             if(stack.isEmpty())
                 return;
 

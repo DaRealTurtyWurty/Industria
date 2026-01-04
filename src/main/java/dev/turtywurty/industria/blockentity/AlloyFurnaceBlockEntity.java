@@ -13,38 +13,38 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
 import dev.turtywurty.industria.screenhandler.AlloyFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
 public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("alloy_furnace");
+    public static final Component TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
     private int progress, maxProgress, burnTime, maxBurnTime;
-    private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
+    private final ContainerData propertyDelegate = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -68,67 +68,67 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 4;
         }
     };
     private ItemStack bufferedStack = ItemStack.EMPTY;
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
 
     public AlloyFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.ALLOY_FURNACE, BlockEntityTypeInit.ALLOY_FURNACE, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1, (itemStack, slot) -> isFuel(itemStack)), Direction.UP);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1, (itemStack, slot) -> isFuel(itemStack)), Direction.UP);
+        this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
     }
 
     public boolean isFuel(ItemStack stack) {
-        return this.world.getFuelRegistry().isFuel(stack);
+        return this.level.fuelValues().isFuel(stack);
     }
 
     public int getFuelTime(ItemStack stack) {
-        return this.world.getFuelRegistry().getFuelTicks(stack);
+        return this.level.fuelValues().burnDuration(stack);
     }
 
-    public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.wrappedInventoryStorage.getStorage(direction);
-    }
-
-    @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public ContainerStorage getInventoryProvider(Direction direction) {
+        return this.wrappedContainerStorage.getStorage(direction);
     }
 
     @Override
-    public Text getDisplayName() {
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
+    }
+
+    @Override
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Nullable
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, getWrappedInventoryStorage(), this.propertyDelegate);
+    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, getWrappedContainerStorage(), this.propertyDelegate);
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var input0 = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
-        var input1 = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
-        var fuel = (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
-        var output = (OutputSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+        var input0 = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        var input1 = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
+        var fuel = (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(2);
+        var output = (OutputSimpleInventory) this.wrappedContainerStorage.getInventory(3);
         return List.of(input0, input1, fuel, output);
     }
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         if (!this.bufferedStack.isEmpty()) {
             if (canOutput(this.bufferedStack)) {
-                this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).addStack(this.bufferedStack);
+                this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).addItem(this.bufferedStack);
                 this.bufferedStack = ItemStack.EMPTY;
                 update();
             } else {
@@ -139,16 +139,16 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         if (this.burnTime > 0) {
             this.burnTime--;
             if (this.burnTime <= 0) {
-                this.world.setBlockState(this.pos, getCachedState().with(Properties.LIT, false));
+                this.level.setBlockAndUpdate(this.worldPosition, getBlockState().setValue(BlockStateProperties.LIT, false));
             } else {
-                this.world.setBlockState(this.pos, getCachedState().with(Properties.LIT, true));
+                this.level.setBlockAndUpdate(this.worldPosition, getBlockState().setValue(BlockStateProperties.LIT, true));
             }
 
             update();
         }
 
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<AlloyFurnaceRecipe>> recipeEntry = getCurrentRecipe();
+            Optional<RecipeHolder<AlloyFurnaceRecipe>> recipeEntry = getCurrentRecipe();
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().smeltTime();
@@ -159,19 +159,19 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
             return;
         }
 
-        Optional<RecipeEntry<AlloyFurnaceRecipe>> currentRecipe = getCurrentRecipe();
+        Optional<RecipeHolder<AlloyFurnaceRecipe>> currentRecipe = getCurrentRecipe();
         if (currentRecipe.isEmpty() || !currentRecipe.get().id().equals(this.currentRecipeId) || !canOutput(currentRecipe.get().value().output())) {
             reset();
             return;
         }
 
         if (this.burnTime <= 0) {
-            ItemStack fuel = this.wrappedInventoryStorage.getInventory(FUEL_SLOT).getStack(0);
+            ItemStack fuel = this.wrappedContainerStorage.getInventory(FUEL_SLOT).getItem(0);
             if (isFuel(fuel)) {
                 int burnTime = getFuelTime(fuel);
                 this.maxBurnTime = burnTime;
                 this.burnTime = burnTime;
-                this.wrappedInventoryStorage.getInventory(FUEL_SLOT).removeStack(0, 1);
+                this.wrappedContainerStorage.getInventory(FUEL_SLOT).removeItem(0, 1);
                 update();
             } else {
                 reset();
@@ -185,14 +185,14 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         if (this.progress >= this.maxProgress) {
             reset();
 
-            ItemStack output = recipe.craft(this.wrappedInventoryStorage.getRecipeInventory(), this.world.getRegistryManager());
+            ItemStack output = recipe.assemble(this.wrappedContainerStorage.getRecipeInventory(), this.level.registryAccess());
             if (canOutput(output)) {
-                SimpleInventory outputInventory = this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT);
-                ItemStack outputStack = outputInventory.getStack(0);
+                SimpleContainer outputInventory = this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
+                ItemStack outputStack = outputInventory.getItem(0);
                 if (outputStack.isEmpty()) {
-                    outputInventory.setStack(0, output);
+                    outputInventory.setItem(0, output);
                 } else {
-                    outputStack.increment(output.getCount());
+                    outputStack.grow(output.getCount());
                 }
             } else {
                 this.bufferedStack = output;
@@ -203,7 +203,7 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     public boolean canOutput(ItemStack output) {
-        return this.wrappedInventoryStorage.getInventory(OUTPUT_SLOT).canInsert(output);
+        return this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).canAddItem(output);
     }
 
     private void reset() {
@@ -214,51 +214,51 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     public RecipeSimpleInventory getInventory() {
-        return this.wrappedInventoryStorage.getRecipeInventory();
+        return this.wrappedContainerStorage.getRecipeInventory();
     }
 
-    private Optional<RecipeEntry<AlloyFurnaceRecipe>> getCurrentRecipe() {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<AlloyFurnaceRecipe>> getCurrentRecipe() {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.ALLOY_FURNACE, getInventory(), this.world);
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.ALLOY_FURNACE, getInventory(), this.level);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
         view.putInt("BurnTime", this.burnTime);
         view.putInt("MaxBurnTime", this.maxBurnTime);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
 
         if (!this.bufferedStack.isEmpty())
-            view.put("BufferedStack", ItemStack.CODEC, this.bufferedStack);
+            view.store("BufferedStack", ItemStack.CODEC, this.bufferedStack);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        this.progress = view.getInt("Progress", 0);
-        this.maxProgress = view.getInt("MaxProgress", 0);
-        this.burnTime = view.getInt("BurnTime", 0);
-        this.maxBurnTime = view.getInt("MaxBurnTime", 0);
+    protected void loadAdditional(ValueInput view) {
+        this.progress = view.getIntOr("Progress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
+        this.burnTime = view.getIntOr("BurnTime", 0);
+        this.maxBurnTime = view.getIntOr("MaxBurnTime", 0);
         this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC).orElse(null);
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         this.bufferedStack = view.read("BufferedStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
     }
 
     @Override
-    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return wrappedInventoryStorage;
+    public WrappedContainerStorage<SimpleContainer> getWrappedContainerStorage() {
+        return wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 }

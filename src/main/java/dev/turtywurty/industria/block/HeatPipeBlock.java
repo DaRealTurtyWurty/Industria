@@ -6,7 +6,7 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.impl.network.HeatPipeNetwork;
 
 public class HeatPipeBlock extends PipeBlock<HeatStorage, HeatPipeNetwork, Double> {
-    public HeatPipeBlock(Settings settings) {
+    public HeatPipeBlock(Properties settings) {
         super(settings, 6, TransferType.HEAT);
     }
 

@@ -2,22 +2,22 @@ package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record UpgradeStationUpdateRecipesPayload(List<UpgradeStationRecipe> recipes) implements CustomPayload {
-    public static final Id<UpgradeStationUpdateRecipesPayload> ID = new Id<>(Industria.id("upgrade_station_update_recipes"));
-    public static final PacketCodec<RegistryByteBuf, UpgradeStationUpdateRecipesPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.collection(ArrayList::new, UpgradeStationRecipe.Serializer.PACKET_CODEC), UpgradeStationUpdateRecipesPayload::recipes,
+public record UpgradeStationUpdateRecipesPayload(List<UpgradeStationRecipe> recipes) implements CustomPacketPayload {
+    public static final Type<UpgradeStationUpdateRecipesPayload> ID = new Type<>(Industria.id("upgrade_station_update_recipes"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeStationUpdateRecipesPayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.collection(ArrayList::new, UpgradeStationRecipe.Serializer.STREAM_CODEC), UpgradeStationUpdateRecipesPayload::recipes,
             UpgradeStationUpdateRecipesPayload::new);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

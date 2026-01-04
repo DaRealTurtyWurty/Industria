@@ -1,21 +1,21 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.CrusherBlockEntity;
 import dev.turtywurty.industria.model.CrusherModel;
 import dev.turtywurty.industria.state.CrusherRenderState;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class CrusherBlockEntityRenderer extends IndustriaBlockEntityRenderer<CrusherBlockEntity, CrusherRenderState> {
     private final CrusherModel model;
 
-    public CrusherBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public CrusherBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
-        this.model = new CrusherModel(context.getLayerModelPart(CrusherModel.LAYER_LOCATION));
+        this.model = new CrusherModel(context.bakeLayer(CrusherModel.LAYER_LOCATION));
     }
 
     @Override
@@ -24,17 +24,17 @@ public class CrusherBlockEntityRenderer extends IndustriaBlockEntityRenderer<Cru
     }
 
     @Override
-    public void updateRenderState(CrusherBlockEntity blockEntity, CrusherRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(CrusherBlockEntity blockEntity, CrusherRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
     }
 
     @Override
-    public void onRender(CrusherRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    public void onRender(CrusherRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         queue.submitModel(this.model,
                 state.progress > 0 ? (float) (((double) state.progress / state.maxProgress) * Math.PI) : 0F,
-                matrices, this.model.getLayer(CrusherModel.TEXTURE),
-                light, overlay, 0, state.crumblingOverlay);
+                matrices, this.model.renderType(CrusherModel.TEXTURE),
+                light, overlay, 0, state.breakProgress);
     }
 }

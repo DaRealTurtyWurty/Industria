@@ -5,7 +5,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import team.reborn.energy.api.EnergyStorage;
 
 public class EnergyStorageInit {
@@ -30,7 +30,7 @@ public class EnergyStorageInit {
         EnergyStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ARC_FURNACE);
 
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
-            if (world instanceof ServerWorld serverWorld) {
+            if (world instanceof ServerLevel serverWorld) {
                 return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.ENERGY, pos);
             }
 

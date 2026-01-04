@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.multiblock;
 
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Vec3i;
 
 /**
  * Represents a position relative to a multiblock structure.

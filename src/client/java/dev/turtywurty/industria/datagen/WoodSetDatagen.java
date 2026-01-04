@@ -1,56 +1,52 @@
 package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.util.WoodRegistrySet;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
-import net.minecraft.block.Block;
-import net.minecraft.client.data.BlockStateModelGenerator;
-import net.minecraft.client.data.TexturedModel;
-import net.minecraft.data.loottable.BlockLootTableGenerator;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.data.recipe.RecipeGenerator;
-import net.minecraft.data.recipe.ShapedRecipeJsonBuilder;
-import net.minecraft.data.recipe.ShapelessRecipeJsonBuilder;
-import net.minecraft.data.tag.ProvidedTagBuilder;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.EntityTypeTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.model.TexturedModel;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.data.recipes.*;
+import net.minecraft.data.tags.TagAppender;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
 
 import java.util.function.Function;
 
 import static dev.turtywurty.industria.datagen.IndustriaRecipeProvider.hasTag;
 
 public class WoodSetDatagen {
-    public static void generateBlockLootTables(WoodRegistrySet woodSet, FabricBlockLootTableProvider provider) {
-        provider.addDrop(woodSet.planks);
-        provider.addDrop(woodSet.log);
-        provider.addDrop(woodSet.strippedLog);
-        provider.addDrop(woodSet.strippedWood);
-        provider.addDrop(woodSet.wood);
-        provider.addDrop(woodSet.sapling);
-        provider.addDrop(woodSet.stairs);
-        provider.addDrop(woodSet.slab, provider::slabDrops);
-        provider.addDrop(woodSet.fence);
-        provider.addDrop(woodSet.fenceGate);
-        provider.addDrop(woodSet.door);
-        provider.addDrop(woodSet.trapdoor);
-        provider.addDrop(woodSet.pressurePlate);
-        provider.addDrop(woodSet.button);
-        provider.addDrop(woodSet.sign, woodSet.signItem);
-        provider.addDrop(woodSet.wallSign, woodSet.signItem);
-        provider.addDrop(woodSet.hangingSign, woodSet.hangingSignItem);
-        provider.addDrop(woodSet.wallHangingSign, woodSet.hangingSignItem);
+    public static void generateBlockLootTables(WoodRegistrySet woodSet, FabricBlockLootSubProvider provider) {
+        provider.dropSelf(woodSet.planks);
+        provider.dropSelf(woodSet.log);
+        provider.dropSelf(woodSet.strippedLog);
+        provider.dropSelf(woodSet.strippedWood);
+        provider.dropSelf(woodSet.wood);
+        provider.dropSelf(woodSet.sapling);
+        provider.dropSelf(woodSet.stairs);
+        provider.add(woodSet.slab, provider::createSlabItemTable);
+        provider.dropSelf(woodSet.fence);
+        provider.dropSelf(woodSet.fenceGate);
+        provider.dropSelf(woodSet.door);
+        provider.dropSelf(woodSet.trapdoor);
+        provider.dropSelf(woodSet.pressurePlate);
+        provider.dropSelf(woodSet.button);
+        provider.dropOther(woodSet.sign, woodSet.signItem);
+        provider.dropOther(woodSet.wallSign, woodSet.signItem);
+        provider.dropOther(woodSet.hangingSign, woodSet.hangingSignItem);
+        provider.dropOther(woodSet.wallHangingSign, woodSet.hangingSignItem);
 
-        provider.addDrop(woodSet.leaves,
-                leavesBlock -> provider.leavesDrops(leavesBlock, woodSet.sapling, BlockLootTableGenerator.SAPLING_DROP_CHANCE));
+        provider.add(woodSet.leaves,
+                leavesBlock -> provider.createLeavesDrops(leavesBlock, woodSet.sapling, BlockLootSubProvider.NORMAL_LEAVES_SAPLING_CHANCES));
     }
 
     public static void generateEnglishLanguage(WoodRegistrySet woodSet, FabricLanguageProvider.TranslationBuilder translationBuilder) {
@@ -82,54 +78,54 @@ public class WoodSetDatagen {
         translationBuilder.add(woodSet.hangingSignItem, typeCaseName + " Hanging Sign");
     }
 
-    public static void generateBlockStateAndModels(WoodRegistrySet woodSet, BlockStateModelGenerator blockStateModelGenerator) {
-        blockStateModelGenerator.createLogTexturePool(woodSet.log)
-                .log(woodSet.log)
+    public static void generateBlockStateAndModels(WoodRegistrySet woodSet, BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.woodProvider(woodSet.log)
+                .logWithHorizontal(woodSet.log)
                 .wood(woodSet.wood);
-        blockStateModelGenerator.createLogTexturePool(woodSet.strippedLog)
-                .log(woodSet.strippedLog)
+        blockStateModelGenerator.woodProvider(woodSet.strippedLog)
+                .logWithHorizontal(woodSet.strippedLog)
                 .wood(woodSet.strippedWood);
-        blockStateModelGenerator.registerTintedBlockAndItem(woodSet.leaves, TexturedModel.LEAVES, 0x00BB0A);
-        blockStateModelGenerator.registerTintableCross(woodSet.sapling, BlockStateModelGenerator.CrossType.NOT_TINTED);
-        blockStateModelGenerator.registerHangingSign(woodSet.strippedLog, woodSet.hangingSign, woodSet.wallHangingSign);
-        blockStateModelGenerator.registerCubeAllModelTexturePool(woodSet.planks)
-                .family(woodSet.createBlockFamily());
+        blockStateModelGenerator.createTintedLeaves(woodSet.leaves, TexturedModel.LEAVES, 0x00BB0A);
+        blockStateModelGenerator.createCrossBlockWithDefaultItem(woodSet.sapling, BlockModelGenerators.PlantType.NOT_TINTED);
+        blockStateModelGenerator.createHangingSign(woodSet.strippedLog, woodSet.hangingSign, woodSet.wallHangingSign);
+        blockStateModelGenerator.family(woodSet.planks)
+                .generateFor(woodSet.createBlockFamily());
     }
 
-    public static void generateRecipes(WoodRegistrySet woodSet, RecipeGenerator generator, RecipeExporter exporter, RegistryEntryLookup<Item> registries) {
-        ShapelessRecipeJsonBuilder.create(registries, RecipeCategory.BUILDING_BLOCKS, woodSet.planks, 4)
-                .input(Ingredient.ofTag(registries.getOrThrow(woodSet.logsItemTag)))
-                .criterion(hasTag(woodSet.logsItemTag), generator.conditionsFromTag(woodSet.logsItemTag))
-                .offerTo(exporter);
+    public static void generateRecipes(WoodRegistrySet woodSet, RecipeProvider generator, RecipeOutput exporter, HolderGetter<Item> registries) {
+        ShapelessRecipeBuilder.shapeless(registries, RecipeCategory.BUILDING_BLOCKS, woodSet.planks, 4)
+                .requires(Ingredient.of(registries.getOrThrow(woodSet.logsItemTag)))
+                .unlockedBy(hasTag(woodSet.logsItemTag), generator.has(woodSet.logsItemTag))
+                .save(exporter);
 
-        ShapedRecipeJsonBuilder.create(registries, RecipeCategory.DECORATIONS, woodSet.hangingSignItem, 6)
-                .input('P', woodSet.planks)
-                .input('C', ConventionalItemTags.CHAINS)
+        ShapedRecipeBuilder.shaped(registries, RecipeCategory.DECORATIONS, woodSet.hangingSignItem, 6)
+                .define('P', woodSet.planks)
+                .define('C', ConventionalItemTags.CHAINS)
                 .pattern("C C")
                 .pattern("PPP")
                 .pattern("PPP")
-                .criterion(RecipeGenerator.hasItem(woodSet.planks), generator.conditionsFromItem(woodSet.planks))
-                .criterion(hasTag(ConventionalItemTags.CHAINS), generator.conditionsFromTag(ConventionalItemTags.CHAINS))
-                .offerTo(exporter);
+                .unlockedBy(RecipeProvider.getHasName(woodSet.planks), generator.has(woodSet.planks))
+                .unlockedBy(hasTag(ConventionalItemTags.CHAINS), generator.has(ConventionalItemTags.CHAINS))
+                .save(exporter);
 
-        ShapedRecipeJsonBuilder.create(registries, RecipeCategory.TRANSPORTATION, woodSet.boatItem)
-                .input('P', woodSet.planks)
+        ShapedRecipeBuilder.shaped(registries, RecipeCategory.TRANSPORTATION, woodSet.boatItem)
+                .define('P', woodSet.planks)
                 .pattern("P P")
                 .pattern("PPP")
-                .criterion(RecipeGenerator.hasItem(woodSet.planks), generator.conditionsFromItem(woodSet.planks))
-                .offerTo(exporter);
+                .unlockedBy(RecipeProvider.getHasName(woodSet.planks), generator.has(woodSet.planks))
+                .save(exporter);
 
-        ShapelessRecipeJsonBuilder.create(registries, RecipeCategory.TRANSPORTATION, woodSet.chestBoatItem)
-                .input(Ingredient.ofTag(registries.getOrThrow(woodSet.logsItemTag)))
-                .input(Ingredient.ofTag(registries.getOrThrow(ConventionalItemTags.WOODEN_CHESTS)))
-                .criterion(hasTag(woodSet.logsItemTag), generator.conditionsFromTag(woodSet.logsItemTag))
-                .criterion(hasTag(ConventionalItemTags.WOODEN_CHESTS), generator.conditionsFromTag(ConventionalItemTags.WOODEN_CHESTS))
-                .offerTo(exporter);
+        ShapelessRecipeBuilder.shapeless(registries, RecipeCategory.TRANSPORTATION, woodSet.chestBoatItem)
+                .requires(Ingredient.of(registries.getOrThrow(woodSet.logsItemTag)))
+                .requires(Ingredient.of(registries.getOrThrow(ConventionalItemTags.WOODEN_CHESTS)))
+                .unlockedBy(hasTag(woodSet.logsItemTag), generator.has(woodSet.logsItemTag))
+                .unlockedBy(hasTag(ConventionalItemTags.WOODEN_CHESTS), generator.has(ConventionalItemTags.WOODEN_CHESTS))
+                .save(exporter);
 
-        generator.generateFamily(woodSet.createBlockFamily(), FeatureSet.empty());
+        generator.generateRecipes(woodSet.createBlockFamily(), FeatureFlagSet.of());
     }
 
-    public static void generateItemTags(WoodRegistrySet woodSet, Function<TagKey<Item>, ProvidedTagBuilder<Item, Item>> provider) {
+    public static void generateItemTags(WoodRegistrySet woodSet, Function<TagKey<Item>, TagAppender<Item, Item>> provider) {
         provider.apply(woodSet.logsItemTag)
                 .add(woodSet.log.asItem())
                 .add(woodSet.strippedLog.asItem())
@@ -185,7 +181,7 @@ public class WoodSetDatagen {
                 .add(woodSet.chestBoatItem);
     }
 
-    public static void generateBlockTags(WoodRegistrySet woodSet, Function<TagKey<Block>, ProvidedTagBuilder<Block, Block>> provider) {
+    public static void generateBlockTags(WoodRegistrySet woodSet, Function<TagKey<Block>, TagAppender<Block, Block>> provider) {
         provider.apply(woodSet.logsBlockTag)
                 .add(woodSet.log)
                 .add(woodSet.strippedLog)
@@ -241,7 +237,7 @@ public class WoodSetDatagen {
                 .add(woodSet.wallHangingSign);
     }
 
-    public static void generateEntityTags(WoodRegistrySet woodSet, Function<TagKey<EntityType<?>>, ProvidedTagBuilder<EntityType<?>, EntityType<?>>> provider) {
+    public static void generateEntityTags(WoodRegistrySet woodSet, Function<TagKey<EntityType<?>>, TagAppender<EntityType<?>, EntityType<?>>> provider) {
         provider.apply(EntityTypeTags.BOAT)
                 .add(woodSet.boatEntityType)
                 .add(woodSet.chestBoatEntityType);

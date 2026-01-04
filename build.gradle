@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.14-SNAPSHOT'
+	id 'net.fabricmc.fabric-loom' version '1.14-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -42,6 +42,7 @@ loom {
 
 	runConfigs.configureEach {
 		ideConfigGenerated = false
+        vmArg("-XX:+AllowEnhancedClassRedefinition")
 	}
 }
 
@@ -53,16 +54,15 @@ fabricApi {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	include modApi("teamreborn:energy:${project.tech_reborn_energy_version}")
-	include modApi("dev.turtywurty:heatapi:${project.heat_api_version}")
-	include modApi("dev.turtywurty:slurryapi:${project.slurry_api_version}")
-	include modApi("dev.turtywurty:gasapi:${project.gas_api_version}")
+	include api("teamreborn:energy:${project.tech_reborn_energy_version}")
+	include api("dev.turtywurty:heatapi:${project.heat_api_version}")
+	include api("dev.turtywurty:slurryapi:${project.slurry_api_version}")
+	include api("dev.turtywurty:gasapi:${project.gas_api_version}")
 
-	modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
+    //api "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
 	implementation "org.jbox2d:jbox2d-library:2.2.1.1"
 }
@@ -76,14 +76,14 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

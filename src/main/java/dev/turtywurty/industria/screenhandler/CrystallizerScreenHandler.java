@@ -1,30 +1,30 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.CrystallizerBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerData;
 
 public class CrystallizerScreenHandler extends IndustriaScreenHandler<CrystallizerBlockEntity, BlockPosPayload> {
-    public CrystallizerScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
+    public CrystallizerScreenHandler(int syncId, Inventory playerInv, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.CRYSTALLIZER, 4, syncId, playerInv, payload, CrystallizerBlockEntity.class);
     }
 
-    public CrystallizerScreenHandler(int syncId, PlayerInventory playerInv, CrystallizerBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.CRYSTALLIZER, syncId, playerInv, blockEntity, wrappedInventoryStorage, properties);
+    public CrystallizerScreenHandler(int syncId, Inventory playerInv, CrystallizerBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+        super(ScreenHandlerTypeInit.CRYSTALLIZER, syncId, playerInv, blockEntity, wrappedContainerStorage, properties);
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
-        WrappedInventoryStorage<?> wrappedStorage = this.wrappedInventoryStorage;
+    protected void addBlockEntitySlots(Inventory playerInventory) {
+        WrappedContainerStorage<?> wrappedStorage = this.wrappedContainerStorage;
         addSlot(new PredicateSlot(wrappedStorage.getInventory(0), 0, 54, 12, $ -> !blockEntity.isRunning()));
         addSlot(new OutputSlot(wrappedStorage.getInventory(1), 0, 148, 27));
         addSlot(new OutputSlot(wrappedStorage.getInventory(2), 0, 148, 51));
@@ -41,8 +41,8 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, BlockInit.CRYSTALLIZER);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, BlockInit.CRYSTALLIZER);
     }
 
     public int getProgress() {
@@ -60,7 +60,7 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
             return 0.0f;
         }
 
-        return MathHelper.clamp(progress / maxProgress, 0.0f, 1.0f);
+        return Mth.clamp(progress / maxProgress, 0.0f, 1.0f);
     }
 
     public int getProgressScaled() {
@@ -82,6 +82,6 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
             return 0.0f;
         }
 
-        return MathHelper.clamp(uses / maxUses, 0.0f, 1.0f);
+        return Mth.clamp(uses / maxUses, 0.0f, 1.0f);
     }
 }

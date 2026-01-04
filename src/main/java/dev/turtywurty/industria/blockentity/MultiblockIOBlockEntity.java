@@ -6,12 +6,12 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.multiblock.old.Port;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -27,23 +27,23 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
 
     @Override
     public void tick() {
-        if(this.world == null)
+        if(this.level == null)
             return;
 
         if(this.multiblock == null) {
-            BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(this.world, this.pos);
+            BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(this.level, this.worldPosition);
             if(primaryPos == null)
                 return;
 
-            BlockEntity blockEntity = this.world.getBlockEntity(primaryPos);
+            BlockEntity blockEntity = this.level.getBlockEntity(primaryPos);
             if(blockEntity instanceof AutoMultiblockable multiblockable) {
                 this.primary = blockEntity;
                 this.multiblock = multiblockable;
-                this.offsetFromPrimary = AutoMultiblockBlock.getOffsetFromPrimary(primaryPos, this.pos, blockEntity.getCachedState().get(Properties.HORIZONTAL_FACING));
+                this.offsetFromPrimary = AutoMultiblockBlock.getOffsetFromPrimary(primaryPos, this.worldPosition, blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
             }
         }
 
-        if(this.multiblock == null || this.world.isClient())
+        if(this.multiblock == null || this.level.isClientSide())
             return;
 
         for (Direction direction : Direction.values()) {
@@ -55,7 +55,7 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
             if(port == null)
                 continue;
 
-            port.tick(this.world, this.pos, this.primary.getPos());
+            port.tick(this.level, this.worldPosition, this.primary.getBlockPos());
         }
     }
 
@@ -78,6 +78,6 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
         if(port == null)
             return null;
 
-        return port.getProvider(transferType, this.world, this.primary.getPos(), this.primary);
+        return port.getProvider(transferType, this.level, this.primary.getBlockPos(), this.primary);
     }
 }

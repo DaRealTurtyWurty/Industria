@@ -3,18 +3,18 @@ package dev.turtywurty.industria.command;
 import com.mojang.brigadier.context.CommandContext;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerLevel;
 
 public class ResetPipeNetworksCommand {
-    public static int execute(CommandContext<ServerCommandSource> context) {
-        ServerWorld serverWorld = context.getSource().getWorld();
+    public static int execute(CommandContext<CommandSourceStack> context) {
+        ServerLevel serverWorld = context.getSource().getLevel();
         WorldPipeNetworks worldPipeNetworks = WorldPipeNetworks.getOrCreate(serverWorld);
         for (PipeNetworkManager<?, ?> manager : worldPipeNetworks.getPipeNetworkManagers()) {
             manager.clear();
         }
 
-        worldPipeNetworks.markDirty();
+        worldPipeNetworks.setDirty();
         return 1;
     }
 }

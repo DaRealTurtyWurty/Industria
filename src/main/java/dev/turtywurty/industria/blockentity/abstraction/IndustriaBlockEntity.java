@@ -8,13 +8,13 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
     int tickRate;
     TickLogic<T, BlockEntityFields<T>> tickLogic;
 
-    WrappedInventoryStorage<SimpleInventory> inventoryStorage;
+    WrappedContainerStorage<SimpleContainer> ContainerStorage;
     WrappedFluidStorage<SingleFluidStorage> fluidStorage;
     WrappedEnergyStorage energyStorage;
 
@@ -33,16 +33,16 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
     IndustriaBlock blockRef;
 
     @Override
-    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
-        BlockState newState = world.getBlockState(pos);
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        BlockState newState = level.getBlockState(pos);
         if (blockRef.multiblockType != null) {
-            if (!oldState.isOf(newState.getBlock())) {
-                blockRef.multiblockType.onMultiblockBreak(world, pos);
+            if (!oldState.is(newState.getBlock())) {
+                blockRef.multiblockType.onMultiblockBreak(level, pos);
             }
         } else if (blockRef.dropContentsOnBreak) {
-            if (!oldState.isOf(newState.getBlock())) {
+            if (!oldState.is(newState.getBlock())) {
                 if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component access maybe?
-                    blockEntityWithInventory.dropContents(world, pos);
+                    blockEntityWithInventory.dropContents(level, pos);
                 }
             }
         }
@@ -91,7 +91,7 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
         this.tickRate = properties.tickRate;
         this.tickLogic = properties.tickLogic;
 
-        this.inventoryStorage = properties.inventoryStorage;
+        this.ContainerStorage = properties.ContainerStorage;
         this.fluidStorage = properties.fluidStorage;
         this.energyStorage = properties.energyStorage;
 
@@ -102,9 +102,9 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
     }
 
     private void registerDefaultFields(BlockEntityFields<T> fields) {
-        fields.addField("world", this.world, IndustriaBlockEntity::getWorld, null);
-        fields.addField("pos", this.pos, IndustriaBlockEntity::getPos, null);
-        fields.addField("cachedState", getCachedState(), IndustriaBlockEntity::getCachedState, null);
+        fields.addField("world", this.level, IndustriaBlockEntity::getLevel, null);
+        fields.addField("pos", this.worldPosition, IndustriaBlockEntity::getBlockPos, null);
+        fields.addField("cachedState", getBlockState(), IndustriaBlockEntity::getBlockState, null);
         fields.addField("ticks", this.ticks, IndustriaBlockEntity::getTicks, null);
         fields.addField("tickRate", this.tickRate, blockEntity -> blockEntity.tickRate, null);
         fields.addField("isDirty", this.isDirty, blockEntity -> blockEntity.isDirty, (blockEntity, value) -> blockEntity.isDirty = value);
@@ -119,7 +119,7 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
         private int tickRate = 0;
         private TickLogic<T, BlockEntityFields<T>> tickLogic;
 
-        private final WrappedInventoryStorage<SimpleInventory> inventoryStorage = new WrappedInventoryStorage<>();
+        private final WrappedContainerStorage<SimpleContainer> ContainerStorage = new WrappedContainerStorage<>();
         private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
         private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
 
@@ -148,13 +148,13 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
             return inventory(builder.build());
         }
 
-        public BlockEntityProperties<T> inventory(SimpleInventory inventory, Direction side) {
-            this.inventoryStorage.addInventory(inventory, side);
+        public BlockEntityProperties<T> inventory(SimpleContainer inventory, Direction side) {
+            this.ContainerStorage.addInventory(inventory, side);
             return this;
         }
 
-        public BlockEntityProperties<T> inventory(SimpleInventory inventory) {
-            this.inventoryStorage.addInventory(inventory);
+        public BlockEntityProperties<T> inventory(SimpleContainer inventory) {
+            this.ContainerStorage.addInventory(inventory);
             return this;
         }
 

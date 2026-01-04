@@ -3,15 +3,15 @@ package dev.turtywurty.industria.worldgen.feature;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.worldgen.config.FluidPocketConfig;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.ChunkRegion;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.util.FeatureContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.material.FluidState;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,12 +25,12 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
 
     @SuppressWarnings("deprecation")
     @Override
-    public boolean generate(FeatureContext<FluidPocketConfig> context) {
-        BlockPos origin = context.getOrigin();
-        WorldAccess world = context.getWorld();
-        FluidPocketConfig config = context.getConfig();
+    public boolean place(FeaturePlaceContext<FluidPocketConfig> context) {
+        BlockPos origin = context.origin();
+        LevelAccessor world = context.level();
+        FluidPocketConfig config = context.config();
         FluidState fluidState = config.fluidState();
-        Random random = context.getRandom();
+        RandomSource random = context.random();
 
         BlockState originState = world.getBlockState(origin);
         if(originState.isAir() || !config.replaceable().test(originState, random))
@@ -39,21 +39,21 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
         if(random.nextInt(100) < 50)
             return false;
 
-        ServerWorld serverWorld;
-        if(!(world instanceof ServerWorld)) {
-            if (world instanceof ChunkRegion) {
-                serverWorld = ((ChunkRegion) world).toServerWorld();
+        ServerLevel serverWorld;
+        if(!(world instanceof ServerLevel)) {
+            if (world instanceof WorldGenRegion) {
+                serverWorld = ((WorldGenRegion) world).getLevel();
             } else {
                 return false;
             }
         } else {
-            serverWorld = (ServerWorld) world;
+            serverWorld = (ServerLevel) world;
         }
 
         Set<BlockPos> positions = new HashSet<>();
         // Define the base radius and depth of the pond
-        int baseRadius = config.radius().get(random);
-        int baseDepth = config.depth().get(random);
+        int baseRadius = config.radius().sample(random);
+        int baseDepth = config.depth().sample(random);
 
         // Iterate over the area to create the pond with randomness
         for (int x = -baseRadius; x <= baseRadius; x++) {
@@ -66,9 +66,9 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
                 int currentDepth = baseDepth + depthVariation;
 
                 for (int y = 0; y < currentDepth; y++) {
-                    BlockPos pos = origin.add(x, -y, z);
+                    BlockPos pos = origin.offset(x, -y, z);
                     BlockState state = world.getBlockState(pos);
-                    if (pos.isWithinDistance(origin, currentRadius) && !state.isAir() && config.replaceable().test(state, random)) {
+                    if (pos.closerThan(origin, currentRadius) && !state.isAir() && config.replaceable().test(state, random)) {
                         positions.add(pos);
                     }
                 }
@@ -77,7 +77,7 @@ public class FluidPocketFeature extends Feature<FluidPocketConfig> {
 
         Map<BlockPos, Integer> positionsWithAmount = new HashMap<>();
         for (BlockPos pos : positions) {
-            positionsWithAmount.put(pos, random.nextBetween((int) FluidConstants.BOTTLE, (int) (FluidConstants.BUCKET * 5)));
+            positionsWithAmount.put(pos, random.nextIntBetweenInclusive((int) FluidConstants.BOTTLE, (int) (FluidConstants.BUCKET * 5)));
         }
 
         var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, positionsWithAmount);

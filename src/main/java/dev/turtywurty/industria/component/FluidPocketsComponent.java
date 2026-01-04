@@ -3,9 +3,9 @@ package dev.turtywurty.industria.component;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,8 @@ public record FluidPocketsComponent(List<WorldFluidPocketsState.FluidPocket> poc
             Codec.list(WorldFluidPocketsState.FluidPocket.CODEC).fieldOf("pockets").forGetter(FluidPocketsComponent::pockets)
     ).apply(instance, FluidPocketsComponent::new));
 
-    public static final PacketCodec<RegistryByteBuf, FluidPocketsComponent> PACKET_CODEC =
-            PacketCodec.tuple(PacketCodecs.collection(ArrayList::new, WorldFluidPocketsState.FluidPocket.PACKET_CODEC),
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPocketsComponent> STREAM_CODEC =
+            StreamCodec.composite(ByteBufCodecs.collection(ArrayList::new, WorldFluidPocketsState.FluidPocket.STREAM_CODEC),
                     FluidPocketsComponent::pockets,
                     FluidPocketsComponent::new);
 }

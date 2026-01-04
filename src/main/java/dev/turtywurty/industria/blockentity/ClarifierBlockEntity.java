@@ -8,7 +8,7 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.*;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -27,26 +27,26 @@ import dev.turtywurty.industria.screenhandler.ClarifierScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ClarifierBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, AutoMultiblockable, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("clarifier");
+    public static final Component TITLE = Industria.containerTitle("clarifier");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 1)
@@ -74,14 +74,14 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     );
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
     private int progress;
     private int maxProgress;
-    private final PropertyDelegate properties = new PropertyDelegate() {
+    private final ContainerData properties = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -101,7 +101,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 2;
         }
     };
@@ -115,17 +115,17 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.UP);
 
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 5), Direction.NORTH);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.SOUTH);
+        this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.SOUTH);
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     @Override
@@ -139,13 +139,13 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         if (!this.outputItemStack.isEmpty()) {
             SyncingSimpleInventory outputInventory = getOutputInventory();
-            if (outputInventory.canInsert(this.outputItemStack)) {
-                this.outputItemStack = outputInventory.addStack(this.outputItemStack);
+            if (outputInventory.canAddItem(this.outputItemStack)) {
+                this.outputItemStack = outputInventory.addItem(this.outputItemStack);
                 update();
             }
 
@@ -169,7 +169,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
         var inputFluidStack = new FluidStack(inputFluidStorage.variant, inputFluidStorage.amount);
         var recipeInput = new ClarifierRecipeInput(inputFluidStack);
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<ClarifierRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+            Optional<RecipeHolder<ClarifierRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
@@ -186,7 +186,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
             return;
         }
 
-        Optional<RecipeEntry<ClarifierRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+        Optional<RecipeHolder<ClarifierRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
             this.maxProgress = 0;
@@ -199,7 +199,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
 
         ClarifierRecipe recipe = recipeEntry.get().value();
         if (this.progress >= this.maxProgress) {
-            this.outputItemStack = recipe.craft(recipeInput, this.world.getRegistryManager());
+            this.outputItemStack = recipe.assemble(recipeInput, this.level.registryAccess());
             this.outputFluidStack = recipe.outputFluidStack();
             inputFluidStorage.amount -= recipe.inputFluid().amount();
 
@@ -210,20 +210,20 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
             update();
         } else {
             this.progress++;
-            this.nextOutputItemStack = recipe.craft(recipeInput, this.world.getRegistryManager());
+            this.nextOutputItemStack = recipe.assemble(recipeInput, this.level.registryAccess());
             update();
         }
     }
 
-    private Optional<RecipeEntry<ClarifierRecipe>> getCurrentRecipe(ClarifierRecipeInput recipeInput) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<ClarifierRecipe>> getCurrentRecipe(ClarifierRecipeInput recipeInput) {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.CLARIFIER, recipeInput, this.world);
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.CLARIFIER, recipeInput, this.level);
     }
 
     public SyncingSimpleInventory getOutputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public SyncingFluidStorage getInputFluidTank() {
@@ -234,8 +234,8 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
         return (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(Direction.NORTH);
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
@@ -260,39 +260,39 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void saveAdditional(ValueOutput view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         Multiblockable.write(this, view);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         if (!this.outputItemStack.isEmpty()) {
-            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
+            view.store("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.outputFluidStack.isEmpty()) {
-            view.put("OutputFluid", FluidStack.CODEC.codec(), this.outputFluidStack);
+            view.store("OutputFluid", FluidStack.CODEC.codec(), this.outputFluidStack);
         }
 
-        view.put("NextOutputStack", ItemStack.OPTIONAL_CODEC, this.nextOutputItemStack);
+        view.store("NextOutputStack", ItemStack.OPTIONAL_CODEC, this.nextOutputItemStack);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void loadAdditional(ValueInput view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         Multiblockable.read(this, view);
 
-        this.progress = view.getInt("Progress", 0);
+        this.progress = view.getIntOr("Progress", 0);
 
-        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
 
-        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+        this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
                 .orElse(null);
 
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
@@ -313,7 +313,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
         // 3x3x2 (3 wide, 3 long, 2 high)
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -325,8 +325,8 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -344,17 +344,17 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ClarifierScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new ClarifierScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
     }
 }

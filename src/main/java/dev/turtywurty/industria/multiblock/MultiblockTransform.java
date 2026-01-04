@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.multiblock;
 
-import net.minecraft.util.math.AxisRotation;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import com.mojang.math.Quadrant;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 
-public record MultiblockTransform(AxisRotation rotation, MirrorMode mirrorMode) {
+public record MultiblockTransform(Quadrant rotation, MirrorMode mirrorMode) {
     public Vec3i applyToSize(Vec3i size) {
         return switch (rotation) {
             case R90, R270 -> new Vec3i(size.getZ(), size.getY(), size.getX());
@@ -92,8 +92,8 @@ public record MultiblockTransform(AxisRotation rotation, MirrorMode mirrorMode) 
                 direction = direction.getOpposite();
         }
 
-        for (int i = 0; i < rotation.index; i++) {
-            direction = direction.rotateYClockwise();
+        for (int i = 0; i < rotation.shift; i++) {
+            direction = direction.getClockWise();
         }
 
         return direction;

@@ -16,19 +16,19 @@ import dev.turtywurty.industria.screenhandler.FractionalDistillationControllerSc
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FractionalDistillationControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("fractional_distillation_controller");
+    public static final Component TITLE = Industria.containerTitle("fractional_distillation_controller");
 
     private final List<BlockPos> towers = new ArrayList<>();
     private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
@@ -57,7 +57,7 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         //Industria.LOGGER.debug("Controller at {} has {} towers.", this.pos, getTowerCount());
@@ -70,27 +70,27 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new FractionalDistillationControllerScreenHandler(syncId, playerInventory, this);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
 
         this.towers.clear();
-        int numberOfTowers = view.getInt("NumberOfTowers", 0);
+        int numberOfTowers = view.getIntOr("NumberOfTowers", 0);
         for (int i = 1; i <= numberOfTowers; i++) {
-            this.towers.add(new BlockPos(this.pos.getX(), this.pos.getY() + i, this.pos.getZ()));
+            this.towers.add(new BlockPos(this.worldPosition.getX(), this.worldPosition.getY() + i, this.worldPosition.getZ()));
         }
 
         ViewUtils.readChild(view, "FluidStorage", this.fluidStorage);
@@ -98,7 +98,7 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
 
         view.putInt("NumberOfTowers", this.towers.size());
         ViewUtils.putChild(view, "FluidStorage", this.fluidStorage);
@@ -106,15 +106,15 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
     }
 
     @Override
-    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public boolean addTower(BlockPos pos) {
         if (this.towers.contains(pos) ||
                 getTowerCount() >= 8 ||
-                pos.getX() != this.pos.getX() || pos.getZ() != this.pos.getZ() ||
-                pos.getY() < this.pos.getY())
+                pos.getX() != this.worldPosition.getX() || pos.getZ() != this.worldPosition.getZ() ||
+                pos.getY() < this.worldPosition.getY())
             return false;
 
         return this.towers.add(pos);

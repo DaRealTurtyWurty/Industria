@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.multiblock.old;
 
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
 
@@ -20,8 +20,8 @@ public interface Multiblockable {
      * @param multiblockable The multiblockable instance to write positions from.
      * @param view           The view to write to.
      */
-    static void write(AutoMultiblockable multiblockable, WriteView view) {
-        view.put("MachinePositions", BlockPos.CODEC.listOf(), multiblockable.getMultiblockPositions());
+    static void write(AutoMultiblockable multiblockable, ValueOutput view) {
+        view.store("MachinePositions", BlockPos.CODEC.listOf(), multiblockable.getMultiblockPositions());
     }
 
     /**
@@ -30,7 +30,7 @@ public interface Multiblockable {
      * @param multiblockable The multiblockable instance to read positions into.
      * @param view           The view to read from.
      */
-    static void read(AutoMultiblockable multiblockable, ReadView view) {
+    static void read(AutoMultiblockable multiblockable, ValueInput view) {
         multiblockable.getMultiblockPositions().clear();
         view.read("MachinePositions", BlockPos.CODEC.listOf()).ifPresent(multiblockable.getMultiblockPositions()::addAll);
     }
@@ -59,7 +59,7 @@ public interface Multiblockable {
      * @param pos   The position of the block that is being used to break the multiblock.
      * @apiNote This method should only be called on the server side.
      */
-    void onMultiblockBreak(World world, BlockPos pos);
+    void onMultiblockBreak(Level world, BlockPos pos);
 
     /**
      * Gets the direction the multiblock is facing.

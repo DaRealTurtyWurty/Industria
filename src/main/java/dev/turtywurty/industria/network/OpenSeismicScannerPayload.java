@@ -1,16 +1,16 @@
 package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.item.ItemStack;
 
-public record OpenSeismicScannerPayload(ItemStack stack) implements CustomPayload {
-    public static final CustomPayload.Id<OpenSeismicScannerPayload> ID =
-            new CustomPayload.Id<>(Industria.id("open_seismic_scanner"));
-    public static final PacketCodec<RegistryByteBuf, OpenSeismicScannerPayload> CODEC =
-            PacketCodec.tuple(ItemStack.PACKET_CODEC, OpenSeismicScannerPayload::stack, OpenSeismicScannerPayload::new);
+public record OpenSeismicScannerPayload(ItemStack stack) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<OpenSeismicScannerPayload> ID =
+            new CustomPacketPayload.Type<>(Industria.id("open_seismic_scanner"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, OpenSeismicScannerPayload> CODEC =
+            StreamCodec.composite(ItemStack.STREAM_CODEC, OpenSeismicScannerPayload::stack, OpenSeismicScannerPayload::new);
 
     public OpenSeismicScannerPayload {
         if (stack == null) {
@@ -19,7 +19,7 @@ public record OpenSeismicScannerPayload(ItemStack stack) implements CustomPayloa
     }
 
     @Override
-    public Id<OpenSeismicScannerPayload> getId() {
+    public Type<OpenSeismicScannerPayload> type() {
         return ID;
     }
 }

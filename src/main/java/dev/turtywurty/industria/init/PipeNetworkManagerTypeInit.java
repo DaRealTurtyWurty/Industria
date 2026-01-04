@@ -19,53 +19,53 @@ import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.core.Registry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import team.reborn.energy.api.EnergyStorage;
 
 public class PipeNetworkManagerTypeInit {
-    public static final RegistryKey<Registry<PipeNetworkManagerType<?, ?>>> PIPE_NETWORK_MANAGERS_TYPE_KEY =
-            RegistryKey.ofRegistry(Industria.id("pipe_network_manager_type"));
+    public static final ResourceKey<Registry<PipeNetworkManagerType<?, ?>>> PIPE_NETWORK_MANAGERS_TYPE_KEY =
+            ResourceKey.createRegistryKey(Industria.id("pipe_network_manager_type"));
 
     public static final Registry<PipeNetworkManagerType<?, ?>> PIPE_NETWORK_MANAGER_TYPES =
-            FabricRegistryBuilder.createSimple(PIPE_NETWORK_MANAGERS_TYPE_KEY)
+            FabricRegistryBuilder.create(PIPE_NETWORK_MANAGERS_TYPE_KEY)
                     .attribute(RegistryAttribute.MODDED)
                     .attribute(RegistryAttribute.SYNCED)
                     .buildAndRegister();
 
-    public static final Codec<PipeNetworkManagerType<?, ?>> CODEC = PipeNetworkManagerTypeInit.PIPE_NETWORK_MANAGER_TYPES.getCodec();
-    public static final PacketCodec<RegistryByteBuf, PipeNetworkManagerType<?, ?>> PACKET_CODEC = PacketCodecs.registryCodec(CODEC);
+    public static final Codec<PipeNetworkManagerType<?, ?>> CODEC = PipeNetworkManagerTypeInit.PIPE_NETWORK_MANAGER_TYPES.byNameCodec();
+    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetworkManagerType<?, ?>> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
     public static final PipeNetworkManagerType<EnergyStorage, CableNetwork> ENERGY =
             register("energy", new PipeNetworkManagerType<>(
                     TransferType.ENERGY,
                     CableNetworkManager::new,
                     CableNetworkManager.CODEC,
-                    CableNetworkManager.PACKET_CODEC));
+                    CableNetworkManager.STREAM_CODEC));
 
     public static final PipeNetworkManagerType<Storage<FluidVariant>, FluidPipeNetwork> FLUID =
             register("fluid", new PipeNetworkManagerType<>(
                     TransferType.FLUID,
                     FluidPipeNetworkManager::new,
                     FluidPipeNetworkManager.CODEC,
-                    FluidPipeNetworkManager.PACKET_CODEC));
+                    FluidPipeNetworkManager.STREAM_CODEC));
 
     public static final PipeNetworkManagerType<Storage<SlurryVariant>, SlurryPipeNetwork> SLURRY =
             register("slurry", new PipeNetworkManagerType<>(
                     TransferType.SLURRY,
                     SlurryPipeNetworkManager::new,
                     SlurryPipeNetworkManager.CODEC,
-                    SlurryPipeNetworkManager.PACKET_CODEC));
+                    SlurryPipeNetworkManager.STREAM_CODEC));
 
     public static final PipeNetworkManagerType<HeatStorage, HeatPipeNetwork> HEAT =
             register("heat", new PipeNetworkManagerType<>(
                     TransferType.HEAT,
                     HeatPipeNetworkManager::new,
                     HeatPipeNetworkManager.CODEC,
-                    HeatPipeNetworkManager.PACKET_CODEC));
+                    HeatPipeNetworkManager.STREAM_CODEC));
 
     @SuppressWarnings("unchecked")
     public static <S, N extends PipeNetwork<S>> PipeNetworkManagerType<S, N> getType(TransferType<S, ?, ?> transferType) {

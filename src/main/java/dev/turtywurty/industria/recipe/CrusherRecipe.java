@@ -11,42 +11,38 @@ import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime) implements Recipe<RecipeSimpleInventory> {
     @Override
-    public boolean matches(RecipeSimpleInventory input, World world) {
-        return this.input.testForRecipe(input.getStack(0));
+    public boolean matches(RecipeSimpleInventory input, Level world) {
+        return this.input.testForRecipe(input.getItem(0));
     }
 
-    public Pair<ItemStack, ItemStack> assemble(RecipeSimpleInventory input, Random random) {
-        return new Pair<>(this.outputA.createStack(random), this.outputB.createStack(random));
+    public Tuple<ItemStack, ItemStack> assemble(RecipeSimpleInventory input, RandomSource random) {
+        return new Tuple<>(this.outputA.createStack(random), this.outputB.createStack(random));
     }
 
     @Override
-    public ItemStack craft(RecipeSimpleInventory input, RegistryWrapper.WrapperLookup lookup) {
-        ItemStack stack = input.getStack(0);
-        stack.decrement(this.input.stackData().count());
-        input.setStack(0, stack);
-        return this.outputA.createStack(new LocalRandom(ThreadLocalRandom.current().nextLong()));
+    public ItemStack assemble(RecipeSimpleInventory input, HolderLookup.Provider lookup) {
+        ItemStack stack = input.getItem(0);
+        stack.shrink(this.input.stackData().count());
+        input.setItem(0, stack);
+        return this.outputA.createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
     @Override
@@ -60,32 +56,32 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.CRUSHER;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(new CrusherRecipeDisplay(
                 input().toDisplay(),
-                new SlotDisplay.CompositeSlotDisplay(List.of(this.outputA().toDisplay(), this.outputB().toDisplay())),
+                new SlotDisplay.Composite(List.of(this.outputA().toDisplay(), this.outputB().toDisplay())),
                 new SlotDisplay.ItemSlotDisplay(BlockInit.CRUSHER.asItem()),
                 processTime()
         ));
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("crusher").toString();
     }
 
@@ -110,11 +106,11 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
                 Codec.INT.fieldOf("process_time").forGetter(CrusherRecipe::processTime)
         ).apply(instance, CrusherRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, CrusherRecipe> PACKET_CODEC =
-                PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, CrusherRecipe::input,
-                        OutputItemStack.PACKET_CODEC, CrusherRecipe::outputA,
-                        OutputItemStack.PACKET_CODEC, CrusherRecipe::outputB,
-                        PacketCodecs.INTEGER, CrusherRecipe::processTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, CrusherRecipe> STREAM_CODEC =
+                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, CrusherRecipe::input,
+                        OutputItemStack.STREAM_CODEC, CrusherRecipe::outputA,
+                        OutputItemStack.STREAM_CODEC, CrusherRecipe::outputB,
+                        ByteBufCodecs.INT, CrusherRecipe::processTime,
                         CrusherRecipe::new);
 
         @Override
@@ -123,8 +119,8 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, CrusherRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, CrusherRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -137,14 +133,14 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
                         Codec.INT.fieldOf("process_time").forGetter(CrusherRecipeDisplay::processTime)
                 ).apply(instance, CrusherRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, CrusherRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
-                SlotDisplay.PACKET_CODEC, CrusherRecipeDisplay::input,
-                SlotDisplay.PACKET_CODEC, CrusherRecipeDisplay::output,
-                SlotDisplay.PACKET_CODEC, CrusherRecipeDisplay::craftingStation,
-                PacketCodecs.INTEGER, CrusherRecipeDisplay::processTime,
+        public static final StreamCodec<RegistryFriendlyByteBuf, CrusherRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+                SlotDisplay.STREAM_CODEC, CrusherRecipeDisplay::input,
+                SlotDisplay.STREAM_CODEC, CrusherRecipeDisplay::output,
+                SlotDisplay.STREAM_CODEC, CrusherRecipeDisplay::craftingStation,
+                ByteBufCodecs.INT, CrusherRecipeDisplay::processTime,
                 CrusherRecipeDisplay::new);
 
-        public static final Serializer<CrusherRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -157,7 +153,7 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

@@ -1,27 +1,27 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
 
 public class ItemGroupInit {
-    public static final Text MAIN_TITLE = Text.translatable("itemGroup." + Industria.MOD_ID + ".main");
+    public static final Component MAIN_TITLE = Component.translatable("itemGroup." + Industria.MOD_ID + ".main");
 
-    public static final ItemGroup MAIN_GROUP = register("main", FabricItemGroup.builder()
-            .displayName(MAIN_TITLE)
-            .icon(() -> BlockInit.ALLOY_FURNACE.asItem().getDefaultStack())
-            .entries((displayContext, entries) ->
-                    Registries.ITEM.getKeys().stream()
-                            .filter(key -> key.getValue().getNamespace().equals(Industria.MOD_ID))
-                            .map(Registries.ITEM::getValueOrThrow)
-                            .forEach(entries::add))
+    public static final CreativeModeTab MAIN_GROUP = register("main", FabricCreativeModeTab.builder()
+            .title(MAIN_TITLE)
+            .icon(() -> BlockInit.ALLOY_FURNACE.asItem().getDefaultInstance())
+            .displayItems((displayContext, entries) ->
+                    BuiltInRegistries.ITEM.registryKeySet().stream()
+                            .filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
+                            .map(BuiltInRegistries.ITEM::getValueOrThrow)
+                            .forEach(entries::accept))
             .build());
 
-    public static <T extends ItemGroup> T register(String name, T group) {
-        return Registry.register(Registries.ITEM_GROUP, Industria.id(name), group);
+    public static <T extends CreativeModeTab> T register(String name, T group) {
+        return Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Industria.id(name), group);
     }
 
     public static void init() {

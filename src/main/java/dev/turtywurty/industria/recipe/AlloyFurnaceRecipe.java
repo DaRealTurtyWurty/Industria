@@ -10,45 +10,41 @@ import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.util.IndustriaIngredient;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output,
                                  int smeltTime) implements Recipe<RecipeSimpleInventory> {
     @Override
-    public boolean matches(RecipeSimpleInventory input, World world) {
-        ItemStack stackA = input.getStack(0);
-        ItemStack stackB = input.getStack(1);
+    public boolean matches(RecipeSimpleInventory input, Level world) {
+        ItemStack stackA = input.getItem(0);
+        ItemStack stackB = input.getItem(1);
         return (this.inputA.testForRecipe(stackA) && this.inputB.testForRecipe(stackB)) ||
                 (this.inputA.testForRecipe(stackB) && this.inputB.testForRecipe(stackA));
     }
 
     @Override
-    public ItemStack craft(RecipeSimpleInventory inventory, RegistryWrapper.WrapperLookup lookup) {
+    public ItemStack assemble(RecipeSimpleInventory inventory, HolderLookup.Provider lookup) {
         // extract the inventory stacks
-        ItemStack stackA = this.inputA.testForRecipe(inventory.getStack(0)) ? inventory.getStack(0) : inventory.getStack(1);
-        ItemStack stackB = this.inputB.testForRecipe(inventory.getStack(0)) ? inventory.getStack(0) : inventory.getStack(1);
+        ItemStack stackA = this.inputA.testForRecipe(inventory.getItem(0)) ? inventory.getItem(0) : inventory.getItem(1);
+        ItemStack stackB = this.inputB.testForRecipe(inventory.getItem(0)) ? inventory.getItem(0) : inventory.getItem(1);
 
         // remove the input stacks
-        stackA.decrement(this.inputA.stackData().count());
-        stackB.decrement(this.inputB.stackData().count());
+        stackA.shrink(this.inputA.stackData().count());
+        stackB.shrink(this.inputB.stackData().count());
 
         // set the stacks back into the inventory
-        inventory.setStack(0, stackA);
-        inventory.setStack(1, stackB);
+        inventory.setItem(0, stackA);
+        inventory.setItem(1, stackB);
 
         return this.output.copy();
     }
@@ -64,32 +60,32 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.ALLOY_FURNACE;
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("alloy_furnace").toString();
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(new AlloyFurnaceRecipeDisplay(
                 this.inputA.toDisplay(),
                 this.inputB.toDisplay(),
-                SlotDisplay.AnyFuelSlotDisplay.INSTANCE,
-                new SlotDisplay.StackSlotDisplay(this.output),
+                SlotDisplay.AnyFuel.INSTANCE,
+                new SlotDisplay.ItemStackSlotDisplay(this.output),
                 new SlotDisplay.ItemSlotDisplay(BlockInit.ALLOY_FURNACE.asItem()),
                 this.smeltTime
         ));
@@ -117,11 +113,11 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
                 Codec.INT.fieldOf("smelt_time").forGetter(AlloyFurnaceRecipe::smeltTime)
         ).apply(instance, AlloyFurnaceRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, AlloyFurnaceRecipe> PACKET_CODEC =
-                PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, AlloyFurnaceRecipe::inputA,
-                        IndustriaIngredient.PACKET_CODEC, AlloyFurnaceRecipe::inputB,
-                        ItemStack.PACKET_CODEC, AlloyFurnaceRecipe::output,
-                        PacketCodecs.INTEGER, AlloyFurnaceRecipe::smeltTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipe> STREAM_CODEC =
+                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, AlloyFurnaceRecipe::inputA,
+                        IndustriaIngredient.STREAM_CODEC, AlloyFurnaceRecipe::inputB,
+                        ItemStack.STREAM_CODEC, AlloyFurnaceRecipe::output,
+                        ByteBufCodecs.INT, AlloyFurnaceRecipe::smeltTime,
                         AlloyFurnaceRecipe::new);
 
         @Override
@@ -130,8 +126,8 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, AlloyFurnaceRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -148,17 +144,17 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
                         Codec.INT.fieldOf("processTime").forGetter(AlloyFurnaceRecipeDisplay::processTime)
                 ).apply(instance, AlloyFurnaceRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, AlloyFurnaceRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
-                SlotDisplay.PACKET_CODEC, AlloyFurnaceRecipeDisplay::inputA,
-                SlotDisplay.PACKET_CODEC, AlloyFurnaceRecipeDisplay::inputB,
-                SlotDisplay.PACKET_CODEC, AlloyFurnaceRecipeDisplay::fuel,
-                SlotDisplay.PACKET_CODEC, AlloyFurnaceRecipeDisplay::result,
-                SlotDisplay.PACKET_CODEC, AlloyFurnaceRecipeDisplay::craftingStation,
-                PacketCodecs.INTEGER, AlloyFurnaceRecipeDisplay::processTime,
+        public static final StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+                SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::inputA,
+                SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::inputB,
+                SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::fuel,
+                SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::result,
+                SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::craftingStation,
+                ByteBufCodecs.INT, AlloyFurnaceRecipeDisplay::processTime,
                 AlloyFurnaceRecipeDisplay::new
         );
 
-        public static final Serializer<AlloyFurnaceRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay craftingStation() {
@@ -166,7 +162,7 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

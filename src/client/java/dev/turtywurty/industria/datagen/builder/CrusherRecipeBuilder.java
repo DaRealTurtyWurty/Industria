@@ -3,29 +3,28 @@ package dev.turtywurty.industria.datagen.builder;
 import dev.turtywurty.industria.recipe.CrusherRecipe;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementCriterion;
-import net.minecraft.advancement.AdvancementRequirements;
-import net.minecraft.advancement.AdvancementRewards;
-import net.minecraft.advancement.criterion.RecipeUnlockedCriterion;
-import net.minecraft.data.recipe.CraftingRecipeJsonBuilder;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.item.Item;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRequirements;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CrusherRecipeBuilder implements CraftingRecipeJsonBuilder {
+public class CrusherRecipeBuilder implements RecipeBuilder {
     private final IndustriaIngredient input;
     private final OutputItemStack outputA, outputB;
     private final int processTime;
 
     private final RecipeCategory category;
-    private final Map<String, AdvancementCriterion<?>> criteria = new HashMap<>();
+    private final Map<String, Criterion<?>> criteria = new HashMap<>();
 
     public CrusherRecipeBuilder(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, RecipeCategory category) {
         this.input = input;
@@ -37,30 +36,30 @@ public class CrusherRecipeBuilder implements CraftingRecipeJsonBuilder {
     }
 
     @Override
-    public CraftingRecipeJsonBuilder criterion(String name, AdvancementCriterion<?> criterion) {
+    public RecipeBuilder unlockedBy(String name, Criterion<?> criterion) {
         this.criteria.put(name, criterion);
         return this;
     }
 
     @Override
-    public CraftingRecipeJsonBuilder group(@Nullable String group) {
+    public RecipeBuilder group(@Nullable String group) {
         return this;
     }
 
     @Override
-    public Item getOutputItem() {
+    public Item getResult() {
         return this.outputA.item();
     }
 
     @Override
-    public void offerTo(RecipeExporter exporter, RegistryKey<Recipe<?>> recipeId) {
-        Advancement.Builder builder = exporter.getAdvancementBuilder()
-                .criterion("has_the_recipe", RecipeUnlockedCriterion.create(recipeId))
-                .rewards(AdvancementRewards.Builder.recipe(recipeId))
-                .criteriaMerger(AdvancementRequirements.CriterionMerger.OR);
-        this.criteria.forEach(builder::criterion);
+    public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeId) {
+        Advancement.Builder builder = exporter.advancement()
+                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeId))
+                .rewards(net.minecraft.advancements.AdvancementRewards.Builder.recipe(recipeId))
+                .requirements(AdvancementRequirements.Strategy.OR);
+        this.criteria.forEach(builder::addCriterion);
         exporter.accept(recipeId,
                 new CrusherRecipe(this.input, this.outputA, this.outputB, this.processTime),
-                builder.build(recipeId.getValue().withPrefixedPath("recipes/" + this.category.getName() + "/")));
+                builder.build(recipeId.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 }

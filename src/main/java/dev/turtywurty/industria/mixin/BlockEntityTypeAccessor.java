@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.mixin;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -9,9 +9,9 @@ import java.util.Set;
 
 @Mixin(BlockEntityType.class)
 public interface BlockEntityTypeAccessor {
-    @Accessor("blocks")
-    void setBlocks(Set<Block> blocks);
+    @Accessor("validBlocks")
+    void setValidBlocks(Set<Block> blocks);
 
-    @Accessor("blocks")
-    Set<Block> getBlocks();
+    @Accessor("validBlocks")
+    Set<Block> getValidBlocks();
 }

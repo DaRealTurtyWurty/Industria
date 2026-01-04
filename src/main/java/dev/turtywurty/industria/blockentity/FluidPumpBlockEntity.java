@@ -20,18 +20,18 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -42,7 +42,7 @@ import java.util.Map;
 
 // TODO: Fix direction of fluid output vs where the pipe thinks a connection is
 public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("fluid_pump");
+    public static final Component TITLE = Industria.containerTitle("fluid_pump");
 
     private static final Direction[] CHECK_DIRECTIONS = {Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
 
@@ -62,7 +62,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         for (FluidState state : fluidStateMap.values()) {
             int count = 0;
             for (FluidState value : fluidStateMap.values()) {
-                if (value.getFluid() == state.getFluid())
+                if (value.getType() == state.getType())
                     count++;
             }
 
@@ -86,14 +86,14 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(Direction.SOUTH);
         if (!isEmpty(fluidStorage)) {
-            Direction relativeSouth = MathUtils.getRelativeDirection(Direction.SOUTH, getCachedState().get(Properties.HORIZONTAL_FACING));
-            BlockPos southPos = this.pos.offset(relativeSouth);
-            Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.world, southPos, relativeSouth.getOpposite());
+            Direction relativeSouth = MathUtils.getRelativeDirection(Direction.SOUTH, getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
+            BlockPos southPos = this.worldPosition.relative(relativeSouth);
+            Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.level, southPos, relativeSouth.getOpposite());
             if (storage != null) {
                 try (Transaction transaction = Transaction.openOuter()) {
                     long inserted = storage.insert(fluidStorage.variant, fluidStorage.amount, transaction);
@@ -108,17 +108,17 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         }
 
         // check surrounding blocks for fluid
-        if (this.world.getTime() % 10 == 0) {
+        if (this.level.getGameTime() % 10 == 0) {
             SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.UP);
             if (energyStorage.getAmount() <= 10)
                 return;
 
-            Direction direction = getCachedState().get(Properties.HORIZONTAL_FACING);
+            Direction direction = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
             Map<Direction, FluidState> fluidStateMap = new HashMap<>();
             for (Direction checkDirection : CHECK_DIRECTIONS) {
                 Direction relative = MathUtils.getRelativeDirection(checkDirection, direction);
-                BlockPos checkPos = this.pos.offset(relative);
-                FluidState fluidState = this.world.getFluidState(checkPos);
+                BlockPos checkPos = this.worldPosition.relative(relative);
+                FluidState fluidState = this.level.getFluidState(checkPos);
                 if (fluidState.isEmpty())
                     break;
 
@@ -135,12 +135,12 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
                     FluidState mostCommon = getMostCommon(fluidStateMap);
 
                     if (mostCommon != null) {
-                        fluidStorage.variant = FluidVariant.of(mostCommon.getFluid());
+                        fluidStorage.variant = FluidVariant.of(mostCommon.getType());
                         fluidStorage.amount = Math.min(fluidStorage.getCapacity(), fluidStorage.amount + FluidConstants.BOTTLE);
                     }
                 } else {
                     for (FluidState state : fluidStateMap.values()) {
-                        if (state.getFluid() == fluidStorage.variant.getFluid()) {
+                        if (state.getType() == fluidStorage.variant.getFluid()) {
                             fluidStorage.amount = Math.min(fluidStorage.getCapacity(), fluidStorage.amount + FluidConstants.BOTTLE);
                             break;
                         }
@@ -156,28 +156,28 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new FluidPumpScreenHandler(syncId, this);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }

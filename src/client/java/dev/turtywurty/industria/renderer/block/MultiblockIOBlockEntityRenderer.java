@@ -1,26 +1,26 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.MultiblockIOBlockEntity;
 import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.multiblock.old.Port;
 import dev.turtywurty.industria.renderer.world.PipeNetworkWorldRenderer;
 import dev.turtywurty.industria.state.MultiblockIORenderState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.DrawStyle;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.debug.gizmo.GizmoDrawing;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.core.Direction;
+import net.minecraft.gizmos.GizmoStyle;
+import net.minecraft.gizmos.Gizmos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRenderer<MultiblockIOBlockEntity, MultiblockIORenderState> {
-    public MultiblockIOBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public MultiblockIOBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
 
@@ -30,8 +30,8 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    public void updateRenderState(MultiblockIOBlockEntity blockEntity, MultiblockIORenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(MultiblockIOBlockEntity blockEntity, MultiblockIORenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
 
         state.ports.clear();
         for (Direction direction : Direction.values()) {
@@ -43,7 +43,7 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(MultiblockIORenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    protected void onRender(MultiblockIORenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         if (!shouldRenderHitboxes())
             return;
 
@@ -56,19 +56,19 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
                 for (TransferType<?, ?, ?> transferType : port.portTypes().stream().map(PortType::transferType).toList()) {
                     int color = PipeNetworkWorldRenderer.getColor(transferType);
 
-                    GizmoDrawing.box(state.pos, size, DrawStyle.stroked(color));
+                    Gizmos.cuboid(state.blockPos, size, GizmoStyle.stroke(color));
 
                     size += 0.1F;
                 }
 
                 // draw the direction
                 Direction opposite = direction.getOpposite();
-                float xOffset = opposite.getOffsetX() * 0.75F;
-                float yOffset = opposite.getOffsetY() * 0.75F;
-                float zOffset = opposite.getOffsetZ() * 0.75F;
+                float xOffset = opposite.getStepX() * 0.75F;
+                float yOffset = opposite.getStepY() * 0.75F;
+                float zOffset = opposite.getStepZ() * 0.75F;
 
-                float alpha = (float) (Math.sin(MinecraftClient.getInstance().world.getTime() % 20) * 0.5 + 0.5F);
-                GizmoDrawing.arrow(state.pos.toCenterPos(), state.pos.toCenterPos().add(xOffset, yOffset, zOffset), 0x88FFFFFF | ((int) (alpha * 255) << 24));
+                float alpha = (float) (Math.sin(Minecraft.getInstance().level.getGameTime() % 20) * 0.5 + 0.5F);
+                Gizmos.arrow(state.blockPos.getCenter(), state.blockPos.getCenter().add(xOffset, yOffset, zOffset), 0x88FFFFFF | ((int) (alpha * 255) << 24));
             }
         }
     }

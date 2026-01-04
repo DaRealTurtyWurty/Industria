@@ -7,12 +7,12 @@ import dev.turtywurty.industria.init.PipeNetworkTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -27,13 +27,13 @@ public abstract class PipeNetwork<S> {
     public static final Codec<PipeNetwork<?>> CODEC = PipeNetworkTypeInit.CODEC.dispatch(
             PipeNetwork::getType, PipeNetworkType::codec);
 
-    public static final PacketCodec<RegistryByteBuf, PipeNetwork<?>> PACKET_CODEC =
-            PipeNetworkTypeInit.PACKET_CODEC.dispatch(PipeNetwork::getType, PipeNetworkType::packetCodec);
+    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetwork<?>> STREAM_CODEC =
+            PipeNetworkTypeInit.STREAM_CODEC.dispatch(PipeNetwork::getType, PipeNetworkType::packetCodec);
 
     protected static <S, ST, N extends PipeNetwork<S>> MapCodec<N> createCodec(RecordCodecBuilder<N, ST> storageApp, BiConsumer<S, ST> storageModifier, Function<UUID, N> factory) {
         return RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
-                        Uuids.CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
+                        UUIDUtil.AUTHLIB_CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
                         ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(PipeNetwork::getPipes),
                         ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(PipeNetwork::getConnectedBlocks),
                         TransferType.CODEC.fieldOf("transferType").forGetter(PipeNetwork::getTransferType),
@@ -48,16 +48,16 @@ public abstract class PipeNetwork<S> {
                 }));
     }
 
-    protected static <S, ST, N extends PipeNetwork<S>> PacketCodec<RegistryByteBuf, N> createPacketCodec(
-            PacketCodec<? super RegistryByteBuf, ST> storageTypeCodec,
+    protected static <S, ST, N extends PipeNetwork<S>> StreamCodec<RegistryFriendlyByteBuf, N> createPacketCodec(
+            StreamCodec<? super RegistryFriendlyByteBuf, ST> storageTypeCodec,
             Function<N, ST> storageTypeRetriever,
             BiConsumer<S, ST> storageModifier,
             Function<UUID, N> factory) {
-        return PacketCodec.tuple(
-                Uuids.PACKET_CODEC, PipeNetwork::getId,
-                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getPipes,
-                ExtraPacketCodecs.BLOCK_POS_SET_PACKET_CODEC, PipeNetwork::getConnectedBlocks,
-                TransferType.PACKET_CODEC, PipeNetwork::getTransferType,
+        return StreamCodec.composite(
+                UUIDUtil.STREAM_CODEC, PipeNetwork::getId,
+                ExtraPacketCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getPipes,
+                ExtraPacketCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getConnectedBlocks,
+                TransferType.STREAM_CODEC, PipeNetwork::getTransferType,
                 storageTypeCodec, storageTypeRetriever,
                 (id, pipes, connectedBlocks, transferType, storage) -> {
                     var network = factory.apply(id);
@@ -119,46 +119,46 @@ public abstract class PipeNetwork<S> {
         return true;
     }
 
-    protected void onConnectedBlocksChanged(World world) {
+    protected void onConnectedBlocksChanged(Level world) {
         // NO-OP
     }
 
-    public void clearConnectedBlocks(World world) {
+    public void clearConnectedBlocks(Level world) {
         this.connectedBlocks.clear();
         onConnectedBlocksChanged(world);
     }
 
-    public void addConnectedBlock(World world, BlockPos pos) {
+    public void addConnectedBlock(Level world, BlockPos pos) {
         this.connectedBlocks.add(pos);
         onConnectedBlocksChanged(world);
     }
 
-    public void removeConnectedBlock(World world, BlockPos pos) {
+    public void removeConnectedBlock(Level world, BlockPos pos) {
         this.connectedBlocks.remove(pos);
         onConnectedBlocksChanged(world);
     }
 
-    public void addConnectedBlocks(World world, Collection<BlockPos> connectedBlocks) {
+    public void addConnectedBlocks(Level world, Collection<BlockPos> connectedBlocks) {
         this.connectedBlocks.addAll(connectedBlocks);
         onConnectedBlocksChanged(world);
     }
 
-    public void addConnectedBlocks(World world, PipeNetwork<?> network) {
+    public void addConnectedBlocks(Level world, PipeNetwork<?> network) {
         this.connectedBlocks.addAll(network.connectedBlocks);
         onConnectedBlocksChanged(world);
     }
 
-    public void addConnectedBlocks(World world, BlockPos... connectedBlocks) {
+    public void addConnectedBlocks(Level world, BlockPos... connectedBlocks) {
         this.connectedBlocks.addAll(Arrays.asList(connectedBlocks));
         onConnectedBlocksChanged(world);
     }
 
-    public void removeConnectedBlocks(World world, Collection<BlockPos> connectedBlocks) {
+    public void removeConnectedBlocks(Level world, Collection<BlockPos> connectedBlocks) {
         this.connectedBlocks.removeAll(connectedBlocks);
         onConnectedBlocksChanged(world);
     }
 
-    public void removeConnectedBlocks(World world, BlockPos... connectedBlocks) {
+    public void removeConnectedBlocks(Level world, BlockPos... connectedBlocks) {
         for (BlockPos blockPos : connectedBlocks) {
             this.connectedBlocks.remove(blockPos);
         }
@@ -166,7 +166,7 @@ public abstract class PipeNetwork<S> {
         onConnectedBlocksChanged(world);
     }
 
-    public void removeConnectedBlocks(World world, PipeNetwork<?> network) {
+    public void removeConnectedBlocks(Level world, PipeNetwork<?> network) {
         this.connectedBlocks.removeAll(network.connectedBlocks);
         onConnectedBlocksChanged(world);
     }
@@ -179,10 +179,10 @@ public abstract class PipeNetwork<S> {
         return this.storage;
     }
 
-    public void tick(World world) {
+    public void tick(Level world) {
         for (BlockPos connectedPos : this.connectedBlocks) {
             for (Direction direction : Direction.values()) {
-                BlockPos pipePos = connectedPos.offset(direction);
+                BlockPos pipePos = connectedPos.relative(direction);
                 if (this.pipes.contains(pipePos)) {
                     this.transferType.pushTo(world, pipePos, connectedPos, direction);
                 }

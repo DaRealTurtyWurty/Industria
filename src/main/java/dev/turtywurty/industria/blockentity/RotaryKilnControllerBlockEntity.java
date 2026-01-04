@@ -9,7 +9,7 @@ import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.heat.InputHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
@@ -24,30 +24,30 @@ import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.ViewUtils;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.ServerRecipeManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -63,7 +63,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     private final List<BlockPos> kilnSegments = new ArrayList<>();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
     private final List<InputRecipeEntry> recipes = new ArrayList<>();
@@ -72,27 +72,27 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     public RotaryKilnControllerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.ROTARY_KILN_CONTROLLER, BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, pos, state);
 
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
+        this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
                 Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
         this.wrappedHeatStorage.addStorage(new InputHeatStorage(this, 2000, 2000));
 
     }
 
-    public static ServerRecipeManager getRecipeManager(World world) {
-        if (world == null || world.isClient())
+    public static RecipeManager getRecipeManager(Level world) {
+        if (world == null || world.isClientSide())
             return null;
 
-        return !(world instanceof ServerWorld serverWorld) ? null : serverWorld.getRecipeManager();
+        return !(world instanceof ServerLevel serverWorld) ? null : serverWorld.recipeAccess();
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     private SyncingSimpleInventory getInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public boolean isProcessing() {
@@ -124,7 +124,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         if (this.ticks++ == 0)
@@ -137,15 +137,15 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
         for (InputRecipeEntry recipe : this.recipes.stream().sorted(Comparator.comparingInt(InputRecipeEntry::getProgress)).toList()) {
             if (recipe == null) {
-                Industria.LOGGER.warn("Found null recipe in Rotary Kiln Controller at {}. Removing it from the list.", this.pos);
+                Industria.LOGGER.warn("Found null recipe in Rotary Kiln Controller at {}. Removing it from the list.", this.worldPosition);
                 this.recipes.remove(null);
                 update();
                 continue;
             }
 
-            Optional<RecipeEntry<?>> recipeEntry = getRecipe(recipe.registryKey());
+            Optional<RecipeHolder<?>> recipeEntry = getRecipe(recipe.registryKey());
             if (recipeEntry.isEmpty()) {
-                Industria.LOGGER.warn("Recipe entry for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.pos);
+                Industria.LOGGER.warn("Recipe entry for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.worldPosition);
                 this.recipes.remove(recipe);
                 update();
                 continue;
@@ -153,20 +153,20 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             RotaryKilnRecipe kilnRecipe = (RotaryKilnRecipe) recipeEntry.get().value();
             if (kilnRecipe == null) {
-                Industria.LOGGER.warn("Recipe for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.pos);
+                Industria.LOGGER.warn("Recipe for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.worldPosition);
                 this.recipes.remove(recipe);
                 update();
                 continue;
             }
 
             if (recipe.getProgress() >= this.kilnSegments.size() * 100) {
-                ItemStack outputStack = kilnRecipe.output().createStack(this.world.random);
+                ItemStack outputStack = kilnRecipe.output().createStack(this.level.getRandom());
 
                 BlockPos endPos = this.kilnSegments.getLast();
-                Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
-                BlockPos spawnPos = endPos.offset(facing);
+                Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+                BlockPos spawnPos = endPos.relative(facing);
                 if (!tryOutputToStorage(spawnPos, facing, outputStack)) {
-                    ItemScatterer.spawn(this.world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), outputStack);
+                    Containers.dropItemStack(this.level, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), outputStack);
                 }
 
                 this.recipes.remove(recipe);
@@ -182,11 +182,11 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
     private void handleInputStack() {
         SyncingSimpleInventory inventory = getInventory();
-        ItemStack inputStack = inventory.getStack(0).copy();
+        ItemStack inputStack = inventory.getItem(0).copy();
         if (inputStack.isEmpty())
             return;
 
-        Optional<RecipeEntry<RotaryKilnRecipe>> recipeEntry = getMatchingRecipe(inputStack);
+        Optional<RecipeHolder<RotaryKilnRecipe>> recipeEntry = getMatchingRecipe(inputStack);
         if (recipeEntry.isEmpty())
             return;
 
@@ -199,13 +199,13 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             this.recipes.add(inputRecipeEntry);
 
-            inventory.removeStack(0, recipe.input().stackData().count());
+            inventory.removeItem(0, recipe.input().stackData().count());
             update();
         }
     }
 
     private boolean tryOutputToStorage(BlockPos spawnPos, Direction facing, ItemStack outputStack) {
-        Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(this.world, spawnPos, facing.getOpposite());
+        Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(this.level, spawnPos, facing.getOpposite());
         if (itemStorage == null || !itemStorage.supportsInsertion())
             return false;
 
@@ -226,7 +226,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return List.of();
 
         // 5x5x1 structure
@@ -241,7 +241,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
             throw new NullPointerException("Unexpected facing direction: null");
 
         // Define axis-aligned directions based on facing
-        Direction right = facing.rotateYClockwise();
+        Direction right = facing.getClockWise();
 
         // The main loop structure is the same for all directions
         for (int w = -widthRange; w <= widthRange; w++) {
@@ -250,12 +250,12 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
                     if (w == 0 && h == 0 && d == 0)
                         continue;
 
-                    BlockPos pos = this.pos
-                            .offset(right, w)
-                            .offset(Direction.UP, h)
-                            .offset(facing, d);
+                    BlockPos pos = this.worldPosition
+                            .relative(right, w)
+                            .relative(Direction.UP, h)
+                            .relative(facing, d);
 
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -273,34 +273,34 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void saveAdditional(ValueOutput view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Heat", this.wrappedHeatStorage);
         Multiblockable.write(this, view);
 
-        view.put("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
+        view.store("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
 
-        var recipesView = view.getList("Recipes");
+        var recipesView = view.childrenList("Recipes");
         for (InputRecipeEntry inputRecipeEntry : this.recipes) {
             if (inputRecipeEntry == null)
                 continue;
 
-            var recipeView = recipesView.add();
+            var recipeView = recipesView.addChild();
 
-            RegistryKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey;
-            if (registryKey != null && registryKey.getValue() != null) {
-                recipeView.put("RegistryKey", RegistryKey.createCodec(RegistryKeys.RECIPE), registryKey);
+            ResourceKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey;
+            if (registryKey != null && registryKey.identifier() != null) {
+                recipeView.store("RegistryKey", ResourceKey.codec(Registries.RECIPE), registryKey);
             }
 
-            recipeView.put("InputStack", ItemStack.OPTIONAL_CODEC, inputRecipeEntry.inputStack);
+            recipeView.store("InputStack", ItemStack.OPTIONAL_CODEC, inputRecipeEntry.inputStack);
             recipeView.putInt("Progress", inputRecipeEntry.progress);
-            recipeView.put("UUID", Uuids.CODEC, inputRecipeEntry.uuid);
+            recipeView.store("UUID", UUIDUtil.AUTHLIB_CODEC, inputRecipeEntry.uuid);
         }
     }
 
     @Override
-    protected void readData(ReadView view) {
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void loadAdditional(ValueInput view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Heat", this.wrappedHeatStorage);
         Multiblockable.read(this, view);
 
@@ -308,21 +308,21 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         view.read("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
 
         this.recipes.clear();
-        ReadView.ListReadView recipesView = view.getListReadView("Recipes");
-        for (ReadView readView : recipesView) {
-            RegistryKey<Recipe<?>> registryKey = readView.read(
+        ValueInput.ValueInputList recipesView = view.childrenListOrEmpty("Recipes");
+        for (ValueInput readView : recipesView) {
+            ResourceKey<Recipe<?>> registryKey = readView.read(
                             "RegistryKey",
-                            RegistryKey.createCodec(RegistryKeys.RECIPE))
+                            ResourceKey.codec(Registries.RECIPE))
                     .orElse(null);
 
             if (registryKey == null && Thread.currentThread().getName().toLowerCase(Locale.ROOT).contains("server")) {
-                Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.pos);
+                Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.worldPosition);
                 continue;
             }
 
             ItemStack inputStack = readView.read("InputStack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
-            int progress = readView.getInt("Progress", 0);
-            Optional<UUID> uuidOpt = readView.read("UUID", Uuids.CODEC);
+            int progress = readView.getIntOr("Progress", 0);
+            Optional<UUID> uuidOpt = readView.read("UUID", UUIDUtil.AUTHLIB_CODEC);
             UUID uuid = uuidOpt.orElseGet(UUID::randomUUID);
 
             var inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);
@@ -331,16 +331,16 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     public void handleSegmentSearching() {
-        if (world == null || world.isClient())
+        if (level == null || level.isClientSide())
             return;
 
-        Direction facing = getCachedState().get(Properties.HORIZONTAL_FACING);
+        Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         for (int segmentIndex = 1; segmentIndex <= 15; segmentIndex++) {
-            BlockPos offsetPos = pos.offset(facing);
-            BlockState offsetState = world.getBlockState(offsetPos);
-            if (offsetState.isOf(BlockInit.ROTARY_KILN)) {
-                world.setBlockState(offsetPos, offsetState.with(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
+            BlockPos offsetPos = worldPosition.relative(facing);
+            BlockState offsetState = level.getBlockState(offsetPos);
+            if (offsetState.is(BlockInit.ROTARY_KILN)) {
+                level.setBlockAndUpdate(offsetPos, offsetState.setValue(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
                 addKilnSegment(offsetPos);
             } else {
                 break;
@@ -366,34 +366,34 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
                 return;
 
             InputRecipeEntry inputRecipeEntry = this.recipes.stream()
-                    .filter(recipe -> MathHelper.floor(recipe.getProgress() / 100f) == segmentIndex)
+                    .filter(recipe -> Mth.floor(recipe.getProgress() / 100f) == segmentIndex)
                     .findFirst()
                     .orElse(null);
             if (inputRecipeEntry == null)
                 return;
 
-            if (this.world != null && !this.world.isClient()) {
-                ItemScatterer.spawn(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), inputRecipeEntry.inputStack());
+            if (this.level != null && !this.level.isClientSide()) {
+                Containers.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), inputRecipeEntry.inputStack());
             }
 
             this.recipes.remove(inputRecipeEntry);
         }
     }
 
-    public Optional<RecipeEntry<?>> getRecipe(RegistryKey<Recipe<?>> recipeKey) {
-        ServerRecipeManager recipeManager = getRecipeManager(this.world);
+    public Optional<RecipeHolder<?>> getRecipe(ResourceKey<Recipe<?>> recipeKey) {
+        RecipeManager recipeManager = getRecipeManager(this.level);
         if (recipeManager == null)
             return Optional.empty();
 
-        return recipeManager.get(recipeKey);
+        return recipeManager.byKey(recipeKey);
     }
 
-    public Optional<RecipeEntry<RotaryKilnRecipe>> getMatchingRecipe(ItemStack stack) {
-        ServerRecipeManager recipeManager = getRecipeManager(this.world);
+    public Optional<RecipeHolder<RotaryKilnRecipe>> getMatchingRecipe(ItemStack stack) {
+        RecipeManager recipeManager = getRecipeManager(this.level);
         if (recipeManager == null)
             return Optional.empty();
 
-        return recipeManager.getFirstMatch(RecipeTypeInit.ROTARY_KILN, SingleItemStackRecipeInput.of(stack), this.world);
+        return recipeManager.getRecipeFor(RecipeTypeInit.ROTARY_KILN, SingleItemStackRecipeInput.of(stack), this.level);
     }
 
     @Override
@@ -401,8 +401,8 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         return PORT_RULES;
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public List<BlockPos> getKilnSegments() {
@@ -416,22 +416,22 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     public static final class InputRecipeEntry {
 
         private final UUID uuid;
-        private final RegistryKey<Recipe<?>> registryKey;
+        private final ResourceKey<Recipe<?>> registryKey;
         private final ItemStack inputStack;
         private int progress;
 
-        public InputRecipeEntry(RegistryKey<Recipe<?>> registryKey, ItemStack inputStack) {
+        public InputRecipeEntry(ResourceKey<Recipe<?>> registryKey, ItemStack inputStack) {
             this(registryKey, inputStack, 0, UUID.randomUUID());
         }
 
-        public InputRecipeEntry(RegistryKey<Recipe<?>> registryKey, ItemStack inputStack, int progress, UUID uuid) {
+        public InputRecipeEntry(ResourceKey<Recipe<?>> registryKey, ItemStack inputStack, int progress, UUID uuid) {
             this.registryKey = registryKey;
             this.inputStack = inputStack;
             this.progress = progress;
             this.uuid = uuid;
         }
 
-        public RegistryKey<Recipe<?>> registryKey() {
+        public ResourceKey<Recipe<?>> registryKey() {
             return registryKey;
         }
 

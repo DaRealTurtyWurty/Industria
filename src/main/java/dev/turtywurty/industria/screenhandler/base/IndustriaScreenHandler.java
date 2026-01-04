@@ -1,112 +1,111 @@
 package dev.turtywurty.industria.screenhandler.base;
 
-import dev.turtywurty.industria.blockentity.util.inventory.ClientWrappedInventoryStorage;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorageHolder;
+import dev.turtywurty.industria.blockentity.util.inventory.ClientWrappedContainerStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorageHolder;
 import dev.turtywurty.industria.network.HasPositionPayload;
-import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.*;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInventoryStorageHolder, P extends HasPositionPayload> extends ScreenHandler {
+public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedContainerStorageHolder, P extends HasPositionPayload> extends AbstractContainerMenu {
     protected final T blockEntity;
-    protected final WrappedInventoryStorage<?> wrappedInventoryStorage;
-    protected final ScreenHandlerContext context;
-    protected final PropertyDelegate propertyDelegate;
+    protected final WrappedContainerStorage<?> wrappedContainerStorage;
+    protected final ContainerLevelAccess context;
+    protected final ContainerData propertyDelegate;
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, P payload, Class<T> blockEntityClass) {
+    public IndustriaScreenHandler(MenuType<?> type, int syncId, Inventory playerInventory, P payload, Class<T> blockEntityClass) {
         this(type, 0, syncId, playerInventory, payload, new CachedBlockEntityFetcher<>(blockEntityClass));
     }
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int propertiesSize, int syncId, PlayerInventory playerInventory, P payload, Class<T> blockEntityClass) {
+    public IndustriaScreenHandler(MenuType<?> type, int propertiesSize, int syncId, Inventory playerInventory, P payload, Class<T> blockEntityClass) {
         this(type, propertiesSize, syncId, playerInventory, payload, new CachedBlockEntityFetcher<>(blockEntityClass));
     }
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int propertiesSize, int syncId, PlayerInventory playerInventory, P payload, CachedBlockEntityFetcher<T> cachedFetcher) {
+    public IndustriaScreenHandler(MenuType<?> type, int propertiesSize, int syncId, Inventory playerInventory, P payload, CachedBlockEntityFetcher<T> cachedFetcher) {
         this(type, syncId, playerInventory,
                 cachedFetcher.apply(playerInventory, payload.pos()),
-                ClientWrappedInventoryStorage.copyOf(cachedFetcher.apply(playerInventory, payload.pos()).getWrappedInventoryStorage()),
-                propertiesSize == 0 ? null : new ArrayPropertyDelegate(propertiesSize));
+                ClientWrappedContainerStorage.copyOf(cachedFetcher.apply(playerInventory, payload.pos()).getWrappedContainerStorage()),
+                propertiesSize == 0 ? null : new SimpleContainerData(propertiesSize));
     }
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, T blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage) {
-        this(type, syncId, playerInventory, blockEntity, wrappedInventoryStorage, null);
+    public IndustriaScreenHandler(MenuType<?> type, int syncId, Inventory playerInventory, T blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+        this(type, syncId, playerInventory, blockEntity, wrappedContainerStorage, null);
     }
 
-    public IndustriaScreenHandler(ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, T blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
+    public IndustriaScreenHandler(MenuType<?> type, int syncId, Inventory playerInventory, T blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
         super(type, syncId);
-        if (properties != null && properties.size() >= 0) {
+        if (properties != null && properties.getCount() >= 0) {
             this.propertyDelegate = properties;
-            checkDataCount(this.propertyDelegate, properties.size());
-            addProperties(this.propertyDelegate);
+            checkContainerDataCount(this.propertyDelegate, properties.getCount());
+            addDataSlots(this.propertyDelegate);
         } else {
-            this.propertyDelegate = new ArrayPropertyDelegate(0);
+            this.propertyDelegate = new SimpleContainerData(0);
         }
 
-        this.context = ScreenHandlerContext.create(playerInventory.player.getEntityWorld(), blockEntity.getPos());
+        this.context = ContainerLevelAccess.create(playerInventory.player.level(), blockEntity.getBlockPos());
         this.blockEntity = blockEntity;
-        this.wrappedInventoryStorage = wrappedInventoryStorage;
-        this.wrappedInventoryStorage.checkSize(getInventorySize());
+        this.wrappedContainerStorage = wrappedContainerStorage;
+        this.wrappedContainerStorage.checkSize(getInventorySize());
 
         addBlockEntitySlots(playerInventory);
-        addPlayerSlots(playerInventory, getPlayerInventoryX(), getPlayerInventoryY());
+        addStandardInventorySlots(playerInventory, getPlayerInventoryX(), getPlayerInventoryY());
 
-        this.wrappedInventoryStorage.onOpen(playerInventory.player);
+        this.wrappedContainerStorage.onOpen(playerInventory.player);
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasStack()) {
+        if (!slot.hasItem()) {
             return stack;
         }
 
-        ItemStack stackInSlot = slot.getStack();
+        ItemStack stackInSlot = slot.getItem();
         stack = stackInSlot.copy();
 
         if (slotIndex < getInventorySize()) {
-            if (!insertItem(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
-                if (!insertItem(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
+            if (!moveItemStackTo(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
+                if (!moveItemStackTo(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
                     return ItemStack.EMPTY;
                 }
             }
         } else {
-            if (!insertItem(stackInSlot, 0, getInventorySize(), false)) {
+            if (!moveItemStackTo(stackInSlot, 0, getInventorySize(), false)) {
                 return ItemStack.EMPTY;
             }
         }
 
         if (stackInSlot.isEmpty()) {
-            slot.setStack(ItemStack.EMPTY);
+            slot.setByPlayer(ItemStack.EMPTY);
         } else {
-            slot.markDirty();
+            slot.setChanged();
         }
 
         return stack;
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        this.wrappedInventoryStorage.onClose(player);
+    public void removed(Player player) {
+        super.removed(player);
+        this.wrappedContainerStorage.onClose(player);
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         boolean validBlock = false;
         for (Block block : getValidBlocks()) {
-            if (canUse(this.context, player, block)) {
+            if (stillValid(this.context, player, block)) {
                 validBlock = true;
                 break;
             }
@@ -133,9 +132,9 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
 
     protected abstract int getInventorySize();
 
-    protected abstract void addBlockEntitySlots(PlayerInventory playerInventory);
+    protected abstract void addBlockEntitySlots(Inventory playerInventory);
 
-    public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedInventoryStorageHolder> implements BiFunction<PlayerInventory, BlockPos, T> {
+    public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedContainerStorageHolder> implements BiFunction<Inventory, BlockPos, T> {
         private final Class<T> blockEntityClass;
         private final Map<BlockPos, T> cache = new HashMap<>();
 
@@ -144,12 +143,12 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedInve
         }
 
         @Override
-        public T apply(PlayerInventory playerInventory, BlockPos pos) {
+        public T apply(Inventory playerInventory, BlockPos pos) {
             if (cache.containsKey(pos)) {
                 return cache.get(pos);
             }
 
-            BlockEntity blockEntity = playerInventory.player.getEntityWorld().getBlockEntity(pos);
+            BlockEntity blockEntity = playerInventory.player.level().getBlockEntity(pos);
             if (blockEntityClass.isInstance(blockEntity)) {
                 T castedBlockEntity = blockEntityClass.cast(blockEntity);
                 cache.put(pos, castedBlockEntity);

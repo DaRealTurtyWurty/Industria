@@ -4,15 +4,15 @@ import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class IndustriaBlockEntity extends UpdatableBlockEntity {
-    public static final Codec<RegistryKey<Recipe<?>>> RECIPE_CODEC = RegistryKey.createCodec(RegistryKeys.RECIPE);
+    public static final Codec<ResourceKey<Recipe<?>>> RECIPE_CODEC = ResourceKey.codec(Registries.RECIPE);
     protected final IndustriaBlock blockRef;
 
     public IndustriaBlockEntity(IndustriaBlock blockRef, BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -21,12 +21,12 @@ public abstract class IndustriaBlockEntity extends UpdatableBlockEntity {
     }
 
     @Override
-    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
-        if (world == null || pos == null || oldState == null)
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        if (level == null || pos == null || oldState == null)
             return;
 
-        BlockState newState = world.getBlockState(pos);
-        boolean isSameBlock = newState.isOf(oldState.getBlock());
+        BlockState newState = level.getBlockState(pos);
+        boolean isSameBlock = newState.is(oldState.getBlock());
         if (isSameBlock)
             return;
 
@@ -40,12 +40,12 @@ public abstract class IndustriaBlockEntity extends UpdatableBlockEntity {
     }
 
     protected void removeMultiblockOnBreak() {
-        blockRef.multiblockType.onMultiblockBreak(world, pos);
+        blockRef.multiblockType.onMultiblockBreak(level, worldPosition);
     }
 
     protected void dropContentsOnBreak() {
         if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component access maybe?
-            blockEntityWithInventory.dropContents(world, pos);
+            blockEntityWithInventory.dropContents(level, worldPosition);
         }
     }
 }

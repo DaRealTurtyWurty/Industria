@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.util.fluid;
 
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.function.Predicate;
 

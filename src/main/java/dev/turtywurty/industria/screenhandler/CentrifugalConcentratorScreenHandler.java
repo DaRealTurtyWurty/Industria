@@ -1,26 +1,26 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.Slot;
 
 public class CentrifugalConcentratorScreenHandler extends IndustriaScreenHandler<CentrifugalConcentratorBlockEntity, BlockPosPayload> {
-    public CentrifugalConcentratorScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
+    public CentrifugalConcentratorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.CENTRIFUGAL_CONCENTRATOR, 3, syncId, playerInventory, payload, CentrifugalConcentratorBlockEntity.class);
     }
 
-    public CentrifugalConcentratorScreenHandler(int syncId, PlayerInventory playerInventory, CentrifugalConcentratorBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.CENTRIFUGAL_CONCENTRATOR, syncId, playerInventory, blockEntity, wrappedInventoryStorage, properties);
+    public CentrifugalConcentratorScreenHandler(int syncId, Inventory playerInventory, CentrifugalConcentratorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+        super(ScreenHandlerTypeInit.CENTRIFUGAL_CONCENTRATOR, syncId, playerInventory, blockEntity, wrappedContainerStorage, properties);
     }
 
     @Override
@@ -34,17 +34,17 @@ public class CentrifugalConcentratorScreenHandler extends IndustriaScreenHandler
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
-        addSlot(new Slot(this.wrappedInventoryStorage.getInventory(0), 0, 54, 35));
-        addSlot(new OutputSlot(this.wrappedInventoryStorage.getInventory(1), 0, 107, 35));
-        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(2), 0, 26, 60));
-        addSlot(new PredicateSlot(this.wrappedInventoryStorage.getInventory(3), 0, 134, 60));
+    protected void addBlockEntitySlots(Inventory playerInventory) {
+        addSlot(new Slot(this.wrappedContainerStorage.getInventory(0), 0, 54, 35));
+        addSlot(new OutputSlot(this.wrappedContainerStorage.getInventory(1), 0, 107, 35));
+        addSlot(new PredicateSlot(this.wrappedContainerStorage.getInventory(2), 0, 26, 60));
+        addSlot(new PredicateSlot(this.wrappedContainerStorage.getInventory(3), 0, 134, 60));
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         // TODO: This doesn't seem to work beyond like a block or two
-        return canUse(this.context, player, BlockInit.CENTRIFUGAL_CONCENTRATOR);
+        return stillValid(this.context, player, BlockInit.CENTRIFUGAL_CONCENTRATOR);
     }
 
     public int getProgress() {
@@ -61,10 +61,10 @@ public class CentrifugalConcentratorScreenHandler extends IndustriaScreenHandler
         if (maxProgress == 0 || progress == 0)
             return 0.0F;
 
-        return MathHelper.clamp(progress / maxProgress, 0.0F, 1.0F);
+        return Mth.clamp(progress / maxProgress, 0.0F, 1.0F);
     }
 
     public int getProgressScaled() {
-        return MathHelper.ceil(getProgressPercent() * 24);
+        return Mth.ceil(getProgressPercent() * 24);
     }
 }

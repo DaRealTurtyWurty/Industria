@@ -1,51 +1,51 @@
 package dev.turtywurty.industria.renderer.world;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.ParticleUtil;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ParticleUtils;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
-    public static final Map<RegistryKey<World>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
+    public static final Map<ResourceKey<Level>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
 
     @Override
-    public void render(WorldRenderContext context) {
+    public void render(LevelRenderContext context) {
         if(!DebugRenderingRegistry.debugRendering)
             return;
 
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null)
             return;
 
-        if (!FLUID_POCKETS.containsKey(player.getEntityWorld().getRegistryKey()))
+        if (!FLUID_POCKETS.containsKey(player.level().dimension()))
             return;
 
-        List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.getEntityWorld().getRegistryKey())
+        List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.level().dimension())
                 .stream()
-                .filter(fluidPocket -> fluidPocket.isWithinDistance(player.getBlockPos(), 64))
+                .filter(fluidPocket -> fluidPocket.isWithinDistance(player.blockPosition(), 64))
                 .toList();
 
-        MatrixStack matrixStack = context.matrices();
+        PoseStack matrixStack = context.poseStack();
         if (matrixStack == null)
             return;
 
-        VertexConsumerProvider provider = context.consumers();
+        MultiBufferSource provider = context.bufferSource();
         if (provider == null)
             return;
 
-        World world = player.getEntityWorld();
+        Level world = player.level();
         if (world == null)
             return;
 
@@ -53,7 +53,7 @@ public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
             // TODO: Draw different colored particles based on fluid
 
             for (BlockPos pos : pocket.fluidPositions().keySet()) {
-                ParticleUtil.spawnParticlesAround(world, pos, 1, ParticleTypes.DRIPPING_WATER);
+                ParticleUtils.spawnParticleInBlock(world, pos, 1, ParticleTypes.DRIPPING_WATER);
             }
         }
     }

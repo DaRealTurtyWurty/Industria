@@ -6,57 +6,55 @@ import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screenhandler.FluidTankScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
 
-public class FluidTankScreen extends HandledScreen<FluidTankScreenHandler> {
+public class FluidTankScreen extends AbstractContainerScreen<FluidTankScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/fluid_tank.png");
 
-    private CyclingButtonWidget<Boolean> toggleButton;
+    private CycleButton<Boolean> toggleButton;
 
-    public FluidTankScreen(FluidTankScreenHandler handler, PlayerInventory inventory, Text title) {
-        super(handler, inventory, title);
-        this.backgroundWidth = 176;
-        this.backgroundHeight = 174;
+    public FluidTankScreen(FluidTankScreenHandler handler, Inventory inventory, Component title) {
+        super(handler, inventory, title, 176, 174);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.playerInventoryTitleY = this.backgroundHeight - 94;
+        this.inventoryLabelY = this.imageHeight - 94;
 
-        addDrawable(new FluidWidget.Builder(this.handler.getBlockEntity().getFluidTank())
-                .bounds(this.x + 79, this.y + 14, 20, 46)
-                .posSupplier(() -> this.handler.getBlockEntity().getPos())
+        addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getFluidTank())
+                .bounds(this.leftPos + 79, this.topPos + 14, 20, 46)
+                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
                 .build());
 
-        this.toggleButton = addDrawableChild(CyclingButtonWidget.onOffBuilder(this.handler.getBlockEntity().isExtractMode())
-                .omitKeyText()
-                .icon((button, value) -> value ? Identifier.ofVanilla("widget/locked_button") : Identifier.ofVanilla("widget/unlocked_button"))
-                .build(this.x + 8, this.y + 14, 20, 20, Text.empty(),
+        this.toggleButton = addRenderableWidget(CycleButton.onOffBuilder(this.menu.getBlockEntity().isExtractMode())
+                .displayOnlyValue()
+                .withSprite((button, value) -> value ? Identifier.withDefaultNamespace("widget/locked_button") : Identifier.withDefaultNamespace("widget/unlocked_button"))
+                .create(this.leftPos + 8, this.topPos + 14, 20, 20, Component.empty(),
                         (button, value) ->
                                 ClientPlayNetworking.send(new FluidTankChangeExtractModePayload(!value))));
     }
 
     @Override
-    protected void handledScreenTick() {
-        super.handledScreenTick();
+    protected void containerTick() {
+        super.containerTick();
         if (this.toggleButton != null)
-            this.toggleButton.setValue(this.handler.getBlockEntity().isExtractMode());
+            this.toggleButton.setValue(this.menu.getBlockEntity().isExtractMode());
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
     }
 }

@@ -4,7 +4,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 
 public class AlloyFurnaceBlock extends IndustriaBlock {
-    public AlloyFurnaceBlock(Settings settings) {
+    public AlloyFurnaceBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasLitProperty()

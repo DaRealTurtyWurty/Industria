@@ -3,14 +3,14 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 // TODO: Update voxel shape
 public class CentrifugalConcentratorBlock extends IndustriaBlock {
-    public static final VoxelShape VOXEL_SHAPE = VoxelShapes.fullCube();
+    public static final VoxelShape VOXEL_SHAPE = Shapes.block();
 
-    public CentrifugalConcentratorBlock(Settings settings) {
+    public CentrifugalConcentratorBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasComparatorOutput()

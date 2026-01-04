@@ -4,18 +4,18 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.turtywurty.industria.fluid.FluidData;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -28,53 +28,53 @@ import java.util.Objects;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
     @Shadow
-    public abstract World getEntityWorld();
+    public abstract Level level();
 
     @Shadow
-    private BlockPos blockPos;
+    private BlockPos blockPosition;
 
     @Shadow
-    public abstract boolean updateMovementInFluid(TagKey<Fluid> tag, double speed);
+    public abstract boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed);
 
     @Shadow
-    protected boolean firstUpdate;
+    protected boolean firstTick;
 
     @Shadow
     protected Object2DoubleMap<TagKey<Fluid>> fluidHeight;
 
     @Shadow
-    protected boolean touchingWater;
+    protected boolean wasTouchingWater;
 
     @Shadow
-    public abstract void onLanding();
+    public abstract void resetFallDistance();
 
     @Shadow
-    public abstract void extinguish();
+    public abstract void clearFire();
 
     @Shadow
     private EntityDimensions dimensions;
 
     @Shadow
-    protected abstract SoundEvent getSplashSound();
+    protected abstract SoundEvent getSwimSplashSound();
 
     @Shadow
-    protected abstract SoundEvent getHighSpeedSplashSound();
+    protected abstract SoundEvent getSwimHighSpeedSplashSound();
 
     @ModifyExpressionValue(method = "updateSwimming",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/fluid/FluidState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$updateSwimming(boolean original) {
         if (original)
             return true;
 
-        FluidState state = getEntityWorld().getFluidState(this.blockPos);
-        FluidData data = FluidData.FLUID_DATA.get(state.getFluid());
+        FluidState state = level().getFluidState(this.blockPosition);
+        FluidData data = FluidData.FLUID_DATA.get(state.getType());
         return data != null && data.canSwim();
     }
 
-    @ModifyExpressionValue(method = "updateWaterState",
+    @ModifyExpressionValue(method = "updateInWaterStateAndDoFluidPushing",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;updateMovementInFluid(Lnet/minecraft/registry/tag/TagKey;D)Z"))
+                    target = "Lnet/minecraft/world/entity/Entity;updateFluidHeightAndDoFluidPushing(Lnet/minecraft/tags/TagKey;D)Z"))
     private boolean industria$updateWaterState(boolean original, @Local double ultrawarmModifier) {
         if (original)
             return true;
@@ -82,7 +82,7 @@ public abstract class EntityMixin {
         Entity entity = (Entity) (Object) this;
 
         for (FluidData fluidDatum : FluidData.FLUID_DATA.values()) {
-            if (updateMovementInFluid(fluidDatum.fluidTag(), fluidDatum.fluidMovementSpeed().apply(entity, ultrawarmModifier))) {
+            if (updateFluidHeightAndDoFluidPushing(fluidDatum.fluidTag(), fluidDatum.fluidMovementSpeed().apply(entity, ultrawarmModifier))) {
                 return true;
             }
         }
@@ -94,7 +94,7 @@ public abstract class EntityMixin {
     private void industria$applyGravity(CallbackInfo callback) {
         if ((Entity) (Object) this instanceof ItemEntity itemEntity) {
             for (FluidData fluidData : FluidData.FLUID_DATA.values()) {
-                if (!this.firstUpdate && this.fluidHeight.getDouble(fluidData.fluidTag()) > 0.0D) {
+                if (!this.firstTick && this.fluidHeight.getDouble(fluidData.fluidTag()) > 0.0D) {
                     fluidData.applyBuoyancy().accept(itemEntity);
                     callback.cancel();
                 }
@@ -102,9 +102,9 @@ public abstract class EntityMixin {
         }
     }
 
-    @Inject(method = "checkWaterState",
+    @Inject(method = "updateInWaterStateAndDoWaterCurrentPushing",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;updateMovementInFluid(Lnet/minecraft/registry/tag/TagKey;D)Z"),
+                    target = "Lnet/minecraft/world/entity/Entity;updateFluidHeightAndDoFluidPushing(Lnet/minecraft/tags/TagKey;D)Z"),
             cancellable = true)
     private void industria$checkWaterState(CallbackInfo callback) {
         Entity entity = (Entity) (Object) this;
@@ -112,16 +112,16 @@ public abstract class EntityMixin {
             if (!fluidData.canSwim())
                 continue;
 
-            if (updateMovementInFluid(fluidData.fluidTag(), fluidData.fluidMovementSpeed().apply(entity, 0.0D))) {
-                if (!this.touchingWater && !this.firstUpdate) {
-                    industria$onSwimmingStart(entity, dimensions, getSplashSound(), getHighSpeedSplashSound(), fluidData);
+            if (updateFluidHeightAndDoFluidPushing(fluidData.fluidTag(), fluidData.fluidMovementSpeed().apply(entity, 0.0D))) {
+                if (!this.wasTouchingWater && !this.firstTick) {
+                    industria$onSwimmingStart(entity, dimensions, getSwimSplashSound(), getSwimHighSpeedSplashSound(), fluidData);
                 }
 
                 if (fluidData.shouldBreakLanding())
-                    onLanding();
-                this.touchingWater = true;
+                    resetFallDistance();
+                this.wasTouchingWater = true;
                 if (fluidData.shouldExtinguish())
-                    extinguish();
+                    clearFire();
 
                 callback.cancel();
             }
@@ -133,7 +133,7 @@ public abstract class EntityMixin {
         Entity entity = Objects.requireNonNullElse(thisEntity.getControllingPassenger(), thisEntity);
         float distanceModifier = entity == thisEntity ? 0.2F : 0.9F;
 
-        Vec3d velocity = entity.getVelocity();
+        Vec3 velocity = entity.getDeltaMovement();
         float volume = Math.min(1.0F, (float) Math.sqrt(velocity.x * velocity.x * 0.2F + velocity.y * velocity.y + velocity.z * velocity.z * 0.2F) * distanceModifier);
         if (volume < 0.25F) {
             thisEntity.playSound(entitySplashSound, volume,
@@ -143,11 +143,11 @@ public abstract class EntityMixin {
                     1.0F + (thisEntity.getRandom().nextFloat() - thisEntity.getRandom().nextFloat()) * 0.4F);
         }
 
-        float yPos = (float) MathHelper.floor(thisEntity.getY());
+        float yPos = (float) Mth.floor(thisEntity.getY());
         for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
             double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
             double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getEntityWorld().addParticleClient(fluidData.bubbleParticle(),
+            thisEntity.level().addParticle(fluidData.bubbleParticle(),
                     thisEntity.getX() + xOffset,
                     yPos + 1.0F,
                     thisEntity.getZ() + yOffset,
@@ -159,7 +159,7 @@ public abstract class EntityMixin {
         for (int i = 0; (float) i < 1.0F + dimensions.width() * 20.0F; i++) {
             double xOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
             double yOffset = (thisEntity.getRandom().nextDouble() * 2.0 - 1.0) * (double) dimensions.width();
-            thisEntity.getEntityWorld().addParticleClient(fluidData.splashParticle(),
+            thisEntity.level().addParticle(fluidData.splashParticle(),
                     thisEntity.getX() + xOffset,
                     yPos + 1.0F,
                     thisEntity.getZ() + yOffset,
@@ -168,6 +168,6 @@ public abstract class EntityMixin {
                     velocity.z);
         }
 
-        thisEntity.emitGameEvent(GameEvent.SPLASH);
+        thisEntity.gameEvent(GameEvent.SPLASH);
     }
 }

@@ -11,12 +11,12 @@ import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkType;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,16 +29,16 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
             (storage, storageAmount) -> ((SimpleHeatStorage) storage).setAmount(storageAmount),
             HeatPipeNetwork::new);
 
-    public static final PacketCodec<RegistryByteBuf, HeatPipeNetwork> PACKET_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, HeatPipeNetwork> STREAM_CODEC =
             PipeNetwork.createPacketCodec(
-                    PacketCodecs.DOUBLE,
+                    ByteBufCodecs.DOUBLE,
                     network -> network.storage.getAmount(),
                     (storage, storageAmount) -> ((SimpleHeatStorage) storage).setAmount(storageAmount),
                     HeatPipeNetwork::new);
 
     public static final Codec<Set<HeatPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final PacketCodec<RegistryByteBuf, Set<HeatPipeNetwork>> SET_PACKET_CODEC =
-            ExtraPacketCodecs.setOf(PACKET_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<HeatPipeNetwork>> SET_STREAM_CODEC =
+            ExtraPacketCodecs.setOf(STREAM_CODEC);
 
     private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
 
@@ -97,14 +97,14 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
     }
 
     @Override
-    public void tick(World world) {
+    public void tick(Level world) {
         super.tick(world);
 
         // Conduct heat between adjacent pipes only once per pair
         for (BlockPos pipePos : this.pipes) {
             HeatStorage pipeStorage = getStorage(pipePos);
             for (Direction dir : Direction.values()) {
-                BlockPos neighbourPos = pipePos.offset(dir);
+                BlockPos neighbourPos = pipePos.relative(dir);
                 if (this.pipes.contains(neighbourPos) && pipePos.asLong() < neighbourPos.asLong()) {
                     HeatStorage neighbourStorage = getStorage(neighbourPos);
                     exchange(pipeStorage, neighbourStorage, PIPE_CONDUCTIVITY);
@@ -115,7 +115,7 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
         // Conduct heat between pipes and connected blocks
         for (BlockPos connectedPos : this.connectedBlocks) {
             for (Direction dir : Direction.values()) {
-                BlockPos pipePos = connectedPos.offset(dir);
+                BlockPos pipePos = connectedPos.relative(dir);
                 if (this.pipes.contains(pipePos)) {
                     HeatStorage pipeStorage = getStorage(pipePos);
                     HeatStorage connectedStorage = this.transferType.lookup(world, connectedPos, dir.getOpposite());

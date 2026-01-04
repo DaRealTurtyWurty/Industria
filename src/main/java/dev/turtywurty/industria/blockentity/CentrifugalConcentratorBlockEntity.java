@@ -17,7 +17,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.OutputSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
@@ -44,29 +44,29 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -76,7 +76,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("centrifugal_concentrator");
+    public static final Component TITLE = Industria.containerTitle("centrifugal_concentrator");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.y() == 0)
@@ -90,7 +90,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
                     .build()
     );
 
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
@@ -99,10 +99,10 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     // Render data
     public float bowlRotation = 0.0f;
     private int progress, maxProgress;
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
     private boolean isProcessing = false;
     private int recipeRPM;
-    private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
+    private final ContainerData propertyDelegate = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -122,7 +122,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 3;
         }
     };
@@ -132,14 +132,14 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     public CentrifugalConcentratorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CENTRIFUGAL_CONCENTRATOR, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, pos, state);
 
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
-        this.wrappedInventoryStorage.addExtractOnlyInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
+        this.wrappedContainerStorage.addExtractOnlyInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createFluidPredicate(() -> {
                     SyncingFluidStorage inputFluidTank = getInputFluidTank();
                     return new FluidStack(inputFluidTank.variant, inputFluidTank.amount);
                 })), Direction.NORTH);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().variant)), Direction.SOUTH);
 
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10, variant -> variant.isOf(Fluids.WATER)), Direction.UP);
@@ -154,26 +154,26 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        SyncableStorage inventoryStorage = getInputInventory();
-        SyncableStorage outputInventoryStorage = getOutputInventory();
+        SyncableStorage ContainerStorage = getInputInventory();
+        SyncableStorage outputContainerStorage = getOutputInventory();
         SyncableStorage bucketInputInventory = getBucketInputInventory();
         SyncableStorage bucketOutputInventory = getBucketOutputInventory();
         SyncableStorage inputFluidTank = getInputFluidTank();
         SyncableStorage outputSlurryTank = getOutputSlurryTank();
         SyncableStorage energyStorage = getEnergyStorage();
-        return List.of(inventoryStorage, outputInventoryStorage, bucketInputInventory, bucketOutputInventory,
+        return List.of(ContainerStorage, outputContainerStorage, bucketInputInventory, bucketOutputInventory,
                 inputFluidTank, outputSlurryTank,
                 energyStorage);
     }
 
     @Override
     public void onTick() {
-        if (this.world == null)
+        if (this.level == null)
             return;
 
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
         if (!bucketInputInventory.isEmpty()) {
-            ItemStack bucket = bucketInputInventory.getStack(0);
+            ItemStack bucket = bucketInputInventory.getItem(0);
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
@@ -194,7 +194,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
         if (!bucketOutputInventory.isEmpty()) {
-            ItemStack bucket = bucketOutputInventory.getStack(0);
+            ItemStack bucket = bucketOutputInventory.getItem(0);
             Storage<SlurryVariant> storage = SlurryStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsInsertion()) {
                 SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
@@ -213,8 +213,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
         if (!this.outputItemStack.isEmpty()) {
             SyncingSimpleInventory outputInventory = getOutputInventory();
-            if (outputInventory.canInsert(this.outputItemStack)) {
-                this.outputItemStack = outputInventory.addStack(this.outputItemStack);
+            if (outputInventory.canAddItem(this.outputItemStack)) {
+                this.outputItemStack = outputInventory.addItem(this.outputItemStack);
                 update();
             }
 
@@ -238,9 +238,9 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
         CentrifugalConcentratorRecipeInput recipeInput = createRecipeInput();
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<CentrifugalConcentratorRecipe>> recipeEntryOpt = getCurrentRecipe(recipeInput);
+            Optional<RecipeHolder<CentrifugalConcentratorRecipe>> recipeEntryOpt = getCurrentRecipe(recipeInput);
             if (recipeEntryOpt.isPresent()) {
-                RecipeEntry<CentrifugalConcentratorRecipe> recipeEntry = recipeEntryOpt.get();
+                RecipeHolder<CentrifugalConcentratorRecipe> recipeEntry = recipeEntryOpt.get();
                 this.currentRecipeId = recipeEntry.id();
 
                 CentrifugalConcentratorRecipe recipe = recipeEntry.value();
@@ -254,7 +254,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
             return;
         }
 
-        Optional<RecipeEntry<CentrifugalConcentratorRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+        Optional<RecipeHolder<CentrifugalConcentratorRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
             this.recipeRPM = 0;
@@ -270,9 +270,9 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         if (this.progress >= this.maxProgress) {
             if (hasEnergy(recipe)) {
                 extractEnergy(recipe);
-                getInputInventory().getStackInSlot(0).decrement(recipe.input().stackData().count());
+                getInputInventory().getItem(0).shrink(recipe.input().stackData().count());
 
-                ItemStack output = recipe.craft(recipeInput, this.world.getRegistryManager());
+                ItemStack output = recipe.assemble(recipeInput, this.level.registryAccess());
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
                 inputFluidTank.amount -= FluidConstants.BUCKET * 2;
 
@@ -283,8 +283,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
                 this.maxProgress = 0;
                 this.currentRecipeId = null;
 
-                if (outputInventory.canInsert(output)) {
-                    this.outputItemStack = outputInventory.addStack(output);
+                if (outputInventory.canAddItem(output)) {
+                    this.outputItemStack = outputInventory.addItem(output);
                 } else {
                     this.outputItemStack = output;
                 }
@@ -313,17 +313,17 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     @Override
     public void onClientTick() {
-        if (this.world == null || !this.isProcessing)
+        if (this.level == null || !this.isProcessing)
             return;
 
         this.bowlRotation += (this.recipeRPM / 60f / 20f);
     }
 
-    private Optional<RecipeEntry<CentrifugalConcentratorRecipe>> getCurrentRecipe(CentrifugalConcentratorRecipeInput recipeInput) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<CentrifugalConcentratorRecipe>> getCurrentRecipe(CentrifugalConcentratorRecipeInput recipeInput) {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.CENTRIFUGAL_CONCENTRATOR, recipeInput, this.world);
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.CENTRIFUGAL_CONCENTRATOR, recipeInput, this.level);
     }
 
     private CentrifugalConcentratorRecipeInput createRecipeInput() {
@@ -339,46 +339,46 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return wrappedContainerStorage;
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
         view.putInt("RecipeRPM", this.recipeRPM);
         view.putBoolean("IsProcessing", this.isProcessing);
 
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
 
         if (!this.outputItemStack.isEmpty()) {
-            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
+            view.store("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-            view.put("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
+            view.store("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
         }
 
         Multiblockable.write(this, view);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        this.progress = view.getInt("Progress", 0);
-        this.maxProgress = view.getInt("MaxProgress", 0);
+    protected void loadAdditional(ValueInput view) {
+        this.progress = view.getIntOr("Progress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
         this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC).orElse(null);
-        this.recipeRPM = view.getInt("RecipeRPM", 0);
-        this.isProcessing = view.getBoolean("IsProcessing", false);
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        this.recipeRPM = view.getIntOr("RecipeRPM", 0);
+        this.isProcessing = view.getBooleanOr("IsProcessing", false);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
@@ -393,7 +393,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -404,8 +404,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -428,34 +428,34 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new CentrifugalConcentratorScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.propertyDelegate);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new CentrifugalConcentratorScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate);
     }
 
     public SyncingSimpleInventory getInputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public SyncingSimpleInventory getOutputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
     }
 
     public SyncingSimpleInventory getBucketInputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(2);
     }
 
     public SyncingSimpleInventory getBucketOutputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(3);
     }
 
     public SyncingFluidStorage getInputFluidTank() {
@@ -470,8 +470,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         return (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {

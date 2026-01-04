@@ -1,58 +1,54 @@
 package dev.turtywurty.industria.screen.fakeworld;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientConnectionState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.recipebook.ClientRecipeBook;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.state.WorldRenderState;
-import net.minecraft.client.session.telemetry.TelemetrySender;
-import net.minecraft.client.session.telemetry.WorldSession;
-import net.minecraft.client.world.ClientChunkLoadProgress;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkSide;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.*;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.state.LevelRenderState;
+import net.minecraft.client.telemetry.TelemetryEventSender;
+import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.ServerLinks;
-import net.minecraft.stat.StatHandler;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.stats.StatsCounter;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.dimension.DimensionTypes;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Creates a stand-alone {@link ClientWorld} that never talks to a server.
+ * Creates a stand-alone {@link ClientLevel} that never talks to a server.
  */
 public final class FakeWorldBuilder {
     private FakeWorldBuilder() {
     }
 
-    public static Result create(MinecraftClient client) {
-        var profile = new GameProfile(client.getSession().getUuidOrNull(), client.getSession().getUsername());
-        DynamicRegistryManager.Immutable registryManager = client.world != null
-                ? client.world.getRegistryManager().toImmutable()
-                : DynamicRegistryManager.of(Registries.REGISTRIES);
+    public static Result create(Minecraft client) {
+        var profile = new GameProfile(client.getUser().getProfileId(), client.getUser().getName());
+        RegistryAccess.Frozen registryManager = client.level != null
+                ? client.level.registryAccess().freeze()
+                : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
         UUID playerUUID = profile.id() == null ? UUID.randomUUID() : profile.id();
 
-        var connectionState = new ClientConnectionState(
-                new ClientChunkLoadProgress(),
+        var connectionState = new CommonListenerCookie(
+                new LevelLoadTracker(),
                 profile,
-                new WorldSession(TelemetrySender.NOOP, true, null, "fake_world"),
+                new WorldSessionTelemetryManager(TelemetryEventSender.DISABLED, true, null, "fake_world"),
                 registryManager,
-                FeatureSet.empty(),
+                FeatureFlagSet.of(),
                 null,
                 null,
                 null,
@@ -60,59 +56,59 @@ public final class FakeWorldBuilder {
                 null,
                 Map.of(),
                 ServerLinks.EMPTY,
-                Map.of(playerUUID, new PlayerListEntry(profile, false)),
+                Map.of(playerUUID, new PlayerInfo(profile, false)),
                 false
         );
 
-        var connection = new ClientConnection(NetworkSide.CLIENTBOUND);
-        ClientPlayNetworkHandler networkHandler = new ClientPlayNetworkHandler(client, connection, connectionState);
+        var connection = new Connection(PacketFlow.CLIENTBOUND);
+        ClientPacketListener networkHandler = new ClientPacketListener(client, connection, connectionState);
 
-        RegistryEntry<DimensionType> dimensionType = connectionState
+        Holder<DimensionType> dimensionType = connectionState
                 .receivedRegistries()
-                .getOrThrow(RegistryKeys.DIMENSION_TYPE)
-                .getOrThrow(DimensionTypes.OVERWORLD);
-        var worldRenderer = new WorldRenderer(
+                .lookupOrThrow(Registries.DIMENSION_TYPE)
+                .getOrThrow(BuiltinDimensionTypes.OVERWORLD);
+        var worldRenderer = new LevelRenderer(
                 client,
                 client.getEntityRenderDispatcher(),
                 client.getBlockEntityRenderDispatcher(),
-                client.getBufferBuilders(),
-                new WorldRenderState(),
-                client.gameRenderer.getEntityRenderDispatcher()
+                client.renderBuffers(),
+                new LevelRenderState(),
+                client.gameRenderer.getFeatureRenderDispatcher()
         );
 
-        var properties = new ClientWorld.Properties(Difficulty.NORMAL, false, false);
-        var world = new ClientWorld(
+        var properties = new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false);
+        var world = new ClientLevel(
                 networkHandler,
                 properties,
-                World.OVERWORLD,
+                Level.OVERWORLD,
                 dimensionType,
                 8,
                 8,
                 worldRenderer,
                 false,
-                Random.create().nextLong(),
+                RandomSource.create().nextLong(),
                 63
         );
-        worldRenderer.setWorld(world);
+        worldRenderer.setLevel(world);
 
-        var player = new ClientPlayerEntity(
+        var player = new LocalPlayer(
                 client,
                 world,
                 networkHandler,
-                new StatHandler(),
+                new StatsCounter(),
                 new ClientRecipeBook(),
-                PlayerInput.DEFAULT,
+                Input.EMPTY,
                 false
         );
-        player.setUuid(playerUUID);
-        player.setYaw(180.0F);
-        player.setPitch(15.0F);
+        player.setUUID(playerUUID);
+        player.setYRot(180.0F);
+        player.setXRot(15.0F);
         player.setNoGravity(true);
         world.addEntity(player);
 
         return new Result(world, networkHandler, player);
     }
 
-    public record Result(ClientWorld world, ClientPlayNetworkHandler networkHandler, ClientPlayerEntity player) {
+    public record Result(ClientLevel world, ClientPacketListener networkHandler, LocalPlayer player) {
     }
 }

@@ -1,8 +1,8 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,13 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CachedVoxelShapes {
     private final VoxelShapeFactory factory;
-    private final Map<WorldView, Map<BlockPos, VoxelShape>> cache = new ConcurrentHashMap<>();
+    private final Map<LevelReader, Map<BlockPos, VoxelShape>> cache = new ConcurrentHashMap<>();
 
     public CachedVoxelShapes(VoxelShapeFactory factory) {
         this.factory = factory;
     }
 
-    public VoxelShape getShape(WorldView world, BlockPos pos) {
+    public VoxelShape getShape(LevelReader world, BlockPos pos) {
         return this.cache.computeIfAbsent(world, w -> new HashMap<>())
                 .computeIfAbsent(pos, p -> this.factory.create(world, p));
     }
@@ -27,6 +27,6 @@ public class CachedVoxelShapes {
 
     @FunctionalInterface
     public interface VoxelShapeFactory {
-        VoxelShape create(WorldView world, BlockPos pos);
+        VoxelShape create(LevelReader world, BlockPos pos);
     }
 }

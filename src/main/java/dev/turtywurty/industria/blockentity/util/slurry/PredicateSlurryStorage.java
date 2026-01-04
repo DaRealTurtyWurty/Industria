@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.util.slurry;
 
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.function.Predicate;
 

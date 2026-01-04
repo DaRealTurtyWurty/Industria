@@ -11,21 +11,21 @@ import dev.turtywurty.industria.multiblock.PieceData;
 import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.MultiblockDesignerScreenHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class MultiblockDesignerBlockEntity extends UpdatableBlockEntity implements BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("multiblock_designer");
+    public static final Component TITLE = Industria.containerTitle("multiblock_designer");
 
     private final Map<BlockPos, PieceData> pieces = new HashMap<>();
 
@@ -34,29 +34,29 @@ public class MultiblockDesignerBlockEntity extends UpdatableBlockEntity implemen
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new MultiblockDesignerScreenHandler(syncId, playerInventory, this);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
-        view.put("Pieces", PieceData.CODEC.listOf(), this.pieces.values().stream().toList());
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
+        view.store("Pieces", PieceData.CODEC.listOf(), this.pieces.values().stream().toList());
     }
 
     @Override
-    protected void readData(ReadView view) {
-        super.readData(view);
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
 
         this.pieces.clear();
         for (PieceData piece : view.read("Pieces", PieceData.CODEC.listOf()).orElse(List.of())) {
@@ -104,7 +104,7 @@ public class MultiblockDesignerBlockEntity extends UpdatableBlockEntity implemen
             pieceData.name = sharedName;
         }
 
-        if (this.world != null && this.world.getBlockEntity(position) instanceof MultiblockPieceBlockEntity piece) {
+        if (this.level != null && this.level.getBlockEntity(position) instanceof MultiblockPieceBlockEntity piece) {
             piece.setKey(paletteChar);
         }
 

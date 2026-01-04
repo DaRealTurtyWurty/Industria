@@ -1,25 +1,25 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
 import dev.turtywurty.industria.state.CentrifugalConcentratorRenderState;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -29,9 +29,9 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
     private final CentrifugalConcentratorModel model;
 
-    public CentrifugalConcentratorBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public CentrifugalConcentratorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
-        this.model = new CentrifugalConcentratorModel(context.getLayerModelPart(CentrifugalConcentratorModel.LAYER_LOCATION));
+        this.model = new CentrifugalConcentratorModel(context.bakeLayer(CentrifugalConcentratorModel.LAYER_LOCATION));
     }
 
     @Override
@@ -40,13 +40,13 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
     }
 
     @Override
-    public void updateRenderState(CentrifugalConcentratorBlockEntity blockEntity, CentrifugalConcentratorRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(CentrifugalConcentratorBlockEntity blockEntity, CentrifugalConcentratorRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.recipeRPM = blockEntity.getRecipeRPM();
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
         state.inputFluidTank = blockEntity.getInputFluidTank();
-        state.updateItemRenderState(0, this, blockEntity, blockEntity.getInputInventory().getStackInSlot(0));
+        state.updateItemRenderState(0, this, blockEntity, blockEntity.getInputInventory().getItem(0));
 
         float progress = state.progress / (float) state.maxProgress;
         if (progress == 0 || Double.isNaN(progress)) {
@@ -57,32 +57,32 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
     }
 
     @Override
-    protected void onRender(CentrifugalConcentratorRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    protected void onRender(CentrifugalConcentratorRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         queue.submitModel(this.model,
                 state.bowlRotation,
-                matrices, this.model.getLayer(CentrifugalConcentratorModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.crumblingOverlay);
+                matrices, this.model.renderType(CentrifugalConcentratorModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
 
         renderInputFluid(state, matrices, queue, light, overlay);
     }
 
-    private void renderInputFluid(CentrifugalConcentratorRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    private void renderInputFluid(CentrifugalConcentratorRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         SingleFluidStorage fluidTank = state.inputFluidTank;
         if (fluidTank.isResourceBlank() || fluidTank.amount <= 0)
             return;
 
         FluidVariant fluidVariant = fluidTank.variant;
-        Sprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
+        TextureAtlasSprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
         if (fluidSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(fluidSprite.getAtlasId());
-        World world = MinecraftClient.getInstance().world;
+        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(fluidSprite.atlasLocation());
+        Level world = Minecraft.getInstance().level;
 
         int sides = 16;
         float outerRadius = 19 / 16f;
         float innerRadius;
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, state.pos);
+        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, state.blockPos);
 
         float fillPercent = fluidTank.amount / (float) fluidTank.getCapacity();
 
@@ -96,8 +96,8 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
         float yMin = 1 / 16f;
         float yMax = 18 / 16f;
-        float yOffset = MathHelper.lerp(fillPercent, yMin, yMax);
-        matrices.push();
+        float yOffset = Mth.lerp(fillPercent, yMin, yMax);
+        matrices.pushPose();
         matrices.translate(0, -yOffset, 0);
 
         float angleOffset = (float) Math.PI / sides;
@@ -105,7 +105,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             float angle0 = angleOffset + (float) (2.0 * Math.PI * i / sides);
             float angle1 = angleOffset + (float) (2.0 * Math.PI * (i + 1) / sides);
 
-            queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
+            queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
                 angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle0, innerRadius, outerRadius, light, overlay);
                 angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle0, outerRadius, outerRadius, light, overlay);
                 angledFluidVertex(vertexConsumer, entry, fluidSprite, fluidColor, angle1, outerRadius, outerRadius, light, overlay);
@@ -122,41 +122,41 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             float y = (float) Math.sin(angle * 3) * 0.02f + 0.225f;
             float z = (float) Math.sin(angle) * radius;
 
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(x, y, z);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotation(angle + (float) Math.PI / 2f));
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            matrices.mulPose(Axis.YP.rotation(angle + (float) Math.PI / 2f));
             matrices.scale(0.5f, 0.5f, 0.5f);
             state.renderItemRenderState(0, matrices, queue);
 
             Vector3f pos = localToWorldPosition(matrices);
-            world.addParticleClient(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
+            world.addParticle(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
 
-            matrices.pop();
+            matrices.popPose();
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 
-    private Vector3f localToWorldPosition(MatrixStack matrices) {
-        Vector3f pos = matrices.peek().getPositionMatrix().transformPosition(0, 0, 0, new Vector3f());
-        Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getCameraPos();
+    private Vector3f localToWorldPosition(PoseStack matrices) {
+        Vector3f pos = matrices.last().pose().transformPosition(0, 0, 0, new Vector3f());
+        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
 
         return new Vector3f((float) (pos.x() + cameraPos.x), (float) (pos.y() + cameraPos.y), (float) (pos.z() + cameraPos.z));
     }
 
-    private void angledFluidVertex(VertexConsumer vc, MatrixStack.Entry entry, Sprite sprite, int fluidColor, float angle, float radius, float uvSize, int light, int overlay) {
-        float x = radius * MathHelper.cos(angle);
-        float z = radius * MathHelper.sin(angle);
+    private void angledFluidVertex(VertexConsumer vc, PoseStack.Pose entry, TextureAtlasSprite sprite, int fluidColor, float angle, float radius, float uvSize, int light, int overlay) {
+        float x = radius * Mth.cos(angle);
+        float z = radius * Mth.sin(angle);
 
-        float u = MathHelper.map(x, -uvSize, uvSize, sprite.getMinU(), sprite.getMaxU());
-        float v = MathHelper.map(z, -uvSize, uvSize, sprite.getMinV(), sprite.getMaxV());
+        float u = Mth.map(x, -uvSize, uvSize, sprite.getU0(), sprite.getU1());
+        float v = Mth.map(z, -uvSize, uvSize, sprite.getV0(), sprite.getV1());
 
-        vc.vertex(entry, x, 0, z)
-                .color(fluidColor)
-                .texture(u, v)
-                .overlay(overlay)
-                .light(light)
-                .normal(0.0f, 1f, 0.0f);
+        vc.addVertex(entry, x, 0, z)
+                .setColor(fluidColor)
+                .setUv(u, v)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(0.0f, 1f, 0.0f);
     }
 }

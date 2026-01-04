@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.util.gas;
 
 import dev.turtywurty.gasapi.api.GasVariant;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.function.Predicate;
 

@@ -13,21 +13,17 @@ import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,7 +32,7 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
                                  OutputItemStack output, OutputItemStack byProduct,
                                  boolean requiresCatalyst, int catalystUses, int processTime) implements Recipe<CrystallizerRecipeInput> {
     @Override
-    public boolean matches(CrystallizerRecipeInput input, World world) {
+    public boolean matches(CrystallizerRecipeInput input, Level world) {
         FluidStack waterFluid = input.waterFluid();
         FluidStack crystalFluid = input.crystalFluid();
         ItemStack catalyst = input.catalyst();
@@ -46,20 +42,20 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
     }
 
     @Override
-    public ItemStack craft(CrystallizerRecipeInput input, RegistryWrapper.WrapperLookup registries) {
-        return createOutput(new LocalRandom(ThreadLocalRandom.current().nextLong()));
+    public ItemStack assemble(CrystallizerRecipeInput input, HolderLookup.Provider registries) {
+        return createOutput(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
-    public ItemStack createOutput(Random random) {
+    public ItemStack createOutput(RandomSource random) {
         return this.output.createStack(random);
     }
 
-    public ItemStack createByProduct(Random random) {
+    public ItemStack createByProduct(RandomSource random) {
         return this.byProduct.createStack(random);
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
@@ -74,12 +70,12 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(
                 new CrystallizerRecipeDisplay(this.waterFluid, this.crystalFluid, this.catalyst.toDisplay(),
                         new SlotDisplay.ItemSlotDisplay(BlockInit.CRYSTALLIZER.asItem()),
@@ -87,12 +83,12 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.CRYSTALLIZER;
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("crystallizer").toString();
     }
 
@@ -122,15 +118,15 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
                 Codec.INT.fieldOf("process_time").forGetter(CrystallizerRecipe::processTime)
         ).apply(instance, CrystallizerRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, CrystallizerRecipe> PACKET_CODEC =
-                PacketCodec.tuple(FluidStack.PACKET_CODEC, CrystallizerRecipe::waterFluid,
-                        FluidStack.PACKET_CODEC, CrystallizerRecipe::crystalFluid,
-                        IndustriaIngredient.PACKET_CODEC, CrystallizerRecipe::catalyst,
-                        OutputItemStack.PACKET_CODEC, CrystallizerRecipe::output,
-                        OutputItemStack.PACKET_CODEC, CrystallizerRecipe::byProduct,
-                        PacketCodecs.BOOLEAN, CrystallizerRecipe::requiresCatalyst,
-                        PacketCodecs.INTEGER, CrystallizerRecipe::catalystUses,
-                        PacketCodecs.INTEGER, CrystallizerRecipe::processTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, CrystallizerRecipe> STREAM_CODEC =
+                StreamCodec.composite(FluidStack.STREAM_CODEC, CrystallizerRecipe::waterFluid,
+                        FluidStack.STREAM_CODEC, CrystallizerRecipe::crystalFluid,
+                        IndustriaIngredient.STREAM_CODEC, CrystallizerRecipe::catalyst,
+                        OutputItemStack.STREAM_CODEC, CrystallizerRecipe::output,
+                        OutputItemStack.STREAM_CODEC, CrystallizerRecipe::byProduct,
+                        ByteBufCodecs.BOOL, CrystallizerRecipe::requiresCatalyst,
+                        ByteBufCodecs.INT, CrystallizerRecipe::catalystUses,
+                        ByteBufCodecs.INT, CrystallizerRecipe::processTime,
                         CrystallizerRecipe::new);
 
         @Override
@@ -139,8 +135,8 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, CrystallizerRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, CrystallizerRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -160,27 +156,27 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
                 Codec.INT.fieldOf("process_time").forGetter(CrystallizerRecipeDisplay::processTime)
         ).apply(instance, CrystallizerRecipeDisplay::new));
 
-        private static final PacketCodec<RegistryByteBuf, CrystallizerRecipeDisplay> PACKET_CODEC =
-                ExtraPacketCodecs.tuple(FluidStack.PACKET_CODEC, CrystallizerRecipeDisplay::waterFluid,
-                        FluidStack.PACKET_CODEC, CrystallizerRecipeDisplay::crystalFluid,
-                        SlotDisplay.PACKET_CODEC, CrystallizerRecipeDisplay::catalyst,
-                        SlotDisplay.PACKET_CODEC, CrystallizerRecipeDisplay::craftingStation,
-                        SlotDisplay.PACKET_CODEC, CrystallizerRecipeDisplay::output,
-                        SlotDisplay.PACKET_CODEC, CrystallizerRecipeDisplay::byProduct,
-                        PacketCodecs.BOOLEAN, CrystallizerRecipeDisplay::requiresCatalyst,
-                        PacketCodecs.INTEGER, CrystallizerRecipeDisplay::catalystUses,
-                        PacketCodecs.INTEGER, CrystallizerRecipeDisplay::processTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, CrystallizerRecipeDisplay> STREAM_CODEC =
+                ExtraPacketCodecs.tuple(FluidStack.STREAM_CODEC, CrystallizerRecipeDisplay::waterFluid,
+                        FluidStack.STREAM_CODEC, CrystallizerRecipeDisplay::crystalFluid,
+                        SlotDisplay.STREAM_CODEC, CrystallizerRecipeDisplay::catalyst,
+                        SlotDisplay.STREAM_CODEC, CrystallizerRecipeDisplay::craftingStation,
+                        SlotDisplay.STREAM_CODEC, CrystallizerRecipeDisplay::output,
+                        SlotDisplay.STREAM_CODEC, CrystallizerRecipeDisplay::byProduct,
+                        ByteBufCodecs.BOOL, CrystallizerRecipeDisplay::requiresCatalyst,
+                        ByteBufCodecs.INT, CrystallizerRecipeDisplay::catalystUses,
+                        ByteBufCodecs.INT, CrystallizerRecipeDisplay::processTime,
                         CrystallizerRecipeDisplay::new);
 
-        private static final Serializer<CrystallizerRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        private static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
-            return new SlotDisplay.CompositeSlotDisplay(List.of(output, byProduct));
+            return new SlotDisplay.Composite(List.of(output, byProduct));
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

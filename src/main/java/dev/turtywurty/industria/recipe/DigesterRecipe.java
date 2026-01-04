@@ -11,31 +11,27 @@ import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
                              int processTime) implements Recipe<DigesterRecipeInput> {
     @Override
-    public boolean matches(DigesterRecipeInput input, World world) {
+    public boolean matches(DigesterRecipeInput input, Level world) {
         return input.slurryStack().matches(this.inputSlurry);
     }
 
     @Override
-    public ItemStack craft(DigesterRecipeInput input, RegistryWrapper.WrapperLookup registries) {
+    public ItemStack assemble(DigesterRecipeInput input, HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -50,17 +46,17 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.DIGESTER;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(new DigesterRecipeDisplay(
                 this.inputSlurry,
                 new SlotDisplay.ItemSlotDisplay(BlockInit.DIGESTER.asItem()),
@@ -70,12 +66,12 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("digester").toString();
     }
 
@@ -100,11 +96,11 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
                 Codec.INT.fieldOf("process_time").forGetter(DigesterRecipe::processTime)
         ).apply(instance, DigesterRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, DigesterRecipe> PACKET_CODEC =
-                PacketCodec.tuple(
-                        SlurryStack.PACKET_CODEC, DigesterRecipe::inputSlurry,
-                        FluidStack.PACKET_CODEC, DigesterRecipe::outputFluid,
-                        PacketCodecs.INTEGER, DigesterRecipe::processTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipe> STREAM_CODEC =
+                StreamCodec.composite(
+                        SlurryStack.STREAM_CODEC, DigesterRecipe::inputSlurry,
+                        FluidStack.STREAM_CODEC, DigesterRecipe::outputFluid,
+                        ByteBufCodecs.INT, DigesterRecipe::processTime,
                         DigesterRecipe::new);
 
         @Override
@@ -113,8 +109,8 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, DigesterRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, DigesterRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -128,22 +124,22 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
                         Codec.INT.fieldOf("process_time").forGetter(DigesterRecipeDisplay::processTime)
                 ).apply(instance, DigesterRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, DigesterRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
-                SlurryStack.PACKET_CODEC, DigesterRecipeDisplay::inputSlurry,
-                SlotDisplay.PACKET_CODEC, DigesterRecipeDisplay::craftingStation,
-                FluidStack.PACKET_CODEC, DigesterRecipeDisplay::outputFluid,
-                PacketCodecs.INTEGER, DigesterRecipeDisplay::processTime,
+        public static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+                SlurryStack.STREAM_CODEC, DigesterRecipeDisplay::inputSlurry,
+                SlotDisplay.STREAM_CODEC, DigesterRecipeDisplay::craftingStation,
+                FluidStack.STREAM_CODEC, DigesterRecipeDisplay::outputFluid,
+                ByteBufCodecs.INT, DigesterRecipeDisplay::processTime,
                 DigesterRecipeDisplay::new);
 
-        public static final Serializer<DigesterRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
-            return SlotDisplay.EmptySlotDisplay.INSTANCE;
+            return SlotDisplay.Empty.INSTANCE;
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

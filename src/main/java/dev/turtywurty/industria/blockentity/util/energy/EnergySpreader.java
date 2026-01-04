@@ -2,10 +2,10 @@ package dev.turtywurty.industria.blockentity.util.energy;
 
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -21,10 +21,10 @@ public interface EnergySpreader {
         }
     }
 
-    default void spread(World world, BlockPos pos, SimpleEnergyStorage energyStorage) {
+    default void spread(Level world, BlockPos pos, SimpleEnergyStorage energyStorage) {
         List<EnergyStorage> storages = new ArrayList<>();
         for (Direction direction : Direction.values()) {
-            EnergyStorage storage = EnergyStorage.SIDED.find(world, pos.offset(direction), direction.getOpposite());
+            EnergyStorage storage = EnergyStorage.SIDED.find(world, pos.relative(direction), direction.getOpposite());
             if (storage == null || !storage.supportsInsertion() || storage.getAmount() >= storage.getCapacity())
                 continue;
 
@@ -55,7 +55,7 @@ public interface EnergySpreader {
                 if (this instanceof UpdatableBlockEntity updatableBlockEntity) {
                     updatableBlockEntity.update();
                 } else if (this instanceof BlockEntity blockEntity) {
-                    blockEntity.markDirty();
+                    blockEntity.setChanged();
                 }
             }
         }

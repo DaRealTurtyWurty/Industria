@@ -2,7 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.fluid.FluidData;
 import dev.turtywurty.industria.init.list.TagList;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.ParticleTypes;
 
 public class FluidDataInit {
     public static void init() {
@@ -12,7 +12,7 @@ public class FluidDataInit {
                 .canSwim()
                 .fluidMovementSpeed((entity, speed) -> 0.01F)
                 .applyWaterMovement()
-                .applyBuoyancy(itemEntity -> itemEntity.setVelocity(itemEntity.getVelocity().add(0.0D, 0.01D, 0.0D)))
+                .applyBuoyancy(itemEntity -> itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().add(0.0D, 0.01D, 0.0D)))
                 .canCauseDrowning()
                 .shouldWitchDrinkWaterBreathing()
                 .affectsBlockBreakSpeed()

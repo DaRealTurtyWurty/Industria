@@ -1,17 +1,17 @@
 package dev.turtywurty.industria.multiblock;
 
+import com.mojang.math.Quadrant;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.AxisRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.gen.blockpredicate.BlockPredicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 
 import java.util.*;
 
@@ -27,15 +27,15 @@ import java.util.*;
  * @param pattern        the pattern defining the layout of blocks in the multiblock structure
  * @param portRules      rules defining how ports are configured within the multiblock structure
  */
-public record MultiblockDefinition(Identifier id, Vec3i size, Vec3i anchor, Set<AxisRotation> rotations,
+public record MultiblockDefinition(Identifier id, Vec3i size, Vec3i anchor, Set<Quadrant> rotations,
                                    Set<MirrorMode> allowedMirrors, Char2ObjectMap<BlockPredicate> palette,
                                    List<List<String>> pattern, Char2ObjectMap<PortRule> portRules,
                                    boolean replaceAirBlocks, boolean replaceReplaceableBlocks) {
-    public static final Codec<Set<AxisRotation>> ROTATIONS_CODEC = ExtraCodecs.setOf(AxisRotation.CODEC);
+    public static final Codec<Set<Quadrant>> ROTATIONS_CODEC = ExtraCodecs.setOf(Quadrant.CODEC);
     public static final Codec<Set<MirrorMode>> MIRROR_MODE_CODEC = ExtraCodecs.setOf(MirrorMode.CODEC);
     public static final Codec<Char2ObjectMap<BlockPredicate>> PALETTE_CODEC = Codec.unboundedMap(
             ExtraCodecs.CHAR_CODEC,
-            BlockPredicate.BASE_CODEC
+            BlockPredicate.CODEC
     ).xmap(Char2ObjectOpenHashMap::new, Char2ObjectOpenHashMap::new);
     public static final Codec<List<List<String>>> PATTERN_CODEC = Codec.list(
             Codec.list(Codec.STRING)
@@ -73,14 +73,14 @@ public record MultiblockDefinition(Identifier id, Vec3i size, Vec3i anchor, Set<
         return column.charAt(x);
     }
 
-    public boolean canHaveBlock(StructureWorldAccess world, BlockPos pos) {
+    public boolean canHaveBlock(WorldGenLevel world, BlockPos pos) {
         return palette.values().stream().anyMatch(predicate -> predicate.test(world, pos));
     }
 
     public static class Builder {
         private int sizeX, sizeY, sizeZ;
         private int anchorX, anchorY, anchorZ;
-        private final Set<AxisRotation> rotations = new HashSet<>();
+        private final Set<Quadrant> rotations = new HashSet<>();
         private final Set<MirrorMode> allowedMirrors = new HashSet<>();
         private final Map<Character, BlockPredicate> palette = new HashMap<>();
         private final List<List<String>> pattern = new ArrayList<>();
@@ -90,7 +90,7 @@ public record MultiblockDefinition(Identifier id, Vec3i size, Vec3i anchor, Set<
         private boolean replaceReplaceableBlocks = false;
 
         public Builder() {
-            this.rotations.add(AxisRotation.R0);
+            this.rotations.add(Quadrant.R0);
             this.allowedMirrors.add(MirrorMode.NONE);
         }
 
@@ -116,7 +116,7 @@ public record MultiblockDefinition(Identifier id, Vec3i size, Vec3i anchor, Set<
             return this;
         }
 
-        public Builder addRotation(AxisRotation... rotation) {
+        public Builder addRotation(Quadrant... rotation) {
             Collections.addAll(this.rotations, rotation);
             return this;
         }

@@ -6,52 +6,50 @@ import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screen.widget.SlurryWidget;
 import dev.turtywurty.industria.screenhandler.ShakingTableScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
 
-public class ShakingTableScreen extends HandledScreen<ShakingTableScreenHandler> {
+public class ShakingTableScreen extends AbstractContainerScreen<ShakingTableScreenHandler> {
     public static final Identifier TEXTURE = Industria.id("textures/gui/container/shaking_table.png");
 
-    public ShakingTableScreen(ShakingTableScreenHandler handler, PlayerInventory inventory, Text title) {
-        super(handler, inventory, title);
-        this.backgroundWidth = 176;
-        this.backgroundHeight = 174;
-        this.playerInventoryTitleY = this.backgroundHeight - 94;
+    public ShakingTableScreen(ShakingTableScreenHandler handler, Inventory inventory, Component title) {
+        super(handler, inventory, title, 176, 174);
+        this.inventoryLabelY = this.imageHeight - 94;
     }
 
     @Override
     protected void init() {
         super.init();
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
-        addDrawable(new EnergyWidget.Builder(this.handler.getBlockEntity().getEnergyStorage())
-                .bounds(this.x + 8, this.y + 10, 12, 66)
+        addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
+                .bounds(this.leftPos + 8, this.topPos + 10, 12, 66)
                 .color(0xFFD4AF37)
                 .build());
 
-        addDrawable(new FluidWidget.Builder(this.handler.getBlockEntity().getInputFluidTank())
-                .bounds(this.x + 24, this.y + 10, 20, 46)
-                .posSupplier(() -> this.handler.getBlockEntity().getPos())
+        addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getInputFluidTank())
+                .bounds(this.leftPos + 24, this.topPos + 10, 20, 46)
+                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
                 .build());
 
-        addDrawable(new SlurryWidget.Builder(this.handler.getBlockEntity().getOutputSlurryTank())
-                .bounds(this.x + 132, this.y + 10, 20, 46)
-                .posSupplier(() -> this.handler.getBlockEntity().getPos())
+        addRenderableOnly(new SlurryWidget.Builder(this.menu.getBlockEntity().getOutputSlurryTank())
+                .bounds(this.leftPos + 132, this.topPos + 10, 20, 46)
+                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
                 .build());
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float deltaTicks, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
-        ScreenUtils.drawTexture(context, TEXTURE, this.x + 76, this.y + 36, 176, 0, this.handler.getProgressScaled(), 17);
+    protected void renderBg(GuiGraphics context, float deltaTicks, int mouseX, int mouseY) {
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 76, this.topPos + 36, 176, 0, this.menu.getProgressScaled(), 17);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
     }
 }

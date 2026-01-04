@@ -2,19 +2,19 @@ package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record OilPumpJackSetRunningPayload(boolean isRunning) implements CustomPayload {
-    public static final Id<OilPumpJackSetRunningPayload> ID = new Id<>(Industria.id("oil_pump_jack_set_running_payload"));
+public record OilPumpJackSetRunningPayload(boolean isRunning) implements CustomPacketPayload {
+    public static final Type<OilPumpJackSetRunningPayload> ID = new Type<>(Industria.id("oil_pump_jack_set_running_payload"));
 
-    public static final PacketCodec<ByteBuf, OilPumpJackSetRunningPayload> CODEC =
-            PacketCodec.tuple(PacketCodecs.BOOLEAN, OilPumpJackSetRunningPayload::isRunning,
+    public static final StreamCodec<ByteBuf, OilPumpJackSetRunningPayload> CODEC =
+            StreamCodec.composite(ByteBufCodecs.BOOL, OilPumpJackSetRunningPayload::isRunning,
                     OilPumpJackSetRunningPayload::new);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

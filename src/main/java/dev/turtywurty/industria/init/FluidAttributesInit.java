@@ -3,14 +3,14 @@ package dev.turtywurty.industria.init;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class FluidAttributesInit {
     public static void init() {
         var commonFluidAttributes = new FluidVariantAttributeHandler() {
             @Override
-            public int getViscosity(FluidVariant variant, @Nullable World world) {
+            public int getViscosity(FluidVariant variant, @Nullable Level world) {
                 return 7500;
             }
         };

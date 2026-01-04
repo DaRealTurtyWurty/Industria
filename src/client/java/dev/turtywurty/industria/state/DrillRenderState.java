@@ -1,16 +1,16 @@
 package dev.turtywurty.industria.state;
 
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 
 public class DrillRenderState extends IndustriaBlockEntityRenderState {
-    public SimpleInventory motorInventory;
+    public SimpleContainer motorInventory;
     public ItemStack drillHeadItemStack;
     public boolean isDrilling;
     public boolean isRetracting;
     public float drillYOffset;
-    public Box drillHeadAABB;
+    public AABB drillHeadAABB;
     public boolean isPaused;
 
     public float clientMotorRotation;

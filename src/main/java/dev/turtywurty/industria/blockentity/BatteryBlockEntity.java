@@ -11,29 +11,29 @@ import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -42,11 +42,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BatteryBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("battery");
-    public static final Text CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Text.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
+    public static final Component TITLE = Industria.containerTitle("battery");
+    public static final Component CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Component.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
     private final BatteryBlock.BatteryLevel batteryLevel;
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private ChargeMode chargeMode = ChargeMode.DISCHARGE;
@@ -55,7 +55,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         super(block, BlockEntityTypeInit.BATTERY, pos, state);
         this.batteryLevel = block.getLevel();
 
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 1));
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1));
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(), this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer()));
         if (this.batteryLevel == BatteryBlock.BatteryLevel.CREATIVE)
             ((SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null)).amount = Long.MAX_VALUE;
@@ -64,7 +64,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var input = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        var input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         List<SyncableStorage> storages = new ArrayList<>();
         storages.add(input);
@@ -77,14 +77,14 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         if (energyStorage == null)
             return;
 
-        ItemStack stack = getInventory().getStack(0);
+        ItemStack stack = getInventory().getItem(0);
         if (!stack.isEmpty()) {
             var itemEnergyStorage = ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM);
             if (itemEnergyStorage != null) {
@@ -120,36 +120,36 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
             }
         }
 
-        spread(this.world, this.pos, energyStorage);
+        spread(this.level, this.worldPosition, energyStorage);
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Nullable
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new BatteryScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage);
+    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new BatteryScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         this.chargeMode = view.read("ChargeMode", ChargeMode.CODEC).orElse(ChargeMode.CHARGE);
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        view.put("ChargeMode", ChargeMode.CODEC, this.chargeMode);
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void saveAdditional(ValueOutput view) {
+        view.store("ChargeMode", ChargeMode.CODEC, this.chargeMode);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
@@ -157,20 +157,20 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         return this.wrappedEnergyStorage.getStorage(direction);
     }
 
-    public InventoryStorage getInventoryProvider(Direction direction) {
-        return this.wrappedInventoryStorage.getStorage(direction);
+    public ContainerStorage getInventoryProvider(Direction direction) {
+        return this.wrappedContainerStorage.getStorage(direction);
     }
 
-    public WrappedInventoryStorage<SimpleInventory> getWrappedInventory() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<SimpleContainer> getWrappedInventory() {
+        return this.wrappedContainerStorage;
     }
 
     public EnergyStorage getEnergy() {
         return this.wrappedEnergyStorage.getStorage(null);
     }
 
-    public SimpleInventory getInventory() {
-        return this.wrappedInventoryStorage.getInventory(0);
+    public SimpleContainer getInventory() {
+        return this.wrappedContainerStorage.getInventory(0);
     }
 
     public boolean isValid(ItemStack stack, int slot) {
@@ -193,13 +193,13 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     public enum ChargeMode {
@@ -207,7 +207,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
         CHARGE;
 
         public static final Codec<ChargeMode> CODEC = Codec.STRING.xmap(ChargeMode::valueOf, ChargeMode::name);
-        public static final PacketCodec<ByteBuf, ChargeMode> PACKET_CODEC = PacketCodec.ofStatic(
+        public static final StreamCodec<ByteBuf, ChargeMode> STREAM_CODEC = StreamCodec.of(
                 (buf, value) -> buf.writeByte(value.ordinal()),
                 buf -> values()[buf.readByte()]);
 

@@ -5,9 +5,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
 public record FluidStack(FluidVariant variant, long amount) {
@@ -20,9 +20,9 @@ public record FluidStack(FluidVariant variant, long amount) {
             ).apply(instance, FluidStack::new)
     );
 
-    public static final PacketCodec<RegistryByteBuf, FluidStack> PACKET_CODEC = PacketCodec.tuple(
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidStack> STREAM_CODEC = StreamCodec.composite(
             FluidVariant.PACKET_CODEC, FluidStack::variant,
-            PacketCodecs.LONG, FluidStack::amount,
+            ByteBufCodecs.LONG, FluidStack::amount,
             FluidStack::new
     );
 

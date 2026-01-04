@@ -2,39 +2,39 @@ package dev.turtywurty.industria.datagen.provider;
 
 import dev.turtywurty.industria.init.IndustriaRegistries;
 import dev.turtywurty.industria.multiblock.MultiblockDefinition;
-import net.minecraft.data.DataOutput;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.DataWriter;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record MultiblockDefinitionProvider(Path path, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture,
+public record MultiblockDefinitionProvider(Path path, CompletableFuture<HolderLookup.Provider> registriesFuture,
                                            String modId) implements DataProvider {
-    public MultiblockDefinitionProvider(DataOutput path, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, String modId) {
-        this(path.resolvePath(DataOutput.OutputType.DATA_PACK).resolve("multiblock_definitions"), registriesFuture, modId);
+    public MultiblockDefinitionProvider(PackOutput path, CompletableFuture<HolderLookup.Provider> registriesFuture, String modId) {
+        this(path.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("multiblock_definitions"), registriesFuture, modId);
     }
 
     @Override
-    public CompletableFuture<?> run(DataWriter writer) {
+    public CompletableFuture<?> run(CachedOutput writer) {
         return this.registriesFuture.thenCompose(registries -> {
-            RegistryWrapper.Impl<MultiblockDefinition> multiblockDefinitions = registries.getOrThrow(IndustriaRegistries.MULTIBLOCK_DEFINITION_KEY);
-            List<RegistryEntry.Reference<MultiblockDefinition>> referenceList = multiblockDefinitions.streamKeys()
-                    .filter(registryKey -> registryKey.getValue().getNamespace().equals(this.modId))
+            HolderLookup.RegistryLookup<MultiblockDefinition> multiblockDefinitions = registries.lookupOrThrow(IndustriaRegistries.MULTIBLOCK_DEFINITION_KEY);
+            List<Holder.Reference<MultiblockDefinition>> referenceList = multiblockDefinitions.listElementIds()
+                    .filter(registryKey -> registryKey.identifier().getNamespace().equals(this.modId))
                     .map(multiblockDefinitions::getOrThrow)
                     .toList();
 
             return CompletableFuture.allOf(referenceList.stream()
                     .map(entry -> {
-                        Identifier id = entry.getKey().orElseThrow().getValue();
+                        Identifier id = entry.unwrapKey().orElseThrow().identifier();
                         MultiblockDefinition definition = entry.value();
                         Path filePath = resolvePath(id);
 
-                        return DataProvider.writeCodecToPath(writer, registries, MultiblockDefinition.CODEC.codec(), definition, filePath);
+                        return DataProvider.saveStable(writer, registries, MultiblockDefinition.CODEC.codec(), definition, filePath);
                     })
                     .toArray(CompletableFuture[]::new));
         });

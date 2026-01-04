@@ -5,9 +5,9 @@ import dev.turtywurty.industria.model.*;
 import dev.turtywurty.industria.renderer.item.DrillHeadItemRenderer;
 import dev.turtywurty.industria.renderer.item.IndustriaBlockEntityItemRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialBlockRendererRegistry;
-import net.minecraft.block.Block;
-import net.minecraft.client.render.item.model.special.SpecialModelTypes;
-import net.minecraft.item.Item;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class DynamicItemRendererInit {
     private static final Map<Item, IndustriaBlockEntityItemRenderer.Unbaked> BLOCK_ENTITY_ITEM_RENDERERS = new HashMap<>();
 
     public static void init() {
-        SpecialModelTypes.ID_MAPPER.put(Industria.id("drill_head"), DrillHeadItemRenderer.Unbaked.CODEC);
+        SpecialModelRenderers.ID_MAPPER.put(Industria.id("drill_head"), DrillHeadItemRenderer.Unbaked.CODEC);
 //        ResourceLoader.get(ResourceType.CLIENT_RESOURCES).registerReloader(Industria.id("drill_head_item_renderer"),
 //                (store, prepareExecutor, reloadSynchronizer, applyExecutor) ->
 //                        CompletableFuture.runAsync(() -> {

@@ -3,32 +3,32 @@ package dev.turtywurty.industria.blockentity.util.inventory;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import dev.turtywurty.industria.util.ViewSerializable;
 import dev.turtywurty.industria.util.ViewUtils;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
-public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedStorage<InventoryStorage> {
+public class WrappedContainerStorage<T extends SimpleContainer> extends WrappedStorage<ContainerStorage> {
     private final List<T> inventories = new ArrayList<>();
-    private final List<Pair<Direction, T>> sidedInventories = new ArrayList<>();
-    private final CombinedStorage<ItemVariant, InventoryStorage> combinedStorage = new CombinedStorage<>(this.storages);
+    private final List<Tuple<Direction, T>> sidedInventories = new ArrayList<>();
+    private final CombinedStorage<ItemVariant, ContainerStorage> combinedStorage = new CombinedStorage<>(this.storages);
 
     public void addInventory(@NotNull T inventory) {
         addInventory(inventory, null);
@@ -36,12 +36,12 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
 
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
-        this.sidedInventories.add(new Pair<>(side, inventory));
-        var storage = InventoryStorage.of(inventory, side);
+        this.sidedInventories.add(new Tuple<>(side, inventory));
+        var storage = ContainerStorage.of(inventory, side);
         addStorage(storage, side);
     }
 
-    public void addInventory(@NotNull T inventory, Supplier<Boolean> canInsert, Supplier<Boolean> canExtract) {
+    public void addInventory(@NotNull T inventory, BooleanSupplier canInsert, BooleanSupplier canExtract) {
         addInventory(inventory, null, canInsert, canExtract);
     }
 
@@ -49,7 +49,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
         addInsertOnlyInventory(inventory, side, () -> true);
     }
 
-    public void addInsertOnlyInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canInsert) {
+    public void addInsertOnlyInventory(@NotNull T inventory, Direction side, BooleanSupplier canInsert) {
         addInventory(inventory, side, canInsert, () -> false);
     }
 
@@ -57,14 +57,14 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
         addInventory(inventory, side, () -> false, () -> true);
     }
 
-    public void addExtractOnlyInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canExtract) {
+    public void addExtractOnlyInventory(@NotNull T inventory, Direction side, BooleanSupplier canExtract) {
         addInventory(inventory, side, () -> false, canExtract);
     }
 
-    public void addInventory(@NotNull T inventory, Direction side, Supplier<Boolean> canInsert, Supplier<Boolean> canExtract) {
+    public void addInventory(@NotNull T inventory, Direction side, BooleanSupplier canInsert, BooleanSupplier canExtract) {
         this.inventories.add(inventory);
-        this.sidedInventories.add(new Pair<>(side, inventory));
-        var storage = PredicateInventoryStorage.of(InventoryStorage.of(inventory, side), canInsert, canExtract);
+        this.sidedInventories.add(new Tuple<>(side, inventory));
+        var storage = PredicateContainerStorage.of(ContainerStorage.of(inventory, side), canInsert, canExtract);
         addStorage(storage, side);
     }
 
@@ -72,7 +72,7 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
         return inventories;
     }
 
-    public CombinedStorage<ItemVariant, InventoryStorage> getCombinedStorage() {
+    public CombinedStorage<ItemVariant, ContainerStorage> getCombinedStorage() {
         return combinedStorage;
     }
 
@@ -87,8 +87,8 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
     public @NotNull List<ItemStack> getStacks() {
         List<ItemStack> stacks = new ArrayList<>();
         for (T inventory : this.inventories) {
-            for (int i = 0; i < inventory.size(); i++) {
-                stacks.add(inventory.getStack(i));
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                stacks.add(inventory.getItem(i));
             }
         }
 
@@ -96,25 +96,25 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
     }
 
     public void checkSize(int size) {
-        if (this.inventories.stream().map(Inventory::size).reduce(0, Integer::sum) != size)
+        if (this.inventories.stream().map(Container::getContainerSize).reduce(0, Integer::sum) != size)
             throw new IllegalArgumentException("Size of inventories does not match the size provided: " + size);
     }
 
-    public void onOpen(@NotNull PlayerEntity player) {
+    public void onOpen(@NotNull Player player) {
         for (T inventory : this.inventories) {
-            inventory.onOpen(player);
+            inventory.startOpen(player);
         }
     }
 
-    public void onClose(@NotNull PlayerEntity player) {
+    public void onClose(@NotNull Player player) {
         for (T inventory : this.inventories) {
-            inventory.onClose(player);
+            inventory.stopOpen(player);
         }
     }
 
-    public void dropContents(@NotNull World world, @NotNull BlockPos pos) {
+    public void dropContents(@NotNull Level world, @NotNull BlockPos pos) {
         for (T inventory : this.inventories) {
-            ItemScatterer.spawn(world, pos, inventory);
+            Containers.dropContents(world, pos, inventory);
         }
     }
 
@@ -122,12 +122,12 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
         return new RecipeSimpleInventory(getStacks().toArray(new ItemStack[0]));
     }
 
-    public List<Pair<Direction, T>> getSidedInventories() {
+    public List<Tuple<Direction, T>> getSidedInventories() {
         return this.sidedInventories;
     }
 
     @Override
-    public void writeData(WriteView view) {
+    public void writeData(ValueOutput view) {
         for (int i = 0; i < this.inventories.size(); i++) {
             T inventory = this.inventories.get(i);
             ViewUtils.putChild(view, "Inventory_" + i, new SimpleInventorySerializer<>(inventory));
@@ -135,22 +135,22 @@ public class WrappedInventoryStorage<T extends SimpleInventory> extends WrappedS
     }
 
     @Override
-    public void readData(ReadView view) {
+    public void readData(ValueInput view) {
         for (int i = 0; i < this.inventories.size(); i++) {
             T inventory = this.inventories.get(i);
             ViewUtils.readChild(view, "Inventory_" + i, new SimpleInventorySerializer<>(inventory));
         }
     }
 
-    public record SimpleInventorySerializer<T extends SimpleInventory>(T inventory) implements ViewSerializable {
+    public record SimpleInventorySerializer<T extends SimpleContainer>(T inventory) implements ViewSerializable {
         @Override
-        public void writeData(WriteView view) {
-            Inventories.writeData(view, this.inventory.getHeldStacks());
+        public void writeData(ValueOutput view) {
+            ContainerHelper.saveAllItems(view, this.inventory.getItems());
         }
 
         @Override
-        public void readData(ReadView view) {
-            Inventories.readData(view, this.inventory.getHeldStacks());
+        public void readData(ValueInput view) {
+            ContainerHelper.loadAllItems(view, this.inventory.getItems());
         }
     }
 }

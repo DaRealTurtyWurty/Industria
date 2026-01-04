@@ -22,25 +22,25 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
 
 public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("induction_heater");
+    public static final Component TITLE = Industria.containerTitle("induction_heater");
     private static final double HEAT_PER_ENERGY = 0.5D;
     private static final double PASSIVE_COOLING = 0.01D;
     private static final double TRANSFER_COEFFICIENT = 0.25D;
@@ -67,7 +67,7 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         OutputHeatStorage heatStorage = getHeatStorage();
@@ -85,8 +85,8 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
     public void endTick() {
         OutputHeatStorage heatStorage = getHeatStorage();
         for (Direction direction : Direction.values()) {
-            BlockPos targetPos = this.pos.offset(direction);
-            HeatStorage targetHeat = HeatStorage.SIDED.find(this.world, targetPos, direction.getOpposite());
+            BlockPos targetPos = this.worldPosition.relative(direction);
+            HeatStorage targetHeat = HeatStorage.SIDED.find(this.level, targetPos, direction.getOpposite());
             if (targetHeat != null && targetHeat.supportsInsertion()) {
                 double heatDifference = heatStorage.getAmount() - targetHeat.getAmount();
                 if (heatDifference > 0) {
@@ -117,36 +117,36 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
         long energyConsumed = Math.min(energyStorage.amount, 20);
         double heatIncrease = energyConsumed * HEAT_PER_ENERGY;
         long maxHeat = (long) (((double) waterTank.amount / (FluidConstants.BUCKET * 10)) * 500);
-        heatStorage.setAmount(MathHelper.clamp(heatStorage.getAmount() + heatIncrease, 0, maxHeat));
+        heatStorage.setAmount(Mth.clamp(heatStorage.getAmount() + heatIncrease, 0, maxHeat));
         waterTank.amount -= FluidConstants.DROPLET;
         energyStorage.amount -= energyConsumed;
         update();
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new InductionHeaterScreenHandler(syncId, this);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         ViewUtils.putChild(view, "HeatStorage", this.heatStorage);
         ViewUtils.putChild(view, "WaterStorage", this.waterStorage);
         ViewUtils.putChild(view, "EnergyStorage", this.energyStorage);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         ViewUtils.readChild(view, "HeatStorage", this.heatStorage);
         ViewUtils.readChild(view, "WaterStorage", this.waterStorage);
         ViewUtils.readChild(view, "EnergyStorage", this.energyStorage);

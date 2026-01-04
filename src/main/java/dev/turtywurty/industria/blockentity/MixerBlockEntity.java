@@ -17,7 +17,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.OutputSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
@@ -44,31 +44,31 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -102,7 +102,7 @@ import java.util.Optional;
 //                        .build());
 //    }
 public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("mixer");
+    public static final Component TITLE = Industria.containerTitle("mixer");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.y() == 2 && p.isCenterColumn())
@@ -135,15 +135,15 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                     .build()
     );
 
-    public final List<Vec3d> mixingItemPositions = DefaultedList.ofSize(6, new Vec3d(0, 1, 0));
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    public final List<Vec3> mixingItemPositions = NonNullList.withSize(6, new Vec3(0, 1, 0));
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private int temperature = 175;
     private int progress, maxProgress;
-    private final PropertyDelegate properties = new PropertyDelegate() {
+    private final ContainerData properties = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -162,25 +162,25 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 2;
         }
     };
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 
     public MixerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.MIXER, BlockEntityTypeInit.MIXER, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new SyncingSimpleInventory(this, 6), Direction.EAST);
-        this.wrappedInventoryStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.WEST);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 6), Direction.EAST);
+        this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.WEST);
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createFluidPredicate(() -> {
                     SyncingFluidStorage inputFluidTank = getInputFluidTank();
                     return new FluidStack(inputFluidTank.variant, inputFluidTank.amount);
                 })), Direction.NORTH);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().variant)), Direction.SOUTH);
 
         this.wrappedFluidStorage.addStorage(
@@ -209,12 +209,12 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
         if (!bucketInputInventory.isEmpty()) {
-            ItemStack bucket = bucketInputInventory.getStack(0);
+            ItemStack bucket = bucketInputInventory.getItem(0);
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
@@ -235,7 +235,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
         if (!bucketOutputInventory.isEmpty()) {
-            ItemStack bucket = bucketOutputInventory.getStack(0);
+            ItemStack bucket = bucketOutputInventory.getItem(0);
             Storage<SlurryVariant> storage = SlurryStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsInsertion()) {
                 SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
@@ -254,8 +254,8 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
         if (!this.outputItemStack.isEmpty()) {
             SyncingSimpleInventory outputInventory = getOutputInventory();
-            if (outputInventory.canInsert(this.outputItemStack)) {
-                this.outputItemStack = outputInventory.addStack(this.outputItemStack);
+            if (outputInventory.canAddItem(this.outputItemStack)) {
+                this.outputItemStack = outputInventory.addItem(this.outputItemStack);
                 update();
             }
 
@@ -277,7 +277,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
         MixerRecipeInput recipeInput = createRecipeInput();
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<MixerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+            Optional<RecipeHolder<MixerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
@@ -288,7 +288,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             return;
         }
 
-        Optional<RecipeEntry<MixerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+        Optional<RecipeHolder<MixerRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
             this.maxProgress = 0;
@@ -302,7 +302,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             if (hasEnergy()) {
                 extractEnergy(recipe);
 
-                ItemStack output = recipe.craft(recipeInput, this.world.getRegistryManager());
+                ItemStack output = recipe.assemble(recipeInput, this.level.registryAccess());
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
                 inputFluidTank.amount -= recipe.inputFluid().amount();
 
@@ -313,8 +313,8 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 this.maxProgress = 0;
                 this.currentRecipeId = null;
 
-                if (outputInventory.canInsert(output)) {
-                    this.outputItemStack = outputInventory.addStack(output);
+                if (outputInventory.canAddItem(output)) {
+                    this.outputItemStack = outputInventory.addItem(output);
                 } else {
                     this.outputItemStack = output;
                 }
@@ -341,39 +341,39 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
         view.putInt("Temperature", this.temperature);
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
 
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
 
         if (!this.outputItemStack.isEmpty()) {
-            view.put("OutputStack", ItemStack.CODEC, this.outputItemStack);
+            view.store("OutputStack", ItemStack.CODEC, this.outputItemStack);
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-            view.put("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
+            view.store("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
         }
 
         Multiblockable.write(this, view);
     }
 
     @Override
-    protected void readData(ReadView view) {
-        this.progress = view.getInt("Progress", 0);
-        this.maxProgress = view.getInt("MaxProgress", 0);
-        this.temperature = view.getInt("Temperature", 0);
-        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+    protected void loadAdditional(ValueInput view) {
+        this.progress = view.getIntOr("Progress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
+        this.temperature = view.getIntOr("Temperature", 0);
+        this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
                 .orElse(null);
 
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
@@ -404,11 +404,11 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         return this.temperature;
     }
 
-    private Optional<RecipeEntry<MixerRecipe>> getCurrentRecipe(MixerRecipeInput recipeInput) {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<MixerRecipe>> getCurrentRecipe(MixerRecipeInput recipeInput) {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.MIXER, recipeInput, this.world);
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.MIXER, recipeInput, this.level);
     }
 
     private MixerRecipeInput createRecipeInput() {
@@ -417,18 +417,18 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new MixerScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new MixerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
     }
 
     @Override
@@ -437,19 +437,19 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     public SyncingSimpleInventory getInputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public SyncingSimpleInventory getOutputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
     }
 
     public SyncingSimpleInventory getBucketInputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(2);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(2);
     }
 
     public SyncingSimpleInventory getBucketOutputInventory() {
-        return (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(3);
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(3);
     }
 
     public SyncingFluidStorage getInputFluidTank() {
@@ -464,8 +464,8 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         return (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
     }
 
-    public InventoryStorage getInventoryProvider(Direction side) {
-        return this.wrappedInventoryStorage.getStorage(side);
+    public ContainerStorage getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
@@ -481,13 +481,13 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
-    public WrappedInventoryStorage<SimpleInventory> getWrappedInventoryStorage() {
-        return wrappedInventoryStorage;
+    public WrappedContainerStorage<SimpleContainer> getWrappedContainerStorage() {
+        return wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     @Override
@@ -497,7 +497,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -508,8 +508,8 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);

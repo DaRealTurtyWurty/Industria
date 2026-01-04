@@ -10,23 +10,23 @@ import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.screenhandler.base.TickableScreenHandler;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class EventsInit {
     public static void init() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.getEntityWorld()));
-            WorldPipeNetworks.syncToClient(sender, handler.player.getEntityWorld());
+            sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.level()));
+            WorldPipeNetworks.syncToClient(sender, handler.player.level());
         });
 
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
-            if (!(world instanceof ServerWorld serverWorld))
+            if (!(world instanceof ServerLevel serverWorld))
                 return;
 
             WorldFluidPocketsState serverState = WorldFluidPocketsState.getServerState(serverWorld);
@@ -35,28 +35,28 @@ public class EventsInit {
             }
         });
 
-        ServerWorldEvents.LOAD.register((server, world) -> {
+        ServerLevelEvents.LOAD.register((server, world) -> {
             ServerConfig.onServerLoad(server);
             WorldPipeNetworks.getOrCreate(world);
         });
 
-        ServerWorldEvents.UNLOAD.register((server, world) -> ServerConfig.onServerSave(server));
+        ServerLevelEvents.UNLOAD.register((server, world) -> ServerConfig.onServerSave(server));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(
-                    CommandManager.literal(Industria.MOD_ID)
-                            .requires(CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK))
-                            .then(CommandManager.literal("config").then(ConfigCommand.register()))
+                    Commands.literal(Industria.MOD_ID)
+                            .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                            .then(Commands.literal("config").then(ConfigCommand.register()))
             );
 
             dispatcher.register(
-                    CommandManager.literal(Industria.MOD_ID)
-                            .requires(CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK))
-                            .then(CommandManager.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
+                    Commands.literal(Industria.MOD_ID)
+                            .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                            .then(Commands.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
             );
         });
 
-        ServerTickEvents.START_WORLD_TICK.register(world -> {
+        ServerTickEvents.START_LEVEL_TICK.register(world -> {
             AutoMultiblockBlock.SHAPE_CACHE.clear();
 
             for (PipeNetworkManager<?, ?> manager : WorldPipeNetworks.getOrCreate(world).getPipeNetworkManagers()) {
@@ -64,9 +64,9 @@ public class EventsInit {
             }
         });
 
-        ServerTickEvents.END_WORLD_TICK.register(world -> {
-            for (ServerPlayerEntity player : world.getPlayers()) {
-                if (player.currentScreenHandler instanceof TickableScreenHandler tickable) {
+        ServerTickEvents.END_LEVEL_TICK.register(world -> {
+            for (ServerPlayer player : world.players()) {
+                if (player.containerMenu instanceof TickableScreenHandler tickable) {
                     tickable.tick(player);
                 }
             }

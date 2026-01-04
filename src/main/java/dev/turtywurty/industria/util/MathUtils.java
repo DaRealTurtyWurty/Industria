@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 public class MathUtils {
@@ -10,15 +10,15 @@ public class MathUtils {
             return direction;
 
         Direction relative = direction;
-        int rotations = (facing.getHorizontalQuarterTurns() - Direction.NORTH.getHorizontalQuarterTurns() + 4) % 4;
+        int rotations = (facing.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
         for (int i = 0; i < rotations; i++) {
-            relative = relative.rotateYClockwise();
+            relative = relative.getClockWise();
         }
 
         return relative;
     }
 
-    public static Box rotateBox(Box box, Direction direction) {
+    public static AABB rotateBox(AABB box, Direction direction) {
         if (direction == null || direction.getAxis().isVertical())
             return box;
 
@@ -27,7 +27,7 @@ public class MathUtils {
         double cz = (box.minZ + box.maxZ) * 0.5;
 
         // Precompute trig
-        double rad = Math.toRadians(direction.getPositiveHorizontalDegrees());
+        double rad = Math.toRadians(direction.toYRot());
         double cos = Math.cos(rad);
         double sin = Math.sin(rad);
 
@@ -46,7 +46,7 @@ public class MathUtils {
         double rz2 = x2 * sin + z2 * cos;
 
         // Build and return new Box by translating back to world coords
-        return new Box(
+        return new AABB(
                 cx + rx1, cy + y1, cz + rz1,
                 cx + rx2, cy + y2, cz + rz2
         );

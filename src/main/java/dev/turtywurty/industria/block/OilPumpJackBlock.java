@@ -5,7 +5,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 
 public class OilPumpJackBlock extends IndustriaBlock {
-    public OilPumpJackBlock(Settings settings) {
+    public OilPumpJackBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasBlockEntityRenderer()

@@ -11,19 +11,19 @@ import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.pipe.PipeNetworkManagerType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientPipeNetworks {
-    private static final Map<RegistryKey<World>, List<PipeNetworkManager<?, PipeNetwork<?>>>> PIPE_NETWORKS = new ConcurrentHashMap<>();
+    private static final Map<ResourceKey<Level>, List<PipeNetworkManager<?, PipeNetwork<?>>>> PIPE_NETWORKS = new ConcurrentHashMap<>();
 
     public static void init() {
         ClientPlayNetworking.registerGlobalReceiver(SyncPipeNetworkManagerPayload.ID, (payload, context) -> {
-            RegistryKey<World> worldKey = payload.dimension();
+            ResourceKey<Level> worldKey = payload.dimension();
             TransferType<?, ?, ?> transferType = payload.transferType();
             Map<BlockPos, UUID> pipeToNetworkId = payload.pipeToNetworkId();
 
@@ -36,7 +36,7 @@ public class ClientPipeNetworks {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(AddPipeNetworkPayload.ID, (payload, context) -> {
-            RegistryKey<World> worldKey = payload.world();
+            ResourceKey<Level> worldKey = payload.world();
             TransferType<?, ?, ?> transferType = payload.transferType();
             PipeNetwork<?> network = payload.network();
 
@@ -56,7 +56,7 @@ public class ClientPipeNetworks {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(RemovePipeNetworkPayload.ID, (payload, context) -> {
-            RegistryKey<World> worldKey = payload.world();
+            ResourceKey<Level> worldKey = payload.world();
             TransferType<?, ?, ?> transferType = payload.transferType();
             UUID networkId = payload.networkId();
 
@@ -77,7 +77,7 @@ public class ClientPipeNetworks {
 
         ClientPlayNetworking.registerGlobalReceiver(ModifyPipeNetworkPayload.ID, (payload, context) -> {
             ModifyPipeNetworkPayload.Operation operation = payload.operation();
-            RegistryKey<World> worldKey = payload.world();
+            ResourceKey<Level> worldKey = payload.world();
             TransferType<?, ?, ?> transferType = payload.transferType();
             UUID networkId = payload.networkId();
             BlockPos pos = payload.pos();
@@ -111,7 +111,7 @@ public class ClientPipeNetworks {
                 PIPE_NETWORKS.clear());
     }
 
-    public static List<PipeNetworkManager<?, PipeNetwork<?>>> get(RegistryKey<World> worldKey) {
+    public static List<PipeNetworkManager<?, PipeNetwork<?>>> get(ResourceKey<Level> worldKey) {
         return PIPE_NETWORKS.get(worldKey);
     }
 }

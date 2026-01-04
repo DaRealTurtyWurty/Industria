@@ -1,18 +1,18 @@
 package dev.turtywurty.industria.init.list;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.block.Block;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 
 public class TagList {
     public static class Items {
         public static final TagKey<Item> ELECTROLYSIS_RODS = of("electrolysis_rods");
 
         public static TagKey<Item> of(String id) {
-            return TagKey.of(RegistryKeys.ITEM, Industria.id(id));
+            return TagKey.create(Registries.ITEM, Industria.id(id));
         }
     }
 
@@ -20,7 +20,7 @@ public class TagList {
         public static final TagKey<Block> BATTERY_BLOCKS = of("battery_blocks");
 
         public static TagKey<Block> of(String id) {
-            return TagKey.of(RegistryKeys.BLOCK, Industria.id(id));
+            return TagKey.create(Registries.BLOCK, Industria.id(id));
         }
     }
 
@@ -30,7 +30,7 @@ public class TagList {
         public static final TagKey<Fluid> SODIUM_ALUMINATE = of("sodium_aluminate");
 
         public static TagKey<Fluid> of(String id) {
-            return TagKey.of(RegistryKeys.FLUID, Industria.id(id));
+            return TagKey.create(Registries.FLUID, Industria.id(id));
         }
     }
 }

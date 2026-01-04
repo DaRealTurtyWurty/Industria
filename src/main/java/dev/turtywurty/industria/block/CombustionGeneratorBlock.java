@@ -4,7 +4,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 
 public class CombustionGeneratorBlock extends IndustriaBlock {
-    public CombustionGeneratorBlock(Settings settings) {
+    public CombustionGeneratorBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasLitProperty()

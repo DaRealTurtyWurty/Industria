@@ -4,21 +4,21 @@ import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
@@ -26,12 +26,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.Entry> {
+public class BlockEntryListWidget extends AbstractSelectionList<BlockEntryListWidget.Entry> {
     private static final int ICON_SIZE = 16;
     private Consumer<Entry> selectionListener = entry -> {
     };
 
-    public BlockEntryListWidget(MinecraftClient client, int x, int y, int width, int height, int itemHeight) {
+    public BlockEntryListWidget(Minecraft client, int x, int y, int width, int height, int itemHeight) {
         super(client, width, height, y, itemHeight);
         setX(x);
     }
@@ -47,12 +47,12 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     }
 
     @Override
-    protected int getScrollbarX() {
+    protected int scrollBarX() {
         return getX() + this.width - SCROLLBAR_WIDTH;
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
 
     @Override
@@ -62,7 +62,7 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             Entry entry = getEntryAtPosition(click.x(), click.y());
             if (entry != null) {
@@ -77,7 +77,7 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
 
     @Override
     public void removeEntry(Entry entry) {
-        if (entry == getSelectedOrNull()) {
+        if (entry == getSelected()) {
             setSelected(null);
         }
     }
@@ -107,54 +107,54 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     }
 
     public int addBlock(Block block) {
-        return addEntry(new BlockEntry(this.client, block));
+        return addEntry(new BlockEntry(this.minecraft, block));
     }
 
     public int addBlockState(BlockState state) {
-        return addEntry(new BlockStateEntry(this.client, state));
+        return addEntry(new BlockStateEntry(this.minecraft, state));
     }
 
     public int addBlockTag(TagKey<Block> tagKey) {
-        return addEntry(new BlockTagEntry(this.client, tagKey));
+        return addEntry(new BlockTagEntry(this.minecraft, tagKey));
     }
 
-    public abstract static class Entry extends EntryListWidget.Entry<Entry> implements AutoCloseable {
-        protected final MinecraftClient client;
-        private final Text primaryText;
-        private final Text secondaryText;
+    public abstract static class Entry extends AbstractSelectionList.Entry<Entry> implements AutoCloseable {
+        protected final Minecraft client;
+        private final Component primaryText;
+        private final Component secondaryText;
         private final FakeWorldScene scene;
 
-        protected Entry(MinecraftClient client, Consumer<FakeWorldSceneBuilder.SceneContext> populator, Text primaryText, Text secondaryText) {
+        protected Entry(Minecraft client, Consumer<FakeWorldSceneBuilder.SceneContext> populator, Component primaryText, Component secondaryText) {
             this.client = client;
             this.primaryText = primaryText;
             this.secondaryText = secondaryText;
 
             this.scene = FakeWorldSceneBuilder.create()
-                    .camera(new Vec3d(-3.0, 2.5, 3.0), 225.0F, 25.0F)
+                    .camera(new Vec3(-3.0, 2.5, 3.0), 225.0F, 25.0F)
                     .populate(populator)
                     .build();
             this.scene.setScaleMultiplier(2.5F);
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+        public void renderContent(GuiGraphics context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
             int renderSize = Math.max(20, Math.min(getHeight() - 2, ICON_SIZE + 14));
-            this.scene.setAnchor(BlockPos.ORIGIN, renderSize / 2, renderSize / 2);
+            this.scene.setAnchor(BlockPos.ZERO, renderSize / 2, renderSize / 2);
             int previewX = getX() + 6;
             int previewY = getY() + (getHeight() - renderSize) / 2;
             this.scene.render(context, previewX, previewY, renderSize, renderSize, deltaTicks);
 
             int textX = previewX + renderSize + 2;
             int primaryY = getY() + 2;
-            int secondaryY = primaryY + this.client.textRenderer.fontHeight + 2;
+            int secondaryY = primaryY + this.client.font.lineHeight + 2;
 
             ScreenUtils.drawTextTruncated(context, this.primaryText, textX, primaryY, getWidth() - ICON_SIZE, 0xFFFFFFFF, false);
             if (!this.secondaryText.getString().isEmpty()) {
-                context.getMatrices().pushMatrix();
-                context.getMatrices().translate(textX, secondaryY);
-                context.getMatrices().scale(0.875F, 0.875F);
+                context.pose().pushMatrix();
+                context.pose().translate(textX, secondaryY);
+                context.pose().scale(0.875F, 0.875F);
                 ScreenUtils.drawTextTruncated(context, this.secondaryText, 0, 0, (int) ((getWidth() - ICON_SIZE) / 0.875f), 0xFFAAAAAA, false);
-                context.getMatrices().popMatrix();
+                context.pose().popMatrix();
             }
         }
 
@@ -187,14 +187,14 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     public static class BlockEntry extends Entry {
         private final Block block;
 
-        public BlockEntry(MinecraftClient client, Block block) {
+        public BlockEntry(Minecraft client, Block block) {
             super(client, ctx -> populateScene(block, ctx),
-                    block.getName(), Text.literal(Registries.BLOCK.getId(block).toString()));
+                    block.getName(), Component.literal(BuiltInRegistries.BLOCK.getKey(block).toString()));
             this.block = block;
         }
 
         private static void populateScene(Block block, FakeWorldSceneBuilder.SceneContext ctx) {
-            ctx.addBlock(BlockPos.ORIGIN, block.getDefaultState());
+            ctx.addBlock(BlockPos.ZERO, block.defaultBlockState());
         }
 
         public Block getBlock() {
@@ -205,14 +205,14 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     public static class BlockStateEntry extends Entry {
         private final BlockState blockState;
 
-        public BlockStateEntry(MinecraftClient client, BlockState blockState) {
+        public BlockStateEntry(Minecraft client, BlockState blockState) {
             super(client, ctx -> populateScene(blockState, ctx),
                     blockState.getBlock().getName(), formatProperties(blockState));
             this.blockState = blockState;
         }
 
         private static void populateScene(BlockState state, FakeWorldSceneBuilder.SceneContext ctx) {
-            ctx.addBlock(BlockPos.ORIGIN, state);
+            ctx.addBlock(BlockPos.ZERO, state);
         }
 
         public BlockState getBlockState() {
@@ -223,9 +223,9 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
     public static class BlockTagEntry extends Entry {
         private final TagKey<Block> tagKey;
 
-        public BlockTagEntry(MinecraftClient client, TagKey<Block> tagKey) {
+        public BlockTagEntry(Minecraft client, TagKey<Block> tagKey) {
             super(client, ctx -> populateScene(tagKey, ctx),
-                    Text.literal("#" + tagKey.id()), describeTag(tagKey));
+                    Component.literal("#" + tagKey.location()), describeTag(tagKey));
             this.tagKey = tagKey;
         }
 
@@ -233,7 +233,7 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
             VariedBlockList variedBlockList = VariedBlockList.Builder.create()
                     .addTag(tagKey)
                     .build();
-            ctx.addVariedBlockList(BlockPos.ORIGIN, variedBlockList);
+            ctx.addVariedBlockList(BlockPos.ZERO, variedBlockList);
         }
 
         public TagKey<Block> getTagKey() {
@@ -241,33 +241,33 @@ public class BlockEntryListWidget extends EntryListWidget<BlockEntryListWidget.E
         }
     }
 
-    private static Text describeTag(TagKey<Block> tagKey) {
-        Optional<RegistryEntryList.Named<Block>> list = Registries.BLOCK.getOptional(tagKey);
+    private static Component describeTag(TagKey<Block> tagKey) {
+        Optional<HolderSet.Named<Block>> list = BuiltInRegistries.BLOCK.get(tagKey);
         if (list.isEmpty())
-            return Text.literal("Empty tag"); // TODO: localization
+            return Component.literal("Empty tag"); // TODO: localization
 
         int count = 0;
-        for (RegistryEntry<Block> ignored : list.get()) {
+        for (Holder<Block> ignored : list.get()) {
             count++;
         }
 
         String descriptor = count == 1 ? "1 block" : count + " blocks"; // TODO: localization
-        return Text.literal(descriptor);
+        return Component.literal(descriptor);
     }
 
-    private static Text formatProperties(BlockState state) {
-        Map<Property<?>, Comparable<?>> entries = state.getEntries();
+    private static Component formatProperties(BlockState state) {
+        Map<Property<?>, Comparable<?>> entries = state.getValues();
         if (entries.isEmpty())
-            return Text.empty();
+            return Component.empty();
 
         String formatted = entries.entrySet().stream()
                 .map(entry -> entry.getKey().getName() + "=" + formatProperty(entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(", "));
-        return Text.literal(formatted);
+        return Component.literal(formatted);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static String formatProperty(Property property, Comparable<?> value) {
-        return property.name(value);
+        return property.getName(value);
     }
 }

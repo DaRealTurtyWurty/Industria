@@ -1,20 +1,20 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 
-public class IconButtonWidget extends ButtonWidget {
+public class IconButtonWidget extends Button {
     private final Identifier iconTexture;
     private final int u, vNormal, vHover, vDisabled, iconW, iconH, texW, texH;
     private final boolean drawBackground;
 
-    public IconButtonWidget(int x, int y, int width, int height, PressAction onPress, Identifier iconTexture,
+    public IconButtonWidget(int x, int y, int width, int height, OnPress onPress, Identifier iconTexture,
                             int u, int vNormal, int vHover, int vDisabled, int iconW, int iconH, int texW, int texH,
                             boolean drawBackground) {
-        super(x, y, width, height, net.minecraft.text.Text.empty(), onPress, DEFAULT_NARRATION_SUPPLIER);
+        super(x, y, width, height, net.minecraft.network.chat.Component.empty(), onPress, DEFAULT_NARRATION);
         this.iconTexture = iconTexture;
         this.u = u;
         this.vNormal = vNormal;
@@ -28,16 +28,16 @@ public class IconButtonWidget extends ButtonWidget {
     }
 
     @Override
-    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         if (this.drawBackground) {
             ScreenUtils.drawGuiTexture(
                     context,
-                    TEXTURES.get(this.active, isSelected()),
+                    SPRITES.get(this.active, isHoveredOrFocused()),
                     getX(),
                     getY(),
                     getWidth(),
                     getHeight(),
-                    ColorHelper.getWhite(this.alpha)
+                    ARGB.white(this.alpha)
             );
         }
 
@@ -60,7 +60,7 @@ public class IconButtonWidget extends ButtonWidget {
 
     public static class Builder {
         private int x, y, width = 20, height = 20;
-        private PressAction onPress = button -> {
+        private OnPress onPress = button -> {
         };
         private Identifier iconTexture;
         private int u, vNormal, vHover, vDisabled, iconW = 16, iconH = 16, texW = 16, texH = 16;
@@ -78,7 +78,7 @@ public class IconButtonWidget extends ButtonWidget {
             return this;
         }
 
-        public Builder onPress(PressAction onPress) {
+        public Builder onPress(OnPress onPress) {
             this.onPress = onPress;
             return this;
         }

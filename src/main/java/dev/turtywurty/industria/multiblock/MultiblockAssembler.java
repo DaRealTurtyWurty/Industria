@@ -2,14 +2,14 @@ package dev.turtywurty.industria.multiblock;
 
 import dev.turtywurty.industria.blockentity.MultiblockIOBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
-import net.minecraft.block.Block;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 
 import java.util.Objects;
 
 public record MultiblockAssembler(MultiblockDefinition definition, MultiblockMatcher.MatchResult matchResult) {
-    public AssembleResult assemble(ServerWorld world) {
+    public AssembleResult assemble(ServerLevel world) {
         for (MultiblockMatcher.MatchResult.Cell cell : matchResult.cells()) {
             if(Objects.equals(cell.position(), matchResult.controllerPos()))
                 continue;
@@ -18,7 +18,7 @@ public record MultiblockAssembler(MultiblockDefinition definition, MultiblockMat
             for (MultiblockMatcher.MatchResult.ResolvedPort port : matchResult.ports()) {
                 if(port.localX() == cell.localX() && port.localY() == cell.localY() && port.localZ() == cell.localZ()) {
                     BlockPos pos = cell.position();
-                    world.setBlockState(pos, BlockInit.AUTO_MULTIBLOCK_IO.getDefaultState());
+                    world.setBlockAndUpdate(pos, BlockInit.AUTO_MULTIBLOCK_IO.defaultBlockState());
                     if(world.getBlockEntity(pos) instanceof MultiblockIOBlockEntity io) {
                         //io.setPortData(port.something()?);
                     }
@@ -30,7 +30,7 @@ public record MultiblockAssembler(MultiblockDefinition definition, MultiblockMat
 
             if(!placedPort) {
                 BlockPos pos = cell.position();
-                world.setBlockState(pos, BlockInit.AUTO_MULTIBLOCK_BLOCK.getDefaultState());
+                world.setBlockAndUpdate(pos, BlockInit.AUTO_MULTIBLOCK_BLOCK.defaultBlockState());
             }
         }
 

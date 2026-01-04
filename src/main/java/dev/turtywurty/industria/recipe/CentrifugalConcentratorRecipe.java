@@ -13,20 +13,16 @@ import dev.turtywurty.industria.recipe.input.CentrifugalConcentratorRecipeInput;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,14 +30,14 @@ import java.util.concurrent.ThreadLocalRandom;
 public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputItemStack output, SlurryStack outputSlurry,
                                             int processTime, int rpm) implements Recipe<CentrifugalConcentratorRecipeInput> {
     @Override
-    public boolean matches(CentrifugalConcentratorRecipeInput input, World world) {
-        return this.input.testForRecipe(input.recipeInventory().getStackInSlot(0)) &&
+    public boolean matches(CentrifugalConcentratorRecipeInput input, Level world) {
+        return this.input.testForRecipe(input.recipeInventory().getItem(0)) &&
                 input.waterAmount() >= FluidConstants.BUCKET * 2;
     }
 
     @Override
-    public ItemStack craft(CentrifugalConcentratorRecipeInput input, RegistryWrapper.WrapperLookup registries) {
-        return this.output.createStack(new LocalRandom(ThreadLocalRandom.current().nextLong()));
+    public ItemStack assemble(CentrifugalConcentratorRecipeInput input, HolderLookup.Provider registries) {
+        return this.output.createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
     @Override
@@ -55,12 +51,12 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(new CentrifugalConcentratorRecipeDisplay(
                 this.input, new SlotDisplay.ItemSlotDisplay(BlockInit.CENTRIFUGAL_CONCENTRATOR.asItem()),
                 this.output, this.outputSlurry,
@@ -68,17 +64,17 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.CENTRIFUGAL_CONCENTRATOR;
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("centrifugal_concentrator").toString();
     }
 
@@ -108,12 +104,12 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
                 Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipe::rpm)
         ).apply(instance, CentrifugalConcentratorRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, CentrifugalConcentratorRecipe> PACKET_CODEC =
-                PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, CentrifugalConcentratorRecipe::input,
-                        OutputItemStack.PACKET_CODEC, CentrifugalConcentratorRecipe::output,
-                        SlurryStack.PACKET_CODEC, CentrifugalConcentratorRecipe::outputSlurry,
-                        PacketCodecs.INTEGER, CentrifugalConcentratorRecipe::processTime,
-                        PacketCodecs.INTEGER, CentrifugalConcentratorRecipe::rpm,
+        private static final StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipe> STREAM_CODEC =
+                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, CentrifugalConcentratorRecipe::input,
+                        OutputItemStack.STREAM_CODEC, CentrifugalConcentratorRecipe::output,
+                        SlurryStack.STREAM_CODEC, CentrifugalConcentratorRecipe::outputSlurry,
+                        ByteBufCodecs.INT, CentrifugalConcentratorRecipe::processTime,
+                        ByteBufCodecs.INT, CentrifugalConcentratorRecipe::rpm,
                         CentrifugalConcentratorRecipe::new);
 
         @Override
@@ -122,14 +118,14 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, CentrifugalConcentratorRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
     public record CentrifugalConcentratorRecipeDisplay(IndustriaIngredient input, SlotDisplay craftingStation,
-                                            OutputItemStack output, SlurryStack outputSlurry,
-                                            int processTime, int rpm) implements RecipeDisplay {
+                                                       OutputItemStack output, SlurryStack outputSlurry,
+                                                       int processTime, int rpm) implements RecipeDisplay {
         public static final MapCodec<CentrifugalConcentratorRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IndustriaIngredient.CODEC.fieldOf("input").forGetter(CentrifugalConcentratorRecipeDisplay::input),
                 SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(CentrifugalConcentratorRecipeDisplay::craftingStation),
@@ -139,16 +135,16 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
                 Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipeDisplay::rpm)
         ).apply(instance, CentrifugalConcentratorRecipeDisplay::new));
 
-        public static final PacketCodec<RegistryByteBuf, CentrifugalConcentratorRecipeDisplay> PACKET_CODEC =
-                PacketCodec.tuple(IndustriaIngredient.PACKET_CODEC, CentrifugalConcentratorRecipeDisplay::input,
-                        SlotDisplay.PACKET_CODEC, CentrifugalConcentratorRecipeDisplay::craftingStation,
-                        OutputItemStack.PACKET_CODEC, CentrifugalConcentratorRecipeDisplay::output,
-                        SlurryStack.PACKET_CODEC, CentrifugalConcentratorRecipeDisplay::outputSlurry,
-                        PacketCodecs.INTEGER, CentrifugalConcentratorRecipeDisplay::processTime,
-                        PacketCodecs.INTEGER, CentrifugalConcentratorRecipeDisplay::rpm,
+        public static final StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipeDisplay> STREAM_CODEC =
+                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::input,
+                        SlotDisplay.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::craftingStation,
+                        OutputItemStack.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::output,
+                        SlurryStack.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::outputSlurry,
+                        ByteBufCodecs.INT, CentrifugalConcentratorRecipeDisplay::processTime,
+                        ByteBufCodecs.INT, CentrifugalConcentratorRecipeDisplay::rpm,
                         CentrifugalConcentratorRecipeDisplay::new);
 
-        public static final Serializer<CentrifugalConcentratorRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -156,7 +152,7 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

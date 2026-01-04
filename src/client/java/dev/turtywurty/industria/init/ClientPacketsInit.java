@@ -9,8 +9,8 @@ import dev.turtywurty.industria.renderer.world.FluidPocketWorldRenderer;
 import dev.turtywurty.industria.screen.SeismicScannerScreen;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 public class ClientPacketsInit {
     public static void init() {
@@ -19,12 +19,12 @@ public class ClientPacketsInit {
                         context.client().setScreen(new SeismicScannerScreen(payload.stack()))));
 
         ClientPlayNetworking.registerGlobalReceiver(SyncFluidPocketsPayload.ID, (payload, context) -> {
-            RegistryKey<World> worldKey = context.player().getEntityWorld().getRegistryKey();
+            ResourceKey<Level> worldKey = context.player().level().dimension();
             FluidPocketWorldRenderer.FLUID_POCKETS.put(worldKey, payload.fluidPockets());
         });
 
         ClientPlayNetworking.registerGlobalReceiver(UpgradeStationUpdateRecipesPayload.ID, (payload, context) -> {
-            if (context.player().currentScreenHandler instanceof UpgradeStationScreenHandler handler) {
+            if (context.player().containerMenu instanceof UpgradeStationScreenHandler handler) {
                 handler.setAvailableRecipes(payload.recipes());
             }
         });

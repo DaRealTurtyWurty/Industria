@@ -8,21 +8,21 @@ import dev.turtywurty.gasapi.handler.GasRenderHandler;
 import dev.turtywurty.gasapi.handler.GasRenderHandlerRegistry;
 import dev.turtywurty.industria.screen.widget.util.Orientation;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class GasWidget implements Drawable, Widget {
+public class GasWidget implements Renderable, LayoutElement {
     private final SingleGasStorage gasTank;
     private final Supplier<BlockPos> posSupplier;
     private final Orientation orientation;
@@ -41,7 +41,7 @@ public class GasWidget implements Drawable, Widget {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         Gas gas = this.gasTank.variant.getGas();
         long gasAmount = this.gasTank.getAmount();
 
@@ -50,7 +50,7 @@ public class GasWidget implements Drawable, Widget {
             return;
 
         BlockPos pos = this.posSupplier.get();
-        World world = MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
 
         int color = gasRenderHandler.getColor(world, pos);
 
@@ -71,7 +71,7 @@ public class GasWidget implements Drawable, Widget {
         }
     }
 
-    protected void drawTooltip(DrawContext context, int mouseX, int mouseY) {
+    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
         long gasAmount = this.gasTank.getAmount();
         long gasCapacity = this.gasTank.getCapacity();
 
@@ -80,11 +80,11 @@ public class GasWidget implements Drawable, Widget {
         if (gasVariantAttributeHandler == null)
             return;
 
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        Font textRenderer = Minecraft.getInstance().font;
         if (gas != null && gasAmount > 0) {
-            context.drawTooltip(textRenderer, List.of(
+            context.setComponentTooltipForNextFrame(textRenderer, List.of(
                             gasVariantAttributeHandler.getName(this.gasTank.variant),
-                            Text.literal((((float) gasAmount / FluidConstants.BUCKET) * 1000) + " / " + ((int) (((float) gasCapacity / FluidConstants.BUCKET) * 1000)) + " mB")),
+                            Component.literal((((float) gasAmount / FluidConstants.BUCKET) * 1000) + " / " + ((int) (((float) gasCapacity / FluidConstants.BUCKET) * 1000)) + " mB")),
                     mouseX, mouseY);
         }
     }
@@ -124,7 +124,7 @@ public class GasWidget implements Drawable, Widget {
     }
 
     @Override
-    public void forEachChild(Consumer<ClickableWidget> consumer) {
+    public void visitWidgets(Consumer<AbstractWidget> consumer) {
     }
 
     private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {

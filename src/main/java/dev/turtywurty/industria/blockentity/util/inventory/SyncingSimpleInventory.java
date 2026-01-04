@@ -2,7 +2,7 @@ package dev.turtywurty.industria.blockentity.util.inventory;
 
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class SyncingSimpleInventory extends RecipeSimpleInventory implements SyncableStorage {
     private final UpdatableBlockEntity blockEntity;
@@ -20,7 +20,7 @@ public class SyncingSimpleInventory extends RecipeSimpleInventory implements Syn
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity != null && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient()) {
+        if (this.isDirty && this.blockEntity != null && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
             this.blockEntity.update();
@@ -28,8 +28,8 @@ public class SyncingSimpleInventory extends RecipeSimpleInventory implements Syn
     }
 
     @Override
-    public void markDirty() {
-        super.markDirty();
+    public void setChanged() {
+        super.setChanged();
         this.isDirty = true;
     }
 

@@ -4,8 +4,8 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class MultiblockTypeInit {
     public static final MultiblockType<OilPumpJackBlockEntity> OIL_PUMP_JACK = register("oil_pump_jack",

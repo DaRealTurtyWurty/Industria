@@ -3,24 +3,24 @@ package dev.turtywurty.industria.screen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.block.WallBannerBlock;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.WallBannerBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -28,8 +28,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class BlockStateSelectionScreen extends Screen {
-    public static final Text BLOCK_TITLE = Text.translatable("screen." + Industria.MOD_ID + ".block_state_selection.block.title");
-    public static final Text STATE_TITLE = Text.translatable("screen." + Industria.MOD_ID + ".block_state_selection.state.title");
+    public static final Component BLOCK_TITLE = Component.translatable("screen." + Industria.MOD_ID + ".block_state_selection.block.title");
+    public static final Component STATE_TITLE = Component.translatable("screen." + Industria.MOD_ID + ".block_state_selection.state.title");
 
     private static final int TOP_MARGIN = 24;
     private static final int SIDE_MARGIN = 16;
@@ -47,7 +47,7 @@ public class BlockStateSelectionScreen extends Screen {
     private static final int CONFIRM_PADDING = 6;
     private static final int BUTTON_GAP = 6;
     private static final float SCENE_SCALE_MULTIPLIER = 2.5F;
-    private static final Vec3d CAMERA_POS = new Vec3d(-3.0, 2.5, 3.0);
+    private static final Vec3 CAMERA_POS = new Vec3(-3.0, 2.5, 3.0);
     private static final float CAMERA_YAW = 225.0F;
     private static final float CAMERA_PITCH = 25.0F;
 
@@ -68,9 +68,9 @@ public class BlockStateSelectionScreen extends Screen {
     private Block selectedBlock;
     private BlockState selectedState;
 
-    private TextFieldWidget searchField;
-    private ButtonWidget confirmButton;
-    private ButtonWidget backButton;
+    private EditBox searchField;
+    private Button confirmButton;
+    private Button backButton;
     private String blockSearchQuery = "";
     private String stateSearchQuery = "";
 
@@ -114,12 +114,12 @@ public class BlockStateSelectionScreen extends Screen {
     @Override
     protected void init() {
         if (this.searchField != null) {
-            setActiveSearchQuery(this.searchField.getText());
+            setActiveSearchQuery(this.searchField.getValue());
         }
 
         if (this.allBlocks.isEmpty()) {
-            this.allBlocks = Registries.BLOCK.stream()
-                    .filter(block -> !block.getDefaultState().isAir())
+            this.allBlocks = BuiltInRegistries.BLOCK.stream()
+                    .filter(block -> !block.defaultBlockState().isAir())
                     .filter(block -> !(block instanceof WallBannerBlock))
                     .sorted(Comparator.comparing(block -> block.getName().getString().toLowerCase(Locale.ROOT)))
                     .toList();
@@ -131,38 +131,38 @@ public class BlockStateSelectionScreen extends Screen {
 
         applyFilter(getActiveSearchQuery());
 
-        this.searchField = addDrawableChild(new TextFieldWidget(
-                this.textRenderer,
+        this.searchField = addRenderableWidget(new EditBox(
+                this.font,
                 this.gridX + SEARCH_PADDING,
                 this.panelY + SEARCH_PADDING,
                 Math.max(0, this.gridWidth - SEARCH_PADDING * 2),
                 SEARCH_HEIGHT,
-                Text.empty()
+                Component.empty()
         ));
         this.searchField.setMaxLength(128);
-        this.searchField.setPlaceholder(MultiblockDesignerScreen.SEARCH_PLACEHOLDER);
-        this.searchField.setChangedListener(this::applyFilter);
-        this.searchField.setText(getActiveSearchQuery());
+        this.searchField.setHint(MultiblockDesignerScreen.SEARCH_PLACEHOLDER);
+        this.searchField.setResponder(this::applyFilter);
+        this.searchField.setValue(getActiveSearchQuery());
 
         if (this.step == Step.STATE) {
-            this.backButton = addDrawableChild(ButtonWidget.builder(ScreenTexts.BACK, button -> switchToBlockStep())
-                    .dimensions(0, 0, 0, 0)
+            this.backButton = addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> switchToBlockStep())
+                    .bounds(0, 0, 0, 0)
                     .build());
         }
 
-        this.confirmButton = addDrawableChild(ButtonWidget.builder(getConfirmText(), button -> {
+        this.confirmButton = addRenderableWidget(Button.builder(getConfirmText(), button -> {
                     if (this.step == Step.BLOCK) {
                         if (this.selectedBlock != null) {
                             switchToStateStep(this.selectedBlock);
                         }
                     } else if (this.selectedState != null) {
                         this.onSelect.accept(this.selectedState);
-                        if (this.client != null && this.client.currentScreen == this) {
-                            close();
+                        if (this.minecraft != null && this.minecraft.screen == this) {
+                            onClose();
                         }
                     }
                 })
-                .dimensions(0, 0, 0, 0)
+                .bounds(0, 0, 0, 0)
                 .build());
         this.confirmButton.active = hasSelection();
 
@@ -176,14 +176,14 @@ public class BlockStateSelectionScreen extends Screen {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         handleCloseCallbacks();
-        if (this.client != null && this.parent != null) {
-            this.client.setScreen(this.parent);
+        if (this.minecraft != null && this.parent != null) {
+            this.minecraft.setScreen(this.parent);
             return;
         }
 
-        super.close();
+        super.onClose();
     }
 
     @Override
@@ -214,12 +214,12 @@ public class BlockStateSelectionScreen extends Screen {
             return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 
         int delta = (int) Math.signum(verticalAmount);
-        this.scrollRow = MathHelper.clamp(this.scrollRow - delta, 0, this.maxScrollRows);
+        this.scrollRow = Mth.clamp(this.scrollRow - delta, 0, this.maxScrollRows);
         return true;
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (isMouseOverScrollbar(click.x(), click.y())) {
                 this.scrolling = true;
@@ -248,7 +248,7 @@ public class BlockStateSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1 && this.scrolling) {
             this.scrolling = false;
             return true;
@@ -258,7 +258,7 @@ public class BlockStateSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (this.scrolling && click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             double mouseY = click.y() + offsetY;
             updateScrollFromMouse(mouseY);
@@ -269,21 +269,21 @@ public class BlockStateSelectionScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Text title = this.step == Step.BLOCK ? BLOCK_TITLE : STATE_TITLE;
-        int titleWidth = this.textRenderer.getWidth(title);
-        context.drawText(this.textRenderer, title, (this.width - titleWidth) / 2, 6, 0xFFEEEEEE, false);
-        Text countLabel = this.step == Step.BLOCK
-                ? Text.translatable("screen." + Industria.MOD_ID + ".block_selection.count", this.blocks.size())
-                : Text.translatable("screen." + Industria.MOD_ID + ".block_state_selection.count", this.states.size());
-        int countWidth = this.textRenderer.getWidth(countLabel);
-        context.drawText(this.textRenderer, countLabel, (this.width - countWidth) / 2, 6 + this.textRenderer.fontHeight + 2, 0xFFB0B0B0, false);
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        Component title = this.step == Step.BLOCK ? BLOCK_TITLE : STATE_TITLE;
+        int titleWidth = this.font.width(title);
+        context.drawString(this.font, title, (this.width - titleWidth) / 2, 6, 0xFFEEEEEE, false);
+        Component countLabel = this.step == Step.BLOCK
+                ? Component.translatable("screen." + Industria.MOD_ID + ".block_selection.count", this.blocks.size())
+                : Component.translatable("screen." + Industria.MOD_ID + ".block_state_selection.count", this.states.size());
+        int countWidth = this.font.width(countLabel);
+        context.drawString(this.font, countLabel, (this.width - countWidth) / 2, 6 + this.font.lineHeight + 2, 0xFFB0B0B0, false);
 
         drawPanel(context);
 
         int slotStride = getSlotStride();
         int startIndex = getStartIndex();
-        Text hoveredTooltip = null;
+        Component hoveredTooltip = null;
 
         for (int row = 0; row < this.visibleRows; row++) {
             for (int col = 0; col < this.columns; col++) {
@@ -309,7 +309,7 @@ public class BlockStateSelectionScreen extends Screen {
                         renderItemPreview(context, block, slotX + SLOT_INSET, slotY + SLOT_INSET, renderSize);
                     } else {
                         FakeWorldScene scene = getBlockScene(block);
-                        scene.setAnchor(BlockPos.ORIGIN, renderSize / 2, renderSize / 2);
+                        scene.setAnchor(BlockPos.ZERO, renderSize / 2, renderSize / 2);
                         scene.render(context, slotX + SLOT_INSET, slotY + SLOT_INSET, renderSize, renderSize, delta);
                     }
 
@@ -322,7 +322,7 @@ public class BlockStateSelectionScreen extends Screen {
 
                     int renderSize = SLOT_SIZE - SLOT_INSET * 2;
                     FakeWorldScene scene = getStateScene(state);
-                    scene.setAnchor(BlockPos.ORIGIN, renderSize / 2, renderSize / 2);
+                    scene.setAnchor(BlockPos.ZERO, renderSize / 2, renderSize / 2);
                     scene.render(context, slotX + SLOT_INSET, slotY + SLOT_INSET, renderSize, renderSize, delta);
 
                     if (hovered) {
@@ -330,7 +330,7 @@ public class BlockStateSelectionScreen extends Screen {
                         if (properties.isEmpty()) {
                             hoveredTooltip = state.getBlock().getName();
                         } else {
-                            hoveredTooltip = Text.literal(state.getBlock().getName().getString() + " (" + properties + ")");
+                            hoveredTooltip = Component.literal(state.getBlock().getName().getString() + " (" + properties + ")");
                         }
                     }
                 }
@@ -345,12 +345,12 @@ public class BlockStateSelectionScreen extends Screen {
         }
     }
 
-    private void drawPanel(DrawContext context) {
+    private void drawPanel(GuiGraphics context) {
         context.fill(this.panelX, this.panelY, this.panelX + this.panelWidth, this.panelY + this.panelHeight, 0xAA101010);
-        context.drawStrokedRectangle(this.panelX, this.panelY, this.panelWidth, this.panelHeight, 0xFF404040);
+        context.renderOutline(this.panelX, this.panelY, this.panelWidth, this.panelHeight, 0xFF404040);
     }
 
-    private void drawSlot(DrawContext context, int x, int y, boolean hovered, boolean selected) {
+    private void drawSlot(GuiGraphics context, int x, int y, boolean hovered, boolean selected) {
         context.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF2B2B2B);
         context.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xFF606060);
         if (hovered) {
@@ -358,11 +358,11 @@ public class BlockStateSelectionScreen extends Screen {
         }
 
         if (selected) {
-            context.drawStrokedRectangle(x, y, SLOT_SIZE, SLOT_SIZE, 0xFF2FA9FF);
+            context.renderOutline(x, y, SLOT_SIZE, SLOT_SIZE, 0xFF2FA9FF);
         }
     }
 
-    private void drawScrollbar(DrawContext context) {
+    private void drawScrollbar(GuiGraphics context) {
         if (!hasScrollbar())
             return;
 
@@ -381,7 +381,7 @@ public class BlockStateSelectionScreen extends Screen {
             return trackHeight;
 
         int thumbHeight = Math.round((float) trackHeight * this.visibleRows / this.totalRows);
-        return MathHelper.clamp(thumbHeight, MIN_THUMB_HEIGHT, trackHeight);
+        return Mth.clamp(thumbHeight, MIN_THUMB_HEIGHT, trackHeight);
     }
 
     private void updateScrollFromMouse(double mouseY) {
@@ -395,8 +395,8 @@ public class BlockStateSelectionScreen extends Screen {
         }
 
         float ratio = (float) (mouseY - trackTop - thumbHeight / 2.0F) / (float) maxOffset;
-        ratio = MathHelper.clamp(ratio, 0.0F, 1.0F);
-        this.scrollRow = MathHelper.clamp(Math.round(ratio * this.maxScrollRows), 0, this.maxScrollRows);
+        ratio = Mth.clamp(ratio, 0.0F, 1.0F);
+        this.scrollRow = Mth.clamp(Math.round(ratio * this.maxScrollRows), 0, this.maxScrollRows);
     }
 
     private int getEntryIndexAt(double mouseX, double mouseY) {
@@ -476,9 +476,9 @@ public class BlockStateSelectionScreen extends Screen {
         int slotStride = getSlotStride();
         this.columns = Math.max(1, (this.gridWidth + SLOT_GAP) / slotStride);
         this.visibleRows = Math.max(1, (this.gridHeight + SLOT_GAP) / slotStride);
-        this.totalRows = MathHelper.ceil((float) getActiveCount() / this.columns);
+        this.totalRows = Mth.ceil((float) getActiveCount() / this.columns);
         this.maxScrollRows = Math.max(0, this.totalRows - this.visibleRows);
-        this.scrollRow = MathHelper.clamp(this.scrollRow, 0, this.maxScrollRows);
+        this.scrollRow = Mth.clamp(this.scrollRow, 0, this.maxScrollRows);
 
         this.gridContentWidth = this.columns * slotStride - SLOT_GAP;
         this.gridContentHeight = this.visibleRows * slotStride - SLOT_GAP;
@@ -523,7 +523,7 @@ public class BlockStateSelectionScreen extends Screen {
             } else {
                 this.blocks = this.allBlocks.stream()
                         .filter(block -> {
-                            String id = Registries.BLOCK.getId(block).toString();
+                            String id = BuiltInRegistries.BLOCK.getKey(block).toString();
                             if (id.contains(trimmed))
                                 return true;
 
@@ -566,25 +566,25 @@ public class BlockStateSelectionScreen extends Screen {
         if (block.asItem() == Items.AIR)
             return ItemStack.EMPTY;
 
-        return block.asItem().getDefaultStack();
+        return block.asItem().getDefaultInstance();
     }
 
-    private void renderItemPreview(DrawContext context, Block block, int x, int y, int size) {
+    private void renderItemPreview(GuiGraphics context, Block block, int x, int y, int size) {
         ItemStack stack = getItemStack(block);
         if (stack.isEmpty())
             return;
 
         float scale = size / 16.0F;
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate(x, y);
-        context.getMatrices().scale(scale, scale);
-        context.drawItemWithoutEntity(stack, 0, 0);
-        context.getMatrices().popMatrix();
+        context.pose().pushMatrix();
+        context.pose().translate(x, y);
+        context.pose().scale(scale, scale);
+        context.renderFakeItem(stack, 0, 0);
+        context.pose().popMatrix();
     }
 
-    private void drawTooltipWrapped(DrawContext context, Text text, int mouseX, int mouseY) {
-        int maxWidth = MathHelper.clamp(this.width - 20, 80, 240);
-        context.drawTooltip(this.textRenderer.wrapLines(text, maxWidth), mouseX, mouseY);
+    private void drawTooltipWrapped(GuiGraphics context, Component text, int mouseX, int mouseY) {
+        int maxWidth = Mth.clamp(this.width - 20, 80, 240);
+        context.setTooltipForNextFrame(this.font.split(text, maxWidth), mouseX, mouseY);
     }
 
     private FakeWorldScene getBlockScene(Block block) {
@@ -593,11 +593,11 @@ public class BlockStateSelectionScreen extends Screen {
             scene = FakeWorldSceneBuilder.create()
                     .camera(CAMERA_POS, CAMERA_YAW, CAMERA_PITCH)
                     .populate(ctx -> {
-                        var state = block.getDefaultState();
-                        if (block instanceof FluidBlock) {
-                            ctx.addFluid(BlockPos.ORIGIN, state.getFluidState());
+                        var state = block.defaultBlockState();
+                        if (block instanceof LiquidBlock) {
+                            ctx.addFluid(BlockPos.ZERO, state.getFluidState());
                         } else {
-                            ctx.addBlock(BlockPos.ORIGIN, state);
+                            ctx.addBlock(BlockPos.ZERO, state);
                         }
                     })
                     .build();
@@ -622,10 +622,10 @@ public class BlockStateSelectionScreen extends Screen {
             scene = FakeWorldSceneBuilder.create()
                     .camera(CAMERA_POS, CAMERA_YAW, CAMERA_PITCH)
                     .populate(ctx -> {
-                        if (state.getBlock() instanceof FluidBlock) {
-                            ctx.addFluid(BlockPos.ORIGIN, state.getFluidState());
+                        if (state.getBlock() instanceof LiquidBlock) {
+                            ctx.addFluid(BlockPos.ZERO, state.getFluidState());
                         } else {
-                            ctx.addBlock(BlockPos.ORIGIN, state);
+                            ctx.addBlock(BlockPos.ZERO, state);
                         }
                     })
                     .build();
@@ -658,12 +658,12 @@ public class BlockStateSelectionScreen extends Screen {
     }
 
     private List<BlockState> getAllStatesForBlock(Block block) {
-        var manager = block.getStateManager();
-        List<BlockState> states = manager.getStates();
+        var manager = block.getStateDefinition();
+        List<BlockState> states = manager.getPossibleStates();
         if (states.size() > 1 || manager.getProperties().isEmpty())
             return states;
 
-        BlockState base = block.getDefaultState();
+        BlockState base = block.defaultBlockState();
         List<BlockState> generated = new ArrayList<>();
         generateStatesRecursive(generated, base, new ArrayList<>(manager.getProperties()), 0);
         return generated.isEmpty() ? List.of(base) : generated;
@@ -677,9 +677,9 @@ public class BlockStateSelectionScreen extends Screen {
         }
 
         Property<?> property = properties.get(index);
-        for (Object rawValue : property.getValues()) {
+        for (Object rawValue : property.getPossibleValues()) {
             Comparable value = (Comparable) rawValue;
-            BlockState next = current.with((Property) property, value);
+            BlockState next = current.setValue((Property) property, value);
             generateStatesRecursive(out, next, properties, index + 1);
         }
     }
@@ -692,7 +692,7 @@ public class BlockStateSelectionScreen extends Screen {
         this.scrollRow = 0;
         this.allStates = getAllStatesForBlock(block);
         closeScenes();
-        clearAndInit();
+        rebuildWidgets();
     }
 
     private void switchToBlockStep() {
@@ -700,11 +700,11 @@ public class BlockStateSelectionScreen extends Screen {
         this.selectedState = null;
         this.scrollRow = 0;
         closeScenes();
-        clearAndInit();
+        rebuildWidgets();
     }
 
-    private Text getConfirmText() {
-        return this.step == Step.BLOCK ? ScreenTexts.CONTINUE : ScreenTexts.DONE;
+    private Component getConfirmText() {
+        return this.step == Step.BLOCK ? CommonComponents.GUI_CONTINUE : CommonComponents.GUI_DONE;
     }
 
     private boolean hasSelection() {
@@ -723,20 +723,20 @@ public class BlockStateSelectionScreen extends Screen {
         }
     }
 
-    private static Text formatProperties(BlockState state) {
-        Map<Property<?>, Comparable<?>> entries = state.getEntries();
+    private static Component formatProperties(BlockState state) {
+        Map<Property<?>, Comparable<?>> entries = state.getValues();
         if (entries.isEmpty())
-            return Text.empty();
+            return Component.empty();
 
         String formatted = entries.entrySet().stream()
                 .map(entry -> entry.getKey().getName() + "=" + formatProperty(entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(", "));
-        return Text.literal(formatted);
+        return Component.literal(formatted);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static String formatProperty(Property property, Comparable<?> value) {
-        return property.name(value);
+        return property.getName(value);
     }
 
     private void handleCloseCallbacks() {

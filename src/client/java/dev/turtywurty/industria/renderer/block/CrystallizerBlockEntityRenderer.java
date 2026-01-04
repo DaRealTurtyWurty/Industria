@@ -1,25 +1,25 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.CrystallizerBlockEntity;
 import dev.turtywurty.industria.model.CrystallizerModel;
 import dev.turtywurty.industria.state.CrystallizerRenderState;
 import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
 public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRenderer<CrystallizerBlockEntity, CrystallizerRenderState> {
-    private static final Vec3d[] OUTPUT_ITEM_POSITIONS = new Vec3d[64];
+    private static final Vec3[] OUTPUT_ITEM_POSITIONS = new Vec3[64];
 
     static {
         var random = new Random(438489438L);
@@ -34,7 +34,7 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
         for (int i = 0; i < OUTPUT_ITEM_POSITIONS.length; i++) {
             int attempts = 0;
             while (true) {
-                Vec3d generatedPos = generatePosition(random, minX, -minY, minZ, maxX, -maxY, maxZ);
+                Vec3 generatedPos = generatePosition(random, minX, -minY, minZ, maxX, -maxY, maxZ);
                 if (!intersects(generatedPos, i, 0.35) || attempts++ > 100) {
                     OUTPUT_ITEM_POSITIONS[i] = generatedPos;
                     break;
@@ -43,7 +43,7 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
         }
     }
 
-    private static boolean intersects(Vec3d pos, int count, double radius) {
+    private static boolean intersects(Vec3 pos, int count, double radius) {
         for (int i = 0; i < count; i++) {
             if (pos.distanceTo(OUTPUT_ITEM_POSITIONS[i]) < radius)
                 return true;
@@ -52,8 +52,8 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
         return false;
     }
 
-    private static Vec3d generatePosition(Random random, float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
-        return new Vec3d(
+    private static Vec3 generatePosition(Random random, float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+        return new Vec3(
                 minX + random.nextFloat() * (maxX - minX),
                 minY + random.nextFloat() * (maxY - minY),
                 minZ + random.nextFloat() * (maxZ - minZ)
@@ -63,9 +63,9 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     private final CrystallizerModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
-    public CrystallizerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public CrystallizerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
-        this.model = new CrystallizerModel(context.getLayerModelPart(CrystallizerModel.LAYER_LOCATION));
+        this.model = new CrystallizerModel(context.bakeLayer(CrystallizerModel.LAYER_LOCATION));
     }
 
     @Override
@@ -74,8 +74,8 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    public void updateRenderState(CrystallizerBlockEntity blockEntity, CrystallizerRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(CrystallizerBlockEntity blockEntity, CrystallizerRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
         state.nextOutputItemStack = blockEntity.getNextOutputItemStack();
@@ -85,16 +85,16 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(CrystallizerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    protected void onRender(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         queue.submitModel(this.model, null,
-                matrices, this.model.getLayer(CrystallizerModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.crumblingOverlay);
+                matrices, this.model.renderType(CrystallizerModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
 
         renderNextOutputItem(state, matrices, queue, light, overlay);
         renderFluids(state, matrices, queue, light, overlay);
     }
 
-    private void renderNextOutputItem(CrystallizerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    private void renderNextOutputItem(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         ItemStack itemStack = state.nextOutputItemStack;
         if (itemStack.isEmpty())
             return;
@@ -103,35 +103,35 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
         for (int i = 0; i < count; i++) {
             int index = (OUTPUT_ITEM_POSITIONS.length / count) * i;
 
-            Vec3d position = OUTPUT_ITEM_POSITIONS[index];
+            Vec3 position = OUTPUT_ITEM_POSITIONS[index];
             float progress = (float) state.progress / state.maxProgress;
             float scale = 0.05f + 0.35f * progress;
 
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(position);
             matrices.scale(scale, scale, scale);
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float) ((i + 1) * 360) / count));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+            matrices.mulPose(Axis.YP.rotationDegrees((float) ((i + 1) * 360) / count));
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
             state.renderItemRenderState(0, matrices, queue);
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
+            matrices.mulPose(Axis.YP.rotationDegrees(90));
             state.renderItemRenderState(0, matrices, queue);
-            matrices.pop();
+            matrices.popPose();
         }
     }
 
-    private void renderFluids(CrystallizerRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
-        World world = MinecraftClient.getInstance().world;
+    private void renderFluids(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+        Level world = Minecraft.getInstance().level;
         this.fluidRenderer.render(state.crystalFluidStorage,
                 queue, matrices,
                 light, overlay,
-                world, state.pos,
+                world, state.blockPos,
                 -18f / 16f, -0.5001f, -18f / 16f,
                 18f / 16f, 46f, 18f / 16f - 0.001f, 0x40000000, ColorMode.SUBTRACTION);
 
         this.fluidRenderer.render(state.waterFluidStorage,
                 queue, matrices,
                 light, overlay,
-                world, state.pos,
+                world, state.blockPos,
                 -18f / 16f, -0.5f, -18f / 16f,
                 18f / 16f, 46f, 18f / 16f);
     }

@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity.util;
 
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface SyncableTickableBlockEntity extends TickableBlockEntity {
     @Override
     default void tick() {
         if (this instanceof BlockEntity blockEntity) {
-            if (blockEntity.getWorld() != null && blockEntity.getWorld().isClient()) {
+            if (blockEntity.getLevel() != null && blockEntity.getLevel().isClientSide()) {
                 onClientTick();
             } else {
                 onTick();

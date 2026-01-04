@@ -1,11 +1,15 @@
 package dev.turtywurty.industria.multiblock;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.*;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.gen.blockpredicate.BlockPredicate;
+import com.mojang.math.Quadrant;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -17,15 +21,15 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
         Objects.requireNonNull(definition, "MultiblockDefinition cannot be null");
     }
 
-    public Optional<MatchResult> tryMatch(ServerWorld world, BlockPos controllerPos) {
+    public Optional<MatchResult> tryMatch(ServerLevel world, BlockPos controllerPos) {
         return tryMatch(world, controllerPos, false);
     }
 
-    public Optional<MatchResult> tryMatch(ServerWorld world, BlockPos controllerPos, boolean skipControllerCheck) {
+    public Optional<MatchResult> tryMatch(ServerLevel world, BlockPos controllerPos, boolean skipControllerCheck) {
         MatchResult bestResult = null;
         int smallestProblemCount = Integer.MAX_VALUE;
 
-        for (AxisRotation rotation : definition.rotations()) {
+        for (Quadrant rotation : definition.rotations()) {
             for (MirrorMode mirrorMode : definition.allowedMirrors()) {
                 var transform = new MultiblockTransform(rotation, mirrorMode);
                 Vec3i size = definition.size();
@@ -49,7 +53,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
     }
 
     private MatchResult createResult(
-            StructureWorldAccess world,
+            WorldGenLevel world,
             BlockPos controllerPos,
             BlockPos originPos,
             MultiblockTransform transform,
@@ -74,7 +78,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                     if (predicate == null || predicate == BlockPredicate.alwaysTrue())
                         continue;
 
-                    BlockPos worldPos = originPos.add(x, y, z);
+                    BlockPos worldPos = originPos.offset(x, y, z);
                     BlockState state = world.getBlockState(worldPos);
 
                     builder.addCell(worldPos, x, y, z, character, state);
@@ -130,7 +134,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
         private final List<ResolvedPort> ports;
         private final List<Problem> problems;
 
-        private final Box boundingBox;
+        private final AABB boundingBox;
 
         public MatchResult(
                 Identifier definitionId,
@@ -196,7 +200,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
             return problems;
         }
 
-        public Box boundingBox() {
+        public AABB boundingBox() {
             return boundingBox;
         }
 
@@ -299,7 +303,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
 
         public record Cell(BlockPos position, int localX, int localY, int localZ, char character, BlockState state) {
             public Cell(BlockPos position, int localX, int localY, int localZ, char character, BlockState state) {
-                this.position = position.toImmutable();
+                this.position = position.immutable();
                 this.localX = localX;
                 this.localY = localY;
                 this.localZ = localZ;
@@ -326,7 +330,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
                     int localY,
                     int localZ,
                     char character) {
-                this.pos = pos.toImmutable();
+                this.pos = pos.immutable();
                 this.face = face;
                 this.mode = mode;
                 this.portTypes = Set.copyOf(portTypes);
@@ -347,20 +351,20 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
 
         public record MismatchProblem(BlockPos pos, char expected, BlockState actualState) implements Problem {
             public MismatchProblem(BlockPos pos, char expected, BlockState actualState) {
-                this.pos = pos.toImmutable();
+                this.pos = pos.immutable();
                 this.expected = expected;
                 this.actualState = actualState;
             }
 
             @Override
             public String message() {
-                return "Mismatch at " + pos + ": expected '" + expected + "', but found '" + actualState.getBlock().getTranslationKey() + "'";
+                return "Mismatch at " + pos + ": expected '" + expected + "', but found '" + actualState.getBlock().getDescriptionId() + "'";
             }
         }
 
         public record NotReplaceableProblem(BlockPos pos, char expected) implements Problem {
             public NotReplaceableProblem(BlockPos pos, char expected) {
-                this.pos = pos.toImmutable();
+                this.pos = pos.immutable();
                 this.expected = expected;
             }
 
@@ -375,10 +379,10 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
         }
     }
 
-    private static Box boxFromPositions(Stream<BlockPos> positions) {
+    private static AABB boxFromPositions(Stream<BlockPos> positions) {
         var iterator = positions.iterator();
         if (!iterator.hasNext())
-            return new Box(0, 0, 0, 0, 0, 0);
+            return new AABB(0, 0, 0, 0, 0, 0);
 
         BlockPos first = iterator.next();
         int minX = first.getX(), minY = first.getY(), minZ = first.getZ();
@@ -393,7 +397,7 @@ public record MultiblockMatcher(@NotNull MultiblockDefinition definition) {
             maxZ = Math.max(maxZ, pos.getZ());
         }
 
-        return new Box(
+        return new AABB(
                 minX, minY, minZ,
                 maxX, maxY, maxZ
         );

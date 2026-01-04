@@ -6,83 +6,88 @@ import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.WoodSetInit;
 import dev.turtywurty.industria.worldgen.config.FluidPocketConfig;
 import dev.turtywurty.industria.worldgen.trunkplacer.RubberTreeTrunkPlacer;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registerable;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.structure.rule.BlockMatchRuleTest;
-import net.minecraft.structure.rule.RuleTest;
-import net.minecraft.structure.rule.TagMatchRuleTest;
-import net.minecraft.util.math.intprovider.ConstantIntProvider;
-import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.world.gen.feature.*;
-import net.minecraft.world.gen.feature.size.TwoLayersFeatureSize;
-import net.minecraft.world.gen.foliage.BlobFoliagePlacer;
-import net.minecraft.world.gen.stateprovider.SimpleBlockStateProvider;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
 import java.util.List;
 
 public class ConfiguredFeatureInit {
-    public static final RegistryKey<ConfiguredFeature<?, ?>> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
 
-    public static final RegistryKey<ConfiguredFeature<?, ?>> BAUXITE_ORE = registerKey("bauxite_ore");
-    public static final RegistryKey<ConfiguredFeature<?, ?>> CASSITERITE_ORE = registerKey("cassiterite_ore");
-    public static final RegistryKey<ConfiguredFeature<?, ?>> ZINC_ORE = registerKey("zinc_ore");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> BAUXITE_ORE = registerKey("bauxite_ore");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> CASSITERITE_ORE = registerKey("cassiterite_ore");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ZINC_ORE = registerKey("zinc_ore");
 
-    public static final RegistryKey<ConfiguredFeature<?, ?>> RUBBER_TREE = registerKey("rubber_tree");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> RUBBER_TREE = registerKey("rubber_tree");
 
-    public static void bootstrap(Registerable<ConfiguredFeature<?, ?>> context) {
-        RuleTest stoneOreReplaceables = new TagMatchRuleTest(BlockTags.STONE_ORE_REPLACEABLES);
-        RuleTest deepslateOreReplaceables = new TagMatchRuleTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
-        RuleTest netherOreReplaceables = new TagMatchRuleTest(BlockTags.BASE_STONE_NETHER);
-        RuleTest endOreReplaceables = new BlockMatchRuleTest(Blocks.END_STONE);
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
+        RuleTest stoneOreReplaceables = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
+        RuleTest deepslateOreReplaceables = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+        RuleTest netherOreReplaceables = new TagMatchTest(BlockTags.BASE_STONE_NETHER);
+        RuleTest endOreReplaceables = new BlockMatchTest(Blocks.END_STONE);
 
-        RegistryEntryLookup<PlacedFeature> registryLookup = context.getRegistryLookup(RegistryKeys.PLACED_FEATURE);
+        HolderGetter<PlacedFeature> registryLookup = context.lookup(Registries.PLACED_FEATURE);
 
         register(context, CRUDE_OIL_POCKET, FeatureInit.FLUID_POCKET,
-                new FluidPocketConfig(FluidInit.CRUDE_OIL.still().getDefaultState(),
-                        UniformIntProvider.create(4, 6),
-                        UniformIntProvider.create(2, 4),
+                new FluidPocketConfig(FluidInit.CRUDE_OIL.still().defaultFluidState(),
+                        UniformInt.of(4, 6),
+                        UniformInt.of(2, 4),
                         stoneOreReplaceables));
 
-        List<OreFeatureConfig.Target> bauxiteTargets = List.of(
-                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.BAUXITE_ORE.getDefaultState()),
-                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_BAUXITE_ORE.getDefaultState()));
+        List<OreConfiguration.TargetBlockState> bauxiteTargets = List.of(
+                OreConfiguration.target(stoneOreReplaceables, BlockInit.BAUXITE_ORE.defaultBlockState()),
+                OreConfiguration.target(deepslateOreReplaceables, BlockInit.DEEPSLATE_BAUXITE_ORE.defaultBlockState()));
 
-        List<OreFeatureConfig.Target> tinTargets = List.of(
-                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.CASSITERITE_ORE.getDefaultState()),
-                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_CASSITERITE_ORE.getDefaultState()));
+        List<OreConfiguration.TargetBlockState> tinTargets = List.of(
+                OreConfiguration.target(stoneOreReplaceables, BlockInit.CASSITERITE_ORE.defaultBlockState()),
+                OreConfiguration.target(deepslateOreReplaceables, BlockInit.DEEPSLATE_CASSITERITE_ORE.defaultBlockState()));
 
-        List<OreFeatureConfig.Target> zincTargets = List.of(
-                OreFeatureConfig.createTarget(stoneOreReplaceables, BlockInit.SPHALERITE_ORE.getDefaultState()),
-                OreFeatureConfig.createTarget(deepslateOreReplaceables, BlockInit.DEEPSLATE_SPHALERITE_ORE.getDefaultState()));
+        List<OreConfiguration.TargetBlockState> zincTargets = List.of(
+                OreConfiguration.target(stoneOreReplaceables, BlockInit.SPHALERITE_ORE.defaultBlockState()),
+                OreConfiguration.target(deepslateOreReplaceables, BlockInit.DEEPSLATE_SPHALERITE_ORE.defaultBlockState()));
 
-        register(context, BAUXITE_ORE, Feature.ORE, new OreFeatureConfig(bauxiteTargets, 8, 0.25f));
-        register(context, CASSITERITE_ORE, Feature.ORE, new OreFeatureConfig(tinTargets, 14));
-        register(context, ZINC_ORE, Feature.SCATTERED_ORE, new OreFeatureConfig(zincTargets, 10));
+        register(context, BAUXITE_ORE, Feature.ORE, new OreConfiguration(bauxiteTargets, 8, 0.25f));
+        register(context, CASSITERITE_ORE, Feature.ORE, new OreConfiguration(tinTargets, 14));
+        register(context, ZINC_ORE, Feature.SCATTERED_ORE, new OreConfiguration(zincTargets, 10));
 
         register(context, RUBBER_TREE, Feature.TREE,
-                new TreeFeatureConfig.Builder(
-                        SimpleBlockStateProvider.of(WoodSetInit.RUBBER.log),
-                        new RubberTreeTrunkPlacer(15, 2, 1, UniformIntProvider.create(10, 13), UniformIntProvider.create(3, 5)),
-                        SimpleBlockStateProvider.of(WoodSetInit.RUBBER.leaves),
-                        new BlobFoliagePlacer(UniformIntProvider.create(2, 4), ConstantIntProvider.create(2), 4),
+                new TreeConfiguration.TreeConfigurationBuilder(
+                        SimpleStateProvider.simple(WoodSetInit.RUBBER.log),
+                        new RubberTreeTrunkPlacer(15, 2, 1, UniformInt.of(10, 13), UniformInt.of(3, 5)),
+                        SimpleStateProvider.simple(WoodSetInit.RUBBER.leaves),
+                        new BlobFoliagePlacer(UniformInt.of(2, 4), ConstantInt.of(2), 4),
                         new TwoLayersFeatureSize(1, 0, 1))
                         .ignoreVines()
-                        .dirtProvider(SimpleBlockStateProvider.of(Blocks.DIRT))
+                        .dirt(SimpleStateProvider.simple(Blocks.DIRT))
                         .build());
     }
 
-    private static RegistryKey<ConfiguredFeature<?, ?>> registerKey(String name) {
-        return RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, Industria.id(name));
+    private static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
+        return ResourceKey.create(Registries.CONFIGURED_FEATURE, Industria.id(name));
     }
 
-    private static <FC extends FeatureConfig, F extends Feature<FC>> void register(Registerable<ConfiguredFeature<?, ?>> context,
-                                                                                   RegistryKey<ConfiguredFeature<?, ?>> key,
-                                                                                   F feature,
-                                                                                   FC featureConfig) {
+    private static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(BootstrapContext<ConfiguredFeature<?, ?>> context,
+                                                                                          ResourceKey<ConfiguredFeature<?, ?>> key,
+                                                                                          F feature,
+                                                                                          FC featureConfig) {
         context.register(key, new ConfiguredFeature<>(feature, featureConfig));
     }
 }

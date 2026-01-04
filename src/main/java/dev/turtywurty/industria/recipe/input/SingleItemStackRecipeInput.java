@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.recipe.input;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 public record SingleItemStackRecipeInput(ItemStack stack) implements RecipeInput {
     public static SingleItemStackRecipeInput of(ItemStack stack) {
@@ -9,7 +9,7 @@ public record SingleItemStackRecipeInput(ItemStack stack) implements RecipeInput
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
+    public ItemStack getItem(int slot) {
         return slot == 0 ? this.stack : ItemStack.EMPTY;
     }
 

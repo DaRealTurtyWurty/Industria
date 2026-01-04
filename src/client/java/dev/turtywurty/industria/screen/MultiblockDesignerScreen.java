@@ -14,47 +14,47 @@ import dev.turtywurty.industria.screen.widget.*;
 import dev.turtywurty.industria.screenhandler.MultiblockDesignerScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
 // TODO: Do not sync the scene every tick, only when there are changes.
-public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerScreenHandler> {
+public class MultiblockDesignerScreen extends AbstractContainerScreen<MultiblockDesignerScreenHandler> {
     private static final Identifier GUI_BORDER_TEXTURE = Industria.id("textures/gui/gui_border.png");
-    private static final Identifier DIRT_TEXTURE = Identifier.ofVanilla("textures/block/dirt.png");
+    private static final Identifier DIRT_TEXTURE = Identifier.withDefaultNamespace("textures/block/dirt.png");
     private static final Identifier ADD_BLOCK_ICON_TEXTURE = Industria.id("textures/gui/icons/add_block.png");
     private static final Identifier ADD_BLOCK_STATE_ICON_TEXTURE = Industria.id("textures/gui/icons/add_blockstate.png");
     private static final Identifier ADD_BLOCK_TAG_ICON_TEXTURE = Industria.id("textures/gui/icons/add_block_tag.png");
     private static final Identifier CLOSE_ICON_TEXTURE = Industria.id("textures/gui/icons/close.png");
     private static final Identifier TRASH_ICON_TEXTURE = Industria.id("textures/gui/icons/trash.png");
-    private static final Identifier CHECKMARK_TEXTURE = Identifier.ofVanilla("textures/gui/sprites/icon/checkmark.png");
+    private static final Identifier CHECKMARK_TEXTURE = Identifier.withDefaultNamespace("textures/gui/sprites/icon/checkmark.png");
 
-    public static final Text SEARCH_PLACEHOLDER = Text.translatable("screen." + Industria.MOD_ID + ".search.placeholder");
-    public static final Text PALETTE_TITLE = Industria.containerTitle("multiblock_designer.palette");
-    public static final Text EXPORT_TITLE = Industria.containerTitle("multiblock_designer.export");
-    public static final Text EDIT_TITLE = Industria.containerTitle("multiblock_designer.edit");
-    public static final Text PALETTE_NAME_NARRATION = Industria.containerTitle("multiblock_designer.edit.palette_name.narration");
-    public static final Text DELETE_ENTRY = Industria.containerTitle("multiblock_designer.edit.delete_entry.button");
-    public static final Text PALETTE_NAME_LABEL = Industria.containerTitle("multiblock_designer.edit.palette_name.label");
-    public static final Text EXPORT_BUTTON_TEXT = Industria.containerTitle("multiblock_designer.export.button");
-    public static final Text EXPORT_COPIED_MESSAGE = Industria.containerTitle("multiblock_designer.export.copied_message");
-    public static final Text PORT_RULES_BUTTON_TEXT = Industria.containerTitle("multiblock_designer.port_rules.button");
+    public static final Component SEARCH_PLACEHOLDER = Component.translatable("screen." + Industria.MOD_ID + ".search.placeholder");
+    public static final Component PALETTE_TITLE = Industria.containerTitle("multiblock_designer.palette");
+    public static final Component EXPORT_TITLE = Industria.containerTitle("multiblock_designer.export");
+    public static final Component EDIT_TITLE = Industria.containerTitle("multiblock_designer.edit");
+    public static final Component PALETTE_NAME_NARRATION = Industria.containerTitle("multiblock_designer.edit.palette_name.narration");
+    public static final Component DELETE_ENTRY = Industria.containerTitle("multiblock_designer.edit.delete_entry.button");
+    public static final Component PALETTE_NAME_LABEL = Industria.containerTitle("multiblock_designer.edit.palette_name.label");
+    public static final Component EXPORT_BUTTON_TEXT = Industria.containerTitle("multiblock_designer.export.button");
+    public static final Component EXPORT_COPIED_MESSAGE = Industria.containerTitle("multiblock_designer.export.copied_message");
+    public static final Component PORT_RULES_BUTTON_TEXT = Industria.containerTitle("multiblock_designer.port_rules.button");
 
     private static final int BORDER_SLICE = 16;
 
@@ -67,15 +67,15 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     private int titleWidth;
     private PaletteEntryListWidget paletteEntryListWidget;
     private BlockEntryListWidget blockEntryListWidget;
-    private TextFieldWidget paletteNameField;
-    private ButtonWidget deleteEntryButton;
-    private ButtonWidget removeBlockEntryButton;
+    private EditBox paletteNameField;
+    private Button deleteEntryButton;
+    private Button removeBlockEntryButton;
     private PaletteEntryListWidget.Entry selectedPaletteEntry;
     private Character selectedPaletteChar;
     private BlockEntryListWidget.Entry selectedBlockEntry;
     private CharTextFieldWidget selectedPieceCharField;
     private IconButtonWidget selectedPieceConfirmButton;
-    private ButtonWidget editPortRulesButton;
+    private Button editPortRulesButton;
     private boolean updatingNameField;
     private IconButtonWidget addBlockButton;
     private IconButtonWidget addBlockStateButton;
@@ -84,16 +84,16 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
 
     private boolean isFakeClose;
 
-    public MultiblockDesignerScreen(MultiblockDesignerScreenHandler handler, PlayerInventory inventory, Text title) {
+    public MultiblockDesignerScreen(MultiblockDesignerScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.playerInventoryTitleX = -10000;
-        this.titleX = -10000;
-        this.titleWidth = this.textRenderer.getWidth(this.title);
+        this.inventoryLabelX = -10000;
+        this.titleLabelX = -10000;
+        this.titleWidth = this.font.width(this.title);
 
         if (this.fakeWorldWidget != null) {
             this.fakeWorldWidget.onClose();
@@ -102,12 +102,12 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         }
 
         this.scene = FakeWorldSceneBuilder.create()
-                .camera(new Vec3d(2.5, 66.0, 7.0), 200.0F, -18.0F)
+                .camera(new Vec3(2.5, 66.0, 7.0), 200.0F, -18.0F)
                 .build();
-        this.fakeWorldWidget = addDrawableChild(new MultiblockDesignerWorldWidget(this, this.x + 7, this.y + 16));
+        this.fakeWorldWidget = addRenderableWidget(new MultiblockDesignerWorldWidget(this, this.leftPos + 7, this.topPos + 16));
         updateFakeWorldWidgetBounds();
 
-        this.selectedPieceCloseButton = addDrawableChild(new IconButtonWidget.Builder()
+        this.selectedPieceCloseButton = addRenderableWidget(new IconButtonWidget.Builder()
                 .iconStates(CLOSE_ICON_TEXTURE, 0, 0, 16, 32, 16, 16, 16, 48)
                 .drawBackground(false)
                 .size(16, 16)
@@ -116,19 +116,19 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         this.selectedPieceCloseButton.visible = false;
         this.selectedPieceCloseButton.active = false;
 
-        this.selectedPieceCharField = addDrawableChild(new CharTextFieldWidget(
-                this.textRenderer,
+        this.selectedPieceCharField = addRenderableWidget(new CharTextFieldWidget(
+                this.font,
                 0,
                 0,
                 20,
                 16,
-                Text.empty()
+                Component.empty()
         ));
         this.selectedPieceCharField.setVisible(false);
         this.selectedPieceCharField.setEditable(true);
-        this.selectedPieceCharField.setChangedListener(this::onSelectedPieceCharChanged);
+        this.selectedPieceCharField.setResponder(this::onSelectedPieceCharChanged);
 
-        this.selectedPieceConfirmButton = addDrawableChild(new IconButtonWidget.Builder()
+        this.selectedPieceConfirmButton = addRenderableWidget(new IconButtonWidget.Builder()
                 .iconStates(CHECKMARK_TEXTURE, 0, 0, 0, 0, 9, 9, 9, 9)
                 .size(16, 16)
                 .onPress(button -> confirmSelectedPieceChar())
@@ -136,14 +136,14 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         this.selectedPieceConfirmButton.visible = false;
         this.selectedPieceConfirmButton.active = false;
 
-        this.editPortRulesButton = addDrawableChild(ButtonWidget.builder(PORT_RULES_BUTTON_TEXT, button -> {
-                    MinecraftClient minecraftClient = MultiblockDesignerScreen.this.client;
+        this.editPortRulesButton = addRenderableWidget(Button.builder(PORT_RULES_BUTTON_TEXT, button -> {
+                    Minecraft minecraftClient = MultiblockDesignerScreen.this.minecraft;
                     if (minecraftClient == null)
                         return;
 
-                    PieceData pieceData = MultiblockDesignerScreen.this.handler.getBlockEntity()
+                    PieceData pieceData = MultiblockDesignerScreen.this.menu.getBlockEntity()
                             .getPieces()
-                            .get(MultiblockDesignerScreen.this.selectedPiece.add(MultiblockDesignerScreen.this.handler.getBlockEntity().getPos()));
+                            .get(MultiblockDesignerScreen.this.selectedPiece.offset(MultiblockDesignerScreen.this.menu.getBlockEntity().getBlockPos()));
                     if (pieceData == null)
                         return;
 
@@ -154,7 +154,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
                             () -> MultiblockDesignerScreen.this.isFakeClose = false
                     ));
                 })
-                .dimensions(0, 0, 0, 20)
+                .bounds(0, 0, 0, 20)
                 .build());
         this.editPortRulesButton.visible = false;
         this.editPortRulesButton.active = false;
@@ -177,8 +177,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         }
         this.selectedPaletteEntry = null;
 
-        this.paletteEntryListWidget = addDrawableChild(new PaletteEntryListWidget(
-                this.client,
+        this.paletteEntryListWidget = addRenderableWidget(new PaletteEntryListWidget(
+                this.minecraft,
                 16,
                 24,
                 (this.width - BORDER_SLICE) / 3 - 16,
@@ -186,7 +186,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
                 24
         ));
         this.paletteEntryListWidget.setSelectionListener(this::onPaletteEntrySelected);
-        this.handler.getBlockEntity().getPieces().forEach((blockPos, pieceData) ->
+        this.menu.getBlockEntity().getPieces().forEach((blockPos, pieceData) ->
                 this.paletteEntryListWidget.addOrUpdateEntry(
                         pieceData.paletteChar,
                         pieceData.name,
@@ -199,20 +199,20 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         int panelStartX = 8;
         int panelStartY = ((this.height - 24) / 3) * 2 + BORDER_SLICE + 8;
 
-        addDrawableChild(ButtonWidget.builder(EXPORT_BUTTON_TEXT, button -> {
-                    String content = this.handler.getBlockEntity().exportMultiblock();
-                    MinecraftClient client = this.client;
+        addRenderableWidget(Button.builder(EXPORT_BUTTON_TEXT, button -> {
+                    String content = this.menu.getBlockEntity().exportMultiblock();
+                    Minecraft client = this.minecraft;
                     if (client == null)
                         return;
 
-                    client.keyboard.setClipboard(content);
-                    ClientPlayerEntity player = client.player;
+                    client.keyboardHandler.setClipboard(content);
+                    LocalPlayer player = client.player;
                     if (player == null)
                         return;
 
-                    player.sendMessage(EXPORT_COPIED_MESSAGE, false);
+                    player.displayClientMessage(EXPORT_COPIED_MESSAGE, false);
                 })
-                .dimensions(panelStartX + 8, panelStartY + 8, panelWidth - 16, 20)
+                .bounds(panelStartX + 8, panelStartY + 8, panelWidth - 16, 20)
                 .build());
     }
 
@@ -223,8 +223,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         int contentX = panelStartX + 8;
         int contentWidth = panelWidth - 16;
 
-        this.paletteNameField = addDrawableChild(new TextFieldWidget(
-                this.textRenderer,
+        this.paletteNameField = addRenderableWidget(new EditBox(
+                this.font,
                 contentX,
                 36,
                 contentWidth,
@@ -232,13 +232,13 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
                 PALETTE_NAME_NARRATION
         ));
         this.paletteNameField.setEditable(false);
-        this.paletteNameField.setChangedListener(this::onPaletteNameChanged);
+        this.paletteNameField.setResponder(this::onPaletteNameChanged);
 
-        MinecraftClient minecraftClient = MultiblockDesignerScreen.this.client;
+        Minecraft minecraftClient = MultiblockDesignerScreen.this.minecraft;
         if (minecraftClient == null)
             return;
 
-        this.addBlockButton = addDrawableChild(new IconButtonWidget.Builder()
+        this.addBlockButton = addRenderableWidget(new IconButtonWidget.Builder()
                 .icon(ADD_BLOCK_ICON_TEXTURE, 0, 0, 16, 16, 16, 16)
                 .position(contentX, 58)
                 .size(20, 20)
@@ -252,7 +252,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
                 })
                 .build());
 
-        this.addBlockStateButton = addDrawableChild(new IconButtonWidget.Builder()
+        this.addBlockStateButton = addRenderableWidget(new IconButtonWidget.Builder()
                 .icon(ADD_BLOCK_STATE_ICON_TEXTURE, 0, 0, 16, 16, 16, 16)
                 .position(contentX + 24, 58)
                 .size(20, 20)
@@ -266,7 +266,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
                 })
                 .build());
 
-        this.addBlockTagButton = addDrawableChild(new IconButtonWidget.Builder()
+        this.addBlockTagButton = addRenderableWidget(new IconButtonWidget.Builder()
                 .icon(ADD_BLOCK_TAG_ICON_TEXTURE, 0, 0, 16, 16, 16, 16)
                 .position(contentX + 48, 58)
                 .size(20, 20)
@@ -283,7 +283,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         this.addBlockStateButton.active = false;
         this.addBlockTagButton.active = false;
 
-        this.blockEntryListWidget = addDrawableChild(new BlockEntryListWidget(
+        this.blockEntryListWidget = addRenderableWidget(new BlockEntryListWidget(
                 minecraftClient,
                 contentX,
                 80,
@@ -293,12 +293,12 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         ));
         this.blockEntryListWidget.setSelectionListener(this::onBlockEntrySelected);
 
-        this.deleteEntryButton = addDrawableChild(ButtonWidget.builder(DELETE_ENTRY, button -> onDeleteSelectedEntry())
-                .dimensions(contentX, panelHeight - 20, contentWidth, 20)
+        this.deleteEntryButton = addRenderableWidget(Button.builder(DELETE_ENTRY, button -> onDeleteSelectedEntry())
+                .bounds(contentX, panelHeight - 20, contentWidth, 20)
                 .build());
         this.deleteEntryButton.active = false;
 
-        this.removeBlockEntryButton = addDrawableChild(new IconButtonWidget.Builder()
+        this.removeBlockEntryButton = addRenderableWidget(new IconButtonWidget.Builder()
                 .iconStates(TRASH_ICON_TEXTURE, 0, 0, 16, 32, 16, 16, 16, 48)
                 .position(contentX + contentWidth - 20, 58)
                 .size(20, 20)
@@ -308,8 +308,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
         if (this.isFakeClose)
             return;
 
@@ -329,8 +329,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    protected void handledScreenTick() {
-        super.handledScreenTick();
+    protected void containerTick() {
+        super.containerTick();
         syncPreview();
         if (this.fakeWorldWidget != null) {
             this.fakeWorldWidget.tick();
@@ -359,7 +359,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (this.fakeWorldWidget != null && this.scene != null && this.fakeWorldWidget.handleClick(click, doubled))
                 return true;
@@ -374,7 +374,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (this.scene != null) {
                 float sensitivity = 0.35F;
@@ -392,23 +392,23 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         boolean textFocused = (this.paletteNameField != null && this.paletteNameField.isFocused())
                 || (this.selectedPieceCharField != null && this.selectedPieceCharField.isFocused());
-        if (textFocused && this.client != null && this.client.options.inventoryKey.matchesKey(input))
+        if (textFocused && this.minecraft != null && this.minecraft.options.keyInventory.matches(input))
             return true;
 
         return super.keyPressed(input);
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         drawDirtBackground(context);
         drawBorderOverlay(context);
-        drawBackground(context, deltaTicks, mouseX, mouseY);
+        renderBg(context, deltaTicks, mouseX, mouseY);
     }
 
-    private void drawDirtBackground(DrawContext context) {
+    private void drawDirtBackground(GuiGraphics context) {
         for (int x = 0; x < this.width; x += 16) {
             for (int y = 0; y < this.height; y += 16) {
                 int drawWidth = Math.min(16, this.width - x);
@@ -420,7 +420,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         context.fill(0, 0, this.width, this.height, 0xAA000000);
     }
 
-    private void drawBorderOverlay(DrawContext context) {
+    private void drawBorderOverlay(GuiGraphics context) {
         ScreenUtils.drawNineSlicedTexture(context, GUI_BORDER_TEXTURE, 0, 0, this.width, this.height, 0, 0, BORDER_SLICE);
 
         int furthestLeft = this.width / 2 - this.titleWidth / 2 - 5;
@@ -435,7 +435,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float deltaTicks, int mouseX, int mouseY) {
+    protected void renderBg(GuiGraphics context, float deltaTicks, int mouseX, int mouseY) {
         drawPalettePanel(context);
         drawExportPanel(context);
         if (this.selectedPiece != null) {
@@ -444,20 +444,20 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         drawEditPanel(context);
     }
 
-    private void drawPalettePanel(DrawContext context) {
+    private void drawPalettePanel(GuiGraphics context) {
         int width = (this.width - BORDER_SLICE) / 3;
         int height = ((this.height - 24) / 3) * 2;
         ScreenUtils.drawNineSlicedTexture(context, GUI_BORDER_TEXTURE, 8, 8, width, height, 0, 48, BORDER_SLICE);
     }
 
-    private void drawExportPanel(DrawContext context) {
+    private void drawExportPanel(GuiGraphics context) {
         int width = (this.width - BORDER_SLICE) / 3;
         int height = (this.height - 24) / 3;
         int startY = (((this.height - 24) / 3) * 2) + BORDER_SLICE;
         ScreenUtils.drawNineSlicedTexture(context, GUI_BORDER_TEXTURE, 8, startY, width, height, 0, 48, BORDER_SLICE);
     }
 
-    private void drawSelectedPiecePanel(DrawContext context) {
+    private void drawSelectedPiecePanel(GuiGraphics context) {
         PanelBounds bounds = getSelectedPiecePanelBounds();
         ScreenUtils.drawNineSlicedTexture(
                 context,
@@ -472,7 +472,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         );
     }
 
-    private void drawEditPanel(DrawContext context) {
+    private void drawEditPanel(GuiGraphics context) {
         int width = (this.width - BORDER_SLICE) / 3 - 8;
         int height = this.height - BORDER_SLICE;
         int startX = ((this.width - BORDER_SLICE) / 3) * 2 + BORDER_SLICE;
@@ -480,22 +480,22 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         updateFakeWorldWidgetBounds();
         updateSelectedPiecePanelWidgets();
         super.render(context, mouseX, mouseY, deltaTicks);
         if (this.fakeWorldWidget != null) {
-            context.drawStrokedRectangle(this.fakeWorldWidget.getX(), this.fakeWorldWidget.getY(),
+            context.renderOutline(this.fakeWorldWidget.getX(), this.fakeWorldWidget.getY(),
                     this.fakeWorldWidget.getWidth(), this.fakeWorldWidget.getHeight(), 0xAAFF4040);
         }
-        context.drawText(this.textRenderer, this.title, this.width / 2 - this.titleWidth / 2, 4, 0xFF404040, false);
+        context.drawString(this.font, this.title, this.width / 2 - this.titleWidth / 2, 4, 0xFF404040, false);
 
-        context.drawText(this.textRenderer, PALETTE_TITLE, 16, 14, 0xFF404040, false);
+        context.drawString(this.font, PALETTE_TITLE, 16, 14, 0xFF404040, false);
 
-        context.drawText(this.textRenderer, EXPORT_TITLE, 16, ((this.height - 24) / 3) * 2 + BORDER_SLICE + 6, 0xFF404040, false);
+        context.drawString(this.font, EXPORT_TITLE, 16, ((this.height - 24) / 3) * 2 + BORDER_SLICE + 6, 0xFF404040, false);
 
-        context.drawText(this.textRenderer, EDIT_TITLE, ((this.width - BORDER_SLICE) / 3) * 2 + BORDER_SLICE + 8, 14, 0xFF404040, false);
-        context.drawText(this.textRenderer, PALETTE_NAME_LABEL, ((this.width - BORDER_SLICE) / 3) * 2 + BORDER_SLICE + 8, 26, 0xFF808080, false);
+        context.drawString(this.font, EDIT_TITLE, ((this.width - BORDER_SLICE) / 3) * 2 + BORDER_SLICE + 8, 14, 0xFF404040, false);
+        context.drawString(this.font, PALETTE_NAME_LABEL, ((this.width - BORDER_SLICE) / 3) * 2 + BORDER_SLICE + 8, 26, 0xFF808080, false);
 
         if (this.selectedPiece != null) {
             renderSelectedPiecePanel(context);
@@ -514,8 +514,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         if (this.scene == null)
             return;
 
-        MultiblockDesignerBlockEntity blockEntity = this.handler.getBlockEntity();
-        BlockPos origin = blockEntity.getPos();
+        MultiblockDesignerBlockEntity blockEntity = this.menu.getBlockEntity();
+        BlockPos origin = blockEntity.getBlockPos();
         Map<BlockPos, PieceData> pieces = blockEntity.getPieces();
         Set<BlockPos> resolved = new HashSet<>();
         Map<BlockPos, VariedBlockList> variedBlockLists = new HashMap<>();
@@ -535,7 +535,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
             }
 
             FakeWorldScene.Nameplate nameplate = paletteChanged
-                    ? this.scene.addNameplate(Vec3d.ofCenter(relative), Text.literal(paletteText), 0.75F)
+                    ? this.scene.addNameplate(Vec3.atCenterOf(relative), Component.literal(paletteText), 0.75F)
                     : existing;
             if (nameplate != null) {
                 nameplates.put(relative, nameplate);
@@ -599,8 +599,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         if (this.selectedPiece == null)
             return;
 
-        BlockPos worldPos = this.selectedPiece.add(this.handler.getBlockEntity().getPos());
-        PieceData data = this.handler.getBlockEntity().getPieces().get(worldPos);
+        BlockPos worldPos = this.selectedPiece.offset(this.menu.getBlockEntity().getBlockPos());
+        PieceData data = this.menu.getBlockEntity().getPieces().get(worldPos);
         if (data == null) {
             clearSelection();
         }
@@ -610,7 +610,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         if (this.paletteEntryListWidget == null)
             return;
 
-        MultiblockDesignerBlockEntity blockEntity = this.handler.getBlockEntity();
+        MultiblockDesignerBlockEntity blockEntity = this.menu.getBlockEntity();
         Set<Character> seen = new HashSet<>();
         for (PieceData pieceData : blockEntity.getPieces().values()) {
             seen.add(pieceData.paletteChar);
@@ -641,7 +641,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         boolean hasSelection = entry != null;
         this.paletteNameField.setEditable(hasSelection);
         this.updatingNameField = true;
-        this.paletteNameField.setText(hasSelection ? entry.getName() : "");
+        this.paletteNameField.setValue(hasSelection ? entry.getName() : "");
         this.updatingNameField = false;
         if (!hasSelection) {
             this.paletteNameField.setFocused(false);
@@ -685,7 +685,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
             return;
 
         this.selectedPaletteEntry.update(name, this.selectedPaletteEntry.getVariedBlockList());
-        this.handler.getBlockEntity().setPaletteName(this.selectedPaletteEntry.getPaletteChar(), name);
+        this.menu.getBlockEntity().setPaletteName(this.selectedPaletteEntry.getPaletteChar(), name);
         ClientPlayNetworking.send(new UpdatePaletteEntryNamePayload(this.selectedPaletteEntry.getPaletteChar(), name));
     }
 
@@ -695,7 +695,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
 
         char paletteChar = this.selectedPaletteEntry.getPaletteChar();
         this.paletteEntryListWidget.removeEntry(paletteChar);
-        this.handler.getBlockEntity().removePiecesWithChar(paletteChar);
+        this.menu.getBlockEntity().removePiecesWithChar(paletteChar);
         ClientPlayNetworking.send(new DeletePaletteEntryPayload(paletteChar));
         onPaletteEntrySelected(null);
     }
@@ -752,7 +752,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
 
         char paletteChar = this.selectedPaletteEntry.getPaletteChar();
         this.selectedPaletteEntry.update(this.selectedPaletteEntry.getName(), newList);
-        this.handler.getBlockEntity().setPaletteVariedBlockList(paletteChar, newList);
+        this.menu.getBlockEntity().setPaletteVariedBlockList(paletteChar, newList);
         if (ClientPlayNetworking.canSend(UpdatePaletteEntryVariedBlockListPayload.ID)) {
             ClientPlayNetworking.send(new UpdatePaletteEntryVariedBlockListPayload(paletteChar, newList));
         } else {
@@ -840,25 +840,25 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         }
     }
 
-    private void renderSelectedPiecePanel(DrawContext context) {
+    private void renderSelectedPiecePanel(GuiGraphics context) {
         PanelBounds bounds = getSelectedPiecePanelBounds();
         int textX = bounds.x() + 8;
         int textY = bounds.y() + 6;
         int titleColor = 0xFF404040;
         int labelColor = 0xFF808080;
-        int lineHeight = this.textRenderer.fontHeight + 2;
+        int lineHeight = this.font.lineHeight + 2;
 
-        context.drawText(this.textRenderer, Text.literal("Selected Piece"), textX, textY, titleColor, false);
+        context.drawString(this.font, Component.literal("Selected Piece"), textX, textY, titleColor, false);
         textY += lineHeight;
 
-        BlockPos worldPos = this.selectedPiece.add(this.handler.getBlockEntity().getPos());
-        PieceData data = this.handler.getBlockEntity().getPieces().get(worldPos);
+        BlockPos worldPos = this.selectedPiece.offset(this.menu.getBlockEntity().getBlockPos());
+        PieceData data = this.menu.getBlockEntity().getPieces().get(worldPos);
         String name = data != null ? data.name : "Unknown";
 
-        context.drawText(this.textRenderer, Text.literal("Name: " + name), textX, textY, labelColor, false);
+        context.drawString(this.font, Component.literal("Name: " + name), textX, textY, labelColor, false);
         textY += lineHeight;
 
-        context.drawText(this.textRenderer, Text.literal("Palette:"), textX, textY, labelColor, false);
+        context.drawString(this.font, Component.literal("Palette:"), textX, textY, labelColor, false);
     }
 
     private PanelBounds getSelectedPiecePanelBounds() {
@@ -932,11 +932,11 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         this.selectedPieceCloseButton.setX(buttonX);
         this.selectedPieceCloseButton.setY(buttonY);
 
-        int lineHeight = this.textRenderer.fontHeight + 2;
+        int lineHeight = this.font.lineHeight + 2;
         int paletteLineY = bounds.y() + 6 + lineHeight * 2;
-        int labelWidth = this.textRenderer.getWidth("Palette:");
+        int labelWidth = this.font.width("Palette:");
         int fieldX = bounds.x() + 8 + labelWidth + 4;
-        int fieldY = paletteLineY - (this.selectedPieceCharField.getHeight() - this.textRenderer.fontHeight) / 2 - 1;
+        int fieldY = paletteLineY - (this.selectedPieceCharField.getHeight() - this.font.lineHeight) / 2 - 1;
         this.selectedPieceCharField.setX(fieldX);
         this.selectedPieceCharField.setY(fieldY);
 
@@ -965,7 +965,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         if (this.selectedPiece == null || this.selectedPieceCharField == null)
             return false;
 
-        String text = this.selectedPieceCharField.getText();
+        String text = this.selectedPieceCharField.getValue();
         if (text == null || text.isEmpty())
             return false;
 
@@ -978,8 +978,8 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         if (this.selectedPiece == null)
             return '\0';
 
-        BlockPos worldPos = this.selectedPiece.add(this.handler.getBlockEntity().getPos());
-        PieceData data = this.handler.getBlockEntity().getPieces().get(worldPos);
+        BlockPos worldPos = this.selectedPiece.offset(this.menu.getBlockEntity().getBlockPos());
+        PieceData data = this.menu.getBlockEntity().getPieces().get(worldPos);
         return data != null ? data.paletteChar : '\0';
     }
 
@@ -988,7 +988,7 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
             return;
 
         if (this.selectedPiece == null) {
-            this.selectedPieceCharField.setText("");
+            this.selectedPieceCharField.setValue("");
             this.selectedPieceCharField.setVisible(false);
             this.selectedPieceCharField.setEditable(false);
             this.selectedPieceCharField.setFocused(false);
@@ -999,22 +999,22 @@ public class MultiblockDesignerScreen extends HandledScreen<MultiblockDesignerSc
         char current = getCurrentPaletteCharForSelection();
         this.selectedPieceCharField.setVisible(true);
         this.selectedPieceCharField.setEditable(true);
-        this.selectedPieceCharField.setText(current == '\0' ? "" : String.valueOf(current));
+        this.selectedPieceCharField.setValue(current == '\0' ? "" : String.valueOf(current));
         this.selectedPieceCharField.setFocused(true);
-        onSelectedPieceCharChanged(this.selectedPieceCharField.getText());
+        onSelectedPieceCharChanged(this.selectedPieceCharField.getValue());
     }
 
     private void confirmSelectedPieceChar() {
         if (this.selectedPiece == null || this.selectedPieceCharField == null)
             return;
 
-        String text = this.selectedPieceCharField.getText();
+        String text = this.selectedPieceCharField.getValue();
         if (text == null || text.isEmpty())
             return;
 
         char newChar = text.charAt(0);
-        BlockPos worldPos = this.selectedPiece.add(this.handler.getBlockEntity().getPos());
-        this.handler.getBlockEntity().setPaletteChar(worldPos, newChar);
+        BlockPos worldPos = this.selectedPiece.offset(this.menu.getBlockEntity().getBlockPos());
+        this.menu.getBlockEntity().setPaletteChar(worldPos, newChar);
         if (ClientPlayNetworking.canSend(SetMultiblockPieceCharPayload.ID)) {
             ClientPlayNetworking.send(new SetMultiblockPieceCharPayload(worldPos, newChar));
         } else {

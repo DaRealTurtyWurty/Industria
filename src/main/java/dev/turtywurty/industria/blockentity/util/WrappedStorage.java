@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.util;
 
 import dev.turtywurty.industria.util.ViewSerializable;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,11 +1,11 @@
 package dev.turtywurty.industria.fluid;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public record FluidData(@NotNull TagKey<Fluid> fluidTag, boolean hardensConcrete
                         boolean shouldWitchDrinkWaterBreathing, boolean willZombiesConvert,
                         boolean canTropicalFishSpawn, boolean shouldTurtlesFavor, boolean shouldTurtleHelmetActivate,
                         boolean affectsBlockBreakSpeed, boolean canBoatsWork, boolean shouldEvaporateInUltrawarm,
-                        @NotNull ParticleEffect bubbleParticle, @NotNull ParticleEffect splashParticle,
+                        @NotNull ParticleOptions bubbleParticle, @NotNull ParticleOptions splashParticle,
                         boolean shouldBreakLanding, boolean shouldExtinguish) {
     public static final Map<Fluid, FluidData> FLUID_DATA = new HashMap<>();
 
@@ -66,8 +66,8 @@ public record FluidData(@NotNull TagKey<Fluid> fluidTag, boolean hardensConcrete
         private boolean affectsBlockBreakSpeed = false;
         private boolean canBoatsWork = false;
         private boolean shouldEvaporateInUltrawarm = false;
-        private ParticleEffect bubbleParticle = ParticleTypes.BUBBLE;
-        private ParticleEffect splashParticle = ParticleTypes.SPLASH;
+        private ParticleOptions bubbleParticle = ParticleTypes.BUBBLE;
+        private ParticleOptions splashParticle = ParticleTypes.SPLASH;
         private boolean shouldBreakLanding = true;
         private boolean shouldExtinguish = false;
 
@@ -215,12 +215,12 @@ public record FluidData(@NotNull TagKey<Fluid> fluidTag, boolean hardensConcrete
             return this;
         }
 
-        public Builder bubbleParticle(@NotNull ParticleEffect bubbleParticle) {
+        public Builder bubbleParticle(@NotNull ParticleOptions bubbleParticle) {
             this.bubbleParticle = bubbleParticle;
             return this;
         }
 
-        public Builder splashParticle(@NotNull ParticleEffect splashParticle) {
+        public Builder splashParticle(@NotNull ParticleOptions splashParticle) {
             this.splashParticle = splashParticle;
             return this;
         }

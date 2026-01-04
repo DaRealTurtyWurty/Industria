@@ -1,30 +1,30 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.BatteryBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Arrays;
 
 public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEntity, BlockPosPayload> {
-    public BatteryScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
+    public BatteryScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.BATTERY, syncId, playerInventory, payload, BatteryBlockEntity.class);
     }
 
-    public BatteryScreenHandler(int syncId, PlayerInventory playerInventory, BatteryBlockEntity blockEntity,
-                                WrappedInventoryStorage<?> wrappedInventoryStorage) {
-        super(ScreenHandlerTypeInit.BATTERY, syncId, playerInventory, blockEntity, wrappedInventoryStorage);
+    public BatteryScreenHandler(int syncId, Inventory playerInventory, BatteryBlockEntity blockEntity,
+                                WrappedContainerStorage<?> wrappedContainerStorage) {
+        super(ScreenHandlerTypeInit.BATTERY, syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
     @Override
@@ -33,24 +33,24 @@ public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEnt
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
-        SimpleInventory inventory = this.wrappedInventoryStorage.getInventory(0);
+    protected void addBlockEntitySlots(Inventory playerInventory) {
+        SimpleContainer inventory = this.wrappedContainerStorage.getInventory(0);
         addSlot(new PredicateSlot(inventory, 0, 80, 35, (stack) -> this.blockEntity.isValid(stack, 0)));
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
+    public ItemStack quickMoveStack(Player player, int slot) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return canUse(player, BlockInit.BASIC_BATTERY, BlockInit.ADVANCED_BATTERY,
                 BlockInit.ELITE_BATTERY, BlockInit.ULTIMATE_BATTERY, BlockInit.CREATIVE_BATTERY);
     }
 
-    private boolean canUse(PlayerEntity player, Block... blocks) {
-        return Arrays.stream(blocks).anyMatch(block -> canUse(this.context, player, block));
+    private boolean canUse(Player player, Block... blocks) {
+        return Arrays.stream(blocks).anyMatch(block -> stillValid(this.context, player, block));
     }
 
     public float getEnergyPercent() {
@@ -60,7 +60,7 @@ public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEnt
         if(energy == 0 || capacity == 0)
             return 0.0f;
 
-        return MathHelper.clamp((float) energy / (float) capacity, 0.0f, 1.0f);
+        return Mth.clamp((float) energy / (float) capacity, 0.0f, 1.0f);
     }
 
     public long getEnergy() {

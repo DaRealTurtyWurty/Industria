@@ -1,28 +1,28 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.renderer.block.*;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 
 public class BlockEntityRendererInit {
     public static void init() {
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.OIL_PUMP_JACK, OilPumpJackBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.DRILL, DrillBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.MOTOR, MotorBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.UPGRADE_STATION, UpgradeStationBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.MIXER, MixerBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.DIGESTER, DigesterBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.AUTO_MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.CLARIFIER, ClarifierBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.CRYSTALLIZER, CrystallizerBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, RotaryKilnBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.ELECTROLYZER, ElectrolyzerBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.FLUID_TANK, FluidTankBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.SHAKING_TABLE, ShakingTableBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.EXAMPLE_MULTIBLOCK_CONTROLLER, ExampleMultiblockControllerBlockEntityRenderer::new);
-        BlockEntityRendererFactories.register(BlockEntityTypeInit.MULTIBLOCK_DESIGNER, MultiblockDesignerBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.OIL_PUMP_JACK, OilPumpJackBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.DRILL, DrillBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.MOTOR, MotorBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.UPGRADE_STATION, UpgradeStationBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.MIXER, MixerBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.DIGESTER, DigesterBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.AUTO_MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.CLARIFIER, ClarifierBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.CRYSTALLIZER, CrystallizerBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.ROTARY_KILN_CONTROLLER, RotaryKilnBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.ELECTROLYZER, ElectrolyzerBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.FLUID_TANK, FluidTankBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.SHAKING_TABLE, ShakingTableBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.EXAMPLE_MULTIBLOCK_CONTROLLER, ExampleMultiblockControllerBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.MULTIBLOCK_DESIGNER, MultiblockDesignerBlockEntityRenderer::new);
     }
 }

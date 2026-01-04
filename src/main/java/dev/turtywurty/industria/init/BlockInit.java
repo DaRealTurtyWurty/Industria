@@ -4,15 +4,18 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
-import net.minecraft.block.*;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.math.intprovider.UniformIntProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DropExperienceBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 
 import java.util.function.Function;
 
@@ -123,11 +126,11 @@ public class BlockInit {
             Block::new, Blocks.IRON_BLOCK);
 
     public static final Block NETHER_PYRITE_ORE = registerWithItemCopy("nether_pyrite_ore",
-            settings -> new ExperienceDroppingBlock(UniformIntProvider.create(4, 6), settings), Blocks.NETHER_GOLD_ORE);
+            settings -> new DropExperienceBlock(UniformInt.of(4, 6), settings), Blocks.NETHER_GOLD_ORE);
 
     public static final Block END_PYRITE_ORE = registerWithItemCopy("end_pyrite_ore",
-            settings -> new ExperienceDroppingBlock(UniformIntProvider.create(4, 6),
-                    settings.luminance(value -> 7).nonOpaque()), Blocks.END_STONE);
+            settings -> new DropExperienceBlock(UniformInt.of(4, 6),
+                    settings.lightLevel(value -> 7).noOcclusion()), Blocks.END_STONE);
 
     public static final Block PYRITE_BLOCK = registerWithItemCopy("pyrite_block",
             Block::new, Blocks.IRON_BLOCK);
@@ -135,20 +138,20 @@ public class BlockInit {
     public static final Block STEEL_BLOCK = registerWithItemCopy("steel_block",
             Block::new, Blocks.IRON_BLOCK);
 
-    public static final ExperienceDroppingBlock QUARTZ_ORE = registerWithItemCopy("quartz_ore",
-            settings -> new ExperienceDroppingBlock(UniformIntProvider.create(2, 5), settings), Blocks.NETHER_QUARTZ_ORE,
-            settings -> settings.sounds(BlockSoundGroup.STONE).luminance(value -> 3).strength(3.0F).mapColor(MapColor.STONE_GRAY));
+    public static final DropExperienceBlock QUARTZ_ORE = registerWithItemCopy("quartz_ore",
+            settings -> new DropExperienceBlock(UniformInt.of(2, 5), settings), Blocks.NETHER_QUARTZ_ORE,
+            settings -> settings.sound(SoundType.STONE).lightLevel(value -> 3).strength(3.0F).mapColor(MapColor.STONE));
 
-    public static final ExperienceDroppingBlock DEEPSLATE_QUARTZ_ORE = registerWithItemCopy("deepslate_quartz_ore",
-            settings -> new ExperienceDroppingBlock(UniformIntProvider.create(2, 5),
-                    settings.luminance(value -> 3).nonOpaque()), Blocks.NETHER_QUARTZ_ORE,
-            settings -> settings.sounds(BlockSoundGroup.DEEPSLATE).luminance(value -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE_GRAY));
+    public static final DropExperienceBlock DEEPSLATE_QUARTZ_ORE = registerWithItemCopy("deepslate_quartz_ore",
+            settings -> new DropExperienceBlock(UniformInt.of(2, 5),
+                    settings.lightLevel(value -> 3).noOcclusion()), Blocks.NETHER_QUARTZ_ORE,
+            settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(value -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE));
     
     public static final AlloyFurnaceBlock ALLOY_FURNACE = registerWithItemCopy("alloy_furnace",
-            AlloyFurnaceBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
+            AlloyFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
     public static final ThermalGeneratorBlock THERMAL_GENERATOR = registerWithItemCopy("thermal_generator",
-            ThermalGeneratorBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
+            ThermalGeneratorBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
     public static final BatteryBlock BASIC_BATTERY = registerWithItemCopy("basic_battery",
             settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.BASIC), Blocks.IRON_BLOCK);
@@ -166,31 +169,31 @@ public class BlockInit {
             settings -> new BatteryBlock(settings, BatteryBlock.BatteryLevel.CREATIVE), Blocks.IRON_BLOCK);
 
     public static final CombustionGeneratorBlock COMBUSTION_GENERATOR = registerWithItemCopy("combustion_generator",
-            CombustionGeneratorBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
+            CombustionGeneratorBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
     public static final SolarPanelBlock SOLAR_PANEL = registerWithItemCopy("solar_panel",
-            SolarPanelBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            SolarPanelBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final CrusherBlock CRUSHER = registerWithItemCopy("crusher",
-            CrusherBlock::new, Blocks.FURNACE, settings -> settings.luminance(value -> 0).nonOpaque());
+            CrusherBlock::new, Blocks.FURNACE, settings -> settings.lightLevel(value -> 0).noOcclusion());
 
     public static final WindTurbineBlock WIND_TURBINE = registerWithItemCopy("wind_turbine",
-            WindTurbineBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            WindTurbineBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final OilPumpJackBlock OIL_PUMP_JACK = registerWithItemCopy("oil_pump_jack",
-            OilPumpJackBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            OilPumpJackBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final DrillBlock DRILL = registerWithItemCopy("drill",
-            DrillBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            DrillBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final MotorBlock MOTOR = registerWithItemCopy("motor",
-            MotorBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            MotorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final DrillTubeBlock DRILL_TUBE = registerWithItemCopy("drill_tube",
-            DrillTubeBlock::new, Blocks.LIGHT_GRAY_CONCRETE, AbstractBlock.Settings::nonOpaque);
+            DrillTubeBlock::new, Blocks.LIGHT_GRAY_CONCRETE, BlockBehaviour.Properties::noOcclusion);
 
     public static final UpgradeStationBlock UPGRADE_STATION = registerWithItemCopy("upgrade_station",
-            UpgradeStationBlock::new, Blocks.ANVIL, AbstractBlock.Settings::nonOpaque);
+            UpgradeStationBlock::new, Blocks.ANVIL, BlockBehaviour.Properties::noOcclusion);
 
     public static final ElectricFurnaceBlock ELECTRIC_FURNACE = registerWithItemCopy("electric_furnace",
             ElectricFurnaceBlock::new, Blocks.FURNACE);
@@ -205,101 +208,101 @@ public class BlockInit {
             FractionalDistillationTowerBlock::new, Blocks.IRON_BLOCK);
 
     public static final CableBlock CABLE = registerWithItemCopy("cable",
-            CableBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            CableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final FluidPipeBlock FLUID_PIPE = registerWithItemCopy("fluid_pipe",
-            FluidPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            FluidPipeBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final SlurryPipeBlock SLURRY_PIPE = registerWithItemCopy("slurry_pipe",
-            SlurryPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            SlurryPipeBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final FluidPumpBlock FLUID_PUMP = registerWithItemCopy("fluid_pump",
-            FluidPumpBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            FluidPumpBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final HeatPipeBlock HEAT_PIPE = registerWithItemCopy("heat_pipe",
-            HeatPipeBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            HeatPipeBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final MixerBlock MIXER = registerWithItemCopy("mixer",
-            MixerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            MixerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final DigesterBlock DIGESTER = registerWithItemCopy("digester",
-            DigesterBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            DigesterBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final AutoMultiblockBlock AUTO_MULTIBLOCK_BLOCK = registerWithCopy("auto_multiblock",
-            AutoMultiblockBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            AutoMultiblockBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final AutoMultiblockIOBlock AUTO_MULTIBLOCK_IO = registerWithCopy("auto_multiblock_io",
-            AutoMultiblockIOBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            AutoMultiblockIOBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final ClarifierBlock CLARIFIER = registerWithItemCopy("clarifier",
-            ClarifierBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            ClarifierBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final CrystallizerBlock CRYSTALLIZER = registerWithItemCopy("crystallizer",
-            CrystallizerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            CrystallizerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final RotaryKilnControllerBlock ROTARY_KILN_CONTROLLER = registerWithCopy("rotary_kiln_controller",
-            RotaryKilnControllerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            RotaryKilnControllerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final RotaryKilnBlock ROTARY_KILN = registerWithCopy("rotary_kiln",
-            RotaryKilnBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            RotaryKilnBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final ElectrolyzerBlock ELECTROLYZER = registerWithItemCopy("electrolyzer",
-            ElectrolyzerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            ElectrolyzerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final FluidTankBlock FLUID_TANK = registerWithItemCopy("fluid_tank",
-            FluidTankBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            FluidTankBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final WellheadBlock WELLHEAD = registerWithItemCopy("wellhead",
-            WellheadBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            WellheadBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final ShakingTableBlock SHAKING_TABLE = registerWithItemCopy("shaking_table",
-            ShakingTableBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            ShakingTableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final CentrifugalConcentratorBlock CENTRIFUGAL_CONCENTRATOR = registerWithItemCopy("centrifugal_concentrator",
-            CentrifugalConcentratorBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            CentrifugalConcentratorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final ArcFurnaceBlock ARC_FURNACE = registerWithItemCopy("arc_furnace",
-            ArcFurnaceBlock::new, Blocks.FURNACE, AbstractBlock.Settings::nonOpaque);
+            ArcFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
     public static final ExampleMultiblockControllerBlock EXAMPLE_MULTIBLOCK_CONTROLLER = registerWithItemCopy("example_multiblock_controller",
-            ExampleMultiblockControllerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            ExampleMultiblockControllerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final MultiblockDesignerBlock MULTIBLOCK_DESIGNER = registerWithItemCopy("multiblock_designer",
-            MultiblockDesignerBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            MultiblockDesignerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final MultiblockPieceBlock MULTIBLOCK_PIECE = registerWithItemCopy("multiblock_piece",
-            MultiblockPieceBlock::new, Blocks.IRON_BLOCK, AbstractBlock.Settings::nonOpaque);
+            MultiblockPieceBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
-    public static <T extends Block> T register(String name, Function<AbstractBlock.Settings, T> constructor, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
+    public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
-                settingsApplier.apply(AbstractBlock.Settings.create()
-                        .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
+                settingsApplier.apply(BlockBehaviour.Properties.of()
+                        .setId(ResourceKey.create(Registries.BLOCK, Industria.id(name))))));
     }
 
-    public static <T extends Block> T registerWithCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy) {
+    public static <T extends Block> T registerWithCopy(String name, Function<BlockBehaviour.Properties, T> constructor, Block toCopy) {
         return registerWithCopy(name, constructor, toCopy, settings -> settings);
     }
 
-    public static <T extends Block> T registerWithCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
+    public static <T extends Block> T registerWithCopy(String name, Function<BlockBehaviour.Properties, T> constructor, Block toCopy, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
-                settingsApplier.apply(AbstractBlock.Settings.copy(toCopy)
-                        .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
+                settingsApplier.apply(BlockBehaviour.Properties.ofFullCopy(toCopy)
+                        .setId(ResourceKey.create(Registries.BLOCK, Industria.id(name))))));
     }
 
-    public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy) {
+    public static <T extends Block> T registerWithItemCopy(String name, Function<BlockBehaviour.Properties, T> constructor, Block toCopy) {
         return registerWithItemCopy(name, constructor, toCopy, settings -> settings);
     }
 
-    public static <T extends Block> T registerWithItemCopy(String name, Function<AbstractBlock.Settings, T> constructor, Block toCopy, Function<AbstractBlock.Settings, AbstractBlock.Settings> settingsApplier) {
+    public static <T extends Block> T registerWithItemCopy(String name, Function<BlockBehaviour.Properties, T> constructor, Block toCopy, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         T registeredBlock = registerBlock(name, constructor.apply(
-                settingsApplier.apply(AbstractBlock.Settings.copy(toCopy)
-                        .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Industria.id(name))))));
-        ItemInit.register(name, settings -> new BlockItem(registeredBlock, settings), Item.Settings::useBlockPrefixedTranslationKey);
+                settingsApplier.apply(BlockBehaviour.Properties.ofFullCopy(toCopy)
+                        .setId(ResourceKey.create(Registries.BLOCK, Industria.id(name))))));
+        ItemInit.register(name, settings -> new BlockItem(registeredBlock, settings), net.minecraft.world.item.Item.Properties::useBlockDescriptionPrefix);
         return registeredBlock;
     }
 
     private static <T extends Block> T registerBlock(String name, T block) {
-        return Registry.register(Registries.BLOCK, Industria.id(name), block);
+        return Registry.register(BuiltInRegistries.BLOCK, Industria.id(name), block);
     }
 
     public static void init() {

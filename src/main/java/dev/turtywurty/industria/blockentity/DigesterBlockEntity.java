@@ -16,7 +16,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.InputSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
@@ -46,25 +46,25 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -74,7 +74,7 @@ import java.util.Optional;
 
 // TODO: Make this work with temperature and pressure
 public class DigesterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
-    public static final Text TITLE = Industria.containerTitle("digester");
+    public static final Component TITLE = Industria.containerTitle("digester");
 
     private static final List<PositionedPortRule> PORT_RULES = List.of(
             PositionedPortRule.when(p -> p.y() == 4 && p.isCenterColumn())
@@ -93,18 +93,18 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
                     .build()
     );
 
-    private final WrappedInventoryStorage<SimpleInventory> wrappedInventoryStorage = new WrappedInventoryStorage<>();
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
 
     private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
-    private RegistryKey<Recipe<?>> currentRecipeId;
+    private ResourceKey<Recipe<?>> currentRecipeId;
     private int progress;
     private int maxProgress;
 
-    private final PropertyDelegate properties = new PropertyDelegate() {
+    private final ContainerData properties = new ContainerData() {
         @Override
         public int get(int index) {
             return switch (index) {
@@ -124,7 +124,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 2;
         }
     };
@@ -132,12 +132,12 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     public DigesterBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.DIGESTER, BlockEntityTypeInit.DIGESTER, pos, state);
 
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createSlurryPredicate(() -> {
                     SyncingSlurryStorage inputSlurryTank = getInputSlurryStorage();
                     return new SlurryStack(inputSlurryTank.variant, inputSlurryTank.amount);
                 })), Direction.UP);
-        this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, 1,
+        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
                 PredicateSimpleInventory.createEmptyFluidPredicate(() -> getOutputFluidStorage().variant)));
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 5_000, 0));
@@ -158,11 +158,11 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     public PredicateSimpleInventory getInputSlurryInventory() {
-        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(0);
+        return (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
 
     public PredicateSimpleInventory getOutputFluidInventory() {
-        return (PredicateSimpleInventory) this.wrappedInventoryStorage.getInventory(1);
+        return (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(1);
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
@@ -184,12 +184,12 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SyncingSimpleInventory bucketInputInventory = getInputSlurryInventory();
         if (!bucketInputInventory.isEmpty()) {
-            ItemStack bucket = bucketInputInventory.getStack(0);
+            ItemStack bucket = bucketInputInventory.getItem(0);
             Storage<SlurryVariant> storage = SlurryStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsExtraction()) {
                 SyncingSlurryStorage inputSlurryTank = getInputSlurryStorage();
@@ -210,7 +210,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
         SyncingSimpleInventory bucketOutputInventory = getOutputFluidInventory();
         if (!bucketOutputInventory.isEmpty()) {
-            ItemStack bucket = bucketOutputInventory.getStack(0);
+            ItemStack bucket = bucketOutputInventory.getItem(0);
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(bucket, ContainerItemContext.withConstant(bucket));
             if (storage != null && storage.supportsInsertion()) {
                 SyncingFluidStorage outputFluidTank = getOutputFluidStorage();
@@ -228,7 +228,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
         }
 
         if (this.currentRecipeId == null) {
-            Optional<RecipeEntry<DigesterRecipe>> recipeEntry = getCurrentRecipe();
+            Optional<RecipeHolder<DigesterRecipe>> recipeEntry = getCurrentRecipe();
             if (recipeEntry.isPresent()) {
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
@@ -239,7 +239,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
             return;
         }
 
-        Optional<RecipeEntry<DigesterRecipe>> recipeEntry = getCurrentRecipe();
+        Optional<RecipeHolder<DigesterRecipe>> recipeEntry = getCurrentRecipe();
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
             this.maxProgress = 0;
@@ -276,12 +276,12 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
         }
     }
 
-    private Optional<RecipeEntry<DigesterRecipe>> getCurrentRecipe() {
-        if (this.world == null || !(this.world instanceof ServerWorld serverWorld))
+    private Optional<RecipeHolder<DigesterRecipe>> getCurrentRecipe() {
+        if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
         InputSlurryStorage slurryStorage = getInputSlurryStorage();
-        return serverWorld.getRecipeManager().getFirstMatch(RecipeTypeInit.DIGESTER, new DigesterRecipeInput(new SlurryStack(slurryStorage.variant, slurryStorage.amount)), this.world);
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.DIGESTER, new DigesterRecipeInput(new SlurryStack(slurryStorage.variant, slurryStorage.amount)), this.level);
     }
 
     private boolean hasEnergy() {
@@ -294,48 +294,48 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Override
-    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new DigesterScreenHandler(syncId, playerInventory, this, this.wrappedInventoryStorage, this.properties);
+    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+        return new DigesterScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        ViewUtils.putChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void saveAdditional(ValueOutput view) {
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
-        this.wrappedSlurryStorage.writeData(view.get("FluidTank"));
-        this.wrappedFluidStorage.writeData(view.get("SlurryTank"));
+        this.wrappedSlurryStorage.writeData(view.child("FluidTank"));
+        this.wrappedFluidStorage.writeData(view.child("SlurryTank"));
         Multiblockable.write(this, view);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
         if (this.currentRecipeId != null) {
-            view.put("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
         }
     }
 
     @Override
-    protected void readData(ReadView view) {
-        ViewUtils.readChild(view, "Inventory", this.wrappedInventoryStorage);
+    protected void loadAdditional(ValueInput view) {
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         Multiblockable.read(this, view);
 
-        this.progress = view.getInt("Progress", 0);
+        this.progress = view.getIntOr("Progress", 0);
 
-        this.maxProgress = view.getInt("MaxProgress", 0);
+        this.maxProgress = view.getIntOr("MaxProgress", 0);
 
-        this.currentRecipeId = view.read("CurrentRecipe", RegistryKey.createCodec(RegistryKeys.RECIPE))
+        this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
                 .orElse(null);
     }
 
@@ -346,7 +346,7 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.world == null)
+        if (this.level == null)
             return List.of();
 
         List<BlockPos> positions = new ArrayList<>();
@@ -357,8 +357,8 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
                     if (x == 0 && y == 0 && z == 0)
                         continue;
 
-                    BlockPos pos = this.pos.add(x, y, z);
-                    if (this.world.getBlockState(pos).isReplaceable()) {
+                    BlockPos pos = this.worldPosition.offset(x, y, z);
+                    if (this.level.getBlockState(pos).canBeReplaced()) {
                         positions.add(pos);
                     } else {
                         invalidPositions.add(pos);
@@ -376,13 +376,13 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
     }
 
     @Override
-    public WrappedInventoryStorage<?> getWrappedInventoryStorage() {
-        return this.wrappedInventoryStorage;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     @Override
     public Block getBlock() {
-        return getCachedState().getBlock();
+        return getBlockState().getBlock();
     }
 
     public @Nullable EnergyStorage getEnergyProvider(@Nullable Direction direction) {

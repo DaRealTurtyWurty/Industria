@@ -1,24 +1,24 @@
 package dev.turtywurty.industria.fluid;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.fluid.FlowableFluid;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 
 import java.util.function.Supplier;
 
-public abstract class IndustriaFluid extends FlowableFluid {
+public abstract class IndustriaFluid extends FlowingFluid {
     private final Supplier<Fluid> stillSupplier, flowingSupplier;
     private final Supplier<Item> bucketSupplier;
     private final Supplier<Block> blockSupplier;
@@ -36,64 +36,64 @@ public abstract class IndustriaFluid extends FlowableFluid {
     }
 
     @Override
-    public Fluid getStill() {
+    public Fluid getSource() {
         return this.stillSupplier.get();
     }
 
     @Override
-    protected boolean isInfinite(ServerWorld world) {
+    protected boolean canConvertToSource(ServerLevel world) {
         return false;
     }
 
     @Override
-    public boolean matchesType(Fluid fluid) {
-        return fluid == getFlowing() || fluid == getStill();
+    public boolean isSame(Fluid fluid) {
+        return fluid == getFlowing() || fluid == getSource();
     }
 
     @Override
-    protected void beforeBreakingBlock(WorldAccess world, BlockPos pos, BlockState state) {
+    protected void beforeDestroyingBlock(LevelAccessor world, BlockPos pos, BlockState state) {
         BlockEntity blockEntity = state.hasBlockEntity() ? world.getBlockEntity(pos) : null;
-        Block.dropStacks(state, world, pos, blockEntity);
+        Block.dropResources(state, world, pos, blockEntity);
     }
 
     @Override
-    protected int getMaxFlowDistance(WorldView world) {
+    protected int getSlopeFindDistance(LevelReader world) {
         return 5;
     }
 
     @Override
-    protected int getLevelDecreasePerBlock(WorldView world) {
+    protected int getDropOff(LevelReader world) {
         return 1;
     }
 
     @Override
-    public Item getBucketItem() {
+    public Item getBucket() {
         return this.bucketSupplier.get();
     }
 
     @Override
-    protected boolean canBeReplacedWith(FluidState state, BlockView world, BlockPos pos, Fluid fluid, Direction direction) {
+    protected boolean canBeReplacedWith(FluidState state, BlockGetter world, BlockPos pos, Fluid fluid, Direction direction) {
         return false;
     }
 
     @Override
-    public int getTickRate(WorldView world) {
+    public int getTickDelay(LevelReader world) {
         return 45;
     }
 
     @Override
-    protected float getBlastResistance() {
+    protected float getExplosionResistance() {
         return 120f;
     }
 
     @Override
-    protected BlockState toBlockState(FluidState state) {
-        return this.blockSupplier.get().getDefaultState().with(Properties.LEVEL_15, getBlockStateLevel(state));
+    protected BlockState createLegacyBlock(FluidState state) {
+        return this.blockSupplier.get().defaultBlockState().setValue(BlockStateProperties.LEVEL, getLegacyLevel(state));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Fluid, FluidState> builder) {
-        super.appendProperties(builder);
+    protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder) {
+        super.createFluidStateDefinition(builder);
         builder.add(LEVEL);
     }
 
@@ -103,13 +103,13 @@ public abstract class IndustriaFluid extends FlowableFluid {
         }
 
         @Override
-        public boolean isStill(FluidState state) {
+        public boolean isSource(FluidState state) {
             return false;
         }
 
         @Override
-        public int getLevel(FluidState state) {
-            return state.get(LEVEL);
+        public int getAmount(FluidState state) {
+            return state.getValue(LEVEL);
         }
     }
 
@@ -119,12 +119,12 @@ public abstract class IndustriaFluid extends FlowableFluid {
         }
 
         @Override
-        public boolean isStill(FluidState state) {
+        public boolean isSource(FluidState state) {
             return true;
         }
 
         @Override
-        public int getLevel(FluidState state) {
+        public int getAmount(FluidState state) {
             return 8;
         }
     }

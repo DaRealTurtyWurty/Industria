@@ -1,44 +1,44 @@
 package dev.turtywurty.industria.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.PillarBlock;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 
-public class RubberLogBlock extends PillarBlock implements LatexBlock {
+public class RubberLogBlock extends RotatedPillarBlock implements LatexBlock {
     public final boolean isStripped;
 
-    public RubberLogBlock(Settings settings, boolean isStripped) {
-        super(isStripped ? settings.ticksRandomly() : settings);
+    public RubberLogBlock(Properties settings, boolean isStripped) {
+        super(isStripped ? settings.randomTicks() : settings);
         this.isStripped = isStripped;
 
-        setDefaultState(this.stateManager.getDefaultState().with(AXIS, Direction.Axis.Y).with(LATEX_LEVEL, 0));
+        registerDefaultState(this.stateDefinition.any().setValue(AXIS, Direction.Axis.Y).setValue(LATEX_LEVEL, 0));
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return withRandomLatex(ctx, super.getPlacementState(ctx), this);
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return withRandomLatex(ctx, super.getStateForPlacement(ctx), this);
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
         builder.add(LATEX_LEVEL);
     }
 
     @Override
-    protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         super.randomTick(state, world, pos, random);
         tickLatex(state, world, pos, random);
     }
 
     @Override
-    protected boolean hasRandomTicks(BlockState state) {
-        return this.isStripped && state.get(LATEX_LEVEL) > 0;
+    protected boolean isRandomlyTicking(BlockState state) {
+        return this.isStripped && state.getValue(LATEX_LEVEL) > 0;
     }
 }

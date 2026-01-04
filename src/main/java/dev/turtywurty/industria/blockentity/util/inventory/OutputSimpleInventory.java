@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class OutputSimpleInventory extends PredicateSimpleInventory {
     public OutputSimpleInventory(UpdatableBlockEntity blockEntity, int size) {

@@ -5,9 +5,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.gasapi.api.Gas;
 import dev.turtywurty.gasapi.api.GasVariant;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Objects;
 
@@ -25,9 +25,9 @@ public record GasStack(GasVariant variant, long amount) {
             ).apply(instance, GasStack::new)
     );
 
-    public static final PacketCodec<RegistryByteBuf, GasStack> PACKET_CODEC = PacketCodec.tuple(
+    public static final StreamCodec<RegistryFriendlyByteBuf, GasStack> STREAM_CODEC = StreamCodec.composite(
             GasVariant.PACKET_CODEC, GasStack::variant,
-            PacketCodecs.LONG, GasStack::amount,
+            ByteBufCodecs.LONG, GasStack::amount,
             GasStack::new
     );
 

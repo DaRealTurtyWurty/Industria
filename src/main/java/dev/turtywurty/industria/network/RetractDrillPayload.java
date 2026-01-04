@@ -2,16 +2,16 @@ package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class RetractDrillPayload implements CustomPayload {
-    public static final Id<RetractDrillPayload> ID = new Id<>(Industria.id("retract_drill"));
-    public static final PacketCodec<ByteBuf, RetractDrillPayload> CODEC =
-            PacketCodec.of((value, buf) -> {}, buf -> new RetractDrillPayload());
+public class RetractDrillPayload implements CustomPacketPayload {
+    public static final Type<RetractDrillPayload> ID = new Type<>(Industria.id("retract_drill"));
+    public static final StreamCodec<ByteBuf, RetractDrillPayload> CODEC =
+            StreamCodec.ofMember((value, buf) -> {}, buf -> new RetractDrillPayload());
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

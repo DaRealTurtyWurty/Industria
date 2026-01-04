@@ -2,10 +2,10 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.recipe.*;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public class RecipeSerializerInit {
     public static final RecipeSerializer<AlloyFurnaceRecipe> ALLOY_FURNACE =
@@ -42,7 +42,7 @@ public class RecipeSerializerInit {
             register("centrifugal_concentrator", CentrifugalConcentratorRecipe.Serializer.INSTANCE);
 
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
-        return Registry.register(Registries.RECIPE_SERIALIZER, Industria.id(name), serializer);
+        return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }
 
     public static void init() {}

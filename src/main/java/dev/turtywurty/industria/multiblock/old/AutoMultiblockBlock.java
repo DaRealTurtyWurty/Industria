@@ -2,23 +2,23 @@ package dev.turtywurty.industria.multiblock.old;
 
 import dev.turtywurty.industria.init.AttachmentTypeInit;
 import dev.turtywurty.industria.util.CachedVoxelShapes;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -28,17 +28,17 @@ public class AutoMultiblockBlock extends Block {
     public static final CachedVoxelShapes SHAPE_CACHE = new CachedVoxelShapes((world, pos) -> {
         MultiblockData data = getMultiblockData(world, pos);
         if (data == null || data.primaryPos() == null)
-            return VoxelShapes.empty();
+            return Shapes.empty();
 
         BlockState primaryState = world.getBlockState(data.primaryPos());
-        Direction direction = data.type().hasDirectionProperty() ? primaryState.get(Properties.HORIZONTAL_FACING, Direction.NORTH) : Direction.NORTH;
+        Direction direction = data.type().hasDirectionProperty() ? primaryState.getValueOrElse(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH) : Direction.NORTH;
         Vec3i offset = getOffsetFromPrimary(data.primaryPos(), pos, null);
 
         VoxelShape shape = data.type().getShape(world, data.primaryPos(), direction);
-        return shape != null ? shape.offset(-offset.getX(), -offset.getY(), -offset.getZ()) : VoxelShapes.empty();
+        return shape != null ? shape.move(-offset.getX(), -offset.getY(), -offset.getZ()) : Shapes.empty();
     });
 
-    public AutoMultiblockBlock(Settings settings) {
+    public AutoMultiblockBlock(Properties settings) {
         super(settings);
     }
 
@@ -60,7 +60,7 @@ public class AutoMultiblockBlock extends Block {
         };
     }
 
-    public static MultiblockData getMultiblockData(WorldView world, BlockPos pos) {
+    public static MultiblockData getMultiblockData(LevelReader world, BlockPos pos) {
         Map<BlockPos, MultiblockData> map = world.getChunk(pos).getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
         if (map == null)
             return null;
@@ -68,32 +68,32 @@ public class AutoMultiblockBlock extends Block {
         return map.get(pos);
     }
 
-    public static BlockPos getPrimaryPos(WorldView world, BlockPos pos) {
+    public static BlockPos getPrimaryPos(LevelReader world, BlockPos pos) {
         MultiblockData data = getMultiblockData(world, pos);
         return data != null ? data.primaryPos() : null;
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient()) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!world.isClientSide()) {
             MultiblockData data = getMultiblockData(world, pos);
             if (data == null)
-                return ActionResult.FAIL;
+                return InteractionResult.FAIL;
 
             BlockPos primaryPos = data.primaryPos();
             if (primaryPos == null)
-                return ActionResult.FAIL;
+                return InteractionResult.FAIL;
 
             data.type().onPrimaryBlockUse(world, player, hit, primaryPos);
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
         BlockState newState = world.getBlockState(pos);
-        if (!world.isClient() && !state.isOf(newState.getBlock())) {
+        if (!world.isClientSide() && !state.is(newState.getBlock())) {
             MultiblockData data = getMultiblockData(world, pos);
             if (data == null)
                 return;
@@ -105,18 +105,18 @@ public class AutoMultiblockBlock extends Block {
             data.type().onMultiblockBreak(world, primaryPos);
         }
 
-        super.onStateReplaced(state, world, pos, moved);
+        super.affectNeighborsAfterRemoval(state, world, pos, moved);
     }
 
     @Override
-    protected BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (!(world instanceof WorldView worldView)) {
-            return VoxelShapes.empty();
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        if (!(world instanceof LevelReader worldView)) {
+            return Shapes.empty();
         }
 
         return SHAPE_CACHE.getShape(worldView, pos);

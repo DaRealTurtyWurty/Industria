@@ -1,22 +1,22 @@
 package dev.turtywurty.industria.network;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record SetMultiblockPieceCharPayload(BlockPos piecePos, char paletteChar) implements CustomPayload {
-    public static final Id<SetMultiblockPieceCharPayload> ID = new Id<>(Industria.id("set_multiblock_piece_char"));
-    public static final PacketCodec<RegistryByteBuf, SetMultiblockPieceCharPayload> CODEC = PacketCodec.tuple(
-            BlockPos.PACKET_CODEC, SetMultiblockPieceCharPayload::piecePos,
-            PacketCodecs.INTEGER, payload -> (int) payload.paletteChar(),
+public record SetMultiblockPieceCharPayload(BlockPos piecePos, char paletteChar) implements CustomPacketPayload {
+    public static final Type<SetMultiblockPieceCharPayload> ID = new Type<>(Industria.id("set_multiblock_piece_char"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetMultiblockPieceCharPayload> CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC, SetMultiblockPieceCharPayload::piecePos,
+            ByteBufCodecs.INT, payload -> (int) payload.paletteChar(),
             (piecePos, charCode) -> new SetMultiblockPieceCharPayload(piecePos, (char) (int) charCode)
     );
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

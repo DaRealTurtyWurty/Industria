@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
-public class RecipeSimpleInventory extends SimpleInventory implements RecipeInput {
+public class RecipeSimpleInventory extends SimpleContainer implements RecipeInput {
     public RecipeSimpleInventory(int size) {
         super(size);
     }
@@ -14,7 +14,12 @@ public class RecipeSimpleInventory extends SimpleInventory implements RecipeInpu
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        return getStack(slot);
+    public ItemStack getItem(int slot) {
+        return super.getItem(slot);
+    }
+
+    @Override
+    public int size() {
+        return getContainerSize();
     }
 }

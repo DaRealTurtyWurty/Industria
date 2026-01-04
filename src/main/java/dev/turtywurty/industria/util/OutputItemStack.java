@@ -2,21 +2,16 @@ package dev.turtywurty.industria.util;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.math.floatprovider.ConstantFloatProvider;
-import net.minecraft.util.math.floatprovider.FloatProvider;
-import net.minecraft.util.math.floatprovider.FloatProviderType;
-import net.minecraft.util.math.intprovider.ConstantIntProvider;
-import net.minecraft.util.math.intprovider.IntProvider;
-import net.minecraft.util.math.intprovider.IntProviderType;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 import java.util.stream.IntStream;
 
@@ -30,18 +25,18 @@ import java.util.stream.IntStream;
  * @see FloatProvider
  */
 public record OutputItemStack(Item item, IntProvider count, FloatProvider chance) {
-    private static final ConstantFloatProvider DEFAULT_CHANCE = ConstantFloatProvider.create(1.0F);
+    private static final ConstantFloat DEFAULT_CHANCE = ConstantFloat.of(1.0F);
 
     public static final OutputItemStack EMPTY = new OutputItemStack(ItemStack.EMPTY);
 
     public static final MapCodec<OutputItemStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Registries.ITEM.getCodec().fieldOf("item").forGetter(OutputItemStack::item),
-            IntProvider.VALUE_CODEC.fieldOf("count").forGetter(OutputItemStack::count),
-            FloatProvider.VALUE_CODEC.fieldOf("chance").forGetter(OutputItemStack::chance)
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(OutputItemStack::item),
+            IntProvider.CODEC.fieldOf("count").forGetter(OutputItemStack::count),
+            FloatProvider.CODEC.fieldOf("chance").forGetter(OutputItemStack::chance)
     ).apply(instance, OutputItemStack::new));
 
-    public static final PacketCodec<RegistryByteBuf, OutputItemStack> PACKET_CODEC =
-            PacketCodec.ofStatic(OutputItemStack::encode, OutputItemStack::decode);
+    public static final StreamCodec<RegistryFriendlyByteBuf, OutputItemStack> STREAM_CODEC =
+            StreamCodec.of(OutputItemStack::encode, OutputItemStack::decode);
 
     public OutputItemStack {
         if (item == null) {
@@ -65,7 +60,7 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
      * @param chance The chance of the item to output.
      */
     public OutputItemStack(Item item, int count, float chance) {
-        this(item, ConstantIntProvider.create(count), ConstantFloatProvider.create(chance));
+        this(item, ConstantInt.of(count), ConstantFloat.of(chance));
     }
 
     /**
@@ -75,7 +70,7 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
      * @see ItemStack
      */
     public OutputItemStack(ItemStack stack) {
-        this(stack.getItem(), ConstantIntProvider.create(stack.getCount()), DEFAULT_CHANCE);
+        this(stack.getItem(), ConstantInt.of(stack.getCount()), DEFAULT_CHANCE);
     }
 
     /**
@@ -87,7 +82,7 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
      * @see IntProvider
      */
     public OutputItemStack(Item item, IntProvider count, float chance) {
-        this(item, count, ConstantFloatProvider.create(chance));
+        this(item, count, ConstantFloat.of(chance));
     }
 
     /**
@@ -99,42 +94,42 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
      * @apiNote If the chance of the item is less than the random number generated,
      * then an empty ItemStack will be returned.
      * @see ItemStack
-     * @see Random
+     * @see RandomSource
      */
-    public ItemStack createStack(Random random) {
-        return this.chance.get(random) < random.nextFloat() ?
+    public ItemStack createStack(RandomSource random) {
+        return this.chance.sample(random) < random.nextFloat() ?
                 ItemStack.EMPTY :
-                new ItemStack(this.item, this.count.get(random));
+                new ItemStack(this.item, this.count.sample(random));
     }
 
     public SlotDisplay toDisplay() {
-        return new SlotDisplay.CompositeSlotDisplay(
-                IntStream.range(this.count.getMin(), this.count.getMax() + 1)
+        return new SlotDisplay.Composite(
+                IntStream.range(this.count.getMinValue(), this.count.getMaxValue() + 1)
                         .mapToObj(count -> new ItemStack(this.item, count))
-                        .map(SlotDisplay.StackSlotDisplay::new)
+                        .map(SlotDisplay.ItemStackSlotDisplay::new)
                         .map(SlotDisplay.class::cast)
                         .toList());
     }
 
-    private static void encode(RegistryByteBuf buf, OutputItemStack stack) {
-        buf.writeRegistryKey(Registries.ITEM.getKey(stack.item()).orElseThrow());
+    private static void encode(RegistryFriendlyByteBuf buf, OutputItemStack stack) {
+        buf.writeResourceKey(BuiltInRegistries.ITEM.getResourceKey(stack.item()).orElseThrow());
 
-        Registries.INT_PROVIDER_TYPE.getKey(stack.count().getType()).ifPresent(buf::writeRegistryKey);
+        BuiltInRegistries.INT_PROVIDER_TYPE.getResourceKey(stack.count().getType()).ifPresent(buf::writeResourceKey);
         ExtraPacketCodecs.encode(buf, stack.count());
 
-        Registries.FLOAT_PROVIDER_TYPE.getKey(stack.chance().getType()).ifPresent(buf::writeRegistryKey);
+        BuiltInRegistries.FLOAT_PROVIDER_TYPE.getResourceKey(stack.chance().getType()).ifPresent(buf::writeResourceKey);
         ExtraPacketCodecs.encode(buf, stack.chance());
     }
 
-    private static OutputItemStack decode(RegistryByteBuf buf) {
-        Item item = Registries.ITEM.get(buf.readRegistryKey(RegistryKeys.ITEM));
+    private static OutputItemStack decode(RegistryFriendlyByteBuf buf) {
+        Item item = BuiltInRegistries.ITEM.getValue(buf.readResourceKey(Registries.ITEM));
 
-        RegistryKey<IntProviderType<?>> countType = buf.readRegistryKey(RegistryKeys.INT_PROVIDER_TYPE);
-        IntProviderType<?> countTypeInstance = Registries.INT_PROVIDER_TYPE.get(countType);
+        ResourceKey<IntProviderType<?>> countType = buf.readResourceKey(Registries.INT_PROVIDER_TYPE);
+        IntProviderType<?> countTypeInstance = BuiltInRegistries.INT_PROVIDER_TYPE.getValue(countType);
         IntProvider count = ExtraPacketCodecs.decode(buf, countTypeInstance);
 
-        RegistryKey<FloatProviderType<?>> chanceType = buf.readRegistryKey(RegistryKeys.FLOAT_PROVIDER_TYPE);
-        FloatProviderType<?> chanceTypeInstance = Registries.FLOAT_PROVIDER_TYPE.get(chanceType);
+        ResourceKey<FloatProviderType<?>> chanceType = buf.readResourceKey(Registries.FLOAT_PROVIDER_TYPE);
+        FloatProviderType<?> chanceTypeInstance = BuiltInRegistries.FLOAT_PROVIDER_TYPE.getValue(chanceType);
         FloatProvider chance = ExtraPacketCodecs.decode(buf, chanceTypeInstance);
 
         return new OutputItemStack(item, count, chance);

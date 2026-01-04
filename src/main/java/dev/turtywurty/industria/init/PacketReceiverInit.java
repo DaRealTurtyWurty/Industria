@@ -6,23 +6,23 @@ import dev.turtywurty.industria.blockentity.MultiblockDesignerBlockEntity;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.screenhandler.*;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class PacketReceiverInit {
     public static void init() {
         ServerPlayNetworking.registerGlobalReceiver(BatteryChargeModePayload.ID, (payload, context) ->
                 context.server().execute(() -> {
-                    ServerPlayerEntity player = context.player();
-                    ScreenHandler handler = player.currentScreenHandler;
+                    ServerPlayer player = context.player();
+                    AbstractContainerMenu handler = player.containerMenu;
                     if (handler instanceof BatteryScreenHandler batteryScreenHandler) {
                         batteryScreenHandler.getBlockEntity().setChargeMode(payload.chargeMode());
                     }
                 }));
 
         ServerPlayNetworking.registerGlobalReceiver(ChangeDrillingPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof DrillScreenHandler handler) {
                 DrillBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setDrilling(payload.drilling());
                 blockEntity.update();
@@ -30,8 +30,8 @@ public class PacketReceiverInit {
         });
 
         ServerPlayNetworking.registerGlobalReceiver(RetractDrillPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof DrillScreenHandler handler) {
                 DrillBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setDrilling(false);
                 blockEntity.setRetracting(true);
@@ -40,8 +40,8 @@ public class PacketReceiverInit {
         });
 
         ServerPlayNetworking.registerGlobalReceiver(ChangeDrillOverflowModePayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof DrillScreenHandler handler) {
                 DrillBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setOverflowMethod(payload.overflowMethod());
                 blockEntity.update();
@@ -49,12 +49,12 @@ public class PacketReceiverInit {
         });
 
         ServerPlayNetworking.registerGlobalReceiver(SetMotorTargetRPMPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof MotorScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof MotorScreenHandler handler) {
                 MotorBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
                 blockEntity.update();
-            } else if (player.currentScreenHandler instanceof DrillScreenHandler handler) {
+            } else if (player.containerMenu instanceof DrillScreenHandler handler) {
                 DrillBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
                 blockEntity.update();
@@ -62,44 +62,44 @@ public class PacketReceiverInit {
         });
 
         ServerPlayNetworking.registerGlobalReceiver(FluidTankChangeExtractModePayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof FluidTankScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof FluidTankScreenHandler handler) {
                 handler.getBlockEntity().setExtractMode(payload.extractMode());
             }
         });
 
         ServerPlayNetworking.registerGlobalReceiver(OilPumpJackSetRunningPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if(player.currentScreenHandler instanceof OilPumpJackScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if(player.containerMenu instanceof OilPumpJackScreenHandler handler) {
                 handler.getBlockEntity().setRunning(payload.isRunning());
             }
         });
 
         ServerPlayNetworking.registerGlobalReceiver(SetMultiblockPieceCharPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
                 MultiblockDesignerBlockEntity blockEntity = handler.getBlockEntity();
                 blockEntity.setPaletteChar(payload.piecePos(), payload.paletteChar());
             }
         });
 
         ServerPlayNetworking.registerGlobalReceiver(UpdatePaletteEntryNamePayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
                 handler.getBlockEntity().setPaletteName(payload.paletteChar(), payload.name());
             }
         });
 
         ServerPlayNetworking.registerGlobalReceiver(DeletePaletteEntryPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
                 handler.getBlockEntity().removePiecesWithChar(payload.paletteChar());
             }
         });
 
         ServerPlayNetworking.registerGlobalReceiver(UpdatePaletteEntryVariedBlockListPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
-            if (player.currentScreenHandler instanceof MultiblockDesignerScreenHandler handler) {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
                 handler.getBlockEntity().setPaletteVariedBlockList(payload.paletteChar(), payload.variedBlockList());
             }
         });

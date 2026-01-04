@@ -1,15 +1,15 @@
 package dev.turtywurty.industria.screen;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 
 public interface MotorRPMHandler {
-    default TextFieldWidget createWidget(TextRenderer textRenderer, int x, int y, int width, int height) {
-        var widget = new TextFieldWidget(textRenderer, x, y, width, height, Text.empty());
+    default EditBox createWidget(Font textRenderer, int x, int y, int width, int height) {
+        var widget = new EditBox(textRenderer, x, y, width, height, Component.empty());
         widget.setMaxLength(6);
-        widget.setText(String.valueOf(getTargetRPM()));
-        widget.setChangedListener(value -> {
+        widget.setValue(String.valueOf(getTargetRPM()));
+        widget.setResponder(value -> {
             try {
                 int targetRPM = Integer.parseInt(value);
                 setTargetRPM(targetRPM);
@@ -22,18 +22,18 @@ public interface MotorRPMHandler {
     }
 
     default void listenForUpdates() {
-        TextFieldWidget targetRPMField = getTargetRPMField();
+        EditBox targetRPMField = getTargetRPMField();
 
         int fieldRPM = 0;
         try {
-            fieldRPM = Integer.parseInt(targetRPMField.getText());
+            fieldRPM = Integer.parseInt(targetRPMField.getValue());
         } catch (NumberFormatException ignored) {
-            targetRPMField.setText("0");
+            targetRPMField.setValue("0");
         }
 
         int targetRPM = getTargetRPM();
         if (targetRPM != fieldRPM) {
-            targetRPMField.setText(String.valueOf(targetRPM));
+            targetRPMField.setValue(String.valueOf(targetRPM));
         }
     }
 
@@ -41,5 +41,5 @@ public interface MotorRPMHandler {
 
     void setTargetRPM(int targetRPM);
 
-    TextFieldWidget getTargetRPMField();
+    EditBox getTargetRPMField();
 }

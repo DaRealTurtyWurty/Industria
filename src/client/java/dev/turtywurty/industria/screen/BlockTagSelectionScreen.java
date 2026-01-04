@@ -4,30 +4,30 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 public class BlockTagSelectionScreen extends Screen {
-    public static final Text TITLE = Text.translatable("screen." + Industria.MOD_ID + ".block_tag_selection.title");
+    public static final Component TITLE = Component.translatable("screen." + Industria.MOD_ID + ".block_tag_selection.title");
 
     private static final int TOP_MARGIN = 24;
     private static final int SIDE_MARGIN = 16;
@@ -44,7 +44,7 @@ public class BlockTagSelectionScreen extends Screen {
     private static final int CONFIRM_HEIGHT = 20;
     private static final int CONFIRM_PADDING = 6;
     private static final float SCENE_SCALE_MULTIPLIER = 2.5F;
-    private static final Vec3d CAMERA_POS = new Vec3d(-3.0, 2.5, 3.0);
+    private static final Vec3 CAMERA_POS = new Vec3(-3.0, 2.5, 3.0);
     private static final float CAMERA_YAW = 225.0F;
     private static final float CAMERA_PITCH = 25.0F;
 
@@ -57,8 +57,8 @@ public class BlockTagSelectionScreen extends Screen {
     private List<TagKey<Block>> allTags = List.of();
     private List<TagKey<Block>> tags = List.of();
     private TagKey<Block> selectedTag;
-    private TextFieldWidget searchField;
-    private ButtonWidget confirmButton;
+    private EditBox searchField;
+    private Button confirmButton;
     private String searchQuery = "";
     private int scrollRow;
     private boolean scrolling;
@@ -100,40 +100,40 @@ public class BlockTagSelectionScreen extends Screen {
     @Override
     protected void init() {
         if (this.searchField != null) {
-            this.searchQuery = this.searchField.getText();
+            this.searchQuery = this.searchField.getValue();
         }
 
         if (this.allTags.isEmpty()) {
-            this.allTags = Registries.BLOCK.streamTags()
-                    .map(RegistryEntryList.Named::getTag)
-                    .sorted(Comparator.comparing(tag -> tag.id().toString()))
+            this.allTags = BuiltInRegistries.BLOCK.getTags()
+                    .map(HolderSet.Named::key)
+                    .sorted(Comparator.comparing(tag -> tag.location().toString()))
                     .toList();
         }
 
         applyFilter(this.searchQuery);
 
-        this.searchField = addDrawableChild(new TextFieldWidget(
-                this.textRenderer,
+        this.searchField = addRenderableWidget(new EditBox(
+                this.font,
                 this.gridX + SEARCH_PADDING,
                 this.panelY + SEARCH_PADDING,
                 Math.max(0, this.gridWidth - SEARCH_PADDING * 2),
                 SEARCH_HEIGHT,
-                Text.empty()
+                Component.empty()
         ));
         this.searchField.setMaxLength(128);
-        this.searchField.setPlaceholder(MultiblockDesignerScreen.SEARCH_PLACEHOLDER);
-        this.searchField.setChangedListener(this::applyFilter);
-        this.searchField.setText(this.searchQuery);
+        this.searchField.setHint(MultiblockDesignerScreen.SEARCH_PLACEHOLDER);
+        this.searchField.setResponder(this::applyFilter);
+        this.searchField.setValue(this.searchQuery);
 
-        this.confirmButton = addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> {
+        this.confirmButton = addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
                     if (this.selectedTag != null) {
                         this.onSelect.accept(this.selectedTag);
-                        if (this.client != null && this.client.currentScreen == this) {
-                            close();
+                        if (this.minecraft != null && this.minecraft.screen == this) {
+                            onClose();
                         }
                     }
                 })
-                .dimensions(0, 0, 0, 0)
+                .bounds(0, 0, 0, 0)
                 .build());
         this.confirmButton.active = this.selectedTag != null;
 
@@ -147,14 +147,14 @@ public class BlockTagSelectionScreen extends Screen {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         handleCloseCallbacks();
-        if (this.client != null && this.parent != null) {
-            this.client.setScreen(this.parent);
+        if (this.minecraft != null && this.parent != null) {
+            this.minecraft.setScreen(this.parent);
             return;
         }
 
-        super.close();
+        super.onClose();
     }
 
     @Override
@@ -177,12 +177,12 @@ public class BlockTagSelectionScreen extends Screen {
             return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 
         int delta = (int) Math.signum(verticalAmount);
-        this.scrollRow = MathHelper.clamp(this.scrollRow - delta, 0, this.maxScrollRows);
+        this.scrollRow = Mth.clamp(this.scrollRow - delta, 0, this.maxScrollRows);
         return true;
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             if (isMouseOverScrollbar(click.x(), click.y())) {
                 this.scrolling = true;
@@ -205,7 +205,7 @@ public class BlockTagSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1 && this.scrolling) {
             this.scrolling = false;
             return true;
@@ -215,7 +215,7 @@ public class BlockTagSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (this.scrolling && click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             double mouseY = click.y() + offsetY;
             updateScrollFromMouse(mouseY);
@@ -226,18 +226,18 @@ public class BlockTagSelectionScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        int titleWidth = this.textRenderer.getWidth(this.title);
-        context.drawText(this.textRenderer, this.title, (this.width - titleWidth) / 2, 6, 0xFFEEEEEE, false);
-        Text countLabel = Text.translatable("screen." + Industria.MOD_ID + ".block_tag_selection.count", this.tags.size());
-        int countWidth = this.textRenderer.getWidth(countLabel);
-        context.drawText(this.textRenderer, countLabel, (this.width - countWidth) / 2, 6 + this.textRenderer.fontHeight + 2, 0xFFB0B0B0, false);
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        int titleWidth = this.font.width(this.title);
+        context.drawString(this.font, this.title, (this.width - titleWidth) / 2, 6, 0xFFEEEEEE, false);
+        Component countLabel = Component.translatable("screen." + Industria.MOD_ID + ".block_tag_selection.count", this.tags.size());
+        int countWidth = this.font.width(countLabel);
+        context.drawString(this.font, countLabel, (this.width - countWidth) / 2, 6 + this.font.lineHeight + 2, 0xFFB0B0B0, false);
 
         drawPanel(context);
 
         int slotStride = getSlotStride();
         int startIndex = getStartIndex();
-        Text hoveredTooltip = null;
+        Component hoveredTooltip = null;
 
         for (int row = 0; row < this.visibleRows; row++) {
             for (int col = 0; col < this.columns; col++) {
@@ -258,7 +258,7 @@ public class BlockTagSelectionScreen extends Screen {
 
                 int renderSize = SLOT_SIZE - SLOT_INSET * 2;
                 FakeWorldScene scene = getScene(tag);
-                scene.setAnchor(BlockPos.ORIGIN, renderSize / 2, renderSize / 2);
+                scene.setAnchor(BlockPos.ZERO, renderSize / 2, renderSize / 2);
                 scene.render(context, slotX + SLOT_INSET, slotY + SLOT_INSET, renderSize, renderSize, delta);
 
                 if (hovered) {
@@ -275,12 +275,12 @@ public class BlockTagSelectionScreen extends Screen {
         }
     }
 
-    private void drawPanel(DrawContext context) {
+    private void drawPanel(GuiGraphics context) {
         context.fill(this.panelX, this.panelY, this.panelX + this.panelWidth, this.panelY + this.panelHeight, 0xAA101010);
-        context.drawStrokedRectangle(this.panelX, this.panelY, this.panelWidth, this.panelHeight, 0xFF404040);
+        context.renderOutline(this.panelX, this.panelY, this.panelWidth, this.panelHeight, 0xFF404040);
     }
 
-    private void drawSlot(DrawContext context, int x, int y, boolean hovered, boolean selected) {
+    private void drawSlot(GuiGraphics context, int x, int y, boolean hovered, boolean selected) {
         context.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF2B2B2B);
         context.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xFF606060);
         if (hovered) {
@@ -288,11 +288,11 @@ public class BlockTagSelectionScreen extends Screen {
         }
 
         if (selected) {
-            context.drawStrokedRectangle(x, y, SLOT_SIZE, SLOT_SIZE, 0xFF2FA9FF);
+            context.renderOutline(x, y, SLOT_SIZE, SLOT_SIZE, 0xFF2FA9FF);
         }
     }
 
-    private void drawScrollbar(DrawContext context) {
+    private void drawScrollbar(GuiGraphics context) {
         if (!hasScrollbar())
             return;
 
@@ -311,7 +311,7 @@ public class BlockTagSelectionScreen extends Screen {
             return trackHeight;
 
         int thumbHeight = Math.round((float) trackHeight * this.visibleRows / this.totalRows);
-        return MathHelper.clamp(thumbHeight, MIN_THUMB_HEIGHT, trackHeight);
+        return Mth.clamp(thumbHeight, MIN_THUMB_HEIGHT, trackHeight);
     }
 
     private void updateScrollFromMouse(double mouseY) {
@@ -325,8 +325,8 @@ public class BlockTagSelectionScreen extends Screen {
         }
 
         float ratio = (float) (mouseY - trackTop - thumbHeight / 2.0F) / (float) maxOffset;
-        ratio = MathHelper.clamp(ratio, 0.0F, 1.0F);
-        this.scrollRow = MathHelper.clamp(Math.round(ratio * this.maxScrollRows), 0, this.maxScrollRows);
+        ratio = Mth.clamp(ratio, 0.0F, 1.0F);
+        this.scrollRow = Mth.clamp(Math.round(ratio * this.maxScrollRows), 0, this.maxScrollRows);
     }
 
     private int getEntryIndexAt(double mouseX, double mouseY) {
@@ -401,9 +401,9 @@ public class BlockTagSelectionScreen extends Screen {
         int slotStride = getSlotStride();
         this.columns = Math.max(1, (this.gridWidth + SLOT_GAP) / slotStride);
         this.visibleRows = Math.max(1, (this.gridHeight + SLOT_GAP) / slotStride);
-        this.totalRows = MathHelper.ceil((float) this.tags.size() / this.columns);
+        this.totalRows = Mth.ceil((float) this.tags.size() / this.columns);
         this.maxScrollRows = Math.max(0, this.totalRows - this.visibleRows);
-        this.scrollRow = MathHelper.clamp(this.scrollRow, 0, this.maxScrollRows);
+        this.scrollRow = Mth.clamp(this.scrollRow, 0, this.maxScrollRows);
 
         this.gridContentWidth = this.columns * slotStride - SLOT_GAP;
         this.gridContentHeight = this.visibleRows * slotStride - SLOT_GAP;
@@ -432,7 +432,7 @@ public class BlockTagSelectionScreen extends Screen {
             this.tags = this.allTags;
         } else {
             this.tags = this.allTags.stream()
-                    .filter(tag -> tag.id().toString().toLowerCase(Locale.ROOT).contains(trimmed))
+                    .filter(tag -> tag.location().toString().toLowerCase(Locale.ROOT).contains(trimmed))
                     .toList();
         }
 
@@ -455,7 +455,7 @@ public class BlockTagSelectionScreen extends Screen {
                     .build();
             scene = FakeWorldSceneBuilder.create()
                     .camera(CAMERA_POS, CAMERA_YAW, CAMERA_PITCH)
-                    .populate(ctx -> ctx.addVariedBlockList(BlockPos.ORIGIN, variedBlockList))
+                    .populate(ctx -> ctx.addVariedBlockList(BlockPos.ZERO, variedBlockList))
                     .build();
             scene.setScaleMultiplier(SCENE_SCALE_MULTIPLIER);
         }
@@ -489,17 +489,17 @@ public class BlockTagSelectionScreen extends Screen {
         closeScenes();
     }
 
-    private void drawTooltipWrapped(DrawContext context, Text text, int mouseX, int mouseY) {
-        int maxWidth = MathHelper.clamp(this.width - 20, 120, 260);
-        context.drawTooltip(this.textRenderer.wrapLines(text, maxWidth), mouseX, mouseY);
+    private void drawTooltipWrapped(GuiGraphics context, Component text, int mouseX, int mouseY) {
+        int maxWidth = Mth.clamp(this.width - 20, 120, 260);
+        context.setTooltipForNextFrame(this.font.split(text, maxWidth), mouseX, mouseY);
     }
 
-    private Text buildTooltipForTag(TagKey<Block> tagKey) {
+    private Component buildTooltipForTag(TagKey<Block> tagKey) {
         List<String> names = new ArrayList<>();
-        RegistryEntryList.Named<Block> list = Registries.BLOCK.getOptional(tagKey).orElse(null);
+        HolderSet.Named<Block> list = BuiltInRegistries.BLOCK.get(tagKey).orElse(null);
         if (list != null) {
-            for (RegistryEntry<Block> entry : list) {
-                Identifier id = entry.getKey().map(RegistryKey::getValue).orElse(Registries.BLOCK.getId(entry.value()));
+            for (Holder<Block> entry : list) {
+                Identifier id = entry.unwrapKey().map(ResourceKey::identifier).orElse(BuiltInRegistries.BLOCK.getKey(entry.value()));
                 names.add(id.toString());
                 if (names.size() >= 50) {
                     names.add("...");
@@ -513,6 +513,6 @@ public class BlockTagSelectionScreen extends Screen {
             joined = "Empty tag";
         }
 
-        return Text.literal(joined);
+        return Component.literal(joined);
     }
 }

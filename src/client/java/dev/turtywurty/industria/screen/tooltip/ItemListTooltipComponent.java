@@ -1,13 +1,13 @@
 package dev.turtywurty.industria.screen.tooltip;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class ItemListTooltipComponent implements TooltipComponent {
+public class ItemListTooltipComponent implements ClientTooltipComponent {
     private final List<ItemStack> stacks;
     private final int columns;
     private int selectedIndex = 0;
@@ -22,23 +22,23 @@ public class ItemListTooltipComponent implements TooltipComponent {
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight(Font textRenderer) {
         int rows = (this.stacks.size() + this.columns - 1) / this.columns;
         return rows * 20 + 8;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(Font textRenderer) {
         return Math.max(96, (Math.min(this.stacks.size(), this.columns) * 20) + this.columns - 1);
     }
 
     @Override
-    public boolean isSticky() {
+    public boolean showTooltipWithItemInHand() {
         return true;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
+    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
         if(this.stacks.isEmpty())
             return;
 
@@ -62,12 +62,12 @@ public class ItemListTooltipComponent implements TooltipComponent {
             }
 
             ItemStack stack = this.stacks.get(index);
-            context.drawItem(stack, xPos + 1, yPos + 1);
-            context.drawStackOverlay(textRenderer, stack, xPos + 1, yPos + 1);
+            context.renderItem(stack, xPos + 1, yPos + 1);
+            context.renderItemDecorations(textRenderer, stack, xPos + 1, yPos + 1);
         }
     }
 
-    public void onRenderTick(DrawContext context, int mouseX, int mouseY) {
+    public void onRenderTick(GuiGraphics context, int mouseX, int mouseY) {
         this.selectedIndex = (int) (System.currentTimeMillis() / 1000L % this.stacks.size());
     }
 }

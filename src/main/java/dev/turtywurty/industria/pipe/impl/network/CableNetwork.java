@@ -10,9 +10,9 @@ import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -25,16 +25,16 @@ public class CableNetwork extends PipeNetwork<EnergyStorage> {
             (storage, storageAmount) -> ((CableNetworkEnergyStorage) storage).amount = storageAmount,
             CableNetwork::new);
 
-    public static final PacketCodec<RegistryByteBuf, CableNetwork> PACKET_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, CableNetwork> STREAM_CODEC =
             PipeNetwork.createPacketCodec(
-                    PacketCodecs.LONG,
+                    ByteBufCodecs.LONG,
                     network -> ((CableNetworkEnergyStorage) network.storage).amount,
                     (storage, storageAmount) -> ((CableNetworkEnergyStorage) storage).amount = storageAmount,
                     CableNetwork::new);
 
     public static final Codec<Set<CableNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final PacketCodec<RegistryByteBuf, Set<CableNetwork>> SET_PACKET_CODEC =
-            ExtraPacketCodecs.setOf(PACKET_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<CableNetwork>> SET_STREAM_CODEC =
+            ExtraPacketCodecs.setOf(STREAM_CODEC);
 
     public CableNetwork(UUID id) {
         super(id, TransferType.ENERGY);

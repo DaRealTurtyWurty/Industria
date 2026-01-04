@@ -1,29 +1,29 @@
 package dev.turtywurty.industria.renderer.world;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.data.ClientPipeNetworks;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
-import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.DrawStyle;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.debug.gizmo.GizmoDrawing;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gizmos.GizmoStyle;
+import net.minecraft.gizmos.Gizmos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
@@ -46,31 +46,31 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
     }
 
     @Override
-    public void render(WorldRenderContext context) {
+    public void render(LevelRenderContext context) {
         if (!DebugRenderingRegistry.debugRendering)
             return;
 
-        VertexConsumerProvider consumers = context.consumers();
+        MultiBufferSource consumers = context.bufferSource();
         if (consumers == null)
             return;
 
-        MatrixStack matrices = context.matrices();
+        PoseStack matrices = context.poseStack();
         if (matrices == null)
             return;
 
-        Entity cameraEntity = context.gameRenderer().getCamera().getFocusedEntity();
+        Entity cameraEntity = context.gameRenderer().getMainCamera().entity();
         if (cameraEntity == null)
             return;
 
-        RegistryKey<World> dimension = cameraEntity.getEntityWorld().getRegistryKey();
+        ResourceKey<Level> dimension = cameraEntity.level().dimension();
         for (PipeNetworkManager<?, ?> manager : ClientPipeNetworks.get(dimension)) {
             TransferType<?, ?, ?> transferType = manager.getTransferType();
             for (PipeNetwork<?> network : manager.getNetworks()) {
                 for (BlockPos pipe : network.getPipes()) {
-                    GizmoDrawing.box(pipe, 0.25f, DrawStyle.stroked(getColor(transferType)));
+                    Gizmos.cuboid(pipe, 0.25f, GizmoStyle.stroke(getColor(transferType)));
 
-                    MinecraftClient client = MinecraftClient.getInstance();
-                    ClientWorld world = client.world;
+                    Minecraft client = Minecraft.getInstance();
+                    ClientLevel world = client.level;
                     if (world == null)
                         return;
 
@@ -85,24 +85,24 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
 
                     String amountStr = String.format("%.2f", amount).replace(".00", "");
 
-                    Text text = Text.literal(amountStr + pipeBlock.getUnit());
+                    Component text = Component.literal(amountStr + pipeBlock.getUnit());
 
-                    Vec3d pos = pipe.toCenterPos();
-                    Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
-                    Vec3d cameraPos = camera.getCameraPos();
+                    Vec3 pos = pipe.getCenter();
+                    Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+                    Vec3 cameraPos = camera.position();
                     pos = pos.subtract(cameraPos);
 
-                    matrices.push();
+                    matrices.pushPose();
                     matrices.translate(pos.x, pos.y + 0.5, pos.z);
-                    matrices.multiply(camera.getRotation());
+                    matrices.mulPose(camera.rotation());
                     matrices.scale(0.025F, -0.025F, 0.025F);
-                    Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+                    Matrix4f matrix4f = matrices.last().pose();
 
-                    TextRenderer textRenderer = client.textRenderer;
-                    float xOffset = (float) (-textRenderer.getWidth(text)) / 2.0F;
+                    Font textRenderer = client.font;
+                    float xOffset = (float) (-textRenderer.width(text)) / 2.0F;
 
-                    textRenderer.draw(text, xOffset, 0, Colors.WHITE, false, matrix4f, consumers, TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
-                    matrices.pop();
+                    textRenderer.drawInBatch(text, xOffset, 0, CommonColors.WHITE, false, matrix4f, consumers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
+                    matrices.popPose();
                 }
             }
         }

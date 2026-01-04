@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.util.math;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.jbox2d.common.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -133,7 +133,7 @@ public class BoundingBox {
         float dy = excess(localPoint.y, halfSize.y);
         float dz = excess(localPoint.z, halfSize.z);
 
-        return MathHelper.sqrt(dx * dx + dy * dy + dz * dz);
+        return Mth.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     /**

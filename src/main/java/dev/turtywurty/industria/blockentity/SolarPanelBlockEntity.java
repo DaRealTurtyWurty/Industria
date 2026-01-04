@@ -12,18 +12,18 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.SolarPanelScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.LightType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -31,7 +31,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 import java.util.List;
 
 public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
-    public static final Text TITLE = Industria.containerTitle("solar_panel");
+    public static final Component TITLE = Industria.containerTitle("solar_panel");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
 
@@ -77,44 +77,44 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
 
     @Override
     public void onTick() {
-        if (this.world == null || this.world.isClient())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
         long currentEnergy = energyStorage.getAmount();
         if (currentEnergy < energyStorage.getCapacity()) {
             int outputSignal = getEnergyOutput();
-            energyStorage.amount += MathHelper.clamp(outputSignal, 0, energyStorage.getCapacity() - currentEnergy);
+            energyStorage.amount += Mth.clamp(outputSignal, 0, energyStorage.getCapacity() - currentEnergy);
             if (currentEnergy != energyStorage.getAmount())
                 update();
         }
 
-        spread(this.world, this.pos, energyStorage);
+        spread(this.level, this.worldPosition, energyStorage);
     }
 
     @Override
-    public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
-        return new BlockPosPayload(this.pos);
+    public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
+        return new BlockPosPayload(this.worldPosition);
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return TITLE;
     }
 
     @Nullable
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
         return new SolarPanelScreenHandler(syncId, playerInventory, this);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         ViewUtils.readChild(view, "Energy", this.energy);
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         ViewUtils.putChild(view, "Energy", this.energy);
     }
 
@@ -127,13 +127,13 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
     }
 
     public int getEnergyOutput() {
-        if (this.world == null)
+        if (this.level == null)
             return 0;
 
-        long dayTime = this.world.getTimeOfDay();
-        boolean isRaining = this.world.isRaining();
-        boolean isThundering = this.world.isThundering();
-        int skylight = this.world.getLightLevel(LightType.SKY, this.pos.up());
+        long dayTime = this.level.getDayTime();
+        boolean isRaining = this.level.isRaining();
+        boolean isThundering = this.level.isThundering();
+        int skylight = this.level.getBrightness(LightLayer.SKY, this.worldPosition.above());
 
         return getEnergyOutput(dayTime, isRaining, isThundering, skylight);
     }

@@ -1,18 +1,18 @@
 package dev.turtywurty.industria.init;
 
+import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.multiblock.MultiblockDefinition;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registerable;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.AxisRotation;
-import net.minecraft.world.gen.blockpredicate.BlockPredicate;
+import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 
 import java.util.List;
 
 public class MultiblockDefinitionInit {
-    public static void bootstrap(Registerable<MultiblockDefinition> context) {
+    public static void bootstrap(BootstrapContext<MultiblockDefinition> context) {
     }
 
     public static final MultiblockDefinition EXAMPLE = register("example",
@@ -21,12 +21,12 @@ public class MultiblockDefinitionInit {
                     .addPatternRow(List.of("GGGG", "GBGG", "GGGG"))
                     .addPatternRow(List.of("CGGG", "GPGG", "OGGG"))
                     .anchor(0, 0, 0)
-                    .addPaletteEntry('G', BlockPredicate.matchingBlocks(Blocks.GLASS))
-                    .addPaletteEntry('B', BlockPredicate.matchingBlocks(Blocks.BLUE_STAINED_GLASS))
-                    .addPaletteEntry('P', BlockPredicate.matchingBlocks(Blocks.PINK_STAINED_GLASS))
-                    .addPaletteEntry('O', BlockPredicate.matchingBlocks(Blocks.ORANGE_STAINED_GLASS))
-                    .addPaletteEntry('C', BlockPredicate.matchingBlocks(BlockInit.EXAMPLE_MULTIBLOCK_CONTROLLER))
-                    .addRotation(AxisRotation.R90, AxisRotation.R180, AxisRotation.R270)
+                    .addPaletteEntry('G', BlockPredicate.matchesBlocks(Blocks.GLASS))
+                    .addPaletteEntry('B', BlockPredicate.matchesBlocks(Blocks.BLUE_STAINED_GLASS))
+                    .addPaletteEntry('P', BlockPredicate.matchesBlocks(Blocks.PINK_STAINED_GLASS))
+                    .addPaletteEntry('O', BlockPredicate.matchesBlocks(Blocks.ORANGE_STAINED_GLASS))
+                    .addPaletteEntry('C', BlockPredicate.matchesBlocks(BlockInit.EXAMPLE_MULTIBLOCK_CONTROLLER))
+                    .addRotation(Quadrant.R90, Quadrant.R180, Quadrant.R270)
     );
 
     public static MultiblockDefinition register(String name, MultiblockDefinition.Builder definition) {

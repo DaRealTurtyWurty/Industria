@@ -2,11 +2,11 @@ package dev.turtywurty.industria.datagen.builder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.client.data.ItemModelGenerator;
-import net.minecraft.client.data.ModelIds;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ModelLocationUtils;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -101,21 +101,21 @@ public class BuiltinEntityModelBuilder {
 
     private final Item item;
     private final Identifier id;
-    private final ItemModelGenerator writer;
+    private final ItemModelGenerators writer;
     private final List<DisplaySettings> displaySettings = new ArrayList<>();
 
-    private BuiltinEntityModelBuilder(Item item, Identifier id, ItemModelGenerator writer) {
+    private BuiltinEntityModelBuilder(Item item, Identifier id, ItemModelGenerators writer) {
         this.item = item;
         this.id = id;
         this.writer = writer;
     }
 
-    public static void write(ItemModelGenerator itemModelGenerator, ItemConvertible item) {
+    public static void write(ItemModelGenerators itemModelGenerator, ItemLike item) {
         write(itemModelGenerator, item, null);
     }
 
     private void write() {
-        this.writer.modelCollector.accept(this.id, () -> {
+        this.writer.modelOutput.accept(this.id, () -> {
             var object = new JsonObject();
             object.addProperty("parent", "minecraft:builtin/entity");
 
@@ -159,15 +159,15 @@ public class BuiltinEntityModelBuilder {
 //        }
     }
 
-    public static void write(ItemModelGenerator writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
+    public static void write(ItemModelGenerators writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
         new BuiltinEntityModelBuilder.Builder(writer, item, id).defaultDisplaySettings(defaultBuilder).build().write();
     }
 
-    public static void write(ItemModelGenerator writer, Item item, DefaultDisplaySettingsBuilder defaultBuilder) {
-        write(writer, item, ModelIds.getItemModelId(item), defaultBuilder);
+    public static void write(ItemModelGenerators writer, Item item, DefaultDisplaySettingsBuilder defaultBuilder) {
+        write(writer, item, ModelLocationUtils.getModelLocation(item), defaultBuilder);
     }
 
-    public static void write(ItemModelGenerator writer, ItemConvertible item, DefaultDisplaySettingsBuilder defaultBuilder) {
+    public static void write(ItemModelGenerators writer, ItemLike item, DefaultDisplaySettingsBuilder defaultBuilder) {
         write(writer, item.asItem(), defaultBuilder);
     }
 
@@ -311,14 +311,14 @@ public class BuiltinEntityModelBuilder {
     }
 
     public static class Builder {
-        private final ItemModelGenerator writer;
+        private final ItemModelGenerators writer;
         private final Item item;
         private final Identifier id;
 
         private final Map<String, DisplaySettings.Builder> displaySettings = new HashMap<>();
         private DefaultDisplaySettingsBuilder defaultDisplaySettingsBuilder;
 
-        public Builder(ItemModelGenerator writer, Item item, Identifier id) {
+        public Builder(ItemModelGenerators writer, Item item, Identifier id) {
             this.writer = writer;
             this.item = item;
             this.id = id;

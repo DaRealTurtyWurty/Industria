@@ -5,7 +5,7 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
 
 public class DrillBlock extends IndustriaBlock {
-    public DrillBlock(Settings settings) {
+    public DrillBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .hasComparatorOutput()

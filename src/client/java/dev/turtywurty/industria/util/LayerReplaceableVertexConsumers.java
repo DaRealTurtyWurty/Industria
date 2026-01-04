@@ -1,20 +1,20 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
-public class LayerReplaceableVertexConsumers implements VertexConsumerProvider {
-    private final VertexConsumerProvider source;
-    private final RenderLayer renderLayer;
+public class LayerReplaceableVertexConsumers implements MultiBufferSource {
+    private final MultiBufferSource source;
+    private final RenderType renderLayer;
 
-    public LayerReplaceableVertexConsumers(VertexConsumerProvider source, RenderLayer renderLayer) {
+    public LayerReplaceableVertexConsumers(MultiBufferSource source, RenderType renderLayer) {
         this.source = source;
         this.renderLayer = renderLayer;
     }
 
     @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
+    public VertexConsumer getBuffer(RenderType layer) {
         return this.source.getBuffer(this.renderLayer);
     }
 }

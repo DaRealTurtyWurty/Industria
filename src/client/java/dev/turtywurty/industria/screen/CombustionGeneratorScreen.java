@@ -3,50 +3,50 @@ package dev.turtywurty.industria.screen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
 
-public class CombustionGeneratorScreen extends HandledScreen<CombustionGeneratorScreenHandler> {
+public class CombustionGeneratorScreen extends AbstractContainerScreen<CombustionGeneratorScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/combustion_generator.png");
 
-    public CombustionGeneratorScreen(CombustionGeneratorScreenHandler handler, PlayerInventory inventory, Text title) {
+    public CombustionGeneratorScreen(CombustionGeneratorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        long energy = this.handler.getEnergy();
-        long maxEnergy = this.handler.getMaxEnergy();
+        long energy = this.menu.getEnergy();
+        long maxEnergy = this.menu.getMaxEnergy();
         int energyBarSize = Math.round((float) energy / maxEnergy * 66);
-        context.fill(this.x + 144, this.y + 10 + 66 - energyBarSize, this.x + 164, this.y + 10 + 66, 0xFFD4AF37);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energyBarSize, this.leftPos + 164, this.topPos + 10 + 66, 0xFFD4AF37);
 
-        int burnTime = this.handler.getBurnTime();
-        int fuelTime = this.handler.getFuelTime();
+        int burnTime = this.menu.getBurnTime();
+        int fuelTime = this.menu.getFuelTime();
         float burnTimePercentage = (float) burnTime / fuelTime;
         int burnTimeSize = Math.round(burnTimePercentage * 14);
-        ScreenUtils.drawTexture(context, TEXTURE, this.x + 82, this.y + 25 + 14 - burnTimeSize, 176, 14 - burnTimeSize, 14, burnTimeSize);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 82, this.topPos + 25 + 14 - burnTimeSize, 176, 14 - burnTimeSize, 14, burnTimeSize);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
 
-        if (isPointWithinBounds(144, 10, 20, 66, mouseX, mouseY)) {
-            long energy = this.handler.getEnergy();
-            long maxEnergy = this.handler.getMaxEnergy();
-            context.drawTooltip(this.textRenderer, Text.literal(energy + " / " + maxEnergy + " FE"), mouseX, mouseY);
+        if (isHovering(144, 10, 20, 66, mouseX, mouseY)) {
+            long energy = this.menu.getEnergy();
+            long maxEnergy = this.menu.getMaxEnergy();
+            context.setTooltipForNextFrame(this.font, Component.literal(energy + " / " + maxEnergy + " FE"), mouseX, mouseY);
         }
     }
 }

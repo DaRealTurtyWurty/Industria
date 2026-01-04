@@ -2,47 +2,47 @@ package dev.turtywurty.industria.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
-public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData stackData) {
+public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) {
     public static final Codec<IndustriaIngredient> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(
             instance -> instance.group(
-                    Ingredient.ENTRIES_CODEC.fieldOf("ingredients").forGetter(IndustriaIngredient::entries),
+                    Ingredient.NON_AIR_HOLDER_SET_CODEC.fieldOf("ingredients").forGetter(IndustriaIngredient::entries),
                     StackData.CODEC.optionalFieldOf("data", StackData.EMPTY).forGetter(IndustriaIngredient::stackData)
             ).apply(instance, IndustriaIngredient::new)
     ));
 
-    public static final PacketCodec<RegistryByteBuf, IndustriaIngredient> PACKET_CODEC =
-            PacketCodec.tuple(PacketCodecs.registryEntryList(RegistryKeys.ITEM), IndustriaIngredient::entries,
-                    StackData.PACKET_CODEC, IndustriaIngredient::stackData,
+    public static final StreamCodec<RegistryFriendlyByteBuf, IndustriaIngredient> STREAM_CODEC =
+            StreamCodec.composite(ByteBufCodecs.holderSet(Registries.ITEM), IndustriaIngredient::entries,
+                    StackData.STREAM_CODEC, IndustriaIngredient::stackData,
                     IndustriaIngredient::new);
 
-    public static final IndustriaIngredient EMPTY = new IndustriaIngredient(RegistryEntryList.of(), StackData.EMPTY);
+    public static final IndustriaIngredient EMPTY = new IndustriaIngredient(HolderSet.direct(), StackData.EMPTY);
 
-    public IndustriaIngredient(RegistryEntryList<Item> entries, int count) {
+    public IndustriaIngredient(HolderSet<Item> entries, int count) {
         this(entries, StackData.create(count));
     }
 
     @SuppressWarnings("deprecation")
     public IndustriaIngredient(int count, Item... items) {
-        this(RegistryEntryList.of(Arrays.stream(items).map(Item::getRegistryEntry).toList()), StackData.create(count));
+        this(HolderSet.direct(Arrays.stream(items).map(Item::builtInRegistryHolder).toList()), StackData.create(count));
     }
 
-    public IndustriaIngredient(RegistryEntryList<Item> entries, int count, ComponentChanges components) {
+    public IndustriaIngredient(HolderSet<Item> entries, int count, DataComponentPatch components) {
         this(entries, StackData.create(count, components));
     }
 
@@ -64,7 +64,7 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
         return this.entries.stream().anyMatch(item ->
                 stack.getItem() == item.value() &&
                         (!matchCount || stack.getCount() == this.stackData.count()) &&
-                        (!matchComponents || this.stackData.components().equals(stack.getComponentChanges())));
+                        (!matchComponents || this.stackData.components().equals(stack.getComponentsPatch())));
     }
 
     public boolean test(ItemStack stack) {
@@ -75,7 +75,7 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
         return this.entries.stream().anyMatch(item ->
                 stack.getItem() == item.value() &&
                         countPredicate.test(stackData().count()) &&
-                        this.stackData.components().equals(stack.getComponentChanges()));
+                        this.stackData.components().equals(stack.getComponentsPatch()));
     }
 
     public static Predicate<Integer> countEquals(int count) {
@@ -100,11 +100,11 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
 
     public SlotDisplay toDisplay() {
         if(isEmpty())
-            return SlotDisplay.EmptySlotDisplay.INSTANCE;
+            return SlotDisplay.Empty.INSTANCE;
 
-        return new SlotDisplay.CompositeSlotDisplay(
+        return new SlotDisplay.Composite(
                 getMatchingStacks().stream()
-                        .map(SlotDisplay.StackSlotDisplay::new)
+                        .map(SlotDisplay.ItemStackSlotDisplay::new)
                         .map(SlotDisplay.class::cast)
                         .toList());
     }
@@ -113,26 +113,26 @@ public record IndustriaIngredient(RegistryEntryList<Item> entries, StackData sta
         return this == EMPTY;
     }
 
-    public record StackData(int count, @NotNull ComponentChanges components) {
+    public record StackData(int count, @NotNull DataComponentPatch components) {
         public static final Codec<StackData> CODEC = RecordCodecBuilder.create(
                 instance -> instance.group(
                         Codec.INT.fieldOf("count").orElse(1).forGetter(StackData::count),
-                        ComponentChanges.CODEC.optionalFieldOf("components", ComponentChanges.EMPTY).forGetter(StackData::components)
+                        DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(StackData::components)
                 ).apply(instance, StackData::new)
         );
 
-        public static final PacketCodec<RegistryByteBuf, StackData> PACKET_CODEC =
-                PacketCodec.tuple(PacketCodecs.INTEGER, StackData::count,
-                        ComponentChanges.PACKET_CODEC, StackData::components,
+        public static final StreamCodec<RegistryFriendlyByteBuf, StackData> STREAM_CODEC =
+                StreamCodec.composite(ByteBufCodecs.INT, StackData::count,
+                        DataComponentPatch.STREAM_CODEC, StackData::components,
                         StackData::new);
 
-        public static final StackData EMPTY = new StackData(1, ComponentChanges.EMPTY);
+        public static final StackData EMPTY = new StackData(1, DataComponentPatch.EMPTY);
 
         public static StackData create(int count) {
-            return new StackData(count, ComponentChanges.EMPTY);
+            return new StackData(count, DataComponentPatch.EMPTY);
         }
 
-        public static StackData create(int count, ComponentChanges components) {
+        public static StackData create(int count, DataComponentPatch components) {
             return new StackData(count, components);
         }
     }

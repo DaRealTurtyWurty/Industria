@@ -4,49 +4,48 @@ import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DrillHeadable;
-import dev.turtywurty.industria.util.DrillRenderData;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockBuilderDrillHeadItem extends Item implements DrillHeadable {
-    public BlockBuilderDrillHeadItem(Settings settings) {
+    public BlockBuilderDrillHeadItem(Properties settings) {
         super(settings);
     }
 
     @Override
     public float updateDrill(DrillBlockEntity blockEntity, float drillYOffset) {
-        World world = blockEntity.getWorld();
-        BlockPos pos = blockEntity.getPos();
+        Level world = blockEntity.getLevel();
+        BlockPos pos = blockEntity.getBlockPos();
 
-        BlockPos down = pos.up(MathHelper.ceil(blockEntity.getDrillYOffset()));
+        BlockPos down = pos.above(Mth.ceil(blockEntity.getDrillYOffset()));
         BlockState state = world.getBlockState(down);
-        float hardness = state.getHardness(world, pos);
+        float hardness = state.getDestroySpeed(world, pos);
         drillYOffset -= ((hardness == -1 || hardness == 0) ? 0.01F : (1F / (hardness + 5)));
 
         if (state.isAir()) {
             drillYOffset -= 0.1F;
         }
 
-        if (WorldFluidPocketsState.getServerState((ServerWorld) world).isPositionInPocket(down)) {
+        if (WorldFluidPocketsState.getServerState((ServerLevel) world).isPositionInPocket(down)) {
             blockEntity.setDrilling(false);
             blockEntity.setRetracting(true);
             return drillYOffset - 0.1F;
         }
 
         boolean isThis = false;
-        if (state.isOf(BlockInit.AUTO_MULTIBLOCK_BLOCK) || state.isOf(BlockInit.DRILL)) {
+        if (state.is(BlockInit.AUTO_MULTIBLOCK_BLOCK) || state.is(BlockInit.DRILL)) {
             drillYOffset -= 0.1F;
             isThis = true;
         }
 
-        if (world.getBlockState(down).getHardness(world, pos) == -1F || blockEntity.getDrillYOffset() < world.getBottomY() - pos.getY()) {
+        if (world.getBlockState(down).getDestroySpeed(world, pos) == -1F || blockEntity.getDrillYOffset() < world.getMinY() - pos.getY()) {
             blockEntity.setDrilling(false);
             blockEntity.setRetracting(true);
             drillYOffset += 0.01F;
@@ -68,21 +67,21 @@ public class BlockBuilderDrillHeadItem extends Item implements DrillHeadable {
             blockEntity.setRetracting(false);
             drillYOffset = 1.0F;
         } else if (!blockEntity.getPlaceableBlockInventory().isEmpty()) {
-            BlockPos pos = blockEntity.getPos().down((int) -drillYOffset + 1);
-            BlockState state = blockEntity.getWorld().getBlockState(pos);
-            if (state.isReplaceable()) {
-                SimpleInventory inventory = blockEntity.getPlaceableBlockInventory();
+            BlockPos pos = blockEntity.getBlockPos().below((int) -drillYOffset + 1);
+            BlockState state = blockEntity.getLevel().getBlockState(pos);
+            if (state.canBeReplaced()) {
+                SimpleContainer inventory = blockEntity.getPlaceableBlockInventory();
 
-                for (int i = 0; i < inventory.size(); i++) {
-                    ItemStack stack = inventory.getStack(i);
+                for (int i = 0; i < inventory.getContainerSize(); i++) {
+                    ItemStack stack = inventory.getItem(i);
                     if (!stack.isEmpty()) {
-                        Block block = Block.getBlockFromItem(stack.getItem());
-                        BlockState blockState = block.getDefaultState();
+                        Block block = Block.byItem(stack.getItem());
+                        BlockState blockState = block.defaultBlockState();
                         if (blockState.isAir())
                             continue;
 
-                        blockEntity.getWorld().setBlockState(pos, blockState);
-                        inventory.removeStack(i, 1);
+                        blockEntity.getLevel().setBlockAndUpdate(pos, blockState);
+                        inventory.removeItem(i, 1);
                         break;
                     }
                 }
@@ -92,8 +91,4 @@ public class BlockBuilderDrillHeadItem extends Item implements DrillHeadable {
         return drillYOffset;
     }
 
-    @Override
-    public DrillRenderData createRenderData() {
-        return new DrillRenderData();
-    }
 }

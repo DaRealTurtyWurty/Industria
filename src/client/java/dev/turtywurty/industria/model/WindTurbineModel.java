@@ -1,19 +1,22 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
-import net.minecraft.client.model.*;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 
 public class WindTurbineModel extends Model<WindTurbineModel.WindTurbineModelRenderState> {
-    public static final EntityModelLayer LAYER_LOCATION = new EntityModelLayer(Industria.id("wind_turbine"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("wind_turbine"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/wind_turbine.png");
 
     private final WindTurbineParts parts;
 
     public WindTurbineModel(ModelPart root) {
-        super(root, RenderLayers::entitySolid);
+        super(root, RenderTypes::entitySolid);
         ModelPart core = root.getChild("core");
         ModelPart propellers = root.getChild("propellers");
         ModelPart propeller0 = propellers.getChild("propeller0");
@@ -23,36 +26,36 @@ public class WindTurbineModel extends Model<WindTurbineModel.WindTurbineModelRen
         this.parts = new WindTurbineParts(core, propellers, propeller0, propeller1, propeller2);
     }
 
-    public static TexturedModelData getTexturedModelData() {
-        ModelData modelData = new ModelData();
-        ModelPartData modelPartData = modelData.getRoot();
-        ModelPartData core = modelPartData.addChild("core", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -28.125F, -10.0625F, 2.0F, 2.0F, 3.0F, new Dilation(0.0F))
-                .uv(0, 0).cuboid(-7.0F, 29.875F, -7.0625F, 14.0F, 2.0F, 14.0F, new Dilation(0.0F))
-                .uv(0, 41).cuboid(-4.0F, -2.125F, -4.0625F, 8.0F, 21.0F, 8.0F, new Dilation(0.0F))
-                .uv(0, 17).cuboid(-6.0F, 18.875F, -6.0625F, 12.0F, 11.0F, 12.0F, new Dilation(0.0F))
-                .uv(33, 48).cuboid(-2.0F, -24.125F, -2.0625F, 4.0F, 22.0F, 4.0F, new Dilation(0.0F))
-                .uv(38, 30).cuboid(-3.0F, -30.125F, -6.0625F, 6.0F, 6.0F, 11.0F, new Dilation(0.0F))
-                .uv(0, 17).cuboid(-1.0F, 29.875F, -1.0625F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F))
-                .uv(0, 6).cuboid(-2.0F, -29.125F, -7.0625F, 4.0F, 4.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, -7.875F, 0.0625F));
+    public static LayerDefinition getTexturedModelData() {
+        MeshDefinition modelData = new MeshDefinition();
+        PartDefinition modelPartData = modelData.getRoot();
+        PartDefinition core = modelPartData.addOrReplaceChild("core", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -28.125F, -10.0625F, 2.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 0).addBox(-7.0F, 29.875F, -7.0625F, 14.0F, 2.0F, 14.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 41).addBox(-4.0F, -2.125F, -4.0625F, 8.0F, 21.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 17).addBox(-6.0F, 18.875F, -6.0625F, 12.0F, 11.0F, 12.0F, new CubeDeformation(0.0F))
+                .texOffs(33, 48).addBox(-2.0F, -24.125F, -2.0625F, 4.0F, 22.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(38, 30).addBox(-3.0F, -30.125F, -6.0625F, 6.0F, 6.0F, 11.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 17).addBox(-1.0F, 29.875F, -1.0625F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 6).addBox(-2.0F, -29.125F, -7.0625F, 4.0F, 4.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -7.875F, 0.0625F));
 
-        ModelPartData propellers = modelPartData.addChild("propellers", ModelPartBuilder.create(), ModelTransform.origin(0.0F, -35.0F, -8.0F));
+        PartDefinition propellers = modelPartData.addOrReplaceChild("propellers", CubeListBuilder.create(), PartPose.offset(0.0F, -35.0F, -8.0F));
 
-        ModelPartData propeller0 = propellers.addChild("propeller0", ModelPartBuilder.create().uv(50, 48).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 0.0F, 0.0F));
+        PartDefinition propeller0 = propellers.addOrReplaceChild("propeller0", CubeListBuilder.create().texOffs(50, 48).addBox(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        ModelPartData propeller1 = propellers.addChild("propeller1", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
+        PartDefinition propeller1 = propellers.addOrReplaceChild("propeller1", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        ModelPartData cube_r1 = propeller1.addChild("cube_r1", ModelPartBuilder.create().uv(57, 0).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -2.1817F));
+        PartDefinition cube_r1 = propeller1.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(57, 0).addBox(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -2.1817F));
 
-        ModelPartData propeller2 = propellers.addChild("propeller2", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
+        PartDefinition propeller2 = propellers.addOrReplaceChild("propeller2", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        ModelPartData cube_r2 = propeller2.addChild("cube_r2", ModelPartBuilder.create().uv(57, 48).cuboid(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 2.1817F));
-        return TexturedModelData.of(modelData, 128, 128);
+        PartDefinition cube_r2 = propeller2.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(57, 48).addBox(-1.0F, -21.0F, -1.0F, 2.0F, 22.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 2.1817F));
+        return LayerDefinition.create(modelData, 128, 128);
     }
 
     @Override
-    public void setAngles(WindTurbineModelRenderState state) {
-        super.setAngles(state);
-        this.parts.propellers().roll = state.propellerRotation;
+    public void setupAnim(WindTurbineModelRenderState state) {
+        super.setupAnim(state);
+        this.parts.propellers().zRot = state.propellerRotation;
     }
 
     public record WindTurbineModelRenderState(float propellerRotation) {

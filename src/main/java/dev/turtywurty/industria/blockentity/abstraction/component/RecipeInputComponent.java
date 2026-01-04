@@ -1,8 +1,8 @@
 package dev.turtywurty.industria.blockentity.abstraction.component;
 
 import dev.turtywurty.industria.blockentity.abstraction.IndustriaSimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 public class RecipeInputComponent implements Component, RecipeInput {
     private final IndustriaSimpleInventory inventory;
@@ -12,12 +12,12 @@ public class RecipeInputComponent implements Component, RecipeInput {
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        return this.inventory.getStack(slot);
+    public ItemStack getItem(int slot) {
+        return this.inventory.getItem(slot);
     }
 
     @Override
     public int size() {
-        return this.inventory.size();
+        return this.inventory.getContainerSize();
     }
 }

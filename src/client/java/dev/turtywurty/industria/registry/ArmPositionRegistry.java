@@ -1,8 +1,8 @@
 package dev.turtywurty.industria.registry;
 
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.state.BipedEntityRenderState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +30,6 @@ public class ArmPositionRegistry {
 
     @FunctionalInterface
     public interface DynamicArmPosition {
-        void apply(BipedEntityRenderState bipedEntityRenderState, ModelPart leftArm, ModelPart rightArm);
+        void apply(HumanoidRenderState bipedEntityRenderState, ModelPart leftArm, ModelPart rightArm);
     }
 }

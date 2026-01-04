@@ -5,82 +5,82 @@ import dev.turtywurty.industria.screenhandler.ThermalGeneratorScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.world.World;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 
-public class ThermalGeneratorScreen extends HandledScreen<ThermalGeneratorScreenHandler> {
+public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGeneratorScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/thermal_generator.png");
 
-    public ThermalGeneratorScreen(ThermalGeneratorScreenHandler handler, PlayerInventory inventory, Text title) {
+    public ThermalGeneratorScreen(ThermalGeneratorScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        long energy = this.handler.getEnergy();
-        long maxEnergy = this.handler.getMaxEnergy();
+        long energy = this.menu.getEnergy();
+        long maxEnergy = this.menu.getMaxEnergy();
         int energyBarHeight = Math.round((float) energy / maxEnergy * 60);
-        context.fill(this.x + 8, this.y + 8 + 60 - energyBarHeight, this.x + 16, this.y + 68, 0xFFD4AF37);
+        context.fill(this.leftPos + 8, this.topPos + 8 + 60 - energyBarHeight, this.leftPos + 16, this.topPos + 68, 0xFFD4AF37);
 
-        Fluid fluid = this.handler.getFluid();
-        long fluidAmount = this.handler.getFluidAmount();
-        long fluidCapacity = this.handler.getFluidCapacity();
+        Fluid fluid = this.menu.getFluid();
+        long fluidAmount = this.menu.getFluidAmount();
+        long fluidCapacity = this.menu.getFluidCapacity();
         int fluidBarHeight = Math.round((float) fluidAmount / fluidCapacity * 60);
 
         FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
         if(fluidRenderHandler == null || fluidAmount <= 0)
             return;
 
-        BlockPos pos = this.handler.getBlockEntity().getPos();
-        FluidState fluidState = fluid.getDefaultState();
-        World world = this.handler.getBlockEntity().getWorld();
+        BlockPos pos = this.menu.getBlockEntity().getBlockPos();
+        FluidState fluidState = fluid.defaultFluidState();
+        Level world = this.menu.getBlockEntity().getLevel();
 
-        Sprite stillTexture = fluidRenderHandler.getFluidSprites(world, pos, fluidState)[0];
+        TextureAtlasSprite stillTexture = fluidRenderHandler.getFluidSprites(world, pos, fluidState)[0];
         int tintColor = fluidRenderHandler.getFluidColor(world, pos, fluidState);
 
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
         float blue = (tintColor & 0xFF) / 255.0F;
-        context.drawSpriteStretched(RenderPipelines.GUI_TEXTURED, stillTexture, this.x + 146, this.y + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, ColorHelper.fromFloats(1.0F, red, green, blue));
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, stillTexture, this.leftPos + 146, this.topPos + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
 
-        if (isPointWithinBounds(146, 8, 16, 60, mouseX, mouseY)) {
-            Fluid fluid = this.handler.getFluid();
-            long fluidAmount = this.handler.getFluidAmount();
-            long fluidCapacity = this.handler.getFluidCapacity();
+        if (isHovering(146, 8, 16, 60, mouseX, mouseY)) {
+            Fluid fluid = this.menu.getFluid();
+            long fluidAmount = this.menu.getFluidAmount();
+            long fluidCapacity = this.menu.getFluidCapacity();
             if (fluid != null && fluidAmount > 0) {
-                context.drawTooltip(this.textRenderer, Text.translatable(fluid.getDefaultState().getBlockState().getBlock().getTranslationKey()), mouseX, mouseY);
-                context.drawTooltip(this.textRenderer, Text.literal(fluidAmount + " / " + fluidCapacity + " mB"), mouseX, mouseY + 10);
+                context.setTooltipForNextFrame(this.font, Component.translatable(fluid.defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()), mouseX, mouseY);
+                context.setTooltipForNextFrame(this.font, Component.literal(fluidAmount + " / " + fluidCapacity + " mB"), mouseX, mouseY + 10);
             }
         }
 
-        if (isPointWithinBounds(8, 8, 8, 60, mouseX, mouseY)) {
-            long energy = this.handler.getEnergy();
-            long maxEnergy = this.handler.getMaxEnergy();
-            context.drawTooltip(this.textRenderer, Text.literal(energy + " / " + maxEnergy + " FE"), mouseX, mouseY);
+        if (isHovering(8, 8, 8, 60, mouseX, mouseY)) {
+            long energy = this.menu.getEnergy();
+            long maxEnergy = this.menu.getMaxEnergy();
+            context.setTooltipForNextFrame(this.font, Component.literal(energy + " / " + maxEnergy + " FE"), mouseX, mouseY);
         }
     }
 }

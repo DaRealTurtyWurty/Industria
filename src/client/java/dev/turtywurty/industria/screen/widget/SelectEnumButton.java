@@ -8,15 +8,15 @@ import dev.turtywurty.industria.util.enums.EnumValueCacher;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.industria.util.enums.TraversableEnum;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValueCacher<T> & TextEnum & StringRepresentable> extends ButtonWidget {
+public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValueCacher<T> & TextEnum & StringRepresentable> extends Button {
     private static final Identifier PLAIN_TEXTURE = Industria.id("textures/gui/widget/select_enum_button.png");
     private static final Identifier HOVERED_TEXTURE = Industria.id("textures/gui/widget/select_enum_button_focused.png");
     private static final Identifier DISABLED_OVERLAY_TEXTURE = Industria.id("textures/gui/widget/select_enum_button_disabled.png");
 
-    private final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+    private final Font textRenderer = Minecraft.getInstance().font;
 
     private final Map<T, Identifier> textureMap;
     private final Consumer<T> onNewValue;
@@ -41,7 +41,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     @SafeVarargs
     public SelectEnumButton(T startValue, Consumer<T> onNewValue, int columns, int x, int y, int width, int height, Map<T, Identifier> textureMap, T... disabledValues) {
-        super(x, y, width, height, net.minecraft.text.Text.empty(), null, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
+        super(x, y, width, height, net.minecraft.network.chat.Component.empty(), null, Button.DEFAULT_NARRATION);
         this.value = startValue;
         this.onNewValue = onNewValue;
         this.columns = columns;
@@ -81,8 +81,8 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    public void onPress(AbstractInput input) {
-        if (input.hasShift())
+    public void onPress(InputWithModifiers input) {
+        if (input.hasShiftDown())
             this.value = findPreviousEnabled(this.value);
         else
             this.value = findNextEnabled(this.value);
@@ -91,7 +91,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (isMouseOverSelectionArea(click.x(), click.y()) && this.hoveredLastFrame) {
             int ordinal = getOrdinal((int) click.x(), (int) click.y());
 
@@ -107,11 +107,11 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float delta) {
-        int color = ColorHelper.getWhite(this.alpha);
+    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        int color = ARGB.white(this.alpha);
         GlStateManager._enableBlend(); // TODO: Come back and check if this is okay?
         GlStateManager._enableDepthTest();
-        ScreenUtils.drawGuiTexture(context, TEXTURES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height, color);
+        ScreenUtils.drawGuiTexture(context, SPRITES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height, color);
         ScreenUtils.drawTexture(context, this.textureMap.get(this.value), getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16, color);
 
         if (this.hoveredLastFrame) {
@@ -138,12 +138,12 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
                 int ordinal = getOrdinal(mouseX, mouseY);
 
                 T current = this.value.getValues()[ordinal];
-                context.drawTooltip(this.textRenderer, current.getAsText(), mouseX, mouseY);
+                context.setTooltipForNextFrame(this.textRenderer, current.getAsText(), mouseX, mouseY);
             }
         }
 
         if (isHovered()) {
-            context.drawTooltip(this.textRenderer, this.value.getAsText(), mouseX, mouseY);
+            context.setTooltipForNextFrame(this.textRenderer, this.value.getAsText(), mouseX, mouseY);
         }
 
         this.hoveredLastFrame = isHovered() || (this.hoveredLastFrame && isMouseOverSelectionArea(mouseX, mouseY + 1));
@@ -168,7 +168,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     private int getSelectionLeft() {
-        return getX() - (this.width * MathHelper.floor(this.columns / 2f));
+        return getX() - (this.width * Mth.floor(this.columns / 2f));
     }
 
     private int getOrdinal(int x, int y) {
@@ -186,7 +186,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     private boolean isMouseOverSelectionArea(double mouseX, double mouseY) {
         int startY = getBottom();
         int numValues = this.value.getValues().length;
-        int endY = startY + (this.height * MathHelper.ceil(numValues / (float) this.columns));
+        int endY = startY + (this.height * Mth.ceil(numValues / (float) this.columns));
         if (mouseY < startY || mouseY > endY) return false;
 
         int ordinal = getOrdinal((int) mouseX, (int) mouseY);

@@ -13,8 +13,8 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Set;
 import java.util.UUID;
@@ -32,9 +32,9 @@ public class FluidPipeNetwork extends PipeNetwork<Storage<FluidVariant>> {
             },
             FluidPipeNetwork::new);
 
-    public static final PacketCodec<RegistryByteBuf, FluidPipeNetwork> PACKET_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPipeNetwork> STREAM_CODEC =
             PipeNetwork.createPacketCodec(
-                    FluidStack.PACKET_CODEC,
+                    FluidStack.STREAM_CODEC,
                     network -> {
                         SingleFluidStorage fluidStorage = (SingleFluidStorage) network.storage;
                         return new FluidStack(fluidStorage.getResource(), fluidStorage.getAmount());
@@ -47,8 +47,8 @@ public class FluidPipeNetwork extends PipeNetwork<Storage<FluidVariant>> {
                     FluidPipeNetwork::new);
 
     public static final Codec<Set<FluidPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final PacketCodec<RegistryByteBuf, Set<FluidPipeNetwork>> SET_PACKET_CODEC =
-            ExtraPacketCodecs.setOf(PACKET_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<FluidPipeNetwork>> SET_STREAM_CODEC =
+            ExtraPacketCodecs.setOf(STREAM_CODEC);
 
     public FluidPipeNetwork(UUID id) {
         super(id, TransferType.FLUID);

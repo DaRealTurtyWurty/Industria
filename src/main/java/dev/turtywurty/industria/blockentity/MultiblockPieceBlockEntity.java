@@ -3,10 +3,10 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import net.minecraft.block.BlockState;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class MultiblockPieceBlockEntity extends UpdatableBlockEntity {
@@ -37,16 +37,16 @@ public class MultiblockPieceBlockEntity extends UpdatableBlockEntity {
     }
 
     @Override
-    protected void writeData(WriteView view) {
+    protected void saveAdditional(ValueOutput view) {
         if (this.designerPos != null) {
-            view.put("Designer", BlockPos.CODEC, this.designerPos);
+            view.store("Designer", BlockPos.CODEC, this.designerPos);
         }
 
-        view.put("Key", ExtraCodecs.CHAR_CODEC, this.key);
+        view.store("Key", ExtraCodecs.CHAR_CODEC, this.key);
     }
 
     @Override
-    protected void readData(ReadView view) {
+    protected void loadAdditional(ValueInput view) {
         this.designerPos = view.read("Designer", BlockPos.CODEC).orElse(null);
         this.key = view.read("Key", ExtraCodecs.CHAR_CODEC).orElse(' ');
     }

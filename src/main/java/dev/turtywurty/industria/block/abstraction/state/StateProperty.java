@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.block.abstraction.state;
 
-import net.minecraft.state.property.Property;
+import net.minecraft.world.level.block.state.properties.Property;
 
 public final class StateProperty<T extends Comparable<T>> {
     private final Property<T> delegate;

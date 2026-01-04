@@ -1,16 +1,21 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
-import net.minecraft.client.gui.*;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
-public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
+public class FakeWorldWidget implements Renderable, GuiEventListener, LayoutElement, NarratableEntry {
     protected int width;
     protected int height;
     protected final FakeWorldScene scene;
@@ -31,12 +36,12 @@ public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         scene.render(context, x, y, width, height, deltaTicks);
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (enableInteraction && click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             this.scene.rotateCamera((float) (offsetX * this.dragSensitivity), (float) (offsetY * this.dragSensitivity));
             return true;
@@ -94,7 +99,7 @@ public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
     }
 
     @Override
-    public void forEachChild(Consumer<ClickableWidget> consumer) {
+    public void visitWidgets(Consumer<AbstractWidget> consumer) {
     }
 
     public void setSize(int width, int height) {
@@ -103,17 +108,17 @@ public class FakeWorldWidget implements Drawable, Element, Widget, Selectable {
     }
 
     @Override
-    public ScreenRect getNavigationFocus() {
-        return Widget.super.getNavigationFocus();
+    public ScreenRectangle getRectangle() {
+        return LayoutElement.super.getRectangle();
     }
 
     @Override
-    public SelectionType getType() {
-        return SelectionType.NONE;
+    public NarrationPriority narrationPriority() {
+        return NarrationPriority.NONE;
     }
 
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {}
+    public void updateNarration(NarrationElementOutput builder) {}
 
     public static class Builder {
         private FakeWorldScene scene;

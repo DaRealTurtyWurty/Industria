@@ -1,19 +1,19 @@
 package dev.turtywurty.industria.util;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.world.World;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.UnaryOperator;
@@ -25,19 +25,19 @@ public class InWorldFluidRenderingComponent {
         this.shouldDebugAmount = shouldDebugAmount;
     }
 
-    public void render(@Nullable SingleFluidStorage fluidTank, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2) {
+    public void render(@Nullable SingleFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2) {
         render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, IndeterminateBoolean.INDETERMINATE);
     }
 
-    public void render(@Nullable SingleFluidStorage fluidTank, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, IndeterminateBoolean drawTopFace) {
+    public void render(@Nullable SingleFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, IndeterminateBoolean drawTopFace) {
         render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, drawTopFace);
     }
 
-    public void render(@Nullable SingleFluidStorage fluidTank, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
+    public void render(@Nullable SingleFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
         render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, color, colorMode, IndeterminateBoolean.INDETERMINATE);
     }
 
-    public void render(@Nullable SingleFluidStorage fluidTank, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode, IndeterminateBoolean drawTopFace) {
+    public void render(@Nullable SingleFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode, IndeterminateBoolean drawTopFace) {
         if (fluidTank == null || fluidTank.isResourceBlank() || fluidTank.amount <= 0)
             return;
 
@@ -45,28 +45,28 @@ public class InWorldFluidRenderingComponent {
         long amount = fluidTank.amount;
         long capacity = fluidTank.getCapacity();
         float fillPercentage = (float) amount / capacity;
-        fillPercentage = MathHelper.clamp(fillPercentage, 0.0F, 1.0F);
+        fillPercentage = Mth.clamp(fillPercentage, 0.0F, 1.0F);
 
         if (this.shouldDebugAmount) {
-            fillPercentage = (float) (Math.sin(world.getTime() / 64.0) * 0.5 + 0.5);
+            fillPercentage = (float) (Math.sin(world.getGameTime() / 64.0) * 0.5 + 0.5);
         }
 
         int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
         int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
 
-        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        TextureAtlasSprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
         if (stillSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(stillSprite.getAtlasId());
+        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(stillSprite.atlasLocation());
 
         float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
 
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
         }
 
         int blockLight = (light >> 4) & 0xF;
@@ -74,7 +74,7 @@ public class InWorldFluidRenderingComponent {
         int newLight = (light & 0xF00000) | (luminosity << 4);
 
         float finalFillPercentage = fillPercentage;
-        queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
             // Front (XY plane, z constant)
             drawTiledXYQuad(vertexConsumer, entry,
                     x1, y1, z1 + 0.001F,
@@ -104,43 +104,43 @@ public class InWorldFluidRenderingComponent {
             }
         });
 
-        matrices.pop();
+        matrices.popPose();
     }
 
-    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, UnaryOperator<RenderLayer> wrapRenderLayer) {
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2, UnaryOperator<RenderType> wrapRenderLayer) {
         renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, wrapRenderLayer);
     }
 
-    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
         renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
     }
 
-    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
         renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, color, colorMode, renderLayer -> renderLayer);
     }
 
-    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, final int light, int overlay, World world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode, UnaryOperator<RenderLayer> wrapRenderLayer) {
+    public void renderTopFaceOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, final int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode, UnaryOperator<RenderType> wrapRenderLayer) {
         if (fluidVariant == null)
             return;
 
         int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
         int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
 
-        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        TextureAtlasSprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
         if (stillSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(stillSprite.getAtlasId());
+        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(stillSprite.atlasLocation());
         renderLayer = wrapRenderLayer.apply(renderLayer);
 
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
         }
 
-        queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) -> {
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
             int blockLight = (light >> 4) & 0xF;
             int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
             int newLight = (light & 0xF00000) | (luminosity << 4);
@@ -148,14 +148,14 @@ public class InWorldFluidRenderingComponent {
             drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, newFluidColor, newLight, overlay);
         });
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static void drawTiledTopQuad(VertexConsumer vertexConsumer,
-                                        MatrixStack.Entry entry,
+                                        PoseStack.Pose entry,
                                         float x1, float y, float z1,
                                         float x2, float z2,
-                                        Sprite sprite,
+                                        TextureAtlasSprite sprite,
                                         int color,
                                         int light, int overlay) {
         float tileSize = 1.0f; // Maximum tile size in world space
@@ -165,10 +165,10 @@ public class InWorldFluidRenderingComponent {
         float tileWidth = (x2 - x1) / tileCountX;
         float tileDepth = (z2 - z1) / tileCountZ;
 
-        float u0 = sprite.getMinU();
-        float v0 = sprite.getMinV();
-        float u1 = sprite.getMaxU();
-        float v1 = sprite.getMaxV();
+        float u0 = sprite.getU0();
+        float v0 = sprite.getV0();
+        float u1 = sprite.getU1();
+        float v1 = sprite.getV1();
 
         float tileUSize = (u1 - u0);
         float tileVSize = (v1 - v0);
@@ -183,77 +183,77 @@ public class InWorldFluidRenderingComponent {
                 float uEnd = u0 + tileUSize;
                 float vEnd = v0 + tileVSize;
 
-                vertexConsumer.vertex(entry, xStart, y, zStart)
-                        .color(color)
-                        .texture(u0, v0)
-                        .light(light)
-                        .overlay(overlay)
-                        .normal(0.0F, 1.0F, 0.0F);
+                vertexConsumer.addVertex(entry, xStart, y, zStart)
+                        .setColor(color)
+                        .setUv(u0, v0)
+                        .setLight(light)
+                        .setOverlay(overlay)
+                        .setNormal(0.0F, 1.0F, 0.0F);
 
-                vertexConsumer.vertex(entry, xStart, y, zEnd)
-                        .color(color)
-                        .texture(u0, vEnd)
-                        .light(light)
-                        .overlay(overlay)
-                        .normal(0.0F, 1.0F, 0.0F);
+                vertexConsumer.addVertex(entry, xStart, y, zEnd)
+                        .setColor(color)
+                        .setUv(u0, vEnd)
+                        .setLight(light)
+                        .setOverlay(overlay)
+                        .setNormal(0.0F, 1.0F, 0.0F);
 
-                vertexConsumer.vertex(entry, xEnd, y, zEnd)
-                        .color(color)
-                        .texture(uEnd, vEnd)
-                        .light(light)
-                        .overlay(overlay)
-                        .normal(0.0F, 1.0F, 0.0F);
+                vertexConsumer.addVertex(entry, xEnd, y, zEnd)
+                        .setColor(color)
+                        .setUv(uEnd, vEnd)
+                        .setLight(light)
+                        .setOverlay(overlay)
+                        .setNormal(0.0F, 1.0F, 0.0F);
 
-                vertexConsumer.vertex(entry, xEnd, y, zStart)
-                        .color(color)
-                        .texture(uEnd, v0)
-                        .light(light)
-                        .overlay(overlay)
-                        .normal(entry, 0.0F, 1.0F, 0.0F);
+                vertexConsumer.addVertex(entry, xEnd, y, zStart)
+                        .setColor(color)
+                        .setUv(uEnd, v0)
+                        .setLight(light)
+                        .setOverlay(overlay)
+                        .setNormal(entry, 0.0F, 1.0F, 0.0F);
             }
         }
     }
 
-    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
+    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
         drawTiledXYQuadOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
     }
 
-    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, OrderedRenderCommandQueue queue, MatrixStack matrices, final int light, int overlay, World world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, int color, ColorMode colorMode) {
+    public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, final int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, int color, ColorMode colorMode) {
         if (fluidVariant == null)
             return;
 
         int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
         int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
 
-        Sprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
+        TextureAtlasSprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
         if (stillSprite == null)
             return;
 
-        RenderLayer renderLayer = RenderLayers.itemEntityTranslucentCull(stillSprite.getAtlasId());
+        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(stillSprite.atlasLocation());
 
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
         }
 
         int blockLight = (light >> 4) & 0xF;
         int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
         int newLight = (light & 0xF00000) | (luminosity << 4);
 
-        queue.submitCustom(matrices, renderLayer, (entry, vertexConsumer) ->
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) ->
                 drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F));
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     // For front and back (XY plane)
     public static void drawTiledXYQuad(VertexConsumer vertexConsumer,
-                                       MatrixStack.Entry entry,
+                                       PoseStack.Pose entry,
                                        float x1, float y1, float z1,
                                        float x2, float y2, float z2,
-                                       Sprite sprite,
+                                       TextureAtlasSprite sprite,
                                        int color,
                                        int light, int overlay,
                                        float nx, float ny, float nz) {
@@ -270,10 +270,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + tileSize;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getMaxU();
-                float v1 = sprite.getMaxV();
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU1();
+                float v1 = sprite.getV1();
                 drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -285,10 +285,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + leftoverX;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverX);
-                float v1 = sprite.getFrameV(tileSize);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverX);
+                float v1 = sprite.getV(tileSize);
                 drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -300,10 +300,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + tileSize;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(tileSize);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(tileSize);
+                float v1 = sprite.getV(leftoverY);
                 drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
 
@@ -313,10 +313,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + leftoverX;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverX);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverX);
+                float v1 = sprite.getV(leftoverY);
                 drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -324,10 +324,10 @@ public class InWorldFluidRenderingComponent {
 
     // For left and right (YZ plane)
     public static void drawTiledYZQuad(VertexConsumer vertexConsumer,
-                                       MatrixStack.Entry entry,
+                                       PoseStack.Pose entry,
                                        float x, float y1, float z1,
                                        float y2, float z2,
-                                       Sprite sprite,
+                                       TextureAtlasSprite sprite,
                                        int color,
                                        int light, int overlay,
                                        float nx, float ny, float nz) {
@@ -344,10 +344,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + tileSize;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getMaxU();
-                float v1 = sprite.getMaxV();
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU1();
+                float v1 = sprite.getV1();
                 drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -359,10 +359,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + leftoverZ;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverZ);
-                float v1 = sprite.getFrameV(tileSize);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverZ);
+                float v1 = sprite.getV(tileSize);
                 drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -374,10 +374,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + tileSize;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(tileSize);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(tileSize);
+                float v1 = sprite.getV(leftoverY);
                 drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
 
@@ -387,17 +387,17 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + leftoverZ;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverZ);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverZ);
+                float v1 = sprite.getV(leftoverY);
                 drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
     }
 
     private static void drawQuad(VertexConsumer vertexConsumer,
-                                 MatrixStack.Entry entry,
+                                 PoseStack.Pose entry,
                                  float x1, float y1, float z1,
                                  float x2, float y2, float z2,
                                  float minU, float minV,
@@ -405,37 +405,37 @@ public class InWorldFluidRenderingComponent {
                                  int color,
                                  int light, int overlay,
                                  float normalX, float normalY, float normalZ) {
-        vertexConsumer.vertex(entry, x1, y1, z1)
-                .color(color)
-                .texture(minU, minV)
-                .light(light)
-                .overlay(overlay)
-                .normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x1, y1, z1)
+                .setColor(color)
+                .setUv(minU, minV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(normalX, normalY, normalZ);
 
-        vertexConsumer.vertex(entry, x1, y2, z1)
-                .color(color)
-                .texture(minU, maxV)
-                .light(light)
-                .overlay(overlay)
-                .normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x1, y2, z1)
+                .setColor(color)
+                .setUv(minU, maxV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(normalX, normalY, normalZ);
 
-        vertexConsumer.vertex(entry, x2, y2, z2)
-                .color(color)
-                .texture(maxU, maxV)
-                .light(light)
-                .overlay(overlay)
-                .normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x2, y2, z2)
+                .setColor(color)
+                .setUv(maxU, maxV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(normalX, normalY, normalZ);
 
-        vertexConsumer.vertex(entry, x2, y1, z2)
-                .color(color)
-                .texture(maxU, minV)
-                .light(light)
-                .overlay(overlay)
-                .normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x2, y1, z2)
+                .setColor(color)
+                .setUv(maxU, minV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(normalX, normalY, normalZ);
     }
 
     private static void drawReversedQuad(VertexConsumer vertexConsumer,
-                                         MatrixStack.Entry entry,
+                                         PoseStack.Pose entry,
                                          float x1, float y1, float z1,
                                          float x2, float y2, float z2,
                                          float minU, float minV,
@@ -444,20 +444,20 @@ public class InWorldFluidRenderingComponent {
                                          int light, int overlay,
                                          float normalX, float normalY, float normalZ) {
         // Vertex 4: (x2, y1, z2) with (maxU, minV)
-        vertexConsumer.vertex(entry, x2, y1, z2).color(color).texture(maxU, minV).light(light).overlay(overlay).normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x2, y1, z2).setColor(color).setUv(maxU, minV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
         // Vertex 3: (x2, y2, z2) with (maxU, maxV)
-        vertexConsumer.vertex(entry, x2, y2, z2).color(color).texture(maxU, maxV).light(light).overlay(overlay).normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x2, y2, z2).setColor(color).setUv(maxU, maxV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
         // Vertex 2: (x1, y2, z1) with (minU, maxV)
-        vertexConsumer.vertex(entry, x1, y2, z1).color(color).texture(minU, maxV).light(light).overlay(overlay).normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x1, y2, z1).setColor(color).setUv(minU, maxV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
         // Vertex 1: (x1, y1, z1) with (minU, minV)
-        vertexConsumer.vertex(entry, x1, y1, z1).color(color).texture(minU, minV).light(light).overlay(overlay).normal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x1, y1, z1).setColor(color).setUv(minU, minV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
     }
 
     private static void drawReversedTiledXYQuad(VertexConsumer vertexConsumer,
-                                                MatrixStack.Entry entry,
+                                                PoseStack.Pose entry,
                                                 float x1, float y1, float z1,
                                                 float x2, float y2, float z2,
-                                                Sprite sprite,
+                                                TextureAtlasSprite sprite,
                                                 int color,
                                                 int light, int overlay,
                                                 float nx, float ny, float nz) {
@@ -474,10 +474,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + tileSize;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getMaxU();
-                float v1 = sprite.getMaxV();
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU1();
+                float v1 = sprite.getV1();
                 drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -489,10 +489,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + leftoverX;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverX);
-                float v1 = sprite.getFrameV(tileSize);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverX);
+                float v1 = sprite.getV(tileSize);
                 drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -504,10 +504,10 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + tileSize;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(tileSize);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(tileSize);
+                float v1 = sprite.getV(leftoverY);
                 drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
 
@@ -517,20 +517,20 @@ public class InWorldFluidRenderingComponent {
                 float xEnd = xStart + leftoverX;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverX);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverX);
+                float v1 = sprite.getV(leftoverY);
                 drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
     }
 
     private static void drawReversedTiledYZQuad(VertexConsumer vertexConsumer,
-                                                MatrixStack.Entry entry,
+                                                PoseStack.Pose entry,
                                                 float x, float y1, float z1,
                                                 float y2, float z2,
-                                                Sprite sprite,
+                                                TextureAtlasSprite sprite,
                                                 int color,
                                                 int light, int overlay,
                                                 float nx, float ny, float nz) {
@@ -547,10 +547,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + tileSize;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getMaxU();
-                float v1 = sprite.getMaxV();
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU1();
+                float v1 = sprite.getV1();
                 drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -562,10 +562,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + leftoverZ;
                 float yStart = y1 + j * tileSize;
                 float yEnd = yStart + tileSize;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverZ);
-                float v1 = sprite.getFrameV(tileSize);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverZ);
+                float v1 = sprite.getV(tileSize);
                 drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }
@@ -577,10 +577,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + tileSize;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(tileSize);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(tileSize);
+                float v1 = sprite.getV(leftoverY);
                 drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
 
@@ -590,10 +590,10 @@ public class InWorldFluidRenderingComponent {
                 float zEnd = zStart + leftoverZ;
                 float yStart = y1 + fullTilesY * tileSize;
                 float yEnd = yStart + leftoverY;
-                float u0 = sprite.getMinU();
-                float v0 = sprite.getMinV();
-                float u1 = sprite.getFrameU(leftoverZ);
-                float v1 = sprite.getFrameV(leftoverY);
+                float u0 = sprite.getU0();
+                float v0 = sprite.getV0();
+                float u1 = sprite.getU(leftoverZ);
+                float v1 = sprite.getV(leftoverY);
                 drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
             }
         }

@@ -3,25 +3,25 @@ package dev.turtywurty.industria.screen.widget;
 import dev.turtywurty.industria.multiblock.VariedBlockList;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldScene;
 import dev.turtywurty.industria.screen.fakeworld.FakeWorldSceneBuilder;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidget.Entry> {
+public class PaletteEntryListWidget extends AbstractSelectionList<PaletteEntryListWidget.Entry> {
     private final Map<Character, Entry> entriesByChar = new HashMap<>();
     private Consumer<Entry> selectionListener = entry -> {
     };
 
-    public PaletteEntryListWidget(MinecraftClient client, int x, int y, int width, int height, int itemHeight) {
+    public PaletteEntryListWidget(Minecraft client, int x, int y, int width, int height, int itemHeight) {
         super(client, width, height, y, itemHeight);
         setX(x);
     }
@@ -37,7 +37,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
     }
 
     @Override
-    protected int getScrollbarX() {
+    protected int scrollBarX() {
         return getX() + this.width - SCROLLBAR_WIDTH;
     }
 
@@ -67,7 +67,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
             return;
         }
 
-        entry = new Entry(this.client, paletteChar, name, variedBlockList);
+        entry = new Entry(this.minecraft, paletteChar, name, variedBlockList);
         addEntry(entry);
     }
 
@@ -88,7 +88,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
         for (Entry entry : toRemove) {
             removeEntry(entry);
             entry.close();
-            if (entry == getSelectedOrNull()) {
+            if (entry == getSelected()) {
                 setSelected(null);
             }
         }
@@ -99,7 +99,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
         if (entry != null) {
             super.removeEntry(entry);
             entry.close();
-            if (entry == getSelectedOrNull()) {
+            if (entry == getSelected()) {
                 setSelected(null);
             }
         }
@@ -119,7 +119,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
             Entry entry = getEntryAtPosition(click.x(), click.y());
             if (entry != null) {
@@ -133,7 +133,7 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
 
     public void tickEntries() {
@@ -148,22 +148,22 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
         }
     }
 
-    public static class Entry extends EntryListWidget.Entry<Entry> implements AutoCloseable {
+    public static class Entry extends AbstractSelectionList.Entry<Entry> implements AutoCloseable {
         private static final int PREVIEW_PADDING = 2;
         private final FakeWorldScene scene;
-        private final MinecraftClient client;
+        private final Minecraft client;
         private final char paletteChar;
         private VariedBlockList variedBlockList;
-        private Text name;
+        private Component name;
 
-        public Entry(MinecraftClient client, char paletteChar, String name, VariedBlockList variedBlockList) {
+        public Entry(Minecraft client, char paletteChar, String name, VariedBlockList variedBlockList) {
             this.client = client;
             this.paletteChar = paletteChar;
-            this.name = Text.literal(name);
+            this.name = Component.literal(name);
             this.variedBlockList = variedBlockList;
             this.scene = FakeWorldSceneBuilder.create()
-                    .camera(new Vec3d(-3.0, 2.5, 3.0), 225.0F, 25.0F)
-                    .populate(ctx -> ctx.addVariedBlockList(BlockPos.ORIGIN, variedBlockList))
+                    .camera(new Vec3(-3.0, 2.5, 3.0), 225.0F, 25.0F)
+                    .populate(ctx -> ctx.addVariedBlockList(BlockPos.ZERO, variedBlockList))
                     .build();
             this.scene.setScaleMultiplier(2.5F);
         }
@@ -173,27 +173,27 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+        public void renderContent(GuiGraphics context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
             int previewSize = Math.max(22, getHeight() - PREVIEW_PADDING * 2);
             int previewX = getX() + PREVIEW_PADDING + 6;
             int previewY = getY() + (getHeight() - previewSize) / 2;
-            this.scene.setAnchor(BlockPos.ORIGIN, previewSize / 2, previewSize / 2);
+            this.scene.setAnchor(BlockPos.ZERO, previewSize / 2, previewSize / 2);
             this.scene.render(context, previewX, previewY, previewSize, previewSize, deltaTicks);
 
             String charText = this.paletteChar == ' ' ? "_" : String.valueOf(this.paletteChar);
             int charX = previewX + previewSize + 2;
-            int textY = getY() + (getHeight() - this.client.textRenderer.fontHeight) / 2 + 2;
-            context.drawText(this.client.textRenderer, charText, charX, textY, 0xFFFFFFFF, false);
+            int textY = getY() + (getHeight() - this.client.font.lineHeight) / 2 + 2;
+            context.drawString(this.client.font, charText, charX, textY, 0xFFFFFFFF, false);
 
-            int nameX = charX + this.client.textRenderer.getWidth(charText) + 6;
+            int nameX = charX + this.client.font.width(charText) + 6;
             int maxNameWidth = Math.max(0, getX() + getWidth() - nameX - 4);
             String displayName = this.name.getString();
-            if (this.client.textRenderer.getWidth(displayName) > maxNameWidth && maxNameWidth > this.client.textRenderer.getWidth("...")) {
-                int ellipsisWidth = this.client.textRenderer.getWidth("...");
-                displayName = this.client.textRenderer.trimToWidth(displayName, maxNameWidth - ellipsisWidth) + "...";
+            if (this.client.font.width(displayName) > maxNameWidth && maxNameWidth > this.client.font.width("...")) {
+                int ellipsisWidth = this.client.font.width("...");
+                displayName = this.client.font.plainSubstrByWidth(displayName, maxNameWidth - ellipsisWidth) + "...";
             }
 
-            context.drawText(this.client.textRenderer, displayName, nameX, textY, hovered ? 0xFFFFFFFF : 0xFFDDDDDD, false);
+            context.drawString(this.client.font, displayName, nameX, textY, hovered ? 0xFFFFFFFF : 0xFFDDDDDD, false);
         }
 
         public void updateFrom(Entry other) {
@@ -206,10 +206,10 @@ public class PaletteEntryListWidget extends EntryListWidget<PaletteEntryListWidg
             if (!variedBlockListChanged && !nameChanged)
                 return;
 
-            this.name = Text.literal(name);
+            this.name = Component.literal(name);
             this.variedBlockList = variedBlockList;
             if (variedBlockListChanged) {
-                this.scene.addVariedBlockList(BlockPos.ORIGIN, variedBlockList);
+                this.scene.addVariedBlockList(BlockPos.ZERO, variedBlockList);
             }
         }
 

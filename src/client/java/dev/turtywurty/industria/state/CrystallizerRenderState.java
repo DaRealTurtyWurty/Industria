@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.state;
 
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class CrystallizerRenderState extends IndustriaBlockEntityRenderState {
     public ItemStack nextOutputItemStack = ItemStack.EMPTY;

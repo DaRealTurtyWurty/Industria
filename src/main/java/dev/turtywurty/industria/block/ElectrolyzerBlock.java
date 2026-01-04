@@ -3,13 +3,13 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.MultiblockTypeInit;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ElectrolyzerBlock extends IndustriaBlock {
-    public static final VoxelShape VOXEL_SHAPE = VoxelShapes.cuboid(-1, 0, 0, 2, 2, 2);
+    public static final VoxelShape VOXEL_SHAPE = Shapes.box(-1, 0, 0, 2, 2, 2);
 
-    public ElectrolyzerBlock(Settings settings) {
+    public ElectrolyzerBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .hasBlockEntityRenderer()
                 .hasComparatorOutput()

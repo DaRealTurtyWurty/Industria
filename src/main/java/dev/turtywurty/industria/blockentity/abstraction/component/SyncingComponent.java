@@ -11,7 +11,7 @@ public class SyncingComponent implements Component {
     }
 
     public void sync() {
-        if (this.isDirty && this.blockEntity != null && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient()) {
+        if (this.isDirty && this.blockEntity != null && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
             this.blockEntity.update();

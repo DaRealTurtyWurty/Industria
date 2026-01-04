@@ -6,15 +6,15 @@ import dev.turtywurty.industria.blockentity.MultiblockDesignerBlockEntity;
 import dev.turtywurty.industria.blockentity.MultiblockPieceBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.ComponentTypeInit;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 
 public class MultiblockDesignerBlock extends IndustriaBlock implements Wrenchable {
-    public MultiblockDesignerBlock(Settings settings) {
+    public MultiblockDesignerBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
                         () -> BlockEntityTypeInit.MULTIBLOCK_DESIGNER)
@@ -22,11 +22,11 @@ public class MultiblockDesignerBlock extends IndustriaBlock implements Wrenchabl
     }
 
     @Override
-    public ActionResult onWrenched(ServerWorld world, BlockPos pos, PlayerEntity player, ItemUsageContext context) {
-        ItemStack stack = context.getStack();
+    public InteractionResult onWrenched(ServerLevel world, BlockPos pos, Player player, UseOnContext context) {
+        ItemStack stack = context.getItemInHand();
 
         boolean success = false;
-        if (stack.hasChangedComponent(ComponentTypeInit.MULTIBLOCK_PIECE_POS)) {
+        if (stack.hasNonDefault(ComponentTypeInit.MULTIBLOCK_PIECE_POS)) {
             BlockPos piece = stack.remove(ComponentTypeInit.MULTIBLOCK_PIECE_POS);
             if (world.getBlockEntity(piece) instanceof MultiblockPieceBlockEntity pieceEntity) {
                 if (pieceEntity.getDesignerPos() != null && world.getBlockEntity(pieceEntity.getDesignerPos()) instanceof MultiblockDesignerBlockEntity oldDesigner) {
@@ -41,6 +41,6 @@ public class MultiblockDesignerBlock extends IndustriaBlock implements Wrenchabl
             }
         }
 
-        return success ? ActionResult.SUCCESS : ActionResult.PASS;
+        return success ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 }

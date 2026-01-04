@@ -6,35 +6,35 @@ import dev.turtywurty.industria.block.abstraction.state.StateProperty;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public class IndustriaBlock extends Block implements BlockEntityProvider {
+public class IndustriaBlock extends Block implements EntityBlock {
     public final StateProperties stateProperties;
     public final boolean placeFacingOpposite;
     public final Supplier<BlockEntityType<?>> blockEntityTypeSupplier;
@@ -51,17 +51,17 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     public final BlockEntityFactory<?> blockEntityFactory;
     public final BlockEntityTickerFactory<?> blockEntityTicker;
     public final boolean hasComparatorOutput;
-    public final Function4<BlockState, World, BlockPos, Direction, Integer> comparatorOutput;
-    public final BlockRenderType renderType;
+    public final Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput;
+    public final RenderShape renderType;
     public final ShapeFactory shapeFactory;
     public final MultiblockType<?> multiblockType;
     public final boolean rightClickToOpenGui;
-    public final BiPredicate<WorldView, BlockPos> canExistAt;
+    public final BiPredicate<LevelReader, BlockPos> canExistAt;
     public final Map<Direction, VoxelShape> cachedDirectionalShapes;
     public final boolean dropContentsOnBreak;
 
     @SuppressWarnings("unchecked")
-    public IndustriaBlock(Settings settings, BlockProperties properties) {
+    public IndustriaBlock(Properties settings, BlockProperties properties) {
         super(settings);
 
         this.stateProperties = properties.stateProperties;
@@ -96,19 +96,19 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
             this.dropContentsOnBreak = false;
         }
 
-        StateManager.Builder<Block, BlockState> builder = new StateManager.Builder<>(this);
-        appendProperties(builder);
-        this.stateManager = builder.build(Block::getDefaultState, BlockState::new);
-        setDefaultState(this.stateManager.getDefaultState());
+        StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<>(this);
+        createBlockStateDefinition(builder);
+        this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
+        registerDefaultState(this.stateDefinition.any());
 
-        BlockState state = this.stateManager.getDefaultState();
+        BlockState state = this.stateDefinition.any();
         state = this.stateProperties.applyDefaults(state);
-        setDefaultState(state);
+        registerDefaultState(state);
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
 
         if (this.stateProperties != null) {
             this.stateProperties.addToBuilder(builder);
@@ -116,137 +116,137 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, BlockRotation rotation) {
-        if (this.stateProperties.containsProperty(Properties.HORIZONTAL_FACING)) {
-            return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state.get(Properties.HORIZONTAL_FACING)));
+    protected BlockState rotate(BlockState state, Rotation rotation) {
+        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            return state.setValue(BlockStateProperties.HORIZONTAL_FACING, rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
         }
 
         return super.rotate(state, rotation);
     }
 
     @Override
-    protected BlockState mirror(BlockState state, BlockMirror mirror) {
-        if (this.stateProperties.containsProperty(Properties.HORIZONTAL_FACING)) {
-            return state.with(Properties.HORIZONTAL_FACING, mirror.apply(state.get(Properties.HORIZONTAL_FACING)));
+    protected BlockState mirror(BlockState state, Mirror mirror) {
+        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            return state.setValue(BlockStateProperties.HORIZONTAL_FACING, mirror.mirror(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
         }
 
         return super.mirror(state, mirror);
     }
 
     @Override
-    public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockState state = super.getPlacementState(ctx);
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        BlockState state = super.getStateForPlacement(ctx);
         if (state == null)
             return null;
 
-        if (this.stateProperties.containsProperty(Properties.HORIZONTAL_FACING)) {
-            Direction facing = ctx.getHorizontalPlayerFacing();
+        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            Direction facing = ctx.getHorizontalDirection();
             if (this.placeFacingOpposite) {
                 facing = facing.getOpposite();
             }
 
-            state = state.with(Properties.HORIZONTAL_FACING, facing);
+            state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, facing);
         }
 
-        if (this.stateProperties.containsProperty(Properties.AXIS)) {
-            state = state.with(Properties.AXIS, ctx.getSide().getAxis());
+        if (this.stateProperties.containsProperty(BlockStateProperties.AXIS)) {
+            state = state.setValue(BlockStateProperties.AXIS, ctx.getClickedFace().getAxis());
         }
 
         return state;
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return this.blockEntityTypeSupplier != null ? this.blockEntityFactory.create(pos, state) : null;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return this.shouldTick ? (BlockEntityTicker<T>) this.blockEntityTicker.create(world, state, type) : BlockEntityProvider.super.getTicker(world, state, type);
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+        return this.shouldTick ? (BlockEntityTicker<T>) this.blockEntityTicker.create(world, state, type) : EntityBlock.super.getTicker(world, state, type);
     }
 
     @Override
-    protected boolean hasComparatorOutput(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return this.hasComparatorOutput;
     }
 
     @Override
-    protected int getComparatorOutput(BlockState state, World world, BlockPos pos, Direction direction) {
-        return this.hasComparatorOutput ? this.comparatorOutput.apply(state, world, pos, direction) : super.getComparatorOutput(state, world, pos, direction);
+    protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos, Direction direction) {
+        return this.hasComparatorOutput ? this.comparatorOutput.apply(state, world, pos, direction) : super.getAnalogOutputSignal(state, world, pos, direction);
     }
 
     @Override
-    protected BlockRenderType getRenderType(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return this.renderType;
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return this.shapeFactory.create(state, world, pos, context);
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (this.multiblockType != null) {
-            if (!world.isClient()) {
+            if (!world.isClientSide()) {
                 this.multiblockType.onPrimaryBlockUse(world, player, hit, pos);
             }
 
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         if (this.rightClickToOpenGui) {
-            if (!world.isClient()) {
+            if (!world.isClientSide()) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
-                if (player instanceof ServerPlayerEntity sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
-                    sPlayer.openHandledScreen(blockEntityWithGui);
+                if (player instanceof ServerPlayer sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
+                    sPlayer.openMenu(blockEntityWithGui);
                 }
             }
 
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (this.multiblockType != null) {
-            if (!world.isClient()) {
+            if (!world.isClientSide()) {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
                 if (blockEntity instanceof AutoMultiblockable multiblockable) {
-                    multiblockable.buildMultiblock(world, pos, state, placer, itemStack, blockEntity::markDirty);
+                    multiblockable.buildMultiblock(world, pos, state, placer, itemStack, blockEntity::setChanged);
                 }
             }
         }
     }
 
     @Override
-    protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
+    protected boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
         return this.canExistAt.test(world, pos);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView,
-                                                   BlockPos pos, Direction direction, BlockPos neighborPos,
-                                                   BlockState neighborState, Random random) {
-        return !state.canPlaceAt(world, pos)
-                ? Blocks.AIR.getDefaultState()
-                : super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView,
+                                     BlockPos pos, Direction direction, BlockPos neighborPos,
+                                     BlockState neighborState, RandomSource random) {
+        return !state.canSurvive(world, pos)
+                ? Blocks.AIR.defaultBlockState()
+                : super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public static class BlockProperties {
         private boolean placeFacingOpposite = true;
         private BlockBlockEntityProperties<?> blockEntityProperties;
         private boolean hasComparatorOutput = false;
-        private Function4<BlockState, World, BlockPos, Direction, Integer> comparatorOutput =
-                (state, world, pos, direction) -> ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
-        private BlockRenderType renderType = BlockRenderType.MODEL;
+        private Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput =
+                (state, world, pos, direction) -> AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(pos));
+        private RenderShape renderType = RenderShape.MODEL;
         private ShapeFactory shapeFactory =
-                (state, world, pos, context) -> VoxelShapes.fullCube();
+                (state, world, pos, context) -> Shapes.block();
         private final StateProperties stateProperties = new StateProperties();
-        private BiPredicate<WorldView, BlockPos> canExistAt = (world, pos) -> true;
+        private BiPredicate<LevelReader, BlockPos> canExistAt = (world, pos) -> true;
         private final Map<Direction, VoxelShape> cachedDirectionalShapes = new HashMap<>();
 
         public BlockProperties hasHorizontalFacing() {
@@ -323,17 +323,17 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         }
 
         public BlockProperties addBooleanStateProperty(String name, boolean defaultValue) {
-            this.stateProperties.addProperty(new StateProperty<>(BooleanProperty.of(name), defaultValue));
+            this.stateProperties.addProperty(new StateProperty<>(BooleanProperty.create(name), defaultValue));
             return this;
         }
 
-        public <T extends Enum<T> & StringIdentifiable> BlockProperties addEnumStateProperty(String name, Class<T> clazz, T defaultValue) {
-            this.stateProperties.addProperty(new StateProperty<>(EnumProperty.of(name, clazz), defaultValue));
+        public <T extends Enum<T> & StringRepresentable> BlockProperties addEnumStateProperty(String name, Class<T> clazz, T defaultValue) {
+            this.stateProperties.addProperty(new StateProperty<>(EnumProperty.create(name, clazz), defaultValue));
             return this;
         }
 
-        public <T extends Enum<T> & StringIdentifiable> BlockProperties addEnumStateProperty(String name, Class<T> clazz, T defaultValue, List<T> values) {
-            this.stateProperties.addProperty(new StateProperty<>(EnumProperty.of(name, clazz, values), defaultValue));
+        public <T extends Enum<T> & StringRepresentable> BlockProperties addEnumStateProperty(String name, Class<T> clazz, T defaultValue, List<T> values) {
+            this.stateProperties.addProperty(new StateProperty<>(EnumProperty.create(name, clazz, values), defaultValue));
             return this;
         }
 
@@ -360,22 +360,22 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
             return this;
         }
 
-        public BlockProperties comparatorOutput(Function4<BlockState, World, BlockPos, Direction, Integer> comparatorOutput) {
+        public BlockProperties comparatorOutput(Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput) {
             this.comparatorOutput = comparatorOutput;
             return this;
         }
 
         public BlockProperties hasBlockEntityRenderer() {
-            return renderType(BlockRenderType.INVISIBLE);
+            return renderType(RenderShape.INVISIBLE);
         }
 
-        public BlockProperties renderType(BlockRenderType renderType) {
+        public BlockProperties renderType(RenderShape renderType) {
             this.renderType = renderType;
             return this;
         }
 
         public BlockProperties emptyShape() {
-            return constantShape(VoxelShapes.empty());
+            return constantShape(Shapes.empty());
         }
 
         public BlockProperties constantShape(VoxelShape shape) {
@@ -387,13 +387,13 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
             return this;
         }
 
-        public BlockProperties canExistAt(BiPredicate<WorldView, BlockPos> canExistAt) {
+        public BlockProperties canExistAt(BiPredicate<LevelReader, BlockPos> canExistAt) {
             this.canExistAt = canExistAt;
             return this;
         }
 
         public BlockProperties useRotatedShapes(VoxelShape shape) {
-            if (!this.stateProperties.containsProperty(Properties.HORIZONTAL_FACING)) {
+            if (!this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
                 hasHorizontalFacing();
             }
 
@@ -401,7 +401,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
                 runShapeCalculation(this.cachedDirectionalShapes, shape);
             }
 
-            return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes.get(state.get(Properties.HORIZONTAL_FACING)));
+            return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
         }
 
         public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
@@ -411,15 +411,15 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
         }
 
         public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
-            final VoxelShape[] buffer = {shape, VoxelShapes.empty()};
+            final VoxelShape[] buffer = {shape, Shapes.empty()};
 
-            final int times = (to.getHorizontalQuarterTurns() - Direction.NORTH.getHorizontalQuarterTurns() + 4) % 4;
+            final int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
             for (int i = 0; i < times; i++) {
-                buffer[0].forEachBox((minX, minY, minZ, maxX, maxY, maxZ) ->
-                        buffer[1] = VoxelShapes.union(buffer[1],
-                                VoxelShapes.cuboid(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+                buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                        buffer[1] = Shapes.or(buffer[1],
+                                Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
                 buffer[0] = buffer[1];
-                buffer[1] = VoxelShapes.empty();
+                buffer[1] = Shapes.empty();
             }
 
             return buffer[0];
@@ -436,7 +436,7 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
 
             public BlockBlockEntityProperties(Supplier<BlockEntityType<T>> blockEntityTypeSupplier) {
                 this.blockEntityTypeSupplier = blockEntityTypeSupplier;
-                this.blockEntityFactory = (pos, state) -> this.blockEntityTypeSupplier.get().instantiate(pos, state);
+                this.blockEntityFactory = (pos, state) -> this.blockEntityTypeSupplier.get().create(pos, state);
             }
 
             public BlockBlockEntityProperties<T> shouldTick() {
@@ -510,11 +510,11 @@ public class IndustriaBlock extends Block implements BlockEntityProvider {
 
     @FunctionalInterface
     public interface BlockEntityTickerFactory<T extends BlockEntity> {
-        BlockEntityTicker<T> create(World world, BlockState state, BlockEntityType<?> type);
+        BlockEntityTicker<T> create(Level world, BlockState state, BlockEntityType<?> type);
     }
 
     @FunctionalInterface
     public interface ShapeFactory {
-        VoxelShape create(BlockState state, BlockView world, BlockPos pos, ShapeContext context);
+        VoxelShape create(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context);
     }
 }

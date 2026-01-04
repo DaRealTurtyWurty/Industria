@@ -1,27 +1,27 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.screenhandler.slot.OutputSlot;
 import dev.turtywurty.industria.screenhandler.slot.PredicateSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import team.reborn.energy.api.EnergyStorage;
 
 public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity, BlockPosPayload> {
-    public DrillScreenHandler(int syncId, PlayerInventory playerInv, BlockPosPayload payload) {
+    public DrillScreenHandler(int syncId, Inventory playerInv, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.DRILL, syncId, playerInv, payload, DrillBlockEntity.class);
     }
 
-    public DrillScreenHandler(int syncId, PlayerInventory playerInv, DrillBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage) {
-        super(ScreenHandlerTypeInit.DRILL, syncId, playerInv, blockEntity, wrappedInventoryStorage);
+    public DrillScreenHandler(int syncId, Inventory playerInv, DrillBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+        super(ScreenHandlerTypeInit.DRILL, syncId, playerInv, blockEntity, wrappedContainerStorage);
     }
 
     @Override
@@ -30,20 +30,20 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
-        SimpleInventory drillHeadInventory = this.wrappedInventoryStorage.getInventory(0);
-        SimpleInventory motorInventory = this.wrappedInventoryStorage.getInventory(1);
-        SimpleInventory outputInventory = this.wrappedInventoryStorage.getInventory(2);
-        SimpleInventory placeableBlockInventory = this.wrappedInventoryStorage.getInventory(3);
+    protected void addBlockEntitySlots(Inventory playerInventory) {
+        SimpleContainer drillHeadInventory = this.wrappedContainerStorage.getInventory(0);
+        SimpleContainer motorInventory = this.wrappedContainerStorage.getInventory(1);
+        SimpleContainer outputInventory = this.wrappedContainerStorage.getInventory(2);
+        SimpleContainer placeableBlockInventory = this.wrappedContainerStorage.getInventory(3);
         addSlot(new PredicateSlot(drillHeadInventory, 0, 80, 35) {
             @Override
-            public boolean isEnabled() {
+            public boolean isActive() {
                 return !DrillScreenHandler.this.blockEntity.isDrilling();
             }
 
             @Override
-            public boolean canInsert(ItemStack stack) {
-                return !DrillScreenHandler.this.blockEntity.isDrilling() && super.canInsert(stack);
+            public boolean mayPlace(ItemStack stack) {
+                return !DrillScreenHandler.this.blockEntity.isDrilling() && super.mayPlace(stack);
             }
         });
 
@@ -61,8 +61,8 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, BlockInit.DRILL);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, BlockInit.DRILL);
     }
 
     public float getEnergyPercentage() {
@@ -71,7 +71,7 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
         long capacity = energyStorage.getCapacity();
         if(energy == 0 || capacity == 0) return 0;
 
-        return MathHelper.clamp((float) energy / capacity, 0, 1);
+        return Mth.clamp((float) energy / capacity, 0, 1);
     }
 
     public int getTargetRPM() {

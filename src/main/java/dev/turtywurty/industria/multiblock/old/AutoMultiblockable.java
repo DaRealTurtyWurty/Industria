@@ -5,17 +5,17 @@ import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.LocalDirection;
 import dev.turtywurty.industria.multiblock.LocalPos;
 import dev.turtywurty.industria.multiblock.PortType;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -56,16 +56,16 @@ public interface AutoMultiblockable extends Multiblockable {
      * @apiNote This method should only be called on the server side.
      */
     // TODO: Validate that the positions are valid before building the multiblock
-    default void buildMultiblock(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack, Runnable onSuccessfulBuild) {
-        if (world == null || world.isClient())
+    default void buildMultiblock(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack, Runnable onSuccessfulBuild) {
+        if (world == null || world.isClientSide())
             return;
 
         long startTime = System.nanoTime();
-        Direction facing = type().hasDirectionProperty() ? state.get(Properties.HORIZONTAL_FACING) : null;
+        Direction facing = type().hasDirectionProperty() ? state.getValue(BlockStateProperties.HORIZONTAL_FACING) : null;
         List<BlockPos> checkPositions = findPositions(facing);
         long findValidPositionsEndTime = System.nanoTime();
         if (checkPositions.size() < type().numBlocks()) {
-            world.breakBlock(pos, true);
+            world.destroyBlock(pos, true);
             return;
         }
 
@@ -80,10 +80,10 @@ public interface AutoMultiblockable extends Multiblockable {
                 toSet = BlockInit.AUTO_MULTIBLOCK_IO;
             }
 
-            world.setBlockState(position, toSet.getDefaultState());
+            world.setBlockAndUpdate(position, toSet.defaultBlockState());
             getMultiblockPositions().add(position);
 
-            Chunk chunk = world.getChunk(position);
+            ChunkAccess chunk = world.getChunk(position);
             Map<BlockPos, MultiblockData> map = chunk.getAttachedOrCreate(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT, HashMap::new);
             Map<BlockPos, MultiblockData> copy = new HashMap<>(map);
             copy.put(position, new MultiblockData(pos, type()));
@@ -99,18 +99,18 @@ public interface AutoMultiblockable extends Multiblockable {
     }
 
     @Override
-    default void onMultiblockBreak(World world, BlockPos pos) {
+    default void onMultiblockBreak(Level world, BlockPos pos) {
         if (world == null)
             return;
 
         for (BlockPos machinePos : getMultiblockPositions()) {
             BlockState blockState = world.getBlockState(machinePos);
-            if (!blockState.isOf(BlockInit.AUTO_MULTIBLOCK_BLOCK) && !blockState.isOf(BlockInit.AUTO_MULTIBLOCK_IO))
+            if (!blockState.is(BlockInit.AUTO_MULTIBLOCK_BLOCK) && !blockState.is(BlockInit.AUTO_MULTIBLOCK_IO))
                 continue;
 
-            world.breakBlock(machinePos, false);
+            world.destroyBlock(machinePos, false);
 
-            Chunk chunk = world.getChunk(machinePos);
+            ChunkAccess chunk = world.getChunk(machinePos);
             Map<BlockPos, MultiblockData> map = chunk.getAttached(AttachmentTypeInit.MULTIBLOCK_ATTACHMENT);
             if (map == null)
                 return;
@@ -124,7 +124,7 @@ public interface AutoMultiblockable extends Multiblockable {
             }
         }
 
-        world.breakBlock(pos, true);
+        world.destroyBlock(pos, true);
     }
 
     /**

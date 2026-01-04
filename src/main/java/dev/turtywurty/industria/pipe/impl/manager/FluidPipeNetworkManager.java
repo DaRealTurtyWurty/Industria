@@ -7,8 +7,8 @@ import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.pipe.impl.network.FluidPipeNetwork;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.UUID;
 
@@ -16,8 +16,8 @@ public class FluidPipeNetworkManager extends PipeNetworkManager<Storage<FluidVar
     public static final MapCodec<FluidPipeNetworkManager> CODEC = PipeNetworkManager.createCodec(
             FluidPipeNetwork.CODEC.codec(), FluidPipeNetworkManager::new);
 
-    public static final PacketCodec<RegistryByteBuf, FluidPipeNetworkManager> PACKET_CODEC =
-            PipeNetworkManager.createPacketCodec(FluidPipeNetwork.PACKET_CODEC, FluidPipeNetworkManager::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPipeNetworkManager> STREAM_CODEC =
+            PipeNetworkManager.createPacketCodec(FluidPipeNetwork.STREAM_CODEC, FluidPipeNetworkManager::new);
 
     public FluidPipeNetworkManager() {
         super(PipeNetworkManagerTypeInit.FLUID, TransferType.FLUID);

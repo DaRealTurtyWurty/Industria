@@ -1,10 +1,10 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.MultiblockDesignerScreen;
-import net.minecraft.client.gui.Click;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ public class MultiblockDesignerWorldWidget extends FakeWorldWidget {
         this.multiblockDesignerScreen = multiblockDesignerScreen;
     }
 
-    public boolean handleClick(Click click, boolean doubled) {
+    public boolean handleClick(MouseButtonEvent click, boolean doubled) {
         if (isInsideWidget(click.x(), click.y())) {
             BlockPos closest = findClosestPiece(click.x(), click.y());
             if (closest != null) {
@@ -41,16 +41,16 @@ public class MultiblockDesignerWorldWidget extends FakeWorldWidget {
         double closestNearDistanceSq = Double.MAX_VALUE;
         double closestNearDepthSq = Double.MAX_VALUE;
         for (BlockPos pos : multiblockDesignerScreen.getCachedVariedBlockLists().keySet()) {
-            Vec3d center = Vec3d.ofCenter(pos);
-            Optional<Vec2f> projectedCenter = this.scene.projectToWidget(center);
+            Vec3 center = Vec3.atCenterOf(pos);
+            Optional<Vec2> projectedCenter = this.scene.projectToWidget(center);
             if (projectedCenter.isEmpty())
                 continue;
 
-            Vec2f screenPos = projectedCenter.get();
+            Vec2 screenPos = projectedCenter.get();
             double dx = screenPos.x - mouseX;
             double dy = screenPos.y - mouseY;
             double distanceSq = dx * dx + dy * dy;
-            double depthSq = this.scene.getCameraPosition().squaredDistanceTo(center);
+            double depthSq = this.scene.getCameraPosition().distanceToSqr(center);
 
             Optional<ProjectedBounds> bounds = projectBlockBounds(pos);
             if (bounds.isPresent() && bounds.get().contains(mouseX, mouseY)) {
@@ -89,12 +89,12 @@ public class MultiblockDesignerWorldWidget extends FakeWorldWidget {
         for (int dx = 0; dx <= 1; dx++) {
             for (int dy = 0; dy <= 1; dy++) {
                 for (int dz = 0; dz <= 1; dz++) {
-                    Optional<Vec2f> projectedCorner = this.scene.projectToWidgetUnclamped(new Vec3d(baseX + dx, baseY + dy, baseZ + dz));
+                    Optional<Vec2> projectedCorner = this.scene.projectToWidgetUnclamped(new Vec3(baseX + dx, baseY + dy, baseZ + dz));
                     if (projectedCorner.isEmpty())
                         continue;
 
                     projected = true;
-                    Vec2f screenCorner = projectedCorner.get();
+                    Vec2 screenCorner = projectedCorner.get();
                     minX = Math.min(minX, screenCorner.x);
                     minY = Math.min(minY, screenCorner.y);
                     maxX = Math.max(maxX, screenCorner.x);

@@ -4,10 +4,10 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
 import dev.turtywurty.industria.fluid.FluidData;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,26 +15,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-    public LivingEntityMixin(EntityType<?> type, World world) {
+    public LivingEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
     }
 
     @ModifyExpressionValue(method = "baseTick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/LivingEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/LivingEntity;isInEyeFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$baseTick(boolean original) {
         if (original)
             return true;
 
         return FluidData.FLUID_DATA.values().stream()
                 .filter(FluidData::canCauseDrowning)
-                .anyMatch(data -> isSubmergedIn(data.fluidTag()));
+                .anyMatch(data -> isEyeInFluid(data.fluidTag()));
     }
 
-    @Inject(method = "tickMovement",
+    @Inject(method = "aiStep",
     at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;isTouchingWater()Z"))
-    private void industria$tickMovement(CallbackInfo callback, @Local(ordinal = 3) LocalDoubleRef g) {
+            target = "Lnet/minecraft/world/entity/LivingEntity;isInWater()Z"))
+    private void industria$tickMovement(CallbackInfo callback, @Local(ordinal = 3, argsOnly = true) LocalDoubleRef g) {
         if (g.get() != 0.0D)
             return;
 

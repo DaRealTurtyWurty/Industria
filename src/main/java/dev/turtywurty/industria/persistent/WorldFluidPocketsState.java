@@ -7,16 +7,16 @@ import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.PersistentStateType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WorldFluidPocketsState extends PersistentState {
+public class WorldFluidPocketsState extends SavedData {
     public static final Codec<WorldFluidPocketsState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             FluidPocket.CODEC.listOf().fieldOf("FluidPockets").forGetter(state -> state.fluidPockets)
     ).apply(instance, pockets -> {
@@ -33,7 +33,7 @@ public class WorldFluidPocketsState extends PersistentState {
         return state;
     }));
 
-    private static final PersistentStateType<WorldFluidPocketsState> TYPE = new PersistentStateType<>(
+    private static final SavedDataType<WorldFluidPocketsState> TYPE = new SavedDataType<>(
             Industria.MOD_ID + ".fluid_pockets",
             WorldFluidPocketsState::new,
             CODEC,
@@ -49,9 +49,9 @@ public class WorldFluidPocketsState extends PersistentState {
         this.fluidPockets.addAll(fluidPockets);
     }
 
-    public static WorldFluidPocketsState getServerState(ServerWorld world) {
-        PersistentStateManager persistentStateManager = world.getPersistentStateManager();
-        return persistentStateManager.getOrCreate(TYPE);
+    public static WorldFluidPocketsState getServerState(ServerLevel world) {
+        DimensionDataStorage persistentStateManager = world.getDataStorage();
+        return persistentStateManager.computeIfAbsent(TYPE);
     }
 
     public void addFluidPocket(FluidPocket fluidPocket) {
@@ -59,12 +59,12 @@ public class WorldFluidPocketsState extends PersistentState {
             return;
 
         this.fluidPockets.add(fluidPocket);
-        markDirty();
+        setDirty();
     }
 
     public boolean removeFluidPocket(FluidPocket fluidPocket) {
         if (this.fluidPockets.remove(fluidPocket)) {
-            markDirty();
+            setDirty();
             return true;
         }
 
@@ -83,7 +83,7 @@ public class WorldFluidPocketsState extends PersistentState {
         changed = changed || this.fluidPockets.removeIf(FluidPocket::isEmpty);
 
         if (changed)
-            markDirty();
+            setDirty();
 
         return changed;
     }
@@ -98,12 +98,12 @@ public class WorldFluidPocketsState extends PersistentState {
         return List.of();
     }
 
-    public static SyncFluidPocketsPayload createSyncPacket(ServerWorld world) {
+    public static SyncFluidPocketsPayload createSyncPacket(ServerLevel world) {
         return new SyncFluidPocketsPayload(getServerState(world).fluidPockets);
     }
 
-    public static void sync(ServerWorld world) {
-        List<ServerPlayerEntity> players = world.getPlayers();
+    public static void sync(ServerLevel world) {
+        List<ServerPlayer> players = world.players();
         if (!players.isEmpty()) {
             SyncFluidPocketsPayload payload = WorldFluidPocketsState.createSyncPacket(world);
             players.forEach(player -> ServerPlayNetworking.send(player, payload));
@@ -180,17 +180,17 @@ public class WorldFluidPocketsState extends PersistentState {
         private static final Codec<Map<BlockPos, Integer>> FLUID_POSITIONS_CODEC =
                 Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT);
 
-        public static final PacketCodec<RegistryByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_PACKET_CODEC =
-                PacketCodecs.map(HashMap::new, ExtraPacketCodecs.BLOCK_POS_STRING_CODEC, PacketCodecs.INTEGER);
+        public static final StreamCodec<RegistryFriendlyByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_STREAM_CODEC =
+                ByteBufCodecs.map(HashMap::new, ExtraPacketCodecs.BLOCK_POS_STRING_CODEC, ByteBufCodecs.INT);
 
         public static final Codec<FluidPocket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 FluidState.CODEC.fieldOf("FluidState").forGetter(FluidPocket::fluidState),
                 FLUID_POSITIONS_CODEC.fieldOf("FluidPositions").forGetter(FluidPocket::fluidPositions)
         ).apply(instance, FluidPocket::new));
 
-        public static final PacketCodec<RegistryByteBuf, FluidPocket> PACKET_CODEC = PacketCodec.tuple(
-                PacketCodecs.registryCodec(FluidState.CODEC), FluidPocket::fluidState,
-                FLUID_POSITIONS_PACKET_CODEC, FluidPocket::fluidPositions,
+        public static final StreamCodec<RegistryFriendlyByteBuf, FluidPocket> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.fromCodecWithRegistries(FluidState.CODEC), FluidPocket::fluidState,
+                FLUID_POSITIONS_STREAM_CODEC, FluidPocket::fluidPositions,
                 FluidPocket::new);
 
         public boolean isEmpty() {

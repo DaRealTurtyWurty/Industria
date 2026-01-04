@@ -5,15 +5,15 @@ import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
@@ -44,41 +44,41 @@ public class SeismicScannerScreen extends Screen {
         this.y = (this.height - this.backgroundHeight) / 2;
 
         this.fluidPockets.clear();
-        if(this.stack.contains(ComponentTypeInit.FLUID_POCKETS)) {
+        if(this.stack.has(ComponentTypeInit.FLUID_POCKETS)) {
             this.fluidPockets.addAll(this.stack.get(ComponentTypeInit.FLUID_POCKETS).pockets());
         }
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.drawText(this.textRenderer, this.title, this.width / 2 - this.textRenderer.getWidth(this.title) / 2, this.y + 8, 0x404040, false);
+        context.drawString(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, this.y + 8, 0x404040, false);
 
         if (this.fluidPockets.isEmpty()) {
-            renderDarkening(context);
-            context.drawText(this.textRenderer, Text.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFF, true);
+            renderMenuBackground(context);
+            context.drawString(this.font, Component.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFF, true);
             return;
         }
 
-        if(this.client == null)
+        if(this.minecraft == null)
             return;
 
         // Render fluid pockets
-        PlayerEntity player = this.client.player;
+        Player player = this.minecraft.player;
 
         if (player == null)
             return;
 
 
-        Matrix3x2fStack matrixStack = context.getMatrices();
+        Matrix3x2fStack matrixStack = context.pose();
         for (WorldFluidPocketsState.FluidPocket fluidPocket : this.fluidPockets) {
-            BlockState blockState = fluidPocket.fluidState().getBlockState();
+            BlockState blockState = fluidPocket.fluidState().createLegacyBlock();
             Set<BlockPos> positions = fluidPocket.fluidPositions().keySet();
 
             int minX = fluidPocket.minX();
@@ -91,8 +91,8 @@ public class SeismicScannerScreen extends Screen {
 
             matrixStack.pushMatrix();
             matrixStack.translate(centerX, centerY);
-            matrixStack.rotate(135 * MathHelper.RADIANS_PER_DEGREE);
-            matrixStack.rotate(-45 * MathHelper.RADIANS_PER_DEGREE);
+            matrixStack.rotate(135 * Mth.DEG_TO_RAD);
+            matrixStack.rotate(-45 * Mth.DEG_TO_RAD);
             matrixStack.translate(-centerX, -centerY);
             for (BlockPos pos : positions) {
                 int x = pos.getX() - fluidPocket.minX();
@@ -110,7 +110,7 @@ public class SeismicScannerScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -118,13 +118,13 @@ public class SeismicScannerScreen extends Screen {
     public void tick() {
         super.tick();
 
-        if (this.client != null && this.client.player != null) {
-            ItemStack stack = this.client.player.getMainHandStack();
-            if (!stack.isOf(this.stack.getItem())) {
-                close();
+        if (this.minecraft != null && this.minecraft.player != null) {
+            ItemStack stack = this.minecraft.player.getMainHandItem();
+            if (!stack.is(this.stack.getItem())) {
+                onClose();
             }
         } else {
-            close();
+            onClose();
         }
     }
 }

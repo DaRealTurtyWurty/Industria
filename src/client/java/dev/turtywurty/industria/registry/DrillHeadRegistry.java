@@ -1,16 +1,16 @@
 package dev.turtywurty.industria.registry;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import dev.turtywurty.industria.state.DrillRenderState;
 import dev.turtywurty.industria.util.DrillHeadable;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.model.LoadedEntityModels;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Tuple;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,30 +28,30 @@ public class DrillHeadRegistry {
         return DRILL_HEADS.get(drillHeadable);
     }
 
-    public static Stream<Pair<DrillHeadable, Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>>>> getModelResolvers() {
-        return DRILL_HEADS.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue().modelResolver));
+    public static Stream<Tuple<DrillHeadable, Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>>>> getModelResolvers() {
+        return DRILL_HEADS.entrySet().stream().map(entry -> new Tuple<>(entry.getKey(), entry.getValue().modelResolver));
     }
 
-    public static Stream<Pair<DrillHeadable, Identifier>> getTextureLocations() {
-        return DRILL_HEADS.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue().textureLocation));
+    public static Stream<Tuple<DrillHeadable, Identifier>> getTextureLocations() {
+        return DRILL_HEADS.entrySet().stream().map(entry -> new Tuple<>(entry.getKey(), entry.getValue().textureLocation));
     }
 
     public static void init() {
     }
 
     public record DrillHeadClientData(
-            Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>> modelResolver,
+            Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
             boolean renderDynamicItem,
             RenderFunction onRender,
             Identifier textureLocation) {
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>> modelResolver,
+        public static DrillHeadClientData create(Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
                                                  boolean renderDynamicItem,
                                                  RenderFunction onRender,
                                                  Identifier textureLocation) {
             return new DrillHeadClientData(modelResolver, renderDynamicItem, onRender, textureLocation);
         }
 
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererFactory.Context, LoadedEntityModels>, Model<?>> modelResolver,
+        public static DrillHeadClientData create(Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
                                                  RenderFunction onRender,
                                                  Identifier textureLocation) {
             return create(modelResolver, true, onRender, textureLocation);
@@ -59,7 +59,7 @@ public class DrillHeadRegistry {
 
         @FunctionalInterface
         public interface RenderFunction {
-            void render(DrillRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, Model<?> model, RenderLayer renderLayer, int light, int overlay);
+            void render(DrillRenderState state, PoseStack matrices, SubmitNodeCollector queue, Model<?> model, RenderType renderLayer, int light, int overlay);
         }
     }
 }

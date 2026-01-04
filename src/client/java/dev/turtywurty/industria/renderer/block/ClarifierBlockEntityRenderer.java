@@ -1,21 +1,21 @@
 package dev.turtywurty.industria.renderer.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.ClarifierBlockEntity;
 import dev.turtywurty.industria.model.ClarifierModel;
 import dev.turtywurty.industria.state.ClarifierRenderState;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<ClarifierBlockEntity, ClarifierRenderState> {
@@ -46,10 +46,10 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         return new GridPosition(x, y);
     }
 
-    public ClarifierBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+    public ClarifierBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
 
-        this.model = new ClarifierModel(context.getLayerModelPart(ClarifierModel.LAYER_LOCATION));
+        this.model = new ClarifierModel(context.bakeLayer(ClarifierModel.LAYER_LOCATION));
     }
 
     @Override
@@ -58,23 +58,23 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
     }
 
     @Override
-    public void updateRenderState(ClarifierBlockEntity blockEntity, ClarifierRenderState state, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
-        super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(ClarifierBlockEntity blockEntity, ClarifierRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
         state.inputFluidTank = blockEntity.getInputFluidTank();
         state.outputFluidTank = blockEntity.getOutputFluidTank();
         state.nextOutputStack = blockEntity.getNextOutputItemStack();
         state.outputInventory = blockEntity.getOutputInventory();
-        state.updateItemRenderState(0, this, blockEntity, blockEntity.getOutputInventory().getStack(0));
+        state.updateItemRenderState(0, this, blockEntity, blockEntity.getOutputInventory().getItem(0));
         state.updateItemRenderState(1, this, blockEntity, blockEntity.getNextOutputItemStack());
     }
 
     @Override
-    protected void onRender(ClarifierRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    protected void onRender(ClarifierRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         queue.submitModel(this.model, null,
-                matrices, this.model.getLayer(ClarifierModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.crumblingOverlay);
+                matrices, this.model.renderType(ClarifierModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
 
         renderInputFluid(state, matrices, queue, light, overlay);
         renderOutputFluid(state, matrices, queue, light, overlay);
@@ -83,8 +83,8 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         renderOutputStack(state, matrices, queue, light, overlay);
     }
 
-    private void renderOutputStack(ClarifierRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
-        ItemStack outputStack = state.outputInventory.getStack(0);
+    private void renderOutputStack(ClarifierRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+        ItemStack outputStack = state.outputInventory.getItem(0);
         if (outputStack.isEmpty())
             return;
 
@@ -92,8 +92,8 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         float zOffset = 11f / 16f + 10f / 16f + 2f / 16f;
         float startY = 0.75f - scale / 2 + 9f / 16f;
 
-        for (int i = 0; i < MathHelper.clamp(outputStack.getCount(), 1, 64); i++) {
-            matrices.push();
+        for (int i = 0; i < Mth.clamp(outputStack.getCount(), 1, 64); i++) {
+            matrices.pushPose();
 
             GridPosition position = OUTPUT_ITEM_POSITIONS[i];
             float xOff = position.x * (scale + (0.0625f * scale)) - 0.345f;
@@ -101,12 +101,12 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
             matrices.translate(xOff, startY - yOff, zOffset);
             matrices.scale(scale, scale, scale);
             state.renderItemRenderState(0, matrices, queue);
-            matrices.pop();
+            matrices.popPose();
         }
     }
 
     // Thanks to Basti for the item rendering math
-    private void renderCurrentOutputItem(ClarifierRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    private void renderCurrentOutputItem(ClarifierRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         if (state.nextOutputStack.isEmpty())
             return;
 
@@ -122,33 +122,33 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         float dy = 0;
         float rotation = 0;
         if (itemProgress >= 0 && itemProgress < 0.6) {
-            dz = MathHelper.map(itemProgress, 0, 0.6f, 0, firstStretch);
+            dz = Mth.map(itemProgress, 0, 0.6f, 0, firstStretch);
             dy = 0;
         }
 
         if (itemProgress >= 0.6 && itemProgress < 0.85) {
-            float t = MathHelper.map(itemProgress, 0.6f, 0.85f, 0, 1);
+            float t = Mth.map(itemProgress, 0.6f, 0.85f, 0, 1);
             t = (float) (0.7 * Math.pow(t, 2) + 0.3 * t); // Curve t, so that t(0) = 0, t(1) = 1, t´(0) = 0.3
-            dz = MathHelper.lerp(t, firstStretch, firstStretch + rampStretch);
-            dy = MathHelper.lerp(t, 0, -rampHeight);
+            dz = Mth.lerp(t, firstStretch, firstStretch + rampStretch);
+            dy = Mth.lerp(t, 0, -rampHeight);
 
-            rotation = (float) (MathHelper.lerp(t, 0, -Math.PI * 2));
+            rotation = (float) (Mth.lerp(t, 0, -Math.PI * 2));
         }
 
         if (itemProgress >= 0.85 && itemProgress < 1) {
-            dz = MathHelper.map(itemProgress, 0.85f, 1f, firstStretch + rampStretch, firstStretch + rampStretch + finalStretch);
+            dz = Mth.map(itemProgress, 0.85f, 1f, firstStretch + rampStretch, firstStretch + rampStretch + finalStretch);
             dy = -rampHeight;
         }
 
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0, 0.75 - scale / 2 - dy, 0 + dz);
         matrices.scale(scale, scale, scale);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotation(rotation));
+        matrices.mulPose(Axis.XP.rotation(rotation));
         state.renderItemRenderState(1, matrices, queue);
-        matrices.pop();
+        matrices.popPose();
     }
 
-    private void renderInputFluid(ClarifierRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    private void renderInputFluid(ClarifierRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         if (state.inputFluidTank == null || state.inputFluidTank.isResourceBlank() || state.inputFluidTank.amount <= 0)
             return;
 
@@ -166,17 +166,17 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         this.fluidRenderer.renderTopFaceOnly(fluidVariant,
                 queue, matrices,
                 light, overlay,
-                MinecraftClient.getInstance().world, state.pos,
+                Minecraft.getInstance().level, state.blockPos,
                 -size, fluidHeight, -size,
                 size, size);
     }
 
-    private void renderOutputFluid(ClarifierRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, int overlay) {
+    private void renderOutputFluid(ClarifierRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         if (state.outputFluidTank == null || state.outputFluidTank.isResourceBlank() || state.outputFluidTank.amount <= 0)
             return;
 
         FluidVariant fluidVariant = state.outputFluidTank.getResource();
-        World world = MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
 
         long amount = state.outputFluidTank.amount;
         float fluidProgress = (float) amount / (FluidConstants.BUCKET * 5);
@@ -186,20 +186,20 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         this.fluidRenderer.renderTopFaceOnly(fluidVariant,
                 queue, matrices,
                 light, overlay,
-                world, state.pos,
+                world, state.blockPos,
                 -0.375f, fluidHeight, -0.5f,
                 0.375f, 1.4375f);
 
-        matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+        matrices.pushPose();
+        matrices.mulPose(Axis.YP.rotationDegrees(180));
         this.fluidRenderer.drawTiledXYQuadOnly(fluidVariant,
                 queue, matrices,
                 light, overlay,
-                world, state.pos,
+                world, state.blockPos,
                 -0.375f, -1.375f, -1.4375f,
                 0.375f, fluidHeight, -1.4375f);
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     private record GridPosition(int x, int y) {

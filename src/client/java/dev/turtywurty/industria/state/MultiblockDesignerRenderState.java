@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.state;
 
 import dev.turtywurty.industria.multiblock.PieceData;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 import java.util.HashMap;
 import java.util.Map;

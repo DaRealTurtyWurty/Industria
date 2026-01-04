@@ -2,26 +2,26 @@ package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.ArcFurnaceBlockEntity;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
-import dev.turtywurty.industria.blockentity.util.inventory.WrappedInventoryStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.base.IndustriaScreenHandler;
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
 public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBlockEntity, BlockPosPayload> {
-    public ArcFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, BlockPosPayload payload) {
+    public ArcFurnaceScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ScreenHandlerTypeInit.ARC_FURNACE, 3, syncId, playerInventory, payload, ArcFurnaceBlockEntity.class);
     }
 
-    public ArcFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, ArcFurnaceBlockEntity blockEntity, WrappedInventoryStorage<?> wrappedInventoryStorage, PropertyDelegate properties) {
-        super(ScreenHandlerTypeInit.ARC_FURNACE, syncId, playerInventory, blockEntity, wrappedInventoryStorage, properties);
+    public ArcFurnaceScreenHandler(int syncId, Inventory playerInventory, ArcFurnaceBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+        super(ScreenHandlerTypeInit.ARC_FURNACE, syncId, playerInventory, blockEntity, wrappedContainerStorage, properties);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
     }
 
     @Override
-    protected void addBlockEntitySlots(PlayerInventory playerInventory) {
+    protected void addBlockEntitySlots(Inventory playerInventory) {
         SyncingSimpleInventory inputInventory = this.blockEntity.getInputInventory();
         SyncingSimpleInventory outputInventory = this.blockEntity.getOutputInventory();
 
@@ -71,10 +71,10 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
         if (maxProgress == 0 || progress == 0)
             return 0.0F;
 
-        return MathHelper.clamp(progress / maxProgress, 0.0F, 1.0F);
+        return Mth.clamp(progress / maxProgress, 0.0F, 1.0F);
     }
 
     public int getProgressScaled() {
-        return MathHelper.ceil(getProgressPercent() * 24);
+        return Mth.ceil(getProgressPercent() * 24);
     }
 }

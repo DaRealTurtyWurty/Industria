@@ -1,18 +1,18 @@
 package dev.turtywurty.industria.screen.fakeworld;
 
 import dev.turtywurty.industria.multiblock.VariedBlockList;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,8 +24,8 @@ import java.util.function.Consumer;
  * Builder that prepares shared fake-world data and populates blocks/entities.
  */
 public final class FakeWorldSceneBuilder {
-    private final MinecraftClient client = MinecraftClient.getInstance();
-    private Vec3d cameraPos = new Vec3d(2.5, 65.0, 4.0);
+    private final Minecraft client = Minecraft.getInstance();
+    private Vec3 cameraPos = new Vec3(2.5, 65.0, 4.0);
     private float cameraYaw = 200.0F;
     private float cameraPitch = -15.0F;
     private Consumer<SceneContext> populator = ctx -> {
@@ -37,7 +37,7 @@ public final class FakeWorldSceneBuilder {
         return new FakeWorldSceneBuilder();
     }
 
-    public FakeWorldSceneBuilder camera(Vec3d position, float yaw, float pitch) {
+    public FakeWorldSceneBuilder camera(Vec3 position, float yaw, float pitch) {
         this.cameraPos = position;
         this.cameraYaw = yaw;
         this.cameraPitch = pitch;
@@ -59,8 +59,8 @@ public final class FakeWorldSceneBuilder {
         var context = new SceneContext(result.world());
         this.populator.accept(context);
 
-        var cameraChunk = new ChunkPos(BlockPos.ofFloored(this.cameraPos));
-        result.world().getChunkManager().setChunkMapCenter(cameraChunk.x, cameraChunk.z);
+        var cameraChunk = new ChunkPos(BlockPos.containing(this.cameraPos));
+        result.world().getChunkSource().updateViewCenter(cameraChunk.x, cameraChunk.z);
 
         Set<BlockPos> allPositions = new HashSet<>();
         for (FakeWorldScene.PlacedBlock placed : context.blocks) {
@@ -76,7 +76,7 @@ public final class FakeWorldSceneBuilder {
         }
 
         for (Entity entity : context.entities) {
-            allPositions.add(entity.getBlockPos());
+            allPositions.add(entity.blockPosition());
         }
 
         List<ChunkPos> allChunks = new ArrayList<>();
@@ -86,8 +86,8 @@ public final class FakeWorldSceneBuilder {
                 .forEach(allChunks::add);
 
         for (ChunkPos chunkPos : allChunks) {
-            int index = result.world().getChunkManager().chunks.getIndex(chunkPos.x, chunkPos.z);
-            result.world().getChunkManager().chunks.set(index, new WorldChunk(
+            int index = result.world().getChunkSource().storage.getIndex(chunkPos.x, chunkPos.z);
+            result.world().getChunkSource().storage.replace(index, new LevelChunk(
                     result.world(),
                     chunkPos
             ));
@@ -121,7 +121,7 @@ public final class FakeWorldSceneBuilder {
             List<FakeWorldScene.PlacedVariedBlockList> variedBlockLists,
             List<Entity> entities,
             List<FakeWorldScene.Nameplate> nameplates,
-            Vec3d cameraPos,
+            Vec3 cameraPos,
             float cameraYaw,
             float cameraPitch,
             Consumer<SceneTickContext> tickHandler
@@ -132,18 +132,18 @@ public final class FakeWorldSceneBuilder {
      * Allows callers to add blocks/entities to the scene during population.
      */
     public static final class SceneContext {
-        private final ClientWorld world;
+        private final ClientLevel world;
         private final List<FakeWorldScene.PlacedBlock> blocks = new ArrayList<>();
         private final List<Entity> entities = new ArrayList<>();
         private final List<FakeWorldScene.PlacedFluid> fluids = new ArrayList<>();
         private final List<FakeWorldScene.PlacedVariedBlockList> variedBlockLists = new ArrayList<>();
         private final List<FakeWorldScene.Nameplate> nameplates = new ArrayList<>();
 
-        SceneContext(ClientWorld world) {
+        SceneContext(ClientLevel world) {
             this.world = world;
         }
 
-        public ClientWorld world() {
+        public ClientLevel world() {
             return this.world;
         }
 
@@ -163,11 +163,11 @@ public final class FakeWorldSceneBuilder {
             this.entities.add(entity);
         }
 
-        public void addNameplate(Vec3d position, Text text, float yOffset) {
+        public void addNameplate(Vec3 position, Component text, float yOffset) {
             this.nameplates.add(new FakeWorldScene.Nameplate(position, text, yOffset));
         }
 
-        public void addNameplate(Vec3d position, Text text) {
+        public void addNameplate(Vec3 position, Component text) {
             addNameplate(position, text, 0.0F);
         }
 
@@ -175,27 +175,27 @@ public final class FakeWorldSceneBuilder {
             return new SceneTickContext(this.world, List.copyOf(this.entities));
         }
 
-        void applyToWorld(ClientWorld world) {
+        void applyToWorld(ClientLevel world) {
             for (FakeWorldScene.PlacedBlock placed : this.blocks) {
                 BlockState state = placed.state();
                 BlockPos pos = placed.pos();
-                world.setBlockState(pos, state);
+                world.setBlockAndUpdate(pos, state);
                 if (state.hasBlockEntity()) {
-                    if (state.getBlock() instanceof BlockEntityProvider provider) {
-                        var blockEntity = provider.createBlockEntity(pos, state);
+                    if (state.getBlock() instanceof EntityBlock provider) {
+                        var blockEntity = provider.newBlockEntity(pos, state);
                         if (blockEntity != null) {
-                            world.addBlockEntity(blockEntity);
+                            world.setBlockEntity(blockEntity);
                         }
                     }
                 }
             }
 
             for (FakeWorldScene.PlacedFluid placed : this.fluids) {
-                world.setBlockState(placed.pos(), placed.state().getBlockState(), Block.NOTIFY_LISTENERS);
+                world.setBlock(placed.pos(), placed.state().createLegacyBlock(), Block.UPDATE_CLIENTS);
             }
         }
     }
 
-    public record SceneTickContext(ClientWorld world, List<Entity> entities) {
+    public record SceneTickContext(ClientLevel world, List<Entity> entities) {
     }
 }

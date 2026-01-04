@@ -2,34 +2,33 @@ package dev.turtywurty.industria.util;
 
 import com.mojang.datafixers.util.*;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.collection.Pool;
-import net.minecraft.util.collection.Weighted;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.floatprovider.*;
-import net.minecraft.util.math.intprovider.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.random.Weighted;
+import net.minecraft.util.random.WeightedList;
+import net.minecraft.util.valueproviders.*;
 
 import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class ExtraPacketCodecs {
-    private static final Map<IntProviderType<?>, PacketCodec<RegistryByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
-    private static final Map<FloatProviderType<?>, PacketCodec<RegistryByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
+    private static final Map<IntProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
+    private static final Map<FloatProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
 
-    public static final PacketCodec<ByteBuf, Set<BlockPos>> BLOCK_POS_SET_PACKET_CODEC = setOf(BlockPos.PACKET_CODEC);
+    public static final StreamCodec<ByteBuf, Set<BlockPos>> BLOCK_POS_SET_STREAM_CODEC = setOf(BlockPos.STREAM_CODEC);
 
-    public static final PacketCodec<ByteBuf, BlockPos> BLOCK_POS_STRING_CODEC = PacketCodecs.codec(ExtraCodecs.BLOCK_POS_STRING_CODEC);
+    public static final StreamCodec<ByteBuf, BlockPos> BLOCK_POS_STRING_CODEC = ByteBufCodecs.fromCodec(ExtraCodecs.BLOCK_POS_STRING_CODEC);
 
-    public static <B extends ByteBuf, V> PacketCodec<B, Set<V>> setOf(PacketCodec<? super B, V> codec) {
-        return PacketCodecs.collection(HashSet::new, codec);
+    public static <B extends ByteBuf, V> StreamCodec<B, Set<V>> setOf(StreamCodec<? super B, V> codec) {
+        return ByteBufCodecs.collection(HashSet::new, codec);
     }
 
-    public static <B extends ByteBuf, V> PacketCodec<B, List<V>> listOf(PacketCodec<? super B, V> codec) {
-        return PacketCodecs.collection(ArrayList::new, codec);
+    public static <B extends ByteBuf, V> StreamCodec<B, List<V>> listOf(StreamCodec<? super B, V> codec) {
+        return ByteBufCodecs.collection(ArrayList::new, codec);
     }
 
     /**
@@ -39,7 +38,7 @@ public class ExtraPacketCodecs {
      * @param codec The codec to register.
      * @param <T>   The type of the {@link IntProvider}.
      */
-    public static <T extends IntProvider> void registerIntProviderCodec(IntProviderType<T> type, PacketCodec<RegistryByteBuf, T> codec) {
+    public static <T extends IntProvider> void registerIntProviderCodec(IntProviderType<T> type, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
         INT_PROVIDER_CODECS.put(type, codec);
     }
 
@@ -50,7 +49,7 @@ public class ExtraPacketCodecs {
      * @param codec The codec to register.
      * @param <T>   The type of the {@link FloatProvider}.
      */
-    public static <T extends FloatProvider> void registerFloatProviderCodec(FloatProviderType<T> type, PacketCodec<RegistryByteBuf, T> codec) {
+    public static <T extends FloatProvider> void registerFloatProviderCodec(FloatProviderType<T> type, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
         FLOAT_PROVIDER_CODECS.put(type, codec);
     }
 
@@ -61,7 +60,7 @@ public class ExtraPacketCodecs {
      * @return The codec for the {@link IntProviderType}.
      * @see IntProviderType
      */
-    public static PacketCodec<RegistryByteBuf, ? extends IntProvider> getIntProviderCodec(IntProviderType<?> type) {
+    public static StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider> getIntProviderCodec(IntProviderType<?> type) {
         return INT_PROVIDER_CODECS.get(type);
     }
 
@@ -72,7 +71,7 @@ public class ExtraPacketCodecs {
      * @return The codec for the {@link FloatProviderType}.
      * @see FloatProviderType
      */
-    public static PacketCodec<RegistryByteBuf, ? extends FloatProvider> getFloatProviderCodec(FloatProviderType<?> type) {
+    public static StreamCodec<RegistryFriendlyByteBuf, ? extends FloatProvider> getFloatProviderCodec(FloatProviderType<?> type) {
         return FLOAT_PROVIDER_CODECS.get(type);
     }
 
@@ -84,8 +83,8 @@ public class ExtraPacketCodecs {
      * @param <T>         The type of the {@link IntProvider}.
      */
     public static <T extends IntProvider> void encode(ByteBuf buf, T intProvider) {
-        PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getIntProviderCodec(intProvider.getType());
-        codec.encode((RegistryByteBuf) buf, intProvider);
+        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getIntProviderCodec(intProvider.getType());
+        codec.encode((RegistryFriendlyByteBuf) buf, intProvider);
     }
 
     /**
@@ -97,8 +96,8 @@ public class ExtraPacketCodecs {
      * @return The decoded {@link IntProvider}.
      */
     public static <T extends IntProvider> T decode(ByteBuf buf, IntProviderType<T> type) {
-        PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getIntProviderCodec(type);
-        return codec.decode((RegistryByteBuf) buf);
+        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getIntProviderCodec(type);
+        return codec.decode((RegistryFriendlyByteBuf) buf);
     }
 
     /**
@@ -109,8 +108,8 @@ public class ExtraPacketCodecs {
      * @param <T>           The type of the {@link FloatProvider}.
      */
     public static <T extends FloatProvider> void encode(ByteBuf buf, T floatProvider) {
-        PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getFloatProviderCodec(floatProvider.getType());
-        codec.encode((RegistryByteBuf) buf, floatProvider);
+        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getFloatProviderCodec(floatProvider.getType());
+        codec.encode((RegistryFriendlyByteBuf) buf, floatProvider);
     }
 
     /**
@@ -122,32 +121,32 @@ public class ExtraPacketCodecs {
      * @return The decoded {@link FloatProvider}.
      */
     public static <T extends FloatProvider> T decode(ByteBuf buf, FloatProviderType<T> type) {
-        PacketCodec<RegistryByteBuf, T> codec = (PacketCodec<RegistryByteBuf, T>) getFloatProviderCodec(type);
-        return codec.decode((RegistryByteBuf) buf);
+        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getFloatProviderCodec(type);
+        return codec.decode((RegistryFriendlyByteBuf) buf);
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1,
             Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2,
+            StreamCodec<? super B, T2> codec2,
             Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3,
+            StreamCodec<? super B, T3> codec3,
             Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4,
+            StreamCodec<? super B, T4> codec4,
             Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5,
+            StreamCodec<? super B, T5> codec5,
             Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6,
+            StreamCodec<? super B, T6> codec6,
             Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7,
+            StreamCodec<? super B, T7> codec7,
             Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8,
+            StreamCodec<? super B, T8> codec8,
             Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9,
+            StreamCodec<? super B, T9> codec9,
             Function<C, T9> from9,
             Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -177,30 +176,30 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1,
             Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2,
+            StreamCodec<? super B, T2> codec2,
             Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3,
+            StreamCodec<? super B, T3> codec3,
             Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4,
+            StreamCodec<? super B, T4> codec4,
             Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5,
+            StreamCodec<? super B, T5> codec5,
             Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6,
+            StreamCodec<? super B, T6> codec6,
             Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7,
+            StreamCodec<? super B, T7> codec7,
             Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8,
+            StreamCodec<? super B, T8> codec8,
             Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9,
+            StreamCodec<? super B, T9> codec9,
             Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10,
+            StreamCodec<? super B, T10> codec10,
             Function<C, T10> from10,
             Function10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -232,32 +231,32 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1,
             Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2,
+            StreamCodec<? super B, T2> codec2,
             Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3,
+            StreamCodec<? super B, T3> codec3,
             Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4,
+            StreamCodec<? super B, T4> codec4,
             Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5,
+            StreamCodec<? super B, T5> codec5,
             Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6,
+            StreamCodec<? super B, T6> codec6,
             Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7,
+            StreamCodec<? super B, T7> codec7,
             Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8,
+            StreamCodec<? super B, T8> codec8,
             Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9,
+            StreamCodec<? super B, T9> codec9,
             Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10,
+            StreamCodec<? super B, T10> codec10,
             Function<C, T10> from10,
-            PacketCodec<? super B, T11> codec11,
+            StreamCodec<? super B, T11> codec11,
             Function<C, T11> from11,
             Function11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -292,22 +291,22 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1, Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2, Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3, Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4, Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5, Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6, Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7, Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8, Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9, Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10, Function<C, T10> from10,
-            PacketCodec<? super B, T11> codec11, Function<C, T11> from11,
-            PacketCodec<? super B, T12> codec12, Function<C, T12> from12,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1, Function<C, T1> from1,
+            StreamCodec<? super B, T2> codec2, Function<C, T2> from2,
+            StreamCodec<? super B, T3> codec3, Function<C, T3> from3,
+            StreamCodec<? super B, T4> codec4, Function<C, T4> from4,
+            StreamCodec<? super B, T5> codec5, Function<C, T5> from5,
+            StreamCodec<? super B, T6> codec6, Function<C, T6> from6,
+            StreamCodec<? super B, T7> codec7, Function<C, T7> from7,
+            StreamCodec<? super B, T8> codec8, Function<C, T8> from8,
+            StreamCodec<? super B, T9> codec9, Function<C, T9> from9,
+            StreamCodec<? super B, T10> codec10, Function<C, T10> from10,
+            StreamCodec<? super B, T11> codec11, Function<C, T11> from11,
+            StreamCodec<? super B, T12> codec12, Function<C, T12> from12,
             Function12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -344,23 +343,23 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1, Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2, Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3, Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4, Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5, Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6, Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7, Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8, Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9, Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10, Function<C, T10> from10,
-            PacketCodec<? super B, T11> codec11, Function<C, T11> from11,
-            PacketCodec<? super B, T12> codec12, Function<C, T12> from12,
-            PacketCodec<? super B, T13> codec13, Function<C, T13> from13,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1, Function<C, T1> from1,
+            StreamCodec<? super B, T2> codec2, Function<C, T2> from2,
+            StreamCodec<? super B, T3> codec3, Function<C, T3> from3,
+            StreamCodec<? super B, T4> codec4, Function<C, T4> from4,
+            StreamCodec<? super B, T5> codec5, Function<C, T5> from5,
+            StreamCodec<? super B, T6> codec6, Function<C, T6> from6,
+            StreamCodec<? super B, T7> codec7, Function<C, T7> from7,
+            StreamCodec<? super B, T8> codec8, Function<C, T8> from8,
+            StreamCodec<? super B, T9> codec9, Function<C, T9> from9,
+            StreamCodec<? super B, T10> codec10, Function<C, T10> from10,
+            StreamCodec<? super B, T11> codec11, Function<C, T11> from11,
+            StreamCodec<? super B, T12> codec12, Function<C, T12> from12,
+            StreamCodec<? super B, T13> codec13, Function<C, T13> from13,
             Function13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -399,24 +398,24 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1, Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2, Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3, Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4, Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5, Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6, Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7, Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8, Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9, Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10, Function<C, T10> from10,
-            PacketCodec<? super B, T11> codec11, Function<C, T11> from11,
-            PacketCodec<? super B, T12> codec12, Function<C, T12> from12,
-            PacketCodec<? super B, T13> codec13, Function<C, T13> from13,
-            PacketCodec<? super B, T14> codec14, Function<C, T14> from14,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1, Function<C, T1> from1,
+            StreamCodec<? super B, T2> codec2, Function<C, T2> from2,
+            StreamCodec<? super B, T3> codec3, Function<C, T3> from3,
+            StreamCodec<? super B, T4> codec4, Function<C, T4> from4,
+            StreamCodec<? super B, T5> codec5, Function<C, T5> from5,
+            StreamCodec<? super B, T6> codec6, Function<C, T6> from6,
+            StreamCodec<? super B, T7> codec7, Function<C, T7> from7,
+            StreamCodec<? super B, T8> codec8, Function<C, T8> from8,
+            StreamCodec<? super B, T9> codec9, Function<C, T9> from9,
+            StreamCodec<? super B, T10> codec10, Function<C, T10> from10,
+            StreamCodec<? super B, T11> codec11, Function<C, T11> from11,
+            StreamCodec<? super B, T12> codec12, Function<C, T12> from12,
+            StreamCodec<? super B, T13> codec13, Function<C, T13> from13,
+            StreamCodec<? super B, T14> codec14, Function<C, T14> from14,
             Function14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -457,25 +456,25 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1, Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2, Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3, Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4, Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5, Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6, Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7, Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8, Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9, Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10, Function<C, T10> from10,
-            PacketCodec<? super B, T11> codec11, Function<C, T11> from11,
-            PacketCodec<? super B, T12> codec12, Function<C, T12> from12,
-            PacketCodec<? super B, T13> codec13, Function<C, T13> from13,
-            PacketCodec<? super B, T14> codec14, Function<C, T14> from14,
-            PacketCodec<? super B, T15> codec15, Function<C, T15> from15,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1, Function<C, T1> from1,
+            StreamCodec<? super B, T2> codec2, Function<C, T2> from2,
+            StreamCodec<? super B, T3> codec3, Function<C, T3> from3,
+            StreamCodec<? super B, T4> codec4, Function<C, T4> from4,
+            StreamCodec<? super B, T5> codec5, Function<C, T5> from5,
+            StreamCodec<? super B, T6> codec6, Function<C, T6> from6,
+            StreamCodec<? super B, T7> codec7, Function<C, T7> from7,
+            StreamCodec<? super B, T8> codec8, Function<C, T8> from8,
+            StreamCodec<? super B, T9> codec9, Function<C, T9> from9,
+            StreamCodec<? super B, T10> codec10, Function<C, T10> from10,
+            StreamCodec<? super B, T11> codec11, Function<C, T11> from11,
+            StreamCodec<? super B, T12> codec12, Function<C, T12> from12,
+            StreamCodec<? super B, T13> codec13, Function<C, T13> from13,
+            StreamCodec<? super B, T14> codec14, Function<C, T14> from14,
+            StreamCodec<? super B, T15> codec15, Function<C, T15> from15,
             Function15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -518,26 +517,26 @@ public class ExtraPacketCodecs {
         };
     }
 
-    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> PacketCodec<B, C> tuple(
-            PacketCodec<? super B, T1> codec1, Function<C, T1> from1,
-            PacketCodec<? super B, T2> codec2, Function<C, T2> from2,
-            PacketCodec<? super B, T3> codec3, Function<C, T3> from3,
-            PacketCodec<? super B, T4> codec4, Function<C, T4> from4,
-            PacketCodec<? super B, T5> codec5, Function<C, T5> from5,
-            PacketCodec<? super B, T6> codec6, Function<C, T6> from6,
-            PacketCodec<? super B, T7> codec7, Function<C, T7> from7,
-            PacketCodec<? super B, T8> codec8, Function<C, T8> from8,
-            PacketCodec<? super B, T9> codec9, Function<C, T9> from9,
-            PacketCodec<? super B, T10> codec10, Function<C, T10> from10,
-            PacketCodec<? super B, T11> codec11, Function<C, T11> from11,
-            PacketCodec<? super B, T12> codec12, Function<C, T12> from12,
-            PacketCodec<? super B, T13> codec13, Function<C, T13> from13,
-            PacketCodec<? super B, T14> codec14, Function<C, T14> from14,
-            PacketCodec<? super B, T15> codec15, Function<C, T15> from15,
-            PacketCodec<? super B, T16> codec16, Function<C, T16> from16,
+    public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> StreamCodec<B, C> tuple(
+            StreamCodec<? super B, T1> codec1, Function<C, T1> from1,
+            StreamCodec<? super B, T2> codec2, Function<C, T2> from2,
+            StreamCodec<? super B, T3> codec3, Function<C, T3> from3,
+            StreamCodec<? super B, T4> codec4, Function<C, T4> from4,
+            StreamCodec<? super B, T5> codec5, Function<C, T5> from5,
+            StreamCodec<? super B, T6> codec6, Function<C, T6> from6,
+            StreamCodec<? super B, T7> codec7, Function<C, T7> from7,
+            StreamCodec<? super B, T8> codec8, Function<C, T8> from8,
+            StreamCodec<? super B, T9> codec9, Function<C, T9> from9,
+            StreamCodec<? super B, T10> codec10, Function<C, T10> from10,
+            StreamCodec<? super B, T11> codec11, Function<C, T11> from11,
+            StreamCodec<? super B, T12> codec12, Function<C, T12> from12,
+            StreamCodec<? super B, T13> codec13, Function<C, T13> from13,
+            StreamCodec<? super B, T14> codec14, Function<C, T14> from14,
+            StreamCodec<? super B, T15> codec15, Function<C, T15> from15,
+            StreamCodec<? super B, T16> codec16, Function<C, T16> from16,
             Function16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, C> to
     ) {
-        return new PacketCodec<>() {
+        return new StreamCodec<>() {
             @Override
             public C decode(B object) {
                 T1 object2 = codec1.decode(object);
@@ -586,83 +585,83 @@ public class ExtraPacketCodecs {
      * Registers the default codecs for all {@link IntProviderType}s and {@link FloatProviderType}s.
      */
     public static void registerDefaults() {
-        registerIntProviderCodec(IntProviderType.CONSTANT, PacketCodec.ofStatic(
+        registerIntProviderCodec(IntProviderType.CONSTANT, StreamCodec.of(
                 (buf, intProvider) -> buf.writeInt(intProvider.getValue()),
-                buf -> ConstantIntProvider.create(buf.readInt())));
+                buf -> ConstantInt.of(buf.readInt())));
 
-        registerIntProviderCodec(IntProviderType.UNIFORM, PacketCodec.ofStatic(
+        registerIntProviderCodec(IntProviderType.UNIFORM, StreamCodec.of(
                 (buf, intProvider) -> {
-                    buf.writeInt(intProvider.getMin());
-                    buf.writeInt(intProvider.getMax());
+                    buf.writeInt(intProvider.getMinValue());
+                    buf.writeInt(intProvider.getMaxValue());
                 },
-                buf -> UniformIntProvider.create(buf.readInt(), buf.readInt())));
+                buf -> UniformInt.of(buf.readInt(), buf.readInt())));
 
-        registerIntProviderCodec(IntProviderType.BIASED_TO_BOTTOM, PacketCodec.ofStatic(
+        registerIntProviderCodec(IntProviderType.BIASED_TO_BOTTOM, StreamCodec.of(
                 (buf, intProvider) -> {
-                    buf.writeInt(intProvider.getMin());
-                    buf.writeInt(intProvider.getMax());
+                    buf.writeInt(intProvider.getMinValue());
+                    buf.writeInt(intProvider.getMaxValue());
                 },
-                buf -> BiasedToBottomIntProvider.create(buf.readInt(), buf.readInt())));
+                buf -> BiasedToBottomInt.of(buf.readInt(), buf.readInt())));
 
-        registerIntProviderCodec(IntProviderType.CLAMPED, PacketCodec.ofStatic(
+        registerIntProviderCodec(IntProviderType.CLAMPED, StreamCodec.of(
                 (buf, intProvider) -> {
-                    IntProviderType<?> type = Registries.INT_PROVIDER_TYPE.get(buf.readIdentifier());
-                    PacketCodec<RegistryByteBuf, IntProvider> codec = (PacketCodec<RegistryByteBuf, IntProvider>) getIntProviderCodec(type);
+                    IntProviderType<?> type = BuiltInRegistries.INT_PROVIDER_TYPE.getValue(buf.readIdentifier());
+                    StreamCodec<RegistryFriendlyByteBuf, IntProvider> codec = (StreamCodec<RegistryFriendlyByteBuf, IntProvider>) getIntProviderCodec(type);
                     codec.encode(buf, intProvider.source);
-                    buf.writeInt(intProvider.getMin());
-                    buf.writeInt(intProvider.getMax());
+                    buf.writeInt(intProvider.getMinValue());
+                    buf.writeInt(intProvider.getMaxValue());
                 },
-                buf -> ClampedIntProvider.create(getIntProviderCodec(IntProviderType.CONSTANT).decode(buf), buf.readInt(), buf.readInt())));
+                buf -> ClampedInt.of(getIntProviderCodec(IntProviderType.CONSTANT).decode(buf), buf.readInt(), buf.readInt())));
 
-        registerIntProviderCodec(IntProviderType.WEIGHTED_LIST, PacketCodec.ofStatic(
+        registerIntProviderCodec(IntProviderType.WEIGHTED_LIST, StreamCodec.of(
                 (buf, value) -> {
-                    PacketCodec<RegistryByteBuf, ? extends IntProvider> codec = getIntProviderCodec(value.getType());
-                    Pool<IntProvider> entries = value.weightedList;
-                    PacketCodec<RegistryByteBuf, Pool<IntProvider>> entriesCodec = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec);
+                    StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider> codec = getIntProviderCodec(value.getType());
+                    WeightedList<IntProvider> entries = value.distribution;
+                    StreamCodec<RegistryFriendlyByteBuf, WeightedList<IntProvider>> entriesCodec = weightedListCodec((StreamCodec<RegistryFriendlyByteBuf, IntProvider>) codec);
                     entriesCodec.encode(buf, entries);
                 },
                 buf -> {
-                    PacketCodec<RegistryByteBuf, ? extends IntProvider> codec = getIntProviderCodec(IntProviderType.CONSTANT);
-                    Pool<IntProvider> entries = weightedListCodec((PacketCodec<RegistryByteBuf, IntProvider>) codec).decode(buf);
-                    return new WeightedListIntProvider(entries);
+                    StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider> codec = getIntProviderCodec(IntProviderType.CONSTANT);
+                    WeightedList<IntProvider> entries = weightedListCodec((StreamCodec<RegistryFriendlyByteBuf, IntProvider>) codec).decode(buf);
+                    return new WeightedListInt(entries);
                 }));
 
-        registerIntProviderCodec(IntProviderType.CLAMPED_NORMAL, PacketCodec.ofStatic(
+        registerIntProviderCodec(IntProviderType.CLAMPED_NORMAL, StreamCodec.of(
                 (buf, intProvider) -> {
                     buf.writeFloat(intProvider.mean);
                     buf.writeFloat(intProvider.deviation);
-                    buf.writeInt(intProvider.getMin());
-                    buf.writeInt(intProvider.getMax());
+                    buf.writeInt(intProvider.getMinValue());
+                    buf.writeInt(intProvider.getMaxValue());
                 },
-                buf -> ClampedNormalIntProvider.of(buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readInt())));
+                buf -> ClampedNormalInt.of(buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readInt())));
 
-        registerFloatProviderCodec(FloatProviderType.CONSTANT, PacketCodec.ofStatic(
+        registerFloatProviderCodec(FloatProviderType.CONSTANT, StreamCodec.of(
                 (buf, floatProvider) -> buf.writeFloat(floatProvider.getValue()),
-                buf -> ConstantFloatProvider.create(buf.readFloat())));
+                buf -> ConstantFloat.of(buf.readFloat())));
 
-        registerFloatProviderCodec(FloatProviderType.UNIFORM, PacketCodec.ofStatic(
+        registerFloatProviderCodec(FloatProviderType.UNIFORM, StreamCodec.of(
                 (buf, floatProvider) -> {
-                    buf.writeFloat(floatProvider.getMin());
-                    buf.writeFloat(floatProvider.getMax());
+                    buf.writeFloat(floatProvider.getMinValue());
+                    buf.writeFloat(floatProvider.getMaxValue());
                 },
-                buf -> UniformFloatProvider.create(buf.readFloat(), buf.readFloat())));
+                buf -> UniformFloat.of(buf.readFloat(), buf.readFloat())));
 
-        registerFloatProviderCodec(FloatProviderType.CLAMPED_NORMAL, PacketCodec.ofStatic(
+        registerFloatProviderCodec(FloatProviderType.CLAMPED_NORMAL, StreamCodec.of(
                 (buf, floatProvider) -> {
                     buf.writeFloat(floatProvider.mean);
                     buf.writeFloat(floatProvider.deviation);
-                    buf.writeFloat(floatProvider.getMin());
-                    buf.writeFloat(floatProvider.getMax());
+                    buf.writeFloat(floatProvider.getMinValue());
+                    buf.writeFloat(floatProvider.getMaxValue());
                 },
-                buf -> ClampedNormalFloatProvider.create(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat())));
+                buf -> ClampedNormalFloat.of(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat())));
 
-        registerFloatProviderCodec(FloatProviderType.TRAPEZOID, PacketCodec.ofStatic(
+        registerFloatProviderCodec(FloatProviderType.TRAPEZOID, StreamCodec.of(
                 (buf, floatProvider) -> {
-                    buf.writeFloat(floatProvider.getMin());
-                    buf.writeFloat(floatProvider.getMax());
+                    buf.writeFloat(floatProvider.getMinValue());
+                    buf.writeFloat(floatProvider.getMaxValue());
                     buf.writeFloat(floatProvider.plateau);
                 },
-                buf -> TrapezoidFloatProvider.create(buf.readFloat(), buf.readFloat(), buf.readFloat())));
+                buf -> TrapezoidFloat.of(buf.readFloat(), buf.readFloat(), buf.readFloat())));
     }
 
     /**
@@ -672,13 +671,13 @@ public class ExtraPacketCodecs {
      * @param <B>          The type of the {@link ByteBuf}.
      * @param <E>          The type of the elements.
      * @return The codec for the weighted list.
-     * @see WeightedListIntProvider
+     * @see WeightedListInt
      */
-    public static <B extends ByteBuf, E> PacketCodec<B, Pool<E>> weightedListCodec(PacketCodec<B, E> elementCodec) {
-        return PacketCodec.<B, Weighted<E>, E, Integer>tuple(
+    public static <B extends ByteBuf, E> StreamCodec<B, WeightedList<E>> weightedListCodec(StreamCodec<B, E> elementCodec) {
+        return StreamCodec.<B, Weighted<E>, E, Integer>composite(
                 elementCodec, Weighted::value,
-                PacketCodecs.VAR_INT, Weighted::weight,
+                ByteBufCodecs.VAR_INT, Weighted::weight,
                 Weighted::new
-        ).collect(PacketCodecs.toList()).xmap(Pool::new, Pool::getEntries);
+        ).apply(ByteBufCodecs.list()).map(WeightedList::new, WeightedList::unwrap);
     }
 }

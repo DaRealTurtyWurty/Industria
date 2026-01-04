@@ -11,20 +11,16 @@ import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,13 +28,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public record ClarifierRecipe(FluidStack inputFluid, FluidStack outputFluidStack, OutputItemStack outputItemStack,
                               int processTime) implements Recipe<ClarifierRecipeInput> {
     @Override
-    public boolean matches(ClarifierRecipeInput input, World world) {
+    public boolean matches(ClarifierRecipeInput input, Level world) {
         return input.fluidStack().matches(inputFluid);
     }
 
     @Override
-    public ItemStack craft(ClarifierRecipeInput input, RegistryWrapper.WrapperLookup registries) {
-        return outputItemStack().createStack(new LocalRandom(ThreadLocalRandom.current().nextLong()));
+    public ItemStack assemble(ClarifierRecipeInput input, HolderLookup.Provider registries) {
+        return outputItemStack().createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
     @Override
@@ -52,22 +48,22 @@ public record ClarifierRecipe(FluidStack inputFluid, FluidStack outputFluidStack
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public RecipeBookCategory getRecipeBookCategory() {
+    public RecipeBookCategory recipeBookCategory() {
         return RecipeBookCategoryInit.CLARIFIER;
     }
 
     @Override
-    public boolean isIgnoredInRecipeBook() {
+    public boolean isSpecial() {
         return true;
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of(new ClarifierRecipeDisplay(
                 this.inputFluid,
                 new SlotDisplay.ItemSlotDisplay(BlockInit.CLARIFIER.asItem()),
@@ -78,7 +74,7 @@ public record ClarifierRecipe(FluidStack inputFluid, FluidStack outputFluidStack
     }
 
     @Override
-    public String getGroup() {
+    public String group() {
         return Industria.id("clarifier").toString();
     }
 
@@ -104,12 +100,12 @@ public record ClarifierRecipe(FluidStack inputFluid, FluidStack outputFluidStack
                 Codec.INT.fieldOf("process_time").forGetter(ClarifierRecipe::processTime)
         ).apply(instance, ClarifierRecipe::new));
 
-        private static final PacketCodec<RegistryByteBuf, ClarifierRecipe> PACKET_CODEC =
-                PacketCodec.tuple(
-                        FluidStack.PACKET_CODEC, ClarifierRecipe::inputFluid,
-                        FluidStack.PACKET_CODEC, ClarifierRecipe::outputFluidStack,
-                        OutputItemStack.PACKET_CODEC, ClarifierRecipe::outputItemStack,
-                        PacketCodecs.INTEGER, ClarifierRecipe::processTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, ClarifierRecipe> STREAM_CODEC =
+                StreamCodec.composite(
+                        FluidStack.STREAM_CODEC, ClarifierRecipe::inputFluid,
+                        FluidStack.STREAM_CODEC, ClarifierRecipe::outputFluidStack,
+                        OutputItemStack.STREAM_CODEC, ClarifierRecipe::outputItemStack,
+                        ByteBufCodecs.INT, ClarifierRecipe::processTime,
                         ClarifierRecipe::new);
 
         @Override
@@ -118,8 +114,8 @@ public record ClarifierRecipe(FluidStack inputFluid, FluidStack outputFluidStack
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, ClarifierRecipe> packetCodec() {
-            return PACKET_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, ClarifierRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 
@@ -133,23 +129,23 @@ public record ClarifierRecipe(FluidStack inputFluid, FluidStack outputFluidStack
                 Codec.INT.fieldOf("process_time").forGetter(ClarifierRecipeDisplay::processTime)
         ).apply(instance, ClarifierRecipeDisplay::new));
 
-        private static final PacketCodec<RegistryByteBuf, ClarifierRecipeDisplay> PACKET_CODEC = PacketCodec.tuple(
-                FluidStack.PACKET_CODEC, ClarifierRecipeDisplay::inputFluid,
-                SlotDisplay.PACKET_CODEC, ClarifierRecipeDisplay::craftingStation,
-                FluidStack.PACKET_CODEC, ClarifierRecipeDisplay::outputFluid,
-                OutputItemStack.PACKET_CODEC, ClarifierRecipeDisplay::outputItem,
-                PacketCodecs.INTEGER, ClarifierRecipeDisplay::processTime,
+        private static final StreamCodec<RegistryFriendlyByteBuf, ClarifierRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+                FluidStack.STREAM_CODEC, ClarifierRecipeDisplay::inputFluid,
+                SlotDisplay.STREAM_CODEC, ClarifierRecipeDisplay::craftingStation,
+                FluidStack.STREAM_CODEC, ClarifierRecipeDisplay::outputFluid,
+                OutputItemStack.STREAM_CODEC, ClarifierRecipeDisplay::outputItem,
+                ByteBufCodecs.INT, ClarifierRecipeDisplay::processTime,
                 ClarifierRecipeDisplay::new);
 
-        public static final Serializer<ClarifierRecipeDisplay> SERIALIZER = new Serializer<>(CODEC, PACKET_CODEC);
+        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
-            return SlotDisplay.EmptySlotDisplay.INSTANCE;
+            return SlotDisplay.Empty.INSTANCE;
         }
 
         @Override
-        public Serializer<? extends RecipeDisplay> serializer() {
+        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
             return SERIALIZER;
         }
     }

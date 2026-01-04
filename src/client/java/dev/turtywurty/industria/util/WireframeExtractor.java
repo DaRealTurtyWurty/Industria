@@ -1,9 +1,9 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.client.render.model.BakedGeometry;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.QuadCollection;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import org.joml.Math;
 import org.joml.Vector3fc;
 
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface WireframeExtractor {
-    static List<Line> fromBakedModel(BakedGeometry model) {
+    static List<Line> fromBakedModel(QuadCollection model) {
         Set<Line> lines = new HashSet<>(); // We are using a set to avoid duplicate lines (hashes are used to determine if a line is a duplicate)
         for (Direction direction : Direction.values()) {
             for (BakedQuad quad : model.getQuads(direction)) {
@@ -31,10 +31,10 @@ public interface WireframeExtractor {
     private static void extractVerticesFromBakedQuad(Set<Line> lines, BakedQuad quad) {
         for (int vIndex = 0; vIndex < 4; vIndex++) {
             int offset = calculateOffset(vIndex);
-            Vector3fc startVertices = quad.getPosition(offset);
+            Vector3fc startVertices = quad.position(offset);
 
             offset = calculateOffset((vIndex + 1) % 4);
-            Vector3fc endVertices = quad.getPosition(offset);
+            Vector3fc endVertices = quad.position(offset);
 
             lines.add(Line.from(startVertices, endVertices));
         }
@@ -99,12 +99,12 @@ public interface WireframeExtractor {
                 return false;
 
             Line line = (Line) obj;
-            return MathHelper.approximatelyEquals(line.x1, x1) &&
-                    MathHelper.approximatelyEquals(line.y1, y1) &&
-                    MathHelper.approximatelyEquals(line.z1, z1) &&
-                    MathHelper.approximatelyEquals(line.x2, x2) &&
-                    MathHelper.approximatelyEquals(line.y2, y2) &&
-                    MathHelper.approximatelyEquals(line.z2, z2);
+            return Mth.equal(line.x1, x1) &&
+                    Mth.equal(line.y1, y1) &&
+                    Mth.equal(line.z1, z1) &&
+                    Mth.equal(line.x2, x2) &&
+                    Mth.equal(line.y2, y2) &&
+                    Mth.equal(line.z2, z2);
         }
     }
 }

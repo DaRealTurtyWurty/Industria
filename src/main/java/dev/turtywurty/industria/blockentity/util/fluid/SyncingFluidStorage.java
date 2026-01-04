@@ -4,7 +4,7 @@ import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 // TODO: Store a FluidStack as a variable so we don't have to reconstruct constantly (not sure how to do this)
@@ -32,13 +32,13 @@ public class SyncingFluidStorage extends SingleFluidStorage implements SyncableS
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity.hasWorld() && !this.blockEntity.getWorld().isClient()) {
+        if (this.isDirty && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
             if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {
                 updatableBlockEntity.update();
             } else {
-                this.blockEntity.markDirty();
+                this.blockEntity.setChanged();
             }
         }
     }

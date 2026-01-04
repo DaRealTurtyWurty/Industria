@@ -1,7 +1,6 @@
 package dev.turtywurty.industria.block.abstraction;
 
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 
-public interface BlockEntityWithGui<T> extends ExtendedScreenHandlerFactory<T> {
-
+public interface BlockEntityWithGui<T> extends ExtendedMenuProvider<T> {
 }
