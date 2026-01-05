@@ -17,7 +17,7 @@ public abstract class ExperienceOrbMixin extends Entity {
 
     @ModifyExpressionValue(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/ExperienceOrb;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$tick(boolean original) {
         if (original)
             return true;

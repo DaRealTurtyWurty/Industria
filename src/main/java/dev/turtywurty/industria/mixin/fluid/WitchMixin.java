@@ -17,7 +17,7 @@ public abstract class WitchMixin extends Raider {
 
     @ModifyExpressionValue(method = "aiStep",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/monster/Witch;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$tickMovement(boolean original) {
         if(original)
             return true;

@@ -22,7 +22,7 @@ public abstract class AbstractBoatMixin extends VehicleEntity {
     @ModifyExpressionValue(method = "getWaterLevelAbove",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$getWaterHeightBelow(boolean original, @Local FluidState fluidState) {
+    private boolean industria$getWaterHeightBelow(boolean original, @Local(name = "fluidState") FluidState fluidState) {
         if (original)
             return true;
 
@@ -34,7 +34,7 @@ public abstract class AbstractBoatMixin extends VehicleEntity {
     @ModifyExpressionValue(method = "checkInWater",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$checkBoatInWater(boolean original, @Local FluidState fluidState) {
+    private boolean industria$checkBoatInWater(boolean original, @Local(name = "fluidState") FluidState fluidState) {
         if (original)
             return true;
 
@@ -46,7 +46,7 @@ public abstract class AbstractBoatMixin extends VehicleEntity {
     @ModifyExpressionValue(method = "isUnderwater",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$getUnderWaterLocation(boolean original, @Local FluidState fluidState) {
+    private boolean industria$getUnderWaterLocation(boolean original, @Local(name = "fluidState") FluidState fluidState) {
         if (original)
             return true;
 
@@ -70,7 +70,7 @@ public abstract class AbstractBoatMixin extends VehicleEntity {
 
     @ModifyExpressionValue(method = "canAddPassenger",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/vehicle/boat/AbstractBoat;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$canAddPassenger(boolean original) {
         if (original)
             return true;

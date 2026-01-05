@@ -14,7 +14,7 @@ public class KelpBlockMixin {
     @ModifyExpressionValue(method= "getStateForPlacement",
             at=@At(value = "INVOKE",
                     target= "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$getPlacementState(boolean original, BlockPlaceContext ctx, @Local FluidState fluidState) {
+    private boolean industria$getPlacementState(boolean original, BlockPlaceContext ctx, @Local(name = "fluidState") FluidState fluidState) {
         if(original)
             return true;
 

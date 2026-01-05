@@ -23,7 +23,7 @@ public abstract class FallingBlockEntityMixin extends Entity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z",
                     ordinal = 0))
-    private boolean industria$tick$0(boolean original, @Local BlockPos blockPos) {
+    private boolean industria$tick$0(boolean original, @Local(name = "pos") BlockPos blockPos) {
         if(original)
             return true;
 
@@ -36,7 +36,7 @@ public abstract class FallingBlockEntityMixin extends Entity {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z",
                     ordinal = 1))
-    private boolean industria$tick$1(boolean original, @Local BlockHitResult clip) {
+    private boolean industria$tick$1(boolean original, @Local(name = "clip") BlockHitResult clip) {
         if(original)
             return true;
 

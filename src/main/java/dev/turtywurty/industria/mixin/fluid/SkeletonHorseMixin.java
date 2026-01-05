@@ -17,7 +17,7 @@ public abstract class SkeletonHorseMixin extends AbstractHorse {
 
     @ModifyExpressionValue(method = "getAmbientSound",
     at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
+            target = "Lnet/minecraft/world/entity/animal/equine/SkeletonHorse;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$getAmbientSound(boolean original) {
         if(original)
             return true;

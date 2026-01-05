@@ -16,7 +16,7 @@ public class BoatDispenseItemBehaviorMixin {
     @ModifyExpressionValue(method = "execute",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$dispenseSilently(boolean original, BlockSource pointer, ItemStack stack, @Local ServerLevel serverWorld, @Local BlockPos blockPos) {
+    private boolean industria$dispenseSilently(boolean original, BlockSource pointer, ItemStack stack, @Local(name = "level") ServerLevel serverWorld, @Local BlockPos blockPos) {
         if(original)
             return true;
 

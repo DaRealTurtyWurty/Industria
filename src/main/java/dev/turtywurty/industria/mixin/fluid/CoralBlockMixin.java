@@ -13,7 +13,7 @@ public class CoralBlockMixin {
     @ModifyExpressionValue(method = "scanForWater",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$isInWater(boolean original, @Local FluidState fluidState) {
+    private boolean industria$isInWater(boolean original, @Local(name = "fluidState") FluidState fluidState) {
         if (original)
             return true;
 

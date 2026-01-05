@@ -16,6 +16,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,6 +40,7 @@ public abstract class EntityMixin {
     @Shadow
     protected boolean firstTick;
 
+    @Final
     @Shadow
     protected Object2DoubleMap<TagKey<Fluid>> fluidHeight;
 
@@ -75,7 +77,7 @@ public abstract class EntityMixin {
     @ModifyExpressionValue(method = "updateInWaterStateAndDoFluidPushing",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/Entity;updateFluidHeightAndDoFluidPushing(Lnet/minecraft/tags/TagKey;D)Z"))
-    private boolean industria$updateWaterState(boolean original, @Local double lavaFlowScale) {
+    private boolean industria$updateWaterState(boolean original, @Local(name = "lavaFlowScale") double lavaFlowScale) {
         if (original)
             return true;
 

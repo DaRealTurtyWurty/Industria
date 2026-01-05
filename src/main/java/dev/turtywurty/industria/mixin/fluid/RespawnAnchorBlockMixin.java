@@ -19,7 +19,7 @@ public class RespawnAnchorBlockMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z",
                     ordinal = 0))
-    private static boolean industria$hasStillWater$0(boolean original, BlockPos pos, Level world, @Local FluidState fluidState) {
+    private static boolean industria$hasStillWater$0(boolean original, BlockPos pos, Level world, @Local(name = "fluid") FluidState fluidState) {
         if (original)
             return true;
 
@@ -31,7 +31,7 @@ public class RespawnAnchorBlockMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z",
                     ordinal = 1))
-    private static boolean industria$hasStillWater$1(boolean original, BlockPos pos, Level world, @Local(ordinal = 1) FluidState fluidState) {
+    private static boolean industria$hasStillWater$1(boolean original, BlockPos pos, Level world, @Local(name = "fluidBelow") FluidState fluidState) {
         if (original)
             return true;
 

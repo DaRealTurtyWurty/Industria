@@ -16,7 +16,7 @@ public class SugarCaneBlockMixin {
     @ModifyExpressionValue(method = "canSurvive",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$canPlaceAt(boolean original, BlockState state, LevelReader world, BlockPos pos, @Local FluidState fluidState) {
+    private boolean industria$canPlaceAt(boolean original, BlockState state, LevelReader world, BlockPos pos, @Local(name = "fluidState") FluidState fluidState) {
         if (original)
             return true;
 

@@ -13,7 +13,7 @@ public class EnderManMixin {
     @ModifyExpressionValue(method = "teleport(DDD)Z",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private boolean industria$teleportTo(boolean original, @Local BlockState blockState) {
+    private boolean industria$teleportTo(boolean original, @Local(name = "blockState") BlockState blockState) {
         if(original)
             return true;
 

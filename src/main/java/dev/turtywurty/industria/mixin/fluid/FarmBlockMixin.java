@@ -14,7 +14,7 @@ public class FarmBlockMixin {
     @ModifyExpressionValue(method = "isNearWater",
             at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
-    private static boolean industria$isWaterNearby(boolean original, LevelReader world, BlockPos pos, @Local BlockPos blockPos) {
+    private static boolean industria$isWaterNearby(boolean original, LevelReader world, BlockPos pos, @Local(name = "blockPos") BlockPos blockPos) {
         if(original)
             return true;
 

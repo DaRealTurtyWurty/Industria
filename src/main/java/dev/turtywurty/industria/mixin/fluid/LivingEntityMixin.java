@@ -17,7 +17,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyExpressionValue(method = "baseTick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
+                    target = "Lnet/minecraft/world/entity/LivingEntity;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"))
     private boolean industria$baseTick(boolean original) {
         if (original)
             return true;
