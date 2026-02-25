@@ -199,7 +199,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
 
         ClarifierRecipe recipe = recipeEntry.get().value();
         if (this.progress >= this.maxProgress) {
-            this.outputItemStack = recipe.assemble(recipeInput, this.level.registryAccess());
+            this.outputItemStack = recipe.assemble(recipeInput);
             this.outputFluidStack = recipe.outputFluidStack();
             inputFluidStorage.amount -= recipe.inputFluid().amount();
 
@@ -210,7 +210,7 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
             update();
         } else {
             this.progress++;
-            this.nextOutputItemStack = recipe.assemble(recipeInput, this.level.registryAccess());
+            this.nextOutputItemStack = recipe.assemble(recipeInput);
             update();
         }
     }

@@ -1,16 +1,18 @@
 package dev.turtywurty.industria.mixin.fluid;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.sugar.Local;
 import dev.turtywurty.industria.fluid.FluidData;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityFluidInteraction;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
@@ -18,16 +20,23 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
+    @Unique
+    private boolean industria$hasExtendedFluidTracking;
+
     @Shadow
     public abstract Level level();
 
@@ -35,14 +44,12 @@ public abstract class EntityMixin {
     private BlockPos blockPosition;
 
     @Shadow
-    public abstract boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tag, double speed);
-
-    @Shadow
     protected boolean firstTick;
 
     @Final
+    @Mutable
     @Shadow
-    protected Object2DoubleMap<TagKey<Fluid>> fluidHeight;
+    private EntityFluidInteraction fluidInteraction;
 
     @Shadow
     protected boolean wasTouchingWater;
@@ -62,6 +69,23 @@ public abstract class EntityMixin {
     @Shadow
     protected abstract SoundEvent getSwimHighSpeedSplashSound();
 
+    @Shadow
+    public abstract boolean isPushedByFluid();
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void industria$extendTrackedFluids(EntityType<?> type, Level level, CallbackInfo callback) {
+        this.fluidInteraction = new EntityFluidInteraction(industria$getTrackedFluidTags());
+        this.industria$hasExtendedFluidTracking = !FluidData.FLUID_DATA.isEmpty();
+    }
+
+    @Inject(method = "updateFluidInteraction", at = @At("HEAD"))
+    private void industria$ensureExtendedFluidTracking(CallbackInfoReturnable<Boolean> callback) {
+        if (!this.industria$hasExtendedFluidTracking && !FluidData.FLUID_DATA.isEmpty()) {
+            this.fluidInteraction = new EntityFluidInteraction(industria$getTrackedFluidTags());
+            this.industria$hasExtendedFluidTracking = true;
+        }
+    }
+
     @ModifyExpressionValue(method = "updateSwimming",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/material/FluidState;is(Lnet/minecraft/tags/TagKey;)Z"))
@@ -74,60 +98,66 @@ public abstract class EntityMixin {
         return data != null && data.canSwim();
     }
 
-    @ModifyExpressionValue(method = "updateInWaterStateAndDoFluidPushing",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;updateFluidHeightAndDoFluidPushing(Lnet/minecraft/tags/TagKey;D)Z"))
-    private boolean industria$updateWaterState(boolean original, @Local(name = "lavaFlowScale") double lavaFlowScale) {
-        if (original)
-            return true;
-
+    @Inject(method = "updateFluidInteraction", at = @At("TAIL"), cancellable = true)
+    private void industria$updateFluidInteraction(CallbackInfoReturnable<Boolean> callback) {
         Entity entity = (Entity) (Object) this;
+        boolean wasInCustomFluid = false;
+        double flowScale = this.level().environmentAttributes().getDimensionValue(EnvironmentAttributes.FAST_LAVA)
+                ? 0.007
+                : 0.0023333333333333335;
 
-        for (FluidData fluidDatum : FluidData.FLUID_DATA.values()) {
-            if (updateFluidHeightAndDoFluidPushing(fluidDatum.fluidTag(), fluidDatum.fluidMovementSpeed().apply(entity, lavaFlowScale))) {
-                return true;
+        for (FluidData fluidData : FluidData.FLUID_DATA.values()) {
+            if (entity.getFluidHeight(fluidData.fluidTag()) <= 0.0D)
+                continue;
+
+            wasInCustomFluid = true;
+
+            if (this.isPushedByFluid()) {
+                this.fluidInteraction.applyCurrentTo(fluidData.fluidTag(), entity,
+                        fluidData.fluidMovementSpeed().apply(entity, flowScale));
             }
+
+            if (!fluidData.canSwim())
+                continue;
+
+            if (!this.wasTouchingWater && !this.firstTick) {
+                industria$onSwimmingStart(entity, this.dimensions, this.getSwimSplashSound(), this.getSwimHighSpeedSplashSound(), fluidData);
+            }
+
+            if (fluidData.shouldBreakLanding())
+                this.resetFallDistance();
+            this.wasTouchingWater = true;
+            if (fluidData.shouldExtinguish())
+                this.clearFire();
         }
 
-        return false;
+        if (wasInCustomFluid) {
+            callback.setReturnValue(true);
+        }
     }
 
     @Inject(method = "applyGravity", at = @At("HEAD"), cancellable = true)
     private void industria$applyGravity(CallbackInfo callback) {
         if ((Entity) (Object) this instanceof ItemEntity itemEntity) {
+            Entity entity = (Entity) (Object) this;
             for (FluidData fluidData : FluidData.FLUID_DATA.values()) {
-                if (!this.firstTick && this.fluidHeight.getDouble(fluidData.fluidTag()) > 0.0D) {
+                if (!this.firstTick && entity.getFluidHeight(fluidData.fluidTag()) > 0.0D && fluidData.applyBuoyancy() != null) {
                     fluidData.applyBuoyancy().accept(itemEntity);
                     callback.cancel();
+                    return;
                 }
             }
         }
     }
 
-    @Inject(method = "updateInWaterStateAndDoWaterCurrentPushing",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;updateFluidHeightAndDoFluidPushing(Lnet/minecraft/tags/TagKey;D)Z"),
-            cancellable = true)
-    private void industria$checkWaterState(CallbackInfo callback) {
-        Entity entity = (Entity) (Object) this;
+    @Unique
+    private static Set<TagKey<Fluid>> industria$getTrackedFluidTags() {
+        Set<TagKey<Fluid>> trackedTags = new HashSet<>(Set.of(FluidTags.WATER, FluidTags.LAVA));
         for (FluidData fluidData : FluidData.FLUID_DATA.values()) {
-            if (!fluidData.canSwim())
-                continue;
-
-            if (updateFluidHeightAndDoFluidPushing(fluidData.fluidTag(), fluidData.fluidMovementSpeed().apply(entity, 0.0D))) {
-                if (!this.wasTouchingWater && !this.firstTick) {
-                    industria$onSwimmingStart(entity, dimensions, getSwimSplashSound(), getSwimHighSpeedSplashSound(), fluidData);
-                }
-
-                if (fluidData.shouldBreakLanding())
-                    resetFallDistance();
-                this.wasTouchingWater = true;
-                if (fluidData.shouldExtinguish())
-                    clearFire();
-
-                callback.cancel();
-            }
+            trackedTags.add(fluidData.fluidTag());
         }
+
+        return trackedTags;
     }
 
     @Unique

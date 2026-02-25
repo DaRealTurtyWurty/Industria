@@ -65,7 +65,7 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
 
         float heightMultiplier = calculateHeightMultiplier(pos, world);
         // if the time of day is > 12000, reduce the output by 50%
-        float timeOfDayModifier = world.getDayTime() > 12000 ? 0.5F : 1.0F;
+        float timeOfDayModifier = world.getGameTime() > 12000 ? 0.5F : 1.0F;
         float output = biomeModifier * heightMultiplier * windSpeed * timeOfDayModifier * 1000.0F;
         return (int) output;
     }

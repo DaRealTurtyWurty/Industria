@@ -16,7 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +34,7 @@ public class WorldFluidPocketsState extends SavedData {
     }));
 
     private static final SavedDataType<WorldFluidPocketsState> TYPE = new SavedDataType<>(
-            Industria.MOD_ID + ".fluid_pockets",
+            Industria.id("fluid_pockets"),
             WorldFluidPocketsState::new,
             CODEC,
             null
@@ -50,7 +50,7 @@ public class WorldFluidPocketsState extends SavedData {
     }
 
     public static WorldFluidPocketsState getServerState(ServerLevel world) {
-        DimensionDataStorage persistentStateManager = world.getDataStorage();
+        SavedDataStorage persistentStateManager = world.getDataStorage();
         return persistentStateManager.computeIfAbsent(TYPE);
     }
 
@@ -200,7 +200,7 @@ public class WorldFluidPocketsState extends SavedData {
         public long extractFluid(long amount) {
             long originalAmount = this.fluidAmount;
 
-            if(amount > this.fluidAmount)
+            if (amount > this.fluidAmount)
                 amount = this.fluidAmount;
 
             Map<BlockPos, Integer> nonEmptyPositions = new HashMap<>();
@@ -210,7 +210,7 @@ public class WorldFluidPocketsState extends SavedData {
                 }
             }
 
-            while(!nonEmptyPositions.isEmpty() && amount > 0) {
+            while (!nonEmptyPositions.isEmpty() && amount > 0) {
                 int randomIndex = ThreadLocalRandom.current().nextInt(nonEmptyPositions.size());
                 BlockPos randomPos = (BlockPos) nonEmptyPositions.keySet().toArray()[randomIndex];
                 int fluidAmount = nonEmptyPositions.get(randomPos);

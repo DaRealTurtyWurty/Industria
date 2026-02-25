@@ -5,12 +5,12 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.turtywurty.industria.fluid.FluidData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
+import net.minecraft.world.level.block.SpreadingSnowyBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(SpreadingSnowyDirtBlock.class)
+@Mixin(SpreadingSnowyBlock.class)
 public class SpreadingSnowyDirtBlockMixin {
     @ModifyExpressionValue(method = "canPropagate",
             at = @At(value = "INVOKE",

@@ -33,7 +33,7 @@ public class DebugRenderingRegistry {
                     return;
                 }
 
-                player.displayClientMessage(Component.literal("Debug rendering: " + (debugRendering ? "[ENABLED]" : "[DISABLED]")), false);
+                player.sendSystemMessage(Component.literal("Debug rendering: " + (debugRendering ? "[ENABLED]" : "[DISABLED]")));
             }
         });
     }

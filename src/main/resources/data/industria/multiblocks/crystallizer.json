@@ -1,0 +1,32 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:crystallizer",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:packed_ice", "minecraft:packed_ice", "minecraft:packed_ice"],
+        ["minecraft:packed_ice", "industria:crystallizer", "minecraft:packed_ice"],
+        ["minecraft:packed_ice", "minecraft:packed_ice", "minecraft:packed_ice"]
+      ],
+      [
+        ["minecraft:glass", "minecraft:glass", "minecraft:glass"],
+        ["minecraft:glass", "minecraft:cauldron", "minecraft:glass"],
+        ["minecraft:glass", "minecraft:glass", "minecraft:glass"]
+      ],
+      [
+        ["minecraft:quartz_block", "minecraft:quartz_block", "minecraft:quartz_block"],
+        ["minecraft:quartz_block", "minecraft:air", "minecraft:quartz_block"],
+        ["minecraft:quartz_block", "minecraft:quartz_block", "minecraft:quartz_block"]
+      ],
+      [
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "minecraft:lightning_rod", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ]
+    ]
+  }
+}

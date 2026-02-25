@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 
 import java.util.function.BiConsumer;
@@ -29,7 +30,7 @@ public class ToggleButton extends Button {
     private boolean toggled;
 
     protected ToggleButton(int x, int y, BiConsumer<ToggleButton, Boolean> onPressed, CreateNarration narrationSupplier, boolean defaultToggle, WidgetSprites textures) {
-        super(x, y, 32, 16, net.minecraft.network.chat.Component.empty(), $ -> {
+        super(x, y, 32, 16, Component.empty(), $ -> {
         }, narrationSupplier);
         this.toggled = defaultToggle;
         this.textures = textures;
@@ -77,7 +78,7 @@ public class ToggleButton extends Button {
         private final int x, y;
         private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {
         };
-        private CreateNarration narrationSupplier = textSupplier -> net.minecraft.network.chat.Component.empty();
+        private CreateNarration narrationSupplier = textSupplier -> Component.empty();
         private boolean defaultToggled;
         private WidgetSprites textures = ToggleButton.DEFAULT_TEXTURES;
 

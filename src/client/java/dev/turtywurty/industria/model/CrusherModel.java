@@ -19,7 +19,7 @@ public class CrusherModel extends Model<Float> {
     private final ModelPart topRight;
 
     public CrusherModel(ModelPart root) {
-        super(root, RenderTypes::entityCutoutNoCull);
+        super(root, RenderTypes::entityCutout);
         ModelPart main = root.getChild("main");
         this.bottomLeft = main.getChild("left").getChild("bottomLeft");
         this.topLeft = main.getChild("left").getChild("topLeft");

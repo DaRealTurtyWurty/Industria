@@ -129,18 +129,6 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(ArcFurnaceBlockEntity::new, BlockInit.ARC_FURNACE)
                     .build());
 
-    public static final BlockEntityType<MultiblockControllerBlockEntity> EXAMPLE_MULTIBLOCK_CONTROLLER = register("example_multiblock_controller",
-            FabricBlockEntityTypeBuilder.create(MultiblockControllerBlockEntity::new, BlockInit.EXAMPLE_MULTIBLOCK_CONTROLLER)
-                    .build());
-
-    public static final BlockEntityType<MultiblockDesignerBlockEntity> MULTIBLOCK_DESIGNER = register("multiblock_designer",
-            FabricBlockEntityTypeBuilder.create(MultiblockDesignerBlockEntity::new, BlockInit.MULTIBLOCK_DESIGNER)
-                    .build());
-
-    public static final BlockEntityType<MultiblockPieceBlockEntity> MULTIBLOCK_PIECE = register("multiblock_piece",
-            FabricBlockEntityTypeBuilder.create(MultiblockPieceBlockEntity::new, BlockInit.MULTIBLOCK_PIECE)
-                    .build());
-
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

@@ -1,0 +1,37 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:oil_pump_jack",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 0],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["industria:steel_block", "industria:oil_pump_jack", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ],
+      [
+        ["minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air"],
+        ["minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block"],
+        ["minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air"]
+      ],
+      [
+        ["minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air"]
+      ],
+      [
+        ["minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air"]
+      ],
+      [
+        ["minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:air", "minecraft:iron_block", "minecraft:air", "minecraft:air", "minecraft:air"]
+      ]
+    ]
+  }
+}

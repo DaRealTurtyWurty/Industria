@@ -89,15 +89,17 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
         matrices.mulPose(Axis.XP.rotation(state.armPitch));
         matrices.translate((attachmentCPosition.x - attachmentBPosition.x) / 16f, (attachmentCPosition.y - attachmentBPosition.y) / 16f, (attachmentCPosition.z - attachmentBPosition.z) / 16f);
         queue.submitCustomGeometry(matrices, RenderTypes.lines(), (matricesEntry, vertexConsumer) ->
-                vertexConsumer.addVertex(matrices.last(), attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
+                vertexConsumer.addVertex(matricesEntry, attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)
                         .setColor(20, 20, 20, 255)
+                        .setLineWidth(2.0f)
                         .setNormal(0, 0, 0));
 
         matrices.popPose();
 
         queue.submitCustomGeometry(matrices, RenderTypes.lines(), (matricesEntry, vertexConsumer) ->
-                vertexConsumer.addVertex(matrices.last(), attachmentDPosition.x, attachmentDPosition.y, attachmentDPosition.z)
+                vertexConsumer.addVertex(matricesEntry, attachmentDPosition.x, attachmentDPosition.y, attachmentDPosition.z)
                         .setColor(20, 20, 20, 255)
+                        .setLineWidth(2.0f)
                         .setNormal(0, 0, 0));
 
         matrices.popPose();

@@ -16,6 +16,9 @@ import java.util.List;
 
 public class IndustriaBlockEntityRenderState extends BlockEntityRenderState {
     public final List<ItemStackRenderState> itemRenderStates = new ArrayList<>();
+    public boolean multiblockFormed = true;
+    public double multiblockRenderOffsetX = 0.0;
+    public double multiblockRenderOffsetZ = 0.0;
     public float tickProgress;
 
     public IndustriaBlockEntityRenderState(int itemRenderStateCount) {

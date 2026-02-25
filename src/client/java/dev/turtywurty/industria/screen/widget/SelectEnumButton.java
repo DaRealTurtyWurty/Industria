@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -41,7 +42,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     @SafeVarargs
     public SelectEnumButton(T startValue, Consumer<T> onNewValue, int columns, int x, int y, int width, int height, Map<T, Identifier> textureMap, T... disabledValues) {
-        super(x, y, width, height, net.minecraft.network.chat.Component.empty(), null, Button.DEFAULT_NARRATION);
+        super(x, y, width, height, Component.empty(), null, Button.DEFAULT_NARRATION);
         this.value = startValue;
         this.onNewValue = onNewValue;
         this.columns = columns;

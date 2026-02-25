@@ -43,7 +43,7 @@ public class SeismicScannerItem extends Item {
             WorldFluidPocketsState state = WorldFluidPocketsState.getServerState((ServerLevel) world);
             List<WorldFluidPocketsState.FluidPocket> existsBelow = state.existsBelow(user.blockPosition());
             if (existsBelow.isEmpty()) {
-                user.displayClientMessage(Component.literal("There are no fluid fluidPockets here!"), false); // TODO: Translatable
+                user.sendSystemMessage(Component.literal("There are no fluid fluidPockets here!")); // TODO: Translatable
                 return InteractionResult.FAIL;
             }
 
@@ -81,7 +81,7 @@ public class SeismicScannerItem extends Item {
                 }
             }
 
-            player.displayClientMessage(text, false);
+            player.sendSystemMessage(text);
         }
     }
 }

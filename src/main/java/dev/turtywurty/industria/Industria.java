@@ -51,7 +51,6 @@ public class Industria implements ModInitializer {
         EntityTypeInit.init();
         RecipeBookCategoryInit.init();
         MultiblockTypeInit.init();
-        MultiblockDefinitionInit.init();
         SlurryInit.init();
         GasInit.init();
         WoodSetInit.init();
@@ -60,6 +59,7 @@ public class Industria implements ModInitializer {
         PipeNetworkManagerTypeInit.init();
         ExtraPacketCodecs.registerDefaults();
         TransferTypesInit.init();
+        MultiblockLibIntegrationInit.init();
         PayloadTypeInit.init();
         PacketReceiverInit.init();
         EventsInit.init();

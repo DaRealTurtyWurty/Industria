@@ -1,0 +1,27 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:centrifugal_concentrator",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block"],
+        ["minecraft:iron_block", "industria:centrifugal_concentrator", "minecraft:iron_block"],
+        ["minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block"]
+      ],
+      [
+        ["minecraft:smooth_stone", "minecraft:glass", "minecraft:smooth_stone"],
+        ["minecraft:glass", "minecraft:cauldron", "minecraft:glass"],
+        ["minecraft:smooth_stone", "minecraft:glass", "minecraft:smooth_stone"]
+      ],
+      [
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "minecraft:lightning_rod", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ]
+    ]
+  }
+}

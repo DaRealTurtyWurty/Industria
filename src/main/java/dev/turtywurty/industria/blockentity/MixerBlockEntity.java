@@ -302,7 +302,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
             if (hasEnergy()) {
                 extractEnergy(recipe);
 
-                ItemStack output = recipe.assemble(recipeInput, this.level.registryAccess());
+                ItemStack output = recipe.assemble(recipeInput);
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
                 inputFluidTank.amount -= recipe.inputFluid().amount();
 

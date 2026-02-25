@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
@@ -40,16 +40,16 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, int freeTreeHeight, BlockPos startPos, TreeConfiguration config) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(WorldGenLevel level, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, int treeHeight, BlockPos startPos, TreeConfiguration config) {
         List<FoliagePlacer.FoliageAttachment> nodes = new ArrayList<>();
-        setDirtAt(world, replacer, random, startPos.below(), config);
-        nodes.add(new FoliagePlacer.FoliageAttachment(startPos.above(freeTreeHeight), 0, false));
+        placeBelowTrunkBlock(level, replacer, random, startPos.below(), config);
+        nodes.add(new FoliagePlacer.FoliageAttachment(startPos.above(treeHeight), 0, false));
 
         int height = this.branchStartHeight.sample(random);
         float branchingPossibility = 0.8F;
         Direction branchDirection = null;
-        for (int yPos = 0; yPos < freeTreeHeight; ++yPos) {
-            placeLog(world, replacer, random, startPos.above(yPos), config);
+        for (int yPos = 0; yPos < treeHeight; ++yPos) {
+            placeLog(level, replacer, random, startPos.above(yPos), config);
 
             if(yPos >= height - 1) {
                 if(random.nextFloat() < branchingPossibility) {
@@ -70,7 +70,7 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
                     int length = this.branchLength.sample(random);
                     for (int hPos = 0; hPos < length; hPos++) {
                         BlockPos offsetPos = pos.offset(offsetX, hPos, offsetZ);
-                        placeLog(world, replacer, random, offsetPos, config);
+                        placeLog(level, replacer, random, offsetPos, config);
 
                         if(hPos == 0 || random.nextFloat() < 0.8F) {
                             offsetX += branchDirection.getStepX();
@@ -89,7 +89,7 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    protected boolean placeLog(LevelSimulatedReader world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, BlockPos pos, TreeConfiguration config) {
+    protected boolean placeLog(WorldGenLevel world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, BlockPos pos, TreeConfiguration config) {
         return placeLog(world, replacer, random, pos, config,
                 state -> state.setValue(LatexBlock.LATEX_LEVEL, random.nextIntBetweenInclusive(1, 5)));
     }

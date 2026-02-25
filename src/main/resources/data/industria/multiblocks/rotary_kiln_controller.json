@@ -1,0 +1,27 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:rotary_kiln_controller",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [0, 0, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block"],
+        ["industria:rotary_kiln_controller", "industria:rotary_kiln", "industria:rotary_kiln", "industria:rotary_kiln", "industria:rotary_kiln", "industria:rotary_kiln", "industria:rotary_kiln", "industria:rotary_kiln", "industria:rotary_kiln", "minecraft:blast_furnace"],
+        ["minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block"]
+      ],
+      [
+        ["minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air"]
+      ],
+      [
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ]
+    ]
+  }
+}

@@ -10,11 +10,11 @@ import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.util.IndustriaIngredient;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output,
+public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStackTemplate output,
                                  int smeltTime) implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
@@ -33,7 +33,7 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
     }
 
     @Override
-    public ItemStack assemble(RecipeSimpleInventory inventory, HolderLookup.Provider lookup) {
+    public ItemStack assemble(RecipeSimpleInventory inventory) {
         // extract the inventory stacks
         ItemStack stackA = this.inputA.testForRecipe(inventory.getItem(0)) ? inventory.getItem(0) : inventory.getItem(1);
         ItemStack stackB = this.inputB.testForRecipe(inventory.getItem(0)) ? inventory.getItem(0) : inventory.getItem(1);
@@ -46,7 +46,7 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
         inventory.setItem(0, stackA);
         inventory.setItem(1, stackB);
 
-        return this.output.copy();
+        return this.output.create();
     }
 
     @Override
@@ -66,6 +66,11 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
 
     @Override
     public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
+    public boolean showNotification() {
         return true;
     }
 
@@ -103,33 +108,21 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
         }
     }
 
-    public static class Serializer implements RecipeSerializer<AlloyFurnaceRecipe> {
-        public static final Serializer INSTANCE = new Serializer();
+    private static final MapCodec<AlloyFurnaceRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            IndustriaIngredient.CODEC.fieldOf("inputA").forGetter(AlloyFurnaceRecipe::inputA),
+            IndustriaIngredient.CODEC.fieldOf("inputB").forGetter(AlloyFurnaceRecipe::inputB),
+            ItemStackTemplate.CODEC.fieldOf("output").forGetter(AlloyFurnaceRecipe::output),
+            Codec.INT.fieldOf("smelt_time").forGetter(AlloyFurnaceRecipe::smeltTime)
+    ).apply(instance, AlloyFurnaceRecipe::new));
 
-        private static final MapCodec<AlloyFurnaceRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                IndustriaIngredient.CODEC.fieldOf("inputA").forGetter(AlloyFurnaceRecipe::inputA),
-                IndustriaIngredient.CODEC.fieldOf("inputB").forGetter(AlloyFurnaceRecipe::inputB),
-                ItemStack.CODEC.fieldOf("output").forGetter(AlloyFurnaceRecipe::output),
-                Codec.INT.fieldOf("smelt_time").forGetter(AlloyFurnaceRecipe::smeltTime)
-        ).apply(instance, AlloyFurnaceRecipe::new));
+    private static final StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipe> STREAM_CODEC =
+            StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, AlloyFurnaceRecipe::inputA,
+                    IndustriaIngredient.STREAM_CODEC, AlloyFurnaceRecipe::inputB,
+                    ItemStackTemplate.STREAM_CODEC, AlloyFurnaceRecipe::output,
+                    ByteBufCodecs.INT, AlloyFurnaceRecipe::smeltTime,
+                    AlloyFurnaceRecipe::new);
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipe> STREAM_CODEC =
-                StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, AlloyFurnaceRecipe::inputA,
-                        IndustriaIngredient.STREAM_CODEC, AlloyFurnaceRecipe::inputB,
-                        ItemStack.STREAM_CODEC, AlloyFurnaceRecipe::output,
-                        ByteBufCodecs.INT, AlloyFurnaceRecipe::smeltTime,
-                        AlloyFurnaceRecipe::new);
-
-        @Override
-        public MapCodec<AlloyFurnaceRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-    }
+    public static final RecipeSerializer<AlloyFurnaceRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
     public record AlloyFurnaceRecipeDisplay(SlotDisplay inputA, SlotDisplay inputB, SlotDisplay fuel,
                                             SlotDisplay result, SlotDisplay craftingStation,
@@ -154,7 +147,7 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
                 AlloyFurnaceRecipeDisplay::new
         );
 
-        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<AlloyFurnaceRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay craftingStation() {
@@ -162,7 +155,7 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
         }
 
         @Override
-        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
+        public RecipeDisplay.Type<AlloyFurnaceRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

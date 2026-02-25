@@ -21,6 +21,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguratio
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedBlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
@@ -76,7 +77,7 @@ public class ConfiguredFeatureInit {
                         new BlobFoliagePlacer(UniformInt.of(2, 4), ConstantInt.of(2), 4),
                         new TwoLayersFeatureSize(1, 0, 1))
                         .ignoreVines()
-                        .dirt(SimpleStateProvider.simple(Blocks.DIRT))
+                        .belowTrunkProvider(RuleBasedBlockStateProvider.always(SimpleStateProvider.simple(Blocks.DIRT)))
                         .build());
     }
 

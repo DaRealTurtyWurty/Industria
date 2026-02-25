@@ -19,6 +19,7 @@ import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerato
 import net.minecraft.client.data.models.blockstates.ConditionBuilder;
 import net.minecraft.client.data.models.blockstates.MultiPartGenerator;
 import net.minecraft.client.data.models.model.*;
+import net.minecraft.client.renderer.block.model.Material;
 import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -26,6 +27,7 @@ import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,54 +55,49 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
 
     public static TextureMapping ore(Block block) {
-        Identifier identifier = TextureMapping.getBlockTexture(block);
-        return ore(identifier);
+        Material material = TextureMapping.getBlockTexture(block);
+        return ore(material);
     }
 
-    public static TextureMapping ore(Identifier id) {
-        return (new TextureMapping()).put(ORE_KEY, id);
+    public static TextureMapping ore(Material material) {
+        return (new TextureMapping()).put(ORE_KEY, material);
     }
 
     public static TextureMapping stoneOre(Block block) {
-        Identifier identifier = TextureMapping.getBlockTexture(block);
-        return stoneOre(identifier);
+        Material material = TextureMapping.getBlockTexture(block);
+        return stoneOre(material);
     }
 
-    public static TextureMapping stoneOre(Identifier id) {
-        return (new TextureMapping()).put(BASE_KEY, Identifier.withDefaultNamespace("block/stone")).put(ORE_KEY, id);
+    public static TextureMapping stoneOre(Material material) {
+        return (new TextureMapping()).put(BASE_KEY, TextureMapping.getBlockTexture(Blocks.STONE)).put(ORE_KEY, material);
+    }
+
+    private static Material removeTexturePrefix(Material material, String prefix) {
+        return new Material(material.sprite().withPath(path -> path.replace(prefix, "")), material.forceTranslucent());
     }
 
     public static TextureMapping deepslateOre(Block block) {
-        Identifier identifier = TextureMapping.getBlockTexture(block);
-        String namespace = identifier.getNamespace();
-        String path = identifier.getPath().replace("deepslate_", "");
-        return deepslateOre(Identifier.fromNamespaceAndPath(namespace, path));
+        return deepslateOre(removeTexturePrefix(TextureMapping.getBlockTexture(block), "deepslate_"));
     }
 
-    public static TextureMapping deepslateOre(Identifier id) {
-        return (new TextureMapping()).put(BASE_KEY, Identifier.withDefaultNamespace("block/deepslate")).put(ORE_KEY, id);
+    public static TextureMapping deepslateOre(Material material) {
+        return (new TextureMapping()).put(BASE_KEY, TextureMapping.getBlockTexture(Blocks.DEEPSLATE)).put(ORE_KEY, material);
     }
 
     public static TextureMapping netherOre(Block block) {
-        Identifier identifier = TextureMapping.getBlockTexture(block);
-        String namespace = identifier.getNamespace();
-        String path = identifier.getPath().replace("nether_", "");
-        return netherOre(Identifier.fromNamespaceAndPath(namespace, path));
+        return netherOre(removeTexturePrefix(TextureMapping.getBlockTexture(block), "nether_"));
     }
 
-    public static TextureMapping netherOre(Identifier id) {
-        return (new TextureMapping()).put(BASE_KEY, Identifier.withDefaultNamespace("block/netherrack")).put(ORE_KEY, id);
+    public static TextureMapping netherOre(Material material) {
+        return (new TextureMapping()).put(BASE_KEY, TextureMapping.getBlockTexture(Blocks.NETHERRACK)).put(ORE_KEY, material);
     }
 
     public static TextureMapping endOre(Block block) {
-        Identifier identifier = TextureMapping.getBlockTexture(block);
-        String namespace = identifier.getNamespace();
-        String path = identifier.getPath().replace("end_", "");
-        return endOre(Identifier.fromNamespaceAndPath(namespace, path));
+        return endOre(removeTexturePrefix(TextureMapping.getBlockTexture(block), "end_"));
     }
 
-    public static TextureMapping endOre(Identifier id) {
-        return (new TextureMapping()).put(BASE_KEY, Identifier.withDefaultNamespace("block/end_stone")).put(ORE_KEY, id);
+    public static TextureMapping endOre(Material material) {
+        return (new TextureMapping()).put(BASE_KEY, TextureMapping.getBlockTexture(Blocks.END_STONE)).put(ORE_KEY, material);
     }
 
     private static void registerPipe(BlockModelGenerators blockStateModelGenerator, Block block, String name) {
@@ -255,6 +252,21 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.FLUID_PUMP);
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.FLUID_TANK);
 
+        // Multiblock controllers and segments should have a visible fallback block model while unformed.
+        registerCustomCube(blockStateModelGenerator, BlockInit.ARC_FURNACE, Industria.id("block/steel_block"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.CENTRIFUGAL_CONCENTRATOR, Industria.id("block/steel_block"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.CLARIFIER, Industria.id("block/clarifier"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.CRYSTALLIZER, Industria.id("block/crystallizer"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.DIGESTER, Industria.id("block/digester"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.DRILL, Industria.id("block/drill_frame"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.ELECTROLYZER, Industria.id("block/electrolyzer"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.MIXER, Industria.id("block/mixer"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.OIL_PUMP_JACK, Industria.id("block/oil_pump_jack"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.ROTARY_KILN, Industria.id("block/rotary_kiln"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.ROTARY_KILN_CONTROLLER, Industria.id("block/rotary_kiln"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.SHAKING_TABLE, Industria.id("block/shaking_table"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.UPGRADE_STATION, Industria.id("block/upgrade_station"));
+
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
@@ -280,6 +292,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
             case "end_ore" -> registerSingleton(blockStateModelGenerator, block, END);
             default -> registerSingleton(blockStateModelGenerator, block, ORE);
         }
+    }
+
+    private void registerCustomCube(final BlockModelGenerators blockStateModelGenerator, final Block block, final Identifier texture) {
+        registerSingleton(blockStateModelGenerator, block, createDefault(
+                ignored -> new TextureMapping().put(TextureSlot.ALL, new Material(texture, false)),
+                ModelTemplates.CUBE_ALL));
     }
 
     @Override

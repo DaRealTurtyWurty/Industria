@@ -15,7 +15,7 @@ public record UpgradeStationOpenPayload(BlockPos pos, List<UpgradeStationRecipe>
     public static final Type<UpgradeStationOpenPayload> ID = new Type<>(Industria.id("upgrade_station_open"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeStationOpenPayload> CODEC =
             StreamCodec.composite(BlockPos.STREAM_CODEC, UpgradeStationOpenPayload::pos,
-                    ByteBufCodecs.collection(ArrayList::new, UpgradeStationRecipe.Serializer.STREAM_CODEC), UpgradeStationOpenPayload::recipes,
+                    ByteBufCodecs.collection(ArrayList::new, UpgradeStationRecipe.SERIALIZER.streamCodec()), UpgradeStationOpenPayload::recipes,
                     UpgradeStationOpenPayload::new);
 
     @Override

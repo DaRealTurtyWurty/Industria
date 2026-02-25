@@ -11,27 +11,30 @@ import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
-                             int processTime) implements Recipe<DigesterRecipeInput> {
+public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, int processTime)
+        implements Recipe<DigesterRecipeInput> {
     @Override
     public boolean matches(DigesterRecipeInput input, Level world) {
         return input.slurryStack().matches(this.inputSlurry);
     }
 
     @Override
-    public ItemStack assemble(DigesterRecipeInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(DigesterRecipeInput input) {
         return ItemStack.EMPTY;
     }
 
@@ -71,6 +74,11 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
     }
 
     @Override
+    public boolean showNotification() {
+        return true;
+    }
+
+    @Override
     public String group() {
         return Industria.id("digester").toString();
     }
@@ -87,51 +95,41 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
         }
     }
 
-    public static class Serializer implements RecipeSerializer<DigesterRecipe> {
-        public static final Serializer INSTANCE = new Serializer();
+    private static final MapCodec<DigesterRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipe::inputSlurry),
+            FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipe::outputFluid),
+            Codec.INT.fieldOf("process_time").forGetter(DigesterRecipe::processTime)
+    ).apply(instance, DigesterRecipe::new));
 
-        private static final MapCodec<DigesterRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipe::inputSlurry),
-                FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipe::outputFluid),
-                Codec.INT.fieldOf("process_time").forGetter(DigesterRecipe::processTime)
-        ).apply(instance, DigesterRecipe::new));
+    private static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipe> STREAM_CODEC = StreamCodec.composite(
+            SlurryStack.STREAM_CODEC, DigesterRecipe::inputSlurry,
+            FluidStack.STREAM_CODEC, DigesterRecipe::outputFluid,
+            ByteBufCodecs.INT, DigesterRecipe::processTime,
+            DigesterRecipe::new
+    );
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipe> STREAM_CODEC =
-                StreamCodec.composite(
-                        SlurryStack.STREAM_CODEC, DigesterRecipe::inputSlurry,
-                        FluidStack.STREAM_CODEC, DigesterRecipe::outputFluid,
-                        ByteBufCodecs.INT, DigesterRecipe::processTime,
-                        DigesterRecipe::new);
+    public static final RecipeSerializer<DigesterRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-        @Override
-        public MapCodec<DigesterRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, DigesterRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-    }
-
-    public record DigesterRecipeDisplay(SlurryStack inputSlurry, SlotDisplay craftingStation, FluidStack outputFluid,
-                                        int processTime) implements RecipeDisplay {
+    public record DigesterRecipeDisplay(SlurryStack inputSlurry, SlotDisplay craftingStation, FluidStack outputFluid, int processTime)
+            implements RecipeDisplay {
         public static final MapCodec<DigesterRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
                 instance -> instance.group(
                         SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipeDisplay::inputSlurry),
                         SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(DigesterRecipeDisplay::craftingStation),
                         FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipeDisplay::outputFluid),
                         Codec.INT.fieldOf("process_time").forGetter(DigesterRecipeDisplay::processTime)
-                ).apply(instance, DigesterRecipeDisplay::new));
+                ).apply(instance, DigesterRecipeDisplay::new)
+        );
 
         public static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
                 SlurryStack.STREAM_CODEC, DigesterRecipeDisplay::inputSlurry,
                 SlotDisplay.STREAM_CODEC, DigesterRecipeDisplay::craftingStation,
                 FluidStack.STREAM_CODEC, DigesterRecipeDisplay::outputFluid,
                 ByteBufCodecs.INT, DigesterRecipeDisplay::processTime,
-                DigesterRecipeDisplay::new);
+                DigesterRecipeDisplay::new
+        );
 
-        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<DigesterRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -139,7 +137,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid,
         }
 
         @Override
-        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
+        public RecipeDisplay.Type<DigesterRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

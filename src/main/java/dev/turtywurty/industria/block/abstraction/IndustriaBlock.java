@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Function4;
 import dev.turtywurty.industria.block.abstraction.state.StateProperties;
 import dev.turtywurty.industria.block.abstraction.state.StateProperty;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.multiblock.old.MultiblockType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -212,14 +211,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
     @Override
     public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        if (this.multiblockType != null) {
-            if (!world.isClientSide()) {
-                BlockEntity blockEntity = world.getBlockEntity(pos);
-                if (blockEntity instanceof AutoMultiblockable multiblockable) {
-                    multiblockable.buildMultiblock(world, pos, state, placer, itemStack, blockEntity::setChanged);
-                }
-            }
-        }
+        super.setPlacedBy(world, pos, state, placer, itemStack);
     }
 
     @Override

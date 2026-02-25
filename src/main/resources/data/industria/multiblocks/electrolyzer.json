@@ -1,0 +1,20 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:electrolyzer",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 0],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "industria:electrolyzer", "minecraft:iron_block"],
+        ["minecraft:iron_block", "industria:heat_pipe", "minecraft:iron_block"]
+      ],
+      [
+        ["minecraft:glass", "minecraft:glass", "minecraft:glass"],
+        ["minecraft:lightning_rod", "minecraft:lightning_rod", "minecraft:lightning_rod"]
+      ]
+    ]
+  }
+}

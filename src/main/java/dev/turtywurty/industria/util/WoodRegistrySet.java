@@ -80,9 +80,9 @@ public class WoodRegistrySet {
                            Function<BlockBehaviour.Properties, PressurePlateBlock> pressurePlate, Function<BlockBehaviour.Properties, ButtonBlock> button,
                            Function<BlockBehaviour.Properties, StandingSignBlock> sign, Function<BlockBehaviour.Properties, WallSignBlock> wallSign,
                            Function<BlockBehaviour.Properties, CeilingHangingSignBlock> hangingSign, Function<BlockBehaviour.Properties, WallHangingSignBlock> wallHangingSign,
-                           Function<net.minecraft.world.item.Item.Properties, SignItem> signItem, Function<net.minecraft.world.item.Item.Properties, HangingSignItem> hangingSignItem,
-                           Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> boatEntityType, Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> chestBoatEntityType,
-                           Function<net.minecraft.world.item.Item.Properties, Item> boatItem, Function<net.minecraft.world.item.Item.Properties, Item> chestBoatItem) {
+                           Function<Item.Properties, SignItem> signItem, Function<Item.Properties, HangingSignItem> hangingSignItem,
+                           Function<Supplier<Item>, EntityType.Builder> boatEntityType, Function<Supplier<Item>, EntityType.Builder> chestBoatEntityType,
+                           Function<Item.Properties, Item> boatItem, Function<Item.Properties, Item> chestBoatItem) {
         this.name = name;
         this.saplingGenerator = saplingGenerator;
         this.blockSetType = new BlockSetType(Industria.id(this.name).toString());
@@ -133,13 +133,13 @@ public class WoodRegistrySet {
                 hangingSignItem == null ? settings -> new HangingSignItem(this.hangingSign, this.wallHangingSign, settings.stacksTo(16)) : hangingSignItem);
 
         this.boatEntityType = EntityTypeInit.register(this.name + "_boat",
-                boatEntityType == null ? net.minecraft.world.entity.EntityType.Builder.<Boat>of((type, world) -> new Boat(type, world, this.planks::asItem), MobCategory.MISC)
+                boatEntityType == null ? EntityType.Builder.<Boat>of((type, world) -> new Boat(type, world, this.planks::asItem), MobCategory.MISC)
                         .noLootTable()
                         .sized(1.375F, 0.5625F)
                         .eyeHeight(0.5625F)
                         .clientTrackingRange(10) : boatEntityType.apply(this.planks::asItem));
         this.chestBoatEntityType = EntityTypeInit.register(this.name + "_chest_boat",
-                chestBoatEntityType == null ? net.minecraft.world.entity.EntityType.Builder.<ChestBoat>of((type, world) -> new ChestBoat(type, world, this.planks::asItem), MobCategory.MISC)
+                chestBoatEntityType == null ? EntityType.Builder.<ChestBoat>of((type, world) -> new ChestBoat(type, world, this.planks::asItem), MobCategory.MISC)
                         .noLootTable()
                         .sized(1.375F, 0.5625F)
                         .eyeHeight(0.5625F)
@@ -197,7 +197,7 @@ public class WoodRegistrySet {
     }
 
     public BlockFamily createBlockFamily() {
-        return new net.minecraft.data.BlockFamily.Builder(this.planks)
+        return new BlockFamily.Builder(this.planks)
                 .button(this.button)
                 .fence(this.fence)
                 .fenceGate(this.fenceGate)
@@ -265,12 +265,12 @@ public class WoodRegistrySet {
         private Function<BlockBehaviour.Properties, WallSignBlock> wallSign;
         private Function<BlockBehaviour.Properties, CeilingHangingSignBlock> hangingSign;
         private Function<BlockBehaviour.Properties, WallHangingSignBlock> wallHangingSign;
-        private Function<net.minecraft.world.item.Item.Properties, SignItem> signItem;
-        private Function<net.minecraft.world.item.Item.Properties, HangingSignItem> hangingSignItem;
-        private Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> boatType;
-        private Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> chestBoatType;
-        private Function<net.minecraft.world.item.Item.Properties, Item> boatItem;
-        private Function<net.minecraft.world.item.Item.Properties, Item> chestBoatItem;
+        private Function<Item.Properties, SignItem> signItem;
+        private Function<Item.Properties, HangingSignItem> hangingSignItem;
+        private Function<Supplier<Item>, EntityType.Builder> boatType;
+        private Function<Supplier<Item>, EntityType.Builder> chestBoatType;
+        private Function<Item.Properties, Item> boatItem;
+        private Function<Item.Properties, Item> chestBoatItem;
 
         public Builder(String name, TreeGrower saplingGenerator) {
             this.name = name;
@@ -410,44 +410,44 @@ public class WoodRegistrySet {
             return this;
         }
 
-        public Builder signItem(Function<net.minecraft.world.item.Item.Properties, SignItem> signItem) {
+        public Builder signItem(Function<Item.Properties, SignItem> signItem) {
             this.signItem = signItem;
             return this;
         }
 
-        public Builder hangingSignItem(Function<net.minecraft.world.item.Item.Properties, HangingSignItem> hangingSignItem) {
+        public Builder hangingSignItem(Function<Item.Properties, HangingSignItem> hangingSignItem) {
             this.hangingSignItem = hangingSignItem;
             return this;
         }
 
-        public Builder boatType(Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> boatType, Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> chestBoatType) {
+        public Builder boatType(Function<Supplier<Item>, EntityType.Builder> boatType, Function<Supplier<Item>, EntityType.Builder> chestBoatType) {
             this.boatType = boatType;
             this.chestBoatType = chestBoatType;
             return this;
         }
 
-        public Builder boatType(Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> boatType) {
+        public Builder boatType(Function<Supplier<Item>, EntityType.Builder> boatType) {
             this.boatType = boatType;
             return this;
         }
 
-        public Builder chestBoatType(Function<Supplier<Item>, net.minecraft.world.entity.EntityType.Builder> chestBoatType) {
+        public Builder chestBoatType(Function<Supplier<Item>, EntityType.Builder> chestBoatType) {
             this.chestBoatType = chestBoatType;
             return this;
         }
 
-        public Builder boatItem(Function<net.minecraft.world.item.Item.Properties, Item> boatItem, Function<net.minecraft.world.item.Item.Properties, Item> chestBoatItem) {
+        public Builder boatItem(Function<Item.Properties, Item> boatItem, Function<Item.Properties, Item> chestBoatItem) {
             this.boatItem = boatItem;
             this.chestBoatItem = chestBoatItem;
             return this;
         }
 
-        public Builder boatItem(Function<net.minecraft.world.item.Item.Properties, Item> boatItem) {
+        public Builder boatItem(Function<Item.Properties, Item> boatItem) {
             this.boatItem = boatItem;
             return this;
         }
 
-        public Builder chestBoatItem(Function<net.minecraft.world.item.Item.Properties, Item> chestBoatItem) {
+        public Builder chestBoatItem(Function<Item.Properties, Item> chestBoatItem) {
             this.chestBoatItem = chestBoatItem;
             return this;
         }

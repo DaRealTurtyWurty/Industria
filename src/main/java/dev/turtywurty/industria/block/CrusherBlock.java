@@ -9,6 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -49,7 +50,7 @@ public class CrusherBlock extends IndustriaBlock {
             if(stack.isEmpty())
                 return;
 
-            var particle = new ItemParticleOption(ParticleTypes.ITEM, stack);
+            var particle = new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(stack));
             for (float[] offset : PARTICLE_OFFSETS) {
                 for (int i = 0; i < random.nextInt(2) + 1; i++) {
                     world.addParticle(particle,

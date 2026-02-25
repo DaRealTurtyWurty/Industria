@@ -17,10 +17,6 @@ public class PayloadTypeInit {
         PayloadTypeRegistry.serverboundPlay().register(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(SetMultiblockPieceCharPayload.ID, SetMultiblockPieceCharPayload.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(UpdatePaletteEntryNamePayload.ID, UpdatePaletteEntryNamePayload.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(DeletePaletteEntryPayload.ID, DeletePaletteEntryPayload.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(UpdatePaletteEntryVariedBlockListPayload.ID, UpdatePaletteEntryVariedBlockListPayload.CODEC);
     }
 
     private static void registerS2C() {

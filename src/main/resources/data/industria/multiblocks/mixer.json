@@ -1,0 +1,27 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:mixer",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "minecraft:copper_block", "minecraft:iron_block"],
+        ["minecraft:iron_block", "industria:mixer", "minecraft:iron_block"],
+        ["minecraft:iron_block", "minecraft:copper_block", "minecraft:iron_block"]
+      ],
+      [
+        ["minecraft:glass", "industria:fluid_tank", "minecraft:glass"],
+        ["industria:fluid_pipe", "minecraft:cauldron", "industria:fluid_pipe"],
+        ["minecraft:glass", "industria:fluid_tank", "minecraft:glass"]
+      ],
+      [
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "minecraft:lightning_rod", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ]
+    ]
+  }
+}

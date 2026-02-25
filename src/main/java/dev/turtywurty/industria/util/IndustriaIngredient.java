@@ -10,6 +10,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import org.jetbrains.annotations.NotNull;
@@ -104,6 +105,7 @@ public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) 
 
         return new SlotDisplay.Composite(
                 getMatchingStacks().stream()
+                        .map(ItemStackTemplate::fromNonEmptyStack)
                         .map(SlotDisplay.ItemStackSlotDisplay::new)
                         .map(SlotDisplay.class::cast)
                         .toList());

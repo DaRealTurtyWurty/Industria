@@ -13,7 +13,7 @@ import java.util.List;
 public record UpgradeStationUpdateRecipesPayload(List<UpgradeStationRecipe> recipes) implements CustomPacketPayload {
     public static final Type<UpgradeStationUpdateRecipesPayload> ID = new Type<>(Industria.id("upgrade_station_update_recipes"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeStationUpdateRecipesPayload> CODEC = StreamCodec.composite(
-            ByteBufCodecs.collection(ArrayList::new, UpgradeStationRecipe.Serializer.STREAM_CODEC), UpgradeStationUpdateRecipesPayload::recipes,
+            ByteBufCodecs.collection(ArrayList::new, UpgradeStationRecipe.SERIALIZER.streamCodec()), UpgradeStationUpdateRecipesPayload::recipes,
             UpgradeStationUpdateRecipesPayload::new);
 
     @Override

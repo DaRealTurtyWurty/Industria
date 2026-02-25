@@ -27,12 +27,13 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +85,7 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 offerAlloySmelting(output, RecipeCategory.MISC,
                         new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.IRON_INGOTS), 1),
                         new IndustriaIngredient(itemLookup.getOrThrow(ItemTags.COALS), 4),
-                        ItemInit.STEEL_INGOT.getDefaultInstance(),
+                        new ItemStackTemplate(ItemInit.STEEL_INGOT),
                         400);
 
                 offerCrusher(output, RecipeCategory.MISC,
@@ -214,13 +215,13 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                 List<ItemLike> tinOres = List.of(BlockInit.CASSITERITE_ORE, BlockInit.DEEPSLATE_CASSITERITE_ORE, ItemInit.CASSITERITE);
                 List<ItemLike> zincOres = List.of(BlockInit.SPHALERITE_ORE, BlockInit.DEEPSLATE_SPHALERITE_ORE, ItemInit.SPHALERITE);
 
-                oreSmelting(aluminiumOres, RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 200, "aluminium_ingot");
-                oreSmelting(tinOres, RecipeCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 200, "tin_ingot");
-                oreSmelting(zincOres, RecipeCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 200, "zinc_ingot");
+                oreSmelting(aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 200, "aluminium_ingot");
+                oreSmelting(tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 200, "tin_ingot");
+                oreSmelting(zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 200, "zinc_ingot");
 
-                oreBlasting(aluminiumOres, RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 100, "aluminium_ingot");
-                oreBlasting(tinOres, RecipeCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 100, "tin_ingot");
-                oreBlasting(zincOres, RecipeCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 100, "zinc_ingot");
+                oreBlasting(aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ItemInit.ALUMINIUM_INGOT, 0.7F, 100, "aluminium_ingot");
+                oreBlasting(tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ItemInit.TIN_INGOT, 0.7F, 100, "tin_ingot");
+                oreBlasting(zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ItemInit.ZINC_INGOT, 0.7F, 100, "zinc_ingot");
 
                 offerMixer(output, RecipeCategory.MISC, List.of(
                                 new IndustriaIngredient(4, ItemInit.BAUXITE),
@@ -283,11 +284,11 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
         };
     }
 
-    private static void offerAlloySmelting(RecipeOutput exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime) {
-        offerAlloySmelting(exporter, category, inputA, inputB, output, smeltTime, RecipeProvider.getSimpleRecipeName(output.getItem()));
+    private static void offerAlloySmelting(RecipeOutput exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStackTemplate output, int smeltTime) {
+        offerAlloySmelting(exporter, category, inputA, inputB, output, smeltTime, RecipeProvider.getSimpleRecipeName(output.item().value()));
     }
 
-    private static void offerAlloySmelting(RecipeOutput exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStack output, int smeltTime, String name) {
+    private static void offerAlloySmelting(RecipeOutput exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStackTemplate output, int smeltTime, String name) {
         new AlloyFurnaceRecipeBuilder(inputA, inputB, output, smeltTime, category).save(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("alloy_" + name)));
     }
 

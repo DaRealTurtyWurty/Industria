@@ -22,7 +22,5 @@ public class BlockEntityRendererInit {
         BlockEntityRenderers.register(BlockEntityTypeInit.SHAKING_TABLE, ShakingTableBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
-        BlockEntityRenderers.register(BlockEntityTypeInit.EXAMPLE_MULTIBLOCK_CONTROLLER, ExampleMultiblockControllerBlockEntityRenderer::new);
-        BlockEntityRenderers.register(BlockEntityTypeInit.MULTIBLOCK_DESIGNER, MultiblockDesignerBlockEntityRenderer::new);
     }
 }

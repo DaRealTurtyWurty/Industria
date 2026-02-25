@@ -76,7 +76,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
         if (fluidSprite == null)
             return;
 
-        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(fluidSprite.atlasLocation());
+        RenderType renderLayer = RenderTypes.entityTranslucent(fluidSprite.atlasLocation());
         Level world = Minecraft.getInstance().level;
 
         int sides = 16;

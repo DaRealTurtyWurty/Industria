@@ -10,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DropExperienceBlock;
@@ -264,15 +265,6 @@ public class BlockInit {
     public static final ArcFurnaceBlock ARC_FURNACE = registerWithItemCopy("arc_furnace",
             ArcFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
-    public static final ExampleMultiblockControllerBlock EXAMPLE_MULTIBLOCK_CONTROLLER = registerWithItemCopy("example_multiblock_controller",
-            ExampleMultiblockControllerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
-
-    public static final MultiblockDesignerBlock MULTIBLOCK_DESIGNER = registerWithItemCopy("multiblock_designer",
-            MultiblockDesignerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
-
-    public static final MultiblockPieceBlock MULTIBLOCK_PIECE = registerWithItemCopy("multiblock_piece",
-            MultiblockPieceBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
-
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.of()
@@ -297,7 +289,7 @@ public class BlockInit {
         T registeredBlock = registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.ofFullCopy(toCopy)
                         .setId(ResourceKey.create(Registries.BLOCK, Industria.id(name))))));
-        ItemInit.register(name, settings -> new BlockItem(registeredBlock, settings), net.minecraft.world.item.Item.Properties::useBlockDescriptionPrefix);
+        ItemInit.register(name, settings -> new BlockItem(registeredBlock, settings), Item.Properties::useBlockDescriptionPrefix);
         return registeredBlock;
     }
 

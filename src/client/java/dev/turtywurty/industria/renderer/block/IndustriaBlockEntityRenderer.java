@@ -4,9 +4,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
+import dev.turtywurty.multiblocklib.MultiblockLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.model.geom.ModelPart;
@@ -16,6 +18,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,6 +27,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -90,19 +94,26 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     @Override
     public void submit(S state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
         setupBlockEntityTransformations(matrices, state);
-        onRender(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
+        boolean shouldRenderMultiblock = shouldRenderMultiblock(state);
+        if (shouldRenderMultiblock) {
+            onRender(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
 
-        if (isPlayerLookingAt(state.blockPos)) {
-            List<ModelPart> wireframe = getModelParts();
-            if (!wireframe.isEmpty()) {
-                boolean isHighContrast = isHighContrast();
-                renderWireframe(wireframe, matrices, queue, isHighContrast);
+            if (isPlayerLookingAt(state.blockPos)) {
+                List<ModelPart> wireframe = getModelParts();
+                if (!wireframe.isEmpty()) {
+                    boolean isHighContrast = isHighContrast();
+                    renderWireframe(wireframe, matrices, queue, isHighContrast);
+                }
             }
+        } else if (shouldRenderUnformedBlock(state)) {
+            renderUnformedBlock(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
         }
 
         matrices.popPose();
 
-        postRender(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
+        if (shouldRenderMultiblock) {
+            postRender(state, matrices, queue, state.lightCoords, OverlayTexture.NO_OVERLAY);
+        }
     }
 
     public ItemModelResolver getItemModelManager() {
@@ -119,6 +130,16 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     public void extractRenderState(T blockEntity, S state, float tickProgress, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.tickProgress = tickProgress;
+        state.multiblockFormed = isMultiblockFormed(blockEntity);
+        state.multiblockRenderOffsetX = 0.0;
+        state.multiblockRenderOffsetZ = 0.0;
+
+        Level level = blockEntity.getLevel();
+        if (state.multiblockFormed && level != null && MultiblockLib.isControllerBlock(blockEntity.getBlockState().getBlock())) {
+            Vec3 offset = computeLibMultiblockRenderOffset(level, blockEntity.getBlockPos());
+            state.multiblockRenderOffsetX = offset.x;
+            state.multiblockRenderOffsetZ = offset.z;
+        }
     }
 
     public static boolean shouldRenderHitboxes() {
@@ -176,12 +197,14 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         var normal = new Vector3f();
 
         int color = getWireframeColor(isHighContrast);
+        RenderType renderType = isHighContrast ? RenderTypes.secondaryBlockOutline() : RenderTypes.lines();
         for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
-            queue.submitCustomGeometry(matrices, isHighContrast ? RenderTypes.secondaryBlockOutline() : RenderTypes.lines(), (entry, vertexConsumer) -> {
-                for (ModelPart modelPart : modelParts) {
-                    visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
-                }
-            });
+            VertexConsumer vertexConsumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
+            for (ModelPart modelPart : modelParts) {
+                matrices.pushPose();
+                visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
+                matrices.popPose();
+            }
         }
     }
 
@@ -231,11 +254,13 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
                 pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
                 vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
                         .setColor(color)
+                        .setLineWidth(2.0f)
                         .setNormal(normal.x, normal.y, normal.z);
 
                 pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
                 vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
                         .setColor(color)
+                        .setLineWidth(2.0f)
                         .setNormal(normal.x, normal.y, normal.z);
             }
         }
@@ -294,6 +319,113 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         return EMPTY_WIREFRAME;
     }
 
+    protected boolean shouldRenderMultiblock(S state) {
+        return state.multiblockFormed;
+    }
+
+    protected boolean shouldRenderUnformedBlock(S state) {
+        return !state.multiblockFormed && state.blockState.getRenderShape() == RenderShape.INVISIBLE;
+    }
+
+    protected void renderUnformedBlock(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+        queue.submitBlock(matrices, state.blockState, light, overlay, 0);
+    }
+
+    private static boolean isMultiblockFormed(final BlockEntity blockEntity) {
+        Level level = blockEntity.getLevel();
+        if (level == null) {
+            return false;
+        }
+
+        BlockState controllerState = blockEntity.getBlockState();
+        BlockPos controllerPos = blockEntity.getBlockPos();
+        if (MultiblockLib.isControllerBlock(controllerState.getBlock())) {
+            // For lib-backed controllers, ignore legacy AutoMultiblockable position state completely.
+            // That legacy state can be stale and cause a second phantom render.
+            return hasNearbyLibPart(level, controllerPos);
+        }
+
+        if (!(blockEntity instanceof AutoMultiblockable multiblockable)) {
+            return true;
+        }
+
+        List<BlockPos> positions = multiblockable.getMultiblockPositions();
+        if (positions.isEmpty()) {
+            return false;
+        }
+
+        for (BlockPos pos : positions) {
+            BlockState state = level.getBlockState(pos);
+            if (state.is(BlockInit.AUTO_MULTIBLOCK_BLOCK) || state.is(BlockInit.AUTO_MULTIBLOCK_IO) || state.is(MultiblockLib.MULTIBLOCK_PART)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean hasNearbyLibPart(final Level level, final BlockPos controllerPos) {
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
+        for (Direction direction : Direction.values()) {
+            mutablePos.set(controllerPos).move(direction);
+            if (level.getBlockState(mutablePos).is(MultiblockLib.MULTIBLOCK_PART)) {
+                return true;
+            }
+        }
+
+        for (int x = -6; x <= 6; x++) {
+            for (int y = -4; y <= 4; y++) {
+                for (int z = -6; z <= 6; z++) {
+                    if (x == 0 && y == 0 && z == 0) {
+                        continue;
+                    }
+
+                    mutablePos.set(controllerPos.getX() + x, controllerPos.getY() + y, controllerPos.getZ() + z);
+                    if (level.getBlockState(mutablePos).is(MultiblockLib.MULTIBLOCK_PART)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static Vec3 computeLibMultiblockRenderOffset(final Level level, final BlockPos controllerPos) {
+        int minX = controllerPos.getX();
+        int maxX = controllerPos.getX();
+        int minZ = controllerPos.getZ();
+        int maxZ = controllerPos.getZ();
+        boolean foundPart = false;
+
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        for (int x = -10; x <= 10; x++) {
+            for (int y = -6; y <= 6; y++) {
+                for (int z = -10; z <= 10; z++) {
+                    mutablePos.set(controllerPos.getX() + x, controllerPos.getY() + y, controllerPos.getZ() + z);
+                    if (!level.getBlockState(mutablePos).is(MultiblockLib.MULTIBLOCK_PART)) {
+                        continue;
+                    }
+
+                    foundPart = true;
+                    minX = Math.min(minX, mutablePos.getX());
+                    maxX = Math.max(maxX, mutablePos.getX());
+                    minZ = Math.min(minZ, mutablePos.getZ());
+                    maxZ = Math.max(maxZ, mutablePos.getZ());
+                }
+            }
+        }
+
+        if (!foundPart) {
+            return Vec3.ZERO;
+        }
+
+        double centerX = (minX + maxX) * 0.5D;
+        double centerZ = (minZ + maxZ) * 0.5D;
+        return new Vec3(centerX - controllerPos.getX(), 0.0D, centerZ - controllerPos.getZ());
+    }
+
     public final void renderForItem(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         setupBlockEntityTransformations(matrices, state);
         onRender(state, matrices, queue, light, overlay);
@@ -305,7 +437,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
 
     protected void setupBlockEntityTransformations(PoseStack matrices, S state) {
         matrices.pushPose();
-        matrices.translate(0.5f, 1.5f, 0.5f);
+        matrices.translate(0.5f + state.multiblockRenderOffsetX, 1.5f, 0.5f + state.multiblockRenderOffsetZ);
         matrices.mulPose(Axis.XP.rotationDegrees(180));
 
         if (!state.blockState.getProperties().contains(BlockStateProperties.HORIZONTAL_FACING))

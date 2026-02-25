@@ -1,0 +1,27 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:drill",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block"],
+        ["minecraft:iron_block", "industria:drill", "minecraft:iron_block"],
+        ["minecraft:iron_block", "minecraft:iron_block", "minecraft:iron_block"]
+      ],
+      [
+        ["minecraft:piston", "minecraft:piston", "minecraft:piston"],
+        ["minecraft:piston", "industria:motor", "minecraft:piston"],
+        ["minecraft:piston", "minecraft:piston", "minecraft:piston"]
+      ],
+      [
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:drill_tube", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ]
+    ]
+  }
+}

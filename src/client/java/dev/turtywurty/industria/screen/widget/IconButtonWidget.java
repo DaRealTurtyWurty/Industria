@@ -3,6 +3,7 @@ package dev.turtywurty.industria.screen.widget;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
@@ -14,7 +15,7 @@ public class IconButtonWidget extends Button {
     public IconButtonWidget(int x, int y, int width, int height, OnPress onPress, Identifier iconTexture,
                             int u, int vNormal, int vHover, int vDisabled, int iconW, int iconH, int texW, int texH,
                             boolean drawBackground) {
-        super(x, y, width, height, net.minecraft.network.chat.Component.empty(), onPress, DEFAULT_NARRATION);
+        super(x, y, width, height, Component.empty(), onPress, DEFAULT_NARRATION);
         this.iconTexture = iconTexture;
         this.u = u;
         this.vNormal = vNormal;

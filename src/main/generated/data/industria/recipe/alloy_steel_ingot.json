@@ -10,7 +10,6 @@
     "ingredients": "#minecraft:coals"
   },
   "output": {
-    "count": 1,
     "id": "industria:steel_ingot"
   },
   "smelt_time": 400

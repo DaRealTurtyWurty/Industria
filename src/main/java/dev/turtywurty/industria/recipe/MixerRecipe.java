@@ -13,12 +13,15 @@ import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
@@ -31,12 +34,13 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFluid, int minTemp, int maxTemp,
-                          OutputItemStack output, SlurryStack outputSlurry,
-                          int processTime) implements Recipe<MixerRecipeInput> {
+                          OutputItemStack output, SlurryStack outputSlurry, int processTime)
+        implements Recipe<MixerRecipeInput> {
     @Override
     public boolean matches(MixerRecipeInput input, Level world) {
-        if(!input.fluidStack().matches(this.inputFluid) || input.temperature() < this.minTemp || input.temperature() > this.maxTemp)
+        if (!input.fluidStack().matches(this.inputFluid) || input.temperature() < this.minTemp || input.temperature() > this.maxTemp) {
             return false;
+        }
 
         List<IndustriaIngredient> remainingIngredients = new ArrayList<>(this.inputs);
         List<ItemStack> presentItems = new ArrayList<>();
@@ -49,12 +53,14 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                         .findFirst()
                         .ifPresentOrElse(
                                 stack1 -> stack1.copyWithCount(stack.getCount() + 1),
-                                () -> presentItems.add(stack));
+                                () -> presentItems.add(stack)
+                        );
             }
         }
 
-        if (presentItems.size() != this.inputs.size())
+        if (presentItems.size() != this.inputs.size()) {
             return false;
+        }
 
         for (ItemStack stack : presentItems) {
             boolean matched = false;
@@ -66,20 +72,18 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                 }
             }
 
-            if (!matched)
+            if (!matched) {
                 return false;
+            }
         }
 
         return remainingIngredients.isEmpty();
     }
 
     @Override
-    public ItemStack assemble(MixerRecipeInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(MixerRecipeInput input) {
         Map<IndustriaIngredient, Integer> ingredientCounts = this.inputs.stream()
-                .collect(HashMap::new,
-                        (map, ingredient) ->
-                                map.put(ingredient, ingredient.stackData().count()),
-                        Map::putAll);
+                .collect(HashMap::new, (map, ingredient) -> map.put(ingredient, ingredient.stackData().count()), Map::putAll);
 
         for (IndustriaIngredient ingredient : this.inputs) {
             for (int slot = 0; slot < input.size(); slot++) {
@@ -109,6 +113,11 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
 
     @Override
     public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
+    public boolean showNotification() {
         return true;
     }
 
@@ -158,39 +167,28 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
         }
     }
 
-    public static class Serializer implements RecipeSerializer<MixerRecipe> {
-        public static final Serializer INSTANCE = new Serializer();
+    private static final MapCodec<MixerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            IndustriaIngredient.CODEC.listOf().fieldOf("inputs").forGetter(MixerRecipe::inputs),
+            FluidStack.CODEC.fieldOf("input_fluid").forGetter(MixerRecipe::inputFluid),
+            Codec.INT.fieldOf("min_temp").forGetter(MixerRecipe::minTemp),
+            Codec.INT.fieldOf("max_temp").forGetter(MixerRecipe::maxTemp),
+            OutputItemStack.CODEC.fieldOf("output").forGetter(MixerRecipe::output),
+            SlurryStack.CODEC.fieldOf("output_slurry").forGetter(MixerRecipe::outputSlurry),
+            Codec.INT.fieldOf("process_time").forGetter(MixerRecipe::processTime)
+    ).apply(instance, MixerRecipe::new));
 
-        private static final MapCodec<MixerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                IndustriaIngredient.CODEC.listOf().fieldOf("inputs").forGetter(MixerRecipe::inputs),
-                FluidStack.CODEC.fieldOf("input_fluid").forGetter(MixerRecipe::inputFluid),
-                Codec.INT.fieldOf("min_temp").forGetter(MixerRecipe::minTemp),
-                Codec.INT.fieldOf("max_temp").forGetter(MixerRecipe::maxTemp),
-                OutputItemStack.CODEC.fieldOf("output").forGetter(MixerRecipe::output),
-                SlurryStack.CODEC.fieldOf("output_slurry").forGetter(MixerRecipe::outputSlurry),
-                Codec.INT.fieldOf("process_time").forGetter(MixerRecipe::processTime)
-        ).apply(instance, MixerRecipe::new));
+    private static final StreamCodec<RegistryFriendlyByteBuf, MixerRecipe> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.collection(ArrayList::new, IndustriaIngredient.STREAM_CODEC), MixerRecipe::inputs,
+            FluidStack.STREAM_CODEC, MixerRecipe::inputFluid,
+            ByteBufCodecs.INT, MixerRecipe::minTemp,
+            ByteBufCodecs.INT, MixerRecipe::maxTemp,
+            OutputItemStack.STREAM_CODEC, MixerRecipe::output,
+            SlurryStack.STREAM_CODEC, MixerRecipe::outputSlurry,
+            ByteBufCodecs.INT, MixerRecipe::processTime,
+            MixerRecipe::new
+    );
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, MixerRecipe> STREAM_CODEC =
-                StreamCodec.composite(ByteBufCodecs.collection(ArrayList::new, IndustriaIngredient.STREAM_CODEC), MixerRecipe::inputs,
-                        FluidStack.STREAM_CODEC, MixerRecipe::inputFluid,
-                        ByteBufCodecs.INT, MixerRecipe::minTemp,
-                        ByteBufCodecs.INT, MixerRecipe::maxTemp,
-                        OutputItemStack.STREAM_CODEC, MixerRecipe::output,
-                        SlurryStack.STREAM_CODEC, MixerRecipe::outputSlurry,
-                        ByteBufCodecs.INT, MixerRecipe::processTime,
-                        MixerRecipe::new);
-
-        @Override
-        public MapCodec<MixerRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, MixerRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-    }
+    public static final RecipeSerializer<MixerRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
     public record MixerRecipeDisplay(List<SlotDisplay> inputs, SlotDisplay craftingStation,
                                      FluidStack fluid, int minTemp, int maxTemp,
@@ -221,7 +219,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
                 MixerRecipeDisplay::new
         );
 
-        public static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<MixerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -229,7 +227,7 @@ public record MixerRecipe(List<IndustriaIngredient> inputs, FluidStack inputFlui
         }
 
         @Override
-        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
+        public RecipeDisplay.Type<MixerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

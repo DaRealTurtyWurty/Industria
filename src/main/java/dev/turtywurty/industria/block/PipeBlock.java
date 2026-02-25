@@ -287,13 +287,13 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
             }
 
             if(!(this instanceof HeatPipeBlock)) {
-                player.displayClientMessage(Component.literal("Pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
+                player.sendOverlayMessage(Component.literal("Pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
                         .append(Component.literal(amountStr + " " + getUnit() + " / " + capacityStr + " " + getUnit())
-                                .withStyle(ChatFormatting.GREEN)), true);
+                                .withStyle(ChatFormatting.GREEN)));
             } else {
-                player.displayClientMessage(Component.literal("Heat pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
+                player.sendOverlayMessage(Component.literal("Heat pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
                         .append(Component.literal(amount + " " + getUnit())
-                                .withStyle(ChatFormatting.RED)), true);
+                                .withStyle(ChatFormatting.RED)));
             }
             return InteractionResult.SUCCESS_SERVER;
         }

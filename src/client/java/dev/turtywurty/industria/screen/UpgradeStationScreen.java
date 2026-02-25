@@ -47,13 +47,13 @@ public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStation
                 .canCraft(this.menu.canCraft())
                 .selectedRecipeIndex(this.menu.getSelectedRecipeIndex())
                 .onRecipeSelected((widget, index) -> {
-                    if (this.minecraft == null || this.minecraft.gameMode == null)
+                    if (this.minecraft.gameMode == null)
                         return;
 
                     this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, index);
                     widget.setSelectedRecipeIndex(index);
                 })
-                .outputFunction(UpgradeStationRecipe::output)
+                .outputFunction(recipe -> recipe.output().create())
                 .columnCount(4)
                 .rowCount(3)
                 .lockable()

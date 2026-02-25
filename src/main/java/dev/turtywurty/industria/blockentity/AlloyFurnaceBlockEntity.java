@@ -160,7 +160,7 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         Optional<RecipeHolder<AlloyFurnaceRecipe>> currentRecipe = getCurrentRecipe();
-        if (currentRecipe.isEmpty() || !currentRecipe.get().id().equals(this.currentRecipeId) || !canOutput(currentRecipe.get().value().output())) {
+        if (currentRecipe.isEmpty() || !currentRecipe.get().id().equals(this.currentRecipeId) || !canOutput(currentRecipe.get().value().output().create())) {
             reset();
             return;
         }
@@ -185,7 +185,7 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         if (this.progress >= this.maxProgress) {
             reset();
 
-            ItemStack output = recipe.assemble(this.wrappedContainerStorage.getRecipeInventory(), this.level.registryAccess());
+            ItemStack output = recipe.assemble(this.wrappedContainerStorage.getRecipeInventory());
             if (canOutput(output)) {
                 SimpleContainer outputInventory = this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
                 ItemStack outputStack = outputInventory.getItem(0);

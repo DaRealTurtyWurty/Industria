@@ -9,6 +9,7 @@ import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,10 +35,16 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
 
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        if (this.level == null) {
+            return;
+        }
+
         BlockState newState = level.getBlockState(pos);
         if (blockRef.multiblockType != null) {
             if (!oldState.is(newState.getBlock())) {
-                blockRef.multiblockType.onMultiblockBreak(level, pos);
+                if (this instanceof AutoMultiblockable multiblockable && !multiblockable.getMultiblockPositions().isEmpty()) {
+                    blockRef.multiblockType.onMultiblockBreak(level, pos);
+                }
             }
         } else if (blockRef.dropContentsOnBreak) {
             if (!oldState.is(newState.getBlock())) {

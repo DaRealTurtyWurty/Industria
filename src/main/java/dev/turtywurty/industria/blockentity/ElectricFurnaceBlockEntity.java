@@ -104,7 +104,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
             this.progress = 0;
             this.maxProgress = 0;
 
-            ItemStack output = entry.value().assemble(recipeInput, this.level.registryAccess());
+            ItemStack output = entry.value().assemble(recipeInput);
             this.wrappedContainerStorage.getInventory(1).addItem(output);
             inputStack.shrink(1);
             setLastRecipe(entry);
@@ -130,7 +130,7 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
     }
 
     private boolean canAcceptOutput(RecipeHolder<SmeltingRecipe> recipeEntry, SingleRecipeInput recipeInput) {
-        ItemStack output = recipeEntry.value().assemble(recipeInput, this.level.registryAccess());
+        ItemStack output = recipeEntry.value().assemble(recipeInput);
         if (output.isEmpty())
             return false;
 

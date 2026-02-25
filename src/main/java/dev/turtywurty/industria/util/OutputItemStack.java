@@ -11,6 +11,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 import java.util.stream.IntStream;
@@ -103,12 +105,19 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
     }
 
     public SlotDisplay toDisplay() {
-        return new SlotDisplay.Composite(
-                IntStream.range(this.count.getMinValue(), this.count.getMaxValue() + 1)
-                        .mapToObj(count -> new ItemStack(this.item, count))
-                        .map(SlotDisplay.ItemStackSlotDisplay::new)
-                        .map(SlotDisplay.class::cast)
-                        .toList());
+        if (this.item == Items.AIR || this.count.getMaxValue() <= 0) {
+            return SlotDisplay.Empty.INSTANCE;
+        }
+
+        var displays = IntStream.rangeClosed(this.count.getMinValue(), this.count.getMaxValue())
+                .mapToObj(count -> new ItemStack(this.item, count))
+                .filter(stack -> !stack.isEmpty())
+                .map(ItemStackTemplate::fromNonEmptyStack)
+                .map(SlotDisplay.ItemStackSlotDisplay::new)
+                .map(SlotDisplay.class::cast)
+                .toList();
+
+        return displays.isEmpty() ? SlotDisplay.Empty.INSTANCE : new SlotDisplay.Composite(displays);
     }
 
     private static void encode(RegistryFriendlyByteBuf buf, OutputItemStack stack) {

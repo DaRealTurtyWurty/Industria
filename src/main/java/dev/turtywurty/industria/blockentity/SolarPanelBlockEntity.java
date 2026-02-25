@@ -130,7 +130,7 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
         if (this.level == null)
             return 0;
 
-        long dayTime = this.level.getDayTime();
+        long dayTime = this.level.getOverworldClockTime();
         boolean isRaining = this.level.isRaining();
         boolean isThundering = this.level.isThundering();
         int skylight = this.level.getBrightness(LightLayer.SKY, this.worldPosition.above());

@@ -279,7 +279,7 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
         RecipeSimpleInventory recipeInventory = getRecipeInventory();
         if (this.progress >= 500) {
             if (recipe.matches(recipeInventory, this.level)) {
-                ItemStack output = recipe.assemble(recipeInventory, this.level.registryAccess());
+                ItemStack output = recipe.assemble(recipeInventory);
                 SimpleContainer outputInventory = getOutputInventory();
                 if (outputInventory.canAddItem(output)) {
                     outputInventory.addItem(output);

@@ -16,7 +16,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -28,14 +28,14 @@ public class WorldPipeNetworks extends SavedData {
     ).apply(instance, WorldPipeNetworks::new));
 
     private static final SavedDataType<WorldPipeNetworks> TYPE = new SavedDataType<>(
-            Industria.MOD_ID + ".pipe_networks",
+            Industria.id("pipe_networks"),
             WorldPipeNetworks::new,
             CODEC,
             null
     );
 
     public static WorldPipeNetworks getOrCreate(ServerLevel serverWorld) {
-        DimensionDataStorage persistentStateManager = serverWorld.getDataStorage();
+        SavedDataStorage persistentStateManager = serverWorld.getDataStorage();
         return persistentStateManager.computeIfAbsent(TYPE);
     }
 

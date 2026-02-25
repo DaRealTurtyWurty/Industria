@@ -321,7 +321,7 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
                 extractEnergy(recipe);
                 getInputInventory().getItem(0).shrink(recipe.input().stackData().count());
 
-                ItemStack output = recipe.assemble(recipeInput, this.level.registryAccess());
+                ItemStack output = recipe.assemble(recipeInput);
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
                 inputFluidTank.amount -= FluidConstants.BUCKET * 2;
 

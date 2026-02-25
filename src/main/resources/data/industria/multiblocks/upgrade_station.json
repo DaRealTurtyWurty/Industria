@@ -1,0 +1,20 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:upgrade_station",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 0],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "industria:upgrade_station", "minecraft:iron_block"],
+        ["minecraft:iron_block", "minecraft:anvil", "minecraft:iron_block"]
+      ],
+      [
+        ["minecraft:air", "minecraft:smithing_table", "minecraft:air"],
+        ["minecraft:air", "minecraft:grindstone", "minecraft:air"]
+      ]
+    ]
+  }
+}

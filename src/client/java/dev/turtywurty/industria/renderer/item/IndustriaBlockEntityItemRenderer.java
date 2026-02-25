@@ -24,6 +24,11 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
     public void submit(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, ItemDisplayContext displayContext, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int i) {
+        // Avoid drawing placed blocks through the special item renderer path; block entities handle world rendering.
+        if (displayContext == ItemDisplayContext.NONE || displayContext == ItemDisplayContext.FIXED) {
+            return;
+        }
+
         if (data == null)
             return;
 
@@ -47,7 +52,7 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         return new BlockEntityItemRenderData(stack);
     }
 
-    public record Unbaked(ModelLayerLocation modelLayer, Identifier texture) implements net.minecraft.client.renderer.special.SpecialModelRenderer.Unbaked {
+    public record Unbaked(ModelLayerLocation modelLayer, Identifier texture) implements SpecialModelRenderer.Unbaked {
         private static final Codec<ModelLayerLocation> ENTITY_MODEL_LAYER_CODEC =
                 RecordCodecBuilder.create(instance -> instance.group(
                         Identifier.CODEC.fieldOf("id").forGetter(ModelLayerLocation::model),

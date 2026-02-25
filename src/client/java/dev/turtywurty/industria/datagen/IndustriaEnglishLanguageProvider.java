@@ -7,7 +7,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
-import dev.turtywurty.industria.multiblock.MultiblockController;
 import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
@@ -31,7 +30,6 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
     @Override
     public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
         addText(translationBuilder, ItemGroupInit.MAIN_TITLE, "Industria");
-        addText(translationBuilder, MultiblockController.NO_VALID_COMBINATION, "No valid multiblock combination found");
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             WoodSetDatagen.generateEnglishLanguage(woodSet, translationBuilder);
@@ -127,37 +125,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.CENTRIFUGAL_CONCENTRATOR, "Centrifugal Concentrator");
         addText(translationBuilder, CentrifugalConcentratorBlockEntity.TITLE, "Centrifugal Concentrator");
 
-        translationBuilder.add(BlockInit.MULTIBLOCK_DESIGNER, "Multiblock Designer");
-        translationBuilder.add(BlockInit.EXAMPLE_MULTIBLOCK_CONTROLLER, "Example Multiblock Controller");
-        translationBuilder.add(BlockInit.MULTIBLOCK_PIECE, "Multiblock Piece");
         translationBuilder.add(ItemInit.WRENCH, "Wrench");
-        addText(translationBuilder, MultiblockDesignerBlockEntity.TITLE, "Multiblock Designer");
-        addText(translationBuilder, MultiblockDesignerScreen.PALETTE_TITLE, "Palette");
-        addText(translationBuilder, MultiblockDesignerScreen.EXPORT_TITLE, "Export");
-        addText(translationBuilder, MultiblockDesignerScreen.EDIT_TITLE, "Edit");
-        addText(translationBuilder, MultiblockDesignerScreen.PALETTE_NAME_NARRATION, "Palette name");
-        addText(translationBuilder, MultiblockDesignerScreen.DELETE_ENTRY, "Delete Entry");
-        addText(translationBuilder, MultiblockDesignerScreen.PALETTE_NAME_LABEL, "Palette Name:");
-        addText(translationBuilder, MultiblockDesignerScreen.EXPORT_BUTTON_TEXT, "Export");
-        addText(translationBuilder, MultiblockDesignerScreen.EXPORT_COPIED_MESSAGE, "Multiblock data copied to clipboard!");
-        addText(translationBuilder, MultiblockDesignerScreen.PORT_RULES_BUTTON_TEXT, "Edit Port Rules");
-        addText(translationBuilder, PortRulesScreen.TITLE, "Port Rules");
-        addText(translationBuilder, PortRulesScreen.SIDES_TITLE, "Sides");
-        addText(translationBuilder, PortRulesScreen.SIDE_NORTH, "North");
-        addText(translationBuilder, PortRulesScreen.SIDE_SOUTH, "South");
-        addText(translationBuilder, PortRulesScreen.SIDE_WEST, "West");
-        addText(translationBuilder, PortRulesScreen.SIDE_EAST, "East");
-        addText(translationBuilder, PortRulesScreen.SIDE_UP, "Up");
-        addText(translationBuilder, PortRulesScreen.SIDE_DOWN, "Down");
-
-        addText(translationBuilder, MultiblockDesignerScreen.SEARCH_PLACEHOLDER, "Search...");
-        addText(translationBuilder, BlockSelectionScreen.TITLE, "Select a Block");
-        addText(translationBuilder, BlockStateSelectionScreen.BLOCK_TITLE, "Select a Block");
-        addText(translationBuilder, BlockStateSelectionScreen.STATE_TITLE, "Select a State");
-        addText(translationBuilder, BlockTagSelectionScreen.TITLE, "Select a Tag");
-        translationBuilder.add("screen." + Industria.MOD_ID + ".block_selection.count", "%s blocks");
-        translationBuilder.add("screen." + Industria.MOD_ID + ".block_state_selection.count", "%s states");
-        translationBuilder.add("screen." + Industria.MOD_ID + ".block_tag_selection.count", "%s tags");
 
         translationBuilder.add(BlockInit.CABLE, "Cable");
         translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");

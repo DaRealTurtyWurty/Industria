@@ -14,12 +14,15 @@ import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
 import dev.turtywurty.industria.util.ExtraPacketCodecs;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
@@ -35,20 +38,25 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
     @Override
     public boolean matches(ElectrolyzerRecipeInput input, Level world) {
         SingleFluidStorage fluidStorage = input.electrolyteFluidStorage();
-        return this.input.testForRecipe(input.getItem(0)) &&
-                this.anode.testForRecipeIgnoreComponents(input.getItem(1)) &&
-                this.cathode.testForRecipe(input.getItem(2)) &&
-                (this.electrolyteItem.testForRecipe(input.getItem(3)) ||
-                        this.electrolyteFluid.testForRecipe(fluidStorage));
+        return this.input.testForRecipe(input.getItem(0))
+                && this.anode.testForRecipeIgnoreComponents(input.getItem(1))
+                && this.cathode.testForRecipe(input.getItem(2))
+                && (this.electrolyteItem.testForRecipe(input.getItem(3))
+                || this.electrolyteFluid.testForRecipe(fluidStorage));
     }
 
     @Override
-    public ItemStack assemble(ElectrolyzerRecipeInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(ElectrolyzerRecipeInput input) {
         return ItemStack.EMPTY;
     }
 
     @Override
     public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
+    public boolean showNotification() {
         return true;
     }
 
@@ -76,11 +84,16 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
     public List<RecipeDisplay> display() {
         return List.of(new ElectrolyzerRecipeDisplay(
                 this.input.toDisplay(),
-                this.anode.toDisplay(), this.cathode.toDisplay(),
-                this.electrolyteItem.toDisplay(), this.electrolyteFluid,
+                this.anode.toDisplay(),
+                this.cathode.toDisplay(),
+                this.electrolyteItem.toDisplay(),
+                this.electrolyteFluid,
                 new SlotDisplay.ItemSlotDisplay(BlockInit.ELECTROLYZER.asItem()),
-                this.outputFluid, this.outputGas,
-                this.processTime, this.energyCost, this.temperature
+                this.outputFluid,
+                this.outputGas,
+                this.processTime,
+                this.energyCost,
+                this.temperature
         ));
     }
 
@@ -101,45 +114,34 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
         }
     }
 
-    public static class Serializer implements RecipeSerializer<ElectrolyzerRecipe> {
-        public static final Serializer INSTANCE = new Serializer();
+    private static final MapCodec<ElectrolyzerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            IndustriaIngredient.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipe::input),
+            IndustriaIngredient.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipe::anode),
+            IndustriaIngredient.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipe::cathode),
+            IndustriaIngredient.CODEC.fieldOf("electrolyte_item").forGetter(ElectrolyzerRecipe::electrolyteItem),
+            FluidStack.CODEC.fieldOf("electrolyte_fluid").forGetter(ElectrolyzerRecipe::electrolyteFluid),
+            FluidStack.CODEC.fieldOf("output_fluid").forGetter(ElectrolyzerRecipe::outputFluid),
+            GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipe::outputGas),
+            Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipe::processTime),
+            Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipe::energyCost),
+            Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature)
+    ).apply(instance, ElectrolyzerRecipe::new));
 
-        private static final MapCodec<ElectrolyzerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                IndustriaIngredient.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipe::input),
-                IndustriaIngredient.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipe::anode),
-                IndustriaIngredient.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipe::cathode),
-                IndustriaIngredient.CODEC.fieldOf("electrolyte_item").forGetter(ElectrolyzerRecipe::electrolyteItem),
-                FluidStack.CODEC.fieldOf("electrolyte_fluid").forGetter(ElectrolyzerRecipe::electrolyteFluid),
-                FluidStack.CODEC.fieldOf("output_fluid").forGetter(ElectrolyzerRecipe::outputFluid),
-                GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipe::outputGas),
-                Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipe::processTime),
-                Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipe::energyCost),
-                Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature)
-        ).apply(instance, ElectrolyzerRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> STREAM_CODEC = ExtraPacketCodecs.tuple(
+            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::input,
+            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::anode,
+            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::cathode,
+            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::electrolyteItem,
+            FluidStack.STREAM_CODEC, ElectrolyzerRecipe::electrolyteFluid,
+            FluidStack.STREAM_CODEC, ElectrolyzerRecipe::outputFluid,
+            GasStack.STREAM_CODEC, ElectrolyzerRecipe::outputGas,
+            ByteBufCodecs.INT, ElectrolyzerRecipe::processTime,
+            ByteBufCodecs.INT, ElectrolyzerRecipe::energyCost,
+            ByteBufCodecs.INT, ElectrolyzerRecipe::temperature,
+            ElectrolyzerRecipe::new
+    );
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> STREAM_CODEC = ExtraPacketCodecs.tuple(
-                IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::input,
-                IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::anode,
-                IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::cathode,
-                IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::electrolyteItem,
-                FluidStack.STREAM_CODEC, ElectrolyzerRecipe::electrolyteFluid,
-                FluidStack.STREAM_CODEC, ElectrolyzerRecipe::outputFluid,
-                GasStack.STREAM_CODEC, ElectrolyzerRecipe::outputGas,
-                ByteBufCodecs.INT, ElectrolyzerRecipe::processTime,
-                ByteBufCodecs.INT, ElectrolyzerRecipe::energyCost,
-                ByteBufCodecs.INT, ElectrolyzerRecipe::temperature,
-                ElectrolyzerRecipe::new);
-
-        @Override
-        public MapCodec<ElectrolyzerRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-    }
+    public static final RecipeSerializer<ElectrolyzerRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
     public record ElectrolyzerRecipeDisplay(
             SlotDisplay input,
@@ -175,9 +177,10 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::processTime,
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::energyCost,
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::temperature,
-                ElectrolyzerRecipeDisplay::new);
+                ElectrolyzerRecipeDisplay::new
+        );
 
-        private static final net.minecraft.world.item.crafting.display.RecipeDisplay.Type SERIALIZER = new net.minecraft.world.item.crafting.display.RecipeDisplay.Type(CODEC, STREAM_CODEC);
+        private static final RecipeDisplay.Type<ElectrolyzerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
@@ -185,7 +188,7 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
         }
 
         @Override
-        public net.minecraft.world.item.crafting.display.RecipeDisplay.Type type() {
+        public RecipeDisplay.Type<ElectrolyzerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

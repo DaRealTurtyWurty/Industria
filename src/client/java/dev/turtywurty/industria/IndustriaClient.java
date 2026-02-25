@@ -18,7 +18,7 @@ public class IndustriaClient implements ClientModInitializer {
         RenderLayerMapInit.init();
         ClientPacketsInit.init();
         ClientEventsInit.init();
-        ModelInit.init();
+        //ModelInit.init(); // TODO: Fix when updated
         ArmPositionInit.init();
         DrillHeadInit.init();
         DebugRenderingRegistry.init();

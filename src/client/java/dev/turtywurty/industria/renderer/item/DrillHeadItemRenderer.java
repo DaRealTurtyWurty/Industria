@@ -64,7 +64,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
         return state;
     }
 
-    public record Unbaked() implements net.minecraft.client.renderer.special.SpecialModelRenderer.Unbaked {
+    public record Unbaked() implements SpecialModelRenderer.Unbaked {
         public static final MapCodec<Unbaked> CODEC = MapCodec.unit(new DrillHeadItemRenderer.Unbaked());
 
         @Override
@@ -73,7 +73,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
         }
 
         @Override
-        public MapCodec<? extends net.minecraft.client.renderer.special.SpecialModelRenderer.Unbaked> type() {
+        public MapCodec<? extends SpecialModelRenderer.Unbaked> type() {
             return CODEC;
         }
     }

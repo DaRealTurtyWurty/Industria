@@ -24,6 +24,7 @@ import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -334,13 +335,20 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         if (level == null || level.isClientSide())
             return;
 
+        this.kilnSegments.clear();
         Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+        MultiblockWorldData multiblockData = this.level instanceof ServerLevel serverLevel
+                ? MultiblockWorldData.get(serverLevel)
+                : null;
 
         for (int segmentIndex = 1; segmentIndex <= 15; segmentIndex++) {
-            BlockPos offsetPos = worldPosition.relative(facing);
+            BlockPos offsetPos = worldPosition.relative(facing, segmentIndex);
             BlockState offsetState = level.getBlockState(offsetPos);
-            if (offsetState.is(BlockInit.ROTARY_KILN)) {
-                level.setBlockAndUpdate(offsetPos, offsetState.setValue(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
+            boolean isMappedLibPart = multiblockData != null && worldPosition.equals(multiblockData.getControllerFor(offsetPos));
+            if (offsetState.is(BlockInit.ROTARY_KILN) || isMappedLibPart) {
+                if (offsetState.is(BlockInit.ROTARY_KILN)) {
+                    level.setBlockAndUpdate(offsetPos, offsetState.setValue(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
+                }
                 addKilnSegment(offsetPos);
             } else {
                 break;

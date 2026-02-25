@@ -2,7 +2,6 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.MotorBlockEntity;
-import dev.turtywurty.industria.blockentity.MultiblockDesignerBlockEntity;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.screenhandler.*;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -72,35 +71,6 @@ public class PacketReceiverInit {
             ServerPlayer player = context.player();
             if(player.containerMenu instanceof OilPumpJackScreenHandler handler) {
                 handler.getBlockEntity().setRunning(payload.isRunning());
-            }
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(SetMultiblockPieceCharPayload.ID, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
-                MultiblockDesignerBlockEntity blockEntity = handler.getBlockEntity();
-                blockEntity.setPaletteChar(payload.piecePos(), payload.paletteChar());
-            }
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(UpdatePaletteEntryNamePayload.ID, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
-                handler.getBlockEntity().setPaletteName(payload.paletteChar(), payload.name());
-            }
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(DeletePaletteEntryPayload.ID, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
-                handler.getBlockEntity().removePiecesWithChar(payload.paletteChar());
-            }
-        });
-
-        ServerPlayNetworking.registerGlobalReceiver(UpdatePaletteEntryVariedBlockListPayload.ID, (payload, context) -> {
-            ServerPlayer player = context.player();
-            if (player.containerMenu instanceof MultiblockDesignerScreenHandler handler) {
-                handler.getBlockEntity().setPaletteVariedBlockList(payload.paletteChar(), payload.variedBlockList());
             }
         });
     }

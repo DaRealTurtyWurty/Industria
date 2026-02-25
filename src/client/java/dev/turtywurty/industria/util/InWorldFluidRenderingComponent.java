@@ -58,7 +58,7 @@ public class InWorldFluidRenderingComponent {
         if (stillSprite == null)
             return;
 
-        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(stillSprite.atlasLocation());
+        RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
 
         float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
 
@@ -130,7 +130,7 @@ public class InWorldFluidRenderingComponent {
         if (stillSprite == null)
             return;
 
-        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(stillSprite.atlasLocation());
+        RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
         renderLayer = wrapRenderLayer.apply(renderLayer);
 
         matrices.pushPose();
@@ -229,7 +229,7 @@ public class InWorldFluidRenderingComponent {
         if (stillSprite == null)
             return;
 
-        RenderType renderLayer = RenderTypes.itemEntityTranslucentCull(stillSprite.atlasLocation());
+        RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
 
         matrices.pushPose();
         matrices.mulPose(Axis.XP.rotationDegrees(180));
