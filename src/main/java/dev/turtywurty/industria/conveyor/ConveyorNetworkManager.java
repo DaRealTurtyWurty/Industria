@@ -2,7 +2,9 @@ package dev.turtywurty.industria.conveyor;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.turtywurty.industria.block.ConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.ConveyorLike;
+import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
+import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.conveyor.AddConveyorNetworkPayload;
@@ -471,23 +473,38 @@ public class ConveyorNetworkManager {
             return preferredBlock;
 
         BlockState conveyorState = world.getBlockState(conveyor);
-        BlockPos outputPos = getOutputPos(conveyor, conveyorState);
-        Direction insertSide = getOutputInsertSide(conveyorState);
-        if (outputPos == null || insertSide == null || attachedBlocks.contains(outputPos) || isConveyor(world, outputPos))
+        ConveyorTopology topology = getConveyorTopology(world, conveyor, conveyorState);
+        if (topology == null)
             return null;
 
-        return TransferType.ITEM.lookup(world, outputPos, insertSide) != null ? outputPos : null;
+        for (ConveyorOutput output : topology.outputs()) {
+            BlockPos outputPos = output.deliveryPos();
+            if (attachedBlocks.contains(outputPos) || isConveyor(world, outputPos))
+                continue;
+
+            if (TransferType.ITEM.lookup(world, outputPos, output.inventoryInsertSide()) != null)
+                return outputPos;
+        }
+
+        return null;
     }
 
     protected boolean canConnect(ServerLevel world, BlockPos conveyor, BlockPos connectedBlock) {
         BlockState conveyorState = world.getBlockState(conveyor);
-        BlockPos outputPos = getOutputPos(conveyor, conveyorState);
-        Direction insertSide = getOutputInsertSide(conveyorState);
-        if (outputPos == null || insertSide == null || !outputPos.equals(connectedBlock))
+        ConveyorTopology topology = getConveyorTopology(world, conveyor, conveyorState);
+        if (topology == null)
             return false;
 
-        return !isConveyor(world, outputPos)
-                && TransferType.ITEM.lookup(world, outputPos, insertSide) != null;
+        for (ConveyorOutput output : topology.outputs()) {
+            BlockPos outputPos = output.deliveryPos();
+            if (!outputPos.equals(connectedBlock))
+                continue;
+
+            return !isConveyor(world, outputPos)
+                    && TransferType.ITEM.lookup(world, outputPos, output.inventoryInsertSide()) != null;
+        }
+
+        return false;
     }
 
     protected boolean reorderConveyors(ServerLevel world, ConveyorNetwork network, List<BlockPos> preferredOrder) {
@@ -585,18 +602,19 @@ public class ConveyorNetworkManager {
     @Nullable
     private BlockPos getNextConveyor(ServerLevel world, BlockPos conveyorPos, Set<BlockPos> conveyorSet) {
         BlockState conveyorState = world.getBlockState(conveyorPos);
-        BlockPos outputPos = getOutputPos(conveyorPos, conveyorState);
-        BlockPos outputConnector = getOutputConnectorPos(conveyorPos, conveyorState);
-        if (outputPos == null || outputConnector == null)
+        ConveyorTopology topology = getConveyorTopology(world, conveyorPos, conveyorState);
+        if (topology == null)
             return null;
 
-        for (BlockPos candidatePos : getCandidateOutputTargets(outputPos)) {
-            if (!conveyorSet.contains(candidatePos))
-                continue;
+        for (ConveyorOutput output : topology.outputs()) {
+            for (BlockPos candidatePos : getCandidateOutputTargets(output.deliveryPos())) {
+                if (!conveyorSet.contains(candidatePos))
+                    continue;
 
-            BlockState outputState = world.getBlockState(candidatePos);
-            if (acceptsInputFrom(outputState, candidatePos, outputConnector))
-                return candidatePos;
+                BlockState outputState = world.getBlockState(candidatePos);
+                if (acceptsInputFrom(world, outputState, candidatePos, output.expectedInputPos()))
+                    return candidatePos;
+            }
         }
 
         return null;
@@ -618,56 +636,32 @@ public class ConveyorNetworkManager {
     }
 
     @Nullable
-    protected ConveyorBlock.Ports getConveyorPorts(BlockPos conveyorPos, BlockState conveyorState) {
-        if (!(conveyorState.getBlock() instanceof ConveyorBlock conveyor))
-            return null;
-
-        return conveyor.getConveyorPorts(
-                conveyorPos,
-                conveyorState.getValue(ConveyorBlock.FACING),
-                conveyorState.getValue(ConveyorBlock.SHAPE)
-        );
+    protected ConveyorTopology getConveyorTopology(Level world, BlockPos conveyorPos, BlockState conveyorState) {
+        return conveyorState.getBlock() instanceof ConveyorLike conveyor
+                ? conveyor.getTopology(world, conveyorPos, conveyorState)
+                : null;
     }
 
-    @Nullable
-    protected BlockPos getOutputPos(BlockPos conveyorPos, BlockState conveyorState) {
-        ConveyorBlock.Ports ports = getConveyorPorts(conveyorPos, conveyorState);
-        return ports != null ? ports.outputPos() : null;
-    }
-
-    @Nullable
-    protected BlockPos getOutputConnectorPos(BlockPos conveyorPos, BlockState conveyorState) {
-        ConveyorBlock.Ports ports = getConveyorPorts(conveyorPos, conveyorState);
-        if (ports == null)
-            return null;
-
-        return ports.outputPos().relative(conveyorState.getValue(ConveyorBlock.FACING).getOpposite());
-    }
-
-    @Nullable
-    protected Direction getOutputInsertSide(BlockState conveyorState) {
-        if (!(conveyorState.getBlock() instanceof ConveyorBlock))
-            return null;
-
-        return conveyorState.getValue(ConveyorBlock.FACING).getOpposite();
-    }
-
-    protected boolean acceptsInputFrom(BlockState conveyorState, BlockPos conveyorPos, BlockPos expectedInputPos) {
-        ConveyorBlock.Ports ports = getConveyorPorts(conveyorPos, conveyorState);
-        if (ports == null)
-            return false;
-
-        return ports.inputPos().equals(expectedInputPos);
+    protected boolean acceptsInputFrom(Level world, BlockState conveyorState, BlockPos conveyorPos, BlockPos expectedInputPos) {
+        ConveyorTopology topology = getConveyorTopology(world, conveyorPos, conveyorState);
+        return topology != null && topology.acceptsInputFrom(expectedInputPos);
     }
 
     protected boolean connectsToConveyor(ServerLevel world, BlockPos fromPos, BlockPos toPos) {
         BlockState fromState = world.getBlockState(fromPos);
-        BlockPos outputPos = getOutputPos(fromPos, fromState);
-        BlockPos outputConnector = getOutputConnectorPos(fromPos, fromState);
-        if (outputPos == null || outputConnector == null || !getCandidateOutputTargets(outputPos).contains(toPos))
+        ConveyorTopology topology = getConveyorTopology(world, fromPos, fromState);
+        if (topology == null)
             return false;
 
-        return acceptsInputFrom(world.getBlockState(toPos), toPos, outputConnector);
+        for (ConveyorOutput output : topology.outputs()) {
+            if (!getCandidateOutputTargets(output.deliveryPos()).contains(toPos))
+                continue;
+
+            if (acceptsInputFrom(world, world.getBlockState(toPos), toPos, output.expectedInputPos()))
+                return true;
+        }
+
+        return false;
     }
 
     protected List<BlockPos> getCandidateOutputTargets(BlockPos outputPos) {

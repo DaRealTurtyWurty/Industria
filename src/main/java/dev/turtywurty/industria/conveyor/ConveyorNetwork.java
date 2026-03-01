@@ -3,7 +3,9 @@ package dev.turtywurty.industria.conveyor;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.turtywurty.industria.block.ConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.ConveyorLike;
+import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
+import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.util.ExtraCodecs;
@@ -16,7 +18,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -202,12 +204,12 @@ public class ConveyorNetwork {
         }
 
         ItemStack stack = item.getStack();
+        BlockState state = level.getBlockState(conveyorPos);
         BlockPos connectedBlock = this.connectedBlocks.get(conveyorPos);
         if (connectedBlock != null) {
             BlockApiLookup<Storage<ItemVariant>, @Nullable Direction> blockLookup = TransferType.ITEM.getBlockLookup();
-            Vec3i directionVec = connectedBlock.subtract(conveyorPos);
-            Direction direction = Direction.getNearest(directionVec, Direction.NORTH);
-            Storage<ItemVariant> connectedBlockStorage = blockLookup.find(level, connectedBlock, direction.getOpposite());
+            Direction insertSide = getOutputInsertSide(level, conveyorPos, state, connectedBlock);
+            Storage<ItemVariant> connectedBlockStorage = blockLookup.find(level, connectedBlock, insertSide);
             if (connectedBlockStorage != null) {
                 try (Transaction transaction = Transaction.openOuter()) {
                     long inserted = connectedBlockStorage.insert(ItemVariant.of(stack), stack.getCount(), transaction);
@@ -227,12 +229,11 @@ public class ConveyorNetwork {
             }
         }
 
-        BlockState state = level.getBlockState(conveyorPos);
         if (!isConveyor(state))
             return;
 
-        BlockPos offset = conveyorPos.relative(state.getValue(ConveyorBlock.FACING));
-        Containers.dropItemStack(level, offset.getX(), offset.getY(), offset.getZ(), stack);
+        BlockPos dropPos = getDropPos(level, conveyorPos, state);
+        Containers.dropItemStack(level, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stack);
         conveyorStorage.removeItems(item);
     }
 
@@ -246,31 +247,17 @@ public class ConveyorNetwork {
 
     private BlockPos getNextConveyor(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        if (!isConveyor(state) || !(state.getBlock() instanceof ConveyorBlock conveyor))
+        ConveyorTopology topology = getTopology(level, pos, state);
+        if (!isConveyor(state) || topology == null)
             return null;
 
-        Direction facing = state.getValue(ConveyorBlock.FACING);
-        ConveyorBlock.Ports currentPorts = conveyor.getConveyorPorts(
-                pos,
-                facing,
-                state.getValue(ConveyorBlock.SHAPE)
-        );
-
-        BlockPos outputPos = currentPorts.outputPos();
-        BlockPos outputConnector = outputPos.relative(facing.getOpposite());
-        for (BlockPos nextPos : getCandidateOutputTargets(outputPos)) {
-            BlockState nextState = level.getBlockState(nextPos);
-            if (!(nextState.getBlock() instanceof ConveyorBlock next))
-                continue;
-
-            ConveyorBlock.Ports nextPorts = next.getConveyorPorts(
-                    nextPos,
-                    nextState.getValue(ConveyorBlock.FACING),
-                    nextState.getValue(ConveyorBlock.SHAPE)
-            );
-
-            if (nextPorts.inputPos().equals(outputConnector))
-                return nextPos;
+        for (ConveyorOutput output : topology.outputs()) {
+            for (BlockPos nextPos : getCandidateOutputTargets(output.deliveryPos())) {
+                BlockState nextState = level.getBlockState(nextPos);
+                ConveyorTopology nextTopology = getTopology(level, nextPos, nextState);
+                if (nextTopology != null && nextTopology.acceptsInputFrom(output.expectedInputPos()))
+                    return nextPos;
+            }
         }
 
         return null;
@@ -281,9 +268,38 @@ public class ConveyorNetwork {
     }
 
     private static int getConveyorSpeed(Level level, BlockPos pos) {
-        return level.getBlockState(pos).getBlock() instanceof ConveyorBlock conveyorBlock
-                ? conveyorBlock.getSpeed(level, pos)
+        BlockState state = level.getBlockState(pos);
+        return state.getBlock() instanceof ConveyorLike conveyorBlock
+                ? conveyorBlock.getSpeed(level, pos, state)
                 : 0;
+    }
+
+    @Nullable
+    private static ConveyorTopology getTopology(Level level, BlockPos pos, BlockState state) {
+        return state.getBlock() instanceof ConveyorLike conveyor
+                ? conveyor.getTopology(level, pos, state)
+                : null;
+    }
+
+    private static BlockPos getDropPos(Level level, BlockPos conveyorPos, BlockState state) {
+        ConveyorTopology topology = getTopology(level, conveyorPos, state);
+        if (topology != null && !topology.outputs().isEmpty()) {
+            return topology.outputs().getFirst().deliveryPos();
+        }
+
+        return conveyorPos;
+    }
+
+    private static @NonNull Direction getOutputInsertSide(Level level, BlockPos conveyorPos, BlockState state, BlockPos connectedBlock) {
+        ConveyorTopology topology = getTopology(level, conveyorPos, state);
+        if (topology != null) {
+            for (ConveyorOutput output : topology.outputs()) {
+                if (output.deliveryPos().equals(connectedBlock))
+                    return output.inventoryInsertSide();
+            }
+        }
+
+        return Direction.getNearest(connectedBlock.subtract(conveyorPos), Direction.NORTH).getOpposite();
     }
 
     public Storage<ItemVariant> getItemStorage(Level level, BlockPos pos) {

@@ -4,7 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.ConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.ConveyorLike;
+import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
+import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
+import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.conveyor.*;
 import dev.turtywurty.industria.data.ClientConveyorNetworks;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
@@ -33,6 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
@@ -88,8 +92,11 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
     }
 
     private static List<Vector3d> calculateItemAnchors(Model<?> model, BlockState state) {
-        Direction facing = state.getValue(ConveyorBlock.FACING);
-        ConveyorBlock.ConveyorShape shape = state.getValue(ConveyorBlock.SHAPE);
+        Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
+                ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
+                : Direction.SOUTH;
+        boolean mirrorTurnRight = state.hasProperty(BasicConveyorBlock.SHAPE)
+                && state.getValue(BasicConveyorBlock.SHAPE) == BasicConveyorBlock.ConveyorShape.TURN_RIGHT;
 
         Map<String, ModelPart> parts = getModelParts(model);
         return parts.entrySet().stream()
@@ -118,7 +125,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                             part.y / 16.0,
                             part.z / 16.0
                     );
-                    if (shape == ConveyorBlock.ConveyorShape.TURN_RIGHT) {
+                    if (mirrorTurnRight) {
                         anchor.x = -anchor.x;
                     }
 
@@ -173,7 +180,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 BlockPos conveyorPos = storageEntry.getKey();
                 ConveyorStorage conveyorStorage = storageEntry.getValue();
                 BlockState state = level.getBlockState(conveyorPos);
-                if (!(state.getBlock() instanceof ConveyorBlock))
+                if (!(state.getBlock() instanceof ConveyorLike))
                     continue;
 
                 List<Vector3d> itemAnchors;
@@ -210,13 +217,15 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
     private void renderConveyorNetwork(ConveyorNetwork network, ClientLevel level) {
         for (BlockPos conveyor : network.getConveyors()) {
             BlockState state = level.getBlockState(conveyor);
-            if (!(state.getBlock() instanceof ConveyorBlock))
+            if (!(state.getBlock() instanceof ConveyorLike conveyorBlock))
                 continue;
 
-            Direction facing = state.getValue(ConveyorBlock.FACING);
-            Vec3 pos = Vec3.atCenterOf(conveyor).subtract(facing.getStepX() * 0.5, facing.getStepY() * 0.5, facing.getStepZ() * 0.5);
-            Vec3 endPos = pos.add(facing.getStepX() * 0.75, facing.getStepY() * 0.75, facing.getStepZ() * 0.75);
-            Gizmos.arrow(pos, endPos, 0xFFFF0000);
+            ConveyorTopology topology = conveyorBlock.getTopology(level, conveyor, state);
+            if (topology.outputs().isEmpty())
+                continue;
+
+            ConveyorOutput output = topology.outputs().getFirst();
+            Gizmos.arrow(Vec3.atCenterOf(conveyor), Vec3.atCenterOf(output.deliveryPos()), 0xFFFF0000);
         }
     }
 

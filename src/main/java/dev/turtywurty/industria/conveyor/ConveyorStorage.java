@@ -3,7 +3,7 @@ package dev.turtywurty.industria.conveyor;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.turtywurty.industria.block.ConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.ConveyorLike;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
@@ -14,6 +14,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,9 +41,10 @@ public class ConveyorStorage {
 
     public ConveyorStorage(Level level, BlockPos pos) {
         this.pos = pos;
+        BlockState state = level.getBlockState(pos);
         this.itemContainer = new ConveyorItemContainer(
-                level.getBlockState(pos).getBlock() instanceof ConveyorBlock conveyorBlock
-                        ? conveyorBlock.getItemLimit(level, pos) : 0,
+                state.getBlock() instanceof ConveyorLike conveyorBlock
+                        ? conveyorBlock.getItemLimit(level, pos, state) : 0,
                 this.items);
         this.itemStorage = ContainerStorage.of(this.itemContainer, null);
     }

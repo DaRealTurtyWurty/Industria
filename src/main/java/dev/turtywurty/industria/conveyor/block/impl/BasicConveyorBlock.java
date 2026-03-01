@@ -1,10 +1,10 @@
-package dev.turtywurty.industria.block;
+package dev.turtywurty.industria.conveyor.block.impl;
 
-import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.conveyor.ConveyorItem;
 import dev.turtywurty.industria.conveyor.ConveyorNetwork;
 import dev.turtywurty.industria.conveyor.ConveyorNetworkManager;
 import dev.turtywurty.industria.conveyor.ConveyorStorage;
+import dev.turtywurty.industria.conveyor.block.*;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -38,16 +38,17 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class ConveyorBlock extends IndustriaBlock {
+public class BasicConveyorBlock extends BaseConveyorBlock {
     public static final EnumProperty<ConveyorShape> SHAPE = EnumProperty.create("shape", ConveyorShape.class);
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final Property<Boolean> ENABLED = BooleanProperty.create("enabled");
 
-    public ConveyorBlock(Properties settings) {
+    public BasicConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .addStateProperty(SHAPE, ConveyorShape.STRAIGHT)
                 .addStateProperty(FACING, Direction.NORTH)
@@ -256,8 +257,8 @@ public class ConveyorBlock extends IndustriaBlock {
         return LevelConveyorNetworks.getOrCreate(level).getNetworkManager();
     }
 
-    public int getItemLimit(Level level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
+    @Override
+    public int getItemLimit(Level level, BlockPos pos, BlockState state) {
         ConveyorShape shape = state.getValue(SHAPE);
         return switch (shape) {
             case STRAIGHT, TURN_LEFT, TURN_RIGHT -> 5;
@@ -265,9 +266,13 @@ public class ConveyorBlock extends IndustriaBlock {
         };
     }
 
-    public int getSpeed(Level level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
-        if (!state.getValue(ENABLED))
+    public int getItemLimit(Level level, BlockPos pos) {
+        return getItemLimit(level, pos, level.getBlockState(pos));
+    }
+
+    @Override
+    public int getSpeed(Level level, BlockPos pos, BlockState state) {
+        if (!isEnabled(level, pos, state))
             return 0;
 
         ConveyorShape shape = state.getValue(SHAPE);
@@ -275,6 +280,15 @@ public class ConveyorBlock extends IndustriaBlock {
             case STRAIGHT, TURN_LEFT, TURN_RIGHT -> 5;
             case UP, DOWN -> 2;
         };
+    }
+
+    public int getSpeed(Level level, BlockPos pos) {
+        return getSpeed(level, pos, level.getBlockState(pos));
+    }
+
+    @Override
+    public boolean isEnabled(Level level, BlockPos pos, BlockState state) {
+        return state.getValue(ENABLED);
     }
 
     public BlockState resolveConveyorState(Level level, BlockPos pos, BlockState oldState, Reason reason, @Nullable BlockPlaceContext context) {
@@ -295,38 +309,43 @@ public class ConveyorBlock extends IndustriaBlock {
                 .setValue(SHAPE, resolvedOrientation.shape());
     }
 
+    @Override
+    public ConveyorTopology getTopology(Level level, BlockPos pos, BlockState state) {
+        return createTopology(pos, state.getValue(FACING), state.getValue(SHAPE));
+    }
+
     public Ports getConveyorPorts(BlockPos pos, Direction facing, ConveyorShape shape) {
+        return toPorts(createTopology(pos, facing, shape));
+    }
+
+    protected ConveyorTopology createTopology(BlockPos pos, Direction facing, ConveyorShape shape) {
         Direction back = facing.getOpposite();
         Direction left = facing.getCounterClockWise();
         Direction right = facing.getClockWise();
         BlockPos forward = pos.relative(facing);
 
-        BlockPos inputPos, outputPos;
-        switch (shape) {
-            case STRAIGHT -> {
-                inputPos = pos.relative(back);
-                outputPos = forward;
-            }
-            case UP -> {
-                inputPos = pos.relative(back);
-                outputPos = forward.above();
-            }
-            case DOWN -> {
-                inputPos = pos.relative(back).above();
-                outputPos = forward;
-            }
-            case TURN_LEFT -> {
-                inputPos = pos.relative(right);
-                outputPos = forward;
-            }
-            case TURN_RIGHT -> {
-                inputPos = pos.relative(left);
-                outputPos = forward;
-            }
-            default -> throw new IllegalStateException("Unexpected conveyor shape: " + shape);
-        }
-
-        return new Ports(inputPos, outputPos);
+        return switch (shape) {
+            case STRAIGHT -> new ConveyorTopology(
+                    List.of(new ConveyorInput("in", pos.relative(back))),
+                    List.of(new ConveyorOutput("out", forward, pos))
+            );
+            case UP -> new ConveyorTopology(
+                    List.of(new ConveyorInput("in", pos.relative(back))),
+                    List.of(new ConveyorOutput("out", forward.above(), pos.above()))
+            );
+            case DOWN -> new ConveyorTopology(
+                    List.of(new ConveyorInput("in", pos.relative(back).above())),
+                    List.of(new ConveyorOutput("out", forward, pos))
+            );
+            case TURN_LEFT -> new ConveyorTopology(
+                    List.of(new ConveyorInput("in", pos.relative(right))),
+                    List.of(new ConveyorOutput("out", forward, pos))
+            );
+            case TURN_RIGHT -> new ConveyorTopology(
+                    List.of(new ConveyorInput("in", pos.relative(left))),
+                    List.of(new ConveyorOutput("out", forward, pos))
+            );
+        };
     }
 
     public ConveyorShape computeBestShape(Level level, BlockPos pos, Direction facing, ConveyorShape currentShape) {
@@ -335,12 +354,12 @@ public class ConveyorBlock extends IndustriaBlock {
         ConveyorShape bestShape = ConveyorShape.STRAIGHT;
         int bestScore = Integer.MIN_VALUE;
         for (ConveyorShape candidate : candidates) {
-            Ports ports = getConveyorPorts(pos, facing, candidate);
+            ConveyorTopology topology = createTopology(pos, facing, candidate);
 
-            if (!isPhysicallyValid(level, pos, facing, candidate, ports))
+            if (!isPhysicallyValid(level, pos, facing, candidate, topology))
                 continue;
 
-            int score = scoreShape(level, pos, facing, candidate, ports);
+            int score = scoreShape(level, pos, facing, candidate, topology);
             if (score > bestScore) {
                 bestScore = score;
                 bestShape = candidate;
@@ -361,12 +380,12 @@ public class ConveyorBlock extends IndustriaBlock {
 
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             for (ConveyorShape candidate : ConveyorShape.values()) {
-                Ports ports = getConveyorPorts(pos, facing, candidate);
+                ConveyorTopology topology = createTopology(pos, facing, candidate);
 
-                if (!isPhysicallyValid(level, pos, facing, candidate, ports))
+                if (!isPhysicallyValid(level, pos, facing, candidate, topology))
                     continue;
 
-                int score = scoreShape(level, pos, facing, candidate, ports);
+                int score = scoreShape(level, pos, facing, candidate, topology);
                 if (score > bestScore || score == bestScore && isPreferredOrientation(facing, candidate, bestFacing, bestShape, currentFacing, currentShape)) {
                     bestScore = score;
                     bestFacing = facing;
@@ -399,13 +418,22 @@ public class ConveyorBlock extends IndustriaBlock {
         return priority;
     }
 
-    public boolean isPhysicallyValid(Level level, BlockPos pos, Direction facing, ConveyorShape shape, Ports ports) {
-        // Check if input and output positions are within world bounds.
-        if (!level.isInValidBounds(pos) || !level.isInValidBounds(ports.inputPos()) || !level.isInValidBounds(ports.outputPos()))
+    public boolean isPhysicallyValid(Level level, BlockPos pos, Direction facing, ConveyorShape shape, ConveyorTopology topology) {
+        if (!level.isInValidBounds(pos))
             return false;
 
-        if (level.getBlockState(ports.outputPos()).isSolidRender())
-            return false;
+        for (ConveyorInput input : topology.inputs()) {
+            if (!level.isInValidBounds(input.expectedSourcePos()))
+                return false;
+        }
+
+        for (ConveyorOutput output : topology.outputs()) {
+            if (!level.isInValidBounds(output.deliveryPos()))
+                return false;
+
+            if (level.getBlockState(output.deliveryPos()).isSolidRender())
+                return false;
+        }
 
         // Check for solid blocks in the conveyor's space.
         for (BlockPos checkPos : BlockPos.betweenClosed(pos, pos.above())) {
@@ -416,7 +444,8 @@ public class ConveyorBlock extends IndustriaBlock {
         return true;
     }
 
-    public int scoreShape(Level level, BlockPos pos, Direction facing, ConveyorShape shape, Ports ports) {
+    public int scoreShape(Level level, BlockPos pos, Direction facing, ConveyorShape shape, ConveyorTopology topology) {
+        Ports ports = toPorts(topology);
         int score = 0;
 
         // Downstream scoring: Prefer connecting to other conveyors, then inventories, then empty space.
@@ -448,10 +477,10 @@ public class ConveyorBlock extends IndustriaBlock {
             return false;
 
         BlockState targetState = level.getBlockState(toPos);
-        Ports targetPorts = getConveyorPorts(toPos, targetState.getValue(FACING), targetState.getValue(SHAPE));
+        if (!(targetState.getBlock() instanceof ConveyorLike targetConveyor))
+            return false;
 
-        // accepts input if its port fromPos is the same as our fromPos
-        return targetPorts.inputPos().equals(fromPos);
+        return targetConveyor.getTopology(level, toPos, targetState).acceptsInputFrom(fromPos);
     }
 
     public boolean connectsFromConveyorOutput(Level level, BlockPos fromPos, BlockPos toPos) {
@@ -459,10 +488,11 @@ public class ConveyorBlock extends IndustriaBlock {
             return false;
 
         BlockState fromState = level.getBlockState(fromPos);
-        Ports fromPorts = getConveyorPorts(fromPos, fromState.getValue(FACING), fromState.getValue(SHAPE));
+        if (!(fromState.getBlock() instanceof ConveyorLike fromConveyor))
+            return false;
 
-        // provides output if its port outputPos is the same as our toPos
-        return fromPorts.outputPos().equals(toPos);
+        return fromConveyor.getTopology(level, fromPos, fromState).outputs().stream()
+                .anyMatch(output -> output.deliveryPos().equals(toPos));
     }
 
     public boolean connectsToInventory(Level level, BlockPos fromPos, BlockPos toPos) {
@@ -493,13 +523,8 @@ public class ConveyorBlock extends IndustriaBlock {
 
         Set<BlockPos> positionsToRecheck = new HashSet<>();
 
-        Ports oldPorts = getConveyorPorts(pos, oldState.getValue(FACING), oldState.getValue(SHAPE));
-        Ports newPorts = getConveyorPorts(pos, newState.getValue(FACING), newState.getValue(SHAPE));
-
-        positionsToRecheck.add(oldPorts.inputPos());
-        positionsToRecheck.add(oldPorts.outputPos());
-        positionsToRecheck.add(newPorts.inputPos());
-        positionsToRecheck.add(newPorts.outputPos());
+        addTopologyPositions(positionsToRecheck, getTopology(level, pos, oldState));
+        addTopologyPositions(positionsToRecheck, getTopology(level, pos, newState));
 
         for (Direction direction : Direction.values()) {
             positionsToRecheck.add(pos.relative(direction));
@@ -510,10 +535,30 @@ public class ConveyorBlock extends IndustriaBlock {
                 continue;
 
             BlockState checkState = level.getBlockState(checkPos);
-            if (checkState.getBlock() instanceof ConveyorBlock) {
+            if (checkState.getBlock() instanceof ConveyorLike) {
                 serverLevel.scheduleTick(checkPos, checkState.getBlock(), 1);
             }
         }
+    }
+
+    private static void addTopologyPositions(Set<BlockPos> positions, ConveyorTopology topology) {
+        topology.inputs().stream()
+                .map(ConveyorInput::expectedSourcePos)
+                .forEach(positions::add);
+        topology.outputs().stream()
+                .map(ConveyorOutput::deliveryPos)
+                .forEach(positions::add);
+    }
+
+    private static Ports toPorts(ConveyorTopology topology) {
+        if (topology.inputs().size() != 1 || topology.outputs().size() != 1) {
+            throw new IllegalStateException("ConveyorBlock expects exactly one input and one output.");
+        }
+
+        return new Ports(
+                topology.inputs().getFirst().expectedSourcePos(),
+                topology.outputs().getFirst().deliveryPos()
+        );
     }
 
     public enum ConveyorShape implements StringRepresentable {

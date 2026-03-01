@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.init;
 
-import dev.turtywurty.industria.block.ConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.model.conveyor.CornerTurnConveyorAnchorPositionsModel;
 import dev.turtywurty.industria.model.conveyor.StraightConveyorAnchorPositionsModel;
 import dev.turtywurty.industria.model.conveyor.VerticalDownConveyorAnchorPositionsModel;
@@ -16,7 +16,7 @@ public final class ConveyorAnchorProviderInit {
     public static void init() {
         ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.CONVEYOR, blockState -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
-            return switch (blockState.getValue(ConveyorBlock.SHAPE)) {
+            return switch (blockState.getValue(BasicConveyorBlock.SHAPE)) {
                 case STRAIGHT ->
                         new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION));
                 case UP ->

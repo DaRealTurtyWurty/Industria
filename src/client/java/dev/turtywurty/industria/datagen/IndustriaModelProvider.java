@@ -3,7 +3,7 @@ package dev.turtywurty.industria.datagen;
 import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
-import dev.turtywurty.industria.block.ConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
@@ -107,7 +107,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(pipeSupplier);
     }
 
-    private static void registerConveyor(BlockModelGenerators blockStateModelGenerator, ConveyorBlock block, String name) {
+    private static void registerConveyor(BlockModelGenerators blockStateModelGenerator, BasicConveyorBlock block, String name) {
         blockStateModelGenerator.blockStateOutput.accept(createConveyorBlockModelDefinitionCreator(block, name));
     }
 
@@ -161,7 +161,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 .withX(Quadrant.R90)));
     }
 
-    private static BlockModelDefinitionGenerator createConveyorBlockModelDefinitionCreator(ConveyorBlock block, String name) {
+    private static BlockModelDefinitionGenerator createConveyorBlockModelDefinitionCreator(BasicConveyorBlock block, String name) {
         Identifier straightModelId = Industria.id("block/" + name);
         Identifier upModelId = Industria.id("block/" + name + "_up");
         Identifier downModelId = Industria.id("block/" + name + "_down");
@@ -172,24 +172,24 @@ public class IndustriaModelProvider extends FabricModelProvider {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             Variant.SimpleModelState state = rotationFor(direction);
             generator.with(new ConditionBuilder()
-                            .term(ConveyorBlock.FACING, direction)
-                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.STRAIGHT),
+                            .term(BasicConveyorBlock.FACING, direction)
+                            .term(BasicConveyorBlock.SHAPE, BasicConveyorBlock.ConveyorShape.STRAIGHT),
                     createWeightedVariant(straightModelId, state));
             generator.with(new ConditionBuilder()
-                            .term(ConveyorBlock.FACING, direction)
-                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.UP),
+                            .term(BasicConveyorBlock.FACING, direction)
+                            .term(BasicConveyorBlock.SHAPE, BasicConveyorBlock.ConveyorShape.UP),
                     createWeightedVariant(upModelId, state));
             generator.with(new ConditionBuilder()
-                            .term(ConveyorBlock.FACING, direction)
-                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.DOWN),
+                            .term(BasicConveyorBlock.FACING, direction)
+                            .term(BasicConveyorBlock.SHAPE, BasicConveyorBlock.ConveyorShape.DOWN),
                     createWeightedVariant(downModelId, state));
             generator.with(new ConditionBuilder()
-                            .term(ConveyorBlock.FACING, direction)
-                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.TURN_LEFT),
+                            .term(BasicConveyorBlock.FACING, direction)
+                            .term(BasicConveyorBlock.SHAPE, BasicConveyorBlock.ConveyorShape.TURN_LEFT),
                     createWeightedVariant(turnLeftModelId, state));
             generator.with(new ConditionBuilder()
-                            .term(ConveyorBlock.FACING, direction)
-                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.TURN_RIGHT),
+                            .term(BasicConveyorBlock.FACING, direction)
+                            .term(BasicConveyorBlock.SHAPE, BasicConveyorBlock.ConveyorShape.TURN_RIGHT),
                     createWeightedVariant(turnRightModelId, state));
         }
 
