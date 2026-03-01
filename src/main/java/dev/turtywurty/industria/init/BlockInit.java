@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
 import net.minecraft.core.Registry;
@@ -268,6 +269,9 @@ public class BlockInit {
 
     public static final BasicConveyorBlock CONVEYOR = registerWithItemCopy("conveyor",
             BasicConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final SplitterConveyorBlock SPLITTER_CONVEYOR = registerWithItemCopy("splitter_conveyor",
+            SplitterConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(

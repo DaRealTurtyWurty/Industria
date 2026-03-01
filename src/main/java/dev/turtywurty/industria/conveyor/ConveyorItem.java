@@ -9,6 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -17,12 +18,14 @@ public class ConveyorItem {
             UUIDUtil.CODEC.fieldOf("id").forGetter(ConveyorItem::getId),
             ItemStack.CODEC.fieldOf("stack").forGetter(ConveyorItem::getStack),
             BlockPos.CODEC.fieldOf("position").forGetter(ConveyorItem::getPosition),
-            Codec.INT.fieldOf("progress").forGetter(ConveyorItem::getProgress)
-    ).apply(instance, (id, stack, position, progress) -> {
+            Codec.INT.fieldOf("progress").forGetter(ConveyorItem::getProgress),
+            Codec.STRING.optionalFieldOf("selected_output_id", "").forGetter(ConveyorItem::getSerializedSelectedOutputId)
+    ).apply(instance, (id, stack, position, progress, selectedOutputId) -> {
         var item = new ConveyorItem(id);
         item.setStack(stack);
         item.setPosition(position);
         item.setProgress(progress);
+        item.setSelectedOutputId(deserializeSelectedOutputId(selectedOutputId));
         return item;
     }));
 
@@ -31,11 +34,13 @@ public class ConveyorItem {
             ItemStack.STREAM_CODEC, ConveyorItem::getStack,
             BlockPos.STREAM_CODEC, ConveyorItem::getPosition,
             ByteBufCodecs.INT, ConveyorItem::getProgress,
-            (id, stack, position, progress) -> {
+            ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedOutputId,
+            (id, stack, position, progress, selectedOutputId) -> {
                 var item = new ConveyorItem(id);
                 item.setStack(stack);
                 item.setPosition(position);
                 item.setProgress(progress);
+                item.setSelectedOutputId(deserializeSelectedOutputId(selectedOutputId));
                 return item;
             }
     );
@@ -44,6 +49,8 @@ public class ConveyorItem {
     private ItemStack stack;
     private BlockPos position;
     private int progress;
+    @Nullable
+    private String selectedOutputId;
 
     public ConveyorItem(UUID id) {
         this.id = id;
@@ -81,5 +88,23 @@ public class ConveyorItem {
 
     public void setProgress(int progress) {
         this.progress = progress;
+    }
+
+    @Nullable
+    public String getSelectedOutputId() {
+        return selectedOutputId;
+    }
+
+    public void setSelectedOutputId(@Nullable String selectedOutputId) {
+        this.selectedOutputId = selectedOutputId;
+    }
+
+    private String getSerializedSelectedOutputId() {
+        return this.selectedOutputId == null ? "" : this.selectedOutputId;
+    }
+
+    @Nullable
+    private static String deserializeSelectedOutputId(String selectedOutputId) {
+        return selectedOutputId.isEmpty() ? null : selectedOutputId;
     }
 }

@@ -3,8 +3,9 @@ package dev.turtywurty.industria.datagen;
 import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
-import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.block.PipeBlock;
+import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
@@ -111,6 +112,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createConveyorBlockModelDefinitionCreator(block, name));
     }
 
+    private static void registerSplitterConveyor(BlockModelGenerators blockStateModelGenerator, SplitterConveyorBlock block, String name) {
+        blockStateModelGenerator.blockStateOutput.accept(createSplitterConveyorBlockModelDefinitionCreator(block, name));
+    }
+
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
     }
@@ -191,6 +196,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
                             .term(BasicConveyorBlock.FACING, direction)
                             .term(BasicConveyorBlock.SHAPE, BasicConveyorBlock.ConveyorShape.TURN_RIGHT),
                     createWeightedVariant(turnRightModelId, state));
+        }
+
+        return generator;
+    }
+
+    private static BlockModelDefinitionGenerator createSplitterConveyorBlockModelDefinitionCreator(SplitterConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(SplitterConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
         }
 
         return generator;
@@ -322,6 +340,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
         registerConveyor(blockStateModelGenerator, BlockInit.CONVEYOR, "conveyor");
+        registerSplitterConveyor(blockStateModelGenerator, BlockInit.SPLITTER_CONVEYOR, "splitter_conveyor");
+
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {

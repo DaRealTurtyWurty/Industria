@@ -50,14 +50,16 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
+    public static final String DEFAULT_ANCHOR_ROUTE = "default";
+
     private static final Map<Model<?>, Map<String, ModelPart>> MODEL_PARTS_CACHE = new Object2ObjectOpenHashMap<>();
-    private static final Map<BlockState, List<Vector3d>> ITEM_ANCHORS_CACHE = new Object2ObjectOpenHashMap<>();
+    private static final Map<BlockState, Map<String, List<Vector3d>>> ITEM_ANCHORS_CACHE = new Object2ObjectOpenHashMap<>();
     private static final Map<UUID, SmoothedProgressState> ITEM_PROGRESS_SMOOTHING = new Object2ObjectOpenHashMap<>();
     private static final Map<UUID, SmoothedDirectionState> ITEM_DIRECTION_SMOOTHING = new Object2ObjectOpenHashMap<>();
 
-    private static final Map<Block, Function<BlockState, Model<?>>> ANCHOR_PROVIDERS = new Object2ObjectOpenHashMap<>();
+    private static final Map<Block, Function<BlockState, Map<String, Model<?>>>> ANCHOR_PROVIDERS = new Object2ObjectOpenHashMap<>();
 
-    public static void registerAnchorProvider(Block block, Function<BlockState, Model<?>> provider) {
+    public static void registerAnchorProvider(Block block, Function<BlockState, Map<String, Model<?>>> provider) {
         ANCHOR_PROVIDERS.put(block, provider);
     }
 
@@ -66,9 +68,10 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
             ImmutableList<BlockState> possibleStates = block.getStateDefinition().getPossibleStates();
             for (BlockState state : possibleStates) {
                 if (!ITEM_ANCHORS_CACHE.containsKey(state)) {
-                    Model<?> model = provider.apply(state);
-                    List<Vector3d> anchors = calculateItemAnchors(model, state);
-                    ITEM_ANCHORS_CACHE.put(state, anchors);
+                    Map<String, Model<?>> models = provider.apply(state);
+                    Map<String, List<Vector3d>> anchorsByRoute = new Object2ObjectOpenHashMap<>();
+                    models.forEach((routeId, model) -> anchorsByRoute.put(routeId, calculateItemAnchors(model, state)));
+                    ITEM_ANCHORS_CACHE.put(state, anchorsByRoute);
                 }
             }
         });
@@ -183,9 +186,9 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 if (!(state.getBlock() instanceof ConveyorLike))
                     continue;
 
-                List<Vector3d> itemAnchors;
+                Map<String, List<Vector3d>> itemAnchorsByRoute;
                 if (ITEM_ANCHORS_CACHE.containsKey(state)) {
-                    itemAnchors = ITEM_ANCHORS_CACHE.get(state);
+                    itemAnchorsByRoute = ITEM_ANCHORS_CACHE.get(state);
                 } else {
                     Industria.LOGGER.warn("No item anchors found for conveyor block state: {}.", state);
                     continue;
@@ -202,6 +205,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 poseStack.translate(pos.x, pos.y, pos.z);
 
                 for (ConveyorItem conveyorItem : conveyorStorage.getItems()) {
+                    List<Vector3d> itemAnchors = resolveItemAnchors(conveyorItem, itemAnchorsByRoute);
                     float smoothedProgress = getSmoothedProgress(conveyorItem, conveyorPos, gameTime, partialTick, visibleItems);
                     renderConveyorItem(conveyorItem, conveyorPos, smoothedProgress, itemAnchors, poseStack, nodeCollector, lightCoords, gameTime, partialTick);
                 }
@@ -225,6 +229,24 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 Gizmos.arrow(Vec3.atCenterOf(conveyor), Vec3.atCenterOf(output.deliveryPos()), 0xFFFF0000);
             }
         }
+    }
+
+    private static List<Vector3d> resolveItemAnchors(ConveyorItem conveyorItem, Map<String, List<Vector3d>> itemAnchorsByRoute) {
+        if (itemAnchorsByRoute.isEmpty())
+            return List.of();
+
+        String selectedOutputId = conveyorItem.getSelectedOutputId();
+        if (selectedOutputId != null) {
+            List<Vector3d> routedAnchors = itemAnchorsByRoute.get(selectedOutputId);
+            if (routedAnchors != null)
+                return routedAnchors;
+        }
+
+        List<Vector3d> defaultAnchors = itemAnchorsByRoute.get(DEFAULT_ANCHOR_ROUTE);
+        if (defaultAnchors != null)
+            return defaultAnchors;
+
+        return itemAnchorsByRoute.values().iterator().next();
     }
 
     private static float getSmoothedProgress(ConveyorItem conveyorItem, BlockPos conveyorPos, long gameTime, float partialTick, Set<UUID> visibleItems) {
