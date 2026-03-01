@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.network;
+package dev.turtywurty.industria.network.pipe;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.multiblock.TransferType;

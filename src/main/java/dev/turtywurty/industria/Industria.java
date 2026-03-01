@@ -7,7 +7,7 @@ import dev.turtywurty.industria.init.transfer_types.TransferTypesInit;
 import dev.turtywurty.industria.init.worldgen.BiomeModificationInit;
 import dev.turtywurty.industria.init.worldgen.FeatureInit;
 import dev.turtywurty.industria.init.worldgen.TrunkPlacerTypeInit;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -57,7 +57,7 @@ public class Industria implements ModInitializer {
         TrunkPlacerTypeInit.init();
         PipeNetworkTypeInit.init();
         PipeNetworkManagerTypeInit.init();
-        ExtraPacketCodecs.registerDefaults();
+        ExtraStreamCodecs.registerDefaults();
         TransferTypesInit.init();
         MultiblockLibIntegrationInit.init();
         PayloadTypeInit.init();

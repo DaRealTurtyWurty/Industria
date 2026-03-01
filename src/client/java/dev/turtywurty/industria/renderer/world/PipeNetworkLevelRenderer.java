@@ -26,7 +26,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
-public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
+import java.util.List;
+
+public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
     public static int getColor(TransferType<?, ?, ?> type) {
         if (type == TransferType.ITEM) {
             return 0x8800BF4D;
@@ -63,7 +65,11 @@ public class PipeNetworkWorldRenderer implements IndustriaWorldRenderer {
             return;
 
         ResourceKey<Level> dimension = cameraEntity.level().dimension();
-        for (PipeNetworkManager<?, ?> manager : ClientPipeNetworks.get(dimension)) {
+        List<PipeNetworkManager<?, PipeNetwork<?>>> pipeNetworkManagers = ClientPipeNetworks.get(dimension);
+        if (pipeNetworkManagers == null)
+            return;
+
+        for (PipeNetworkManager<?, ?> manager : pipeNetworkManagers) {
             TransferType<?, ?, ?> transferType = manager.getTransferType();
             for (PipeNetwork<?> network : manager.getNetworks()) {
                 for (BlockPos pipe : network.getPipes()) {

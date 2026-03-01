@@ -6,12 +6,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.init.PipeNetworkManagerTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.network.AddPipeNetworkPayload;
-import dev.turtywurty.industria.network.ModifyPipeNetworkPayload;
-import dev.turtywurty.industria.network.RemovePipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.AddPipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.ModifyPipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.RemovePipeNetworkPayload;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -44,17 +44,17 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
     public static final StreamCodec<RegistryFriendlyByteBuf, List<PipeNetworkManager<?, ?>>> LIST_STREAM_CODEC =
             ByteBufCodecs.collection(ArrayList::new, STREAM_CODEC);
 
-    public static final Codec<Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_CODEC = Codec.unboundedMap(
-            ExtraCodecs.BLOCK_POS_STRING_CODEC, UUIDUtil.AUTHLIB_CODEC);
+    public static final Codec<Map<BlockPos, UUID>> BLOCK_POS_TO_UUID_CODEC = Codec.unboundedMap(
+            ExtraCodecs.BLOCK_POS_STRING_CODEC, UUIDUtil.CODEC);
 
-    public static final StreamCodec<ByteBuf, Map<BlockPos, UUID>> PIPE_TO_NETWORK_ID_STREAM_CODEC =
+    public static final StreamCodec<ByteBuf, Map<BlockPos, UUID>> BLOCK_POS_TO_UUID_STREAM_CODEC =
             ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, UUIDUtil.STREAM_CODEC);
 
     protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> MapCodec<M> createCodec(Codec<N> networkCodec, Supplier<M> factory) {
         return RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
                         ExtraCodecs.setOf(networkCodec).fieldOf("networks").forGetter(PipeNetworkManager::getNetworks),
-                        PIPE_TO_NETWORK_ID_CODEC.fieldOf("pipeToNetworkId").forGetter(PipeNetworkManager::getPipeToNetworkId)
+                        BLOCK_POS_TO_UUID_CODEC.fieldOf("pipeToNetworkId").forGetter(PipeNetworkManager::getPipeToNetworkId)
                 ).apply(instance, (networks, pipeToNetworkId) -> {
                     var manager = factory.get();
                     manager.networks.addAll(networks);
@@ -65,8 +65,8 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
 
     protected static <S, N extends PipeNetwork<S>, M extends PipeNetworkManager<S, N>> StreamCodec<RegistryFriendlyByteBuf, M> createPacketCodec(StreamCodec<RegistryFriendlyByteBuf, N> networkCodec, Supplier<M> factory) {
         return StreamCodec.composite(
-                ExtraPacketCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
-                PIPE_TO_NETWORK_ID_STREAM_CODEC, PipeNetworkManager::getPipeToNetworkId,
+                ExtraStreamCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
+                BLOCK_POS_TO_UUID_STREAM_CODEC, PipeNetworkManager::getPipeToNetworkId,
                 (networks, pipeToNetworkId) -> {
                     var manager = factory.get();
                     manager.networks.addAll(networks);

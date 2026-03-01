@@ -26,5 +26,8 @@ public class IndustriaBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
                 .add(BlockInit.ELITE_BATTERY)
                 .add(BlockInit.ULTIMATE_BATTERY)
                 .add(BlockInit.CREATIVE_BATTERY);
+
+        valueLookupBuilder(TagList.Blocks.CONVEYORS)
+                .add(BlockInit.CONVEYOR);
     }
 }

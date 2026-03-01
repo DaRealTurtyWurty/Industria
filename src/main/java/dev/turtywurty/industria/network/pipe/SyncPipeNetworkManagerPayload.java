@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.network;
+package dev.turtywurty.industria.network.pipe;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.multiblock.TransferType;
@@ -21,7 +21,7 @@ public record SyncPipeNetworkManagerPayload(TransferType<?, ?, ?> transferType, 
             StreamCodec.composite(
                     TransferType.STREAM_CODEC, SyncPipeNetworkManagerPayload::transferType,
                     ResourceKey.streamCodec(Registries.DIMENSION), SyncPipeNetworkManagerPayload::dimension,
-                    PipeNetworkManager.PIPE_TO_NETWORK_ID_STREAM_CODEC, SyncPipeNetworkManagerPayload::pipeToNetworkId,
+                    PipeNetworkManager.BLOCK_POS_TO_UUID_STREAM_CODEC, SyncPipeNetworkManagerPayload::pipeToNetworkId,
                     SyncPipeNetworkManagerPayload::new);
 
     @Override

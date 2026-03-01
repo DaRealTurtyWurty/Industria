@@ -1,5 +1,6 @@
 package dev.turtywurty.industria;
 
+import dev.turtywurty.industria.data.ClientConveyorNetworks;
 import dev.turtywurty.industria.data.ClientPipeNetworks;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
@@ -25,5 +26,8 @@ public class IndustriaClient implements ClientModInitializer {
         EntityRendererInit.init();
         ColorProviderInit.init();
         ClientPipeNetworks.init();
+        ClientConveyorNetworks.init();
+        ReloadListenerInit.init();
+        ConveyorAnchorProviderInit.init();
     }
 }

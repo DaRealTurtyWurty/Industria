@@ -10,7 +10,7 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkType;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -38,7 +38,7 @@ public class HeatPipeNetwork extends PipeNetwork<HeatStorage> {
 
     public static final Codec<Set<HeatPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
     public static final StreamCodec<RegistryFriendlyByteBuf, Set<HeatPipeNetwork>> SET_STREAM_CODEC =
-            ExtraPacketCodecs.setOf(STREAM_CODEC);
+            ExtraStreamCodecs.setOf(STREAM_CODEC);
 
     private final Map<BlockPos, HeatStorage> pipeStorages = new HashMap<>();
 

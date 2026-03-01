@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FluidPocketWorldRenderer implements IndustriaWorldRenderer {
+public class FluidPocketLevelRenderer implements IndustriaLevelRenderer {
     public static final Map<ResourceKey<Level>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
 
     @Override

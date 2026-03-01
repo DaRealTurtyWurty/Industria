@@ -124,10 +124,10 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
         buf.writeResourceKey(BuiltInRegistries.ITEM.getResourceKey(stack.item()).orElseThrow());
 
         BuiltInRegistries.INT_PROVIDER_TYPE.getResourceKey(stack.count().getType()).ifPresent(buf::writeResourceKey);
-        ExtraPacketCodecs.encode(buf, stack.count());
+        ExtraStreamCodecs.encode(buf, stack.count());
 
         BuiltInRegistries.FLOAT_PROVIDER_TYPE.getResourceKey(stack.chance().getType()).ifPresent(buf::writeResourceKey);
-        ExtraPacketCodecs.encode(buf, stack.chance());
+        ExtraStreamCodecs.encode(buf, stack.chance());
     }
 
     private static OutputItemStack decode(RegistryFriendlyByteBuf buf) {
@@ -135,11 +135,11 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
 
         ResourceKey<IntProviderType<?>> countType = buf.readResourceKey(Registries.INT_PROVIDER_TYPE);
         IntProviderType<?> countTypeInstance = BuiltInRegistries.INT_PROVIDER_TYPE.getValue(countType);
-        IntProvider count = ExtraPacketCodecs.decode(buf, countTypeInstance);
+        IntProvider count = ExtraStreamCodecs.decode(buf, countTypeInstance);
 
         ResourceKey<FloatProviderType<?>> chanceType = buf.readResourceKey(Registries.FLOAT_PROVIDER_TYPE);
         FloatProviderType<?> chanceTypeInstance = BuiltInRegistries.FLOAT_PROVIDER_TYPE.getValue(chanceType);
-        FloatProvider chance = ExtraPacketCodecs.decode(buf, chanceTypeInstance);
+        FloatProvider chance = ExtraStreamCodecs.decode(buf, chanceTypeInstance);
 
         return new OutputItemStack(item, count, chance);
     }

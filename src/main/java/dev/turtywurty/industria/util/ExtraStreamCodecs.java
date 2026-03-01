@@ -10,18 +10,19 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.util.valueproviders.*;
+import org.joml.Vector3d;
 
 import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
-public class ExtraPacketCodecs {
+public class ExtraStreamCodecs {
     private static final Map<IntProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
     private static final Map<FloatProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
 
     public static final StreamCodec<ByteBuf, Set<BlockPos>> BLOCK_POS_SET_STREAM_CODEC = setOf(BlockPos.STREAM_CODEC);
-
     public static final StreamCodec<ByteBuf, BlockPos> BLOCK_POS_STRING_CODEC = ByteBufCodecs.fromCodec(ExtraCodecs.BLOCK_POS_STRING_CODEC);
+    public static final StreamCodec<ByteBuf, Vector3d> VECTOR_3D_STREAM_CODEC = ByteBufCodecs.fromCodec(ExtraCodecs.VECTOR_3D_CODEC);
 
     public static <B extends ByteBuf, V> StreamCodec<B, Set<V>> setOf(StreamCodec<? super B, V> codec) {
         return ByteBufCodecs.collection(HashSet::new, codec);

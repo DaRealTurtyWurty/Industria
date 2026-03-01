@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
+import org.joml.Vector3d;
 
 import java.util.List;
 import java.util.Set;
@@ -58,6 +59,10 @@ public class ExtraCodecs {
     public static final Codec<Block> BLOCK_CODEC = Codec.STRING.xmap(
             id -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(id)),
             block -> BuiltInRegistries.BLOCK.getKey(block).toString()
+    );
+    public static final Codec<Vector3d> VECTOR_3D_CODEC = Codec.DOUBLE.listOf().xmap(
+            list -> new Vector3d(list.get(0), list.get(1), list.get(2)),
+            vec -> List.of(vec.x, vec.y, vec.z)
     );
 
     public static <T> Codec<Set<T>> setOf(Codec<T> codec) {

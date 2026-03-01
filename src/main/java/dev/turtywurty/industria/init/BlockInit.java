@@ -265,6 +265,9 @@ public class BlockInit {
     public static final ArcFurnaceBlock ARC_FURNACE = registerWithItemCopy("arc_furnace",
             ArcFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
+    public static final ConveyorBlock CONVEYOR = registerWithItemCopy("conveyor",
+            ConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.of()

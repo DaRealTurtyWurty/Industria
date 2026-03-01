@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.init.PipeNetworkTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -33,7 +33,7 @@ public abstract class PipeNetwork<S> {
     protected static <S, ST, N extends PipeNetwork<S>> MapCodec<N> createCodec(RecordCodecBuilder<N, ST> storageApp, BiConsumer<S, ST> storageModifier, Function<UUID, N> factory) {
         return RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
-                        UUIDUtil.AUTHLIB_CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
+                        UUIDUtil.CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
                         ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(PipeNetwork::getPipes),
                         ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(PipeNetwork::getConnectedBlocks),
                         TransferType.CODEC.fieldOf("transferType").forGetter(PipeNetwork::getTransferType),
@@ -55,8 +55,8 @@ public abstract class PipeNetwork<S> {
             Function<UUID, N> factory) {
         return StreamCodec.composite(
                 UUIDUtil.STREAM_CODEC, PipeNetwork::getId,
-                ExtraPacketCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getPipes,
-                ExtraPacketCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getConnectedBlocks,
+                ExtraStreamCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getPipes,
+                ExtraStreamCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getConnectedBlocks,
                 TransferType.STREAM_CODEC, PipeNetwork::getTransferType,
                 storageTypeCodec, storageTypeRetriever,
                 (id, pipes, connectedBlocks, transferType, storage) -> {

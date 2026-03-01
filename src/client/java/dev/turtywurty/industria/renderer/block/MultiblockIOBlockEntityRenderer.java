@@ -5,7 +5,7 @@ import dev.turtywurty.industria.blockentity.MultiblockIOBlockEntity;
 import dev.turtywurty.industria.multiblock.PortType;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.multiblock.old.Port;
-import dev.turtywurty.industria.renderer.world.PipeNetworkWorldRenderer;
+import dev.turtywurty.industria.renderer.world.PipeNetworkLevelRenderer;
 import dev.turtywurty.industria.state.MultiblockIORenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -54,7 +54,7 @@ public class MultiblockIOBlockEntityRenderer extends IndustriaBlockEntityRendere
             for (Port port : ports.values()) {
                 float size = 0.5f;
                 for (TransferType<?, ?, ?> transferType : port.portTypes().stream().map(PortType::transferType).toList()) {
-                    int color = PipeNetworkWorldRenderer.getColor(transferType);
+                    int color = PipeNetworkLevelRenderer.getColor(transferType);
 
                     Gizmos.cuboid(state.blockPos, size, GizmoStyle.stroke(color));
 

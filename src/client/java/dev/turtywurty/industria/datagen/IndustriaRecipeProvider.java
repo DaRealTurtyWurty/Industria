@@ -199,6 +199,16 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, BlockInit.CONVEYOR, 8)
+                        .pattern("III")
+                        .pattern("RRR")
+                        .pattern("III")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('R', ItemInit.RUBBER)
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(ItemInit.RUBBER), has(ItemInit.RUBBER))
+                        .save(output);
+
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ALUMINIUM_BLOCK);
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.TIN_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.TIN_BLOCK);
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ZINC_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ZINC_BLOCK);

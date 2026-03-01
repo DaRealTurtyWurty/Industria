@@ -1,6 +1,13 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.network.*;
+import dev.turtywurty.industria.network.conveyor.AddConveyorNetworkPayload;
+import dev.turtywurty.industria.network.conveyor.ModifyConveyorNetworkPayload;
+import dev.turtywurty.industria.network.conveyor.RemoveConveyorNetworkPayload;
+import dev.turtywurty.industria.network.pipe.AddPipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.ModifyPipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.RemovePipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.SyncPipeNetworkManagerPayload;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 public class PayloadTypeInit {
@@ -28,5 +35,8 @@ public class PayloadTypeInit {
         PayloadTypeRegistry.clientboundPlay().register(RemovePipeNetworkPayload.ID, RemovePipeNetworkPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ModifyPipeNetworkPayload.ID, ModifyPipeNetworkPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(RotaryKilnControllerRemovedPayload.ID, RotaryKilnControllerRemovedPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(AddConveyorNetworkPayload.ID, AddConveyorNetworkPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ModifyConveyorNetworkPayload.ID, ModifyConveyorNetworkPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(RemoveConveyorNetworkPayload.ID, RemoveConveyorNetworkPayload.CODEC);
     }
 }

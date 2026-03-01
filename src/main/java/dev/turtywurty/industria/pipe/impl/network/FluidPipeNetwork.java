@@ -8,7 +8,7 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkType;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -48,7 +48,7 @@ public class FluidPipeNetwork extends PipeNetwork<Storage<FluidVariant>> {
 
     public static final Codec<Set<FluidPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
     public static final StreamCodec<RegistryFriendlyByteBuf, Set<FluidPipeNetwork>> SET_STREAM_CODEC =
-            ExtraPacketCodecs.setOf(STREAM_CODEC);
+            ExtraStreamCodecs.setOf(STREAM_CODEC);
 
     public FluidPipeNetwork(UUID id) {
         super(id, TransferType.FLUID);

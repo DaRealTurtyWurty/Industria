@@ -2,7 +2,10 @@ package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.server.level.ServerLevel;
 
 public class ItemStorageInit {
     public static void init() {
@@ -21,5 +24,11 @@ public class ItemStorageInit {
         ItemStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getInventoryProvider, BlockEntityTypeInit.SHAKING_TABLE);
         ItemStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getInventoryProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
         ItemStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ARC_FURNACE);
+        ItemStorage.SIDED.registerForBlocks((level, pos, _, _, _) -> {
+            if (level instanceof ServerLevel serverLevel)
+                return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
+
+            return null;
+        }, BlockInit.CONVEYOR);
     }
 }

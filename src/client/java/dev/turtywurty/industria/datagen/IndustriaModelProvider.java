@@ -3,6 +3,7 @@ package dev.turtywurty.industria.datagen;
 import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
+import dev.turtywurty.industria.block.ConveyorBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
@@ -21,6 +22,7 @@ import net.minecraft.client.data.models.blockstates.MultiPartGenerator;
 import net.minecraft.client.data.models.model.*;
 import net.minecraft.client.renderer.block.model.Material;
 import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.WeightedList;
@@ -105,6 +107,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(pipeSupplier);
     }
 
+    private static void registerConveyor(BlockModelGenerators blockStateModelGenerator, ConveyorBlock block, String name) {
+        blockStateModelGenerator.blockStateOutput.accept(createConveyorBlockModelDefinitionCreator(block, name));
+    }
+
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
     }
@@ -153,6 +159,50 @@ public class IndustriaModelProvider extends FabricModelProvider {
                 .with(new ConditionBuilder().term(PipeBlock.DOWN, PipeBlock.ConnectorType.BLOCK),
                         createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT
                                 .withX(Quadrant.R90)));
+    }
+
+    private static BlockModelDefinitionGenerator createConveyorBlockModelDefinitionCreator(ConveyorBlock block, String name) {
+        Identifier straightModelId = Industria.id("block/" + name);
+        Identifier upModelId = Industria.id("block/" + name + "_up");
+        Identifier downModelId = Industria.id("block/" + name + "_down");
+        Identifier turnLeftModelId = Industria.id("block/" + name + "_turn_left");
+        Identifier turnRightModelId = Industria.id("block/" + name + "_turn_right");
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            Variant.SimpleModelState state = rotationFor(direction);
+            generator.with(new ConditionBuilder()
+                            .term(ConveyorBlock.FACING, direction)
+                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.STRAIGHT),
+                    createWeightedVariant(straightModelId, state));
+            generator.with(new ConditionBuilder()
+                            .term(ConveyorBlock.FACING, direction)
+                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.UP),
+                    createWeightedVariant(upModelId, state));
+            generator.with(new ConditionBuilder()
+                            .term(ConveyorBlock.FACING, direction)
+                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.DOWN),
+                    createWeightedVariant(downModelId, state));
+            generator.with(new ConditionBuilder()
+                            .term(ConveyorBlock.FACING, direction)
+                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.TURN_LEFT),
+                    createWeightedVariant(turnLeftModelId, state));
+            generator.with(new ConditionBuilder()
+                            .term(ConveyorBlock.FACING, direction)
+                            .term(ConveyorBlock.SHAPE, ConveyorBlock.ConveyorShape.TURN_RIGHT),
+                    createWeightedVariant(turnRightModelId, state));
+        }
+
+        return generator;
+    }
+
+    private static Variant.SimpleModelState rotationFor(Direction direction) {
+        return switch (direction) {
+            case EAST -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R90);
+            case SOUTH -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R180);
+            case WEST -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R270);
+            case NORTH, UP, DOWN -> Variant.SimpleModelState.DEFAULT;
+        };
     }
 
     @Override
@@ -271,6 +321,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
+        registerConveyor(blockStateModelGenerator, BlockInit.CONVEYOR, "conveyor");
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
