@@ -314,10 +314,6 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         return createTopology(pos, state.getValue(FACING), state.getValue(SHAPE));
     }
 
-    public Ports getConveyorPorts(BlockPos pos, Direction facing, ConveyorShape shape) {
-        return toPorts(createTopology(pos, facing, shape));
-    }
-
     protected ConveyorTopology createTopology(BlockPos pos, Direction facing, ConveyorShape shape) {
         Direction back = facing.getOpposite();
         Direction left = facing.getCounterClockWise();
@@ -445,22 +441,23 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
     }
 
     public int scoreShape(Level level, BlockPos pos, Direction facing, ConveyorShape shape, ConveyorTopology topology) {
-        Ports ports = toPorts(topology);
+        ConveyorInput input = topology.inputs().getFirst();
+        ConveyorOutput output = topology.outputs().getFirst();
         int score = 0;
 
         // Downstream scoring: Prefer connecting to other conveyors, then inventories, then empty space.
-        if (connectsToConveyorInput(level, pos, ports.outputPos())) {
+        if (connectsToConveyorInput(level, pos, output.deliveryPos())) {
             score += 100;
-        } else if (connectsToInventory(level, pos, ports.outputPos())) {
+        } else if (connectsToInventory(level, pos, output.deliveryPos())) {
             score += 60;
-        } else if (level.isEmptyBlock(ports.outputPos())) {
+        } else if (level.isEmptyBlock(output.deliveryPos())) {
             score += 5;
         }
 
         // Upstream scoring: Prefer receiving from conveyors, then inserting into inventories.
-        if (connectsFromConveyorOutput(level, ports.inputPos(), pos)) {
+        if (connectsFromConveyorOutput(level, input.expectedSourcePos(), pos)) {
             score += 80;
-        } else if (inventoryCanInsert(level, pos, ports.inputPos())) {
+        } else if (inventoryCanInsert(level, pos, input.expectedSourcePos())) {
             score += 40;
         }
 
@@ -550,17 +547,6 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
                 .forEach(positions::add);
     }
 
-    private static Ports toPorts(ConveyorTopology topology) {
-        if (topology.inputs().size() != 1 || topology.outputs().size() != 1) {
-            throw new IllegalStateException("ConveyorBlock expects exactly one input and one output.");
-        }
-
-        return new Ports(
-                topology.inputs().getFirst().expectedSourcePos(),
-                topology.outputs().getFirst().deliveryPos()
-        );
-    }
-
     public enum ConveyorShape implements StringRepresentable {
         STRAIGHT,
         UP,
@@ -580,8 +566,5 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
     }
 
     public record ResolvedOrientation(Direction facing, ConveyorShape shape) {
-    }
-
-    public record Ports(BlockPos inputPos, BlockPos outputPos) {
     }
 }

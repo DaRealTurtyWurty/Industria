@@ -3,6 +3,7 @@ package dev.turtywurty.industria.util;
 import com.mojang.datafixers.util.*;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,6 +18,8 @@ import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class ExtraStreamCodecs {
+    public static final StreamCodec<ByteBuf, Map<BlockPos, UUID>> BLOCK_POS_TO_UUID_STREAM_CODEC =
+            ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, UUIDUtil.STREAM_CODEC);
     private static final Map<IntProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
     private static final Map<FloatProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
 

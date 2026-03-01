@@ -20,4 +20,8 @@ public interface ConveyorLike {
     default ConveyorOutput selectOutput(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorNetwork network, ConveyorRoutingState routingState) {
         return getTopology(level, pos, state).outputs().getFirst();
     }
+
+    default void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorRoutingState routingState) {
+        // NO-OP
+    }
 }

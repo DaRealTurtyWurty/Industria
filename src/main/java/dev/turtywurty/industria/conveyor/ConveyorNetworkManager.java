@@ -1,16 +1,17 @@
 package dev.turtywurty.industria.conveyor;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.conveyor.block.ConveyorLike;
 import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
+import dev.turtywurty.industria.conveyor.block.ConveyorRoutingState;
 import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.conveyor.AddConveyorNetworkPayload;
 import dev.turtywurty.industria.network.conveyor.RemoveConveyorNetworkPayload;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
-import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -26,21 +27,26 @@ import org.jspecify.annotations.NonNull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConveyorNetworkManager {
+public class ConveyorNetworkManager implements ConveyorRoutingState {
+    private static final MapCodec<Map<BlockPos, Integer>> ROUND_ROBIN_INDICES_CODEC =
+            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT).optionalFieldOf("round_robin_indices", Map.of());
     public static final MapCodec<ConveyorNetworkManager> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             ExtraCodecs.setOf(ConveyorNetwork.CODEC).fieldOf("networks").forGetter(ConveyorNetworkManager::getNetworks),
-            PipeNetworkManager.BLOCK_POS_TO_UUID_CODEC.fieldOf("conveyor_to_network_id").forGetter(ConveyorNetworkManager::getConveyorToNetworkId)
+            ExtraCodecs.BLOCK_POS_TO_UUID_CODEC.fieldOf("conveyor_to_network_id").forGetter(ConveyorNetworkManager::getConveyorToNetworkId),
+            ROUND_ROBIN_INDICES_CODEC.forGetter(ConveyorNetworkManager::getRoundRobinIndices)
     ).apply(instance, ConveyorNetworkManager::new));
     protected final Set<ConveyorNetwork> networks = ConcurrentHashMap.newKeySet();
     protected final Map<BlockPos, UUID> conveyorToNetworkId = new ConcurrentHashMap<>();
+    protected final Map<BlockPos, Integer> roundRobinIndices = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> networkStorageHashes = new ConcurrentHashMap<>();
 
     public ConveyorNetworkManager() {
     }
 
-    public ConveyorNetworkManager(Set<ConveyorNetwork> networks, Map<BlockPos, UUID> conveyorToNetworkId) {
+    public ConveyorNetworkManager(Set<ConveyorNetwork> networks, Map<BlockPos, UUID> conveyorToNetworkId, Map<BlockPos, Integer> roundRobinIndices) {
         this.networks.addAll(networks);
         this.conveyorToNetworkId.putAll(conveyorToNetworkId);
+        this.roundRobinIndices.putAll(roundRobinIndices);
     }
 
     public Set<ConveyorNetwork> getNetworks() {
@@ -84,6 +90,7 @@ public class ConveyorNetworkManager {
     }
 
     public UUID removeConveyor(BlockPos pos) {
+        this.roundRobinIndices.remove(pos);
         return this.conveyorToNetworkId.remove(pos);
     }
 
@@ -94,6 +101,7 @@ public class ConveyorNetworkManager {
     public void clear() {
         this.networks.clear();
         this.conveyorToNetworkId.clear();
+        this.roundRobinIndices.clear();
         this.networkStorageHashes.clear();
     }
 
@@ -110,7 +118,7 @@ public class ConveyorNetworkManager {
         for (ConveyorNetwork network : networks) {
             boolean orderChanged = reorderConveyors(level, network, new ArrayList<>(network.getConveyors()));
             boolean connectedBlocksChanged = updateConnectedBlocks(level, network);
-            network.tick(level);
+            network.tick(level, this);
 
             UUID networkId = network.getId();
             activeNetworkIds.add(networkId);
@@ -465,6 +473,29 @@ public class ConveyorNetworkManager {
 
     public Map<BlockPos, UUID> getConveyorToNetworkId() {
         return this.conveyorToNetworkId;
+    }
+
+    public Map<BlockPos, Integer> getRoundRobinIndices() {
+        return this.roundRobinIndices;
+    }
+
+    @Override
+    public int getRoundRobinIndex(BlockPos pos, int outputCount) {
+        if (outputCount <= 0)
+            return 0;
+
+        return Math.floorMod(this.roundRobinIndices.getOrDefault(pos, 0), outputCount);
+    }
+
+    @Override
+    public void advanceRoundRobinIndex(BlockPos pos, int outputCount) {
+        if (outputCount <= 0)
+            return;
+
+        this.roundRobinIndices.compute(pos, (_, current) -> {
+            int next = current == null ? 1 : current + 1;
+            return Math.floorMod(next, outputCount);
+        });
     }
 
     @Nullable

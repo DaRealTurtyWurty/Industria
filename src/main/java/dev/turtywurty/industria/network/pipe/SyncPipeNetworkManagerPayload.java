@@ -2,7 +2,7 @@ package dev.turtywurty.industria.network.pipe;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,7 +21,7 @@ public record SyncPipeNetworkManagerPayload(TransferType<?, ?, ?> transferType, 
             StreamCodec.composite(
                     TransferType.STREAM_CODEC, SyncPipeNetworkManagerPayload::transferType,
                     ResourceKey.streamCodec(Registries.DIMENSION), SyncPipeNetworkManagerPayload::dimension,
-                    PipeNetworkManager.BLOCK_POS_TO_UUID_STREAM_CODEC, SyncPipeNetworkManagerPayload::pipeToNetworkId,
+                    ExtraStreamCodecs.BLOCK_POS_TO_UUID_STREAM_CODEC, SyncPipeNetworkManagerPayload::pipeToNetworkId,
                     SyncPipeNetworkManagerPayload::new);
 
     @Override

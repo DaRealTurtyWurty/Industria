@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -13,7 +14,9 @@ import net.minecraft.world.phys.AABB;
 import org.joml.Vector3d;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class ExtraCodecs {
     public static final Codec<Set<BlockPos>> BLOCK_POS_SET_CODEC = setOf(BlockPos.CODEC);
@@ -55,6 +58,8 @@ public class ExtraCodecs {
                 }
             },
             blockPos -> blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ());
+    public static final Codec<Map<BlockPos, UUID>> BLOCK_POS_TO_UUID_CODEC = Codec.unboundedMap(
+            BLOCK_POS_STRING_CODEC, UUIDUtil.CODEC);
     public static final Codec<Character> CHAR_CODEC = Codec.STRING.xmap(s -> s.charAt(0), String::valueOf);
     public static final Codec<Block> BLOCK_CODEC = Codec.STRING.xmap(
             id -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(id)),
