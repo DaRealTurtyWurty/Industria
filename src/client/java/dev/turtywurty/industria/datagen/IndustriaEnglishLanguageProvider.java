@@ -132,6 +132,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.CONVEYOR, "Conveyor");
         translationBuilder.add(BlockInit.SPLITTER_CONVEYOR, "Splitter Conveyor");
         translationBuilder.add(BlockInit.MERGER_CONVEYOR, "Merger Conveyor");
+        translationBuilder.add(BlockInit.FEEDER_CONVEYOR, "Feeder Conveyor");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");

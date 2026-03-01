@@ -29,7 +29,7 @@ public final class ConveyorAnchorProviderInit {
             });
         });
 
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.SPLITTER_CONVEYOR, blockState -> {
+        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.SPLITTER_CONVEYOR, _ -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(
                     SplitterConveyorBlock.LEFT_OUTPUT_ID,
@@ -39,7 +39,7 @@ public final class ConveyorAnchorProviderInit {
             );
         });
 
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.MERGER_CONVEYOR, blockState -> {
+        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.MERGER_CONVEYOR, _ -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(
                     MergerConveyorBlock.LEFT_INPUT_ID,
@@ -47,6 +47,12 @@ public final class ConveyorAnchorProviderInit {
                     MergerConveyorBlock.RIGHT_INPUT_ID,
                     new MergerConveyorAnchorPositionsModel(entityModels.bakeLayer(MergerConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION))
             );
+        });
+
+        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.FEEDER_CONVEYOR, _ -> {
+            EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
+            return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
+                    new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION)));
         });
     }
 }

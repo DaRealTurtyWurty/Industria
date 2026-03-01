@@ -229,6 +229,16 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, BlockInit.FEEDER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CRC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ALUMINIUM_BLOCK);
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.TIN_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.TIN_BLOCK);
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ZINC_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ZINC_BLOCK);

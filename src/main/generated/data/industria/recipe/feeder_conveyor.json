@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "industria:conveyor",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "CCC",
+    "CRC",
+    "CCC"
+  ],
+  "result": {
+    "count": 8,
+    "id": "industria:feeder_conveyor"
+  }
+}

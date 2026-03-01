@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.FeederConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
@@ -107,10 +108,10 @@ public class BlockInit {
 
     public static final Block NICKEL_BLOCK = registerWithItemCopy("nickel_block",
             Block::new, Blocks.IRON_BLOCK);
-    
+
     public static final Block IRIDIUM_ORE = registerWithItemCopy("iridium_ore",
             Block::new, Blocks.IRON_ORE);
-    
+
     public static final Block DEEPSLATE_IRIDIUM_ORE = registerWithItemCopy("deepslate_iridium_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE);
 
@@ -150,7 +151,7 @@ public class BlockInit {
             settings -> new DropExperienceBlock(UniformInt.of(2, 5),
                     settings.lightLevel(value -> 3).noOcclusion()), Blocks.NETHER_QUARTZ_ORE,
             settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(value -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE));
-    
+
     public static final AlloyFurnaceBlock ALLOY_FURNACE = registerWithItemCopy("alloy_furnace",
             AlloyFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
@@ -276,6 +277,9 @@ public class BlockInit {
 
     public static final MergerConveyorBlock MERGER_CONVEYOR = registerWithItemCopy("merger_conveyor",
             MergerConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final FeederConveyorBlock FEEDER_CONVEYOR = registerWithItemCopy("feeder_conveyor",
+            FeederConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
