@@ -29,11 +29,11 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.item.crafting.CookingBookCategory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -207,6 +207,26 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .define('R', ItemInit.RUBBER)
                         .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                         .unlockedBy(getHasName(ItemInit.RUBBER), has(ItemInit.RUBBER))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.SPLITTER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CQC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('Q', ConventionalItemTags.QUARTZ_GEMS)
+                        .unlockedBy(hasTag(ConventionalItemTags.QUARTZ_GEMS), has(ConventionalItemTags.QUARTZ_GEMS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.MERGER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CLC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('L', ConventionalItemTags.LAPIS_GEMS)
+                        .unlockedBy(hasTag(ConventionalItemTags.LAPIS_GEMS), has(ConventionalItemTags.LAPIS_GEMS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
                         .save(output);
 
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ALUMINIUM_BLOCK);

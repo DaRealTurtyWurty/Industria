@@ -242,6 +242,13 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 return routedAnchors;
         }
 
+        String selectedAnchorRouteId = conveyorItem.getSelectedAnchorRouteId();
+        if (selectedAnchorRouteId != null) {
+            List<Vector3d> routedAnchors = itemAnchorsByRoute.get(selectedAnchorRouteId);
+            if (routedAnchors != null)
+                return routedAnchors;
+        }
+
         List<Vector3d> defaultAnchors = itemAnchorsByRoute.get(DEFAULT_ANCHOR_ROUTE);
         if (defaultAnchors != null)
             return defaultAnchors;

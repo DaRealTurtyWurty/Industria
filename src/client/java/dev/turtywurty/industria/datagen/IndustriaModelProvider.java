@@ -5,6 +5,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
@@ -112,8 +113,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createConveyorBlockModelDefinitionCreator(block, name));
     }
 
-    private static void registerSplitterConveyor(BlockModelGenerators blockStateModelGenerator, SplitterConveyorBlock block, String name) {
-        blockStateModelGenerator.blockStateOutput.accept(createSplitterConveyorBlockModelDefinitionCreator(block, name));
+    private static void registerSplitterConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createSplitterConveyorBlockModelDefinitionCreator(BlockInit.SPLITTER_CONVEYOR, "splitter_conveyor"));
+    }
+
+    private static void registerMergerConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createMergerConveyorBlockModelDefinitionCreator(BlockInit.MERGER_CONVEYOR, "merger_conveyor"));
     }
 
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
@@ -208,6 +213,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             generator.with(new ConditionBuilder()
                             .term(SplitterConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
+    private static BlockModelDefinitionGenerator createMergerConveyorBlockModelDefinitionCreator(MergerConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(MergerConveyorBlock.FACING, direction),
                     createWeightedVariant(modelId, rotationFor(direction)));
         }
 
@@ -340,8 +358,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
         registerConveyor(blockStateModelGenerator, BlockInit.CONVEYOR, "conveyor");
-        registerSplitterConveyor(blockStateModelGenerator, BlockInit.SPLITTER_CONVEYOR, "splitter_conveyor");
-
+        registerSplitterConveyor(blockStateModelGenerator);
+        registerMergerConveyor(blockStateModelGenerator);
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {

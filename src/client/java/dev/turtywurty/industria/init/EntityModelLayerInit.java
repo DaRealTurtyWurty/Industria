@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.model.*;
 import dev.turtywurty.industria.model.conveyor.CornerTurnConveyorAnchorPositionsModel;
+import dev.turtywurty.industria.model.conveyor.MergerConveyorAnchorPositionsModel;
 import dev.turtywurty.industria.model.conveyor.SplitterConveyorAnchorPositionsModel;
 import dev.turtywurty.industria.model.conveyor.StraightConveyorAnchorPositionsModel;
 import dev.turtywurty.industria.model.conveyor.VerticalDownConveyorAnchorPositionsModel;
@@ -39,6 +40,8 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(CentrifugalConcentratorModel.LAYER_LOCATION, CentrifugalConcentratorModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(CornerTurnConveyorAnchorPositionsModel.LAYER_LOCATION, CornerTurnConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION, StraightConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(MergerConveyorAnchorPositionsModel.LEFT_LAYER_LOCATION, MergerConveyorAnchorPositionsModel::createLeftLayer);
+        ModelLayerRegistry.registerModelLayer(MergerConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION, MergerConveyorAnchorPositionsModel::createRightLayer);
         ModelLayerRegistry.registerModelLayer(SplitterConveyorAnchorPositionsModel.LEFT_LAYER_LOCATION, SplitterConveyorAnchorPositionsModel::createLeftLayer);
         ModelLayerRegistry.registerModelLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION, SplitterConveyorAnchorPositionsModel::createRightLayer);
         ModelLayerRegistry.registerModelLayer(VerticalUpConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalUpConveyorAnchorPositionsModel::createMainLayer);

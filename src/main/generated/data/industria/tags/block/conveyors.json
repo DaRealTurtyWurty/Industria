@@ -1,6 +1,7 @@
 {
   "values": [
     "industria:conveyor",
-    "industria:splitter_conveyor"
+    "industria:splitter_conveyor",
+    "industria:merger_conveyor"
   ]
 }

@@ -94,6 +94,7 @@ public class ConveyorStorage {
         item.setPosition(this.pos);
         item.setProgress(0);
         item.setSelectedOutputId(null);
+        item.setSelectedAnchorRouteId(null);
         this.items.add(item);
         return true;
     }

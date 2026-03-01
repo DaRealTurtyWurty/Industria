@@ -29,6 +29,7 @@ public class IndustriaBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
 
         valueLookupBuilder(TagList.Blocks.CONVEYORS)
                 .add(BlockInit.CONVEYOR)
-                .add(BlockInit.SPLITTER_CONVEYOR);
+                .add(BlockInit.SPLITTER_CONVEYOR)
+                .add(BlockInit.MERGER_CONVEYOR);
     }
 }

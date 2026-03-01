@@ -3,11 +3,9 @@ package dev.turtywurty.industria.datagen;
 import dev.turtywurty.fabricslurryapi.api.Slurry;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariantAttributes;
-import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
-import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
@@ -133,6 +131,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.HEAT_PIPE, "Heat Pipe");
         translationBuilder.add(BlockInit.CONVEYOR, "Conveyor");
         translationBuilder.add(BlockInit.SPLITTER_CONVEYOR, "Splitter Conveyor");
+        translationBuilder.add(BlockInit.MERGER_CONVEYOR, "Merger Conveyor");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");

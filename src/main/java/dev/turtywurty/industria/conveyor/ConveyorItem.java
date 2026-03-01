@@ -19,13 +19,15 @@ public class ConveyorItem {
             ItemStack.CODEC.fieldOf("stack").forGetter(ConveyorItem::getStack),
             BlockPos.CODEC.fieldOf("position").forGetter(ConveyorItem::getPosition),
             Codec.INT.fieldOf("progress").forGetter(ConveyorItem::getProgress),
-            Codec.STRING.optionalFieldOf("selected_output_id", "").forGetter(ConveyorItem::getSerializedSelectedOutputId)
-    ).apply(instance, (id, stack, position, progress, selectedOutputId) -> {
+            Codec.STRING.optionalFieldOf("selected_output_id", "").forGetter(ConveyorItem::getSerializedSelectedOutputId),
+            Codec.STRING.optionalFieldOf("selected_anchor_route_id", "").forGetter(ConveyorItem::getSerializedSelectedAnchorRouteId)
+    ).apply(instance, (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
         var item = new ConveyorItem(id);
         item.setStack(stack);
         item.setPosition(position);
         item.setProgress(progress);
-        item.setSelectedOutputId(deserializeSelectedOutputId(selectedOutputId));
+        item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
+        item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
         return item;
     }));
 
@@ -35,12 +37,14 @@ public class ConveyorItem {
             BlockPos.STREAM_CODEC, ConveyorItem::getPosition,
             ByteBufCodecs.INT, ConveyorItem::getProgress,
             ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedOutputId,
-            (id, stack, position, progress, selectedOutputId) -> {
+            ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedAnchorRouteId,
+            (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
                 var item = new ConveyorItem(id);
                 item.setStack(stack);
                 item.setPosition(position);
                 item.setProgress(progress);
-                item.setSelectedOutputId(deserializeSelectedOutputId(selectedOutputId));
+                item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
+                item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
                 return item;
             }
     );
@@ -51,6 +55,8 @@ public class ConveyorItem {
     private int progress;
     @Nullable
     private String selectedOutputId;
+    @Nullable
+    private String selectedAnchorRouteId;
 
     public ConveyorItem(UUID id) {
         this.id = id;
@@ -99,12 +105,25 @@ public class ConveyorItem {
         this.selectedOutputId = selectedOutputId;
     }
 
+    @Nullable
+    public String getSelectedAnchorRouteId() {
+        return selectedAnchorRouteId;
+    }
+
+    public void setSelectedAnchorRouteId(@Nullable String selectedAnchorRouteId) {
+        this.selectedAnchorRouteId = selectedAnchorRouteId;
+    }
+
     private String getSerializedSelectedOutputId() {
         return this.selectedOutputId == null ? "" : this.selectedOutputId;
     }
 
+    private String getSerializedSelectedAnchorRouteId() {
+        return this.selectedAnchorRouteId == null ? "" : this.selectedAnchorRouteId;
+    }
+
     @Nullable
-    private static String deserializeSelectedOutputId(String selectedOutputId) {
-        return selectedOutputId.isEmpty() ? null : selectedOutputId;
+    private static String deserializeSelectedRouteId(String selectedRouteId) {
+        return selectedRouteId.isEmpty() ? null : selectedRouteId;
     }
 }

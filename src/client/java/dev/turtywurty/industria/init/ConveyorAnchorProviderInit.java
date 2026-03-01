@@ -1,12 +1,9 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
-import dev.turtywurty.industria.model.conveyor.CornerTurnConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.SplitterConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.StraightConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.VerticalDownConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.VerticalUpConveyorAnchorPositionsModel;
+import dev.turtywurty.industria.model.conveyor.*;
 import dev.turtywurty.industria.renderer.world.ConveyorNetworkLevelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -39,6 +36,16 @@ public final class ConveyorAnchorProviderInit {
                     new SplitterConveyorAnchorPositionsModel(entityModels.bakeLayer(SplitterConveyorAnchorPositionsModel.LEFT_LAYER_LOCATION)),
                     SplitterConveyorBlock.RIGHT_OUTPUT_ID,
                     new SplitterConveyorAnchorPositionsModel(entityModels.bakeLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION))
+            );
+        });
+
+        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.MERGER_CONVEYOR, blockState -> {
+            EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
+            return Map.of(
+                    MergerConveyorBlock.LEFT_INPUT_ID,
+                    new MergerConveyorAnchorPositionsModel(entityModels.bakeLayer(MergerConveyorAnchorPositionsModel.LEFT_LAYER_LOCATION)),
+                    MergerConveyorBlock.RIGHT_INPUT_ID,
+                    new MergerConveyorAnchorPositionsModel(entityModels.bakeLayer(MergerConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION))
             );
         });
     }

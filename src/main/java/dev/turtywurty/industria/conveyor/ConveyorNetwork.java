@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.conveyor.block.ConveyorLike;
+import dev.turtywurty.industria.conveyor.block.ConveyorInput;
 import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
 import dev.turtywurty.industria.conveyor.block.ConveyorRoutingState;
 import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
@@ -203,6 +204,7 @@ public class ConveyorNetwork {
                 hash = 31 * hash + item.getProgress();
                 hash = 31 * hash + item.getStack().hashCode();
                 hash = 31 * hash + Objects.hashCode(item.getSelectedOutputId());
+                hash = 31 * hash + Objects.hashCode(item.getSelectedAnchorRouteId());
             }
         }
 
@@ -228,6 +230,7 @@ public class ConveyorNetwork {
             BlockPos nextPos = selectedOutput.nextConveyorPos();
             ConveyorStorage nextStorage = this.storage.getStorageAt(level, nextPos);
             if (nextStorage != null && nextStorage.addItem(item)) {
+                prepareItemForInputRoute(level, nextPos, item, selectedOutput.output().expectedInputPos());
                 prepareItemForConveyor(level, nextPos, item, routingState);
                 conveyorStorage.removeItems(item);
                 onOutputUsed(level, conveyorPos, state, selectedOutput.output(), routingState);
@@ -348,6 +351,18 @@ public class ConveyorNetwork {
         if (output != null) {
             item.setSelectedOutputId(output.id());
         }
+    }
+
+    private void prepareItemForInputRoute(Level level, BlockPos conveyorPos, ConveyorItem item, BlockPos inputPos) {
+        BlockState state = level.getBlockState(conveyorPos);
+        if (!(state.getBlock() instanceof ConveyorLike conveyor)) {
+            item.setSelectedAnchorRouteId(null);
+            return;
+        }
+
+        ConveyorTopology topology = conveyor.getTopology(level, conveyorPos, state);
+        ConveyorInput input = topology.getInputFrom(inputPos);
+        item.setSelectedAnchorRouteId(input != null ? input.id() : null);
     }
 
     @Nullable
