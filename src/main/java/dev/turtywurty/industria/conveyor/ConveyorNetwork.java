@@ -229,7 +229,12 @@ public class ConveyorNetwork {
         if (selectedOutput.nextConveyorPos() != null) {
             BlockPos nextPos = selectedOutput.nextConveyorPos();
             ConveyorStorage nextStorage = this.storage.getStorageAt(level, nextPos);
-            if (nextStorage != null && nextStorage.addItem(item)) {
+            BlockState nextState = level.getBlockState(nextPos);
+            BlockPos nextInputPos = selectedOutput.output().expectedInputPos();
+            if (nextStorage != null
+                    && canTargetAcceptIncomingItem(level, nextPos, nextState, item, nextInputPos, routingState)
+                    && nextStorage.addItem(item)) {
+                onIncomingItemAccepted(level, nextPos, nextState, item, nextInputPos, routingState);
                 prepareItemForInputRoute(level, nextPos, item, selectedOutput.output().expectedInputPos());
                 prepareItemForConveyor(level, nextPos, item, routingState);
                 conveyorStorage.removeItems(item);
@@ -334,6 +339,19 @@ public class ConveyorNetwork {
         }
     }
 
+    private boolean canTargetAcceptIncomingItem(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, BlockPos inputPos,
+                                                ConveyorRoutingState routingState) {
+        return state.getBlock() instanceof ConveyorLike conveyor
+                && conveyor.canAcceptIncomingItem(level, conveyorPos, state, item, inputPos, this, routingState);
+    }
+
+    private void onIncomingItemAccepted(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, BlockPos inputPos,
+                                        ConveyorRoutingState routingState) {
+        if (state.getBlock() instanceof ConveyorLike conveyor) {
+            conveyor.onIncomingItemAccepted(level, conveyorPos, state, item, inputPos, this, routingState);
+        }
+    }
+
     private void prepareItemForConveyor(Level level, BlockPos conveyorPos, ConveyorItem item, ConveyorRoutingState routingState) {
         BlockState state = level.getBlockState(conveyorPos);
         if (!(state.getBlock() instanceof ConveyorLike conveyor)) {
@@ -363,6 +381,61 @@ public class ConveyorNetwork {
         ConveyorTopology topology = conveyor.getTopology(level, conveyorPos, state);
         ConveyorInput input = topology.getInputFrom(inputPos);
         item.setSelectedAnchorRouteId(input != null ? input.id() : null);
+    }
+
+    public boolean hasReadyItemForInput(Level level, BlockPos conveyorPos, BlockPos inputPos) {
+        BlockState state = level.getBlockState(conveyorPos);
+        ConveyorTopology topology = getTopology(level, conveyorPos, state);
+        if (topology == null)
+            return false;
+
+        ConveyorInput input = topology.getInputFrom(inputPos);
+        if (input == null)
+            return false;
+
+        ConveyorStorage sourceStorage = this.storage.getStorages().get(input.expectedSourcePos());
+        if (sourceStorage == null)
+            return false;
+
+        BlockState sourceState = level.getBlockState(input.expectedSourcePos());
+        for (ConveyorItem sourceItem : sourceStorage.getItems()) {
+            if (sourceItem.getProgress() < ConveyorStorage.MAX_PROGRESS)
+                continue;
+
+            if (targetsConveyor(level, input.expectedSourcePos(), sourceState, sourceItem, conveyorPos))
+                return true;
+        }
+
+        return false;
+    }
+
+    private boolean targetsConveyor(Level level, BlockPos sourcePos, BlockState sourceState, ConveyorItem item, BlockPos targetPos) {
+        ConveyorOutput output = getSelectedOutputForItem(level, sourcePos, sourceState, item);
+        if (output == null)
+            return false;
+
+        BlockPos nextConveyorPos = getNextConveyor(level, output);
+        return targetPos.equals(nextConveyorPos);
+    }
+
+    @Nullable
+    private ConveyorOutput getSelectedOutputForItem(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item) {
+        if (!isConveyor(state) || !(state.getBlock() instanceof ConveyorLike conveyor))
+            return null;
+
+        ConveyorTopology topology = conveyor.getTopology(level, conveyorPos, state);
+        if (topology.outputs().isEmpty())
+            return null;
+
+        String selectedOutputId = item.getSelectedOutputId();
+        if (selectedOutputId != null) {
+            for (ConveyorOutput output : topology.outputs()) {
+                if (output.id().equals(selectedOutputId))
+                    return output;
+            }
+        }
+
+        return topology.outputs().size() == 1 ? topology.outputs().getFirst() : null;
     }
 
     @Nullable

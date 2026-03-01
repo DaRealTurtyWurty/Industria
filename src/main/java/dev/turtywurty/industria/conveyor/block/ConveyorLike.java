@@ -21,6 +21,16 @@ public interface ConveyorLike {
         return getTopology(level, pos, state).outputs().getFirst();
     }
 
+    default boolean canAcceptIncomingItem(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
+                                          ConveyorNetwork network, ConveyorRoutingState routingState) {
+        return true;
+    }
+
+    default void onIncomingItemAccepted(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
+                                        ConveyorNetwork network, ConveyorRoutingState routingState) {
+        // NO-OP
+    }
+
     default void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorRoutingState routingState) {
         // NO-OP
     }

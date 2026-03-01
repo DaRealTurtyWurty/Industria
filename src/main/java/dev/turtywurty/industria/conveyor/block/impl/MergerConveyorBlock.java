@@ -7,6 +7,7 @@ import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.conveyor.block.BaseConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.ConveyorInput;
 import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
+import dev.turtywurty.industria.conveyor.block.ConveyorRoutingState;
 import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import net.minecraft.core.BlockPos;
@@ -239,5 +240,47 @@ public class MergerConveyorBlock extends BaseConveyorBlock {
                 ),
                 List.of(new ConveyorOutput("out", pos.relative(facing), pos))
         );
+    }
+
+    @Override
+    public boolean canAcceptIncomingItem(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
+                                         ConveyorNetwork network, ConveyorRoutingState routingState) {
+        ConveyorTopology topology = getTopology(level, pos, state);
+        if (topology.inputs().size() <= 1)
+            return true;
+
+        int inputIndex = getInputIndex(topology, inputPos);
+        if (inputIndex < 0)
+            return true;
+
+        int preferredInputIndex = routingState.getRoundRobinIndex(pos, topology.inputs().size());
+        if (inputIndex == preferredInputIndex)
+            return true;
+
+        BlockPos preferredInputPos = topology.inputs().get(preferredInputIndex).expectedSourcePos();
+        return !network.hasReadyItemForInput(level, pos, preferredInputPos);
+    }
+
+    @Override
+    public void onIncomingItemAccepted(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
+                                       ConveyorNetwork network, ConveyorRoutingState routingState) {
+        ConveyorTopology topology = getTopology(level, pos, state);
+        if (topology.inputs().size() <= 1)
+            return;
+
+        int inputIndex = getInputIndex(topology, inputPos);
+        if (inputIndex < 0)
+            return;
+
+        routingState.setRoundRobinIndex(pos, inputIndex + 1, topology.inputs().size());
+    }
+
+    private static int getInputIndex(ConveyorTopology topology, BlockPos inputPos) {
+        for (int index = 0; index < topology.inputs().size(); index++) {
+            if (topology.inputs().get(index).expectedSourcePos().equals(inputPos))
+                return index;
+        }
+
+        return -1;
     }
 }

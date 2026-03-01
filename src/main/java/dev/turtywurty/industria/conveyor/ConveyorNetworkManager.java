@@ -509,6 +509,15 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         this.routingStateChanged = true;
     }
 
+    @Override
+    public void setRoundRobinIndex(BlockPos pos, int index, int outputCount) {
+        if (outputCount <= 0)
+            return;
+
+        this.roundRobinIndices.put(pos, Math.floorMod(index, outputCount));
+        this.routingStateChanged = true;
+    }
+
     protected Map<String, BlockPos> findConnectedBlocks(ServerLevel world, BlockPos conveyor, Map<String, BlockPos> preferredBlocks, Set<BlockPos> attachedBlocks) {
         BlockState conveyorState = world.getBlockState(conveyor);
         ConveyorTopology topology = getConveyorTopology(world, conveyor, conveyorState);
