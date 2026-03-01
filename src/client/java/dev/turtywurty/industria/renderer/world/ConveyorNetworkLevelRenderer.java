@@ -221,11 +221,9 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 continue;
 
             ConveyorTopology topology = conveyorBlock.getTopology(level, conveyor, state);
-            if (topology.outputs().isEmpty())
-                continue;
-
-            ConveyorOutput output = topology.outputs().getFirst();
-            Gizmos.arrow(Vec3.atCenterOf(conveyor), Vec3.atCenterOf(output.deliveryPos()), 0xFFFF0000);
+            for (ConveyorOutput output : topology.outputs()) {
+                Gizmos.arrow(Vec3.atCenterOf(conveyor), Vec3.atCenterOf(output.deliveryPos()), 0xFFFF0000);
+            }
         }
     }
 

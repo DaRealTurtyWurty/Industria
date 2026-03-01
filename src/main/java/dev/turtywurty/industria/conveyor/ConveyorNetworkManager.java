@@ -39,6 +39,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
     protected final Map<BlockPos, UUID> conveyorToNetworkId = new ConcurrentHashMap<>();
     protected final Map<BlockPos, Integer> roundRobinIndices = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> networkStorageHashes = new ConcurrentHashMap<>();
+    private volatile boolean routingStateChanged;
 
     public ConveyorNetworkManager() {
     }
@@ -103,6 +104,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         this.conveyorToNetworkId.clear();
         this.roundRobinIndices.clear();
         this.networkStorageHashes.clear();
+        this.routingStateChanged = false;
     }
 
     public void syncNetwork(ServerLevel world, ConveyorNetwork network) {
@@ -112,6 +114,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
     }
 
     public void tick(ServerLevel level) {
+        this.routingStateChanged = false;
         List<CustomPacketPayload> payloads = new ArrayList<>();
         Set<UUID> activeNetworkIds = new HashSet<>();
 
@@ -133,6 +136,8 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         this.networkStorageHashes.keySet().removeIf(networkId -> !activeNetworkIds.contains(networkId));
         if (!payloads.isEmpty()) {
             syncAndSave(level, payloads);
+        } else if (this.routingStateChanged) {
+            LevelConveyorNetworks.getOrCreate(level).setDirty();
         }
     }
 
@@ -160,6 +165,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
             return false;
 
         Map<BlockPos, ConveyorStorage> preservedStorages = new HashMap<>();
+        Map<BlockPos, Integer> preservedRoutingState = snapshotRoutingState(connectedConveyors);
         for (BlockPos conveyorPos : connectedConveyors) {
             UUID networkId = getNetworkId(conveyorPos);
             if (networkId == null)
@@ -188,6 +194,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
             return false;
 
         recreatedNetwork.getStorage().getStorages().putAll(preservedStorages);
+        restoreRoutingState(recreatedNetwork.getConveyors(), preservedRoutingState);
         reorderConveyors(world, recreatedNetwork, new ArrayList<>(recreatedNetwork.getConveyors()));
         updateConnectedBlocks(world, recreatedNetwork);
         syncNetwork(world, recreatedNetwork);
@@ -275,6 +282,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
 
         List<CustomPacketPayload> payloads = new ArrayList<>();
         network.removeConveyor(pos);
+        Map<BlockPos, Integer> preservedRoutingState = snapshotRoutingState(network.getConveyors());
 
         if (network.getConveyors().isEmpty()) {
             removeNetwork(network);
@@ -334,6 +342,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
             updateConnectedBlocks(world, newNetwork);
 
             transferStorage(network, newNetwork, connectedComponent);
+            restoreRoutingState(connectedComponent, preservedRoutingState);
 
             addNetwork(newNetwork);
             for (BlockPos conveyor : connectedComponent) {
@@ -393,28 +402,29 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
     }
 
     protected boolean updateConnectedBlocks(ServerLevel world, ConveyorNetwork network) {
-        Map<BlockPos, BlockPos> existingConnectedBlocks = new HashMap<>(network.getConnectedBlocks());
-        Map<BlockPos, BlockPos> resolvedConnectedBlocks = new HashMap<>();
-        Set<BlockPos> conveyorSet = new HashSet<>(network.getConveyors());
+        Map<BlockPos, Map<String, BlockPos>> existingConnectedBlocks = copyConnectedBlocks(network.getConnectedBlocks());
+        Map<BlockPos, Map<String, BlockPos>> resolvedConnectedBlocks = new HashMap<>();
 
         Set<BlockPos> attachedBlocks = new HashSet<>();
         for (BlockPos conveyor : network.getConveyors()) {
-            if (getOutputConveyor(world, conveyor, conveyorSet) != null)
+            Map<String, BlockPos> connectedBlocks = findConnectedBlocks(
+                    world,
+                    conveyor,
+                    existingConnectedBlocks.getOrDefault(conveyor, Map.of()),
+                    attachedBlocks
+            );
+            if (connectedBlocks.isEmpty())
                 continue;
 
-            BlockPos connectedBlock = findConnectedBlock(world, conveyor, existingConnectedBlocks.get(conveyor), attachedBlocks);
-            if (connectedBlock == null)
-                continue;
-
-            attachedBlocks.add(connectedBlock);
-            resolvedConnectedBlocks.put(conveyor, connectedBlock);
+            resolvedConnectedBlocks.put(conveyor, connectedBlocks);
         }
 
         if (existingConnectedBlocks.equals(resolvedConnectedBlocks))
             return false;
 
         network.clearConnectedBlocks(world);
-        resolvedConnectedBlocks.forEach((conveyor, connectedBlock) -> network.addConnectedBlock(world, conveyor, connectedBlock));
+        resolvedConnectedBlocks.forEach((conveyor, connectedBlocks) ->
+                connectedBlocks.forEach((outputId, connectedBlock) -> network.addConnectedBlock(world, conveyor, outputId, connectedBlock)));
         return true;
     }
 
@@ -496,46 +506,31 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
             int next = current == null ? 1 : current + 1;
             return Math.floorMod(next, outputCount);
         });
+        this.routingStateChanged = true;
     }
 
-    @Nullable
-    protected BlockPos findConnectedBlock(ServerLevel world, BlockPos conveyor, @Nullable BlockPos preferredBlock, Set<BlockPos> attachedBlocks) {
-        if (preferredBlock != null && !attachedBlocks.contains(preferredBlock) && canConnect(world, conveyor, preferredBlock))
-            return preferredBlock;
-
+    protected Map<String, BlockPos> findConnectedBlocks(ServerLevel world, BlockPos conveyor, Map<String, BlockPos> preferredBlocks, Set<BlockPos> attachedBlocks) {
         BlockState conveyorState = world.getBlockState(conveyor);
         ConveyorTopology topology = getConveyorTopology(world, conveyor, conveyorState);
-        if (topology == null)
-            return null;
+        if (topology == null || topology.outputs().isEmpty())
+            return Map.of();
+
+        Set<ConveyorOutput> routedOutputs = getConnectedOutputConveyors(world, conveyor, null).keySet();
+        Map<String, BlockPos> connectedBlocks = new LinkedHashMap<>();
 
         for (ConveyorOutput output : topology.outputs()) {
-            BlockPos outputPos = output.deliveryPos();
-            if (attachedBlocks.contains(outputPos) || isConveyor(world, outputPos))
+            if (routedOutputs.contains(output))
                 continue;
 
-            if (TransferType.ITEM.lookup(world, outputPos, output.inventoryInsertSide()) != null)
-                return outputPos;
-        }
-
-        return null;
-    }
-
-    protected boolean canConnect(ServerLevel world, BlockPos conveyor, BlockPos connectedBlock) {
-        BlockState conveyorState = world.getBlockState(conveyor);
-        ConveyorTopology topology = getConveyorTopology(world, conveyor, conveyorState);
-        if (topology == null)
-            return false;
-
-        for (ConveyorOutput output : topology.outputs()) {
-            BlockPos outputPos = output.deliveryPos();
-            if (!outputPos.equals(connectedBlock))
+            BlockPos connectedBlock = findConnectedBlock(world, output, preferredBlocks.get(output.id()), attachedBlocks);
+            if (connectedBlock == null)
                 continue;
 
-            return !isConveyor(world, outputPos)
-                    && TransferType.ITEM.lookup(world, outputPos, output.inventoryInsertSide()) != null;
+            attachedBlocks.add(connectedBlock);
+            connectedBlocks.put(output.id(), connectedBlock);
         }
 
-        return false;
+        return connectedBlocks;
     }
 
     protected boolean reorderConveyors(ServerLevel world, ConveyorNetwork network, List<BlockPos> preferredOrder) {
@@ -548,44 +543,61 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         Set<BlockPos> conveyorSet = new HashSet<>(conveyors);
         Comparator<BlockPos> comparator = createBlockPosComparator(preferredOrder, conveyorSet);
 
-        Map<BlockPos, BlockPos> nextConveyorMap = new HashMap<>();
+        Map<BlockPos, Set<BlockPos>> outgoingConveyors = new HashMap<>();
         Map<BlockPos, Integer> inDegree = new HashMap<>();
         for (BlockPos conveyor : conveyorSet) {
+            outgoingConveyors.put(conveyor, new LinkedHashSet<>());
             inDegree.put(conveyor, 0);
         }
 
         for (BlockPos conveyor : conveyorSet) {
-            BlockPos nextConveyor = getNextConveyorFromShapeAndFacing(world, conveyor, conveyorSet);
-            if (nextConveyor == null)
-                continue;
-
-            nextConveyorMap.put(conveyor, nextConveyor);
-            inDegree.merge(nextConveyor, 1, Integer::sum);
+            for (BlockPos downstreamConveyor : getConnectedOutputConveyors(world, conveyor, conveyorSet).values()) {
+                if (outgoingConveyors.get(conveyor).add(downstreamConveyor)) {
+                    inDegree.merge(downstreamConveyor, 1, Integer::sum);
+                }
+            }
         }
 
         List<BlockPos> orderedConveyors = new ArrayList<>(conveyorSet.size());
-        Set<BlockPos> visited = new HashSet<>();
+        Set<BlockPos> processed = new HashSet<>();
+        PriorityQueue<BlockPos> ready = new PriorityQueue<>(comparator);
 
-        List<BlockPos> startNodes = inDegree.entrySet().stream()
+        inDegree.entrySet().stream()
                 .filter(entry -> entry.getValue() == 0)
                 .map(Map.Entry::getKey)
-                .sorted(comparator)
-                .toList();
-        for (BlockPos startNode : startNodes) {
-            appendPath(startNode, nextConveyorMap, visited, orderedConveyors);
-        }
+                .forEach(ready::add);
 
         while (orderedConveyors.size() < conveyorSet.size()) {
-            BlockPos start = conveyorSet.stream()
-                    .filter(pos -> !visited.contains(pos))
-                    .min(Comparator
-                            .comparingInt((BlockPos pos) -> inDegree.getOrDefault(pos, 0))
-                            .thenComparing(comparator))
-                    .orElse(null);
-            if (start == null)
-                break;
+            if (ready.isEmpty()) {
+                BlockPos cycleStart = conveyorSet.stream()
+                        .filter(pos -> !processed.contains(pos))
+                        .min(Comparator
+                                .comparingInt((BlockPos pos) -> inDegree.getOrDefault(pos, 0))
+                                .thenComparing(comparator))
+                        .orElse(null);
+                if (cycleStart == null)
+                    break;
 
-            appendPath(start, nextConveyorMap, visited, orderedConveyors);
+                ready.add(cycleStart);
+            }
+
+            BlockPos conveyor = ready.poll();
+            if (!processed.add(conveyor))
+                continue;
+
+            orderedConveyors.add(conveyor);
+
+            List<BlockPos> downstreamConveyors = new ArrayList<>(outgoingConveyors.getOrDefault(conveyor, Set.of()));
+            downstreamConveyors.sort(comparator);
+            for (BlockPos downstreamConveyor : downstreamConveyors) {
+                if (processed.contains(downstreamConveyor))
+                    continue;
+
+                int remainingInDegree = inDegree.merge(downstreamConveyor, -1, Integer::sum);
+                if (remainingInDegree == 0) {
+                    ready.add(downstreamConveyor);
+                }
+            }
         }
 
         if (existingOrder.equals(orderedConveyors))
@@ -612,43 +624,22 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
                 .thenComparingInt(BlockPos::getX);
     }
 
-    private static void appendPath(BlockPos start, Map<BlockPos, BlockPos> nextConveyorMap, Set<BlockPos> visited, List<BlockPos> orderedConveyors) {
-        BlockPos current = start;
-        while (current != null && visited.add(current)) {
-            orderedConveyors.add(current);
-            current = nextConveyorMap.get(current);
-        }
-    }
-
-    @Nullable
-    protected BlockPos getNextConveyorFromShapeAndFacing(ServerLevel world, BlockPos conveyorPos, Set<BlockPos> conveyorSet) {
-        return getNextConveyor(world, conveyorPos, conveyorSet);
-    }
-
-    @Nullable
-    protected BlockPos getOutputConveyor(ServerLevel world, BlockPos conveyorPos, Set<BlockPos> conveyorSet) {
-        return getNextConveyor(world, conveyorPos, conveyorSet);
-    }
-
-    @Nullable
-    private BlockPos getNextConveyor(ServerLevel world, BlockPos conveyorPos, Set<BlockPos> conveyorSet) {
+    protected Map<ConveyorOutput, BlockPos> getConnectedOutputConveyors(ServerLevel world, BlockPos conveyorPos, @Nullable Set<BlockPos> conveyorSet) {
         BlockState conveyorState = world.getBlockState(conveyorPos);
         ConveyorTopology topology = getConveyorTopology(world, conveyorPos, conveyorState);
-        if (topology == null)
-            return null;
+        if (topology == null || topology.outputs().isEmpty())
+            return Map.of();
+
+        Map<ConveyorOutput, BlockPos> connectedOutputs = new LinkedHashMap<>();
 
         for (ConveyorOutput output : topology.outputs()) {
-            for (BlockPos candidatePos : getCandidateOutputTargets(output.deliveryPos())) {
-                if (!conveyorSet.contains(candidatePos))
-                    continue;
-
-                BlockState outputState = world.getBlockState(candidatePos);
-                if (acceptsInputFrom(world, outputState, candidatePos, output.expectedInputPos()))
-                    return candidatePos;
+            BlockPos connectedConveyor = findConnectedOutputConveyor(world, output, conveyorSet);
+            if (connectedConveyor != null) {
+                connectedOutputs.put(output, connectedConveyor);
             }
         }
 
-        return null;
+        return connectedOutputs;
     }
 
     protected Set<BlockPos> getConnectedConveyorNeighbors(ServerLevel world, BlockPos pos) {
@@ -695,6 +686,23 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         return false;
     }
 
+    @Nullable
+    private BlockPos findConnectedOutputConveyor(Level world, ConveyorOutput output, @Nullable Set<BlockPos> conveyorSet) {
+        for (BlockPos candidatePos : getCandidateOutputTargets(output.deliveryPos())) {
+            if (conveyorSet != null && !conveyorSet.contains(candidatePos))
+                continue;
+
+            if (conveyorSet == null && !isConveyor(world, candidatePos))
+                continue;
+
+            BlockState outputState = world.getBlockState(candidatePos);
+            if (acceptsInputFrom(world, outputState, candidatePos, output.expectedInputPos()))
+                return candidatePos;
+        }
+
+        return null;
+    }
+
     protected List<BlockPos> getCandidateOutputTargets(BlockPos outputPos) {
         return List.of(outputPos, outputPos.above(), outputPos.below());
     }
@@ -711,5 +719,50 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         }
 
         return candidates;
+    }
+
+    private Map<BlockPos, Integer> snapshotRoutingState(Collection<BlockPos> conveyors) {
+        Map<BlockPos, Integer> snapshot = new HashMap<>();
+        for (BlockPos conveyor : conveyors) {
+            Integer index = this.roundRobinIndices.get(conveyor);
+            if (index != null) {
+                snapshot.put(conveyor, index);
+            }
+        }
+
+        return snapshot;
+    }
+
+    private void restoreRoutingState(Collection<BlockPos> conveyors, Map<BlockPos, Integer> snapshot) {
+        for (BlockPos conveyor : conveyors) {
+            Integer index = snapshot.get(conveyor);
+            if (index != null) {
+                this.roundRobinIndices.put(conveyor, index);
+            }
+        }
+    }
+
+    @Nullable
+    private BlockPos findConnectedBlock(ServerLevel world, ConveyorOutput output, @Nullable BlockPos preferredBlock, Set<BlockPos> attachedBlocks) {
+        if (preferredBlock != null && !attachedBlocks.contains(preferredBlock) && canAttachInventory(world, output, preferredBlock))
+            return preferredBlock;
+
+        BlockPos outputPos = output.deliveryPos();
+        if (attachedBlocks.contains(outputPos) || isConveyor(world, outputPos))
+            return null;
+
+        return canAttachInventory(world, output, outputPos) ? outputPos : null;
+    }
+
+    private boolean canAttachInventory(ServerLevel world, ConveyorOutput output, BlockPos connectedBlock) {
+        return output.deliveryPos().equals(connectedBlock)
+                && !isConveyor(world, connectedBlock)
+                && TransferType.ITEM.lookup(world, connectedBlock, output.inventoryInsertSide()) != null;
+    }
+
+    private static Map<BlockPos, Map<String, BlockPos>> copyConnectedBlocks(Map<BlockPos, Map<String, BlockPos>> connectedBlocks) {
+        Map<BlockPos, Map<String, BlockPos>> copy = new HashMap<>();
+        connectedBlocks.forEach((conveyorPos, attachments) -> copy.put(conveyorPos, new HashMap<>(attachments)));
+        return copy;
     }
 }

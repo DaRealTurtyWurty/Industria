@@ -266,10 +266,6 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         };
     }
 
-    public int getItemLimit(Level level, BlockPos pos) {
-        return getItemLimit(level, pos, level.getBlockState(pos));
-    }
-
     @Override
     public int getSpeed(Level level, BlockPos pos, BlockState state) {
         if (!isEnabled(level, pos, state))
@@ -280,10 +276,6 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
             case STRAIGHT, TURN_LEFT, TURN_RIGHT -> 5;
             case UP, DOWN -> 2;
         };
-    }
-
-    public int getSpeed(Level level, BlockPos pos) {
-        return getSpeed(level, pos, level.getBlockState(pos));
     }
 
     @Override

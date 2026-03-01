@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.conveyor;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -34,10 +35,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ConveyorNetwork {
-    private static final Codec<Map<BlockPos, BlockPos>> CONNECTED_BLOCKS_CODEC =
-            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, BlockPos.CODEC);
-    private static final StreamCodec<ByteBuf, Map<BlockPos, BlockPos>> CONNECTED_BLOCKS_STREAM_CODEC =
-            ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, BlockPos.STREAM_CODEC);
+    private static final String LEGACY_OUTPUT_ID = "out";
+    private static final Codec<Map<BlockPos, Map<String, BlockPos>>> CONNECTED_BLOCKS_CODEC = Codec.either(
+            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.unboundedMap(Codec.STRING, BlockPos.CODEC)),
+            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, BlockPos.CODEC)
+    ).xmap(
+            connectedBlocks -> connectedBlocks.map(ConveyorNetwork::copyConnectedBlocks, ConveyorNetwork::upgradeLegacyConnectedBlocks),
+            connectedBlocks -> Either.left(copyConnectedBlocks(connectedBlocks))
+    );
+    private static final StreamCodec<ByteBuf, Map<BlockPos, Map<String, BlockPos>>> CONNECTED_BLOCKS_STREAM_CODEC =
+            ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, BlockPos.STREAM_CODEC));
 
     public static final MapCodec<ConveyorNetwork> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
@@ -70,7 +77,7 @@ public class ConveyorNetwork {
 
     protected UUID id;
     protected final List<BlockPos> conveyors = new CopyOnWriteArrayList<>();
-    protected final Map<BlockPos, BlockPos> connectedBlocks = new ConcurrentHashMap<>();
+    protected final Map<BlockPos, Map<String, BlockPos>> connectedBlocks = new ConcurrentHashMap<>();
     private final ConveyorNetworkStorage storage = new ConveyorNetworkStorage();
 
     public ConveyorNetwork(UUID id) {
@@ -107,7 +114,7 @@ public class ConveyorNetwork {
         }
     }
 
-    public Map<BlockPos, BlockPos> getConnectedBlocks() {
+    public Map<BlockPos, Map<String, BlockPos>> getConnectedBlocks() {
         return connectedBlocks;
     }
 
@@ -120,34 +127,50 @@ public class ConveyorNetwork {
         onConnectedBlocksChanged(level);
     }
 
-    public void addConnectedBlock(Level level, BlockPos connection, BlockPos pos) {
-        this.connectedBlocks.put(connection, pos);
+    public void addConnectedBlock(Level level, BlockPos conveyorPos, String outputId, BlockPos pos) {
+        this.connectedBlocks.computeIfAbsent(conveyorPos, _ -> new ConcurrentHashMap<>()).put(outputId, pos);
         onConnectedBlocksChanged(level);
     }
 
     public void removeConnectedBlock(Level level, BlockPos pos) {
-        this.connectedBlocks.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(pos))
-                .findFirst()
-                .ifPresent(entry -> this.connectedBlocks.remove(entry.getKey()));
+        this.connectedBlocks.entrySet().removeIf(entry -> {
+            entry.getValue().values().removeIf(pos::equals);
+            return entry.getValue().isEmpty();
+        });
         onConnectedBlocksChanged(level);
     }
 
     public void addConnectedBlocks(Level level, ConveyorNetwork network) {
-        this.connectedBlocks.putAll(network.connectedBlocks);
+        network.connectedBlocks.forEach((conveyorPos, attachments) ->
+                this.connectedBlocks.computeIfAbsent(conveyorPos, _ -> new ConcurrentHashMap<>()).putAll(attachments));
         onConnectedBlocksChanged(level);
     }
 
     public void removeConnectedBlocks(Level level, BlockPos... connectedBlocks) {
+        Set<BlockPos> removedBlocks = Set.of(connectedBlocks);
         for (BlockPos blockPos : connectedBlocks) {
             this.connectedBlocks.remove(blockPos);
         }
+
+        this.connectedBlocks.entrySet().removeIf(entry -> {
+            entry.getValue().values().removeIf(removedBlocks::contains);
+            return entry.getValue().isEmpty();
+        });
 
         onConnectedBlocksChanged(level);
     }
 
     public void removeConnectedBlocks(Level level, ConveyorNetwork network) {
-        network.connectedBlocks.forEach(this.connectedBlocks::remove);
+        for (Map.Entry<BlockPos, Map<String, BlockPos>> entry : network.connectedBlocks.entrySet()) {
+            Map<String, BlockPos> attachments = this.connectedBlocks.get(entry.getKey());
+            if (attachments == null)
+                continue;
+
+            attachments.keySet().removeAll(entry.getValue().keySet());
+            if (attachments.isEmpty()) {
+                this.connectedBlocks.remove(entry.getKey());
+            }
+        }
         onConnectedBlocksChanged(level);
     }
 
@@ -211,7 +234,7 @@ public class ConveyorNetwork {
         }
 
         ItemStack stack = item.getStack();
-        BlockPos connectedBlock = this.connectedBlocks.get(conveyorPos);
+        BlockPos connectedBlock = getConnectedBlock(conveyorPos, selectedOutput.output());
         if (connectedBlock != null && connectedBlock.equals(selectedOutput.output().deliveryPos())) {
             BlockApiLookup<Storage<ItemVariant>, @Nullable Direction> blockLookup = TransferType.ITEM.getBlockLookup();
             Direction insertSide = selectedOutput.output().inventoryInsertSide();
@@ -305,6 +328,15 @@ public class ConveyorNetwork {
         }
     }
 
+    @Nullable
+    public BlockPos getConnectedBlock(BlockPos conveyorPos, ConveyorOutput output) {
+        Map<String, BlockPos> attachedOutputs = this.connectedBlocks.get(conveyorPos);
+        if (attachedOutputs == null)
+            return null;
+
+        return attachedOutputs.get(output.id());
+    }
+
     private record SelectedOutput(ConveyorOutput output, @Nullable BlockPos nextConveyorPos) {
     }
 
@@ -314,5 +346,20 @@ public class ConveyorNetwork {
             return storage.getItemStorage();
 
         return null;
+    }
+
+    private static Map<BlockPos, Map<String, BlockPos>> upgradeLegacyConnectedBlocks(Map<BlockPos, BlockPos> legacyConnectedBlocks) {
+        Map<BlockPos, Map<String, BlockPos>> upgraded = new HashMap<>();
+        legacyConnectedBlocks.forEach((conveyorPos, connectedBlock) -> upgraded.put(
+                conveyorPos,
+                new HashMap<>(Map.of(LEGACY_OUTPUT_ID, connectedBlock))
+        ));
+        return upgraded;
+    }
+
+    private static Map<BlockPos, Map<String, BlockPos>> copyConnectedBlocks(Map<BlockPos, Map<String, BlockPos>> connectedBlocks) {
+        Map<BlockPos, Map<String, BlockPos>> copy = new HashMap<>();
+        connectedBlocks.forEach((conveyorPos, attachments) -> copy.put(conveyorPos, new HashMap<>(attachments)));
+        return copy;
     }
 }
