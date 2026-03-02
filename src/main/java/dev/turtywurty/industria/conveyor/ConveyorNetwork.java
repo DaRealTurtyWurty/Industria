@@ -246,7 +246,9 @@ public class ConveyorNetwork {
 
         ItemStack stack = item.getStack();
         BlockPos connectedBlock = getConnectedBlock(conveyorPos, selectedOutput.output());
-        if (connectedBlock != null && connectedBlock.equals(selectedOutput.output().deliveryPos())) {
+        if (connectedBlock != null
+                && connectedBlock.equals(selectedOutput.output().deliveryPos())
+                && canOutputToStorage(level, conveyorPos, state, item, selectedOutput.output(), connectedBlock, routingState)) {
             BlockApiLookup<Storage<ItemVariant>, @Nullable Direction> blockLookup = TransferType.ITEM.getBlockLookup();
             Direction insertSide = selectedOutput.output().inventoryInsertSide();
             Storage<ItemVariant> connectedBlockStorage = blockLookup.find(level, connectedBlock, insertSide);
@@ -350,6 +352,12 @@ public class ConveyorNetwork {
         if (state.getBlock() instanceof ConveyorLike conveyor) {
             conveyor.onIncomingItemAccepted(level, conveyorPos, state, item, inputPos, this, routingState);
         }
+    }
+
+    private boolean canOutputToStorage(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, ConveyorOutput output,
+                                       BlockPos storagePos, ConveyorRoutingState routingState) {
+        return state.getBlock() instanceof ConveyorLike conveyor
+                && conveyor.canOutputToStorage(level, conveyorPos, state, item, output, storagePos, this, routingState);
     }
 
     private void prepareItemForConveyor(Level level, BlockPos conveyorPos, ConveyorItem item, ConveyorRoutingState routingState) {

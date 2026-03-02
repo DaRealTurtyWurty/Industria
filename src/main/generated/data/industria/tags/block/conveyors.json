@@ -3,6 +3,7 @@
     "industria:conveyor",
     "industria:splitter_conveyor",
     "industria:merger_conveyor",
-    "industria:feeder_conveyor"
+    "industria:feeder_conveyor",
+    "industria:hatch_conveyor"
   ]
 }

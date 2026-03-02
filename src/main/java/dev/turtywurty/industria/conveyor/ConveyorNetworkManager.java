@@ -13,6 +13,8 @@ import dev.turtywurty.industria.network.conveyor.AddConveyorNetworkPayload;
 import dev.turtywurty.industria.network.conveyor.RemoveConveyorNetworkPayload;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.util.ExtraCodecs;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -753,20 +755,30 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
 
     @Nullable
     private BlockPos findConnectedBlock(ServerLevel world, ConveyorOutput output, @Nullable BlockPos preferredBlock, Set<BlockPos> attachedBlocks) {
-        if (preferredBlock != null && !attachedBlocks.contains(preferredBlock) && canAttachInventory(world, output, preferredBlock))
+        BlockPos conveyorPos = output.expectedInputPos();
+        if (preferredBlock != null && !attachedBlocks.contains(preferredBlock) && canAttachInventory(world, conveyorPos, output, preferredBlock))
             return preferredBlock;
 
         BlockPos outputPos = output.deliveryPos();
         if (attachedBlocks.contains(outputPos) || isConveyor(world, outputPos))
             return null;
 
-        return canAttachInventory(world, output, outputPos) ? outputPos : null;
+        return canAttachInventory(world, conveyorPos, output, outputPos) ? outputPos : null;
     }
 
-    private boolean canAttachInventory(ServerLevel world, ConveyorOutput output, BlockPos connectedBlock) {
-        return output.deliveryPos().equals(connectedBlock)
-                && !isConveyor(world, connectedBlock)
-                && TransferType.ITEM.lookup(world, connectedBlock, output.inventoryInsertSide()) != null;
+    private boolean canAttachInventory(ServerLevel world, BlockPos conveyorPos, ConveyorOutput output, BlockPos connectedBlock) {
+        if (!output.deliveryPos().equals(connectedBlock) || isConveyor(world, connectedBlock))
+            return false;
+
+        BlockState conveyorState = world.getBlockState(conveyorPos);
+        if (!(conveyorState.getBlock() instanceof ConveyorLike conveyor))
+            return false;
+
+        if (!conveyor.canAttachToStorageOutput(world, conveyorPos, conveyorState, output, connectedBlock))
+            return false;
+
+        Storage<ItemVariant> storage = TransferType.ITEM.lookup(world, connectedBlock, output.inventoryInsertSide());
+        return storage != null && storage.supportsInsertion();
     }
 
     private static Map<BlockPos, Map<String, BlockPos>> copyConnectedBlocks(Map<BlockPos, Map<String, BlockPos>> connectedBlocks) {

@@ -67,6 +67,7 @@ public class ConveyorStorage {
     }
 
     public List<ConveyorItem> getItems() {
+        sanitizeItems();
         return items;
     }
 
@@ -88,6 +89,9 @@ public class ConveyorStorage {
     }
 
     public boolean addItem(ConveyorItem item) {
+        if (item == null || item.getStack() == null || item.getStack().isEmpty())
+            return false;
+
         if (isFull() || !canAcceptIncomingItem())
             return false;
 
@@ -108,14 +112,17 @@ public class ConveyorStorage {
     }
 
     public boolean isEmpty() {
+        sanitizeItems();
         return this.items.isEmpty();
     }
 
     public boolean isFull() {
+        sanitizeItems();
         return this.items.size() >= this.itemContainer.getContainerSize();
     }
 
     public boolean canAcceptIncomingItem() {
+        sanitizeItems();
         if (isFull())
             return false;
 
@@ -129,6 +136,7 @@ public class ConveyorStorage {
     }
 
     public boolean canMove(ConveyorItem movingItem, int startProgress, int endProgress) {
+        sanitizeItems();
         if (movingItem == null || startProgress == endProgress)
             return true;
 
@@ -170,5 +178,9 @@ public class ConveyorStorage {
             return MAX_PROGRESS;
 
         return Math.max(1, (int) Math.ceil(MAX_PROGRESS / (double) itemLimit));
+    }
+
+    private void sanitizeItems() {
+        this.items.removeIf(item -> item == null || item.getStack() == null || item.getStack().isEmpty());
     }
 }

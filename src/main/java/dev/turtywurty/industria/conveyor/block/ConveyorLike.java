@@ -31,6 +31,15 @@ public interface ConveyorLike {
         // NO-OP
     }
 
+    default boolean canAttachToStorageOutput(Level level, BlockPos pos, BlockState state, ConveyorOutput output, BlockPos storagePos) {
+        return false;
+    }
+
+    default boolean canOutputToStorage(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorOutput output,
+                                       BlockPos storagePos, ConveyorNetwork network, ConveyorRoutingState routingState) {
+        return canAttachToStorageOutput(level, pos, state, output, storagePos);
+    }
+
     default void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorRoutingState routingState) {
         // NO-OP
     }

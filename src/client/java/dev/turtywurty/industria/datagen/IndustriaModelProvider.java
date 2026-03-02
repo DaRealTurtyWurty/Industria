@@ -6,6 +6,7 @@ import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.FeederConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.HatchConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
@@ -126,6 +127,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createFeederConveyorBlockModelDefinitionCreator(BlockInit.FEEDER_CONVEYOR, "feeder_conveyor"));
     }
 
+    private static void registerHatchConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createHatchConveyorBlockModelDefinitionCreator(BlockInit.HATCH_CONVEYOR, "hatch_conveyor"));
+    }
+
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
     }
@@ -244,6 +249,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             generator.with(new ConditionBuilder()
                             .term(FeederConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
+    private static BlockModelDefinitionGenerator createHatchConveyorBlockModelDefinitionCreator(HatchConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(HatchConveyorBlock.FACING, direction),
                     createWeightedVariant(modelId, rotationFor(direction)));
         }
 
@@ -379,6 +397,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerSplitterConveyor(blockStateModelGenerator);
         registerMergerConveyor(blockStateModelGenerator);
         registerFeederConveyor(blockStateModelGenerator);
+        registerHatchConveyor(blockStateModelGenerator);
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {

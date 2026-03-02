@@ -44,7 +44,16 @@ public class ConveyorItemContainer implements Container, StackedContentsCompatib
 
     @Override
     public ItemStack getItem(int slot) {
-        return this.items.size() > slot ? this.items.get(slot).getStack() : ItemStack.EMPTY;
+        if (slot < 0 || this.items.size() <= slot)
+            return ItemStack.EMPTY;
+
+        ItemStack stack = this.items.get(slot).getStack();
+        if (stack == null || stack.isEmpty()) {
+            this.items.remove(slot);
+            return ItemStack.EMPTY;
+        }
+
+        return stack;
     }
 
     @Override
@@ -77,6 +86,14 @@ public class ConveyorItemContainer implements Container, StackedContentsCompatib
 
     @Override
     public void setItem(int slot, ItemStack itemStack) {
+        if (slot < 0 || this.items.size() <= slot)
+            return;
+
+        if (itemStack == null || itemStack.isEmpty()) {
+            this.items.remove(slot);
+            return;
+        }
+
         this.items.get(slot).setStack(itemStack);
     }
 
@@ -103,7 +120,10 @@ public class ConveyorItemContainer implements Container, StackedContentsCompatib
     @Override
     public void fillStackedContents(StackedItemContents contents) {
         for (ConveyorItem item : items) {
-            contents.accountStack(item.getStack());
+            ItemStack stack = item.getStack();
+            if (stack != null && !stack.isEmpty()) {
+                contents.accountStack(stack);
+            }
         }
     }
 }

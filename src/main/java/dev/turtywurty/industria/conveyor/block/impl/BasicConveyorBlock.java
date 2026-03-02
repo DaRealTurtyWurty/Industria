@@ -437,20 +437,16 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         ConveyorOutput output = topology.outputs().getFirst();
         int score = 0;
 
-        // Downstream scoring: Prefer connecting to other conveyors, then inventories, then empty space.
+        // Downstream scoring: Prefer connecting to other conveyors, then empty space.
         if (connectsToConveyorInput(level, pos, output.deliveryPos())) {
             score += 100;
-        } else if (connectsToInventory(level, pos, output.deliveryPos())) {
-            score += 60;
         } else if (level.isEmptyBlock(output.deliveryPos())) {
             score += 5;
         }
 
-        // Upstream scoring: Prefer receiving from conveyors, then inserting into inventories.
+        // Upstream scoring: Prefer receiving from other conveyors.
         if (connectsFromConveyorOutput(level, input.expectedSourcePos(), pos)) {
             score += 80;
-        } else if (inventoryCanInsert(level, pos, input.expectedSourcePos())) {
-            score += 40;
         }
 
         // Small preference for straight shapes for aesthetic reasons.

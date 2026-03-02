@@ -26,6 +26,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity {
@@ -60,30 +62,24 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
     }
 
     private void tryInitialize() {
-        if (this.networkId == null) {
-            ConveyorNetworkManager manager = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level).getNetworkManager();
-            ConveyorNetwork network = manager.getNetworkAt(this.worldPosition);
-            if (network != null) {
-                this.networkId = network.getId();
-            } else {
-                manager.traverseCreateNetwork((ServerLevel) this.level, this.worldPosition);
-                network = manager.getNetworkAt(this.worldPosition);
-                if (network != null) {
-                    this.networkId = network.getId();
-                }
-            }
+        ConveyorNetworkManager manager = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level).getNetworkManager();
+        ConveyorNetwork network = manager.getNetworkAt(this.worldPosition);
+        if (network == null) {
+            manager.traverseCreateNetwork((ServerLevel) this.level, this.worldPosition);
+            network = manager.getNetworkAt(this.worldPosition);
         }
 
-        if (this.conveyorStorage == null && this.networkId != null) {
-            ConveyorNetworkManager manager = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level).getNetworkManager();
-            ConveyorNetwork network = manager.getNetwork(this.networkId);
-            if (network != null) {
-                ConveyorNetworkStorage networkStorage = network.getStorage();
-                if (networkStorage != null) {
-                    ConveyorStorage conveyorStorage = networkStorage.getStorageAt(this.level, this.worldPosition);
-                    this.conveyorStorage = new FeederItemStorage((ServerLevel) this.level, conveyorStorage);
-                }
-            }
+        if (network == null) {
+            this.networkId = null;
+            this.conveyorStorage = null;
+            return;
+        }
+
+        this.networkId = network.getId();
+
+        ConveyorStorage conveyorStorage = network.getStorage().getStorageAt(this.level, this.worldPosition);
+        if (this.conveyorStorage == null || !this.conveyorStorage.isFor(conveyorStorage)) {
+            this.conveyorStorage = new FeederItemStorage((ServerLevel) this.level, conveyorStorage);
         }
     }
 
@@ -99,24 +95,49 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
                 if (variantToPull != null) {
                     long extracted = storageToPullFrom.extract(variantToPull, 1, transaction);
                     if (extracted > 0) {
-                        transaction.commit();
-
                         ItemStack extractedStack = variantToPull.toStack((int) extracted);
-                        addItemToStorage(extractedStack);
+                        if (addItemToStorage(extractedStack)) {
+                            transaction.commit();
+                        }
                     }
                 }
             }
         }
     }
 
-    private void addItemToStorage(ItemStack extractedStack) {
+    private boolean addItemToStorage(ItemStack extractedStack) {
+        if (extractedStack.isEmpty())
+            return false;
+
         LevelConveyorNetworks networks = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level);
         ConveyorNetworkManager manager = networks.getNetworkManager();
-        ConveyorNetwork network = manager.getNetwork(this.networkId);
-        if (network != null) {
-            network.getStorage().addItems(this.level, this.worldPosition, extractedStack);
-            manager.syncNetwork((ServerLevel) this.level, network);
+        ConveyorNetwork network = manager.getNetworkAt(this.worldPosition);
+        if (network == null) {
+            manager.traverseCreateNetwork((ServerLevel) this.level, this.worldPosition);
+            network = manager.getNetworkAt(this.worldPosition);
         }
+
+        if (network == null)
+            return false;
+
+        this.networkId = network.getId();
+
+        ConveyorStorage storage = network.getStorage().getStorageAt(this.level, this.worldPosition);
+        ConveyorItem conveyorItem = new ConveyorItem(this.worldPosition, extractedStack.copy());
+        if (!storage.addItem(conveyorItem))
+            return false;
+
+        BlockState state = this.level.getBlockState(this.worldPosition);
+        if (state.getBlock() instanceof ConveyorLike conveyor) {
+            conveyor.selectOutput(this.level, this.worldPosition, state, conveyorItem, network, manager);
+        }
+
+        if (this.conveyorStorage == null || !this.conveyorStorage.isFor(storage)) {
+            this.conveyorStorage = new FeederItemStorage((ServerLevel) this.level, storage);
+        }
+
+        manager.syncNetwork((ServerLevel) this.level, network);
+        return true;
     }
 
     private static @Nullable ItemVariant findItemVariant(Storage<ItemVariant> storageToPullFrom) {
@@ -148,14 +169,12 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
     private static final class FeederItemStorage extends SnapshotParticipant<PendingInsert> implements Storage<ItemVariant> {
         private final ServerLevel level;
         private final ConveyorStorage conveyorStorage;
-        private final Storage<ItemVariant> delegate;
 
         private PendingInsert pendingInsert;
 
         private FeederItemStorage(ServerLevel level, ConveyorStorage conveyorStorage) {
             this.level = level;
             this.conveyorStorage = conveyorStorage;
-            this.delegate = conveyorStorage.getItemStorage();
         }
 
         @Override
@@ -163,7 +182,8 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
             if (resource.isBlank() || maxAmount <= 0)
                 return 0;
 
-            if (this.pendingInsert != null || !this.conveyorStorage.canAcceptIncomingItem())
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            if (this.pendingInsert != null || conveyorStorage == null || !conveyorStorage.canAcceptIncomingItem())
                 return 0;
 
             updateSnapshots(transaction);
@@ -173,32 +193,46 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
 
         @Override
         public boolean supportsExtraction() {
-            return this.delegate.supportsExtraction();
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null && conveyorStorage.getItemStorage().supportsExtraction();
         }
 
         @Override
         public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-            return this.delegate.extract(resource, maxAmount, transaction);
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null
+                    ? conveyorStorage.getItemStorage().extract(resource, maxAmount, transaction)
+                    : 0;
         }
 
         @Override
         public Iterator<StorageView<ItemVariant>> iterator() {
-            return this.delegate.iterator();
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null
+                    ? conveyorStorage.getItemStorage().iterator()
+                    : List.<StorageView<ItemVariant>>of().iterator();
         }
 
         @Override
         public Iterator<StorageView<ItemVariant>> nonEmptyIterator() {
-            return this.delegate.nonEmptyIterator();
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null
+                    ? conveyorStorage.getItemStorage().nonEmptyIterator()
+                    : List.<StorageView<ItemVariant>>of().iterator();
         }
 
         @Override
         public Iterable<StorageView<ItemVariant>> nonEmptyViews() {
-            return this.delegate.nonEmptyViews();
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null
+                    ? conveyorStorage.getItemStorage().nonEmptyViews()
+                    : List.of();
         }
 
         @Override
         public long getVersion() {
-            return this.delegate.getVersion();
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null ? conveyorStorage.getItemStorage().getVersion() : 0;
         }
 
         @Override
@@ -218,36 +252,54 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
             if (this.pendingInsert == null)
                 return;
 
-            commitInsert(this.level, this.conveyorStorage, this.pendingInsert.variant());
+            commitInsert(this.level, this.conveyorStorage.getPos(), this.pendingInsert.variant());
             this.pendingInsert = null;
         }
 
-        private static void commitInsert(ServerLevel level, ConveyorStorage conveyorStorage, ItemVariant variant) {
+        private @Nullable ConveyorStorage resolveConveyorStorage() {
+            LevelConveyorNetworks networks = LevelConveyorNetworks.getOrCreate(this.level);
+            ConveyorNetworkManager manager = networks.getNetworkManager();
+            ConveyorNetwork network = manager.getNetworkAt(this.conveyorStorage.getPos());
+            if (network == null) {
+                manager.traverseCreateNetwork(this.level, this.conveyorStorage.getPos());
+                network = manager.getNetworkAt(this.conveyorStorage.getPos());
+            }
+
+            return network != null ? network.getStorage().getStorageAt(this.level, this.conveyorStorage.getPos()) : null;
+        }
+
+        private static void commitInsert(ServerLevel level, BlockPos conveyorPos, ItemVariant variant) {
             LevelConveyorNetworks networks = LevelConveyorNetworks.getOrCreate(level);
             ConveyorNetworkManager manager = networks.getNetworkManager();
-            ConveyorNetwork network = manager.getNetworkAt(conveyorStorage.getPos());
+            ConveyorNetwork network = manager.getNetworkAt(conveyorPos);
             if (network == null) {
-                manager.traverseCreateNetwork(level, conveyorStorage.getPos());
-                network = manager.getNetworkAt(conveyorStorage.getPos());
+                manager.traverseCreateNetwork(level, conveyorPos);
+                network = manager.getNetworkAt(conveyorPos);
             }
 
             if (network == null)
                 return;
 
-            var conveyorItem = new ConveyorItem(conveyorStorage.getPos(), variant.toStack(1));
+            ConveyorStorage conveyorStorage = network.getStorage().getStorageAt(level, conveyorPos);
+            var conveyorItem = new ConveyorItem(conveyorPos, variant.toStack(1));
             if (!conveyorStorage.addItem(conveyorItem))
                 return;
 
-            BlockState state = level.getBlockState(conveyorStorage.getPos());
+            BlockState state = level.getBlockState(conveyorPos);
             if (state.getBlock() instanceof ConveyorLike conveyor) {
-                conveyor.selectOutput(level, conveyorStorage.getPos(), state, conveyorItem, network, manager);
+                conveyor.selectOutput(level, conveyorPos, state, conveyorItem, network, manager);
             }
 
             manager.syncNetwork(level, network);
         }
 
         public boolean canAcceptItem() {
-            return this.conveyorStorage.canAcceptIncomingItem();
+            ConveyorStorage conveyorStorage = resolveConveyorStorage();
+            return conveyorStorage != null && conveyorStorage.canAcceptIncomingItem();
+        }
+
+        public boolean isFor(ConveyorStorage conveyorStorage) {
+            return Objects.equals(this.conveyorStorage, conveyorStorage);
         }
     }
 
