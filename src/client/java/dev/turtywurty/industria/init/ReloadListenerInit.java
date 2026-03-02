@@ -16,5 +16,10 @@ public final class ReloadListenerInit {
                 Industria.id("client_conveyor_networks"),
                 ConveyorNetworkLevelRenderer.ReloadListener.INSTANCE
         );
+
+        clientResourceLoader.registerReloadListener(
+                Industria.id("conveyor_special_renderer"),
+                ConveyorSpecialRendererInit.ReloadListener.INSTANCE
+        );
     }
 }

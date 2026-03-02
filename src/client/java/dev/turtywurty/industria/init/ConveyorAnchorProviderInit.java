@@ -1,21 +1,37 @@
 package dev.turtywurty.industria.init;
 
+import com.google.common.collect.ImmutableMap;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.model.conveyor.*;
 import dev.turtywurty.industria.renderer.world.ConveyorNetworkLevelRenderer;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public final class ConveyorAnchorProviderInit {
     private ConveyorAnchorProviderInit() {
     }
 
+    private static final Map<Block, Function<BlockState, Map<String, Model<?>>>> ANCHOR_PROVIDERS = new Object2ObjectOpenHashMap<>();
+
+    public static void registerAnchorProvider(Block block, Function<BlockState, Map<String, Model<?>>> provider) {
+        ANCHOR_PROVIDERS.put(block, provider);
+    }
+
+    public static Map<Block, Function<BlockState, Map<String, Model<?>>>> getAnchorProviders() {
+        return ImmutableMap.copyOf(ANCHOR_PROVIDERS);
+    }
+
     public static void init() {
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.CONVEYOR, blockState -> {
+        registerAnchorProvider(BlockInit.CONVEYOR, blockState -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE, switch (blockState.getValue(BasicConveyorBlock.SHAPE)) {
                 case STRAIGHT ->
@@ -29,7 +45,7 @@ public final class ConveyorAnchorProviderInit {
             });
         });
 
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.SPLITTER_CONVEYOR, _ -> {
+        registerAnchorProvider(BlockInit.SPLITTER_CONVEYOR, _ -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(
                     SplitterConveyorBlock.LEFT_OUTPUT_ID,
@@ -39,7 +55,7 @@ public final class ConveyorAnchorProviderInit {
             );
         });
 
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.MERGER_CONVEYOR, _ -> {
+        registerAnchorProvider(BlockInit.MERGER_CONVEYOR, _ -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(
                     MergerConveyorBlock.LEFT_INPUT_ID,
@@ -49,13 +65,13 @@ public final class ConveyorAnchorProviderInit {
             );
         });
 
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.FEEDER_CONVEYOR, _ -> {
+        registerAnchorProvider(BlockInit.FEEDER_CONVEYOR, _ -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
                     new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION)));
         });
 
-        ConveyorNetworkLevelRenderer.registerAnchorProvider(BlockInit.HATCH_CONVEYOR, _ -> {
+        registerAnchorProvider(BlockInit.HATCH_CONVEYOR, _ -> {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
                     new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION)));

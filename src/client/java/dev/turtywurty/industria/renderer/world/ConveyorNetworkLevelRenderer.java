@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.conveyor.*;
 import dev.turtywurty.industria.conveyor.block.ConveyorLike;
 import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
 import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
-import dev.turtywurty.industria.conveyor.*;
 import dev.turtywurty.industria.data.ClientConveyorNetworks;
+import dev.turtywurty.industria.init.ConveyorAnchorProviderInit;
+import dev.turtywurty.industria.init.ConveyorSpecialRendererInit;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
@@ -34,20 +36,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector3d;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
     public static final String DEFAULT_ANCHOR_ROUTE = "default";
@@ -57,14 +53,8 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
     private static final Map<UUID, SmoothedProgressState> ITEM_PROGRESS_SMOOTHING = new Object2ObjectOpenHashMap<>();
     private static final Map<UUID, SmoothedDirectionState> ITEM_DIRECTION_SMOOTHING = new Object2ObjectOpenHashMap<>();
 
-    private static final Map<Block, Function<BlockState, Map<String, Model<?>>>> ANCHOR_PROVIDERS = new Object2ObjectOpenHashMap<>();
-
-    public static void registerAnchorProvider(Block block, Function<BlockState, Map<String, Model<?>>> provider) {
-        ANCHOR_PROVIDERS.put(block, provider);
-    }
-
     private static void loadAnchorCache() {
-        ANCHOR_PROVIDERS.forEach((block, provider) -> {
+        ConveyorAnchorProviderInit.getAnchorProviders().forEach((block, provider) -> {
             ImmutableList<BlockState> possibleStates = block.getStateDefinition().getPossibleStates();
             for (BlockState state : possibleStates) {
                 if (!ITEM_ANCHORS_CACHE.containsKey(state)) {
@@ -167,14 +157,14 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
         ResourceKey<Level> dimension = level.dimension();
         ConveyorNetworkManager manager = ClientConveyorNetworks.get(dimension);
-        if(manager == null) {
+        if (manager == null) {
             ITEM_PROGRESS_SMOOTHING.clear();
             ITEM_DIRECTION_SMOOTHING.clear();
             return;
         }
 
         for (ConveyorNetwork network : manager.getNetworks()) {
-            if(DebugRenderingRegistry.debugRendering) {
+            if (DebugRenderingRegistry.debugRendering) {
                 renderConveyorNetwork(network, level);
             }
 
@@ -186,6 +176,25 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 if (!(state.getBlock() instanceof ConveyorLike))
                     continue;
 
+                int lightCoords = LevelRenderer.getLightCoords(level, conveyorPos);
+
+                ConveyorSpecialRendererInit.ConveyorSpecialRendererEntry rendererEntry = ConveyorSpecialRendererInit.getRenderer(state);
+                ConveyorSpecialRendererInit.RenderContext renderContext = null;
+                if (rendererEntry != null) {
+                    renderContext = new ConveyorSpecialRendererInit.RenderContext(
+                            context, partialTick, gameTime, manager, network, networkStorage, conveyorPos, lightCoords,
+                            conveyorStorage, state, new AtomicReference<>());
+                }
+
+                if (rendererEntry != null && !rendererEntry.afterItemRendering()) {
+                    if (rendererEntry.overrideItemRendering()) {
+                        rendererEntry.renderer().render(renderContext);
+                        continue;
+                    } else {
+                        rendererEntry.renderer().render(renderContext);
+                    }
+                }
+
                 Map<String, List<Vector3d>> itemAnchorsByRoute;
                 if (ITEM_ANCHORS_CACHE.containsKey(state)) {
                     itemAnchorsByRoute = ITEM_ANCHORS_CACHE.get(state);
@@ -193,8 +202,6 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                     Industria.LOGGER.warn("No item anchors found for conveyor block state: {}.", state);
                     continue;
                 }
-
-                int lightCoords = LevelRenderer.getLightCoords(level, conveyorPos);
 
                 Vec3 pos = conveyorPos.getCenter();
                 Camera camera = minecraft.gameRenderer.getMainCamera();
@@ -204,10 +211,19 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 poseStack.pushPose();
                 poseStack.translate(pos.x, pos.y, pos.z);
 
+                Map<ConveyorItem, Pair<List<Vector3d>, Float>> itemRenderData = new HashMap<>();
                 for (ConveyorItem conveyorItem : conveyorStorage.getItems()) {
                     List<Vector3d> itemAnchors = resolveItemAnchors(conveyorItem, itemAnchorsByRoute);
                     float smoothedProgress = getSmoothedProgress(conveyorItem, conveyorPos, gameTime, partialTick, visibleItems);
                     renderConveyorItem(conveyorItem, conveyorPos, smoothedProgress, itemAnchors, poseStack, nodeCollector, lightCoords, gameTime, partialTick);
+                    if (rendererEntry != null && rendererEntry.afterItemRendering()) {
+                        itemRenderData.put(conveyorItem, Pair.of(itemAnchors, smoothedProgress));
+                    }
+                }
+
+                if (rendererEntry != null && rendererEntry.afterItemRendering()) {
+                    renderContext.itemRenderData().set(itemRenderData);
+                    rendererEntry.renderer().render(renderContext);
                 }
 
                 poseStack.popPose();
@@ -373,7 +389,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         return new Vector3d(direction).normalize();
     }
 
-    private static Vector3d interpolateAnchorPosition(List<Vector3d> itemAnchors, float normalizedProgress) {
+    public static Vector3d interpolateAnchorPosition(List<Vector3d> itemAnchors, float normalizedProgress) {
         if (itemAnchors.isEmpty())
             return new Vector3d(0, 0, 0);
 

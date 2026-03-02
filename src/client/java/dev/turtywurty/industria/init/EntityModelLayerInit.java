@@ -2,12 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.model.*;
-import dev.turtywurty.industria.model.conveyor.CornerTurnConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.MergerConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.SplitterConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.StraightConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.VerticalDownConveyorAnchorPositionsModel;
-import dev.turtywurty.industria.model.conveyor.VerticalUpConveyorAnchorPositionsModel;
+import dev.turtywurty.industria.model.conveyor.*;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -46,6 +41,7 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION, SplitterConveyorAnchorPositionsModel::createRightLayer);
         ModelLayerRegistry.registerModelLayer(VerticalUpConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalUpConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(VerticalDownConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalDownConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(ConveyorFlapsModel.LAYER_LOCATION, ConveyorFlapsModel::createMainLayer);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             var normalLayer = new ModelLayerLocation(Industria.id("boat/" + woodSet.getName()), "main");
