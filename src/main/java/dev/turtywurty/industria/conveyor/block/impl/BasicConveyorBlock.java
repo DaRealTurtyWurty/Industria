@@ -258,7 +258,7 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
     public int getItemLimit(Level level, BlockPos pos, BlockState state) {
         ConveyorShape shape = state.getValue(SHAPE);
         return switch (shape) {
-            case STRAIGHT, TURN_LEFT, TURN_RIGHT -> 5;
+            case STRAIGHT, TURN_LEFT, TURN_RIGHT -> 3;
             case UP, DOWN -> 3;
         };
     }

@@ -214,7 +214,7 @@ public class SplitterConveyorBlock extends BaseConveyorBlock {
 
     @Override
     public int getItemLimit(Level level, BlockPos pos, BlockState state) {
-        return 5;
+        return 3;
     }
 
     @Override
