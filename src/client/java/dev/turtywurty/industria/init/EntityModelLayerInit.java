@@ -42,6 +42,7 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(VerticalUpConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalUpConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(VerticalDownConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalDownConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(ConveyorFlapsModel.LAYER_LOCATION, ConveyorFlapsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(SideInjectorConveyorAnchorModel.LAYER_LOCATION, SideInjectorConveyorAnchorModel::createMainLayer);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             var normalLayer = new ModelLayerLocation(Industria.id("boat/" + woodSet.getName()), "main");

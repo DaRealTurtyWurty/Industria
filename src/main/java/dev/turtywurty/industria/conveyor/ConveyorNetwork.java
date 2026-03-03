@@ -4,11 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.turtywurty.industria.conveyor.block.ConveyorLike;
-import dev.turtywurty.industria.conveyor.block.ConveyorInput;
-import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
-import dev.turtywurty.industria.conveyor.block.ConveyorRoutingState;
-import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
+import dev.turtywurty.industria.conveyor.block.*;
 import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.util.ExtraCodecs;
@@ -29,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -320,15 +315,17 @@ public class ConveyorNetwork {
         if (output == null)
             return null;
 
-        return new SelectedOutput(output, getNextConveyor(level, output));
+        return new SelectedOutput(output, getNextConveyor(level, conveyorPos, state, output));
     }
 
     @Nullable
-    private BlockPos getNextConveyor(Level level, ConveyorOutput output) {
+    private BlockPos getNextConveyor(Level level, BlockPos sourcePos, BlockState sourceState, ConveyorOutput output) {
+        if (!(sourceState.getBlock() instanceof ConveyorLike sourceConveyor))
+            return null;
+
         for (BlockPos nextPos : getCandidateOutputTargets(output.deliveryPos())) {
             BlockState nextState = level.getBlockState(nextPos);
-            ConveyorTopology nextTopology = getTopology(level, nextPos, nextState);
-            if (nextTopology != null && nextTopology.acceptsInputFrom(output.expectedInputPos()))
+            if (sourceConveyor.canConnectToConveyor(level, sourcePos, sourceState, output, nextPos, nextState))
                 return nextPos;
         }
 
@@ -422,7 +419,7 @@ public class ConveyorNetwork {
         if (output == null)
             return false;
 
-        BlockPos nextConveyorPos = getNextConveyor(level, output);
+        BlockPos nextConveyorPos = getNextConveyor(level, sourcePos, sourceState, output);
         return targetPos.equals(nextConveyorPos);
     }
 

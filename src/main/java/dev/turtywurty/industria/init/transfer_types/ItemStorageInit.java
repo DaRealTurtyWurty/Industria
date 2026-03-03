@@ -30,7 +30,7 @@ public class ItemStorageInit {
                 return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
 
             return null;
-        }, BlockInit.CONVEYOR, BlockInit.SPLITTER_CONVEYOR, BlockInit.MERGER_CONVEYOR, BlockInit.HATCH_CONVEYOR);
+        }, BlockInit.CONVEYOR, BlockInit.SPLITTER_CONVEYOR, BlockInit.MERGER_CONVEYOR, BlockInit.HATCH_CONVEYOR, BlockInit.SIDE_INJECTOR_CONVEYOR);
 
         ItemStorage.SIDED.registerForBlocks((level, _, _, blockEntity, side) -> {
             if (level instanceof ServerLevel && blockEntity instanceof FeederConveyorBlockEntity feeder)

@@ -105,6 +105,7 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootSubProvider 
         dropSelf(BlockInit.MERGER_CONVEYOR);
         dropSelf(BlockInit.FEEDER_CONVEYOR);
         dropSelf(BlockInit.HATCH_CONVEYOR);
+        dropSelf(BlockInit.SIDE_INJECTOR_CONVEYOR);
 
         dropSelf(BlockInit.MIXER);
         dropSelf(BlockInit.DIGESTER);

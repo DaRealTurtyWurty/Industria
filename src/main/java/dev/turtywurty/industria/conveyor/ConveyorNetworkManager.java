@@ -644,7 +644,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
         Map<ConveyorOutput, BlockPos> connectedOutputs = new LinkedHashMap<>();
 
         for (ConveyorOutput output : topology.outputs()) {
-            BlockPos connectedConveyor = findConnectedOutputConveyor(world, output, conveyorSet);
+            BlockPos connectedConveyor = findConnectedOutputConveyor(world, conveyorPos, conveyorState, output, conveyorSet);
             if (connectedConveyor != null) {
                 connectedOutputs.put(output, connectedConveyor);
             }
@@ -675,13 +675,11 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
                 : null;
     }
 
-    protected boolean acceptsInputFrom(Level world, BlockState conveyorState, BlockPos conveyorPos, BlockPos expectedInputPos) {
-        ConveyorTopology topology = getConveyorTopology(world, conveyorPos, conveyorState);
-        return topology != null && topology.acceptsInputFrom(expectedInputPos);
-    }
-
     protected boolean connectsToConveyor(ServerLevel world, BlockPos fromPos, BlockPos toPos) {
         BlockState fromState = world.getBlockState(fromPos);
+        if (!(fromState.getBlock() instanceof ConveyorLike sourceConveyor))
+            return false;
+
         ConveyorTopology topology = getConveyorTopology(world, fromPos, fromState);
         if (topology == null)
             return false;
@@ -690,7 +688,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
             if (!getCandidateOutputTargets(output.deliveryPos()).contains(toPos))
                 continue;
 
-            if (acceptsInputFrom(world, world.getBlockState(toPos), toPos, output.expectedInputPos()))
+            if (sourceConveyor.canConnectToConveyor(world, fromPos, fromState, output, toPos, world.getBlockState(toPos)))
                 return true;
         }
 
@@ -698,7 +696,11 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
     }
 
     @Nullable
-    private BlockPos findConnectedOutputConveyor(Level world, ConveyorOutput output, @Nullable Set<BlockPos> conveyorSet) {
+    private BlockPos findConnectedOutputConveyor(Level world, BlockPos sourcePos, BlockState sourceState, ConveyorOutput output,
+                                                 @Nullable Set<BlockPos> conveyorSet) {
+        if (!(sourceState.getBlock() instanceof ConveyorLike sourceConveyor))
+            return null;
+
         for (BlockPos candidatePos : getCandidateOutputTargets(output.deliveryPos())) {
             if (conveyorSet != null && !conveyorSet.contains(candidatePos))
                 continue;
@@ -707,7 +709,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
                 continue;
 
             BlockState outputState = world.getBlockState(candidatePos);
-            if (acceptsInputFrom(world, outputState, candidatePos, output.expectedInputPos()))
+            if (sourceConveyor.canConnectToConveyor(world, sourcePos, sourceState, output, candidatePos, outputState))
                 return candidatePos;
         }
 

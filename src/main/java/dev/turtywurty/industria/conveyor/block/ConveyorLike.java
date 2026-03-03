@@ -43,4 +43,28 @@ public interface ConveyorLike {
     default void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorRoutingState routingState) {
         // NO-OP
     }
+
+    default ConveyorConnectionType getConnectionType(Level level, BlockPos pos, BlockState state, ConveyorOutput output) {
+        return ConveyorConnectionType.STANDARD;
+    }
+
+    default boolean canConnectToConveyor(Level level, BlockPos pos, BlockState state, ConveyorOutput output, BlockPos targetPos, BlockState targetState) {
+        if (!(targetState.getBlock() instanceof ConveyorLike targetConveyor))
+            return false;
+
+        return targetConveyor.canAcceptIncomingConnection(
+                level,
+                targetPos,
+                targetState,
+                pos,
+                state,
+                output,
+                getConnectionType(level, pos, state, output));
+    }
+
+    default boolean canAcceptIncomingConnection(Level level, BlockPos pos, BlockState state, BlockPos sourcePos, BlockState sourceState,
+                                                ConveyorOutput sourceOutput, ConveyorConnectionType connectionType) {
+        return connectionType == ConveyorConnectionType.STANDARD
+                && getTopology(level, pos, state).acceptsInputFrom(sourceOutput.expectedInputPos());
+    }
 }

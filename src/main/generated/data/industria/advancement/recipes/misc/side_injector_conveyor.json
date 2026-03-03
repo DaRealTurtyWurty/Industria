@@ -11,11 +11,11 @@
       },
       "trigger": "minecraft:inventory_changed"
     },
-    "has_hopper": {
+    "has_piston": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:hopper"
+            "items": "minecraft:piston"
           }
         ]
       },
@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:hatch_conveyor"
+        "recipe": "industria:side_injector_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -31,13 +31,13 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_hopper",
+      "has_piston",
       "has_conveyor"
     ]
   ],
   "rewards": {
     "recipes": [
-      "industria:hatch_conveyor"
+      "industria:side_injector_conveyor"
     ]
   }
 }

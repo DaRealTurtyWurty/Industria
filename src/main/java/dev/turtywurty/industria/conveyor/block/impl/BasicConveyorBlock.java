@@ -5,10 +5,7 @@ import dev.turtywurty.industria.conveyor.ConveyorNetwork;
 import dev.turtywurty.industria.conveyor.ConveyorNetworkManager;
 import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.conveyor.block.*;
-import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -480,22 +477,23 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
                 .anyMatch(output -> output.deliveryPos().equals(toPos));
     }
 
-    public boolean connectsToInventory(Level level, BlockPos fromPos, BlockPos toPos) {
-        int dx = fromPos.getX() - toPos.getX();
-        int dz = fromPos.getZ() - toPos.getZ();
-        Direction sideTowardConveyor = Direction.getApproximateNearest(dx, 0, dz);
+    @Override
+    public boolean canAcceptIncomingConnection(Level level, BlockPos pos, BlockState state, BlockPos sourcePos, BlockState sourceState,
+                                               ConveyorOutput sourceOutput, ConveyorConnectionType connectionType) {
+        boolean accepts = super.canAcceptIncomingConnection(level, pos, state, sourcePos, sourceState, sourceOutput, connectionType);
+        if (accepts)
+            return true;
 
-        Storage<ItemVariant> storage = TransferType.ITEM.getBlockLookup().find(level, toPos, sideTowardConveyor);
-        return storage != null && storage.supportsInsertion();
-    }
+        if (connectionType != ConveyorConnectionType.SIDE_INJECT
+                || state.getValue(SHAPE) != ConveyorShape.STRAIGHT
+                || !sourceOutput.deliveryPos().equals(pos)) {
+            return false;
+        }
 
-    public boolean inventoryCanInsert(Level level, BlockPos fromPos, BlockPos toPos) {
-        int dx = fromPos.getX() - toPos.getX();
-        int dz = fromPos.getZ() - toPos.getZ();
-        Direction sideTowardConveyor = Direction.getApproximateNearest(dx, 0, dz);
-
-        Storage<ItemVariant> storage = TransferType.ITEM.getBlockLookup().find(level, toPos, sideTowardConveyor);
-        return storage != null && storage.supportsExtraction();
+        Direction facing = state.getValue(FACING);
+        BlockPos leftPos = pos.relative(facing.getCounterClockWise());
+        BlockPos rightPos = pos.relative(facing.getClockWise());
+        return sourcePos.equals(leftPos) || sourcePos.equals(rightPos);
     }
 
     public boolean computeEnabled(Level level, BlockPos pos, BlockState state) {

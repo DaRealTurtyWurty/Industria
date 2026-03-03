@@ -5,10 +5,10 @@ import dev.turtywurty.industria.conveyor.ConveyorNetwork;
 import dev.turtywurty.industria.conveyor.ConveyorNetworkManager;
 import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.conveyor.block.BaseConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.ConveyorConnectionType;
 import dev.turtywurty.industria.conveyor.block.ConveyorInput;
 import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
 import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
-import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,21 +39,18 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-public class FeederConveyorBlock extends BaseConveyorBlock {
+public class SideInjectorConveyorBlock extends BaseConveyorBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final Property<Boolean> ENABLED = BooleanProperty.create("enabled");
 
-    public FeederConveyorBlock(Properties settings) {
+    public SideInjectorConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
                 .addStateProperty(FACING, Direction.NORTH)
                 .addStateProperty(WATERLOGGED, false)
                 .addStateProperty(ENABLED, true)
                 .notPlaceFacingOpposite()
                 .hasComparatorOutput()
-                .blockEntityProperties(
-                        new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.FEEDER_CONVEYOR)
-                                .shouldTick())
         );
     }
 
@@ -120,11 +117,21 @@ public class FeederConveyorBlock extends BaseConveyorBlock {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         FluidState fluidState = level.getFluidState(pos);
+        boolean waterlogged = fluidState.getType() == Fluids.WATER;
+        boolean enabled = !level.hasNeighborSignal(pos);
+        Direction preferredFacing = context.getHorizontalDirection();
 
-        return defaultBlockState()
-                .setValue(FACING, context.getHorizontalDirection())
-                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER)
-                .setValue(ENABLED, !level.hasNeighborSignal(pos));
+        for (Direction facing : getPlacementOrder(preferredFacing)) {
+            BlockState candidateState = defaultBlockState()
+                    .setValue(FACING, facing)
+                    .setValue(WATERLOGGED, waterlogged)
+                    .setValue(ENABLED, enabled);
+
+            if (isValidInjectorPlacement(level, pos, candidateState))
+                return candidateState;
+        }
+
+        return null;
     }
 
     @Override
@@ -208,6 +215,11 @@ public class FeederConveyorBlock extends BaseConveyorBlock {
                 : super.getFluidState(state);
     }
 
+    @Override
+    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        return isValidInjectorPlacement(level, pos, state);
+    }
+
     public ConveyorNetworkManager getNetworkManager(ServerLevel level) {
         return LevelConveyorNetworks.getOrCreate(level).getNetworkManager();
     }
@@ -236,5 +248,42 @@ public class FeederConveyorBlock extends BaseConveyorBlock {
                 List.of(new ConveyorInput("in", pos.relative(back))),
                 List.of(new ConveyorOutput("out", pos.relative(facing), pos))
         );
+    }
+
+    @Override
+    public ConveyorConnectionType getConnectionType(Level level, BlockPos pos, BlockState state, ConveyorOutput output) {
+        return ConveyorConnectionType.SIDE_INJECT;
+    }
+
+    @Override
+    public boolean canConnectToConveyor(Level level, BlockPos pos, BlockState state, ConveyorOutput output, BlockPos targetPos, BlockState targetState) {
+        return targetPos.equals(output.deliveryPos()) && super.canConnectToConveyor(level, pos, state, output, targetPos, targetState);
+    }
+
+    private static Direction[] getPlacementOrder(Direction preferredFacing) {
+        return new Direction[] {
+                preferredFacing,
+                preferredFacing.getClockWise(),
+                preferredFacing.getCounterClockWise(),
+                preferredFacing.getOpposite()
+        };
+    }
+
+    private static boolean isValidInjectorPlacement(LevelReader level, BlockPos pos, BlockState state) {
+        if (!(state.getBlock() instanceof SideInjectorConveyorBlock sideInjector))
+            return false;
+
+        if (!(level instanceof Level actualLevel))
+            return false;
+
+        Direction facing = state.getValue(FACING);
+        BlockPos targetPos = pos.relative(facing);
+        BlockState targetState = level.getBlockState(targetPos);
+        ConveyorTopology topology = sideInjector.getTopology(actualLevel, pos, state);
+        if (topology.outputs().isEmpty())
+            return false;
+
+        ConveyorOutput output = topology.outputs().getFirst();
+        return sideInjector.canConnectToConveyor(actualLevel, pos, state, output, targetPos, targetState);
     }
 }

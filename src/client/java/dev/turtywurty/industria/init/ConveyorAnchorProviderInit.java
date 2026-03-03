@@ -76,5 +76,11 @@ public final class ConveyorAnchorProviderInit {
             return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
                     new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION)));
         });
+
+        registerAnchorProvider(BlockInit.SIDE_INJECTOR_CONVEYOR, _ -> {
+            EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
+            return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
+                    new SideInjectorConveyorAnchorModel(entityModels.bakeLayer(SideInjectorConveyorAnchorModel.LAYER_LOCATION)));
+        });
     }
 }
