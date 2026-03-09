@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.conveyor.*;
 import dev.turtywurty.industria.renderer.conveyor.FeederConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.HatchConveyorSpecialRenderer;
+import dev.turtywurty.industria.renderer.conveyor.LadderConveyorSpecialRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -48,6 +49,11 @@ public final class ConveyorSpecialRendererInit {
                         .build());
         registerSimple(BlockInit.HATCH_CONVEYOR, () ->
                 ConveyorSpecialRendererEntry.builder(HatchConveyorSpecialRenderer.INSTANCE)
+                        .afterItemRendering(true)
+                        .build());
+        registerSimple(BlockInit.LADDER_CONVEYOR, () ->
+                ConveyorSpecialRendererEntry.builder(LadderConveyorSpecialRenderer.INSTANCE)
+                        .overrideItemRendering(true)
                         .afterItemRendering(true)
                         .build());
     }

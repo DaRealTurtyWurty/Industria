@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
-import dev.turtywurty.industria.model.conveyor.*;
+import dev.turtywurty.industria.model.conveyor.anchor.*;
 import dev.turtywurty.industria.renderer.world.ConveyorNetworkLevelRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;

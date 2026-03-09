@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.model.*;
 import dev.turtywurty.industria.model.conveyor.*;
+import dev.turtywurty.industria.model.conveyor.anchor.*;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -43,6 +44,8 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(VerticalDownConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalDownConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(ConveyorFlapsModel.LAYER_LOCATION, ConveyorFlapsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(SideInjectorConveyorAnchorModel.LAYER_LOCATION, SideInjectorConveyorAnchorModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(LadderConveyorPlatformModel.LAYER_LOCATION, LadderConveyorPlatformModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(LadderConveyorTopPlatformModel.LAYER_LOCATION, LadderConveyorTopPlatformModel::createMainLayer);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             var normalLayer = new ModelLayerLocation(Industria.id("boat/" + woodSet.getName()), "main");

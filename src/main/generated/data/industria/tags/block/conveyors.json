@@ -5,6 +5,7 @@
     "industria:merger_conveyor",
     "industria:feeder_conveyor",
     "industria:hatch_conveyor",
-    "industria:side_injector_conveyor"
+    "industria:side_injector_conveyor",
+    "industria:ladder_conveyor"
   ]
 }

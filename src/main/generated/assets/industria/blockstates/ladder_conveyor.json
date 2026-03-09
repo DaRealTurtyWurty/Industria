@@ -1,0 +1,86 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180
+      },
+      "when": {
+        "facing": "north",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor"
+      },
+      "when": {
+        "facing": "south",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "west",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "upward": "false"
+      }
+    }
+  ]
+}

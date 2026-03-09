@@ -184,55 +184,63 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                     renderContext = new ConveyorSpecialRendererInit.RenderContext(
                             context, partialTick, gameTime, manager, network, networkStorage, conveyorPos, lightCoords,
                             conveyorStorage, state, new AtomicReference<>());
-                }
 
-                if (rendererEntry != null && !rendererEntry.afterItemRendering()) {
-                    if (rendererEntry.overrideItemRendering()) {
+                    if (!rendererEntry.afterItemRendering()) {
                         rendererEntry.renderer().render(renderContext);
-                        continue;
-                    } else {
-                        rendererEntry.renderer().render(renderContext);
+                        if (rendererEntry.overrideItemRendering())
+                            continue;
                     }
                 }
 
-                Map<String, List<Vector3d>> itemAnchorsByRoute;
-                if (ITEM_ANCHORS_CACHE.containsKey(state)) {
-                    itemAnchorsByRoute = ITEM_ANCHORS_CACHE.get(state);
-                } else {
+                Map<String, List<Vector3d>> itemAnchorsByRoute = ITEM_ANCHORS_CACHE.getOrDefault(state, null);
+                if (itemAnchorsByRoute == null && (rendererEntry == null || !rendererEntry.overrideItemRendering())) {
                     Industria.LOGGER.warn("No item anchors found for conveyor block state: {}.", state);
                     continue;
                 }
 
-                Vec3 pos = conveyorPos.getCenter();
-                Camera camera = minecraft.gameRenderer.getMainCamera();
-                Vec3 cameraPos = camera.position();
-                pos = pos.subtract(cameraPos);
-
-                poseStack.pushPose();
-                poseStack.translate(pos.x, pos.y, pos.z);
-
-                Map<ConveyorItem, Pair<List<Vector3d>, Float>> itemRenderData = new HashMap<>();
-                for (ConveyorItem conveyorItem : conveyorStorage.getItems()) {
-                    List<Vector3d> itemAnchors = resolveItemAnchors(conveyorItem, itemAnchorsByRoute);
-                    float smoothedProgress = getSmoothedProgress(conveyorItem, conveyorPos, gameTime, partialTick, visibleItems);
-                    renderConveyorItem(conveyorItem, conveyorPos, smoothedProgress, itemAnchors, poseStack, nodeCollector, lightCoords, gameTime, partialTick);
-                    if (rendererEntry != null && rendererEntry.afterItemRendering()) {
-                        itemRenderData.put(conveyorItem, Pair.of(itemAnchors, smoothedProgress));
-                    }
-                }
-
-                if (rendererEntry != null && rendererEntry.afterItemRendering()) {
-                    renderContext.itemRenderData().set(itemRenderData);
-                    rendererEntry.renderer().render(renderContext);
-                }
-
-                poseStack.popPose();
+                renderConveyorItems(conveyorStorage, conveyorPos, itemAnchorsByRoute, poseStack, nodeCollector, lightCoords,
+                        gameTime, partialTick, rendererEntry, renderContext, visibleItems);
             }
         }
 
         ITEM_PROGRESS_SMOOTHING.keySet().removeIf(id -> !visibleItems.contains(id));
         ITEM_DIRECTION_SMOOTHING.keySet().removeIf(id -> !visibleItems.contains(id));
     }
+
+    private void renderConveyorItems(ConveyorStorage conveyorStorage, BlockPos conveyorPos, Map<String, List<Vector3d>> itemAnchorsByRoute,
+                                     PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords, long gameTime, float partialTick,
+                                     ConveyorSpecialRendererInit.ConveyorSpecialRendererEntry rendererEntry, ConveyorSpecialRendererInit.RenderContext renderContext,
+                                     Set<UUID> visibleItems) {
+        Vec3 conveyorCenter = conveyorPos.getCenter();
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Vec3 cameraPosition = camera.position();
+        Vec3 relativePosition = conveyorCenter.subtract(cameraPosition);
+
+        poseStack.pushPose();
+        poseStack.translate(relativePosition.x, relativePosition.y, relativePosition.z);
+
+        Map<ConveyorItem, Pair<List<Vector3d>, Float>> itemRenderData = new HashMap<>();
+        for (ConveyorItem conveyorItem : conveyorStorage.getItems()) {
+            List<Vector3d> itemAnchors = resolveItemAnchors(conveyorItem, itemAnchorsByRoute);
+            float smoothedProgress = getSmoothedProgress(conveyorItem, conveyorPos, gameTime, partialTick, visibleItems);
+
+            if (rendererEntry == null || !rendererEntry.overrideItemRendering()) {
+                renderConveyorItem(conveyorItem, conveyorPos, smoothedProgress, itemAnchors, poseStack, nodeCollector, lightCoords, gameTime, partialTick);
+            }
+
+            if (rendererEntry != null && rendererEntry.afterItemRendering()) {
+                itemRenderData.put(conveyorItem, Pair.of(itemAnchors, smoothedProgress));
+            }
+        }
+
+        if (rendererEntry != null && rendererEntry.afterItemRendering()) {
+            renderContext.itemRenderData().set(itemRenderData);
+            rendererEntry.renderer().render(renderContext);
+        }
+
+        poseStack.popPose();
+    }
+
 
     private void renderConveyorNetwork(ConveyorNetwork network, ClientLevel level) {
         for (BlockPos conveyor : network.getConveyors()) {
@@ -248,7 +256,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
     }
 
     private static List<Vector3d> resolveItemAnchors(ConveyorItem conveyorItem, Map<String, List<Vector3d>> itemAnchorsByRoute) {
-        if (itemAnchorsByRoute.isEmpty())
+        if (itemAnchorsByRoute == null || itemAnchorsByRoute.isEmpty())
             return List.of();
 
         String selectedOutputId = conveyorItem.getSelectedOutputId();
@@ -411,7 +419,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         );
     }
 
-    private static void renderItem(ItemStack stack, PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords) {
+    public static void renderItem(ItemStack stack, PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords) {
         Minecraft minecraft = Minecraft.getInstance();
         ItemModelResolver modelResolver = minecraft.getItemModelResolver();
 

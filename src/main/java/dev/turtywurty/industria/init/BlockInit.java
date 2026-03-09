@@ -284,6 +284,9 @@ public class BlockInit {
     public static final SideInjectorConveyorBlock SIDE_INJECTOR_CONVEYOR = registerWithItemCopy("side_injector_conveyor",
             SideInjectorConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final LadderConveyorBlock LADDER_CONVEYOR = registerWithItemCopy("ladder_conveyor",
+            LadderConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.of()

@@ -1,4 +1,4 @@
-package dev.turtywurty.industria.model.conveyor;
+package dev.turtywurty.industria.model.conveyor.anchor;
 
 import dev.turtywurty.industria.Industria;
 import net.minecraft.client.model.Model;

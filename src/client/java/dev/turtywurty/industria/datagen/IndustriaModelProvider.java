@@ -7,6 +7,7 @@ import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.FeederConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.HatchConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.LadderConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SideInjectorConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
@@ -134,6 +135,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     private static void registerSideInjectorConveyor(BlockModelGenerators blockStateModelGenerator) {
         blockStateModelGenerator.blockStateOutput.accept(createSideInjectorConveyorBlockModelDefinitionCreator(BlockInit.SIDE_INJECTOR_CONVEYOR, "side_injector_conveyor"));
+    }
+
+    private static void registerLadderConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createLadderConveyorBlockModelDefinitionCreator(BlockInit.LADDER_CONVEYOR, "ladder_conveyor"));
     }
 
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
@@ -286,6 +291,57 @@ public class IndustriaModelProvider extends FabricModelProvider {
         return generator;
     }
 
+    private static BlockModelDefinitionGenerator createLadderConveyorBlockModelDefinitionCreator(LadderConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+        Identifier topModelId = Industria.id("block/" + name + "_top");
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.BOTTOM)
+                            .term(LadderConveyorBlock.UPWARD, true),
+                    createWeightedVariant(modelId, rotationFor(direction).withX(Quadrant.R180)));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.MIDDLE)
+                            .term(LadderConveyorBlock.UPWARD, true),
+                    createWeightedVariant(modelId, rotationFor(direction).withX(Quadrant.R180)));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.TOP)
+                            .term(LadderConveyorBlock.UPWARD, true),
+                    createWeightedVariant(topModelId, rotationFor(direction).withX(Quadrant.R180)));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.SINGLE)
+                            .term(LadderConveyorBlock.UPWARD, true),
+                    createWeightedVariant(topModelId, rotationFor(direction).withX(Quadrant.R180)));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.BOTTOM)
+                            .term(LadderConveyorBlock.UPWARD, false),
+                    createWeightedVariant(modelId, rotationFor(direction.getOpposite())));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.MIDDLE)
+                            .term(LadderConveyorBlock.UPWARD, false),
+                    createWeightedVariant(modelId, rotationFor(direction.getOpposite())));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.TOP)
+                            .term(LadderConveyorBlock.UPWARD, false),
+                    createWeightedVariant(topModelId, rotationFor(direction.getOpposite())));
+            generator.with(new ConditionBuilder()
+                            .term(LadderConveyorBlock.FACING, direction)
+                            .term(LadderConveyorBlock.LINE_POSITION, LadderConveyorBlock.LinePosition.SINGLE)
+                            .term(LadderConveyorBlock.UPWARD, false),
+                    createWeightedVariant(topModelId, rotationFor(direction.getOpposite())));
+        }
+
+        return generator;
+    }
+
     private static Variant.SimpleModelState rotationFor(Direction direction) {
         return switch (direction) {
             case EAST -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R90);
@@ -417,7 +473,9 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerFeederConveyor(blockStateModelGenerator);
         registerHatchConveyor(blockStateModelGenerator);
         registerSideInjectorConveyor(blockStateModelGenerator);
+        registerLadderConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.SIDE_INJECTOR_CONVEYOR, Industria.id("block/side_injector_conveyor"));
+        blockStateModelGenerator.registerSimpleItemModel(BlockInit.LADDER_CONVEYOR, Industria.id("block/ladder_conveyor"));
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
