@@ -4,6 +4,13 @@ import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.network.conveyor.AddConveyorNetworkPayload;
 import dev.turtywurty.industria.network.conveyor.ModifyConveyorNetworkPayload;
 import dev.turtywurty.industria.network.conveyor.RemoveConveyorNetworkPayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorBlacklistModePayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorFilterStackPayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorFilterTagPayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorMatchComponentsPayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorMatchDurabilityPayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorMatchEnchantmentsPayload;
+import dev.turtywurty.industria.network.conveyor.SetFilterConveyorTagFilteringPayload;
 import dev.turtywurty.industria.network.pipe.AddPipeNetworkPayload;
 import dev.turtywurty.industria.network.pipe.ModifyPipeNetworkPayload;
 import dev.turtywurty.industria.network.pipe.RemovePipeNetworkPayload;
@@ -24,6 +31,13 @@ public class PayloadTypeInit {
         PayloadTypeRegistry.serverboundPlay().register(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorFilterStackPayload.ID, SetFilterConveyorFilterStackPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorBlacklistModePayload.ID, SetFilterConveyorBlacklistModePayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorMatchDurabilityPayload.ID, SetFilterConveyorMatchDurabilityPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorMatchEnchantmentsPayload.ID, SetFilterConveyorMatchEnchantmentsPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorMatchComponentsPayload.ID, SetFilterConveyorMatchComponentsPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorFilterTagPayload.ID, SetFilterConveyorFilterTagPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(SetFilterConveyorTagFilteringPayload.ID, SetFilterConveyorTagFilteringPayload.CODEC);
     }
 
     private static void registerS2C() {

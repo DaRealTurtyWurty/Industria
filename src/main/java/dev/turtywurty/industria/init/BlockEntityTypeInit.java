@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEntity;
+import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -132,6 +133,10 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<FeederConveyorBlockEntity> FEEDER_CONVEYOR = register("feeder_conveyor",
             FabricBlockEntityTypeBuilder.create(FeederConveyorBlockEntity::new, BlockInit.FEEDER_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<FilterConveyorBlockEntity> FILTER_CONVEYOR = register("filter_conveyor",
+            FabricBlockEntityTypeBuilder.create(FilterConveyorBlockEntity::new, BlockInit.FILTER_CONVEYOR)
                     .build());
 
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {

@@ -32,3 +32,5 @@ accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage getC
 accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage inRange (II)Z
 accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
 accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen showTooltipWithItemInHand (Lnet/minecraft/world/item/ItemStack;)Z

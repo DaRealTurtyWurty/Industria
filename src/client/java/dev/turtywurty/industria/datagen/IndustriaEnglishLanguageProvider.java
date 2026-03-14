@@ -4,8 +4,10 @@ import dev.turtywurty.fabricslurryapi.api.Slurry;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
+import dev.turtywurty.industria.screen.FilterConveyorScreen;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
@@ -136,6 +138,12 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.HATCH_CONVEYOR, "Hatch Conveyor");
         translationBuilder.add(BlockInit.SIDE_INJECTOR_CONVEYOR, "Side Injector Conveyor");
         translationBuilder.add(BlockInit.LADDER_CONVEYOR, "Ladder Conveyor");
+        translationBuilder.add(BlockInit.FILTER_CONVEYOR, "Filter Conveyor");
+        addText(translationBuilder, FilterConveyorBlockEntity.TITLE, "Filter Conveyor");
+        addText(translationBuilder, FilterConveyorScreen.BLACKLIST_MODE_LABEL, "Blacklist Mode");
+        addText(translationBuilder, FilterConveyorScreen.MATCH_DURABILITY_LABEL, "Match Durability");
+        addText(translationBuilder, FilterConveyorScreen.MATCH_ENCHANTMENTS_LABEL, "Match Enchantments");
+        addText(translationBuilder, FilterConveyorScreen.MATCH_COMPONENTS_LABEL, "Match Components");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");

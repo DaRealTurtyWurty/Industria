@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import com.google.common.collect.ImmutableMap;
 import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.FilterConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
 import dev.turtywurty.industria.model.conveyor.anchor.*;
@@ -81,6 +82,16 @@ public final class ConveyorAnchorProviderInit {
             EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
             return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
                     new SideInjectorConveyorAnchorModel(entityModels.bakeLayer(SideInjectorConveyorAnchorModel.LAYER_LOCATION)));
+        });
+
+        registerAnchorProvider(BlockInit.FILTER_CONVEYOR, _ -> {
+            EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
+            return Map.of(
+                    FilterConveyorBlock.FORWARD_OUTPUT_ID,
+                    new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION)),
+                    FilterConveyorBlock.RIGHT_OUTPUT_ID,
+                    new SplitterConveyorAnchorPositionsModel(entityModels.bakeLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION))
+            );
         });
     }
 }

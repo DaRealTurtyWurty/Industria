@@ -4,13 +4,7 @@ import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
-import dev.turtywurty.industria.conveyor.block.impl.BasicConveyorBlock;
-import dev.turtywurty.industria.conveyor.block.impl.FeederConveyorBlock;
-import dev.turtywurty.industria.conveyor.block.impl.HatchConveyorBlock;
-import dev.turtywurty.industria.conveyor.block.impl.LadderConveyorBlock;
-import dev.turtywurty.industria.conveyor.block.impl.MergerConveyorBlock;
-import dev.turtywurty.industria.conveyor.block.impl.SideInjectorConveyorBlock;
-import dev.turtywurty.industria.conveyor.block.impl.SplitterConveyorBlock;
+import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
@@ -141,6 +135,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createLadderConveyorBlockModelDefinitionCreator(BlockInit.LADDER_CONVEYOR, "ladder_conveyor"));
     }
 
+    private static void registerFilterConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createFilterConveyorBlockModelDefinitionCreator(BlockInit.FILTER_CONVEYOR, "filter_conveyor"));
+    }
+
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
     }
@@ -233,6 +231,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             generator.with(new ConditionBuilder()
                             .term(SplitterConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
+    private static BlockModelDefinitionGenerator createFilterConveyorBlockModelDefinitionCreator(FilterConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(FilterConveyorBlock.FACING, direction),
                     createWeightedVariant(modelId, rotationFor(direction)));
         }
 
@@ -476,6 +487,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerLadderConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.SIDE_INJECTOR_CONVEYOR, Industria.id("block/side_injector_conveyor"));
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.LADDER_CONVEYOR, Industria.id("block/ladder_conveyor"));
+        registerFilterConveyor(blockStateModelGenerator);
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
