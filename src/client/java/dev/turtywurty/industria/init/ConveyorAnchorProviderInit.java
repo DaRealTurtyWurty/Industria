@@ -93,5 +93,11 @@ public final class ConveyorAnchorProviderInit {
                     new SplitterConveyorAnchorPositionsModel(entityModels.bakeLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION))
             );
         });
+
+        registerAnchorProvider(BlockInit.MAGNETIC_CONVEYOR, _ -> {
+            EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
+            return Map.of(ConveyorNetworkLevelRenderer.DEFAULT_ANCHOR_ROUTE,
+                    new StraightConveyorAnchorPositionsModel(entityModels.bakeLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION)));
+        });
     }
 }

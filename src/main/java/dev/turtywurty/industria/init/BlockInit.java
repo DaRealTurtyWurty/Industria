@@ -2,7 +2,6 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
-import dev.turtywurty.industria.conveyor.block.impl.FilterConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
@@ -290,6 +289,9 @@ public class BlockInit {
 
     public static final FilterConveyorBlock FILTER_CONVEYOR = registerWithItemCopy("filter_conveyor",
             FilterConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final MagneticConveyorBlock MAGNETIC_CONVEYOR = registerWithItemCopy("magnetic_conveyor",
+            MagneticConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(

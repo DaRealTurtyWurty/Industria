@@ -107,8 +107,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(pipeSupplier);
     }
 
-    private static void registerConveyor(BlockModelGenerators blockStateModelGenerator, BasicConveyorBlock block, String name) {
-        blockStateModelGenerator.blockStateOutput.accept(createConveyorBlockModelDefinitionCreator(block, name));
+    private static void registerConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createConveyorBlockModelDefinitionCreator(BlockInit.CONVEYOR, "conveyor"));
     }
 
     private static void registerSplitterConveyor(BlockModelGenerators blockStateModelGenerator) {
@@ -137,6 +137,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     private static void registerFilterConveyor(BlockModelGenerators blockStateModelGenerator) {
         blockStateModelGenerator.blockStateOutput.accept(createFilterConveyorBlockModelDefinitionCreator(BlockInit.FILTER_CONVEYOR, "filter_conveyor"));
+    }
+
+    private static void registerMagneticConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createMagneticConveyorBlockModelDefinitionCreator(BlockInit.MAGNETIC_CONVEYOR, "magnetic_conveyor"));
     }
 
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
@@ -353,6 +357,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
         return generator;
     }
 
+    private static BlockModelDefinitionGenerator createMagneticConveyorBlockModelDefinitionCreator(MagneticConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(MagneticConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
     private static Variant.SimpleModelState rotationFor(Direction direction) {
         return switch (direction) {
             case EAST -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R90);
@@ -478,7 +495,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
-        registerConveyor(blockStateModelGenerator, BlockInit.CONVEYOR, "conveyor");
+        registerConveyor(blockStateModelGenerator);
         registerSplitterConveyor(blockStateModelGenerator);
         registerMergerConveyor(blockStateModelGenerator);
         registerFeederConveyor(blockStateModelGenerator);
@@ -488,6 +505,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.SIDE_INJECTOR_CONVEYOR, Industria.id("block/side_injector_conveyor"));
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.LADDER_CONVEYOR, Industria.id("block/ladder_conveyor"));
         registerFilterConveyor(blockStateModelGenerator);
+        registerMagneticConveyor(blockStateModelGenerator);
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
