@@ -132,7 +132,7 @@ public class BlockInit {
 
     public static final Block END_PYRITE_ORE = registerWithItemCopy("end_pyrite_ore",
             settings -> new DropExperienceBlock(UniformInt.of(4, 6),
-                    settings.lightLevel(value -> 7).noOcclusion()), Blocks.END_STONE);
+                    settings.lightLevel(_ -> 7).noOcclusion()), Blocks.END_STONE);
 
     public static final Block PYRITE_BLOCK = registerWithItemCopy("pyrite_block",
             Block::new, Blocks.IRON_BLOCK);
@@ -142,12 +142,12 @@ public class BlockInit {
 
     public static final DropExperienceBlock QUARTZ_ORE = registerWithItemCopy("quartz_ore",
             settings -> new DropExperienceBlock(UniformInt.of(2, 5), settings), Blocks.NETHER_QUARTZ_ORE,
-            settings -> settings.sound(SoundType.STONE).lightLevel(value -> 3).strength(3.0F).mapColor(MapColor.STONE));
+            settings -> settings.sound(SoundType.STONE).lightLevel(_ -> 3).strength(3.0F).mapColor(MapColor.STONE));
 
     public static final DropExperienceBlock DEEPSLATE_QUARTZ_ORE = registerWithItemCopy("deepslate_quartz_ore",
             settings -> new DropExperienceBlock(UniformInt.of(2, 5),
-                    settings.lightLevel(value -> 3).noOcclusion()), Blocks.NETHER_QUARTZ_ORE,
-            settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(value -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE));
+                    settings.lightLevel(_ -> 3).noOcclusion()), Blocks.NETHER_QUARTZ_ORE,
+            settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(_ -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE));
 
     public static final AlloyFurnaceBlock ALLOY_FURNACE = registerWithItemCopy("alloy_furnace",
             AlloyFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
@@ -177,7 +177,7 @@ public class BlockInit {
             SolarPanelBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final CrusherBlock CRUSHER = registerWithItemCopy("crusher",
-            CrusherBlock::new, Blocks.FURNACE, settings -> settings.lightLevel(value -> 0).noOcclusion());
+            CrusherBlock::new, Blocks.FURNACE, settings -> settings.lightLevel(_ -> 0).noOcclusion());
 
     public static final WindTurbineBlock WIND_TURBINE = registerWithItemCopy("wind_turbine",
             WindTurbineBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
@@ -292,6 +292,9 @@ public class BlockInit {
 
     public static final MagneticConveyorBlock MAGNETIC_CONVEYOR = registerWithItemCopy("magnetic_conveyor",
             MagneticConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final DropChuteConveyorBlock DROP_CHUTE_CONVEYOR = registerWithItemCopy("drop_chute_conveyor",
+            DropChuteConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(

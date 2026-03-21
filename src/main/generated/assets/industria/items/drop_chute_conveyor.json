@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "industria:block/drop_chute_conveyor"
+  }
+}

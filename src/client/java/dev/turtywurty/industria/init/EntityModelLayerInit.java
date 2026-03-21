@@ -42,6 +42,7 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION, SplitterConveyorAnchorPositionsModel::createRightLayer);
         ModelLayerRegistry.registerModelLayer(VerticalUpConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalUpConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(VerticalDownConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalDownConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(DropChuteConveyorAnchorPositionsModel.LAYER_LOCATION, DropChuteConveyorAnchorPositionsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(ConveyorFlapsModel.LAYER_LOCATION, ConveyorFlapsModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(SideInjectorConveyorAnchorModel.LAYER_LOCATION, SideInjectorConveyorAnchorModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(LadderConveyorPlatformModel.LAYER_LOCATION, LadderConveyorPlatformModel::createMainLayer);

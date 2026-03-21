@@ -32,7 +32,7 @@ public class ItemStorageInit {
                     return null;
                 }, BlockInit.CONVEYOR, BlockInit.SPLITTER_CONVEYOR, BlockInit.MERGER_CONVEYOR, BlockInit.HATCH_CONVEYOR,
                 BlockInit.SIDE_INJECTOR_CONVEYOR, BlockInit.LADDER_CONVEYOR, BlockInit.FILTER_CONVEYOR,
-                BlockInit.MAGNETIC_CONVEYOR);
+                BlockInit.MAGNETIC_CONVEYOR, BlockInit.DROP_CHUTE_CONVEYOR);
 
         ItemStorage.SIDED.registerForBlocks((level, _, _, blockEntity, side) -> {
             if (level instanceof ServerLevel && blockEntity instanceof FeederConveyorBlockEntity feeder)

@@ -289,6 +289,16 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, BlockInit.DROP_CHUTE_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CDC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('D', Items.DROPPER)
+                        .unlockedBy(getHasName(Items.DROPPER), has(Items.DROPPER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ALUMINIUM_BLOCK);
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.TIN_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.TIN_BLOCK);
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ZINC_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ZINC_BLOCK);

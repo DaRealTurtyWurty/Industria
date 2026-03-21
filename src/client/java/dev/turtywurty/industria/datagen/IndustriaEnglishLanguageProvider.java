@@ -145,6 +145,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, FilterConveyorScreen.MATCH_ENCHANTMENTS_LABEL, "Match Enchantments");
         addText(translationBuilder, FilterConveyorScreen.MATCH_COMPONENTS_LABEL, "Match Components");
         translationBuilder.add(BlockInit.MAGNETIC_CONVEYOR,  "Magnetic Conveyor");
+        translationBuilder.add(BlockInit.DROP_CHUTE_CONVEYOR, "Drop Chute Conveyor");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");
