@@ -1,6 +1,16 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
+    "has_comparator": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:comparator"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
     "has_conveyor": {
       "conditions": {
         "items": [
@@ -11,19 +21,9 @@
       },
       "trigger": "minecraft:inventory_changed"
     },
-    "has_dropper": {
-      "conditions": {
-        "items": [
-          {
-            "items": "minecraft:dropper"
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
-    },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:drop_chute_conveyor"
+        "recipe": "industria:detector_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -31,13 +31,13 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_dropper",
+      "has_comparator",
       "has_conveyor"
     ]
   ],
   "rewards": {
     "recipes": [
-      "industria:drop_chute_conveyor"
+      "industria:detector_conveyor"
     ]
   }
 }

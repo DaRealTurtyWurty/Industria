@@ -9,6 +9,7 @@
     "industria:ladder_conveyor",
     "industria:filter_conveyor",
     "industria:magnetic_conveyor",
+    "industria:detector_conveyor",
     "industria:drop_chute_conveyor"
   ]
 }

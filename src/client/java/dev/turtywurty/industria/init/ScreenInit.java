@@ -30,5 +30,6 @@ public class ScreenInit {
         MenuScreens.register(ScreenHandlerTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.ARC_FURNACE, ArcFurnaceScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.FILTER_CONVEYOR, FilterConveyorScreen::new);
+        MenuScreens.register(ScreenHandlerTypeInit.DETECTOR_CONVEYOR, DetectorConveyorScreen::new);
     }
 }

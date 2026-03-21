@@ -3,11 +3,12 @@ package dev.turtywurty.industria.conveyor.block;
 import dev.turtywurty.industria.conveyor.ConveyorItem;
 import dev.turtywurty.industria.conveyor.ConveyorNetwork;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface ConveyorLike {
-    int getItemLimit(Level level, BlockPos pos, BlockState state);
+    int getItemLimit(BlockGetter level, BlockPos pos, BlockState state);
 
     int getSpeed(Level level, BlockPos pos, BlockState state);
 

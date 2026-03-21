@@ -293,6 +293,9 @@ public class BlockInit {
     public static final MagneticConveyorBlock MAGNETIC_CONVEYOR = registerWithItemCopy("magnetic_conveyor",
             MagneticConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final DetectorConveyorBlock DETECTOR_CONVEYOR = registerWithItemCopy("detector_conveyor",
+            DetectorConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static final DropChuteConveyorBlock DROP_CHUTE_CONVEYOR = registerWithItemCopy("drop_chute_conveyor",
             DropChuteConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 

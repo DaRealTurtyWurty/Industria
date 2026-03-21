@@ -289,6 +289,16 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, BlockInit.DETECTOR_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CDC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('D', Items.COMPARATOR)
+                        .unlockedBy(getHasName(Items.COMPARATOR), has(Items.COMPARATOR))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
                 shaped(RecipeCategory.MISC, BlockInit.DROP_CHUTE_CONVEYOR, 8)
                         .pattern("CCC")
                         .pattern("CDC")

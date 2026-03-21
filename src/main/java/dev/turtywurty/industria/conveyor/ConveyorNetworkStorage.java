@@ -9,6 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -58,7 +59,7 @@ public class ConveyorNetworkStorage {
         Stream.of(stacks).map(stack -> new ConveyorItem(pos, stack)).forEach(storage::addItem);
     }
 
-    public ConveyorStorage getStorageAt(Level level, BlockPos pos) {
+    public ConveyorStorage getStorageAt(BlockGetter level, BlockPos pos) {
         return storages.computeIfAbsent(pos, _ -> new ConveyorStorage(level, pos));
     }
 

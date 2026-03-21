@@ -13,7 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class ConveyorStorage {
     private final ConveyorItemContainer itemContainer;
     private final Storage<ItemVariant> itemStorage;
 
-    public ConveyorStorage(Level level, BlockPos pos) {
+    public ConveyorStorage(BlockGetter level, BlockPos pos) {
         this.pos = pos;
         BlockState state = level.getBlockState(pos);
         this.itemContainer = new ConveyorItemContainer(

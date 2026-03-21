@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "industria:block/drop_chute_conveyor"
+        "model": "industria:block/conveyor"
       },
       "when": {
         "facing": "north"
@@ -10,7 +10,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/drop_chute_conveyor",
+        "model": "industria:block/conveyor",
         "y": 90
       },
       "when": {
@@ -19,7 +19,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/drop_chute_conveyor",
+        "model": "industria:block/conveyor",
         "y": 180
       },
       "when": {
@@ -28,7 +28,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/drop_chute_conveyor",
+        "model": "industria:block/conveyor",
         "y": 270
       },
       "when": {

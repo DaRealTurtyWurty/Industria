@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.conveyor.block.impl;
 
+import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.conveyor.ConveyorItem;
 import dev.turtywurty.industria.conveyor.ConveyorNetwork;
 import dev.turtywurty.industria.conveyor.ConveyorNetworkManager;
@@ -7,8 +8,9 @@ import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.conveyor.block.BaseConveyorBlock;
 import dev.turtywurty.industria.conveyor.block.ConveyorInput;
 import dev.turtywurty.industria.conveyor.block.ConveyorOutput;
-import dev.turtywurty.industria.conveyor.block.ConveyorRoutingState;
 import dev.turtywurty.industria.conveyor.block.ConveyorTopology;
+import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
+import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,6 +29,7 @@ import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -40,26 +43,26 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-public class MergerConveyorBlock extends BaseConveyorBlock {
-    public static final String LEFT_INPUT_ID = "left";
-    public static final String RIGHT_INPUT_ID = "right";
-
+public class DetectorConveyorBlock extends BaseConveyorBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final Property<Boolean> ENABLED = BooleanProperty.create("enabled");
 
-    public MergerConveyorBlock(Properties settings) {
-        super(settings, new BlockProperties()
+    public DetectorConveyorBlock(BlockBehaviour.Properties settings) {
+        super(settings, new IndustriaBlock.BlockProperties()
                 .addStateProperty(FACING, Direction.NORTH)
                 .addStateProperty(WATERLOGGED, false)
                 .addStateProperty(ENABLED, true)
                 .notPlaceFacingOpposite()
                 .hasComparatorOutput()
+                .blockEntityProperties(new IndustriaBlock.BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.DETECTOR_CONVEYOR)
+                        .rightClickToOpenGui())
         );
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player,
+                                          InteractionHand hand, BlockHitResult hitResult) {
         if (itemStack.isEmpty()) {
             if (player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
                 if (level.isClientSide())
@@ -215,7 +218,7 @@ public class MergerConveyorBlock extends BaseConveyorBlock {
 
     @Override
     public int getItemLimit(BlockGetter level, BlockPos pos, BlockState state) {
-        return 3;
+        return 5;
     }
 
     @Override
@@ -229,59 +232,45 @@ public class MergerConveyorBlock extends BaseConveyorBlock {
     }
 
     @Override
+    protected boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        if (!state.getValue(ENABLED) || !(level instanceof Level realLevel) || realLevel.isClientSide())
+            return 0;
+
+        ConveyorNetworkManager networkManager = getNetworkManager((ServerLevel) level);
+        ConveyorNetwork networkAt = networkManager.getNetworkAt(pos);
+        if (networkAt == null)
+            return 0;
+
+        ConveyorStorage storageAt = networkAt.getStorage().getStorageAt(level, pos);
+        if (storageAt == null)
+            return 0;
+
+        if (level.getBlockEntity(pos) instanceof DetectorConveyorBlockEntity blockEntity)
+            return storageAt.getItems().stream()
+                    .map(ConveyorItem::getStack)
+                    .anyMatch(blockEntity::doesMatchFilter) ? 15 : 0;
+
+        return !storageAt.getItems().isEmpty() ? 15 : 0;
+    }
+
+    @Override
+    protected int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return getSignal(state, level, pos, direction);
+    }
+
+    @Override
     public ConveyorTopology getTopology(Level level, BlockPos pos, BlockState state) {
         Direction facing = state.getValue(FACING);
-        Direction left = facing.getCounterClockWise();
-        Direction right = facing.getClockWise();
+        Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(
-                        new ConveyorInput(LEFT_INPUT_ID, pos.relative(left)),
-                        new ConveyorInput(RIGHT_INPUT_ID, pos.relative(right))
-                ),
+                List.of(new ConveyorInput("in", pos.relative(back))),
                 List.of(new ConveyorOutput("out", pos.relative(facing), pos))
         );
-    }
-
-    @Override
-    public boolean canAcceptIncomingItem(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
-                                         ConveyorNetwork network, ConveyorRoutingState routingState) {
-        ConveyorTopology topology = getTopology(level, pos, state);
-        if (topology.inputs().size() <= 1)
-            return true;
-
-        int inputIndex = getInputIndex(topology, inputPos);
-        if (inputIndex < 0)
-            return true;
-
-        int preferredInputIndex = routingState.getRoundRobinIndex(pos, topology.inputs().size());
-        if (inputIndex == preferredInputIndex)
-            return true;
-
-        BlockPos preferredInputPos = topology.inputs().get(preferredInputIndex).expectedSourcePos();
-        return !network.hasReadyItemForInput(level, pos, preferredInputPos);
-    }
-
-    @Override
-    public void onIncomingItemAccepted(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
-                                       ConveyorNetwork network, ConveyorRoutingState routingState) {
-        ConveyorTopology topology = getTopology(level, pos, state);
-        if (topology.inputs().size() <= 1)
-            return;
-
-        int inputIndex = getInputIndex(topology, inputPos);
-        if (inputIndex < 0)
-            return;
-
-        routingState.setRoundRobinIndex(pos, inputIndex + 1, topology.inputs().size());
-    }
-
-    private static int getInputIndex(ConveyorTopology topology, BlockPos inputPos) {
-        for (int index = 0; index < topology.inputs().size(); index++) {
-            if (topology.inputs().get(index).expectedSourcePos().equals(inputPos))
-                return index;
-        }
-
-        return -1;
     }
 }

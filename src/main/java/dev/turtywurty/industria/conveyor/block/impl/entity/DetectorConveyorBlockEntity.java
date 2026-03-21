@@ -8,7 +8,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
-import dev.turtywurty.industria.screenhandler.FilterConveyorScreenHandler;
+import dev.turtywurty.industria.screenhandler.DetectorConveyorScreenHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -28,10 +28,9 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder, ConveyorFilterAccess {
-    public static final Component TITLE = Industria.containerTitle("filter_conveyor");
+public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder, ConveyorFilterAccess {
+    public static final Component TITLE = Industria.containerTitle("detector_conveyor");
 
-    // This is purely to make the screen handler happy :)
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
     private ItemStack filterStack = ItemStack.EMPTY;
@@ -43,8 +42,8 @@ public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements B
     private TagKey<Item> filterTag = null;
     private boolean isTagFiltering = false;
 
-    public FilterConveyorBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockInit.FILTER_CONVEYOR, BlockEntityTypeInit.FILTER_CONVEYOR, pos, state);
+    public DetectorConveyorBlockEntity(BlockPos pos, BlockState state) {
+        super(BlockInit.DETECTOR_CONVEYOR, BlockEntityTypeInit.DETECTOR_CONVEYOR, pos, state);
     }
 
     @Override
@@ -59,7 +58,7 @@ public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements B
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-        return new FilterConveyorScreenHandler(containerId, inventory, this, this.wrappedContainerStorage);
+        return new DetectorConveyorScreenHandler(containerId, inventory, this, this.wrappedContainerStorage);
     }
 
     @Override
@@ -99,18 +98,18 @@ public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements B
 
         if (this.isTagFiltering) {
             //noinspection SimplifiableConditionalExpression - This is more readable in my opinion
-            return this.blacklistMode ?
-                    !stack.is(this.filterTag) :
-                    stack.is(this.filterTag);
+            return this.blacklistMode
+                    ? !stack.is(this.filterTag)
+                    : stack.is(this.filterTag);
         }
 
         if (this.filterStack.isEmpty())
             return false;
 
         //noinspection SimplifiableConditionalExpression - This is more readable in my opinion
-        return this.blacklistMode ?
-                !internalStackMatches(stack) :
-                internalStackMatches(stack);
+        return this.blacklistMode
+                ? !internalStackMatches(stack)
+                : internalStackMatches(stack);
     }
 
     private boolean internalStackMatches(ItemStack stack) {

@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.MagneticConveyorBlockEntity;
@@ -138,6 +139,10 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<FilterConveyorBlockEntity> FILTER_CONVEYOR = register("filter_conveyor",
             FabricBlockEntityTypeBuilder.create(FilterConveyorBlockEntity::new, BlockInit.FILTER_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<DetectorConveyorBlockEntity> DETECTOR_CONVEYOR = register("detector_conveyor",
+            FabricBlockEntityTypeBuilder.create(DetectorConveyorBlockEntity::new, BlockInit.DETECTOR_CONVEYOR)
                     .build());
 
     public static final BlockEntityType<MagneticConveyorBlockEntity> MAGNETIC_CONVEYOR = register("magnetic_conveyor",

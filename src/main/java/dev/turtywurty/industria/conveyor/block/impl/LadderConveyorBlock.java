@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
@@ -211,7 +212,7 @@ public class LadderConveyorBlock extends BaseConveyorBlock {
     }
 
     @Override
-    public int getItemLimit(Level level, BlockPos pos, BlockState state) {
+    public int getItemLimit(BlockGetter level, BlockPos pos, BlockState state) {
         return 3;
     }
 

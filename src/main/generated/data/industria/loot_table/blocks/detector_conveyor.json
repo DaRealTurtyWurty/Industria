@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "industria:drop_chute_conveyor"
+          "name": "industria:detector_conveyor"
         }
       ],
       "rolls": 1.0

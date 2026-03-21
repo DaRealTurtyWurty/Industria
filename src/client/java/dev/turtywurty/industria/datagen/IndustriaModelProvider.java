@@ -143,6 +143,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createMagneticConveyorBlockModelDefinitionCreator(BlockInit.MAGNETIC_CONVEYOR, "magnetic_conveyor"));
     }
 
+    private static void registerDetectorConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createDetectorConveyorBlockModelDefinitionCreator(BlockInit.DETECTOR_CONVEYOR));
+    }
+
     private static void registerDropChuteConveyor(BlockModelGenerators blockStateModelGenerator) {
         blockStateModelGenerator.blockStateOutput.accept(createDropChuteConveyorBlockModelDefinitionCreator(BlockInit.DROP_CHUTE_CONVEYOR, "drop_chute_conveyor"));
     }
@@ -374,6 +378,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
         return generator;
     }
 
+    private static BlockModelDefinitionGenerator createDetectorConveyorBlockModelDefinitionCreator(DetectorConveyorBlock block) {
+        Identifier modelId = Industria.id("block/conveyor");
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(DetectorConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
     private static BlockModelDefinitionGenerator createDropChuteConveyorBlockModelDefinitionCreator(DropChuteConveyorBlock block, String name) {
         Identifier modelId = Industria.id("block/" + name);
 
@@ -523,6 +540,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.LADDER_CONVEYOR, Industria.id("block/ladder_conveyor"));
         registerFilterConveyor(blockStateModelGenerator);
         registerMagneticConveyor(blockStateModelGenerator);
+        registerDetectorConveyor(blockStateModelGenerator);
+        blockStateModelGenerator.registerSimpleItemModel(BlockInit.DETECTOR_CONVEYOR, Industria.id("block/conveyor"));
         registerDropChuteConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DROP_CHUTE_CONVEYOR, Industria.id("block/drop_chute_conveyor"));
     }

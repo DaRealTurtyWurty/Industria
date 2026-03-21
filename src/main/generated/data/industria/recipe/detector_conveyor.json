@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "C": "industria:conveyor",
-    "D": "minecraft:dropper"
+    "D": "minecraft:comparator"
   },
   "pattern": [
     "CCC",
@@ -12,6 +12,6 @@
   ],
   "result": {
     "count": 8,
-    "id": "industria:drop_chute_conveyor"
+    "id": "industria:detector_conveyor"
   }
 }

@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.screenhandler;
 
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
-import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
+import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ScreenHandlerTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -22,13 +22,13 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
-public class FilterConveyorScreenHandler extends IndustriaScreenHandler<FilterConveyorBlockEntity, BlockPosPayload> {
-    public FilterConveyorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ScreenHandlerTypeInit.FILTER_CONVEYOR, syncId, playerInventory, payload, FilterConveyorBlockEntity.class);
+public class DetectorConveyorScreenHandler extends IndustriaScreenHandler<DetectorConveyorBlockEntity, BlockPosPayload> {
+    public DetectorConveyorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
+        super(ScreenHandlerTypeInit.DETECTOR_CONVEYOR, syncId, playerInventory, payload, DetectorConveyorBlockEntity.class);
     }
 
-    public FilterConveyorScreenHandler(int syncId, Inventory playerInventory, FilterConveyorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
-        super(ScreenHandlerTypeInit.FILTER_CONVEYOR, syncId, playerInventory, blockEntity, wrappedContainerStorage);
+    public DetectorConveyorScreenHandler(int syncId, Inventory playerInventory, DetectorConveyorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+        super(ScreenHandlerTypeInit.DETECTOR_CONVEYOR, syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class FilterConveyorScreenHandler extends IndustriaScreenHandler<FilterCo
 
     @Override
     protected List<Block> getValidBlocks() {
-        return List.of(BlockInit.FILTER_CONVEYOR);
+        return List.of(BlockInit.DETECTOR_CONVEYOR);
     }
 
     public void setFilterStack(ItemStack stack) {
