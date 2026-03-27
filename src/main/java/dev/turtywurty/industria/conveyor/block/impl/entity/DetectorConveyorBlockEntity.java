@@ -3,8 +3,10 @@ package dev.turtywurty.industria.conveyor.block.impl.entity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.IndustriaBlockEntity;
+import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorageHolder;
+import dev.turtywurty.industria.conveyor.block.impl.DetectorConveyorBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
@@ -28,7 +30,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder, ConveyorFilterAccess {
+public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder, ConveyorFilterAccess, TickableBlockEntity {
     public static final Component TITLE = Industria.containerTitle("detector_conveyor");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -41,6 +43,7 @@ public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements
 
     private TagKey<Item> filterTag = null;
     private boolean isTagFiltering = false;
+    private int lastSignalStrength = Integer.MIN_VALUE;
 
     public DetectorConveyorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.DETECTOR_CONVEYOR, BlockEntityTypeInit.DETECTOR_CONVEYOR, pos, state);
@@ -64,6 +67,11 @@ public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements
     @Override
     public WrappedContainerStorage<?> getWrappedContainerStorage() {
         return this.wrappedContainerStorage;
+    }
+
+    @Override
+    public void tick() {
+        refreshRedstoneOutput();
     }
 
     @Override
@@ -132,6 +140,26 @@ public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements
     @Override
     public boolean shouldWaitForEndTick() {
         return false;
+    }
+
+    @Override
+    public void forceUpdate() {
+        super.forceUpdate();
+        refreshRedstoneOutput();
+    }
+
+    private void refreshRedstoneOutput() {
+        if (this.level == null || this.level.isClientSide())
+            return;
+
+        BlockState state = getBlockState();
+        int currentSignalStrength = DetectorConveyorBlock.getSignalStrength(state, this.level, this.worldPosition);
+        boolean shouldNotify = this.lastSignalStrength != currentSignalStrength;
+
+        this.lastSignalStrength = currentSignalStrength;
+        if (shouldNotify) {
+            DetectorConveyorBlock.updateRedstoneOutput(this.level, this.worldPosition, state);
+        }
     }
 
     @Override

@@ -294,7 +294,8 @@ public class BlockInit {
             MagneticConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final DetectorConveyorBlock DETECTOR_CONVEYOR = registerWithItemCopy("detector_conveyor",
-            DetectorConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            DetectorConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final DropChuteConveyorBlock DROP_CHUTE_CONVEYOR = registerWithItemCopy("drop_chute_conveyor",
             DropChuteConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);

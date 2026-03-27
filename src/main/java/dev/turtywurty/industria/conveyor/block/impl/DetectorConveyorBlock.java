@@ -34,28 +34,25 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 public class DetectorConveyorBlock extends BaseConveyorBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-    public static final Property<Boolean> ENABLED = BooleanProperty.create("enabled");
 
     public DetectorConveyorBlock(BlockBehaviour.Properties settings) {
         super(settings, new IndustriaBlock.BlockProperties()
                 .addStateProperty(FACING, Direction.NORTH)
                 .addStateProperty(WATERLOGGED, false)
-                .addStateProperty(ENABLED, true)
                 .notPlaceFacingOpposite()
                 .hasComparatorOutput()
+                .comparatorOutput((state, level, pos, direction) -> getSignalStrength(state, level, pos))
                 .blockEntityProperties(new IndustriaBlock.BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.DETECTOR_CONVEYOR)
+                        .shouldTick()
                         .rightClickToOpenGui())
         );
     }
@@ -127,8 +124,7 @@ public class DetectorConveyorBlock extends BaseConveyorBlock {
 
         return defaultBlockState()
                 .setValue(FACING, context.getHorizontalDirection())
-                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER)
-                .setValue(ENABLED, !level.hasNeighborSignal(pos));
+                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
     @Override
@@ -140,19 +136,6 @@ public class DetectorConveyorBlock extends BaseConveyorBlock {
 
         if (level instanceof ServerLevel serverLevel) {
             getNetworkManager(serverLevel).placeConveyor(serverLevel, pos);
-            serverLevel.scheduleTick(pos, this, 1);
-        }
-    }
-
-    @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
-        super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
-
-        if (level.isClientSide())
-            return;
-
-        if (level instanceof ServerLevel serverLevel) {
-            serverLevel.scheduleTick(pos, this, 1);
         }
     }
 
@@ -175,13 +158,8 @@ public class DetectorConveyorBlock extends BaseConveyorBlock {
             return;
 
         boolean waterlogged = level.getFluidState(pos).getType() == Fluids.WATER;
-        boolean enabled = !level.hasNeighborSignal(pos);
-        BlockState resolved = current
-                .setValue(WATERLOGGED, waterlogged)
-                .setValue(ENABLED, enabled);
-
-        if (resolved != current) {
-            level.setBlock(pos, resolved, Block.UPDATE_ALL);
+        if (current.getValue(WATERLOGGED) != waterlogged) {
+            level.setBlock(pos, current.setValue(WATERLOGGED, waterlogged), Block.UPDATE_ALL);
         }
     }
 
@@ -218,17 +196,12 @@ public class DetectorConveyorBlock extends BaseConveyorBlock {
 
     @Override
     public int getItemLimit(BlockGetter level, BlockPos pos, BlockState state) {
-        return 5;
+        return 3;
     }
 
     @Override
     public int getSpeed(Level level, BlockPos pos, BlockState state) {
-        return isEnabled(level, pos, state) ? 5 : 0;
-    }
-
-    @Override
-    public boolean isEnabled(Level level, BlockPos pos, BlockState state) {
-        return state.getValue(ENABLED);
+        return 5;
     }
 
     @Override
@@ -236,13 +209,12 @@ public class DetectorConveyorBlock extends BaseConveyorBlock {
         return true;
     }
 
-    @Override
-    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        if (!state.getValue(ENABLED) || !(level instanceof Level realLevel) || realLevel.isClientSide())
+    public static int getSignalStrength(BlockState state, BlockGetter level, BlockPos pos) {
+        if (!(level instanceof ServerLevel serverLevel)
+                || !(state.getBlock() instanceof DetectorConveyorBlock detectorConveyor))
             return 0;
 
-        ConveyorNetworkManager networkManager = getNetworkManager((ServerLevel) level);
-        ConveyorNetwork networkAt = networkManager.getNetworkAt(pos);
+        ConveyorNetwork networkAt = detectorConveyor.getNetworkManager(serverLevel).getNetworkAt(pos);
         if (networkAt == null)
             return 0;
 
@@ -250,17 +222,43 @@ public class DetectorConveyorBlock extends BaseConveyorBlock {
         if (storageAt == null)
             return 0;
 
-        if (level.getBlockEntity(pos) instanceof DetectorConveyorBlockEntity blockEntity)
-            return storageAt.getItems().stream()
-                    .map(ConveyorItem::getStack)
-                    .anyMatch(blockEntity::doesMatchFilter) ? 15 : 0;
+        if (level.getBlockEntity(pos) instanceof DetectorConveyorBlockEntity blockEntity) {
+            for (ConveyorItem item : storageAt.getItems()) {
+                if (blockEntity.doesMatchFilter(item.getStack()))
+                    return 15;
+            }
+
+            return 0;
+        }
 
         return !storageAt.getItems().isEmpty() ? 15 : 0;
     }
 
+    public static void updateRedstoneOutput(Level level, BlockPos pos, BlockState state) {
+        Block block = state.getBlock();
+        level.updateNeighborsAt(pos, block);
+        level.updateNeighborsAt(pos.below(), block);
+        level.updateNeighbourForOutputSignal(pos, block);
+    }
+
+    private static boolean canEmitTowards(BlockState state, Direction direction) {
+        Direction facing = state.getValue(FACING);
+        return direction == Direction.DOWN
+                || direction == facing.getClockWise()
+                || direction == facing.getCounterClockWise();
+    }
+
+    @Override
+    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        if (!canEmitTowards(state, direction))
+            return 0;
+
+        return getSignalStrength(state, level, pos);
+    }
+
     @Override
     protected int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return getSignal(state, level, pos, direction);
+        return canEmitTowards(state, direction) ? getSignalStrength(state, level, pos) : 0;
     }
 
     @Override
