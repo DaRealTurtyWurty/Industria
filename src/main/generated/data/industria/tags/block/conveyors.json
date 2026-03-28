@@ -10,6 +10,8 @@
     "industria:filter_conveyor",
     "industria:magnetic_conveyor",
     "industria:detector_conveyor",
-    "industria:drop_chute_conveyor"
+    "industria:drop_chute_conveyor",
+    "industria:count_conveyor",
+    "industria:delay_conveyor"
   ]
 }

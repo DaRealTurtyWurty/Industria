@@ -41,7 +41,7 @@ public interface ConveyorLike {
         return canAttachToStorageOutput(level, pos, state, output, storagePos);
     }
 
-    default void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorRoutingState routingState) {
+    default void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorItem item, ConveyorRoutingState routingState) {
         // NO-OP
     }
 

@@ -147,6 +147,14 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createDetectorConveyorBlockModelDefinitionCreator(BlockInit.DETECTOR_CONVEYOR));
     }
 
+    private static void registerCountConveyor(BlockModelGenerators blockStateModelGenerator) {
+        registerFacingOnlyConveyor(blockStateModelGenerator, BlockInit.COUNT_CONVEYOR, Industria.id("block/conveyor"));
+    }
+
+    private static void registerDelayConveyor(BlockModelGenerators blockStateModelGenerator) {
+        registerFacingOnlyConveyor(blockStateModelGenerator, BlockInit.DELAY_CONVEYOR, Industria.id("block/conveyor"));
+    }
+
     private static void registerDropChuteConveyor(BlockModelGenerators blockStateModelGenerator) {
         blockStateModelGenerator.blockStateOutput.accept(createDropChuteConveyorBlockModelDefinitionCreator(BlockInit.DROP_CHUTE_CONVEYOR, "drop_chute_conveyor"));
     }
@@ -381,14 +389,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
     private static BlockModelDefinitionGenerator createDetectorConveyorBlockModelDefinitionCreator(DetectorConveyorBlock block) {
         Identifier modelId = Industria.id("block/conveyor");
 
-        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
-            generator.with(new ConditionBuilder()
-                            .term(DetectorConveyorBlock.FACING, direction),
-                    createWeightedVariant(modelId, rotationFor(direction)));
-        }
-
-        return generator;
+        return createFacingOnlyConveyorBlockModelDefinitionCreator(block, modelId);
     }
 
     private static BlockModelDefinitionGenerator createDropChuteConveyorBlockModelDefinitionCreator(DropChuteConveyorBlock block, String name) {
@@ -398,6 +399,21 @@ public class IndustriaModelProvider extends FabricModelProvider {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             generator.with(new ConditionBuilder()
                             .term(DropChuteConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
+    private static void registerFacingOnlyConveyor(BlockModelGenerators blockStateModelGenerator, Block block, Identifier modelId) {
+        blockStateModelGenerator.blockStateOutput.accept(createFacingOnlyConveyorBlockModelDefinitionCreator(block, modelId));
+    }
+
+    private static BlockModelDefinitionGenerator createFacingOnlyConveyorBlockModelDefinitionCreator(Block block, Identifier modelId) {
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(AbstractHorizontalConveyorBlock.FACING, direction),
                     createWeightedVariant(modelId, rotationFor(direction)));
         }
 
@@ -544,6 +560,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DETECTOR_CONVEYOR, Industria.id("block/conveyor"));
         registerDropChuteConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DROP_CHUTE_CONVEYOR, Industria.id("block/drop_chute_conveyor"));
+        registerCountConveyor(blockStateModelGenerator);
+        blockStateModelGenerator.registerSimpleItemModel(BlockInit.COUNT_CONVEYOR, Industria.id("block/conveyor"));
+        registerDelayConveyor(blockStateModelGenerator);
+        blockStateModelGenerator.registerSimpleItemModel(BlockInit.DELAY_CONVEYOR, Industria.id("block/conveyor"));
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {

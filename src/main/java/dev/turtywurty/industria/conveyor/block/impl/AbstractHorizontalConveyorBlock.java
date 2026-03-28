@@ -47,26 +47,8 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
     @Override
     protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player,
                                           InteractionHand hand, BlockHitResult hitResult) {
-        if (itemStack.isEmpty()) {
-            if (player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
-                if (level.isClientSide())
-                    return InteractionResult.SUCCESS;
-
-                if (level instanceof ServerLevel serverLevel) {
-                    ConveyorNetworkManager networkManager = getNetworkManager(serverLevel);
-                    boolean recreated = networkManager.recreateNetworkAt(serverLevel, pos);
-                    player.sendSystemMessage(Component.literal(recreated
-                            ? "Recreated conveyor network."
-                            : "Failed to recreate conveyor network."));
-
-                    return InteractionResult.SUCCESS_SERVER;
-                }
-
-                return InteractionResult.SUCCESS_SERVER;
-            }
-
+        if (itemStack.isEmpty())
             return super.useItemOn(itemStack, state, level, pos, player, hand, hitResult);
-        }
 
         if (level.isClientSide())
             return InteractionResult.SUCCESS;
@@ -101,6 +83,28 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
         }
 
         return super.useItemOn(itemStack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (player.isShiftKeyDown()) {
+            if (level.isClientSide())
+                return InteractionResult.SUCCESS;
+
+            if (level instanceof ServerLevel serverLevel) {
+                ConveyorNetworkManager networkManager = getNetworkManager(serverLevel);
+                boolean recreated = networkManager.recreateNetworkAt(serverLevel, pos);
+                player.sendSystemMessage(Component.literal(recreated
+                        ? "Recreated conveyor network."
+                        : "Failed to recreate conveyor network."));
+
+                return InteractionResult.SUCCESS_SERVER;
+            }
+
+            return InteractionResult.SUCCESS_SERVER;
+        }
+
+        return super.useWithoutItem(state, level, pos, player, hit);
     }
 
     @Override

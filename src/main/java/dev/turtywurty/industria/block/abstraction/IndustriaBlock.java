@@ -186,18 +186,18 @@ public class IndustriaBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (this.multiblockType != null) {
-            if (!world.isClientSide()) {
-                this.multiblockType.onPrimaryBlockUse(world, player, hit, pos);
+            if (!level.isClientSide()) {
+                this.multiblockType.onPrimaryBlockUse(level, player, hit, pos);
             }
 
             return InteractionResult.SUCCESS;
         }
 
         if (this.rightClickToOpenGui) {
-            if (!world.isClientSide()) {
-                BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (!level.isClientSide()) {
+                BlockEntity blockEntity = level.getBlockEntity(pos);
                 if (player instanceof ServerPlayer sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
                     sPlayer.openMenu(blockEntityWithGui);
                 }
@@ -206,7 +206,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        return super.useWithoutItem(state, world, pos, player, hit);
+        return super.useWithoutItem(state, level, pos, player, hit);
     }
 
     @Override

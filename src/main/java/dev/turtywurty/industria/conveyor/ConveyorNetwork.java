@@ -233,7 +233,7 @@ public class ConveyorNetwork {
                 prepareItemForInputRoute(level, nextPos, item, selectedOutput.output().expectedInputPos());
                 prepareItemForConveyor(level, nextPos, item, routingState);
                 conveyorStorage.removeItems(item);
-                onOutputUsed(level, conveyorPos, state, selectedOutput.output(), routingState);
+                onOutputUsed(level, conveyorPos, state, selectedOutput.output(), item, routingState);
             }
 
             return;
@@ -253,7 +253,7 @@ public class ConveyorNetwork {
                     if (inserted >= stack.getCount()) {
                         conveyorStorage.removeItems(item);
                         transaction.commit();
-                        onOutputUsed(level, conveyorPos, state, selectedOutput.output(), routingState);
+                        onOutputUsed(level, conveyorPos, state, selectedOutput.output(), item, routingState);
                     } else if (inserted > 0) {
                         stack.shrink((int) inserted);
                         item.setStack(stack);
@@ -273,7 +273,7 @@ public class ConveyorNetwork {
         BlockPos dropPos = selectedOutput.output().deliveryPos();
         Containers.dropItemStack(level, dropPos.getX(), dropPos.getY(), dropPos.getZ(), stack);
         conveyorStorage.removeItems(item);
-        onOutputUsed(level, conveyorPos, state, selectedOutput.output(), routingState);
+        onOutputUsed(level, conveyorPos, state, selectedOutput.output(), item, routingState);
     }
 
     public static boolean isConveyor(BlockState state) {
@@ -332,9 +332,9 @@ public class ConveyorNetwork {
         return null;
     }
 
-    private static void onOutputUsed(Level level, BlockPos conveyorPos, BlockState state, ConveyorOutput output, ConveyorRoutingState routingState) {
+    private static void onOutputUsed(Level level, BlockPos conveyorPos, BlockState state, ConveyorOutput output, ConveyorItem item, ConveyorRoutingState routingState) {
         if (state.getBlock() instanceof ConveyorLike conveyor) {
-            conveyor.onOutputUsed(level, conveyorPos, state, output, routingState);
+            conveyor.onOutputUsed(level, conveyorPos, state, output, item, routingState);
         }
     }
 

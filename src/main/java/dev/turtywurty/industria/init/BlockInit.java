@@ -300,6 +300,12 @@ public class BlockInit {
     public static final DropChuteConveyorBlock DROP_CHUTE_CONVEYOR = registerWithItemCopy("drop_chute_conveyor",
             DropChuteConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final CountConveyorBlock COUNT_CONVEYOR = registerWithItemCopy("count_conveyor",
+            CountConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final DelayConveyorBlock DELAY_CONVEYOR = registerWithItemCopy("delay_conveyor",
+            DelayConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.of()
