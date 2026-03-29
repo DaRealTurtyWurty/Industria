@@ -119,6 +119,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.blockStateOutput.accept(createMergerConveyorBlockModelDefinitionCreator(BlockInit.MERGER_CONVEYOR, "merger_conveyor"));
     }
 
+    private static void registerAlternatorConveyor(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.blockStateOutput.accept(createAlternatorConveyorBlockModelDefinitionCreator(BlockInit.ALTERNATOR_CONVEYOR, "alternator_conveyor"));
+    }
+
     private static void registerFeederConveyor(BlockModelGenerators blockStateModelGenerator) {
         blockStateModelGenerator.blockStateOutput.accept(createFeederConveyorBlockModelDefinitionCreator(BlockInit.FEEDER_CONVEYOR, "feeder_conveyor"));
     }
@@ -290,6 +294,19 @@ public class IndustriaModelProvider extends FabricModelProvider {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             generator.with(new ConditionBuilder()
                             .term(FeederConveyorBlock.FACING, direction),
+                    createWeightedVariant(modelId, rotationFor(direction)));
+        }
+
+        return generator;
+    }
+
+    private static BlockModelDefinitionGenerator createAlternatorConveyorBlockModelDefinitionCreator(AlternatorConveyorBlock block, String name) {
+        Identifier modelId = Industria.id("block/" + name);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            generator.with(new ConditionBuilder()
+                            .term(AlternatorConveyorBlock.FACING, direction),
                     createWeightedVariant(modelId, rotationFor(direction)));
         }
 
@@ -548,6 +565,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerConveyor(blockStateModelGenerator);
         registerSplitterConveyor(blockStateModelGenerator);
         registerMergerConveyor(blockStateModelGenerator);
+        registerAlternatorConveyor(blockStateModelGenerator);
         registerFeederConveyor(blockStateModelGenerator);
         registerHatchConveyor(blockStateModelGenerator);
         registerSideInjectorConveyor(blockStateModelGenerator);

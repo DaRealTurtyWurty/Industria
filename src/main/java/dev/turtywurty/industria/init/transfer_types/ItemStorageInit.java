@@ -30,7 +30,7 @@ public class ItemStorageInit {
                         return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
 
                     return null;
-                }, BlockInit.CONVEYOR, BlockInit.SPLITTER_CONVEYOR, BlockInit.MERGER_CONVEYOR, BlockInit.HATCH_CONVEYOR,
+                }, BlockInit.CONVEYOR, BlockInit.SPLITTER_CONVEYOR, BlockInit.MERGER_CONVEYOR, BlockInit.ALTERNATOR_CONVEYOR, BlockInit.HATCH_CONVEYOR,
                 BlockInit.SIDE_INJECTOR_CONVEYOR, BlockInit.LADDER_CONVEYOR, BlockInit.FILTER_CONVEYOR,
                 BlockInit.MAGNETIC_CONVEYOR, BlockInit.DROP_CHUTE_CONVEYOR, BlockInit.DETECTOR_CONVEYOR,
                 BlockInit.COUNT_CONVEYOR, BlockInit.DELAY_CONVEYOR);

@@ -267,44 +267,60 @@ public class BlockInit {
             ArcFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
     public static final BasicConveyorBlock CONVEYOR = registerWithItemCopy("conveyor",
-            BasicConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            BasicConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final SplitterConveyorBlock SPLITTER_CONVEYOR = registerWithItemCopy("splitter_conveyor",
-            SplitterConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            SplitterConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final MergerConveyorBlock MERGER_CONVEYOR = registerWithItemCopy("merger_conveyor",
-            MergerConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            MergerConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final AlternatorConveyorBlock ALTERNATOR_CONVEYOR = registerWithItemCopy("alternator_conveyor",
+            AlternatorConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final FeederConveyorBlock FEEDER_CONVEYOR = registerWithItemCopy("feeder_conveyor",
-            FeederConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            FeederConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final HatchConveyorBlock HATCH_CONVEYOR = registerWithItemCopy("hatch_conveyor",
-            HatchConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            HatchConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final SideInjectorConveyorBlock SIDE_INJECTOR_CONVEYOR = registerWithItemCopy("side_injector_conveyor",
-            SideInjectorConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            SideInjectorConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final LadderConveyorBlock LADDER_CONVEYOR = registerWithItemCopy("ladder_conveyor",
-            LadderConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            LadderConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final FilterConveyorBlock FILTER_CONVEYOR = registerWithItemCopy("filter_conveyor",
-            FilterConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            FilterConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final MagneticConveyorBlock MAGNETIC_CONVEYOR = registerWithItemCopy("magnetic_conveyor",
-            MagneticConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            MagneticConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final DetectorConveyorBlock DETECTOR_CONVEYOR = registerWithItemCopy("detector_conveyor",
             DetectorConveyorBlock::new, Blocks.IRON_BLOCK,
             settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final DropChuteConveyorBlock DROP_CHUTE_CONVEYOR = registerWithItemCopy("drop_chute_conveyor",
-            DropChuteConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            DropChuteConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final CountConveyorBlock COUNT_CONVEYOR = registerWithItemCopy("count_conveyor",
-            CountConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            CountConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static final DelayConveyorBlock DELAY_CONVEYOR = registerWithItemCopy("delay_conveyor",
-            DelayConveyorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            DelayConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(

@@ -114,6 +114,16 @@ public class ConveyorItem {
         this.selectedAnchorRouteId = selectedAnchorRouteId;
     }
 
+    public ConveyorItem copy() {
+        var item = new ConveyorItem(this.id);
+        item.setStack(this.stack.copy());
+        item.setPosition(this.position);
+        item.setProgress(this.progress);
+        item.setSelectedOutputId(this.selectedOutputId);
+        item.setSelectedAnchorRouteId(this.selectedAnchorRouteId);
+        return item;
+    }
+
     private String getSerializedSelectedOutputId() {
         return this.selectedOutputId == null ? "" : this.selectedOutputId;
     }

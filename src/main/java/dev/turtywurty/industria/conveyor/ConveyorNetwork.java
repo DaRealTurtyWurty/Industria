@@ -84,6 +84,16 @@ public class ConveyorNetwork {
         this(UUID.randomUUID());
     }
 
+    public ConveyorNetwork copy() {
+        var network = new ConveyorNetwork(this.id);
+        network.conveyors.addAll(this.conveyors);
+        this.connectedBlocks.forEach((conveyorPos, attachments) ->
+                network.connectedBlocks.put(conveyorPos, new ConcurrentHashMap<>(attachments)));
+        this.storage.getStorages().forEach((pos, conveyorStorage) ->
+                network.storage.getStorages().put(pos, conveyorStorage.copy()));
+        return network;
+    }
+
     public UUID getId() {
         return id;
     }

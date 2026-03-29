@@ -18,6 +18,10 @@ public record AddConveyorNetworkPayload(ResourceKey<Level> level,
                     ConveyorNetwork.STREAM_CODEC, AddConveyorNetworkPayload::network,
                     AddConveyorNetworkPayload::new);
 
+    public AddConveyorNetworkPayload {
+        network = network.copy();
+    }
+
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return ID;

@@ -3,6 +3,32 @@ plugins {
 	id 'maven-publish'
 }
 
+def resolveRunJavaExecutable = {
+	def isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+	def javaPluginExtension = extensions.findByType(org.gradle.api.plugins.JavaPluginExtension)
+	if (javaPluginExtension != null && javaPluginExtension.toolchain.languageVersion.present) {
+		return javaToolchains.launcherFor(javaPluginExtension.toolchain).get().executablePath.asFile
+	}
+
+	def javaHome = System.getProperty("java.home")
+	return new File(javaHome, "bin/${isWindows ? 'java.exe' : 'java'}")
+}
+
+def supportsJvmArg = { String arg ->
+	def javaExecutable = resolveRunJavaExecutable()
+	if (!javaExecutable.isFile()) {
+		return false
+	}
+
+	def process = new ProcessBuilder(javaExecutable.absolutePath, arg, "-version")
+			.redirectErrorStream(true)
+			.start()
+	process.inputStream.text
+	return process.waitFor() == 0
+}
+
+def allowEnhancedClassRedefinition = supportsJvmArg("-XX:+AllowEnhancedClassRedefinition")
+
 version = project.mod_version
 group = project.maven_group
 
@@ -42,7 +68,9 @@ loom {
 
 	runConfigs.configureEach {
 		ideConfigGenerated = false
-        vmArg("-XX:+AllowEnhancedClassRedefinition")
+		if (allowEnhancedClassRedefinition) {
+			vmArg("-XX:+AllowEnhancedClassRedefinition")
+		}
 	}
 }
 

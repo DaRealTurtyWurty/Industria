@@ -180,6 +180,16 @@ public class ConveyorStorage {
         return Math.max(1, (int) Math.ceil(MAX_PROGRESS / (double) itemLimit));
     }
 
+    public ConveyorStorage copy() {
+        return new ConveyorStorage(
+                this.pos,
+                this.itemContainer.getContainerSize(),
+                this.items.stream()
+                        .map(ConveyorItem::copy)
+                        .toList()
+        );
+    }
+
     private void sanitizeItems() {
         this.items.removeIf(item -> item == null || item.getStack() == null || item.getStack().isEmpty());
     }
