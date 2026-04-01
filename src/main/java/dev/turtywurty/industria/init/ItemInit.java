@@ -124,8 +124,13 @@ public class ItemInit {
     // Miscellaneous
     public static final Item RED_MUD = register("red_mud");
     public static final Item CRYOLITE = register("cryolite");
-    public static final Item CARBON_ROD = registerWithSettings("carbon_rod", settings -> settings.durability(50));
-    public static final WrenchItem WRENCH = register("wrench", settings -> new WrenchItem(settings.stacksTo(1)));
+    public static final Item CARBON_ROD = registerWithSettings("carbon_rod",
+            settings -> settings.durability(50));
+    public static final WrenchItem WRENCH = register("wrench",
+            settings -> new WrenchItem(settings.stacksTo(1)));
+    public static final Item EMPTY_MOB_JAR = register("mob_jar", Item::new);
+    public static final MobJarItem FILLED_MOB_JAR = register("filled_mob_jar",
+            settings -> new MobJarItem(settings.craftRemainder(ItemInit.EMPTY_MOB_JAR)));
 
     public static Item register(String name) {
         return registerItem(name, new Item(new Item.Properties()

@@ -4,9 +4,11 @@ import dev.turtywurty.fabricslurryapi.api.Slurry;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.conveyor.block.impl.entity.ContainmentConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.screen.ContainmentConveyorScreen;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.screen.DetectorConveyorScreen;
 import dev.turtywurty.industria.screen.FilterConveyorScreen;
@@ -157,6 +159,11 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.DROP_CHUTE_CONVEYOR, "Drop Chute Conveyor");
         translationBuilder.add(BlockInit.COUNT_CONVEYOR, "Count Conveyor");
         translationBuilder.add(BlockInit.DELAY_CONVEYOR, "Delay Conveyor");
+        translationBuilder.add(BlockInit.CONTAINMENT_CONVEYOR, "Containment Conveyor");
+        addText(translationBuilder, ContainmentConveyorBlockEntity.TITLE, "Containment Conveyor");
+        addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.capturing"), "Capturing");
+        addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.idle"), "Waiting for mob");
+        addText(translationBuilder, ContainmentConveyorScreen.PROGRESS_TOOLTIP_TEXT, "Progress: %s%%");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");

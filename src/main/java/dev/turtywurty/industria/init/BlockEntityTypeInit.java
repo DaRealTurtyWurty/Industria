@@ -154,6 +154,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(DelayConveyorBlockEntity::new, BlockInit.DELAY_CONVEYOR)
                     .build());
 
+    public static final BlockEntityType<ContainmentConveyorBlockEntity> CONTAINMENT_CONVEYOR = register("containment_conveyor",
+            FabricBlockEntityTypeBuilder.create(ContainmentConveyorBlockEntity::new, BlockInit.CONTAINMENT_CONVEYOR)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

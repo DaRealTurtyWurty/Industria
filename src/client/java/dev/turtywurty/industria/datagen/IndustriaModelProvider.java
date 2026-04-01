@@ -159,6 +159,10 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerFacingOnlyConveyor(blockStateModelGenerator, BlockInit.DELAY_CONVEYOR, Industria.id("block/conveyor"));
     }
 
+    private static void registerContainmentConveyor(BlockModelGenerators blockStateModelGenerator) {
+        registerFacingOnlyConveyor(blockStateModelGenerator, BlockInit.CONTAINMENT_CONVEYOR, Industria.id("block/conveyor"));
+    }
+
     private static void registerDropChuteConveyor(BlockModelGenerators blockStateModelGenerator) {
         blockStateModelGenerator.blockStateOutput.accept(createDropChuteConveyorBlockModelDefinitionCreator(BlockInit.DROP_CHUTE_CONVEYOR, "drop_chute_conveyor"));
     }
@@ -582,6 +586,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.COUNT_CONVEYOR, Industria.id("block/conveyor"));
         registerDelayConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DELAY_CONVEYOR, Industria.id("block/conveyor"));
+        registerContainmentConveyor(blockStateModelGenerator);
+        blockStateModelGenerator.registerSimpleItemModel(BlockInit.CONTAINMENT_CONVEYOR, Industria.id("block/conveyor"));
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {

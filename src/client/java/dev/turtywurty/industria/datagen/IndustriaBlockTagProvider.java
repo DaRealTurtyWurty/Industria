@@ -41,6 +41,7 @@ public class IndustriaBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
                 .add(BlockInit.DETECTOR_CONVEYOR)
                 .add(BlockInit.DROP_CHUTE_CONVEYOR)
                 .add(BlockInit.COUNT_CONVEYOR)
-                .add(BlockInit.DELAY_CONVEYOR);
+                .add(BlockInit.DELAY_CONVEYOR)
+                .add(BlockInit.CONTAINMENT_CONVEYOR);
     }
 }

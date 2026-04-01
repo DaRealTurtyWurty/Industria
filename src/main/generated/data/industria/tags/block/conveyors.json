@@ -13,6 +13,7 @@
     "industria:detector_conveyor",
     "industria:drop_chute_conveyor",
     "industria:count_conveyor",
-    "industria:delay_conveyor"
+    "industria:delay_conveyor",
+    "industria:containment_conveyor"
   ]
 }

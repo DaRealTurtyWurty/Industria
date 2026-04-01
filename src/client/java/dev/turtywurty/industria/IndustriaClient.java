@@ -30,5 +30,6 @@ public class IndustriaClient implements ClientModInitializer {
         ReloadListenerInit.init();
         ConveyorAnchorProviderInit.init();
         ConveyorSpecialRendererInit.init();
+        TooltipInit.init();
     }
 }

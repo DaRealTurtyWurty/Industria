@@ -19,5 +19,6 @@ public class ComponentTypeInit {
         return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Industria.id(name), builder.apply(DataComponentType.builder()).build());
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

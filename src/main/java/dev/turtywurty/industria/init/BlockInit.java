@@ -322,6 +322,10 @@ public class BlockInit {
             DelayConveyorBlock::new, Blocks.IRON_BLOCK,
             settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
+    public static final ContainmentConveyorBlock CONTAINMENT_CONVEYOR = registerWithItemCopy("containment_conveyor",
+            ContainmentConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.of()
