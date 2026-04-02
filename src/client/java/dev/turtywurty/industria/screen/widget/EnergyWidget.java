@@ -2,7 +2,7 @@ package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.widget.util.Orientation;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.layouts.LayoutElement;
@@ -30,7 +30,7 @@ public class EnergyWidget implements Renderable, LayoutElement {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         long currentEnergy = this.energyStorage.getAmount();
         long maxEnergy = this.energyStorage.getCapacity();
         long energy = Math.min(maxEnergy, Math.max(0, currentEnergy));
@@ -51,7 +51,7 @@ public class EnergyWidget implements Renderable, LayoutElement {
         }
     }
 
-    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
+    protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         context.setTooltipForNextFrame(Minecraft.getInstance().font,
                 Component.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"),
                 mouseX, mouseY);

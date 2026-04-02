@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.IntProviders;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -22,8 +23,8 @@ import java.util.function.BiConsumer;
 public class RubberTreeTrunkPlacer extends TrunkPlacer {
     public static final MapCodec<RubberTreeTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(instance ->
             trunkPlacerParts(instance).and(
-                    instance.group(IntProvider.POSITIVE_CODEC.fieldOf("branch_start_height").forGetter(placer -> placer.branchStartHeight),
-                            IntProvider.NON_NEGATIVE_CODEC.fieldOf("branch_length").forGetter(placer -> placer.branchLength)))
+                    instance.group(IntProviders.POSITIVE_CODEC.fieldOf("branch_start_height").forGetter(placer -> placer.branchStartHeight),
+                            IntProviders.NON_NEGATIVE_CODEC.fieldOf("branch_length").forGetter(placer -> placer.branchLength)))
                     .apply(instance, RubberTreeTrunkPlacer::new));
     public final IntProvider branchStartHeight;
     public final IntProvider branchLength;

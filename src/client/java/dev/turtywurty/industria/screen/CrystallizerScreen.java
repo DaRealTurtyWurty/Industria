@@ -4,7 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screenhandler.CrystallizerScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -34,21 +34,14 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerScre
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 94, this.topPos + 38, 176, 0, this.menu.getProgressScaled(), 17);
-    }
-
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
 
         float catalystUsesPercent = this.menu.getCatalystUsesPercent();
-        if(catalystUsesPercent > 0) {
+        if (catalystUsesPercent > 0) {
             int width = (int) (18 * catalystUsesPercent);
             context.fill(this.leftPos + 52, this.topPos + 27, this.leftPos + 53 + width, this.topPos + 29, 0xaaFF0000);
         }
-
-        renderTooltip(context, mouseX, mouseY);
     }
 }

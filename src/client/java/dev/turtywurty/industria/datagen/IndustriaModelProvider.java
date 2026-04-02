@@ -9,6 +9,8 @@ import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.init.ItemInit;
+import dev.turtywurty.industria.model.*;
+import dev.turtywurty.industria.renderer.item.IndustriaBlockEntityItemRenderer;
 import dev.turtywurty.industria.renderer.item.DrillHeadItemRenderer;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
@@ -20,8 +22,8 @@ import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerato
 import net.minecraft.client.data.models.blockstates.ConditionBuilder;
 import net.minecraft.client.data.models.blockstates.MultiPartGenerator;
 import net.minecraft.client.data.models.model.*;
-import net.minecraft.client.renderer.block.model.Material;
-import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.dispatch.Variant;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -621,35 +623,47 @@ public class IndustriaModelProvider extends FabricModelProvider {
     public void generateItemModels(ItemModelGenerators itemModelGenerator) {
         itemModelGenerator.itemModelOutput.accept(ItemInit.SIMPLE_DRILL_HEAD, ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ItemInit.SIMPLE_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
         itemModelGenerator.itemModelOutput.accept(ItemInit.BLOCK_BUILDER_DRILL_HEAD, ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ItemInit.BLOCK_BUILDER_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
+        itemModelGenerator.itemModelOutput.accept(ItemInit.EMPTY_MOB_JAR, ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(ItemInit.EMPTY_MOB_JAR)));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.WIND_TURBINE, BuiltinEntityModelBuilder.defaultBlock()
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.WIND_TURBINE,
+                new IndustriaBlockEntityItemRenderer.Unbaked(WindTurbineModel.LAYER_LOCATION, WindTurbineModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
                     displaySettings.setTranslation(-2.5f, -2.5f, 0);
                     displaySettings.setScale(0.5f, 0.5f, 0.5f);
                 }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.OIL_PUMP_JACK, BuiltinEntityModelBuilder.defaultBlock()
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.OIL_PUMP_JACK,
+                new IndustriaBlockEntityItemRenderer.Unbaked(OilPumpJackModel.LAYER_LOCATION, OilPumpJackModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
                     displaySettings.setTranslation(-1.5f, -2.75f, 0);
                     displaySettings.setScale(0.275f, 0.275f, 0.275f);
                 }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.DRILL, BuiltinEntityModelBuilder.defaultBlock()
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.DRILL,
+                new IndustriaBlockEntityItemRenderer.Unbaked(DrillFrameModel.LAYER_LOCATION, DrillFrameModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
                     displaySettings.setTranslation(-2.5f, -2.5f, 0);
                     displaySettings.setScale(0.5f, 0.5f, 0.5f);
                 }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.UPGRADE_STATION, BuiltinEntityModelBuilder.defaultBlock()
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.UPGRADE_STATION,
+                new IndustriaBlockEntityItemRenderer.Unbaked(UpgradeStationModel.LAYER_LOCATION, UpgradeStationModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
                 .copyModifyGui(displaySettings -> {
                     displaySettings.setTranslation(-1.5f, -2.75f, 0);
                     displaySettings.setScale(0.275f, 0.275f, 0.275f);
                 }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.MOTOR, BuiltinEntityModelBuilder.defaultBlock());
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.MOTOR,
+                new IndustriaBlockEntityItemRenderer.Unbaked(MotorModel.LAYER_LOCATION, MotorModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock());
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SIMPLE_DRILL_HEAD,
+                Industria.id("block/simple_drill_head"),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyAll(displaySettings ->
                                 displaySettings.rotate(180, 180, 0))
@@ -657,69 +671,78 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 displaySettings.rotate(0, 180, 0)));
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.BLOCK_BUILDER_DRILL_HEAD,
+                Industria.id("block/simple_drill_head"),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyAll(displaySettings ->
                                 displaySettings.rotate(180, 180, 0))
                         .copyModifyGui(displaySettings ->
                                 displaySettings.rotate(0, 180, 0)));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.MIXER,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.MIXER,
+                new IndustriaBlockEntityItemRenderer.Unbaked(MixerModel.LAYER_LOCATION, MixerModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.DIGESTER,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.DIGESTER,
+                new IndustriaBlockEntityItemRenderer.Unbaked(DigesterModel.LAYER_LOCATION, DigesterModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.CLARIFIER,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.CLARIFIER,
+                new IndustriaBlockEntityItemRenderer.Unbaked(ClarifierModel.LAYER_LOCATION, ClarifierModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.CRYSTALLIZER,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.CRYSTALLIZER,
+                new IndustriaBlockEntityItemRenderer.Unbaked(CrystallizerModel.LAYER_LOCATION, CrystallizerModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.ROTARY_KILN,
+        generateSpecialItemModel(itemModelGenerator, ItemInit.ROTARY_KILN,
+                new IndustriaBlockEntityItemRenderer.Unbaked(RotaryKilnModel.LAYER_LOCATION, RotaryKilnModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-2.5f, -2.75f, 0);
                             displaySettings.setScale(0.1375f, 0.1375f, 0.1375f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.ELECTROLYZER,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.ELECTROLYZER,
+                new IndustriaBlockEntityItemRenderer.Unbaked(ElectrolyzerModel.LAYER_LOCATION, ElectrolyzerModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.SHAKING_TABLE,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.SHAKING_TABLE,
+                new IndustriaBlockEntityItemRenderer.Unbaked(ShakingTableModel.LAYER_LOCATION, ShakingTableModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, BlockInit.CENTRIFUGAL_CONCENTRATOR,
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.CENTRIFUGAL_CONCENTRATOR,
+                new IndustriaBlockEntityItemRenderer.Unbaked(CentrifugalConcentratorModel.LAYER_LOCATION, CentrifugalConcentratorModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        final List<Item> exclusionList = List.of(ItemInit.SEISMIC_SCANNER, ItemInit.SIMPLE_DRILL_HEAD, ItemInit.BLOCK_BUILDER_DRILL_HEAD);
+        final List<Item> exclusionList = List.of(ItemInit.SEISMIC_SCANNER, ItemInit.SIMPLE_DRILL_HEAD, ItemInit.BLOCK_BUILDER_DRILL_HEAD, ItemInit.EMPTY_MOB_JAR);
 
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                 .map(BuiltInRegistries.ITEM::getValue)
@@ -730,5 +753,23 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     private void createBattery(BlockModelGenerators blockStateModelGenerator, BatteryBlock block) {
         blockStateModelGenerator.woodProvider(block).logWithHorizontal(block);
+    }
+
+    private static void generateSpecialBlockItemModel(ItemModelGenerators itemModelGenerator, Block block,
+                                                      IndustriaBlockEntityItemRenderer.Unbaked renderer,
+                                                      BuiltinEntityModelBuilder.DefaultDisplaySettingsBuilder displaySettings) {
+        generateSpecialItemModel(itemModelGenerator, block.asItem(), renderer, displaySettings);
+    }
+
+    private static void generateSpecialItemModel(ItemModelGenerators itemModelGenerator, Item item,
+                                                 IndustriaBlockEntityItemRenderer.Unbaked renderer,
+                                                 BuiltinEntityModelBuilder.DefaultDisplaySettingsBuilder displaySettings) {
+        itemModelGenerator.itemModelOutput.accept(item,
+                ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item), renderer));
+        BuiltinEntityModelBuilder.write(itemModelGenerator, item, textureToSprite(renderer.texture()), displaySettings);
+    }
+
+    private static Identifier textureToSprite(Identifier texture) {
+        return texture.withPath(path -> path.replaceFirst("^textures/", "").replaceFirst("\\.png$", ""));
     }
 }

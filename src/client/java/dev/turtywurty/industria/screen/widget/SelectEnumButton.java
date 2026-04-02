@@ -10,7 +10,7 @@ import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.industria.util.enums.TraversableEnum;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -108,7 +108,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     }
 
     @Override
-    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int color = ARGB.white(this.alpha);
         GlStateManager._enableBlend(); // TODO: Come back and check if this is okay?
         GlStateManager._enableDepthTest();

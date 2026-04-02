@@ -9,16 +9,16 @@ import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -42,7 +42,7 @@ public class SlurryWidget implements Renderable, LayoutElement {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         Slurry slurry = this.slurryTank.variant.getSlurry();
         long amount = this.slurryTank.getAmount();
 
@@ -51,10 +51,10 @@ public class SlurryWidget implements Renderable, LayoutElement {
             return;
 
         BlockPos pos = this.posSupplier.get();
-        Level world = Minecraft.getInstance().level;
+        ClientLevel level = Minecraft.getInstance().level;
 
-        TextureAtlasSprite stillTexture = slurryRenderHandler.getSprite(world, pos);
-        int tintColor = slurryRenderHandler.getColor(world, pos);
+        TextureAtlasSprite stillTexture = slurryRenderHandler.getSprite(level, pos);
+        int tintColor = slurryRenderHandler.getColor(level, pos);
 
         float red = (tintColor >> 16 & 0xFF) / 255.0F;
         float green = (tintColor >> 8 & 0xFF) / 255.0F;
@@ -77,7 +77,7 @@ public class SlurryWidget implements Renderable, LayoutElement {
         }
     }
 
-    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
+    protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         Slurry slurry = this.slurryTank.variant.getSlurry();
 
         long amount = this.slurryTank.getAmount();

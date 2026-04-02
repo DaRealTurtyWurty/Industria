@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/digester"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

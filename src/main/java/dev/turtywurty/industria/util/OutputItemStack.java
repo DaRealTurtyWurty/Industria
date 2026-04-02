@@ -5,8 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.*;
 import net.minecraft.world.item.Item;
@@ -33,12 +33,17 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
 
     public static final MapCodec<OutputItemStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(OutputItemStack::item),
-            IntProvider.CODEC.fieldOf("count").forGetter(OutputItemStack::count),
-            FloatProvider.CODEC.fieldOf("chance").forGetter(OutputItemStack::chance)
+            IntProviders.CODEC.fieldOf("count").forGetter(OutputItemStack::count),
+            FloatProviders.CODEC.fieldOf("chance").forGetter(OutputItemStack::chance)
     ).apply(instance, OutputItemStack::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OutputItemStack> STREAM_CODEC =
-            StreamCodec.of(OutputItemStack::encode, OutputItemStack::decode);
+            StreamCodec.composite(
+                    ByteBufCodecs.registry(Registries.ITEM), OutputItemStack::item,
+                    ExtraStreamCodecs.INT_PROVIDER_STREAM_CODEC, OutputItemStack::count,
+                    ExtraStreamCodecs.FLOAT_PROVIDER_STREAM_CODEC, OutputItemStack::chance,
+                    OutputItemStack::new
+            );
 
     public OutputItemStack {
         if (item == null) {
@@ -105,11 +110,11 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
     }
 
     public SlotDisplay toDisplay() {
-        if (this.item == Items.AIR || this.count.getMaxValue() <= 0) {
+        if (this.item == Items.AIR || this.count.maxInclusive() <= 0) {
             return SlotDisplay.Empty.INSTANCE;
         }
 
-        var displays = IntStream.rangeClosed(this.count.getMinValue(), this.count.getMaxValue())
+        var displays = IntStream.rangeClosed(this.count.minInclusive(), this.count.maxInclusive())
                 .mapToObj(count -> new ItemStack(this.item, count))
                 .filter(stack -> !stack.isEmpty())
                 .map(ItemStackTemplate::fromNonEmptyStack)
@@ -118,29 +123,5 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
                 .toList();
 
         return displays.isEmpty() ? SlotDisplay.Empty.INSTANCE : new SlotDisplay.Composite(displays);
-    }
-
-    private static void encode(RegistryFriendlyByteBuf buf, OutputItemStack stack) {
-        buf.writeResourceKey(BuiltInRegistries.ITEM.getResourceKey(stack.item()).orElseThrow());
-
-        BuiltInRegistries.INT_PROVIDER_TYPE.getResourceKey(stack.count().getType()).ifPresent(buf::writeResourceKey);
-        ExtraStreamCodecs.encode(buf, stack.count());
-
-        BuiltInRegistries.FLOAT_PROVIDER_TYPE.getResourceKey(stack.chance().getType()).ifPresent(buf::writeResourceKey);
-        ExtraStreamCodecs.encode(buf, stack.chance());
-    }
-
-    private static OutputItemStack decode(RegistryFriendlyByteBuf buf) {
-        Item item = BuiltInRegistries.ITEM.getValue(buf.readResourceKey(Registries.ITEM));
-
-        ResourceKey<IntProviderType<?>> countType = buf.readResourceKey(Registries.INT_PROVIDER_TYPE);
-        IntProviderType<?> countTypeInstance = BuiltInRegistries.INT_PROVIDER_TYPE.getValue(countType);
-        IntProvider count = ExtraStreamCodecs.decode(buf, countTypeInstance);
-
-        ResourceKey<FloatProviderType<?>> chanceType = buf.readResourceKey(Registries.FLOAT_PROVIDER_TYPE);
-        FloatProviderType<?> chanceTypeInstance = BuiltInRegistries.FLOAT_PROVIDER_TYPE.getValue(chanceType);
-        FloatProvider chance = ExtraStreamCodecs.decode(buf, chanceTypeInstance);
-
-        return new OutputItemStack(item, count, chance);
     }
 }

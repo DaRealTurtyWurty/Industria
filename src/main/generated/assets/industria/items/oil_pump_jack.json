@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/oil_pump_jack"
+    "type": "minecraft:special",
+    "base": "industria:item/oil_pump_jack",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:oil_pump_jack",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/oil_pump_jack.png"
+    }
   }
 }

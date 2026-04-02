@@ -4,9 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.ModelLocationUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -102,22 +104,28 @@ public class BuiltinEntityModelBuilder {
     private final Item item;
     private final Identifier id;
     private final ItemModelGenerators writer;
+    private final @Nullable Identifier particleTextureId;
     private final List<DisplaySettings> displaySettings = new ArrayList<>();
 
-    private BuiltinEntityModelBuilder(Item item, Identifier id, ItemModelGenerators writer) {
+    private BuiltinEntityModelBuilder(Item item, Identifier id, ItemModelGenerators writer, @Nullable Identifier particleTextureId) {
         this.item = item;
         this.id = id;
         this.writer = writer;
+        this.particleTextureId = particleTextureId;
     }
 
     public static void write(ItemModelGenerators itemModelGenerator, ItemLike item) {
-        write(itemModelGenerator, item, null);
+        write(itemModelGenerator, item, defaultParticleTexture(item.asItem()), null);
     }
 
     private void write() {
         this.writer.modelOutput.accept(this.id, () -> {
             var object = new JsonObject();
-            object.addProperty("parent", "minecraft:builtin/entity");
+            if (this.particleTextureId != null) {
+                var textures = new JsonObject();
+                textures.addProperty("particle", this.particleTextureId.toString());
+                object.add("textures", textures);
+            }
 
             var display = new JsonObject();
             for (DisplaySettings displaySetting : this.displaySettings) {
@@ -159,16 +167,33 @@ public class BuiltinEntityModelBuilder {
 //        }
     }
 
+    private static Identifier defaultParticleTexture(Item item) {
+        Identifier itemId = BuiltInRegistries.ITEM.getKey(item);
+        return Identifier.fromNamespaceAndPath(itemId.getNamespace(), "item/" + itemId.getPath());
+    }
+
+    public static void write(ItemModelGenerators writer, ItemLike item, Identifier particleTextureId) {
+        write(writer, item, particleTextureId, null);
+    }
+
+    public static void write(ItemModelGenerators writer, ItemLike item, Identifier particleTextureId, DefaultDisplaySettingsBuilder defaultBuilder) {
+        write(writer, item.asItem(), ModelLocationUtils.getModelLocation(item.asItem()), particleTextureId, defaultBuilder);
+    }
+
     public static void write(ItemModelGenerators writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
-        new BuiltinEntityModelBuilder.Builder(writer, item, id).defaultDisplaySettings(defaultBuilder).build().write();
+        write(writer, item, id, defaultParticleTexture(item), defaultBuilder);
+    }
+
+    public static void write(ItemModelGenerators writer, Item item, Identifier id, Identifier particleTextureId, DefaultDisplaySettingsBuilder defaultBuilder) {
+        new BuiltinEntityModelBuilder.Builder(writer, item, id, particleTextureId).defaultDisplaySettings(defaultBuilder).build().write();
     }
 
     public static void write(ItemModelGenerators writer, Item item, DefaultDisplaySettingsBuilder defaultBuilder) {
-        write(writer, item, ModelLocationUtils.getModelLocation(item), defaultBuilder);
+        write(writer, item, defaultParticleTexture(item), defaultBuilder);
     }
 
     public static void write(ItemModelGenerators writer, ItemLike item, DefaultDisplaySettingsBuilder defaultBuilder) {
-        write(writer, item.asItem(), defaultBuilder);
+        write(writer, item, defaultParticleTexture(item.asItem()), defaultBuilder);
     }
 
     public static DefaultDisplaySettingsBuilder defaultItem() {
@@ -314,14 +339,16 @@ public class BuiltinEntityModelBuilder {
         private final ItemModelGenerators writer;
         private final Item item;
         private final Identifier id;
+        private final @Nullable Identifier particleTextureId;
 
         private final Map<String, DisplaySettings.Builder> displaySettings = new HashMap<>();
         private DefaultDisplaySettingsBuilder defaultDisplaySettingsBuilder;
 
-        public Builder(ItemModelGenerators writer, Item item, Identifier id) {
+        public Builder(ItemModelGenerators writer, Item item, Identifier id, @Nullable Identifier particleTextureId) {
             this.writer = writer;
             this.item = item;
             this.id = id;
+            this.particleTextureId = particleTextureId;
         }
 
         public Builder addDisplaySettings(String name, DisplaySettings.Builder displaySettings) {
@@ -335,7 +362,7 @@ public class BuiltinEntityModelBuilder {
         }
 
         public BuiltinEntityModelBuilder build() {
-            var builder = new BuiltinEntityModelBuilder(this.item, this.id, this.writer);
+            var builder = new BuiltinEntityModelBuilder(this.item, this.id, this.writer, this.particleTextureId);
             if (this.defaultDisplaySettingsBuilder != null) {
                 for (Map.Entry<String, DisplaySettings> displaySettingsEntry : this.defaultDisplaySettingsBuilder.build().entrySet()) {
                     builder.displaySettings.add(displaySettingsEntry.getValue());

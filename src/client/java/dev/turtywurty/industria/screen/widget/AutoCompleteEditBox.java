@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.screen.widget;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -211,8 +211,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
+    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
         if (isDropdownVisible()) {
             renderDropdown(graphics, mouseX, mouseY);
         }
@@ -423,7 +423,7 @@ public class AutoCompleteEditBox<T> extends EditBox {
         this.scrollOffset = Math.round(scrollAmount * getMaxScrollOffset());
     }
 
-    private void renderDropdown(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderDropdown(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         int dropdownX = getDropdownX();
         int dropdownY = getDropdownY();
         int dropdownWidth = getDropdownWidth();
@@ -453,7 +453,7 @@ public class AutoCompleteEditBox<T> extends EditBox {
             }
 
             String text = this.font.plainSubstrByWidth(toSuggestionString(this.suggestions.get(suggestionIndex)), contentWidth - DROPDOWN_PADDING * 2);
-            graphics.drawString(this.font, text, contentX + DROPDOWN_PADDING, entryY + 2, DROPDOWN_TEXT_COLOR, false);
+            graphics.text(this.font, text, contentX + DROPDOWN_PADDING, entryY + 2, DROPDOWN_TEXT_COLOR, false);
         }
         graphics.disableScissor();
 

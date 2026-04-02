@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -126,7 +126,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int scrollBarOffset = (int) (41.0F * this.scrollAmount);
         ScreenUtils.drawGuiTexture(context,
                 shouldScroll() ? SCROLLER_TEXTURE : SCROLLER_DISABLED_TEXTURE,
@@ -144,7 +144,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
         return this.canCraft && this.recipes.size() > this.columnCount * this.rowCount;
     }
 
-    private void renderRecipeBackground(GuiGraphics context, int mouseX, int mouseY, int x, int y, int scrollOffset) {
+    private void renderRecipeBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, int x, int y, int scrollOffset) {
         for (int index = this.scrollOffset; index < scrollOffset && index < this.recipes.size(); index++) {
             int column = index - this.scrollOffset;
             int xPos = x + column % this.columnCount * 16;
@@ -165,7 +165,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
         }
     }
 
-    private void renderRecipeIcons(GuiGraphics context, int x, int y, int scrollOffset) {
+    private void renderRecipeIcons(GuiGraphicsExtractor context, int x, int y, int scrollOffset) {
         for (int index = this.scrollOffset; index < scrollOffset && index < this.recipes.size(); index++) {
             int column = index - this.scrollOffset;
             int xPos = x + column % this.columnCount * 16;
@@ -175,7 +175,7 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
 
             T recipe = this.recipes.get(index);
             ItemStack output = this.outputFunction.apply(recipe);
-            context.renderItem(output, xPos, yPos);
+            context.item(output, xPos, yPos);
         }
     }
 

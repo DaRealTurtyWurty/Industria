@@ -6,7 +6,7 @@ import dev.turtywurty.industria.screen.widget.AutoCompleteProvider;
 import dev.turtywurty.industria.screen.widget.ToggleButton;
 import dev.turtywurty.industria.screenhandler.DetectorConveyorScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
@@ -201,7 +201,7 @@ public class DetectorConveyorScreen extends AbstractContainerScreen<DetectorConv
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float tickDelta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tickDelta) {
         ScreenUtils.drawTexture(graphics,
                 this.menu.isTagFiltering() ? TEXTURE_TAG_MODE : TEXTURE_STACK_MODE,
                 this.leftPos, this.topPos,
@@ -210,8 +210,8 @@ public class DetectorConveyorScreen extends AbstractContainerScreen<DetectorConv
     }
 
     @Override
-    protected void renderSlots(GuiGraphics graphics, int mouseX, int mouseY) {
-        super.renderSlots(graphics, mouseX, mouseY);
+    protected void extractSlots(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        super.extractSlots(graphics, mouseX, mouseY);
         if (this.menu.isTagFiltering())
             return;
 
@@ -222,13 +222,14 @@ public class DetectorConveyorScreen extends AbstractContainerScreen<DetectorConv
         }
 
         if (!this.menu.getFilterStack().isEmpty()) {
-            renderFloatingItem(graphics, this.menu.getFilterStack(), x, y, "");
+            graphics.fakeItem(this.menu.getFilterStack(), x, y);
+            graphics.itemDecorations(this.font, this.menu.getFilterStack(), x, y, "");
         }
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
-        super.render(graphics, mouseX, mouseY, tickDelta);
+    protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        super.extractTooltip(graphics, mouseX, mouseY);
         if (this.menu.isTagFiltering())
             return;
 

@@ -4,7 +4,7 @@ import dev.turtywurty.industria.screen.tooltip.ItemListTooltipComponent;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -44,7 +44,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends Abstr
     }
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         if (!this.shouldRender || this.recipe == null)
             return;
 
@@ -60,8 +60,8 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends Abstr
             if (stack.isEmpty())
                 return;
 
-            context.renderItem(stack, getX(), getY());
-            context.renderItemDecorations(this.textRenderer, stack, getX(), getY());
+            context.item(stack, getX(), getY());
+            context.itemDecorations(this.textRenderer, stack, getX(), getY());
             context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x8808080);
 
             if (!isPointWithinBounds(getX(), getY(), getWidth(), getHeight(), mouseX, mouseY))
@@ -83,7 +83,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends Abstr
             stack.getTooltipImage().ifPresent((data) -> componentList.add(componentList.isEmpty() ? 0 : 1, ClientTooltipComponent.create(data)));
             componentList.addFirst(itemListComponent);
 
-            context.renderTooltip(this.textRenderer, componentList, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+            context.tooltip(this.textRenderer, componentList, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
         }
     }
 

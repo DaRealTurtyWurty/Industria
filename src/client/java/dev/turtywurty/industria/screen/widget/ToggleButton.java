@@ -2,7 +2,7 @@ package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.input.InputWithModifiers;
@@ -48,7 +48,7 @@ public class ToggleButton extends Button {
     }
 
     @Override
-    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
+    protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         ScreenUtils.drawTexture(
                 context,
                 this.textures.get(this.toggled, isHovered()),

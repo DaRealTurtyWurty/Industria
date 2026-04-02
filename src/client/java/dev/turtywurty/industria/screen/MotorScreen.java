@@ -5,7 +5,7 @@ import dev.turtywurty.industria.network.SetMotorTargetRPMPayload;
 import dev.turtywurty.industria.screenhandler.MotorScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -40,7 +40,7 @@ public class MotorScreen extends AbstractContainerScreen<MotorScreenHandler> imp
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int energy = Mth.ceil(this.menu.getEnergyPercentage() * 66);
@@ -48,8 +48,8 @@ public class MotorScreen extends AbstractContainerScreen<MotorScreenHandler> imp
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    protected void extractTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        super.extractTooltip(context, mouseX, mouseY);
 
         int energy = Mth.ceil(this.menu.getEnergyPercentage() * 66);
         if (isHovering(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {

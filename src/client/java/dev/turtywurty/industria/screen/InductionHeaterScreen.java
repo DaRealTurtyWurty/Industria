@@ -4,7 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screen.widget.EnergyWidget;
 import dev.turtywurty.industria.screenhandler.InductionHeaterScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -29,15 +29,9 @@ public class InductionHeaterScreen extends AbstractContainerScreen<InductionHeat
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
 
-    }
-
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
     }
 }

@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.*;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -16,12 +15,13 @@ import org.joml.Vector3d;
 import java.util.*;
 import java.util.function.Function;
 
-@SuppressWarnings("unchecked")
 public class ExtraStreamCodecs {
     public static final StreamCodec<ByteBuf, Map<BlockPos, UUID>> BLOCK_POS_TO_UUID_STREAM_CODEC =
             ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, UUIDUtil.STREAM_CODEC);
-    private static final Map<IntProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider>> INT_PROVIDER_CODECS = new HashMap<>();
-    private static final Map<FloatProviderType<?>, StreamCodec<RegistryFriendlyByteBuf, ? extends FloatProvider>> FLOAT_PROVIDER_CODECS = new HashMap<>();
+    public static final StreamCodec<RegistryFriendlyByteBuf, IntProvider> INT_PROVIDER_STREAM_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(IntProviders.CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, FloatProvider> FLOAT_PROVIDER_STREAM_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(FloatProviders.CODEC);
 
     public static final StreamCodec<ByteBuf, Set<BlockPos>> BLOCK_POS_SET_STREAM_CODEC = setOf(BlockPos.STREAM_CODEC);
     public static final StreamCodec<ByteBuf, BlockPos> BLOCK_POS_STRING_CODEC = ByteBufCodecs.fromCodec(ExtraCodecs.BLOCK_POS_STRING_CODEC);
@@ -33,100 +33,6 @@ public class ExtraStreamCodecs {
 
     public static <B extends ByteBuf, V> StreamCodec<B, List<V>> listOf(StreamCodec<? super B, V> codec) {
         return ByteBufCodecs.collection(ArrayList::new, codec);
-    }
-
-    /**
-     * Registers a codec for an {@link IntProviderType}.
-     *
-     * @param type  The type to register the codec for.
-     * @param codec The codec to register.
-     * @param <T>   The type of the {@link IntProvider}.
-     */
-    public static <T extends IntProvider> void registerIntProviderCodec(IntProviderType<T> type, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-        INT_PROVIDER_CODECS.put(type, codec);
-    }
-
-    /**
-     * Registers a codec for a {@link FloatProviderType}.
-     *
-     * @param type  The type to register the codec for.
-     * @param codec The codec to register.
-     * @param <T>   The type of the {@link FloatProvider}.
-     */
-    public static <T extends FloatProvider> void registerFloatProviderCodec(FloatProviderType<T> type, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-        FLOAT_PROVIDER_CODECS.put(type, codec);
-    }
-
-    /**
-     * Gets the codec for an {@link IntProviderType}.
-     *
-     * @param type The type to get the codec for.
-     * @return The codec for the {@link IntProviderType}.
-     * @see IntProviderType
-     */
-    public static StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider> getIntProviderCodec(IntProviderType<?> type) {
-        return INT_PROVIDER_CODECS.get(type);
-    }
-
-    /**
-     * Gets the codec for a {@link FloatProviderType}.
-     *
-     * @param type The type to get the codec for.
-     * @return The codec for the {@link FloatProviderType}.
-     * @see FloatProviderType
-     */
-    public static StreamCodec<RegistryFriendlyByteBuf, ? extends FloatProvider> getFloatProviderCodec(FloatProviderType<?> type) {
-        return FLOAT_PROVIDER_CODECS.get(type);
-    }
-
-    /**
-     * Encodes an {@link IntProvider} into a {@link ByteBuf}.
-     *
-     * @param buf         The {@link ByteBuf} to encode the {@link IntProvider} into.
-     * @param intProvider The {@link IntProvider} to encode.
-     * @param <T>         The type of the {@link IntProvider}.
-     */
-    public static <T extends IntProvider> void encode(ByteBuf buf, T intProvider) {
-        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getIntProviderCodec(intProvider.getType());
-        codec.encode((RegistryFriendlyByteBuf) buf, intProvider);
-    }
-
-    /**
-     * Decodes an {@link IntProvider} from a {@link ByteBuf}.
-     *
-     * @param buf  The {@link ByteBuf} to decode the {@link IntProvider} from.
-     * @param type The type of the {@link IntProvider}.
-     * @param <T>  The type of the {@link IntProvider}.
-     * @return The decoded {@link IntProvider}.
-     */
-    public static <T extends IntProvider> T decode(ByteBuf buf, IntProviderType<T> type) {
-        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getIntProviderCodec(type);
-        return codec.decode((RegistryFriendlyByteBuf) buf);
-    }
-
-    /**
-     * Encodes a {@link FloatProvider} into a {@link ByteBuf}.
-     *
-     * @param buf           The {@link ByteBuf} to encode the {@link FloatProvider} into.
-     * @param floatProvider The {@link FloatProvider} to encode.
-     * @param <T>           The type of the {@link FloatProvider}.
-     */
-    public static <T extends FloatProvider> void encode(ByteBuf buf, T floatProvider) {
-        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getFloatProviderCodec(floatProvider.getType());
-        codec.encode((RegistryFriendlyByteBuf) buf, floatProvider);
-    }
-
-    /**
-     * Decodes a {@link FloatProvider} from a {@link ByteBuf}.
-     *
-     * @param buf  The {@link ByteBuf} to decode the {@link FloatProvider} from.
-     * @param type The type of the {@link FloatProvider}.
-     * @param <T>  The type of the {@link FloatProvider}.
-     * @return The decoded {@link FloatProvider}.
-     */
-    public static <T extends FloatProvider> T decode(ByteBuf buf, FloatProviderType<T> type) {
-        StreamCodec<RegistryFriendlyByteBuf, T> codec = (StreamCodec<RegistryFriendlyByteBuf, T>) getFloatProviderCodec(type);
-        return codec.decode((RegistryFriendlyByteBuf) buf);
     }
 
     public static <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9> StreamCodec<B, C> tuple(
@@ -583,89 +489,6 @@ public class ExtraStreamCodecs {
                 codec16.encode(object, from16.apply(object2));
             }
         };
-    }
-
-    /**
-     * Registers the default codecs for all {@link IntProviderType}s and {@link FloatProviderType}s.
-     */
-    public static void registerDefaults() {
-        registerIntProviderCodec(IntProviderType.CONSTANT, StreamCodec.of(
-                (buf, intProvider) -> buf.writeInt(intProvider.getValue()),
-                buf -> ConstantInt.of(buf.readInt())));
-
-        registerIntProviderCodec(IntProviderType.UNIFORM, StreamCodec.of(
-                (buf, intProvider) -> {
-                    buf.writeInt(intProvider.getMinValue());
-                    buf.writeInt(intProvider.getMaxValue());
-                },
-                buf -> UniformInt.of(buf.readInt(), buf.readInt())));
-
-        registerIntProviderCodec(IntProviderType.BIASED_TO_BOTTOM, StreamCodec.of(
-                (buf, intProvider) -> {
-                    buf.writeInt(intProvider.getMinValue());
-                    buf.writeInt(intProvider.getMaxValue());
-                },
-                buf -> BiasedToBottomInt.of(buf.readInt(), buf.readInt())));
-
-        registerIntProviderCodec(IntProviderType.CLAMPED, StreamCodec.of(
-                (buf, intProvider) -> {
-                    IntProviderType<?> type = BuiltInRegistries.INT_PROVIDER_TYPE.getValue(buf.readIdentifier());
-                    StreamCodec<RegistryFriendlyByteBuf, IntProvider> codec = (StreamCodec<RegistryFriendlyByteBuf, IntProvider>) getIntProviderCodec(type);
-                    codec.encode(buf, intProvider.source);
-                    buf.writeInt(intProvider.getMinValue());
-                    buf.writeInt(intProvider.getMaxValue());
-                },
-                buf -> ClampedInt.of(getIntProviderCodec(IntProviderType.CONSTANT).decode(buf), buf.readInt(), buf.readInt())));
-
-        registerIntProviderCodec(IntProviderType.WEIGHTED_LIST, StreamCodec.of(
-                (buf, value) -> {
-                    StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider> codec = getIntProviderCodec(value.getType());
-                    WeightedList<IntProvider> entries = value.distribution;
-                    StreamCodec<RegistryFriendlyByteBuf, WeightedList<IntProvider>> entriesCodec = weightedListCodec((StreamCodec<RegistryFriendlyByteBuf, IntProvider>) codec);
-                    entriesCodec.encode(buf, entries);
-                },
-                buf -> {
-                    StreamCodec<RegistryFriendlyByteBuf, ? extends IntProvider> codec = getIntProviderCodec(IntProviderType.CONSTANT);
-                    WeightedList<IntProvider> entries = weightedListCodec((StreamCodec<RegistryFriendlyByteBuf, IntProvider>) codec).decode(buf);
-                    return new WeightedListInt(entries);
-                }));
-
-        registerIntProviderCodec(IntProviderType.CLAMPED_NORMAL, StreamCodec.of(
-                (buf, intProvider) -> {
-                    buf.writeFloat(intProvider.mean);
-                    buf.writeFloat(intProvider.deviation);
-                    buf.writeInt(intProvider.getMinValue());
-                    buf.writeInt(intProvider.getMaxValue());
-                },
-                buf -> ClampedNormalInt.of(buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readInt())));
-
-        registerFloatProviderCodec(FloatProviderType.CONSTANT, StreamCodec.of(
-                (buf, floatProvider) -> buf.writeFloat(floatProvider.getValue()),
-                buf -> ConstantFloat.of(buf.readFloat())));
-
-        registerFloatProviderCodec(FloatProviderType.UNIFORM, StreamCodec.of(
-                (buf, floatProvider) -> {
-                    buf.writeFloat(floatProvider.getMinValue());
-                    buf.writeFloat(floatProvider.getMaxValue());
-                },
-                buf -> UniformFloat.of(buf.readFloat(), buf.readFloat())));
-
-        registerFloatProviderCodec(FloatProviderType.CLAMPED_NORMAL, StreamCodec.of(
-                (buf, floatProvider) -> {
-                    buf.writeFloat(floatProvider.mean);
-                    buf.writeFloat(floatProvider.deviation);
-                    buf.writeFloat(floatProvider.getMinValue());
-                    buf.writeFloat(floatProvider.getMaxValue());
-                },
-                buf -> ClampedNormalFloat.of(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat())));
-
-        registerFloatProviderCodec(FloatProviderType.TRAPEZOID, StreamCodec.of(
-                (buf, floatProvider) -> {
-                    buf.writeFloat(floatProvider.getMinValue());
-                    buf.writeFloat(floatProvider.getMaxValue());
-                    buf.writeFloat(floatProvider.plateau);
-                },
-                buf -> TrapezoidFloat.of(buf.readFloat(), buf.readFloat(), buf.readFloat())));
     }
 
     /**

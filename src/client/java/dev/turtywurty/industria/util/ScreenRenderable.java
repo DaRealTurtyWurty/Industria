@@ -1,8 +1,8 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 @FunctionalInterface
 public interface ScreenRenderable {
-    void render(GuiGraphics context, double mouseX, double mouseY, float partialTicks);
+    void extractRenderState(GuiGraphicsExtractor context, double mouseX, double mouseY, float partialTicks);
 }

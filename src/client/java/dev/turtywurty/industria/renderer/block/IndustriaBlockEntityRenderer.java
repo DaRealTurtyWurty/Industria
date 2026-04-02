@@ -4,23 +4,25 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
+import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
 import dev.turtywurty.multiblocklib.MultiblockLib;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -129,12 +131,18 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     @Override
     public void extractRenderState(T blockEntity, S state, float tickProgress, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        state.blockState = blockEntity.getBlockState();
+        state.movingBlockRenderState = null;
         state.tickProgress = tickProgress;
         state.multiblockFormed = isMultiblockFormed(blockEntity);
         state.multiblockRenderOffsetX = 0.0;
         state.multiblockRenderOffsetZ = 0.0;
 
         Level level = blockEntity.getLevel();
+        if (level instanceof ClientLevel clientLevel && !state.blockState.isAir()) {
+            state.movingBlockRenderState = createMovingBlock(blockEntity.getBlockPos(), state.blockState, clientLevel);
+        }
+
         if (state.multiblockFormed && level != null && MultiblockLib.isControllerBlock(blockEntity.getBlockState().getBlock())) {
             Vec3 offset = computeLibMultiblockRenderOffset(level, blockEntity.getBlockPos());
             state.multiblockRenderOffsetX = offset.x;
@@ -328,7 +336,9 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     protected void renderUnformedBlock(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitBlock(matrices, state.blockState, light, overlay, 0);
+        if (state.movingBlockRenderState != null) {
+            queue.submitMovingBlock(matrices, state.movingBlockRenderState);
+        }
     }
 
     private static boolean isMultiblockFormed(final BlockEntity blockEntity) {
@@ -450,6 +460,17 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             case WEST -> 270;
             default -> 0;
         }));
+    }
+
+    private static MovingBlockRenderState createMovingBlock(BlockPos pos, BlockState blockState, ClientLevel level) {
+        MovingBlockRenderState renderState = new MovingBlockRenderState();
+        renderState.randomSeedPos = pos;
+        renderState.blockPos = pos;
+        renderState.blockState = blockState;
+        renderState.biome = level.getBiome(pos);
+        renderState.cardinalLighting = level.cardinalLighting();
+        renderState.lightEngine = level.getLightEngine();
+        return renderState;
     }
 
     public static void drawFilledBox(

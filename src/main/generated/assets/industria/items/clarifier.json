@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/clarifier"
+    "type": "minecraft:special",
+    "base": "industria:item/clarifier",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:clarifier",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/clarifier.png"
+    }
   }
 }

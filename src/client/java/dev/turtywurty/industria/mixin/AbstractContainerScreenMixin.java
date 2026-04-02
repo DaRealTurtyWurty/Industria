@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.mixin;
 
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -17,11 +17,11 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;isFake()Z"))
-    private void industria$drawSlot(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(method = "extractSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;isFake()Z"))
+    private void industria$drawSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (DebugRenderingRegistry.debugRendering) {
             String text = String.valueOf(slot.index);
-            context.drawString(this.font,
+            graphics.text(this.font,
                     text,
                     slot.x + (this.font.width(text) / 2),
                     slot.y + (this.font.lineHeight / 2),

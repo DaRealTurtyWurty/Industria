@@ -36,6 +36,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,9 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public class IndustriaBlock extends Block implements EntityBlock {
+    private static final ThreadLocal<Deque<BlockProperties>> PENDING_PROPERTIES =
+            ThreadLocal.withInitial(ArrayDeque::new);
+
     public final StateProperties stateProperties;
     public final boolean placeFacingOpposite;
     public final Supplier<BlockEntityType<?>> blockEntityTypeSupplier;
@@ -59,9 +64,25 @@ public class IndustriaBlock extends Block implements EntityBlock {
     public final Map<Direction, VoxelShape> cachedDirectionalShapes;
     public final boolean dropContentsOnBreak;
 
+    private static @Nullable BlockProperties pendingProperties() {
+        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
+        return pendingProperties.isEmpty() ? null : pendingProperties.peek();
+    }
+
+    private static void popPendingProperties() {
+        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
+        pendingProperties.pop();
+        if (pendingProperties.isEmpty()) {
+            PENDING_PROPERTIES.remove();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public IndustriaBlock(Properties settings, BlockProperties properties) {
+        PENDING_PROPERTIES.get().push(properties);
         super(settings);
+
+        popPendingProperties();
 
         this.stateProperties = properties.stateProperties;
         this.placeFacingOpposite = properties.placeFacingOpposite;
@@ -95,13 +116,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
             this.dropContentsOnBreak = false;
         }
 
-        StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<>(this);
-        createBlockStateDefinition(builder);
-        this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
-        registerDefaultState(this.stateDefinition.any());
-
-        BlockState state = this.stateDefinition.any();
-        state = this.stateProperties.applyDefaults(state);
+        BlockState state = this.stateProperties.applyDefaults(this.defaultBlockState());
         registerDefaultState(state);
     }
 
@@ -109,8 +124,16 @@ public class IndustriaBlock extends Block implements EntityBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
 
-        if (this.stateProperties != null) {
-            this.stateProperties.addToBuilder(builder);
+        StateProperties stateProperties = this.stateProperties;
+        if (stateProperties == null) {
+            BlockProperties pendingProperties = pendingProperties();
+            if (pendingProperties != null) {
+                stateProperties = pendingProperties.stateProperties;
+            }
+        }
+
+        if (stateProperties != null) {
+            stateProperties.addToBuilder(builder);
         }
     }
 

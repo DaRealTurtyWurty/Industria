@@ -1,11 +1,13 @@
+import org.gradle.api.plugins.JavaPluginExtension
+
 plugins {
-	id 'net.fabricmc.fabric-loom' version '1.14-SNAPSHOT'
+	id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
 	id 'maven-publish'
 }
 
 def resolveRunJavaExecutable = {
 	def isWindows = System.getProperty("os.name").toLowerCase().contains("win")
-	def javaPluginExtension = extensions.findByType(org.gradle.api.plugins.JavaPluginExtension)
+	def javaPluginExtension = extensions.findByType(JavaPluginExtension)
 	if (javaPluginExtension != null && javaPluginExtension.toolchain.languageVersion.present) {
 		return javaToolchains.launcherFor(javaPluginExtension.toolchain).get().executablePath.asFile
 	}

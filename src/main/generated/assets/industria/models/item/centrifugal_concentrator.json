@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/centrifugal_concentrator"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

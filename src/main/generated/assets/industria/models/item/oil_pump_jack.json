@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/oil_pump_jack"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

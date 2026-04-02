@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/upgrade_station"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

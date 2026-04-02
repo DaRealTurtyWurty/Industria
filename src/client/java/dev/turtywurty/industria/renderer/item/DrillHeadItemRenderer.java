@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
@@ -30,7 +29,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
     public final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
     @Override
-    public void submit(DrillRenderState state, ItemDisplayContext displayContext, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int outlineColor) {
+    public void submit(DrillRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int outlineColor) {
         if (state == null)
             return;
 
@@ -64,16 +63,16 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
         return state;
     }
 
-    public record Unbaked() implements SpecialModelRenderer.Unbaked {
+    public record Unbaked() implements SpecialModelRenderer.Unbaked<DrillRenderState> {
         public static final MapCodec<Unbaked> CODEC = MapCodec.unit(new DrillHeadItemRenderer.Unbaked());
 
         @Override
-        public SpecialModelRenderer<?> bake(BakingContext context) {
+        public SpecialModelRenderer<DrillRenderState> bake(BakingContext context) {
             return new DrillHeadItemRenderer();
         }
 
         @Override
-        public MapCodec<? extends SpecialModelRenderer.Unbaked> type() {
+        public MapCodec<? extends SpecialModelRenderer.Unbaked<DrillRenderState>> type() {
             return CODEC;
         }
     }

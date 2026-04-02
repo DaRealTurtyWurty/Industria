@@ -3,7 +3,7 @@ package dev.turtywurty.industria.screen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.CombustionGeneratorScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -23,7 +23,7 @@ public class CombustionGeneratorScreen extends AbstractContainerScreen<Combustio
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         long energy = this.menu.getEnergy();
@@ -39,9 +39,8 @@ public class CombustionGeneratorScreen extends AbstractContainerScreen<Combustio
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
+    protected void extractTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        super.extractTooltip(context, mouseX, mouseY);
 
         if (isHovering(144, 10, 20, 66, mouseX, mouseY)) {
             long energy = this.menu.getEnergy();

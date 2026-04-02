@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/rotary_kiln_controller"
+    "type": "minecraft:special",
+    "base": "industria:item/rotary_kiln",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:rotary_kiln",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/rotary_kiln.png"
+    }
   }
 }

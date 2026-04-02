@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,12 +22,7 @@ import java.util.function.Consumer;
 public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
         implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
-    public void submit(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, ItemDisplayContext displayContext, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int i) {
-        // Avoid drawing placed blocks through the special item renderer path; block entities handle world rendering.
-        if (displayContext == ItemDisplayContext.NONE || displayContext == ItemDisplayContext.FIXED) {
-            return;
-        }
-
+    public void submit(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int i) {
         if (data == null)
             return;
 
@@ -52,7 +46,8 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         return new BlockEntityItemRenderData(stack);
     }
 
-    public record Unbaked(ModelLayerLocation modelLayer, Identifier texture) implements SpecialModelRenderer.Unbaked {
+    public record Unbaked(ModelLayerLocation modelLayer, Identifier texture)
+            implements SpecialModelRenderer.Unbaked<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
         private static final Codec<ModelLayerLocation> ENTITY_MODEL_LAYER_CODEC =
                 RecordCodecBuilder.create(instance -> instance.group(
                         Identifier.CODEC.fieldOf("id").forGetter(ModelLayerLocation::model),
@@ -71,7 +66,7 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         }
 
         @Override
-        public SpecialModelRenderer<?> bake(BakingContext context) {
+        public SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> bake(BakingContext context) {
             EntityModelSet entityModels = context.entityModelSet();
             return new IndustriaBlockEntityItemRenderer(entityModels.bakeLayer(this.modelLayer), this.texture);
         }

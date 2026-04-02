@@ -6,7 +6,7 @@ import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
 import dev.turtywurty.industria.state.CentrifugalConcentratorRenderState;
-import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import dev.turtywurty.industria.util.FluidRenderUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.client.Minecraft;
@@ -72,21 +72,22 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             return;
 
         FluidVariant fluidVariant = fluidTank.variant;
-        TextureAtlasSprite fluidSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if (fluidSprite == null)
+        Level level = Minecraft.getInstance().level;
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, level, state.blockPos);
+        if (renderData == null)
             return;
+        TextureAtlasSprite fluidSprite = renderData.stillSprite();
 
         RenderType renderLayer = RenderTypes.entityTranslucent(fluidSprite.atlasLocation());
-        Level world = Minecraft.getInstance().level;
 
         int sides = 16;
         float outerRadius = 19 / 16f;
         float innerRadius;
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, state.blockPos);
+        int fluidColor = renderData.tintColor();
 
         float fillPercent = fluidTank.amount / (float) fluidTank.getCapacity();
 
-        // fillPercent = (float) (Math.sin(world.getTime() / world.getTickManager().getTickRate()) * 0.5f + 0.5f);
+        // fillPercent = (float) (Math.sin(level.getTime() / level.getTickManager().getTickRate()) * 0.5f + 0.5f);
 
         if (fillPercent <= 7 / 16f) {
             innerRadius = 0;
@@ -130,7 +131,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
             state.renderItemRenderState(0, matrices, queue);
 
             Vector3f pos = localToWorldPosition(matrices);
-            world.addParticle(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
+            level.addParticle(ParticleTypes.BUBBLE, pos.x, pos.y + 0.25, pos.z, 0, 0, 0);
 
             matrices.popPose();
         }

@@ -12,14 +12,9 @@ accessible field net/minecraft/client/model/geom/ModelPart children Ljava/util/M
 accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
 accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
 accessible field net/minecraft/client/gui/components/AbstractButton SPRITES Lnet/minecraft/client/gui/components/WidgetSprites;
-accessible    method    net/minecraft/client/gui/GuiGraphics    setTooltipForNextFrameInternal    (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/Identifier;Z)V
 mutable field net/minecraft/world/level/block/Block stateDefinition Lnet/minecraft/world/level/block/state/StateDefinition;
 accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties lightEmission Ljava/util/function/ToIntFunction;
-accessible field net/minecraft/world/level/block/state/StateHolder values Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
-accessible    method    net/minecraft/client/gui/GuiGraphics    blitTiledSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIIIIIIIII)V
-accessible    method    net/minecraft/client/gui/GuiGraphics    blitNineSlicedSprite    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lnet/minecraft/client/resources/metadata/gui/GuiSpriteScaling$NineSlice;IIIII)V
-accessible    method    net/minecraft/client/gui/GuiGraphics    blitNineSliceInnerSegment    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/resources/metadata/gui/GuiSpriteScaling$NineSlice;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIIIIIIIII)V
-accessible    method    net/minecraft/client/gui/GuiGraphics    innerBlit    (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor innerBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V
 accessible field net/minecraft/data/loot/BlockLootSubProvider NORMAL_LEAVES_SAPLING_CHANCES [F
 accessible field net/minecraft/client/particle/ParticleEngine level Lnet/minecraft/client/multiplayer/ClientLevel;
 accessible field net/minecraft/client/multiplayer/ClientChunkCache storage Lnet/minecraft/client/multiplayer/ClientChunkCache$Storage;
@@ -32,5 +27,4 @@ accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage getC
 accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage inRange (II)Z
 accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
 accessible field net/minecraft/client/renderer/feature/FeatureRenderDispatcher bufferSource Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;
-accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen renderFloatingItem (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V
 accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen showTooltipWithItemInHand (Lnet/minecraft/world/item/ItemStack;)Z

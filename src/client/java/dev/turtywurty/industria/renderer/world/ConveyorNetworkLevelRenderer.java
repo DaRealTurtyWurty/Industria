@@ -78,7 +78,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
     @SuppressWarnings("UnstableApiUsage")
     private static void collectModelParts(ModelPart part, Map<String, ModelPart> parts) {
-        ((ModelPartAccessor) (Object) part).fabric$callForEachChild((name, child) -> {
+        ((ModelPartAccessor) (Object) part).fabric$callAddAllChildren((name, child) -> {
             parts.putIfAbsent(name, child);
             collectModelParts(child, parts);
         });

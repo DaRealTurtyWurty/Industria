@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "facing=north,part=0": {
+      "model": "industria:block/invisible"
+    },
+    "facing=north,part=1": {
+      "model": "industria:block/invisible"
+    },
+    "facing=north,part=2": {
+      "model": "industria:block/invisible"
+    },
+    "facing=north,part=3": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south,part=0": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south,part=1": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south,part=2": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south,part=3": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west,part=0": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west,part=1": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west,part=2": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west,part=3": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east,part=0": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east,part=1": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east,part=2": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east,part=3": {
+      "model": "industria:block/invisible"
+    }
+  }
+}
