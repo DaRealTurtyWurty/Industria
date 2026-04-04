@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.conveyor.*;
+import dev.turtywurty.industria.renderer.conveyor.ContainmentConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.FeederConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.HatchConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.LadderConveyorSpecialRenderer;
@@ -55,6 +56,9 @@ public final class ConveyorSpecialRendererInit {
                 ConveyorSpecialRendererEntry.builder(LadderConveyorSpecialRenderer.INSTANCE)
                         .overrideItemRendering(true)
                         .afterItemRendering(true)
+                        .build());
+        registerSimple(BlockInit.CONTAINMENT_CONVEYOR, () ->
+                ConveyorSpecialRendererEntry.builder(ContainmentConveyorSpecialRenderer.INSTANCE)
                         .build());
     }
 

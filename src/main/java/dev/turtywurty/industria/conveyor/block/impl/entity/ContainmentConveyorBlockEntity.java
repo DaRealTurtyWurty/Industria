@@ -15,7 +15,6 @@ import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.ItemInit;
-import dev.turtywurty.industria.mixin.BeehiveBlockEntityAccessor;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.screenhandler.ContainmentConveyorScreenHandler;
@@ -36,6 +35,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -45,6 +45,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, WrappedContainerStorageHolder, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("containment_conveyor");
@@ -52,8 +53,9 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
     private final AABB bounds;
     private final WrappedContainerStorage<SimpleContainer> jarStorage = new WrappedContainerStorage<>();
     private LivingEntity containingEntity;
+    private TypedEntityData<EntityType<?>> containingEntityData;
     private int progress;
-    private final int maxProgress = 40;
+    private final int maxProgress = 100;
 
     public ContainmentConveyorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.CONTAINMENT_CONVEYOR, BlockEntityTypeInit.CONTAINMENT_CONVEYOR, pos, state);
@@ -64,7 +66,7 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var inventoryStorage = ((SyncableStorage) getInventoryStorage(null));
+        var inventoryStorage = Objects.requireNonNull(((SyncableStorage) this.jarStorage.getInventory(0)));
         return List.of(inventoryStorage);
     }
 
@@ -74,6 +76,8 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         output.putInt("Progress", this.progress);
         if (this.containingEntity != null) {
             writeEntityData(output, this.containingEntity);
+        } else if (this.containingEntityData != null) {
+            writeEntityData(output, this.containingEntityData);
         }
         this.jarStorage.writeData(output);
     }
@@ -82,8 +86,16 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         this.progress = input.getIntOr("Progress", 0);
-        this.containingEntity = readEntityData(input);
+        this.containingEntity = null;
+        this.containingEntityData = readEntityData(input);
+        resolveContainingEntity();
         this.jarStorage.readData(input);
+    }
+
+    @Override
+    public void setLevel(Level level) {
+        super.setLevel(level);
+        resolveContainingEntity();
     }
 
     @Override
@@ -91,9 +103,13 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         if (this.level == null || this.level.isClientSide())
             return;
 
+        resolveContainingEntity();
+
         if (this.containingEntity != null) {
             if (++this.progress >= this.maxProgress) {
                 onComplete();
+            } else {
+                update();
             }
 
             return;
@@ -109,13 +125,25 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         if (storage == null || !storage.canAcceptIncomingItem())
             return;
 
-        List<LivingEntity> entities = this.level.getEntitiesOfClass(LivingEntity.class, this.bounds, Entity::isAlive);
+        List<LivingEntity> entities = this.level.getEntitiesOfClass(LivingEntity.class, this.bounds, entity -> !entity.isSpectator() && entity.isAlive() && !(entity instanceof Player));
         for (LivingEntity entity : entities) {
             if (entity instanceof LivingEntity livingEntity && storage.canAcceptIncomingItem()) {
-                this.containingEntity = livingEntity;
+                onEntityFound(livingEntity);
                 break;
             }
         }
+    }
+
+    private void onEntityFound(LivingEntity livingEntity) {
+        this.containingEntity = livingEntity;
+        this.containingEntityData = null;
+        this.containingEntity.remove(Entity.RemovalReason.DISCARDED);
+        SimpleContainer inventory = this.jarStorage.getInventory(0);
+        if (inventory != null) {
+            inventory.removeItem(0, 1);
+        }
+
+        update();
     }
 
     private void onComplete() {
@@ -125,10 +153,11 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
             if (storage != null && storage.canAcceptIncomingItem()) {
                 Entity entity = this.containingEntity;
                 this.containingEntity = null;
+                this.containingEntityData = null;
                 this.progress = 0;
 
-                entity.remove(Entity.RemovalReason.DISCARDED);
                 storage.addItem(createItem(entity));
+                update();
             }
         }
     }
@@ -137,9 +166,8 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         ItemStack stack = ItemInit.FILLED_MOB_JAR.getDefaultInstance();
         try (var reporter = new ProblemReporter.ScopedCollector(entity.problemPath(), Industria.LOGGER)) {
             TagValueOutput output = TagValueOutput.createWithContext(reporter, entity.registryAccess());
-
-            entity.save(output);
-            BeehiveBlockEntityAccessor.getIgnoredBeeTags().forEach(output::discard);
+            entity.saveWithoutId(output);
+            discardTags(output);
 
             CompoundTag entityTag = output.buildResult();
             stack.set(DataComponents.ENTITY_DATA, TypedEntityData.of(entity.getType(), entityTag));
@@ -148,25 +176,53 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         }
     }
 
+    private static void discardTags(TagValueOutput output) {
+        output.discard("Passengers");
+        output.discard("Leash");
+        output.discard("UUID");
+        output.discard("Pos");
+        output.discard("Motion");
+        output.discard("Brain");
+    }
+
     private void writeEntityData(ValueOutput output, LivingEntity entity) {
         try (var reporter = new ProblemReporter.ScopedCollector(entity.problemPath(), Industria.LOGGER)) {
             TagValueOutput tagOutput = TagValueOutput.createWithContext(reporter, entity.registryAccess());
-            entity.save(tagOutput);
-            BeehiveBlockEntityAccessor.getIgnoredBeeTags().forEach(tagOutput::discard);
+            entity.saveWithoutId(tagOutput);
+            discardTags(tagOutput);
 
-            output.store("ContainingEntity", CompoundTag.CODEC, tagOutput.buildResult());
+            writeEntityData(output, TypedEntityData.of(entity.getType(), tagOutput.buildResult()));
         }
     }
 
-    private LivingEntity readEntityData(ValueInput input) {
-        CompoundTag entityTag = input.read("ContainingEntity", CompoundTag.CODEC).orElse(null);
-        if (entityTag == null)
+    private void writeEntityData(ValueOutput output, TypedEntityData<EntityType<?>> entityData) {
+        output.store("ContainingEntityType", EntityType.CODEC, entityData.type());
+        output.store("ContainingEntityData", CompoundTag.CODEC, entityData.copyTagWithoutId());
+    }
+
+    private TypedEntityData<EntityType<?>> readEntityData(ValueInput input) {
+        EntityType<?> entityType = input.read("ContainingEntityType", EntityType.CODEC).orElse(null);
+        CompoundTag entityTag = input.read("ContainingEntityData", CompoundTag.CODEC).orElse(null);
+        if (entityType == null || entityTag == null)
             return null;
 
-        if (this.level != null)
-            return (LivingEntity) EntityType.loadEntityRecursive(entityTag, this.level, EntitySpawnReason.LOAD, EntityProcessor.NOP);
+        return TypedEntityData.of(entityType, entityTag);
+    }
 
-        return null;
+    private void resolveContainingEntity() {
+        if (this.level == null || this.containingEntity != null || this.containingEntityData == null)
+            return;
+
+        Entity entity = EntityType.loadEntityRecursive(
+                this.containingEntityData.type(),
+                this.containingEntityData.copyTagWithoutId(),
+                this.level,
+                EntitySpawnReason.LOAD,
+                EntityProcessor.NOP);
+        this.containingEntityData = null;
+        if (entity instanceof LivingEntity livingEntity) {
+            this.containingEntity = livingEntity;
+        }
     }
 
     public Storage<ItemVariant> getInventoryStorage(Direction side) {
