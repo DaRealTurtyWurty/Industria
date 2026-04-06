@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/simple_drill_head"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

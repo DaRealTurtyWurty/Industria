@@ -5,7 +5,7 @@ import dev.turtywurty.industria.init.ComponentTypeInit;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -50,19 +50,19 @@ public class SeismicScannerScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderBackground(context, mouseX, mouseY, delta);
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(context, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        context.drawString(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, this.y + 8, 0x404040, false);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(context, mouseX, mouseY, delta);
+        context.text(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, this.y + 8, 0x404040, false);
 
         if (this.fluidPockets.isEmpty()) {
-            renderMenuBackground(context);
-            context.drawString(this.font, Component.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFF, true);
+            extractMenuBackground(context);
+            context.text(this.font, Component.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFF, true);
             return;
         }
 

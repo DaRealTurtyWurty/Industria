@@ -10,13 +10,13 @@ import dev.turtywurty.industria.screen.widget.util.Orientation;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -41,7 +41,7 @@ public class GasWidget implements Renderable, LayoutElement {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         Gas gas = this.gasTank.variant.getGas();
         long gasAmount = this.gasTank.getAmount();
 
@@ -50,9 +50,9 @@ public class GasWidget implements Renderable, LayoutElement {
             return;
 
         BlockPos pos = this.posSupplier.get();
-        Level world = Minecraft.getInstance().level;
+        ClientLevel level = Minecraft.getInstance().level;
 
-        int color = gasRenderHandler.getColor(world, pos);
+        int color = gasRenderHandler.getColor(level, pos);
 
         long gasCapacity = this.gasTank.getCapacity();
         float percentage = (float) gasAmount / gasCapacity;
@@ -71,7 +71,7 @@ public class GasWidget implements Renderable, LayoutElement {
         }
     }
 
-    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
+    protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         long gasAmount = this.gasTank.getAmount();
         long gasCapacity = this.gasTank.getCapacity();
 

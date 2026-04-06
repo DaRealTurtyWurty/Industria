@@ -40,7 +40,8 @@ replay_*.log
 *.jfr
 
 src/main/generated/.cache
-extracted/
+mc_source/
+.codex
 
 # railroad
 .railroad/

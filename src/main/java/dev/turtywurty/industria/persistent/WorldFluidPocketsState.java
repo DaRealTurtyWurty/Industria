@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -181,7 +181,7 @@ public class WorldFluidPocketsState extends SavedData {
                 Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT);
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_STREAM_CODEC =
-                ByteBufCodecs.map(HashMap::new, ExtraPacketCodecs.BLOCK_POS_STRING_CODEC, ByteBufCodecs.INT);
+                ByteBufCodecs.map(HashMap::new, ExtraStreamCodecs.BLOCK_POS_STRING_CODEC, ByteBufCodecs.INT);
 
         public static final Codec<FluidPocket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 FluidState.CODEC.fieldOf("FluidState").forGetter(FluidPocket::fluidState),

@@ -36,6 +36,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,9 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public class IndustriaBlock extends Block implements EntityBlock {
+    private static final ThreadLocal<Deque<BlockProperties>> PENDING_PROPERTIES =
+            ThreadLocal.withInitial(ArrayDeque::new);
+
     public final StateProperties stateProperties;
     public final boolean placeFacingOpposite;
     public final Supplier<BlockEntityType<?>> blockEntityTypeSupplier;
@@ -59,9 +64,25 @@ public class IndustriaBlock extends Block implements EntityBlock {
     public final Map<Direction, VoxelShape> cachedDirectionalShapes;
     public final boolean dropContentsOnBreak;
 
+    private static @Nullable BlockProperties pendingProperties() {
+        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
+        return pendingProperties.isEmpty() ? null : pendingProperties.peek();
+    }
+
+    private static void popPendingProperties() {
+        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
+        pendingProperties.pop();
+        if (pendingProperties.isEmpty()) {
+            PENDING_PROPERTIES.remove();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public IndustriaBlock(Properties settings, BlockProperties properties) {
+        PENDING_PROPERTIES.get().push(properties);
         super(settings);
+
+        popPendingProperties();
 
         this.stateProperties = properties.stateProperties;
         this.placeFacingOpposite = properties.placeFacingOpposite;
@@ -95,13 +116,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
             this.dropContentsOnBreak = false;
         }
 
-        StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<>(this);
-        createBlockStateDefinition(builder);
-        this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
-        registerDefaultState(this.stateDefinition.any());
-
-        BlockState state = this.stateDefinition.any();
-        state = this.stateProperties.applyDefaults(state);
+        BlockState state = this.stateProperties.applyDefaults(this.defaultBlockState());
         registerDefaultState(state);
     }
 
@@ -109,8 +124,16 @@ public class IndustriaBlock extends Block implements EntityBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
 
-        if (this.stateProperties != null) {
-            this.stateProperties.addToBuilder(builder);
+        StateProperties stateProperties = this.stateProperties;
+        if (stateProperties == null) {
+            BlockProperties pendingProperties = pendingProperties();
+            if (pendingProperties != null) {
+                stateProperties = pendingProperties.stateProperties;
+            }
+        }
+
+        if (stateProperties != null) {
+            stateProperties.addToBuilder(builder);
         }
     }
 
@@ -186,18 +209,18 @@ public class IndustriaBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (this.multiblockType != null) {
-            if (!world.isClientSide()) {
-                this.multiblockType.onPrimaryBlockUse(world, player, hit, pos);
+            if (!level.isClientSide()) {
+                this.multiblockType.onPrimaryBlockUse(level, player, hit, pos);
             }
 
             return InteractionResult.SUCCESS;
         }
 
         if (this.rightClickToOpenGui) {
-            if (!world.isClientSide()) {
-                BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (!level.isClientSide()) {
+                BlockEntity blockEntity = level.getBlockEntity(pos);
                 if (player instanceof ServerPlayer sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
                     sPlayer.openMenu(blockEntityWithGui);
                 }
@@ -206,7 +229,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        return super.useWithoutItem(state, world, pos, player, hit);
+        return super.useWithoutItem(state, level, pos, player, hit);
     }
 
     @Override

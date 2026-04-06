@@ -295,7 +295,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             recipeView.store("InputStack", ItemStack.OPTIONAL_CODEC, inputRecipeEntry.inputStack);
             recipeView.putInt("Progress", inputRecipeEntry.progress);
-            recipeView.store("UUID", UUIDUtil.AUTHLIB_CODEC, inputRecipeEntry.uuid);
+            recipeView.store("UUID", UUIDUtil.CODEC, inputRecipeEntry.uuid);
         }
     }
 
@@ -323,7 +323,7 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
             ItemStack inputStack = readView.read("InputStack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
             int progress = readView.getIntOr("Progress", 0);
-            Optional<UUID> uuidOpt = readView.read("UUID", UUIDUtil.AUTHLIB_CODEC);
+            Optional<UUID> uuidOpt = readView.read("UUID", UUIDUtil.CODEC);
             UUID uuid = uuidOpt.orElseGet(UUID::randomUUID);
 
             var inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);

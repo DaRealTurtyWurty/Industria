@@ -2,21 +2,17 @@ package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.ThermalGeneratorScreenHandler;
+import dev.turtywurty.industria.util.FluidRenderUtils;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 
 public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGeneratorScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/thermal_generator.png");
@@ -32,7 +28,7 @@ public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGener
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         long energy = this.menu.getEnergy();
@@ -45,27 +41,21 @@ public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGener
         long fluidCapacity = this.menu.getFluidCapacity();
         int fluidBarHeight = Math.round((float) fluidAmount / fluidCapacity * 60);
 
-        FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-        if(fluidRenderHandler == null || fluidAmount <= 0)
+        if (fluidAmount <= 0)
             return;
 
         BlockPos pos = this.menu.getBlockEntity().getBlockPos();
-        FluidState fluidState = fluid.defaultFluidState();
         Level world = this.menu.getBlockEntity().getLevel();
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluid, world, pos);
+        if (renderData == null)
+            return;
 
-        TextureAtlasSprite stillTexture = fluidRenderHandler.getFluidSprites(world, pos, fluidState)[0];
-        int tintColor = fluidRenderHandler.getFluidColor(world, pos, fluidState);
-
-        float red = (tintColor >> 16 & 0xFF) / 255.0F;
-        float green = (tintColor >> 8 & 0xFF) / 255.0F;
-        float blue = (tintColor & 0xFF) / 255.0F;
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, stillTexture, this.leftPos + 146, this.topPos + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, renderData.stillSprite(), this.leftPos + 146, this.topPos + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, renderData.tintColor());
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
+    protected void extractTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        super.extractTooltip(context, mouseX, mouseY);
 
         if (isHovering(146, 8, 16, 60, mouseX, mouseY)) {
             Fluid fluid = this.menu.getFluid();

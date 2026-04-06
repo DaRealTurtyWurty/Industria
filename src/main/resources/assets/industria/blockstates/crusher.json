@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,running=false": {
+      "model": "industria:block/invisible"
+    },
+    "facing=north,running=true": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south,running=false": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south,running=true": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west,running=false": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west,running=true": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east,running=false": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east,running=true": {
+      "model": "industria:block/invisible"
+    }
+  }
+}

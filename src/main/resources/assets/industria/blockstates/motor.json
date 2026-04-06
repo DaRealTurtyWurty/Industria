@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "industria:block/invisible"
+    },
+    "facing=south": {
+      "model": "industria:block/invisible"
+    },
+    "facing=west": {
+      "model": "industria:block/invisible"
+    },
+    "facing=east": {
+      "model": "industria:block/invisible"
+    }
+  }
+}

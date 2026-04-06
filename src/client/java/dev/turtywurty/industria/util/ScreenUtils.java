@@ -2,7 +2,7 @@ package dev.turtywurty.industria.util;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
@@ -10,31 +10,31 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 public class ScreenUtils {
-    public static void drawTexture(GuiGraphics context, Identifier texture, int x, int y, float u, float v, int width, int height) {
+    public static void drawTexture(GuiGraphicsExtractor context, Identifier texture, int x, int y, float u, float v, int width, int height) {
         drawTexture(context, texture, x, y, u, v, width, height, 256, 256);
     }
 
-    public static void drawTexture(GuiGraphics context, Identifier texture, int x, int y, float u, float v, int width, int height, int color) {
+    public static void drawTexture(GuiGraphicsExtractor context, Identifier texture, int x, int y, float u, float v, int width, int height, int color) {
         drawTexture(context, texture, x, y, u, v, width, height, 256, 256, color);
     }
 
-    public static void drawTexture(GuiGraphics context, Identifier texture, int x, int y, float u, float v, int width, int height, int texWidth, int texHeight) {
+    public static void drawTexture(GuiGraphicsExtractor context, Identifier texture, int x, int y, float u, float v, int width, int height, int texWidth, int texHeight) {
         drawTexture(context, texture, x, y, u, v, width, height, texWidth, texHeight, -1);
     }
 
-    public static void drawTexture(GuiGraphics context, Identifier texture, int x, int y, float u, float v, int width, int height, int texWidth, int texHeight, int color) {
+    public static void drawTexture(GuiGraphicsExtractor context, Identifier texture, int x, int y, float u, float v, int width, int height, int texWidth, int texHeight, int color) {
         context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, texWidth, texHeight, color);
     }
 
-    public static void drawGuiTexture(GuiGraphics context, Identifier texture, int x, int y, int width, int height) {
+    public static void drawGuiTexture(GuiGraphicsExtractor context, Identifier texture, int x, int y, int width, int height) {
         drawGuiTexture(context, texture, x, y, width, height, -1);
     }
 
-    public static void drawGuiTexture(GuiGraphics context, Identifier texture, int x, int y, int width, int height, int color) {
+    public static void drawGuiTexture(GuiGraphicsExtractor context, Identifier texture, int x, int y, int width, int height, int color) {
         context.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x, y, width, height, color);
     }
 
-    public static void renderTiledSprite(GuiGraphics context, RenderPipeline pipeline, TextureAtlasSprite sprite, int x, int y, int width, int height, int color) {
+    public static void renderTiledSprite(GuiGraphicsExtractor context, RenderPipeline pipeline, TextureAtlasSprite sprite, int x, int y, int width, int height, int color) {
         int spriteWidth = 16;
         int spriteHeight = 16;
 
@@ -92,7 +92,7 @@ public class ScreenUtils {
         }
     }
 
-    public static void drawNineSlicedTexture(GuiGraphics context, Identifier texture,
+    public static void drawNineSlicedTexture(GuiGraphicsExtractor context, Identifier texture,
                                              int startX, int startY,
                                              int width, int height,
                                              int u0, int v0, int sliceSize,
@@ -100,14 +100,14 @@ public class ScreenUtils {
         drawNineSlicedTexture(context, texture, startX, startY, width, height, u0, v0, sliceSize, 256, 256, drawMiddle);
     }
 
-    public static void drawNineSlicedTexture(GuiGraphics context, Identifier texture,
+    public static void drawNineSlicedTexture(GuiGraphicsExtractor context, Identifier texture,
                                              int startX, int startY,
                                              int width, int height,
                                              int u0, int v0, int sliceSize) {
         drawNineSlicedTexture(context, texture, startX, startY, width, height, u0, v0, sliceSize, true);
     }
 
-    public static void drawNineSlicedTexture(GuiGraphics context, Identifier texture,
+    public static void drawNineSlicedTexture(GuiGraphicsExtractor context, Identifier texture,
                                              int startX, int startY,
                                              int width, int height,
                                              int u0, int v0, int sliceSize,
@@ -115,7 +115,7 @@ public class ScreenUtils {
         drawNineSlicedTexture(context, texture, startX, startY, width, height, u0, v0, sliceSize, texWidth, texHeight, true);
     }
 
-    public static void drawNineSlicedTexture(GuiGraphics context, Identifier texture,
+    public static void drawNineSlicedTexture(GuiGraphicsExtractor context, Identifier texture,
                                              int startX, int startY,
                                              int width, int height,
                                              int u0, int v0, int sliceSize,
@@ -160,18 +160,18 @@ public class ScreenUtils {
         ScreenUtils.drawTexture(context, texture, rightStart, bottomStart, u2, v2, sliceSize, sliceSize, texWidth, texHeight);
     }
 
-    public static void drawTextTruncated(GuiGraphics context, String text, int x, int y, int maxWidth, int color, boolean shadow) {
+    public static void drawTextTruncated(GuiGraphicsExtractor context, String text, int x, int y, int maxWidth, int color, boolean shadow) {
         Minecraft client = Minecraft.getInstance();
         int textWidth = client.font.width(text);
         if (textWidth <= maxWidth) {
-            context.drawString(client.font, text, x, y, color, shadow);
+            context.text(client.font, text, x, y, color, shadow);
         } else {
             String truncatedText = client.font.plainSubstrByWidth(text, maxWidth - client.font.width("...")) + "...";
-            context.drawString(client.font, truncatedText, x, y, color, shadow);
+            context.text(client.font, truncatedText, x, y, color, shadow);
         }
     }
 
-    public static void drawTextTruncated(GuiGraphics context, Component text, int x, int y, int maxWidth, int color, boolean shadow) {
+    public static void drawTextTruncated(GuiGraphicsExtractor context, Component text, int x, int y, int maxWidth, int color, boolean shadow) {
         drawTextTruncated(context, text.getString(), x, y, maxWidth, color, shadow);
     }
 }

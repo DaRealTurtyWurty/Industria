@@ -1,4 +1,6 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:item/seismic_scanner"
+  },
   "display": {}
 }

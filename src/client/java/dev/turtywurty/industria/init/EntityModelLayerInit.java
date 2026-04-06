@@ -2,6 +2,8 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.model.*;
+import dev.turtywurty.industria.model.conveyor.*;
+import dev.turtywurty.industria.model.conveyor.anchor.*;
 import dev.turtywurty.industria.util.WoodRegistrySet;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -32,6 +34,19 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(ElectrolyzerModel.LAYER_LOCATION, ElectrolyzerModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(ShakingTableModel.LAYER_LOCATION, ShakingTableModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(CentrifugalConcentratorModel.LAYER_LOCATION, CentrifugalConcentratorModel::getTexturedModelData);
+        ModelLayerRegistry.registerModelLayer(CornerTurnConveyorAnchorPositionsModel.LAYER_LOCATION, CornerTurnConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(StraightConveyorAnchorPositionsModel.LAYER_LOCATION, StraightConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(MergerConveyorAnchorPositionsModel.LEFT_LAYER_LOCATION, MergerConveyorAnchorPositionsModel::createLeftLayer);
+        ModelLayerRegistry.registerModelLayer(MergerConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION, MergerConveyorAnchorPositionsModel::createRightLayer);
+        ModelLayerRegistry.registerModelLayer(SplitterConveyorAnchorPositionsModel.LEFT_LAYER_LOCATION, SplitterConveyorAnchorPositionsModel::createLeftLayer);
+        ModelLayerRegistry.registerModelLayer(SplitterConveyorAnchorPositionsModel.RIGHT_LAYER_LOCATION, SplitterConveyorAnchorPositionsModel::createRightLayer);
+        ModelLayerRegistry.registerModelLayer(VerticalUpConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalUpConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(VerticalDownConveyorAnchorPositionsModel.LAYER_LOCATION, VerticalDownConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(DropChuteConveyorAnchorPositionsModel.LAYER_LOCATION, DropChuteConveyorAnchorPositionsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(ConveyorFlapsModel.LAYER_LOCATION, ConveyorFlapsModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(SideInjectorConveyorAnchorModel.LAYER_LOCATION, SideInjectorConveyorAnchorModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(LadderConveyorPlatformModel.LAYER_LOCATION, LadderConveyorPlatformModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(LadderConveyorTopPlatformModel.LAYER_LOCATION, LadderConveyorTopPlatformModel::createMainLayer);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             var normalLayer = new ModelLayerLocation(Industria.id("boat/" + woodSet.getName()), "main");

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "#c:ingots/iron",
+    "R": "industria:rubber"
+  },
+  "pattern": [
+    "III",
+    "RRR",
+    "III"
+  ],
+  "result": {
+    "count": 8,
+    "id": "industria:conveyor"
+  }
+}

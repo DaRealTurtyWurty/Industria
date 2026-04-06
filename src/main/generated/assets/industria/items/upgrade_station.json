@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/upgrade_station"
+    "type": "minecraft:special",
+    "base": "industria:item/upgrade_station",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:upgrade_station",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/upgrade_station.png"
+    }
   }
 }

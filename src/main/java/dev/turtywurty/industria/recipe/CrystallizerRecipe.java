@@ -10,7 +10,7 @@ import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -163,7 +163,7 @@ public record CrystallizerRecipe(FluidStack waterFluid, FluidStack crystalFluid,
                 Codec.INT.fieldOf("process_time").forGetter(CrystallizerRecipeDisplay::processTime)
         ).apply(instance, CrystallizerRecipeDisplay::new));
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, CrystallizerRecipeDisplay> STREAM_CODEC = ExtraPacketCodecs.tuple(
+        private static final StreamCodec<RegistryFriendlyByteBuf, CrystallizerRecipeDisplay> STREAM_CODEC = ExtraStreamCodecs.tuple(
                 FluidStack.STREAM_CODEC, CrystallizerRecipeDisplay::waterFluid,
                 FluidStack.STREAM_CODEC, CrystallizerRecipeDisplay::crystalFluid,
                 SlotDisplay.STREAM_CODEC, CrystallizerRecipeDisplay::catalyst,

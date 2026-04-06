@@ -3,19 +3,24 @@ package dev.turtywurty.industria.state;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.renderer.block.IndustriaBlockEntityRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class IndustriaBlockEntityRenderState extends BlockEntityRenderState {
     public final List<ItemStackRenderState> itemRenderStates = new ArrayList<>();
+    public BlockState blockState = Blocks.AIR.defaultBlockState();
+    public MovingBlockRenderState movingBlockRenderState;
     public boolean multiblockFormed = true;
     public double multiblockRenderOffsetX = 0.0;
     public double multiblockRenderOffsetZ = 0.0;

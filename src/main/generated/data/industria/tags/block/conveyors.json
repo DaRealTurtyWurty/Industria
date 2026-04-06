@@ -1,0 +1,19 @@
+{
+  "values": [
+    "industria:conveyor",
+    "industria:splitter_conveyor",
+    "industria:merger_conveyor",
+    "industria:alternator_conveyor",
+    "industria:feeder_conveyor",
+    "industria:hatch_conveyor",
+    "industria:side_injector_conveyor",
+    "industria:ladder_conveyor",
+    "industria:filter_conveyor",
+    "industria:magnetic_conveyor",
+    "industria:detector_conveyor",
+    "industria:drop_chute_conveyor",
+    "industria:count_conveyor",
+    "industria:delay_conveyor",
+    "industria:containment_conveyor"
+  ]
+}

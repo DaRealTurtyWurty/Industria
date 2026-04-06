@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.screen.tooltip;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
@@ -38,7 +38,7 @@ public class ItemListTooltipComponent implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor context) {
         if(this.stacks.isEmpty())
             return;
 
@@ -62,12 +62,12 @@ public class ItemListTooltipComponent implements ClientTooltipComponent {
             }
 
             ItemStack stack = this.stacks.get(index);
-            context.renderItem(stack, xPos + 1, yPos + 1);
-            context.renderItemDecorations(textRenderer, stack, xPos + 1, yPos + 1);
+            context.item(stack, xPos + 1, yPos + 1);
+            context.itemDecorations(textRenderer, stack, xPos + 1, yPos + 1);
         }
     }
 
-    public void onRenderTick(GuiGraphics context, int mouseX, int mouseY) {
+    public void onRenderTick(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         this.selectedIndex = (int) (System.currentTimeMillis() / 1000L % this.stacks.size());
     }
 }

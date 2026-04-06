@@ -29,11 +29,11 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.item.crafting.CookingBookCategory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -197,6 +197,156 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .define('R', ConventionalItemTags.REDSTONE_DUSTS)
                         .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                         .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.CONVEYOR, 8)
+                        .pattern("III")
+                        .pattern("RRR")
+                        .pattern("III")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('R', ItemInit.RUBBER)
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(ItemInit.RUBBER), has(ItemInit.RUBBER))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.SPLITTER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CQC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('Q', ConventionalItemTags.QUARTZ_GEMS)
+                        .unlockedBy(hasTag(ConventionalItemTags.QUARTZ_GEMS), has(ConventionalItemTags.QUARTZ_GEMS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.MERGER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CLC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('L', ConventionalItemTags.LAPIS_GEMS)
+                        .unlockedBy(hasTag(ConventionalItemTags.LAPIS_GEMS), has(ConventionalItemTags.LAPIS_GEMS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.ALTERNATOR_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CRC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('R', Items.LEVER)
+                        .unlockedBy(getHasName(Items.LEVER), has(Items.LEVER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.FEEDER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CRC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.HATCH_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CHC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('H', Items.HOPPER)
+                        .unlockedBy(getHasName(Items.HOPPER), has(Items.HOPPER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.SIDE_INJECTOR_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CPC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('P', Items.PISTON)
+                        .unlockedBy(getHasName(Items.PISTON), has(Items.PISTON))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.LADDER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CLC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('L', Items.LADDER)
+                        .unlockedBy(getHasName(Items.LADDER), has(Items.LADDER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.FILTER_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CPC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('P', Items.PAPER)
+                        .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.MAGNETIC_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CPC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('P', Items.COMPASS)
+                        .unlockedBy(getHasName(Items.COMPASS), has(Items.COMPASS))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.DETECTOR_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CDC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('D', Items.COMPARATOR)
+                        .unlockedBy(getHasName(Items.COMPARATOR), has(Items.COMPARATOR))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.DROP_CHUTE_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CDC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('D', Items.DROPPER)
+                        .unlockedBy(getHasName(Items.DROPPER), has(Items.DROPPER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.COUNT_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CDC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('D', Items.COMPARATOR)
+                        .unlockedBy(getHasName(Items.COMPARATOR), has(Items.COMPARATOR))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.DELAY_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CRC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('R', Items.REPEATER)
+                        .unlockedBy(getHasName(Items.REPEATER), has(Items.REPEATER))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, BlockInit.CONTAINMENT_CONVEYOR, 8)
+                        .pattern("CCC")
+                        .pattern("CMC")
+                        .pattern("CCC")
+                        .define('C', BlockInit.CONVEYOR)
+                        .define('M', ItemInit.EMPTY_MOB_JAR)
+                        .unlockedBy(getHasName(ItemInit.EMPTY_MOB_JAR), has(ItemInit.EMPTY_MOB_JAR))
+                        .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
                         .save(output);
 
                 nineBlockStorageRecipes(RecipeCategory.MISC, ItemInit.ALUMINIUM_INGOT, RecipeCategory.BUILDING_BLOCKS, BlockInit.ALUMINIUM_BLOCK);

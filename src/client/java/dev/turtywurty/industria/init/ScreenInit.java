@@ -29,5 +29,8 @@ public class ScreenInit {
         MenuScreens.register(ScreenHandlerTypeInit.SHAKING_TABLE, ShakingTableScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.ARC_FURNACE, ArcFurnaceScreen::new);
+        MenuScreens.register(ScreenHandlerTypeInit.FILTER_CONVEYOR, FilterConveyorScreen::new);
+        MenuScreens.register(ScreenHandlerTypeInit.DETECTOR_CONVEYOR, DetectorConveyorScreen::new);
+        MenuScreens.register(ScreenHandlerTypeInit.CONTAINMENT_CONVEYOR, ContainmentConveyorScreen::new);
     }
 }

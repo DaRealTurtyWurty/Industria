@@ -57,14 +57,14 @@ public class WindTurbineBlock extends IndustriaBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!world.isClientSide()) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide()) {
             BlockPos blockEntityPos = pos;
             if (state.getValue(PART) != 0) {
                 blockEntityPos = pos.below(state.getValue(PART));
             }
 
-            if (world.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
+            if (level.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
                 player.openMenu(windTurbine);
             }
         }

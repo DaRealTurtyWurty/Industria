@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/wind_turbine"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

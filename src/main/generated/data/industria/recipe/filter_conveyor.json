@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "industria:conveyor",
+    "P": "minecraft:paper"
+  },
+  "pattern": [
+    "CCC",
+    "CPC",
+    "CCC"
+  ],
+  "result": {
+    "count": 8,
+    "id": "industria:filter_conveyor"
+  }
+}

@@ -4,7 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screenhandler.ClarifierScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -35,14 +35,8 @@ public class ClarifierScreen extends AbstractContainerScreen<ClarifierScreenHand
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 76, this.topPos + 36, 176, 0, this.menu.getProgressScaled(), 17);
-    }
-
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
     }
 }

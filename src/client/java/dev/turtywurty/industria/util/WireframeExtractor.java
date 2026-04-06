@@ -1,49 +1,10 @@
 package dev.turtywurty.industria.util;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.QuadCollection;
-import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import org.joml.Math;
 import org.joml.Vector3fc;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public interface WireframeExtractor {
-    static List<Line> fromBakedModel(QuadCollection model) {
-        Set<Line> lines = new HashSet<>(); // We are using a set to avoid duplicate lines (hashes are used to determine if a line is a duplicate)
-        for (Direction direction : Direction.values()) {
-            for (BakedQuad quad : model.getQuads(direction)) {
-                extractVerticesFromBakedQuad(lines, quad);
-            }
-        }
-
-        for (BakedQuad quad : model.getQuads(null)) {
-            extractVerticesFromBakedQuad(lines, quad);
-        }
-
-        return new ArrayList<>(lines);
-    }
-
-    private static void extractVerticesFromBakedQuad(Set<Line> lines, BakedQuad quad) {
-        for (int vIndex = 0; vIndex < 4; vIndex++) {
-            int offset = calculateOffset(vIndex);
-            Vector3fc startVertices = quad.position(offset);
-
-            offset = calculateOffset((vIndex + 1) % 4);
-            Vector3fc endVertices = quad.position(offset);
-
-            lines.add(Line.from(startVertices, endVertices));
-        }
-    }
-
-    private static int calculateOffset(int index) {
-        return index * VertexOffsets.STRIDE + VertexOffsets.POSITION;
-    }
-
     record Line(float x1, float y1, float z1,
                 float x2, float y2, float z2,
                 float normalX, float normalY, float normalZ,

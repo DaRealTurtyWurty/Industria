@@ -6,7 +6,7 @@ import dev.turtywurty.industria.network.BatteryChargeModePayload;
 import dev.turtywurty.industria.screenhandler.BatteryScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -36,7 +36,7 @@ public class BatteryScreen extends AbstractContainerScreen<BatteryScreenHandler>
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
@@ -44,9 +44,8 @@ public class BatteryScreen extends AbstractContainerScreen<BatteryScreenHandler>
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
+    protected void extractTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        super.extractTooltip(context, mouseX, mouseY);
 
         int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
         if (isHovering(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {

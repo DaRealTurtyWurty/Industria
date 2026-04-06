@@ -1,5 +1,7 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "textures": {
+    "particle": "industria:block/rotary_kiln"
+  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [

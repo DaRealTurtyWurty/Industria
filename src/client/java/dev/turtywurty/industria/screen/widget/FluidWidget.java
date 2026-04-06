@@ -1,25 +1,21 @@
 package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.widget.util.Orientation;
+import dev.turtywurty.industria.util.FluidRenderUtils;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -44,24 +40,18 @@ public class FluidWidget implements Renderable, LayoutElement {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         Fluid fluid = this.fluidTank.variant.getFluid();
         long fluidAmount = this.fluidTank.getAmount();
 
-        FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-        if (fluidRenderHandler == null || fluidAmount <= 0)
+        if (fluidAmount <= 0)
             return;
 
-        BlockPos pos = this.posSupplier.get();
-        FluidState fluidState = fluid.defaultFluidState();
         Level world = Minecraft.getInstance().level;
-
-        TextureAtlasSprite stillTexture = fluidRenderHandler.getFluidSprites(world, pos, fluidState)[0];
-        int tintColor = fluidRenderHandler.getFluidColor(world, pos, fluidState);
-
-        float red = (tintColor >> 16 & 0xFF) / 255.0F;
-        float green = (tintColor >> 8 & 0xFF) / 255.0F;
-        float blue = (tintColor & 0xFF) / 255.0F;
+        BlockPos pos = this.posSupplier.get();
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluid, world, pos);
+        if (renderData == null)
+            return;
 
         long fluidCapacity = this.fluidTank.getCapacity();
         float percentage = (float) fluidAmount / fluidCapacity;
@@ -73,14 +63,14 @@ public class FluidWidget implements Renderable, LayoutElement {
             fillWidth = (int) (width * percentage);
         }
 
-        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
+        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, renderData.stillSprite(), fillX, fillY, fillWidth, fillHeight, renderData.tintColor());
 
         if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
         }
     }
 
-    protected void drawTooltip(GuiGraphics context, int mouseX, int mouseY) {
+    protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         Fluid fluid = this.fluidTank.variant.getFluid();
 
         long fluidAmount = this.fluidTank.getAmount();

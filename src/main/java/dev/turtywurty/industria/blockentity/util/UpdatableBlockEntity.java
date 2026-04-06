@@ -48,7 +48,7 @@ public class UpdatableBlockEntity extends BlockEntity {
 
     public void forceUpdate() {
         this.isDirty = false;
-        setChanged();
+        setChanged(); // TODO: Check that this doesn't do a block update (I think it just marks dirty but not sure)
 
         if (this.level != null && !this.level.isClientSide()) {
             this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);

@@ -1,8 +1,12 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
+import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.server.level.ServerLevel;
 
 public class ItemStorageInit {
     public static void init() {
@@ -21,5 +25,21 @@ public class ItemStorageInit {
         ItemStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getInventoryProvider, BlockEntityTypeInit.SHAKING_TABLE);
         ItemStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getInventoryProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
         ItemStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ARC_FURNACE);
+        ItemStorage.SIDED.registerForBlocks((level, pos, _, _, _) -> {
+                    if (level instanceof ServerLevel serverLevel)
+                        return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
+
+                    return null;
+                }, BlockInit.CONVEYOR, BlockInit.SPLITTER_CONVEYOR, BlockInit.MERGER_CONVEYOR, BlockInit.ALTERNATOR_CONVEYOR, BlockInit.HATCH_CONVEYOR,
+                BlockInit.SIDE_INJECTOR_CONVEYOR, BlockInit.LADDER_CONVEYOR, BlockInit.FILTER_CONVEYOR,
+                BlockInit.MAGNETIC_CONVEYOR, BlockInit.DROP_CHUTE_CONVEYOR, BlockInit.DETECTOR_CONVEYOR,
+                BlockInit.COUNT_CONVEYOR, BlockInit.DELAY_CONVEYOR, BlockInit.CONTAINMENT_CONVEYOR);
+
+        ItemStorage.SIDED.registerForBlocks((level, _, _, blockEntity, side) -> {
+            if (level instanceof ServerLevel && blockEntity instanceof FeederConveyorBlockEntity feeder)
+                return feeder.getItemStorage(side);
+
+            return null;
+        }, BlockInit.FEEDER_CONVEYOR);
     }
 }

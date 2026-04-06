@@ -3,7 +3,7 @@ package dev.turtywurty.industria.screen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.screenhandler.AlloyFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -24,7 +24,7 @@ public class AlloyFurnaceScreen extends AbstractContainerScreen<AlloyFurnaceScre
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int progress = Mth.ceil(this.menu.getProgressPercent() * 24);
@@ -32,11 +32,5 @@ public class AlloyFurnaceScreen extends AbstractContainerScreen<AlloyFurnaceScre
 
         int burnTime = Mth.ceil(this.menu.getBurnTimePercent() * 14);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 56, this.topPos + 36 + 14 - burnTime, 176, 14 - burnTime, 14, burnTime);
-    }
-
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
     }
 }

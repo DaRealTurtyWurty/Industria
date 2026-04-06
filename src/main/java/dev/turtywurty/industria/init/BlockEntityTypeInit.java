@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.conveyor.block.impl.entity.*;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -127,6 +128,34 @@ public class BlockEntityTypeInit {
 
     public static final BlockEntityType<ArcFurnaceBlockEntity> ARC_FURNACE = register("arc_furnace",
             FabricBlockEntityTypeBuilder.create(ArcFurnaceBlockEntity::new, BlockInit.ARC_FURNACE)
+                    .build());
+
+    public static final BlockEntityType<FeederConveyorBlockEntity> FEEDER_CONVEYOR = register("feeder_conveyor",
+            FabricBlockEntityTypeBuilder.create(FeederConveyorBlockEntity::new, BlockInit.FEEDER_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<FilterConveyorBlockEntity> FILTER_CONVEYOR = register("filter_conveyor",
+            FabricBlockEntityTypeBuilder.create(FilterConveyorBlockEntity::new, BlockInit.FILTER_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<DetectorConveyorBlockEntity> DETECTOR_CONVEYOR = register("detector_conveyor",
+            FabricBlockEntityTypeBuilder.create(DetectorConveyorBlockEntity::new, BlockInit.DETECTOR_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<MagneticConveyorBlockEntity> MAGNETIC_CONVEYOR = register("magnetic_conveyor",
+            FabricBlockEntityTypeBuilder.create(MagneticConveyorBlockEntity::new, BlockInit.MAGNETIC_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<CountConveyorBlockEntity> COUNT_CONVEYOR = register("count_conveyor",
+            FabricBlockEntityTypeBuilder.create(CountConveyorBlockEntity::new, BlockInit.COUNT_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<DelayConveyorBlockEntity> DELAY_CONVEYOR = register("delay_conveyor",
+            FabricBlockEntityTypeBuilder.create(DelayConveyorBlockEntity::new, BlockInit.DELAY_CONVEYOR)
+                    .build());
+
+    public static final BlockEntityType<ContainmentConveyorBlockEntity> CONTAINMENT_CONVEYOR = register("containment_conveyor",
+            FabricBlockEntityTypeBuilder.create(ContainmentConveyorBlockEntity::new, BlockInit.CONTAINMENT_CONVEYOR)
                     .build());
 
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria;
 
+import dev.turtywurty.industria.data.ClientConveyorNetworks;
 import dev.turtywurty.industria.data.ClientPipeNetworks;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
@@ -15,15 +16,19 @@ public class IndustriaClient implements ClientModInitializer {
         RenderFluidHandlerInit.init();
         SlurryRenderHandlerInit.init();
         GasRenderHandlerInit.init();
-        RenderLayerMapInit.init();
         ClientPacketsInit.init();
         ClientEventsInit.init();
-        //ModelInit.init(); // TODO: Fix when updated
+        ModelInit.init();
         ArmPositionInit.init();
         DrillHeadInit.init();
         DebugRenderingRegistry.init();
         EntityRendererInit.init();
         ColorProviderInit.init();
         ClientPipeNetworks.init();
+        ClientConveyorNetworks.init();
+        ReloadListenerInit.init();
+        ConveyorAnchorProviderInit.init();
+        ConveyorSpecialRendererInit.init();
+        TooltipInit.init();
     }
 }

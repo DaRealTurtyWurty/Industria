@@ -10,7 +10,7 @@ import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkType;
 import dev.turtywurty.industria.util.ExtraCodecs;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -48,7 +48,7 @@ public class SlurryPipeNetwork extends PipeNetwork<Storage<SlurryVariant>> {
 
     public static final Codec<Set<SlurryPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
     public static final StreamCodec<RegistryFriendlyByteBuf, Set<SlurryPipeNetwork>> SET_STREAM_CODEC =
-            ExtraPacketCodecs.setOf(STREAM_CODEC);
+            ExtraStreamCodecs.setOf(STREAM_CODEC);
 
     public SlurryPipeNetwork(UUID id) {
         super(id, TransferType.SLURRY);

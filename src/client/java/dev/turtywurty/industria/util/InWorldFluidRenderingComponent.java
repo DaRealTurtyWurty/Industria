@@ -3,7 +3,6 @@ package dev.turtywurty.industria.util;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -51,12 +50,12 @@ public class InWorldFluidRenderingComponent {
             fillPercentage = (float) (Math.sin(world.getGameTime() / 64.0) * 0.5 + 0.5);
         }
 
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
-        int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
-
-        TextureAtlasSprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if (stillSprite == null)
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
+        if (renderData == null)
             return;
+        int fluidColor = renderData.tintColor();
+        int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+        TextureAtlasSprite stillSprite = renderData.stillSprite();
 
         RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
 
@@ -123,12 +122,12 @@ public class InWorldFluidRenderingComponent {
         if (fluidVariant == null)
             return;
 
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
-        int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
-
-        TextureAtlasSprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if (stillSprite == null)
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
+        if (renderData == null)
             return;
+        int fluidColor = renderData.tintColor();
+        int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+        TextureAtlasSprite stillSprite = renderData.stillSprite();
 
         RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
         renderLayer = wrapRenderLayer.apply(renderLayer);
@@ -222,12 +221,12 @@ public class InWorldFluidRenderingComponent {
         if (fluidVariant == null)
             return;
 
-        int fluidColor = FluidVariantRendering.getColor(fluidVariant, world, pos);
-        int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
-
-        TextureAtlasSprite stillSprite = FluidVariantRendering.getSprite(fluidVariant);
-        if (stillSprite == null)
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
+        if (renderData == null)
             return;
+        int fluidColor = renderData.tintColor();
+        int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
+        TextureAtlasSprite stillSprite = renderData.stillSprite();
 
         RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
 

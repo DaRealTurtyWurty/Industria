@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/digester"
+    "type": "minecraft:special",
+    "base": "industria:item/digester",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:digester",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/digester.png"
+    }
   }
 }

@@ -5,7 +5,7 @@ import dev.turtywurty.industria.network.RotaryKilnControllerRemovedPayload;
 import dev.turtywurty.industria.network.SyncFluidPocketsPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.renderer.block.RotaryKilnBlockEntityRenderer;
-import dev.turtywurty.industria.renderer.world.FluidPocketWorldRenderer;
+import dev.turtywurty.industria.renderer.world.FluidPocketLevelRenderer;
 import dev.turtywurty.industria.screen.SeismicScannerScreen;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -20,7 +20,7 @@ public class ClientPacketsInit {
 
         ClientPlayNetworking.registerGlobalReceiver(SyncFluidPocketsPayload.ID, (payload, context) -> {
             ResourceKey<Level> worldKey = context.player().level().dimension();
-            FluidPocketWorldRenderer.FLUID_POCKETS.put(worldKey, payload.fluidPockets());
+            FluidPocketLevelRenderer.FLUID_POCKETS.put(worldKey, payload.fluidPockets());
         });
 
         ClientPlayNetworking.registerGlobalReceiver(UpgradeStationUpdateRecipesPayload.ID, (payload, context) -> {

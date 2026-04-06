@@ -1,0 +1,139 @@
+package dev.turtywurty.industria.conveyor;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
+
+public class ConveyorItem {
+    public static final MapCodec<ConveyorItem> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            UUIDUtil.CODEC.fieldOf("id").forGetter(ConveyorItem::getId),
+            ItemStack.CODEC.fieldOf("stack").forGetter(ConveyorItem::getStack),
+            BlockPos.CODEC.fieldOf("position").forGetter(ConveyorItem::getPosition),
+            Codec.INT.fieldOf("progress").forGetter(ConveyorItem::getProgress),
+            Codec.STRING.optionalFieldOf("selected_output_id", "").forGetter(ConveyorItem::getSerializedSelectedOutputId),
+            Codec.STRING.optionalFieldOf("selected_anchor_route_id", "").forGetter(ConveyorItem::getSerializedSelectedAnchorRouteId)
+    ).apply(instance, (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
+        var item = new ConveyorItem(id);
+        item.setStack(stack);
+        item.setPosition(position);
+        item.setProgress(progress);
+        item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
+        item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
+        return item;
+    }));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorItem> STREAM_CODEC = StreamCodec.composite(
+            UUIDUtil.STREAM_CODEC, ConveyorItem::getId,
+            ItemStack.STREAM_CODEC, ConveyorItem::getStack,
+            BlockPos.STREAM_CODEC, ConveyorItem::getPosition,
+            ByteBufCodecs.INT, ConveyorItem::getProgress,
+            ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedOutputId,
+            ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedAnchorRouteId,
+            (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
+                var item = new ConveyorItem(id);
+                item.setStack(stack);
+                item.setPosition(position);
+                item.setProgress(progress);
+                item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
+                item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
+                return item;
+            }
+    );
+
+    private final UUID id;
+    private ItemStack stack;
+    private BlockPos position;
+    private int progress;
+    @Nullable
+    private String selectedOutputId;
+    @Nullable
+    private String selectedAnchorRouteId;
+
+    public ConveyorItem(UUID id) {
+        this.id = id;
+    }
+
+    public ConveyorItem(BlockPos position, ItemStack stack) {
+        this(UUID.randomUUID());
+        this.position = position;
+        this.stack = stack;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public ItemStack getStack() {
+        return stack;
+    }
+
+    public void setStack(ItemStack stack) {
+        this.stack = stack;
+    }
+
+    public BlockPos getPosition() {
+        return position;
+    }
+
+    public void setPosition(BlockPos position) {
+        this.position = position;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    @Nullable
+    public String getSelectedOutputId() {
+        return selectedOutputId;
+    }
+
+    public void setSelectedOutputId(@Nullable String selectedOutputId) {
+        this.selectedOutputId = selectedOutputId;
+    }
+
+    @Nullable
+    public String getSelectedAnchorRouteId() {
+        return selectedAnchorRouteId;
+    }
+
+    public void setSelectedAnchorRouteId(@Nullable String selectedAnchorRouteId) {
+        this.selectedAnchorRouteId = selectedAnchorRouteId;
+    }
+
+    public ConveyorItem copy() {
+        var item = new ConveyorItem(this.id);
+        item.setStack(this.stack.copy());
+        item.setPosition(this.position);
+        item.setProgress(this.progress);
+        item.setSelectedOutputId(this.selectedOutputId);
+        item.setSelectedAnchorRouteId(this.selectedAnchorRouteId);
+        return item;
+    }
+
+    private String getSerializedSelectedOutputId() {
+        return this.selectedOutputId == null ? "" : this.selectedOutputId;
+    }
+
+    private String getSerializedSelectedAnchorRouteId() {
+        return this.selectedAnchorRouteId == null ? "" : this.selectedAnchorRouteId;
+    }
+
+    @Nullable
+    private static String deserializeSelectedRouteId(String selectedRouteId) {
+        return selectedRouteId.isEmpty() ? null : selectedRouteId;
+    }
+}

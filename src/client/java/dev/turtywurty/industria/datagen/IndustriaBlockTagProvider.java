@@ -26,5 +26,22 @@ public class IndustriaBlockTagProvider extends FabricTagsProvider.BlockTagsProvi
                 .add(BlockInit.ELITE_BATTERY)
                 .add(BlockInit.ULTIMATE_BATTERY)
                 .add(BlockInit.CREATIVE_BATTERY);
+
+        valueLookupBuilder(TagList.Blocks.CONVEYORS)
+                .add(BlockInit.CONVEYOR)
+                .add(BlockInit.SPLITTER_CONVEYOR)
+                .add(BlockInit.MERGER_CONVEYOR)
+                .add(BlockInit.ALTERNATOR_CONVEYOR)
+                .add(BlockInit.FEEDER_CONVEYOR)
+                .add(BlockInit.HATCH_CONVEYOR)
+                .add(BlockInit.SIDE_INJECTOR_CONVEYOR)
+                .add(BlockInit.LADDER_CONVEYOR)
+                .add(BlockInit.FILTER_CONVEYOR)
+                .add(BlockInit.MAGNETIC_CONVEYOR)
+                .add(BlockInit.DETECTOR_CONVEYOR)
+                .add(BlockInit.DROP_CHUTE_CONVEYOR)
+                .add(BlockInit.COUNT_CONVEYOR)
+                .add(BlockInit.DELAY_CONVEYOR)
+                .add(BlockInit.CONTAINMENT_CONVEYOR);
     }
 }

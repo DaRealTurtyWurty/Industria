@@ -2,9 +2,11 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.command.ConfigCommand;
+import dev.turtywurty.industria.command.ResetConveyorNetworksCommand;
 import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.config.ServerConfig;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
+import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
@@ -23,6 +25,7 @@ public class EventsInit {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             sender.sendPacket(WorldFluidPocketsState.createSyncPacket(handler.player.level()));
             WorldPipeNetworks.syncToClient(sender, handler.player.level());
+            LevelConveyorNetworks.syncToClient(sender, handler.player.level());
         });
 
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
@@ -54,14 +57,22 @@ public class EventsInit {
                             .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                             .then(Commands.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
             );
+
+            dispatcher.register(
+                    Commands.literal(Industria.MOD_ID)
+                            .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                            .then(Commands.literal("reset_conveyor_networks").executes(ResetConveyorNetworksCommand::execute).build())
+            );
         });
 
-        ServerTickEvents.START_LEVEL_TICK.register(world -> {
+        ServerTickEvents.START_LEVEL_TICK.register(level -> {
             AutoMultiblockBlock.SHAPE_CACHE.clear();
 
-            for (PipeNetworkManager<?, ?> manager : WorldPipeNetworks.getOrCreate(world).getPipeNetworkManagers()) {
-                manager.tick(world);
+            for (PipeNetworkManager<?, ?> manager : WorldPipeNetworks.getOrCreate(level).getPipeNetworkManagers()) {
+                manager.tick(level);
             }
+
+            LevelConveyorNetworks.getOrCreate(level).getNetworkManager().tick(level);
         });
 
         ServerTickEvents.END_LEVEL_TICK.register(world -> {

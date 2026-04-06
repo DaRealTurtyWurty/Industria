@@ -18,6 +18,7 @@ public class TagList {
 
     public static class Blocks {
         public static final TagKey<Block> BATTERY_BLOCKS = of("battery_blocks");
+        public static final TagKey<Block> CONVEYORS = of("conveyors");
 
         public static TagKey<Block> of(String id) {
             return TagKey.create(Registries.BLOCK, Industria.id(id));

@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
+import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
 import net.minecraft.core.Registry;
@@ -104,10 +105,10 @@ public class BlockInit {
 
     public static final Block NICKEL_BLOCK = registerWithItemCopy("nickel_block",
             Block::new, Blocks.IRON_BLOCK);
-    
+
     public static final Block IRIDIUM_ORE = registerWithItemCopy("iridium_ore",
             Block::new, Blocks.IRON_ORE);
-    
+
     public static final Block DEEPSLATE_IRIDIUM_ORE = registerWithItemCopy("deepslate_iridium_ore",
             Block::new, Blocks.DEEPSLATE_IRON_ORE);
 
@@ -131,7 +132,7 @@ public class BlockInit {
 
     public static final Block END_PYRITE_ORE = registerWithItemCopy("end_pyrite_ore",
             settings -> new DropExperienceBlock(UniformInt.of(4, 6),
-                    settings.lightLevel(value -> 7).noOcclusion()), Blocks.END_STONE);
+                    settings.lightLevel(_ -> 7).noOcclusion()), Blocks.END_STONE);
 
     public static final Block PYRITE_BLOCK = registerWithItemCopy("pyrite_block",
             Block::new, Blocks.IRON_BLOCK);
@@ -141,13 +142,13 @@ public class BlockInit {
 
     public static final DropExperienceBlock QUARTZ_ORE = registerWithItemCopy("quartz_ore",
             settings -> new DropExperienceBlock(UniformInt.of(2, 5), settings), Blocks.NETHER_QUARTZ_ORE,
-            settings -> settings.sound(SoundType.STONE).lightLevel(value -> 3).strength(3.0F).mapColor(MapColor.STONE));
+            settings -> settings.sound(SoundType.STONE).lightLevel(_ -> 3).strength(3.0F).mapColor(MapColor.STONE));
 
     public static final DropExperienceBlock DEEPSLATE_QUARTZ_ORE = registerWithItemCopy("deepslate_quartz_ore",
             settings -> new DropExperienceBlock(UniformInt.of(2, 5),
-                    settings.lightLevel(value -> 3).noOcclusion()), Blocks.NETHER_QUARTZ_ORE,
-            settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(value -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE));
-    
+                    settings.lightLevel(_ -> 3).noOcclusion()), Blocks.NETHER_QUARTZ_ORE,
+            settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(_ -> 3).strength(4.5F, 3.0F).mapColor(MapColor.DEEPSLATE));
+
     public static final AlloyFurnaceBlock ALLOY_FURNACE = registerWithItemCopy("alloy_furnace",
             AlloyFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
@@ -176,7 +177,7 @@ public class BlockInit {
             SolarPanelBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final CrusherBlock CRUSHER = registerWithItemCopy("crusher",
-            CrusherBlock::new, Blocks.FURNACE, settings -> settings.lightLevel(value -> 0).noOcclusion());
+            CrusherBlock::new, Blocks.FURNACE, settings -> settings.lightLevel(_ -> 0).noOcclusion());
 
     public static final WindTurbineBlock WIND_TURBINE = registerWithItemCopy("wind_turbine",
             WindTurbineBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
@@ -264,6 +265,66 @@ public class BlockInit {
 
     public static final ArcFurnaceBlock ARC_FURNACE = registerWithItemCopy("arc_furnace",
             ArcFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
+
+    public static final BasicConveyorBlock CONVEYOR = registerWithItemCopy("conveyor",
+            BasicConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final SplitterConveyorBlock SPLITTER_CONVEYOR = registerWithItemCopy("splitter_conveyor",
+            SplitterConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final MergerConveyorBlock MERGER_CONVEYOR = registerWithItemCopy("merger_conveyor",
+            MergerConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final AlternatorConveyorBlock ALTERNATOR_CONVEYOR = registerWithItemCopy("alternator_conveyor",
+            AlternatorConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final FeederConveyorBlock FEEDER_CONVEYOR = registerWithItemCopy("feeder_conveyor",
+            FeederConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final HatchConveyorBlock HATCH_CONVEYOR = registerWithItemCopy("hatch_conveyor",
+            HatchConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final SideInjectorConveyorBlock SIDE_INJECTOR_CONVEYOR = registerWithItemCopy("side_injector_conveyor",
+            SideInjectorConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final LadderConveyorBlock LADDER_CONVEYOR = registerWithItemCopy("ladder_conveyor",
+            LadderConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final FilterConveyorBlock FILTER_CONVEYOR = registerWithItemCopy("filter_conveyor",
+            FilterConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final MagneticConveyorBlock MAGNETIC_CONVEYOR = registerWithItemCopy("magnetic_conveyor",
+            MagneticConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final DetectorConveyorBlock DETECTOR_CONVEYOR = registerWithItemCopy("detector_conveyor",
+            DetectorConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final DropChuteConveyorBlock DROP_CHUTE_CONVEYOR = registerWithItemCopy("drop_chute_conveyor",
+            DropChuteConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final CountConveyorBlock COUNT_CONVEYOR = registerWithItemCopy("count_conveyor",
+            CountConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final DelayConveyorBlock DELAY_CONVEYOR = registerWithItemCopy("delay_conveyor",
+            DelayConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
+
+    public static final ContainmentConveyorBlock CONTAINMENT_CONVEYOR = registerWithItemCopy("containment_conveyor",
+            ContainmentConveyorBlock::new, Blocks.IRON_BLOCK,
+            settings -> settings.noOcclusion().isRedstoneConductor(Blocks::never));
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(

@@ -11,7 +11,7 @@ import dev.turtywurty.industria.init.RecipeBookCategoryInit;
 import dev.turtywurty.industria.init.RecipeSerializerInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
-import dev.turtywurty.industria.util.ExtraPacketCodecs;
+import dev.turtywurty.industria.util.ExtraStreamCodecs;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -127,7 +127,7 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
             Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature)
     ).apply(instance, ElectrolyzerRecipe::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> STREAM_CODEC = ExtraPacketCodecs.tuple(
+    public static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> STREAM_CODEC = ExtraStreamCodecs.tuple(
             IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::input,
             IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::anode,
             IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::cathode,
@@ -165,7 +165,7 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
                 Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipeDisplay::temperature)
         ).apply(instance, ElectrolyzerRecipeDisplay::new));
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipeDisplay> STREAM_CODEC = ExtraPacketCodecs.tuple(
+        private static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipeDisplay> STREAM_CODEC = ExtraStreamCodecs.tuple(
                 SlotDisplay.STREAM_CODEC, ElectrolyzerRecipeDisplay::input,
                 SlotDisplay.STREAM_CODEC, ElectrolyzerRecipeDisplay::anode,
                 SlotDisplay.STREAM_CODEC, ElectrolyzerRecipeDisplay::cathode,

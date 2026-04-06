@@ -2,10 +2,10 @@ package dev.turtywurty.industria.data;
 
 import dev.turtywurty.industria.init.PipeNetworkManagerTypeInit;
 import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.network.AddPipeNetworkPayload;
-import dev.turtywurty.industria.network.ModifyPipeNetworkPayload;
-import dev.turtywurty.industria.network.RemovePipeNetworkPayload;
-import dev.turtywurty.industria.network.SyncPipeNetworkManagerPayload;
+import dev.turtywurty.industria.network.pipe.AddPipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.ModifyPipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.RemovePipeNetworkPayload;
+import dev.turtywurty.industria.network.pipe.SyncPipeNetworkManagerPayload;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.pipe.PipeNetworkManagerType;
