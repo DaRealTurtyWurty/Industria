@@ -41,6 +41,7 @@ replay_*.log
 
 src/main/generated/.cache
 mc_source/
+.codex
 
 # railroad
 .railroad/
