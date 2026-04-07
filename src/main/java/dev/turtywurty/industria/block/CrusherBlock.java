@@ -42,12 +42,12 @@ public class CrusherBlock extends IndustriaBlock {
 
     @Override
     public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
-        if(world.getBlockEntity(pos) instanceof CrusherBlockEntity blockEntity) {
-            if(blockEntity.getProgress() <= 0)
+        if (world.getBlockEntity(pos) instanceof CrusherBlockEntity blockEntity) {
+            if (blockEntity.getProgress() <= 0)
                 return;
 
             ItemStack stack = blockEntity.getWrappedContainerStorage().getInventory(CrusherBlockEntity.INPUT_SLOT).getItem(0);
-            if(stack.isEmpty())
+            if (stack.isEmpty())
                 return;
 
             var particle = new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(stack));

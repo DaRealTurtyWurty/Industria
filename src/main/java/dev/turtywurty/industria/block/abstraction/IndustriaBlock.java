@@ -36,11 +36,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -63,19 +59,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
     public final BiPredicate<LevelReader, BlockPos> canExistAt;
     public final Map<Direction, VoxelShape> cachedDirectionalShapes;
     public final boolean dropContentsOnBreak;
-
-    private static @Nullable BlockProperties pendingProperties() {
-        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
-        return pendingProperties.isEmpty() ? null : pendingProperties.peek();
-    }
-
-    private static void popPendingProperties() {
-        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
-        pendingProperties.pop();
-        if (pendingProperties.isEmpty()) {
-            PENDING_PROPERTIES.remove();
-        }
-    }
 
     @SuppressWarnings("unchecked")
     public IndustriaBlock(Properties settings, BlockProperties properties) {
@@ -118,6 +101,19 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
         BlockState state = this.stateProperties.applyDefaults(this.defaultBlockState());
         registerDefaultState(state);
+    }
+
+    private static @Nullable BlockProperties pendingProperties() {
+        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
+        return pendingProperties.isEmpty() ? null : pendingProperties.peek();
+    }
+
+    private static void popPendingProperties() {
+        Deque<BlockProperties> pendingProperties = PENDING_PROPERTIES.get();
+        pendingProperties.pop();
+        if (pendingProperties.isEmpty()) {
+            PENDING_PROPERTIES.remove();
+        }
     }
 
     @Override
@@ -251,7 +247,24 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 : super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
+    @FunctionalInterface
+    public interface BlockEntityFactory<T extends BlockEntity> {
+        T create(BlockPos pos, BlockState state);
+    }
+
+    @FunctionalInterface
+    public interface BlockEntityTickerFactory<T extends BlockEntity> {
+        BlockEntityTicker<T> create(Level world, BlockState state, BlockEntityType<?> type);
+    }
+
+    @FunctionalInterface
+    public interface ShapeFactory {
+        VoxelShape create(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context);
+    }
+
     public static class BlockProperties {
+        private final StateProperties stateProperties = new StateProperties();
+        private final Map<Direction, VoxelShape> cachedDirectionalShapes = new HashMap<>();
         private boolean placeFacingOpposite = true;
         private BlockBlockEntityProperties<?> blockEntityProperties;
         private boolean hasComparatorOutput = false;
@@ -260,9 +273,28 @@ public class IndustriaBlock extends Block implements EntityBlock {
         private RenderShape renderType = RenderShape.MODEL;
         private ShapeFactory shapeFactory =
                 (state, world, pos, context) -> Shapes.block();
-        private final StateProperties stateProperties = new StateProperties();
         private BiPredicate<LevelReader, BlockPos> canExistAt = (world, pos) -> true;
-        private final Map<Direction, VoxelShape> cachedDirectionalShapes = new HashMap<>();
+
+        public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
+            for (final Direction direction : Direction.values()) {
+                shapeCache.put(direction, calculateShape(direction, shape));
+            }
+        }
+
+        public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
+            final VoxelShape[] buffer = {shape, Shapes.empty()};
+
+            final int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
+            for (int i = 0; i < times; i++) {
+                buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                        buffer[1] = Shapes.or(buffer[1],
+                                Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+                buffer[0] = buffer[1];
+                buffer[1] = Shapes.empty();
+            }
+
+            return buffer[0];
+        }
 
         public BlockProperties hasHorizontalFacing() {
             return hasHorizontalFacing(true);
@@ -419,27 +451,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
             return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
         }
 
-        public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
-            for (final Direction direction : Direction.values()) {
-                shapeCache.put(direction, calculateShape(direction, shape));
-            }
-        }
-
-        public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
-            final VoxelShape[] buffer = {shape, Shapes.empty()};
-
-            final int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
-            for (int i = 0; i < times; i++) {
-                buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
-                        buffer[1] = Shapes.or(buffer[1],
-                                Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
-                buffer[0] = buffer[1];
-                buffer[1] = Shapes.empty();
-            }
-
-            return buffer[0];
-        }
-
         public static class BlockBlockEntityProperties<T extends BlockEntity> {
             public final Supplier<BlockEntityType<T>> blockEntityTypeSupplier;
             public boolean shouldTick = false;
@@ -516,20 +527,5 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 }
             }
         }
-    }
-
-    @FunctionalInterface
-    public interface BlockEntityFactory<T extends BlockEntity> {
-        T create(BlockPos pos, BlockState state);
-    }
-
-    @FunctionalInterface
-    public interface BlockEntityTickerFactory<T extends BlockEntity> {
-        BlockEntityTicker<T> create(Level world, BlockState state, BlockEntityType<?> type);
-    }
-
-    @FunctionalInterface
-    public interface ShapeFactory {
-        VoxelShape create(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context);
     }
 }

@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.blockentity.util.fluid;
 
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,7 +35,7 @@ public class SyncingFluidStorage extends SingleFluidStorage implements SyncableS
         if (this.isDirty && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
-            if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {
+            if (this.blockEntity instanceof UpdateableBlockEntityLike updatableBlockEntity) {
                 updatableBlockEntity.update();
             } else {
                 this.blockEntity.setChanged();

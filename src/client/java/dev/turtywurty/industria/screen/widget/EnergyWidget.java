@@ -9,6 +9,7 @@ import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.network.chat.Component;
 import team.reborn.energy.api.EnergyStorage;
 
+import java.util.Locale;
 import java.util.function.Consumer;
 
 // TODO: Use texture for the energy bar instead of a solid color fill
@@ -33,7 +34,7 @@ public class EnergyWidget implements Renderable, LayoutElement {
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         long currentEnergy = this.energyStorage.getAmount();
         long maxEnergy = this.energyStorage.getCapacity();
-        long energy = Math.min(maxEnergy, Math.max(0, currentEnergy));
+        long energy = Math.clamp(currentEnergy, 0, maxEnergy);
         float percentage = (float) energy / maxEnergy;
 
         int fillX = this.x, fillY = this.y, fillWidth = this.width, fillHeight = this.height;
@@ -52,8 +53,12 @@ public class EnergyWidget implements Renderable, LayoutElement {
     }
 
     protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        boolean showFullAmount = Minecraft.getInstance().hasShiftDown();
+        String amount = showFullAmount ? Long.toString(this.energyStorage.getAmount()) : formatCompact(this.energyStorage.getAmount());
+        String capacity = showFullAmount ? Long.toString(this.energyStorage.getCapacity()) : formatCompact(this.energyStorage.getCapacity());
+
         context.setTooltipForNextFrame(Minecraft.getInstance().font,
-                Component.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"),
+                Component.literal(amount + " / " + capacity + " FE"),
                 mouseX, mouseY);
     }
 
@@ -100,7 +105,30 @@ public class EnergyWidget implements Renderable, LayoutElement {
     }
 
     @Override
-    public void visitWidgets(Consumer<AbstractWidget> consumer) {}
+    public void visitWidgets(Consumer<AbstractWidget> consumer) {
+    }
+
+    private static String formatCompact(long value) {
+        long absValue = Math.abs(value);
+        if (absValue < 1000)
+            return Long.toString(value);
+
+        String[] suffixes = {"k", "m", "b", "t", "q"};
+        double compactValue = value;
+        int suffixIndex = -1;
+        while (Math.abs(compactValue) >= 1000 && suffixIndex < suffixes.length - 1) {
+            compactValue /= 1000.0;
+            suffixIndex++;
+        }
+
+        if (Math.abs(compactValue) >= 100 || compactValue == Math.rint(compactValue))
+            return String.format(Locale.ROOT, "%.0f%s", compactValue, suffixes[suffixIndex]);
+
+        if (Math.abs(compactValue) >= 10)
+            return String.format(Locale.ROOT, "%.1f%s", compactValue, suffixes[suffixIndex]);
+
+        return String.format(Locale.ROOT, "%.2f%s", compactValue, suffixes[suffixIndex]);
+    }
 
     private static boolean isPointWithinBounds(int x, int y, int width, int height, int pointX, int pointY) {
         return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;

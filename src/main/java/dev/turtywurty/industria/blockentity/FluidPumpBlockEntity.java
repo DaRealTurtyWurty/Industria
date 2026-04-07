@@ -183,7 +183,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     public SingleFluidStorage getFluidProvider(Direction side) {
-            return this.wrappedFluidStorage.getStorage(side);
+        return this.wrappedFluidStorage.getStorage(side);
     }
 
     public EnergyStorage getEnergyProvider(Direction side) {

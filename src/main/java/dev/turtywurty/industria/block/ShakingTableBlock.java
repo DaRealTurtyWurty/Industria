@@ -2,7 +2,6 @@ package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -49,7 +48,6 @@ public class ShakingTableBlock extends IndustriaBlock {
                 .useRotatedShapes(VOXEL_SHAPE)
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.SHAKING_TABLE)
                         .shouldTick()
-                        .multiblockProperties(MultiblockTypeInit.SHAKING_TABLE)
-                        .build()));
+                ));
     }
 }

@@ -118,6 +118,12 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.ELECTROLYZER, "Electrolyzer");
         addText(translationBuilder, ElectrolyzerBlockEntity.TITLE, "Electrolyzer");
 
+        translationBuilder.add(BlockInit.ARC_FURNACE, "Arc Furnace");
+        addText(translationBuilder, ArcFurnaceBlockEntity.TITLE, "Arc Furnace");
+        addTextEnum(translationBuilder, ArcFurnaceBlockEntity.Mode.BLASTING, "Blasting");
+        addTextEnum(translationBuilder, ArcFurnaceBlockEntity.Mode.ALLOYING, "Alloying");
+        addTextEnum(translationBuilder, ArcFurnaceBlockEntity.Mode.RECYCLING, "Recycling");
+
         translationBuilder.add(BlockInit.FLUID_TANK, "Fluid Tank");
         addText(translationBuilder, FluidTankBlockEntity.TITLE, "Fluid Tank");
 

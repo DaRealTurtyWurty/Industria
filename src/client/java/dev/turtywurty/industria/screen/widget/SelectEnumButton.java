@@ -77,6 +77,10 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
         return this.value;
     }
 
+    public void setValue(T value) {
+        this.value = value;
+    }
+
     public boolean isHoveredLastFrame() {
         return this.hoveredLastFrame;
     }
@@ -113,7 +117,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
         GlStateManager._enableBlend(); // TODO: Come back and check if this is okay?
         GlStateManager._enableDepthTest();
         ScreenUtils.drawGuiTexture(context, SPRITES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height, color);
-        ScreenUtils.drawTexture(context, this.textureMap.get(this.value), getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16, color);
+        renderValue(context, this.value, getX(), getY(), color);
 
         if (this.hoveredLastFrame) {
             int startX = getSelectionLeft();
@@ -127,7 +131,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
                 int y = startY + (this.height * row);
 
                 ScreenUtils.drawTexture(context, current == this.value ? HOVERED_TEXTURE : PLAIN_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height, color);
-                ScreenUtils.drawTexture(context, this.textureMap.get(current), x + 2, y + 2, 0, 0, 16, 16, 16, 16, color);
+                renderValue(context, current, x, y, color);
 
                 if (this.disabledValues.contains(current)) {
                     ScreenUtils.drawTexture(context, DISABLED_OVERLAY_TEXTURE, x, y, 0, 0, this.width, this.height, this.width, this.height, color);
@@ -196,5 +200,19 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
 
     private void setActiveness() {
         this.active = this.disabledValues.size() != this.value.getValues().length;
+    }
+
+    private void renderValue(GuiGraphicsExtractor context, T value, int x, int y, int color) {
+        Identifier texture = this.textureMap.get(value);
+        if (texture != null) {
+            ScreenUtils.drawTexture(context, texture, x + 2, y + 2, 0, 0, 16, 16, 16, 16, color);
+            return;
+        }
+
+        String text = value.getAsText().getString();
+        String displayText = text.length() <= 3 ? text : text.substring(0, 3);
+        int textX = x + ((this.width - this.textRenderer.width(displayText)) / 2);
+        int textY = y + ((this.height - this.textRenderer.lineHeight) / 2);
+        context.text(this.textRenderer, displayText, textX, textY, color, false);
     }
 }

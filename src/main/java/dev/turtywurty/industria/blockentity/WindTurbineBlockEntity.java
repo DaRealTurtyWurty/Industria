@@ -44,7 +44,7 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
     private ImprovedNoise windNoise;
     private boolean canReceiveWind = true;
 
-    private float propellerRotation = 0F; // Client side only
+    private final float propellerRotation = 0F; // Client side only
 
     public WindTurbineBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.WIND_TURBINE, BlockEntityTypeInit.WIND_TURBINE, pos, state);

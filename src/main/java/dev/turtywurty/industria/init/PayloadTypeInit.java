@@ -28,6 +28,7 @@ public class PayloadTypeInit {
     }
 
     private static void registerC2S() {
+        registerServerbound(ArcFurnaceSetModePayload.ID, ArcFurnaceSetModePayload.CODEC);
         registerServerbound(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC);
         registerServerbound(ChangeDrillingPayload.ID, ChangeDrillingPayload.CODEC);
         registerServerbound(RetractDrillPayload.ID, RetractDrillPayload.CODEC);

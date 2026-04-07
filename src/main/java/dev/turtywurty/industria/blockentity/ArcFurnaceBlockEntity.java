@@ -6,7 +6,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
@@ -14,91 +13,80 @@ import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.gas.InputGasStorage;
 import dev.turtywurty.industria.blockentity.util.gas.WrappedGasStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
+import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
+import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
+import dev.turtywurty.industria.recipe.RecyclingRecipe;
 import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
+import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.base.SimpleEnergyStorage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
-public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoMultiblockable, SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("arc_furnace");
 
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.x() == 3)
-                    .on(LocalDirection.LEFT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.z() == 3)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.output(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.x() == 0)
-                    .on(LocalDirection.RIGHT)
-                    .types(PortType.input(TransferType.ENERGY), PortType.input(TransferType.FLUID), PortType.input(TransferType.GAS))
-                    .build()
-    );
+    private static final int INPUT_PORT_X = 2;
+    private static final int OUTPUT_PORT_Z = 2;
+    private static final int AUX_INPUT_PORT_X = -1;
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedGasStorage<SingleGasStorage> wrappedGasStorage = new WrappedGasStorage<>();
 
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
-
-    private Mode mode = Mode.SMELTING;
-    private ResourceKey<Recipe<?>> currentRecipeId;
-
-    private int progress, maxProgress;
-
+    private final RecipeManager.CachedCheck<SingleRecipeInput, BlastingRecipe> blastingMatchGetter;
+    private final RecipeManager.CachedCheck<RecipeSimpleInventory, AlloyFurnaceRecipe> alloyingMatchGetter;
+    private final RecipeManager.CachedCheck<SingleRecipeInput, RecyclingRecipe> recyclingMatchGetter;
+    private final List<ResourceKey<Recipe<?>>> currentRecipeIds = new ArrayList<>();
+    private final NonNullList<ItemStack> bufferedOutputs = NonNullList.withSize(9, ItemStack.EMPTY);
+    private final int[] progress = new int[9], maxProgress = new int[9];
+    private Mode mode = Mode.BLASTING;
     private final ContainerData propertyDelegate = new ContainerData() {
         @Override
         public int getCount() {
-            return 3; // mode, progress, maxProgress
+            return 19;
         }
 
         @Override
         public int get(int index) {
             return switch (index) {
                 case 0 -> mode.ordinal();
-                case 1 -> progress;
-                case 2 -> maxProgress;
+                case 1, 2, 3, 4, 5, 6, 7, 8, 9 -> progress[index - 1];
+                case 10, 11, 12, 13, 14, 15, 16, 17, 18 -> maxProgress[index - 10];
                 default -> throw new IndexOutOfBoundsException("Invalid index: " + index);
             };
         }
@@ -107,8 +95,8 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
         public void set(int index, int value) {
             switch (index) {
                 case 0 -> mode = Mode.values()[value];
-                case 1 -> progress = value;
-                case 2 -> maxProgress = value;
+                case 1, 2, 3, 4, 5, 6, 7, 8, 9 -> progress[index - 1] = value;
+                case 10, 11, 12, 13, 14, 15, 16, 17, 18 -> maxProgress[index - 10] = value;
                 default -> throw new IndexOutOfBoundsException("Invalid index: " + index);
             }
         }
@@ -119,25 +107,18 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
 
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 9), Direction.WEST);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.SOUTH);
-        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000_000, 1_000_000, 0), Direction.EAST);
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000_000, 1_000_000, 0), Direction.EAST);
         this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.EAST);
         this.wrappedGasStorage.addStorage(new InputGasStorage(this, FluidConstants.BUCKET * 5), Direction.EAST);
-    }
 
-    @Override
-    public Block getBlock() {
-        return BlockInit.ARC_FURNACE;
+        this.blastingMatchGetter = RecipeManager.createCheck(RecipeType.BLASTING);
+        this.alloyingMatchGetter = RecipeManager.createCheck(RecipeTypeInit.ALLOY_FURNACE);
+        this.recyclingMatchGetter = RecipeManager.createCheck(RecipeTypeInit.RECYCLING);
     }
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        SyncableStorage inputInventory = getInputInventory();
-        SyncableStorage outputInventory = getOutputInventory();
-        SyncableStorage energyStorage = getEnergyStorage();
-        SyncableStorage fluidStorage = getFluidStorage();
-        SyncableStorage gasStorage = getGasStorage();
-
-        return List.of(inputInventory, outputInventory, energyStorage, fluidStorage, gasStorage);
+        return List.of(getInputInventory(), getOutputInventory(), getEnergyStorage(), getFluidStorage(), getGasStorage());
     }
 
     @Override
@@ -145,48 +126,263 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
         if (level == null || level.isClientSide())
             return;
 
+        if (hasBufferedOutput()) {
+            attemptOutputBufferInsertion();
+            return;
+        }
 
+        SimpleEnergyStorage energyStorage = getEnergyStorage();
+        if (energyStorage.getAmount() < mode.getEnergyCostPerTick())
+            return;
+
+        List<ResourceKey<Recipe<?>>> matchingRecipeIds = calculateCurrentRecipeIds();
+        if (matchingRecipeIds.isEmpty()) {
+            this.currentRecipeIds.clear();
+            for (int index = 0; index < this.progress.length; index++) {
+                if (this.progress[index] > 0) {
+                    this.progress[index]--;
+                    if (this.progress[index] <= 0) {
+                        this.maxProgress[index] = 0;
+                    }
+
+                    update();
+                }
+            }
+
+            return;
+        }
+
+        for (int index = 0; index < matchingRecipeIds.size(); index++) {
+            if (index > 0 && this.mode == Mode.ALLOYING)
+                break;
+
+            handleRecipeProcessing(matchingRecipeIds, index, energyStorage);
+        }
     }
 
-    @Override
-    public WrappedContainerStorage<?> getWrappedContainerStorage() {
-        return this.wrappedContainerStorage;
-    }
+    @SuppressWarnings("DataFlowIssue") // We already check when this method is called if the server level is null
+    private void handleRecipeProcessing(List<ResourceKey<Recipe<?>>> matchingRecipeIds, int index, SimpleEnergyStorage energyStorage) {
+        ResourceKey<Recipe<?>> recipeId = matchingRecipeIds.get(index);
+        if (recipeId == null)
+            return;
 
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.ARC_FURNACE;
-    }
+        var serverLevel = (ServerLevel) level;
+        SyncingSimpleInventory inputInventory = getInputInventory();
+        var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(index));
+        Optional<? extends Recipe<?>> recipeOpt = (switch (mode) {
+            case BLASTING -> this.blastingMatchGetter.getRecipeFor(singleRecipeInput, serverLevel);
+            case ALLOYING ->
+                    this.alloyingMatchGetter.getRecipeFor(inputInventory, serverLevel).stream().filter(r -> r.id().equals(recipeId)).findFirst();
+            case RECYCLING -> this.recyclingMatchGetter.getRecipeFor(singleRecipeInput, serverLevel);
+        }).map(RecipeHolder::value);
 
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null)
-            return List.of();
+        if (recipeOpt.isEmpty())
+            return;
 
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-        for (int x = 0; x <= 3; x++) {
-            for (int z = 0; z <= 3; z++) {
-                for (int y = 0; y <= 4; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
+        Recipe<?> recipe = recipeOpt.get();
+        if (this.currentRecipeIds.size() <= index || !this.currentRecipeIds.get(index).equals(recipeId)) {
+            this.currentRecipeIds.add(index, recipeId);
+            this.progress[index] = 0;
+            this.maxProgress[index] = switch (mode) {
+                case BLASTING -> ((BlastingRecipe) recipe).cookingTime() / 2;
+                case ALLOYING -> ((AlloyFurnaceRecipe) recipe).smeltTime() / 2;
+                case RECYCLING -> ((RecyclingRecipe) recipe).processTime() / 2;
+            };
+            update();
+        } else {
+            if (this.progress[index] < this.maxProgress[index]) {
+                energyStorage.amount -= mode.getEnergyCostPerTick();
+                this.progress[index]++;
+                update();
+                return;
+            }
 
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
+            if (this.progress[index] >= this.maxProgress[index]) {
+                List<ItemStack> output = switch (mode) {
+                    case BLASTING -> List.of(((BlastingRecipe) recipe).assemble(singleRecipeInput));
+                    case ALLOYING -> List.of(((AlloyFurnaceRecipe) recipe).assemble(inputInventory));
+                    case RECYCLING -> ((RecyclingRecipe) recipe).assemble(serverLevel.getRandom());
+                };
+
+                for (ItemStack stack : output) {
+                    if (!stack.isEmpty()) {
+                        if (getOutputInventory().canAddItem(stack)) {
+                            getOutputInventory().addItem(stack);
+                        } else {
+                            this.bufferedOutputs.add(stack);
+                        }
                     }
                 }
+
+                switch (mode) {
+                    case BLASTING -> {
+                        ItemStack inputStack = inputInventory.getItem(index);
+                        inputStack.shrink(1);
+                        inputInventory.setItem(index, inputStack);
+                    }
+                    case RECYCLING -> {
+                        ItemStack inputStack = inputInventory.getItem(index);
+                        inputStack.shrink(((RecyclingRecipe) recipe).input().stackData().count());
+                        inputInventory.setItem(index, inputStack);
+                    }
+                    case ALLOYING -> {
+                    } // This is a NO-OP because the recipe itself does this
+                }
+
+                this.progress[index] = 0;
+                update();
+            }
+        }
+    }
+
+    private void attemptOutputBufferInsertion() {
+        SimpleContainer inventory = getOutputInventory();
+
+        List<ItemStack> newBufferedOutputs = new ArrayList<>();
+        for (ItemStack output : this.bufferedOutputs) {
+            if (inventory.canAddItem(output)) {
+                output = inventory.addItem(output);
+                if (!output.isEmpty()) {
+                    newBufferedOutputs.add(output);
+                }
+
+                update();
+            } else {
+                newBufferedOutputs.add(output);
             }
         }
 
-        return invalidPositions.isEmpty() ? positions : List.of();
+        for (int index = 0; index < this.bufferedOutputs.size(); index++) {
+            this.bufferedOutputs.set(index, index < newBufferedOutputs.size() ? newBufferedOutputs.get(index) : ItemStack.EMPTY);
+        }
+    }
+
+    private boolean hasBufferedOutput() {
+        return !this.bufferedOutputs.stream().allMatch(ItemStack::isEmpty);
+    }
+
+    private List<ResourceKey<Recipe<?>>> calculateCurrentRecipeIds() {
+        ServerLevel level = ((ServerLevel) this.level);
+        if (level == null)
+            return Collections.emptyList();
+
+        SyncingSimpleInventory inputInventory = getInputInventory();
+        return switch (this.mode) {
+            case BLASTING -> {
+                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>();
+
+                for (int slot = 0; slot < inputInventory.getContainerSize(); slot++) {
+                    var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(slot));
+                    Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.blastingMatchGetter.getRecipeFor(singleRecipeInput, level)
+                            .map(RecipeHolder::id);
+                    if (recipeKeyOpt.isPresent()) {
+                        recipeIds.add(slot, recipeKeyOpt.get());
+                    }
+                }
+
+                yield recipeIds;
+            }
+            case ALLOYING -> this.alloyingMatchGetter.getRecipeFor(inputInventory, level)
+                    .stream()
+                    .map(RecipeHolder::id)
+                    .toList();
+            case RECYCLING -> {
+                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>();
+
+                for (int slot = 0; slot < inputInventory.getContainerSize(); slot++) {
+                    var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(slot));
+                    Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.recyclingMatchGetter.getRecipeFor(singleRecipeInput, level)
+                            .map(RecipeHolder::id);
+                    if (recipeKeyOpt.isPresent()) {
+                        recipeIds.add(slot, recipeKeyOpt.get());
+                    }
+                }
+
+                yield recipeIds;
+            }
+        };
     }
 
     @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
+
+        view.putString("Mode", this.mode.getSerializedName());
+        view.putIntArray("Progress", this.progress);
+        view.putIntArray("MaxProgress", this.maxProgress);
+
+        if (!this.currentRecipeIds.isEmpty()) {
+            view.store("CurrentRecipeIds", ExtraCodecs.listOf(RECIPE_CODEC), this.currentRecipeIds);
+        }
+
+        if (hasBufferedOutput()) {
+            view.store("BufferedOutputs", ExtraCodecs.listOf(ItemStack.CODEC),
+                    this.bufferedOutputs.stream()
+                            .filter(stack -> !stack.isEmpty())
+                            .toList());
+        }
+
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.putChild(view, "GasTank", this.wrappedGasStorage);
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
+
+        this.mode = view.read("Mode", Codec.STRING).flatMap(Mode::fromStringOptional).orElse(Mode.BLASTING);
+
+        int[] progressArray = view.getIntArray("Progress").orElse(new int[0]);
+        Arrays.setAll(this.progress, index -> index < progressArray.length ? progressArray[index] : 0);
+
+        int[] maxProgressArray = view.getIntArray("MaxProgress").orElse(new int[0]);
+        Arrays.setAll(this.maxProgress, index -> index < maxProgressArray.length ? maxProgressArray[index] : 0);
+
+        this.currentRecipeIds.clear();
+        view.read("CurrentRecipeIds", ExtraCodecs.listOf(RECIPE_CODEC)).ifPresent(this.currentRecipeIds::addAll);
+
+        this.bufferedOutputs.clear();
+        view.read("BufferedOutputs", ExtraCodecs.listOf(ItemStack.CODEC)).ifPresent(buff -> {
+            for (int index = 0; index < Math.min(buff.size(), this.bufferedOutputs.size()); index++) {
+                this.bufferedOutputs.set(index, buff.get(index));
+            }
+        });
+
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
+        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
+        ViewUtils.readChild(view, "GasTank", this.wrappedGasStorage);
+    }
+
+    @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        if (isItemInputPort(localOffset))
+            return this.wrappedContainerStorage.getStorage(Direction.WEST);
+
+        if (isItemOutputPort(localOffset))
+            return this.wrappedContainerStorage.getStorage(Direction.SOUTH);
+
+        return null;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return isAuxInputPort(localOffset) ? getFluidStorage() : null;
+    }
+
+    @Override
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return isAuxInputPort(localOffset) ? getEnergyStorage() : null;
+    }
+
+    @Override
+    public @Nullable SingleGasStorage getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
+        if (isFormed())
+            return isAuxInputPort(getLocalOffsetFromController(worldPos)) ? getGasStorage() : null;
+
+        return side == Direction.EAST ? getGasStorage() : null;
     }
 
     @Override
@@ -205,43 +401,13 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
     }
 
     @Override
-    protected void saveAdditional(ValueOutput view) {
-        super.saveAdditional(view);
-
-        view.putString("Mode", this.mode.getSerializedName());
-        view.putInt("Progress", this.progress);
-        view.putInt("MaxProgress", this.maxProgress);
-
-        if (this.currentRecipeId != null) {
-            view.store("CurrentRecipeId", RECIPE_CODEC, this.currentRecipeId);
-        }
-
-        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
-        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
-        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
-        ViewUtils.putChild(view, "GasTank", this.wrappedGasStorage);
-        Multiblockable.write(this, view);
+    public Block getBlock() {
+        return BlockInit.ARC_FURNACE;
     }
 
     @Override
-    protected void loadAdditional(ValueInput view) {
-        super.loadAdditional(view);
-
-        this.mode = view.read("Mode", Codec.STRING).flatMap(Mode::fromStringOptional).orElse(Mode.SMELTING);
-        this.progress = view.getIntOr("Progress", 0);
-        this.maxProgress = view.getIntOr("MaxProgress", 0);
-        this.currentRecipeId = view.read("CurrentRecipeId", RECIPE_CODEC).orElse(null);
-
-        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
-        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
-        ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
-        ViewUtils.readChild(view, "GasTank", this.wrappedGasStorage);
-        Multiblockable.read(this, view);
-    }
-
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
     }
 
     public ContainerStorage getInventoryProvider(Direction side) {
@@ -280,36 +446,47 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
         return (InputGasStorage) getGasProvider(Direction.EAST);
     }
 
+    public Mode getMode() {
+        return this.mode;
+    }
+
     public void setMode(Mode mode) {
-        if (this.level == null || this.level.isClientSide())
+        if (this.mode == mode) {
             return;
+        }
 
         this.mode = mode;
+        this.currentRecipeIds.clear();
+        Arrays.fill(this.progress, 0);
+        Arrays.fill(this.maxProgress, 0);
         update();
     }
 
-    public enum Mode implements StringRepresentable {
-        SMELTING,
-        ALLOYING,
-        RECYCLING;
+    private boolean isItemInputPort(BlockPos localOffset) {
+        return localOffset.getX() == INPUT_PORT_X;
+    }
+
+    private boolean isItemOutputPort(BlockPos localOffset) {
+        return localOffset.getZ() == OUTPUT_PORT_Z;
+    }
+
+    private boolean isAuxInputPort(BlockPos localOffset) {
+        return localOffset.getX() == AUX_INPUT_PORT_X;
+    }
+
+    public enum Mode implements IndustriaEnum<Mode> {
+        BLASTING(10),
+        ALLOYING(20),
+        RECYCLING(30);
 
         private final String name;
+        private final int energyCostPerTick;
+        private final Component text;
 
-        Mode() {
+        Mode(int energyCostPerTick) {
             this.name = name().toLowerCase(Locale.ROOT);
-        }
-
-        Mode(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getSerializedName() {
-            return this.name;
-        }
-
-        public String getName() {
-            return name;
+            this.energyCostPerTick = energyCostPerTick;
+            this.text = Component.translatable("industria.arc_furnace.mode." + this.name);
         }
 
         public static Mode fromString(String name) {
@@ -318,15 +495,40 @@ public class ArcFurnaceBlockEntity extends IndustriaBlockEntity implements AutoM
                     return mode;
             }
 
-            throw new IllegalArgumentException("No enum constant " + Mode.class.getCanonicalName() + "." + name);
+            return null;
         }
 
         public static Optional<Mode> fromStringOptional(String name) {
-            try {
-                return Optional.of(fromString(name));
-            } catch (IllegalArgumentException ignored) {
-                return Optional.empty();
-            }
+            return Optional.ofNullable(fromString(name));
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
+        public int getEnergyCostPerTick() {
+            return this.energyCostPerTick;
+        }
+
+        @Override
+        public Mode next() {
+            return values()[(ordinal() + 1) % values().length];
+        }
+
+        @Override
+        public Mode previous() {
+            return values()[(ordinal() - 1 + values().length) % values().length];
+        }
+
+        @Override
+        public Mode[] getValues() {
+            return values();
+        }
+
+        @Override
+        public Component getAsText() {
+            return this.text;
         }
     }
 }

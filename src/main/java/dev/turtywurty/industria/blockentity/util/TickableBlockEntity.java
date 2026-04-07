@@ -5,8 +5,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 
 public interface TickableBlockEntity {
-    void tick();
-
     static <T extends BlockEntity> BlockEntityTicker<T> createTicker(Level world) {
         return !world.isClientSide() ? (world0, blockPos, blockState, blockEntity) -> ((TickableBlockEntity) blockEntity).tick() : null;
     }
@@ -18,4 +16,6 @@ public interface TickableBlockEntity {
             return createTicker(world);
         }
     }
+
+    void tick();
 }

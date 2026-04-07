@@ -4,30 +4,24 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.*;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ClarifierRecipe;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
 import dev.turtywurty.industria.screenhandler.ClarifierScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -49,34 +43,15 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ClarifierBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, AutoMultiblockable, BlockEntityWithGui<BlockPosPayload> {
+public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("clarifier");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 1)
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.FLUID))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.z() == -1 && p.x() == 0)
-                    .on(LocalDirection.FRONT)
-                    .types(PortType.output(TransferType.FLUID))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 1 && p.x() == 0)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.output(TransferType.ITEM))
-                    .build()
-    );
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private ResourceKey<Recipe<?>> currentRecipeId;
     private int progress;
@@ -255,15 +230,10 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
-    }
-
-    @Override
     protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
-        Multiblockable.write(this, view);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
@@ -284,9 +254,9 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
-        Multiblockable.read(this, view);
 
         this.progress = view.getIntOr("Progress", 0);
 
@@ -306,44 +276,6 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.CLARIFIER;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        // 3x3x2 (3 wide, 3 long, 2 high)
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                for (int y = 0; y <= 1; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
-    }
-
-    @Override
     public BlockPosPayload getScreenOpeningData(ServerPlayer player) {
         return new BlockPosPayload(this.worldPosition);
     }
@@ -351,6 +283,23 @@ public class ClarifierBlockEntity extends IndustriaBlockEntity implements Syncab
     @Override
     public Component getDisplayName() {
         return TITLE;
+    }
+
+    @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 && localOffset.getX() == 0 && localOffset.getZ() == 1
+                ? this.wrappedContainerStorage.getStorage(Direction.SOUTH)
+                : null;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        if (localOffset.getY() == 1 && localOffset.getX() == 0 && localOffset.getZ() == 0)
+            return getInputFluidTank();
+
+        return localOffset.getY() == 0 && localOffset.getX() == 0 && localOffset.getZ() == -1
+                ? getOutputFluidTank()
+                : null;
     }
 
     @Override

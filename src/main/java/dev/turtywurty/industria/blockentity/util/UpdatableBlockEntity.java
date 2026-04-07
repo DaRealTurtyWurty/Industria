@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class UpdatableBlockEntity extends BlockEntity {
+public class UpdatableBlockEntity extends BlockEntity implements UpdateableBlockEntityLike {
     protected boolean isDirty = false;
 
     public UpdatableBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

@@ -3,7 +3,7 @@ package dev.turtywurty.industria.blockentity.util.gas;
 import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class SyncingGasStorage extends SingleGasStorage implements SyncableStora
         if (this.isDirty && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
-            if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {
+            if (this.blockEntity instanceof UpdateableBlockEntityLike updatableBlockEntity) {
                 updatableBlockEntity.update();
             } else {
                 this.blockEntity.setChanged();

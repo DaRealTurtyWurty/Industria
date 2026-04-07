@@ -2,7 +2,6 @@ package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -38,6 +37,6 @@ public class ClarifierBlock extends IndustriaBlock {
                         .shouldTick()
                         .rightClickToOpenGui()
                         .dropContentsOnBreak()
-                        .multiblockProperties(MultiblockTypeInit.CLARIFIER).build()));
+                ));
     }
 }

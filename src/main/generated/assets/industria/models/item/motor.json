@@ -1,7 +1,4 @@
 {
-  "textures": {
-    "particle": "industria:block/motor"
-  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [
@@ -92,5 +89,8 @@
         0.0
       ]
     }
+  },
+  "textures": {
+    "particle": "industria:block/motor"
   }
 }

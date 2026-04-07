@@ -7,7 +7,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -24,15 +23,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CentrifugalConcentratorRecipe;
 import dev.turtywurty.industria.recipe.input.CentrifugalConcentratorRecipeInput;
@@ -45,6 +36,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -70,32 +62,18 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
+public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("centrifugal_concentrator");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 0)
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.input(TransferType.ENERGY), PortType.output(TransferType.SLURRY), PortType.output(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 2)
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.FLUID), PortType.output(TransferType.ITEM))
-                    .build()
-    );
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
 
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
     // Render data
     public float bowlRotation = 0.0f;
     private int progress, maxProgress;
@@ -368,7 +346,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
             view.store("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
         }
 
-        Multiblockable.write(this, view);
+        super.saveAdditional(view);
     }
 
     @Override
@@ -383,48 +361,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
-        Multiblockable.read(this, view);
-    }
-
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.CENTRIFUGAL_CONCENTRATOR;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-        for (int x = -1; x < 2; x++) {
-            for (int z = -1; z < 2; z++) {
-                for (int y = 0; y < 3; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
-    }
-
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
+        super.loadAdditional(view);
     }
 
     @Override
@@ -484,6 +421,28 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaBlockEntity imp
 
     public EnergyStorage getEnergyProvider(Direction side) {
         return this.wrappedEnergyStorage.getStorage(side);
+    }
+
+    @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 || localOffset.getY() == 2
+                ? this.wrappedContainerStorage.getCombinedStorage()
+                : null;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 2 ? getInputFluidTank() : null;
+    }
+
+    @Override
+    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
+        return localOffset.getY() == 0 ? getOutputSlurryTank() : null;
+    }
+
+    @Override
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 ? getEnergyStorage() : null;
     }
 
     public int getProgress() {

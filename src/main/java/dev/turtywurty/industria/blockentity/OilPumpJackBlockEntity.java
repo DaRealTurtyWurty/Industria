@@ -3,7 +3,6 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
@@ -12,19 +11,12 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.FluidInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -43,19 +35,11 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, WrappedContainerStorageHolder {
+public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder {
     public static final Component TITLE = Industria.containerTitle("oil_pump_jack");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.z() == -4 && p.y() == 0 && p.x() >= -1 && p.x() <= 2)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.input(TransferType.ENERGY))
-                    .build()
-    );
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedContainerStorage<?> wrappedContainerStorage = new WrappedContainerStorage<>();
-    private final List<BlockPos> machinePositions = new ArrayList<>();
     public float clientRotation;
     public boolean reverseCounterWeights;
     private int ticks;
@@ -186,7 +170,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
 
     @Override
     protected void loadAdditional(ValueInput view) {
-        Multiblockable.read(this, view);
+        super.loadAdditional(view);
         this.wellheadPos = view.read("WellheadPos", BlockPos.CODEC).orElse(null);
         ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
@@ -195,7 +179,7 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
 
     @Override
     protected void saveAdditional(ValueOutput view) {
-        Multiblockable.write(this, view);
+        super.saveAdditional(view);
         if (this.wellheadPos != null) {
             view.store("WellheadPos", BlockPos.CODEC, this.wellheadPos);
         }
@@ -205,126 +189,15 @@ public class OilPumpJackBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.OIL_PUMP_JACK;
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return null;
     }
 
     @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.machinePositions;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(Direction facing) {
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> correctPositions = new ArrayList<>();
-        List<BlockPos> incorrectPositions = new ArrayList<>();
-
-        var mutablePos = new BlockPos.MutableBlockPos();
-        for (int k = 0; k <= 2; k++) {
-            for (int i = -4; i <= 3; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    if (i == 0 && j == 0 && k == 0)
-                        continue;
-
-                    if (i == 3 && j == 0 && k == 2)
-                        continue;
-
-                    // check east and west sides (relative to facing)
-                    if (i == 3 && j != 0 && k == 0) {
-                        BlockPos checkPos = this.worldPosition.relative(facing, i)
-                                .relative(j > 0 ? facing.getCounterClockWise() : facing.getClockWise(), 2);
-
-                        if (isValidPosition(this.level, checkPos)) {
-                            correctPositions.add(checkPos);
-                        } else {
-                            incorrectPositions.add(checkPos);
-                        }
-                    }
-
-                    mutablePos.set(this.worldPosition.relative(facing, i).relative(facing.getCounterClockWise(), j).relative(Direction.UP, k));
-
-                    if (isValidPosition(this.level, mutablePos)) {
-                        correctPositions.add(mutablePos.immutable());
-                    } else {
-                        incorrectPositions.add(mutablePos.immutable());
-                    }
-                }
-            }
-        }
-
-        for (int i = -3; i <= 2; i++) {
-            for (int j = -1; j <= 1; j++) {
-                if (i == -3 && j == 0)
-                    continue;
-
-                mutablePos.set(this.worldPosition.relative(facing, i).relative(facing.getCounterClockWise(), j).relative(Direction.UP, 3));
-                if (isValidPosition(this.level, mutablePos)) {
-                    correctPositions.add(mutablePos.immutable());
-                } else {
-                    incorrectPositions.add(mutablePos.immutable());
-                }
-            }
-        }
-
-        for (int i = -1; i <= 2; i++) {
-            for (int j = 0; j <= 3; j++) {
-                mutablePos.set(this.worldPosition.relative(facing, i).relative(Direction.UP, 4 + j));
-                if (((i == -1 && j < 2) || (i == 2 && j == 0))) {
-                    // check east and west sides (relative to facing)
-                    BlockPos immutablePos = mutablePos.immutable();
-                    BlockPos eastPos = immutablePos.relative(facing.getClockWise());
-                    BlockPos westPos = immutablePos.relative(facing.getCounterClockWise());
-                    if (isValidPosition(this.level, eastPos)) {
-                        correctPositions.add(eastPos);
-                    } else {
-                        incorrectPositions.add(eastPos);
-                    }
-
-                    if (isValidPosition(this.level, westPos)) {
-                        correctPositions.add(westPos);
-                    } else {
-                        incorrectPositions.add(westPos);
-                    }
-                }
-
-                if (isValidPosition(this.level, mutablePos)) {
-                    correctPositions.add(mutablePos.immutable());
-                } else {
-                    incorrectPositions.add(mutablePos.immutable());
-                }
-            }
-        }
-
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j <= 4; j++) {
-                mutablePos.set(this.worldPosition.relative(facing, 4 + i).relative(Direction.UP, 4 + j));
-
-                if (i == 0 && j > 1 && j < 4) {
-                    BlockPos checkPos = mutablePos.relative(facing.getOpposite());
-                    if (isValidPosition(this.level, checkPos)) {
-                        correctPositions.add(checkPos);
-                    } else {
-                        incorrectPositions.add(checkPos);
-                    }
-                }
-
-                if (isValidPosition(this.level, mutablePos)) {
-                    correctPositions.add(mutablePos.immutable());
-                } else {
-                    incorrectPositions.add(mutablePos.immutable());
-                }
-            }
-        }
-
-        return incorrectPositions.isEmpty() ? correctPositions : incorrectPositions;
-    }
-
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getZ() == -4 && localOffset.getY() == 0 && localOffset.getX() >= -1 && localOffset.getX() <= 2
+                ? getEnergyStorage()
+                : null;
     }
 
     public void removeWellhead() {

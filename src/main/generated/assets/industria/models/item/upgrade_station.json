@@ -1,7 +1,4 @@
 {
-  "textures": {
-    "particle": "industria:block/upgrade_station"
-  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [
@@ -97,5 +94,8 @@
         0.0
       ]
     }
+  },
+  "textures": {
+    "particle": "industria:block/upgrade_station"
   }
 }

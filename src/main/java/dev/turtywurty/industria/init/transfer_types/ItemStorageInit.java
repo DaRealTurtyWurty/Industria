@@ -5,8 +5,12 @@ import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEn
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
+import dev.turtywurty.multiblocklib.MultiblockLib;
+import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ItemStorageInit {
     public static void init() {
@@ -25,6 +29,10 @@ public class ItemStorageInit {
         ItemStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getInventoryProvider, BlockEntityTypeInit.SHAKING_TABLE);
         ItemStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getInventoryProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
         ItemStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getInventoryProvider, BlockEntityTypeInit.ARC_FURNACE);
+        ItemStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
+            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
+            return controller != null ? controller.getItemStorageForExternal(pos) : null;
+        }, MultiblockLib.MULTIBLOCK_PART);
         ItemStorage.SIDED.registerForBlocks((level, pos, _, _, _) -> {
                     if (level instanceof ServerLevel serverLevel)
                         return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
@@ -41,5 +49,20 @@ public class ItemStorageInit {
 
             return null;
         }, BlockInit.FEEDER_CONVEYOR);
+    }
+
+    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(ServerLevel level, BlockPos pos, BlockEntity blockEntity) {
+        if (blockEntity instanceof IndustriaMultiblockControllerBlockEntity controller)
+            return controller;
+
+        if (level == null)
+            return null;
+
+        BlockPos controllerPos = MultiblockWorldData.get(level).getControllerFor(pos);
+        if (controllerPos == null)
+            return null;
+
+        BlockEntity controllerEntity = level.getBlockEntity(controllerPos);
+        return controllerEntity instanceof IndustriaMultiblockControllerBlockEntity controller ? controller : null;
     }
 }

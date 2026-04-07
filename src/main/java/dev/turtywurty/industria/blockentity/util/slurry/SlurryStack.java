@@ -31,7 +31,7 @@ public record SlurryStack(SlurryVariant variant, long amount) {
     }
 
     public boolean matches(SlurryStack other) {
-        if(Objects.equals(this, other))
+        if (Objects.equals(this, other))
             return true;
 
         return other == null ? isEmpty() : this.variant.equals(other.variant()) && this.amount >= other.amount();

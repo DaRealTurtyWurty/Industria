@@ -81,4 +81,8 @@ public class ExtraCodecs {
     public static <T> Codec<List<T>> listOf(MapCodec<T> codec) {
         return Codec.list(codec.codec());
     }
+
+    public static <T> Codec<List<T>> listOf(Codec<T> codec) {
+        return Codec.list(codec);
+    }
 }

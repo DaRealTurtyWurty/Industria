@@ -3,7 +3,6 @@ package dev.turtywurty.industria.block;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.network.RotaryKilnControllerRemovedPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
@@ -146,7 +145,7 @@ public class RotaryKilnControllerBlock extends IndustriaBlock {
                 .hasBlockEntityRenderer()
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.ROTARY_KILN_CONTROLLER)
                         .shouldTick()
-                        .multiblockProperties(MultiblockTypeInit.ROTARY_KILN_CONTROLLER).build()));
+                ));
     }
 
     public static VoxelShape getVoxelShape(BlockGetter world, BlockPos pos, Direction direction) {
@@ -165,7 +164,7 @@ public class RotaryKilnControllerBlock extends IndustriaBlock {
     @Override
     public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
         super.playerDestroy(world, player, pos, state, blockEntity, tool);
-        if(world instanceof ServerLevel serverWorld) {
+        if (world instanceof ServerLevel serverWorld) {
             var payload = new RotaryKilnControllerRemovedPayload(pos);
             for (ServerPlayer sPlayer : serverWorld.players()) {
                 ServerPlayNetworking.send(sPlayer, payload);

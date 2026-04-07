@@ -4,7 +4,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
@@ -13,22 +12,18 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
 import dev.turtywurty.industria.screenhandler.CrystallizerScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -49,7 +44,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,40 +55,12 @@ import java.util.Optional;
 // output:
 // aluminium hydroxide (gibbsite) (item)
 // sodium carbonate (item) - by-product
-public class CrystallizerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, AutoMultiblockable {
+public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crystallizer");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 3 && p.isCenterColumn())
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.FLUID))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 3 && p.z() == 1)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.input(TransferType.FLUID))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.x() == -1)
-                    .on(LocalDirection.LEFT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.z() == -1)
-                    .on(LocalDirection.FRONT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.x() == 1)
-                    .on(LocalDirection.RIGHT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build()
-    );
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private int progress;
     private int maxProgress;
@@ -312,6 +278,7 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
 
@@ -349,49 +316,6 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
                 .byKey(recipeId)
                 .map(RecipeHolder::value)
                 .orElse(null);
-    }
-
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
-    }
-
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.CRYSTALLIZER;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        // 3x3x4 (3 wide, 3 long, 4 high)
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                for (int y = 0; y < 4; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
     }
 
     @Override
@@ -447,5 +371,27 @@ public class CrystallizerBlockEntity extends IndustriaBlockEntity implements Syn
 
     public int getMaxProgress() {
         return this.maxProgress;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        if (localOffset.getY() == 3 && localOffset.getX() == 0 && localOffset.getZ() == 0)
+            return getCrystalFluidStorage();
+
+        return localOffset.getY() == 3 && localOffset.getZ() == 1 ? getWaterFluidStorage() : null;
+    }
+
+    @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        if (localOffset.getY() != 0)
+            return null;
+
+        if (localOffset.getX() == -1)
+            return this.wrappedContainerStorage.getStorage(getLeftDirection());
+
+        if (localOffset.getZ() == -1)
+            return this.wrappedContainerStorage.getStorage(getFrontDirection());
+
+        return localOffset.getX() == 1 ? this.wrappedContainerStorage.getStorage(getRightDirection()) : null;
     }
 }

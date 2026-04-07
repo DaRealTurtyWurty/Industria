@@ -41,6 +41,9 @@ public class RecipeSerializerInit {
     public static final RecipeSerializer<CentrifugalConcentratorRecipe> CENTRIFUGAL_CONCENTRATOR =
             register("centrifugal_concentrator", CentrifugalConcentratorRecipe.SERIALIZER);
 
+    public static final RecipeSerializer<RecyclingRecipe> RECYCLING =
+            register("recycling", RecyclingRecipe.SERIALIZER);
+
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
         return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }

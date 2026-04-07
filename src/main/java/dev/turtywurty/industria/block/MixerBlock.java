@@ -2,7 +2,6 @@ package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -18,6 +17,6 @@ public class MixerBlock extends IndustriaBlock {
                 .blockEntityProperties(
                         new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.MIXER)
                                 .shouldTick()
-                                .multiblockProperties(MultiblockTypeInit.MIXER).build()));
+                ));
     }
 }

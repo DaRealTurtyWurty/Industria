@@ -37,7 +37,7 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
         return this.input.testForRecipe(input.getItem(0));
     }
 
-    public Tuple<ItemStack, ItemStack> assemble(RecipeSimpleInventory input, RandomSource random) {
+    public Tuple<ItemStack, ItemStack> assemble(RandomSource random) {
         return new Tuple<>(this.outputA.createStack(random), this.outputB.createStack(random));
     }
 

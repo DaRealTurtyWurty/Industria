@@ -4,7 +4,6 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +27,7 @@ public class RotaryKilnBlock extends IndustriaBlock {
                 .hasBlockEntityRenderer()
                 .addStateProperty(SEGMENT_INDEX, 1)
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.ROTARY_KILN)
-                        .multiblockProperties(MultiblockTypeInit.ROTARY_KILN).build()));
+                ));
     }
 
     public static VoxelShape getVoxelShape(BlockGetter world, BlockPos pos, Direction facing) {

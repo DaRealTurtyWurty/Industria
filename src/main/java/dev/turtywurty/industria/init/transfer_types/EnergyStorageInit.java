@@ -5,7 +5,11 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
+import dev.turtywurty.multiblocklib.MultiblockLib;
+import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import team.reborn.energy.api.EnergyStorage;
 
 public class EnergyStorageInit {
@@ -28,7 +32,10 @@ public class EnergyStorageInit {
         EnergyStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getEnergyProvider, BlockEntityTypeInit.SHAKING_TABLE);
         EnergyStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getEnergyProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
         EnergyStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ARC_FURNACE);
-
+        EnergyStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
+            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
+            return controller != null ? controller.getEnergyStorageForExternal(pos) : null;
+        }, MultiblockLib.MULTIBLOCK_PART);
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerLevel serverWorld) {
                 return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.ENERGY, pos);
@@ -36,5 +43,20 @@ public class EnergyStorageInit {
 
             return null;
         }, BlockInit.CABLE);
+    }
+
+    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(ServerLevel level, BlockPos pos, BlockEntity blockEntity) {
+        if (blockEntity instanceof IndustriaMultiblockControllerBlockEntity controller)
+            return controller;
+
+        if (level == null)
+            return null;
+
+        BlockPos controllerPos = MultiblockWorldData.get(level).getControllerFor(pos);
+        if (controllerPos == null)
+            return null;
+
+        BlockEntity controllerEntity = level.getBlockEntity(controllerPos);
+        return controllerEntity instanceof IndustriaMultiblockControllerBlockEntity controller ? controller : null;
     }
 }

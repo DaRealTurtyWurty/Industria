@@ -27,24 +27,9 @@ public class WellheadBlock extends IndustriaBlock {
                         .shouldTick()));
     }
 
-    @Override
-    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        super.setPlacedBy(world, pos, state, placer, itemStack);
-        loadDrillTubes(world, pos);
-    }
-
-    @Override
-    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-        if(direction == Direction.DOWN) {
-            loadDrillTubes(world, pos);
-        }
-
-        return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-    }
-
     private static void loadDrillTubes(LevelReader world, BlockPos pos) {
         List<BlockPos> positions = findDrillTubes(world, pos);
-        if(!positions.isEmpty() && world.getBlockEntity(pos) instanceof WellheadBlockEntity wellheadBlockEntity) {
+        if (!positions.isEmpty() && world.getBlockEntity(pos) instanceof WellheadBlockEntity wellheadBlockEntity) {
             wellheadBlockEntity.modifyDrillTubes(positions);
         }
     }
@@ -65,5 +50,20 @@ public class WellheadBlock extends IndustriaBlock {
         }
 
         return drillTubes;
+    }
+
+    @Override
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        super.setPlacedBy(world, pos, state, placer, itemStack);
+        loadDrillTubes(world, pos);
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+        if (direction == Direction.DOWN) {
+            loadDrillTubes(world, pos);
+        }
+
+        return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 }

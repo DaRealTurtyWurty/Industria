@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBlockEntity, BlockPosPayload> {
     public ArcFurnaceScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ScreenHandlerTypeInit.ARC_FURNACE, 3, syncId, playerInventory, payload, ArcFurnaceBlockEntity.class);
+        super(ScreenHandlerTypeInit.ARC_FURNACE, 19, syncId, playerInventory, payload, ArcFurnaceBlockEntity.class);
     }
 
     public ArcFurnaceScreenHandler(int syncId, Inventory playerInventory, ArcFurnaceBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
@@ -57,12 +57,16 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
         return 119;
     }
 
+    public ArcFurnaceBlockEntity.Mode getMode() {
+        return ArcFurnaceBlockEntity.Mode.values()[this.propertyDelegate.get(0)];
+    }
+
     public int getProgress() {
-        return this.propertyDelegate.get(0);
+        return this.propertyDelegate.get(1);
     }
 
     public int getMaxProgress() {
-        return this.propertyDelegate.get(1);
+        return this.propertyDelegate.get(2);
     }
 
     public float getProgressPercent() {

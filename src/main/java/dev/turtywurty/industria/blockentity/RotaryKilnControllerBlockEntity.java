@@ -5,22 +5,13 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.RotaryKilnBlock;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.heat.InputHeatStorage;
 import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -53,16 +44,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityContentsDropper, AutoMultiblockable {
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 4)
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build()
-    );
-
+public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper {
     private final List<BlockPos> kilnSegments = new ArrayList<>();
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
@@ -221,63 +204,10 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
     }
 
     @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.ROTARY_KILN_CONTROLLER;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null || this.level.isClientSide())
-            return List.of();
-
-        // 5x5x1 structure
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-
-        int widthRange = 2;  // -2 to 2 = 5 blocks
-        int heightRange = 4; // 0 to 4 = 5 blocks
-        int depthRange = 0;  // 0 only = 1 block
-
-        if (facing == null)
-            throw new NullPointerException("Unexpected facing direction: null");
-
-        // Define axis-aligned directions based on facing
-        Direction right = facing.getClockWise();
-
-        // The main loop structure is the same for all directions
-        for (int w = -widthRange; w <= widthRange; w++) {
-            for (int h = 0; h <= heightRange; h++) {
-                for (int d = 0; d <= depthRange; d++) {
-                    if (w == 0 && h == 0 && d == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition
-                            .relative(right, w)
-                            .relative(Direction.UP, h)
-                            .relative(facing, d);
-
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
-    }
-
-    @Override
     protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Heat", this.wrappedHeatStorage);
-        Multiblockable.write(this, view);
 
         view.store("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
 
@@ -301,9 +231,9 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
 
     @Override
     protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Heat", this.wrappedHeatStorage);
-        Multiblockable.read(this, view);
 
         this.kilnSegments.clear();
         view.read("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
@@ -404,13 +334,15 @@ public class RotaryKilnControllerBlockEntity extends IndustriaBlockEntity implem
         return recipeManager.getRecipeFor(RecipeTypeInit.ROTARY_KILN, SingleItemStackRecipeInput.of(stack), this.level);
     }
 
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
-    }
-
     public ContainerStorage getInventoryProvider(Direction side) {
         return this.wrappedContainerStorage.getStorage(side);
+    }
+
+    @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getX() == 0 && localOffset.getZ() == 0 && localOffset.getY() == 4
+                ? this.wrappedContainerStorage.getStorage(Direction.UP)
+                : null;
     }
 
     public List<BlockPos> getKilnSegments() {

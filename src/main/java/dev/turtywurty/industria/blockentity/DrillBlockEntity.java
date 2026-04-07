@@ -5,7 +5,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
@@ -15,14 +14,6 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.DamageTypeInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
@@ -30,6 +21,8 @@ import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -61,42 +54,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, AutoMultiblockable, BlockEntityContentsDropper {
+public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("drill");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 2)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && (p.x() != 0 || p.z() != 0))
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.output(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 1 && p.x() == -1 && p.z() == 0)
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 1 && p.x() == 1 && p.z() == 0)
-                    .on(LocalDirection.FRONT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.isCenterColumn() && p.y() == 2)
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.input(TransferType.ENERGY))
-                    .build()
-    );
-
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private final List<ItemStack> overflowStacks = new ArrayList<>(); // Only used if overflowMethod is set to PAUSE
     public float clientMotorRotation;
+    // Only used client side
+    public float clockwiseRotation, counterClockwiseRotation;
     private boolean drilling = false;
     private float drillYOffset = 1.0F;
     private boolean retracting = false;
@@ -105,9 +71,6 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     private float currentRotationSpeed = 0.0F, targetRotationSpeed = 0.75F;
     private boolean isPaused;
     private AABB drillHeadAABB;
-
-    // Only used client side
-    public float clockwiseRotation, counterClockwiseRotation;
 
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.DRILL, BlockEntityTypeInit.DRILL, pos, state);
@@ -233,7 +196,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
 
     @Override
     protected void loadAdditional(ValueInput view) {
-        Multiblockable.read(this, view);
+        super.loadAdditional(view);
 
         this.drilling = view.getBooleanOr("Drilling", false);
 
@@ -261,7 +224,7 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
 
     @Override
     protected void saveAdditional(ValueOutput view) {
-        Multiblockable.write(this, view);
+        super.saveAdditional(view);
         view.putBoolean("Drilling", this.drilling);
         view.putBoolean("Retracting", this.retracting);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
@@ -288,16 +251,6 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
         }
     }
 
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.DRILL;
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
-    }
-
     public ContainerStorage getInventoryProvider(@Nullable Direction direction) {
         return this.wrappedContainerStorage.getStorage(direction);
     }
@@ -307,27 +260,27 @@ public class DrillBlockEntity extends IndustriaBlockEntity implements BlockEntit
     }
 
     @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        if (localOffset.getY() == 0 && (localOffset.getX() != 0 || localOffset.getZ() != 0))
+            return this.wrappedContainerStorage.getStorage(Direction.DOWN);
+
+        if (localOffset.getY() == 1 && localOffset.getX() == -1 && localOffset.getZ() == 0)
+            return this.wrappedContainerStorage.getStorage(Direction.UP);
+
+        if (localOffset.getY() == 1 && localOffset.getX() == 1 && localOffset.getZ() == 0)
+            return this.wrappedContainerStorage.getStorage(getFrontDirection());
+
+        if (localOffset.getY() == 2)
+            return this.wrappedContainerStorage.getStorage(getBackDirection());
+
+        return null;
     }
 
-    // 3x3x3 Multiblock
     @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        List<BlockPos> positions = new ArrayList<>();
-
-        for (int x = -1; x <= 1; x++) {
-            for (int y = 0; y <= 2; y++) {
-                for (int z = -1; z <= 1; z++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    positions.add(this.worldPosition.offset(x, y, z));
-                }
-            }
-        }
-
-        return positions;
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getX() == 0 && localOffset.getZ() == 0 && localOffset.getY() == 2
+                ? getEnergyStorage()
+                : null;
     }
 
     @Override

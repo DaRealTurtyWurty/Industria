@@ -98,27 +98,7 @@ public record PredicateContainerStorage(ContainerStorage delegate, BooleanSuppli
         return delegate.getVersion();
     }
 
-    private static class PredicateKey {
-        private final BooleanSupplier canInsert;
-        private final BooleanSupplier canExtract;
+    private record PredicateKey(BooleanSupplier canInsert, BooleanSupplier canExtract) {
 
-        public PredicateKey(BooleanSupplier canInsert, BooleanSupplier canExtract) {
-            this.canInsert = canInsert;
-            this.canExtract = canExtract;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            PredicateKey that = (PredicateKey) o;
-            return Objects.equals(canInsert, that.canInsert) &&
-                    Objects.equals(canExtract, that.canExtract);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(canInsert, canExtract);
-        }
     }
 }

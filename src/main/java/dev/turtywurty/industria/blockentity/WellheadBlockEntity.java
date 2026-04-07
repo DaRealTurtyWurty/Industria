@@ -31,13 +31,12 @@ import java.util.List;
 import java.util.Map;
 
 public class WellheadBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
-    private BlockPos oilPumpJackPos;
+    private static final Codec<Map<BlockPos, Integer>> DRILL_TUBES_CODEC =
+            Codec.unboundedMap(BlockPos.CODEC, Codec.INT);
     private final Map<BlockPos, Integer> drillTubes = new HashMap<>();
 
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
-
-    private static final Codec<Map<BlockPos, Integer>> DRILL_TUBES_CODEC =
-            Codec.unboundedMap(BlockPos.CODEC, Codec.INT);
+    private BlockPos oilPumpJackPos;
 
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.UPGRADE_STATION, BlockEntityTypeInit.WELLHEAD, pos, state);
@@ -181,17 +180,17 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         return this.drillTubes;
     }
 
-    public void setOilPumpJackPos(@Nullable BlockPos pos) {
-        this.oilPumpJackPos = pos;
-        update();
-    }
-
     public boolean hasOilPumpJack() {
         return this.oilPumpJackPos != null;
     }
 
     public BlockPos getOilPumpJackPos() {
         return this.oilPumpJackPos;
+    }
+
+    public void setOilPumpJackPos(@Nullable BlockPos pos) {
+        this.oilPumpJackPos = pos;
+        update();
     }
 
     @Override

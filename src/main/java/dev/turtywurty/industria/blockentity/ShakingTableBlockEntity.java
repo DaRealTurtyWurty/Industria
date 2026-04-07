@@ -7,7 +7,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -24,15 +23,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ShakingTableRecipe;
 import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
@@ -45,6 +36,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -75,30 +67,18 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
-public class ShakingTableBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
+public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("shaking_table");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 0)
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.input(TransferType.ENERGY), PortType.output(TransferType.SLURRY), PortType.input(TransferType.ITEM))
-                    .build(),
-            PositionedPortRule.when(p -> p.y() == 1)
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.FLUID), PortType.input(TransferType.ITEM))
-                    .build()
-    );
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
 
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private final AABB shakeBox;
     private int progress, maxProgress;
     private final ContainerData properties = new ContainerData() {
@@ -274,17 +254,16 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         if (!this.outputSlurryStack.isEmpty()) {
-//            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
-//            if (Objects.equals(outputSlurryTank.variant, this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.amount >= 0) {
-//                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
-//                outputSlurryTank.variant = this.outputSlurryStack.variant();
-//                outputSlurryTank.amount += inserted;
-//                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
-//                update();
-//            }
-//
-//            return;
-            this.outputSlurryStack = this.outputSlurryStack.withAmount(0); // TODO: Remove after slurry pipes are fixed
+            SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
+            if (Objects.equals(outputSlurryTank.variant, this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.amount >= 0) {
+                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.amount, this.outputSlurryStack.amount());
+                outputSlurryTank.variant = this.outputSlurryStack.variant();
+                outputSlurryTank.amount += inserted;
+                this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
+                update();
+            }
+
+            return;
         }
 
         ShakingTableRecipeInput recipeInput = createRecipeInput();
@@ -417,7 +396,7 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
             view.store("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
         }
 
-        Multiblockable.write(this, view);
+        super.saveAdditional(view);
     }
 
     @Override
@@ -434,55 +413,12 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
 
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
         this.outputSlurryStack = view.read("OutputSlurry", SlurryStack.CODEC.codec()).orElse(SlurryStack.EMPTY);
-        Multiblockable.read(this, view);
+        super.loadAdditional(view);
     }
 
     @Override
     public WrappedContainerStorage<?> getWrappedContainerStorage() {
         return this.wrappedContainerStorage;
-    }
-
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.SHAKING_TABLE;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-
-        boolean isNorthSouth = facing == Direction.NORTH || facing == Direction.SOUTH;
-        for (int z = (isNorthSouth ? -2 : -1); z <= (isNorthSouth ? 2 : 1); z++) {
-            for (int x = (isNorthSouth ? -1 : -2); x <= (isNorthSouth ? 1 : 2); x++) {
-                for (int y = 0; y <= 1; y++) {
-                    if (x == 0 && z == 0 && y == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
     }
 
     @Override
@@ -554,5 +490,27 @@ public class ShakingTableBlockEntity extends IndustriaBlockEntity implements Syn
 
     public EnergyStorage getEnergyProvider(Direction side) {
         return this.wrappedEnergyStorage.getStorage(side);
+    }
+
+    @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 || localOffset.getY() == 1
+                ? this.wrappedContainerStorage.getCombinedStorage()
+                : null;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 1 ? getInputFluidTank() : null;
+    }
+
+    @Override
+    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
+        return localOffset.getY() == 0 ? getOutputSlurryTank() : null;
+    }
+
+    @Override
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 ? getEnergyStorage() : null;
     }
 }

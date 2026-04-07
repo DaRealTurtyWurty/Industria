@@ -30,6 +30,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -662,7 +663,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
                 BuiltinEntityModelBuilder.defaultBlock());
 
         BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SEISMIC_SCANNER);
-        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.SIMPLE_DRILL_HEAD,
+        BuiltinEntityModelBuilder.write(itemModelGenerator, (ItemLike) ItemInit.SIMPLE_DRILL_HEAD,
                 Industria.id("block/simple_drill_head"),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyAll(displaySettings ->
@@ -670,7 +671,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
                         .copyModifyGui(displaySettings ->
                                 displaySettings.rotate(0, 180, 0)));
 
-        BuiltinEntityModelBuilder.write(itemModelGenerator, ItemInit.BLOCK_BUILDER_DRILL_HEAD,
+        BuiltinEntityModelBuilder.write(itemModelGenerator, (ItemLike) ItemInit.BLOCK_BUILDER_DRILL_HEAD,
                 Industria.id("block/simple_drill_head"),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyAll(displaySettings ->
@@ -765,8 +766,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                                  IndustriaBlockEntityItemRenderer.Unbaked renderer,
                                                  BuiltinEntityModelBuilder.DefaultDisplaySettingsBuilder displaySettings) {
         itemModelGenerator.itemModelOutput.accept(item,
-                ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item), renderer));
-        BuiltinEntityModelBuilder.write(itemModelGenerator, item, textureToSprite(renderer.texture()), displaySettings);
+                ItemModelUtils.specialModel(BuiltinEntityModelBuilder.getItemModelLocation(item), renderer));
+        BuiltinEntityModelBuilder.write(itemModelGenerator, (ItemLike) item, textureToSprite(renderer.texture()), displaySettings);
     }
 
     private static Identifier textureToSprite(Identifier texture) {

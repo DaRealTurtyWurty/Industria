@@ -19,7 +19,7 @@ public class IndustriaSimpleInventory extends SimpleContainer {
     public void setChanged() {
         super.setChanged();
 
-        if(this.componentContainer.hasComponent(SyncingComponent.class)) {
+        if (this.componentContainer.hasComponent(SyncingComponent.class)) {
             this.componentContainer.getComponent(SyncingComponent.class).sync();
         }
     }
@@ -27,11 +27,11 @@ public class IndustriaSimpleInventory extends SimpleContainer {
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         boolean valid = true;
-        if(this.componentContainer.hasComponent(StackPredicateComponent.class)) {
+        if (this.componentContainer.hasComponent(StackPredicateComponent.class)) {
             valid = this.componentContainer.getComponent(StackPredicateComponent.class).test(slot, stack);
         }
 
-        if(this.componentContainer.hasComponent(OutputOnlyInventoryComponent.class)) {
+        if (this.componentContainer.hasComponent(OutputOnlyInventoryComponent.class)) {
             valid = false;
         }
 

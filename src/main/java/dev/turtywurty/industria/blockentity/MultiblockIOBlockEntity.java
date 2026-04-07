@@ -27,32 +27,32 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
 
     @Override
     public void tick() {
-        if(this.level == null)
+        if (this.level == null)
             return;
 
-        if(this.multiblock == null) {
+        if (this.multiblock == null) {
             BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(this.level, this.worldPosition);
-            if(primaryPos == null)
+            if (primaryPos == null)
                 return;
 
             BlockEntity blockEntity = this.level.getBlockEntity(primaryPos);
-            if(blockEntity instanceof AutoMultiblockable multiblockable) {
+            if (blockEntity instanceof AutoMultiblockable multiblockable) {
                 this.primary = blockEntity;
                 this.multiblock = multiblockable;
                 this.offsetFromPrimary = AutoMultiblockBlock.getOffsetFromPrimary(primaryPos, this.worldPosition, blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
             }
         }
 
-        if(this.multiblock == null || this.level.isClientSide())
+        if (this.multiblock == null || this.level.isClientSide())
             return;
 
         for (Direction direction : Direction.values()) {
             Map<Direction, Port> ports = getPorts(direction);
-            if(ports == null)
+            if (ports == null)
                 continue;
 
             Port port = ports.get(direction);
-            if(port == null)
+            if (port == null)
                 continue;
 
             port.tick(this.level, this.worldPosition, this.primary.getBlockPos());
@@ -60,22 +60,22 @@ public class MultiblockIOBlockEntity extends BlockEntity implements TickableBloc
     }
 
     public Map<Direction, Port> getPorts(Direction direction) {
-        if(this.multiblock == null)
+        if (this.multiblock == null)
             return null;
 
         return this.multiblock.getPorts(offsetFromPrimary, direction);
     }
 
     public <T> T getProvider(TransferType<T, ?, ?> transferType, @Nullable Direction direction) {
-        if(this.multiblock == null)
+        if (this.multiblock == null)
             return null;
 
         Map<Direction, Port> ports = this.multiblock.getPorts(offsetFromPrimary, direction);
-        if(ports == null)
+        if (ports == null)
             return null;
 
         Port port = ports.get(direction);
-        if(port == null)
+        if (port == null)
             return null;
 
         return port.getProvider(transferType, this.level, this.primary.getBlockPos(), this.primary);

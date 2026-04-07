@@ -27,6 +27,15 @@ public class PacketReceiverInit {
                     }
                 }));
 
+        ServerPlayNetworking.registerGlobalReceiver(ArcFurnaceSetModePayload.ID, (payload, context) ->
+                context.server().execute(() -> {
+                    ServerPlayer player = context.player();
+                    AbstractContainerMenu handler = player.containerMenu;
+                    if (handler instanceof ArcFurnaceScreenHandler arcFurnaceScreenHandler) {
+                        arcFurnaceScreenHandler.getBlockEntity().setMode(payload.mode());
+                    }
+                }));
+
         ServerPlayNetworking.registerGlobalReceiver(ChangeDrillingPayload.ID, (payload, context) -> {
             ServerPlayer player = context.player();
             if (player.containerMenu instanceof DrillScreenHandler handler) {

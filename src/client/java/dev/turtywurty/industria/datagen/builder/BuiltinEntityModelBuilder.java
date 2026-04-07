@@ -3,7 +3,6 @@ package dev.turtywurty.industria.datagen.builder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.client.data.models.ItemModelGenerators;
-import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -177,7 +176,7 @@ public class BuiltinEntityModelBuilder {
     }
 
     public static void write(ItemModelGenerators writer, ItemLike item, Identifier particleTextureId, DefaultDisplaySettingsBuilder defaultBuilder) {
-        write(writer, item.asItem(), ModelLocationUtils.getModelLocation(item.asItem()), particleTextureId, defaultBuilder);
+        write(writer, item.asItem(), getItemModelLocation(item.asItem()), particleTextureId, defaultBuilder);
     }
 
     public static void write(ItemModelGenerators writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
@@ -189,11 +188,16 @@ public class BuiltinEntityModelBuilder {
     }
 
     public static void write(ItemModelGenerators writer, Item item, DefaultDisplaySettingsBuilder defaultBuilder) {
-        write(writer, item, defaultParticleTexture(item), defaultBuilder);
+        write(writer, item, getItemModelLocation(item), defaultParticleTexture(item), defaultBuilder);
     }
 
     public static void write(ItemModelGenerators writer, ItemLike item, DefaultDisplaySettingsBuilder defaultBuilder) {
         write(writer, item, defaultParticleTexture(item.asItem()), defaultBuilder);
+    }
+
+    public static Identifier getItemModelLocation(Item item) {
+        Identifier itemId = BuiltInRegistries.ITEM.getKey(item);
+        return Identifier.fromNamespaceAndPath(itemId.getNamespace(), "item/" + itemId.getPath());
     }
 
     public static DefaultDisplaySettingsBuilder defaultItem() {

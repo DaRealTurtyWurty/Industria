@@ -2,11 +2,8 @@ package dev.turtywurty.industria.blockentity.abstraction;
 
 import org.jetbrains.annotations.Nullable;
 
-public class BlockEntityField<T, B extends IndustriaBlockEntity<?>> {
-    private final T defaultValue;
-    private final @Nullable FieldGetter<T, B> getter;
-    private final @Nullable FieldSetter<T, B> setter;
-
+public record BlockEntityField<T, B extends IndustriaBlockEntity<?>>(T defaultValue, @Nullable FieldGetter<T, B> getter,
+                                                                     @Nullable FieldSetter<T, B> setter) {
     public BlockEntityField(T defaultValue, @Nullable FieldGetter<T, B> getter, @Nullable FieldSetter<T, B> setter) {
         this.defaultValue = defaultValue;
         this.getter = getter;
@@ -15,18 +12,6 @@ public class BlockEntityField<T, B extends IndustriaBlockEntity<?>> {
 
     public BlockEntityField(T defaultValue) {
         this(defaultValue, null, null);
-    }
-
-    public T getDefaultValue() {
-        return this.defaultValue;
-    }
-
-    public @Nullable FieldGetter<T, B> getGetter() {
-        return this.getter;
-    }
-
-    public @Nullable FieldSetter<T, B> getSetter() {
-        return this.setter;
     }
 
     public T get(B blockEntity) {

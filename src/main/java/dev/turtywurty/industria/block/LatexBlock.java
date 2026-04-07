@@ -17,7 +17,7 @@ public interface LatexBlock {
     }
 
     default void tickLatex(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-        if(random.nextInt(10) == 0){
+        if (random.nextInt(10) == 0) {
             world.setBlockAndUpdate(pos, state.setValue(LATEX_LEVEL, state.getValue(LATEX_LEVEL) - 1));
         }
     }

@@ -1,26 +1,28 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class SyncingSimpleInventory extends RecipeSimpleInventory implements SyncableStorage {
-    private final UpdatableBlockEntity blockEntity;
+    private final UpdateableBlockEntityLike blockEntity;
     private boolean isDirty = false;
 
-    public SyncingSimpleInventory(UpdatableBlockEntity blockEntity, int size) {
+    public SyncingSimpleInventory(UpdateableBlockEntityLike blockEntity, int size) {
         super(size);
         this.blockEntity = blockEntity;
     }
 
-    public SyncingSimpleInventory(UpdatableBlockEntity blockEntity, ItemStack... stacks) {
+    public SyncingSimpleInventory(UpdateableBlockEntityLike blockEntity, ItemStack... stacks) {
         super(stacks);
         this.blockEntity = blockEntity;
     }
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity != null && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
+        if (this.isDirty && this.blockEntity instanceof BlockEntity blockEntity &&
+                blockEntity.hasLevel() && !blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
             this.blockEntity.update();
@@ -33,7 +35,7 @@ public class SyncingSimpleInventory extends RecipeSimpleInventory implements Syn
         this.isDirty = true;
     }
 
-    public UpdatableBlockEntity getBlockEntity() {
+    public UpdateableBlockEntityLike getBlockEntity() {
         return this.blockEntity;
     }
 }

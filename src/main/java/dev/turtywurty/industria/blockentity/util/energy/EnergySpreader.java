@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.blockentity.util.energy;
 
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +52,7 @@ public interface EnergySpreader {
             transaction.commit();
 
             if (currentEnergy != energyStorage.getAmount()) {
-                if (this instanceof UpdatableBlockEntity updatableBlockEntity) {
+                if (this instanceof UpdateableBlockEntityLike updatableBlockEntity) {
                     updatableBlockEntity.update();
                 } else if (this instanceof BlockEntity blockEntity) {
                     blockEntity.setChanged();

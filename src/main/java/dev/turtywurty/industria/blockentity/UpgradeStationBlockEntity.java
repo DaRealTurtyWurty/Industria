@@ -4,7 +4,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
@@ -13,14 +12,6 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
@@ -54,19 +45,11 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 import java.util.*;
 
-public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, SyncableTickableBlockEntity, AutoMultiblockable, BlockEntityContentsDropper {
+public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("upgrade_station");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> true)
-                    .on(LocalDirection.values())
-                    .types(PortType.input(TransferType.ENERGY))
-                    .build()
-    );
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private final List<ResourceKey<Recipe<?>>> availableRecipes = new ArrayList<>();
     @Nullable
     private ResourceKey<Recipe<?>> selectedRecipe;
@@ -205,7 +188,6 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     @Override
     protected void saveAdditional(ValueOutput view) {
         super.saveAdditional(view);
-        Multiblockable.write(this, view);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         if (this.selectedRecipe != null) {
@@ -222,7 +204,7 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
 
     @Override
     protected void loadAdditional(ValueInput view) {
-        Multiblockable.read(this, view);
+        super.loadAdditional(view);
 
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
@@ -332,34 +314,6 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
         return upgradeStationRecipe;
     }
 
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.UPGRADE_STATION;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        List<BlockPos> positions = new ArrayList<>();
-        positions.add(this.worldPosition.above());
-
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 2; z++) {
-                if (x == 0 && z == 0) {
-                    continue;
-                }
-
-                positions.add(this.worldPosition.offset(x, 0, z));
-            }
-        }
-
-        return positions;
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
-    }
-
     public EnergyStorage getEnergyStorage() {
         return this.wrappedEnergyStorage.getStorage(null);
     }
@@ -398,8 +352,8 @@ public class UpgradeStationBlockEntity extends IndustriaBlockEntity implements B
     }
 
     @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return getEnergyStorage();
     }
 
     @Override

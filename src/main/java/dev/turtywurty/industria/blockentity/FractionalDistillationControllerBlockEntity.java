@@ -19,9 +19,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -63,8 +60,8 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
         //Industria.LOGGER.debug("Controller at {} has {} towers.", this.pos, getTowerCount());
 
         SingleFluidStorage tank = getFluidTank();
-        if (tank.isResourceBlank() || tank.amount == 0)
-            return;
+        if (tank.isResourceBlank() || tank.amount == 0) {
+        }
 
 
     }
@@ -103,11 +100,6 @@ public class FractionalDistillationControllerBlockEntity extends IndustriaBlockE
         view.putInt("NumberOfTowers", this.towers.size());
         ViewUtils.putChild(view, "FluidStorage", this.fluidStorage);
         ViewUtils.putChild(view, "HeatStorage", this.heatStorage);
-    }
-
-    @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     public boolean addTower(BlockPos pos) {

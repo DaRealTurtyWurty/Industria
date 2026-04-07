@@ -2,7 +2,7 @@ package dev.turtywurty.industria.blockentity.util.heat;
 
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +30,7 @@ public class SyncingHeatStorage extends SimpleHeatStorage implements SyncableSto
         if (this.isDirty && this.blockEntity.hasLevel() && !this.blockEntity.getLevel().isClientSide()) {
             this.isDirty = false;
 
-            if (this.blockEntity instanceof UpdatableBlockEntity updatableBlockEntity) {
+            if (this.blockEntity instanceof UpdateableBlockEntityLike updatableBlockEntity) {
                 updatableBlockEntity.update();
             } else {
                 this.blockEntity.setChanged();

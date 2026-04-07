@@ -150,7 +150,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
             update();
             return;
         } else {
-            outputs = recipeEntry.get().value().assemble(getInventory(), this.level.getRandom());
+            outputs = recipeEntry.get().value().assemble(this.level.getRandom());
             if (!canOutput(outputs.getA()) || !canOutput(outputs.getB())) {
                 this.currentRecipeId = null;
                 this.maxProgress = 0;

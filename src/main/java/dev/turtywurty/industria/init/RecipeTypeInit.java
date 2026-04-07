@@ -8,6 +8,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 
 public class RecipeTypeInit {
+    // TODO: Rename this to AlloyingRecipe and the type to ALLOYING
     public static final RecipeType<AlloyFurnaceRecipe> ALLOY_FURNACE =
             register("alloy_furnace", AlloyFurnaceRecipe.Type.INSTANCE);
 
@@ -41,9 +42,13 @@ public class RecipeTypeInit {
     public static final RecipeType<CentrifugalConcentratorRecipe> CENTRIFUGAL_CONCENTRATOR =
             register("centrifugal_concentrator", CentrifugalConcentratorRecipe.Type.INSTANCE);
 
+    public static final RecipeType<RecyclingRecipe> RECYCLING =
+            register("recycling", RecyclingRecipe.Type.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeType<T> register(String name, RecipeType<T> type) {
         return Registry.register(BuiltInRegistries.RECIPE_TYPE, Industria.id(name), type);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

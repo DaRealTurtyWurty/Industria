@@ -7,7 +7,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -23,15 +22,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
@@ -68,37 +59,17 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 // TODO: Make this work with temperature and pressure
-public class DigesterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
+public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("digester");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 4 && p.isCenterColumn())
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.SLURRY))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.z() == -1)
-                    .on(LocalDirection.FRONT)
-                    .types(PortType.input(TransferType.ENERGY))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 1)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.output(TransferType.FLUID))
-                    .build()
-    );
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
-
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private ResourceKey<Recipe<?>> currentRecipeId;
     private int progress;
@@ -175,11 +146,6 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     public OutputFluidStorage getOutputFluidStorage() {
         return (OutputFluidStorage) this.wrappedFluidStorage.getStorage(Direction.SOUTH);
-    }
-
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
     }
 
     @Override
@@ -310,11 +276,11 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         this.wrappedSlurryStorage.writeData(view.child("FluidTank"));
         this.wrappedFluidStorage.writeData(view.child("SlurryTank"));
-        Multiblockable.write(this, view);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
@@ -325,11 +291,11 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     @Override
     protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
-        Multiblockable.read(this, view);
 
         this.progress = view.getIntOr("Progress", 0);
 
@@ -337,42 +303,6 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
                 .orElse(null);
-    }
-
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.DIGESTER;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-        for (int x = -1; x < 2; x++) {
-            for (int z = -1; z < 2; z++) {
-                for (int y = 0; y < 5; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
     }
 
     @Override
@@ -395,5 +325,22 @@ public class DigesterBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     public @Nullable SingleFluidStorage getFluidProvider(@Nullable Direction direction) {
         return this.wrappedFluidStorage.getStorage(direction);
+    }
+
+    @Override
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getZ() == -1 ? getEnergyStorage() : null;
+    }
+
+    @Override
+    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
+        return localOffset.getY() == 4 && localOffset.getX() == 0 && localOffset.getZ() == 0
+                ? getInputSlurryStorage()
+                : null;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 && localOffset.getZ() == 1 ? getOutputFluidStorage() : null;
     }
 }

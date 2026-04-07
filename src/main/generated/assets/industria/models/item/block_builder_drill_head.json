@@ -1,7 +1,4 @@
 {
-  "textures": {
-    "particle": "industria:block/simple_drill_head"
-  },
   "display": {
     "firstperson_lefthand": {
       "rotation": [
@@ -109,5 +106,8 @@
         0.0
       ]
     }
+  },
+  "textures": {
+    "particle": "industria:block/simple_drill_head"
   }
 }

@@ -3,12 +3,12 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.gasapi.api.storage.GasStorage;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
+import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.*;
@@ -23,14 +23,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.list.TagList;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
@@ -42,6 +35,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
@@ -66,54 +60,11 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper, AutoMultiblockable {
+public class ElectrolyzerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("electrolyzer");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 1)
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.ITEM), PortType.input(TransferType.ENERGY))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.z() == 0)
-                    .on(LocalDirection.BACK)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.x() == -1)
-                    .on(LocalDirection.LEFT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.x() == 1)
-                    .on(LocalDirection.RIGHT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.z() == -1)
-                    .on(LocalDirection.FRONT)
-                    .types(PortType.io(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0)
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.io(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.z() == -1)
-                    .on(LocalDirection.FRONT)
-                    .types(PortType.input(TransferType.FLUID))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0)
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.output(TransferType.GAS), PortType.input(TransferType.HEAT))
-                    .build()
-    );
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -121,7 +72,6 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     private final WrappedGasStorage<SingleGasStorage> wrappedGasStorage = new WrappedGasStorage<>();
     private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
 
     private int progress, maxProgress;
     private int electrolyteConversionProgress, maxElectrolyteConversionProgress;
@@ -133,7 +83,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 case 1 -> maxProgress;
                 case 2 -> electrolyteConversionProgress;
                 case 3 -> maxElectrolyteConversionProgress;
-                default -> throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + getCount());
+                default ->
+                        throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + getCount());
             };
         }
 
@@ -144,7 +95,8 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
                 case 1 -> maxProgress = value;
                 case 2 -> electrolyteConversionProgress = value;
                 case 3 -> maxElectrolyteConversionProgress = value;
-                default -> throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + getCount());
+                default ->
+                        throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for " + getCount());
             }
         }
 
@@ -371,10 +323,12 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "FluidStorage", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "GasStorage", this.wrappedGasStorage);
+        ViewUtils.putChild(view, "HeatStorage", this.wrappedHeatStorage);
 
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
@@ -394,6 +348,7 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
 
     @Override
     protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidStorage", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "EnergyStorage", this.wrappedEnergyStorage);
@@ -498,45 +453,34 @@ public class ElectrolyzerBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.ELECTROLYZER;
-    }
-
-    // x y z
-    // 3 2 2
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 0; z++) {
-                for (int y = 0; y <= 1; y++) {
-                    if (x == 0 && z == 0 && y == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 1
+                || localOffset.getZ() == 0
+                || localOffset.getX() == -1
+                || localOffset.getX() == 1
+                || localOffset.getZ() == -1
+                || localOffset.getY() == 0
+                ? this.wrappedContainerStorage.getCombinedStorage()
+                : null;
     }
 
     @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getZ() == -1 ? getElectrolyteFluidStorage() : null;
     }
 
     @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 1 ? getEnergyStorage() : null;
+    }
+
+    @Override
+    public @Nullable SingleGasStorage getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
+        return isFormed() && getLocalOffsetFromController(worldPos).getY() == 0 ? getOutputGasStorage() : null;
+    }
+
+    @Override
+    protected @Nullable HeatStorage getHeatStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
+        return localOffset.getY() == 0 ? getHeatStorage() : null;
     }
 }

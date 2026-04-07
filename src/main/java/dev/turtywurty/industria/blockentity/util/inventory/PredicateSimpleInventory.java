@@ -4,7 +4,7 @@ import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
 import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.gasapi.api.storage.GasStorage;
-import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
@@ -22,23 +22,14 @@ import java.util.function.Supplier;
 public class PredicateSimpleInventory extends SyncingSimpleInventory {
     private final BiPredicate<ItemStack, Integer> predicate;
 
-    public PredicateSimpleInventory(UpdatableBlockEntity blockEntity, int size, BiPredicate<ItemStack, Integer> predicate) {
+    public PredicateSimpleInventory(UpdateableBlockEntityLike blockEntity, int size, BiPredicate<ItemStack, Integer> predicate) {
         super(blockEntity, size);
         this.predicate = predicate;
     }
 
-    public PredicateSimpleInventory(UpdatableBlockEntity blockEntity, BiPredicate<ItemStack, Integer> predicate, ItemStack... stacks) {
+    public PredicateSimpleInventory(UpdateableBlockEntityLike blockEntity, BiPredicate<ItemStack, Integer> predicate, ItemStack... stacks) {
         super(blockEntity, stacks);
         this.predicate = predicate;
-    }
-
-    @Override
-    public boolean canPlaceItem(int slot, ItemStack stack) {
-        return this.predicate.test(stack, slot);
-    }
-
-    public BiPredicate<ItemStack, Integer> getPredicate() {
-        return this.predicate;
     }
 
     public static BiPredicate<ItemStack, Integer> createEmptyFluidPredicate(Supplier<FluidVariant> fluidVariantSupplier) {
@@ -111,5 +102,14 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
                 return storage.extract(gasStackSupplier.get().variant(), FluidConstants.BUCKET, transaction) > 0;
             }
         };
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        return this.predicate.test(stack, slot);
+    }
+
+    public BiPredicate<ItemStack, Integer> getPredicate() {
+        return this.predicate;
     }
 }

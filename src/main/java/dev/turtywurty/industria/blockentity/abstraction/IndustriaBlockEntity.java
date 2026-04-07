@@ -33,6 +33,10 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
 
     IndustriaBlock blockRef;
 
+    public IndustriaBlockEntity(BlockPos pos, BlockState state, BlockEntityType<T> type) {
+        super(type, pos, state);
+    }
+
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
         if (this.level == null) {
@@ -53,10 +57,6 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
                 }
             }
         }
-    }
-
-    public IndustriaBlockEntity(BlockPos pos, BlockState state, BlockEntityType<T> type) {
-        super(type, pos, state);
     }
 
     @Override
@@ -123,14 +123,12 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
 
     public static class BlockEntityProperties<T extends IndustriaBlockEntity<T>> {
         private final T blockEntity;
-        private int tickRate = 0;
-        private TickLogic<T, BlockEntityFields<T>> tickLogic;
-
         private final WrappedContainerStorage<SimpleContainer> ContainerStorage = new WrappedContainerStorage<>();
         private final WrappedFluidStorage<SingleFluidStorage> fluidStorage = new WrappedFluidStorage<>();
         private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
-
         private final BlockEntityFields<T> fields = new BlockEntityFields<>();
+        private int tickRate = 0;
+        private TickLogic<T, BlockEntityFields<T>> tickLogic;
 
         public BlockEntityProperties(T blockEntity) {
             this.blockEntity = blockEntity;

@@ -7,7 +7,6 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
-import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -24,15 +23,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.SyncingSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
-import dev.turtywurty.industria.init.MultiblockTypeInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
-import dev.turtywurty.industria.multiblock.LocalDirection;
-import dev.turtywurty.industria.multiblock.PortType;
-import dev.turtywurty.industria.multiblock.TransferType;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
-import dev.turtywurty.industria.multiblock.old.Multiblockable;
-import dev.turtywurty.industria.multiblock.old.PositionedPortRule;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.MixerRecipe;
 import dev.turtywurty.industria.recipe.input.MixerRecipeInput;
@@ -45,6 +36,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -72,7 +64,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,46 +92,14 @@ import java.util.Optional;
 //                        .incrementProgress()
 //                        .build());
 //    }
-public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, AutoMultiblockable, BlockEntityContentsDropper {
+public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("mixer");
-
-    private static final List<PositionedPortRule> PORT_RULES = List.of(
-            PositionedPortRule.when(p -> p.y() == 2 && p.isCenterColumn())
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.FLUID))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.output(TransferType.SLURRY))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
-                    .on(LocalDirection.RIGHT)
-                    .types(PortType.input(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 0 && p.z() == 0 && p.x() != 0)
-                    .on(LocalDirection.LEFT)
-                    .types(PortType.output(TransferType.ITEM))
-                    .build(),
-
-            PositionedPortRule.when(p -> p.y() == 2 && !p.isCenterColumn())
-                    .on(LocalDirection.UP)
-                    .types(PortType.input(TransferType.ENERGY))
-                    .build(),
-            PositionedPortRule.when(p -> p.y() == 0 && !p.isCenterColumn())
-                    .on(LocalDirection.DOWN)
-                    .types(PortType.input(TransferType.ENERGY))
-                    .build()
-    );
 
     public final List<Vec3> mixingItemPositions = NonNullList.withSize(6, new Vec3(0, 1, 0));
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedSlurryStorage<SingleSlurryStorage> wrappedSlurryStorage = new WrappedSlurryStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
-    private final List<BlockPos> multiblockPositions = new ArrayList<>();
     private int temperature = 175;
     private int progress, maxProgress;
     private final ContainerData properties = new ContainerData() {
@@ -342,6 +301,7 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
 
     @Override
     protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
         view.putInt("Temperature", this.temperature);
@@ -361,12 +321,11 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         if (!this.outputSlurryStack.isEmpty()) {
             view.store("OutputSlurry", SlurryStack.CODEC.codec(), this.outputSlurryStack);
         }
-
-        Multiblockable.write(this, view);
     }
 
     @Override
     protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         this.progress = view.getIntOr("Progress", 0);
         this.maxProgress = view.getIntOr("MaxProgress", 0);
         this.temperature = view.getIntOr("Temperature", 0);
@@ -381,7 +340,6 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
                 .orElse(ItemStack.EMPTY);
         this.outputSlurryStack = view.read("OutputSlurry", SlurryStack.CODEC.codec())
                 .orElse(SlurryStack.EMPTY);
-        Multiblockable.read(this, view);
     }
 
     private boolean hasEnergy() {
@@ -431,11 +389,6 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
         return new MixerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
     }
 
-    @Override
-    public List<PositionedPortRule> getPortRules() {
-        return PORT_RULES;
-    }
-
     public SyncingSimpleInventory getInputInventory() {
         return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
     }
@@ -481,6 +434,35 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     }
 
     @Override
+    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 0 && localOffset.getZ() == 0 && localOffset.getX() != 0
+                ? this.wrappedContainerStorage.getCombinedStorage()
+                : null;
+    }
+
+    @Override
+    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return localOffset.getY() == 2 && localOffset.getX() == 0 && localOffset.getZ() == 0
+                ? getInputFluidTank()
+                : null;
+    }
+
+    @Override
+    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
+        return localOffset.getY() == 0 && (localOffset.getX() != 0 || localOffset.getZ() != 0)
+                ? getOutputSlurryTank()
+                : null;
+    }
+
+    @Override
+    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
+        return (localOffset.getY() == 2 && (localOffset.getX() != 0 || localOffset.getZ() != 0))
+                || (localOffset.getY() == 0 && (localOffset.getX() != 0 || localOffset.getZ() != 0))
+                ? getEnergyStorage()
+                : null;
+    }
+
+    @Override
     public WrappedContainerStorage<SimpleContainer> getWrappedContainerStorage() {
         return wrappedContainerStorage;
     }
@@ -488,42 +470,6 @@ public class MixerBlockEntity extends IndustriaBlockEntity implements SyncableTi
     @Override
     public Block getBlock() {
         return getBlockState().getBlock();
-    }
-
-    @Override
-    public MultiblockType<?> type() {
-        return MultiblockTypeInit.MIXER;
-    }
-
-    @Override
-    public List<BlockPos> findPositions(@Nullable Direction facing) {
-        if (this.level == null)
-            return List.of();
-
-        List<BlockPos> positions = new ArrayList<>();
-        List<BlockPos> invalidPositions = new ArrayList<>();
-        for (int x = -1; x < 2; x++) {
-            for (int z = -1; z < 2; z++) {
-                for (int y = 0; y < 3; y++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    BlockPos pos = this.worldPosition.offset(x, y, z);
-                    if (this.level.getBlockState(pos).canBeReplaced()) {
-                        positions.add(pos);
-                    } else {
-                        invalidPositions.add(pos);
-                    }
-                }
-            }
-        }
-
-        return invalidPositions.isEmpty() ? positions : List.of();
-    }
-
-    @Override
-    public List<BlockPos> getMultiblockPositions() {
-        return this.multiblockPositions;
     }
 
     public boolean isMixing() {

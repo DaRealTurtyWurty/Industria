@@ -1,20 +1,28 @@
 package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.ArcFurnaceBlockEntity;
+import dev.turtywurty.industria.network.ArcFurnaceSetModePayload;
 import dev.turtywurty.industria.screen.widget.EnergyWidget;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screen.widget.GasWidget;
+import dev.turtywurty.industria.screen.widget.SelectEnumButton;
 import dev.turtywurty.industria.screen.widget.util.Orientation;
 import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
+import java.util.Map;
+
 public class ArcFurnaceScreen extends AbstractContainerScreen<ArcFurnaceScreenHandler> {
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/arc_furnace.png");
+
+    private SelectEnumButton<ArcFurnaceBlockEntity.Mode> modeButton;
 
     public ArcFurnaceScreen(ArcFurnaceScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title, 176, 201);
@@ -44,7 +52,12 @@ public class ArcFurnaceScreen extends AbstractContainerScreen<ArcFurnaceScreenHa
                 .orientation(Orientation.HORIZONTAL)
                 .build());
 
-        // TODO: Add triple toggle button for the mode
+        this.modeButton = addRenderableWidget(new SelectEnumButton<>(
+                this.menu.getMode(),
+                mode -> ClientPlayNetworking.send(new ArcFurnaceSetModePayload(mode)),
+                ArcFurnaceBlockEntity.Mode.values().length,
+                this.leftPos + 78, this.topPos + 82, 20, 20,
+                Map.of()));
     }
 
     @Override
