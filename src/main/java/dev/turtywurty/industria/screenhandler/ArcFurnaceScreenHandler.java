@@ -39,14 +39,15 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
         SyncingSimpleInventory inputInventory = this.blockEntity.getInputInventory();
         SyncingSimpleInventory outputInventory = this.blockEntity.getOutputInventory();
 
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 3; y++) {
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
                 addSlot(new Slot(inputInventory, (x + y * 3), 26 + x * 18, 18 + y * 18));
             }
         }
 
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 3; y++) {
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
                 addSlot(new Slot(outputInventory, (x + y * 3), 112 + x * 18, 18 + y * 18));
             }
         }
@@ -61,24 +62,24 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
         return ArcFurnaceBlockEntity.Mode.values()[this.propertyDelegate.get(0)];
     }
 
-    public int getProgress() {
-        return this.propertyDelegate.get(1);
+    public int getProgress(int index) {
+        return this.propertyDelegate.get(1 + index);
     }
 
-    public int getMaxProgress() {
-        return this.propertyDelegate.get(2);
+    public int getMaxProgress(int index) {
+        return this.propertyDelegate.get(10 + index);
     }
 
-    public float getProgressPercent() {
-        float progress = getProgress();
-        float maxProgress = getMaxProgress();
+    public float getProgressPercent(int index) {
+        float progress = getProgress(index);
+        float maxProgress = getMaxProgress(index);
         if (maxProgress == 0 || progress == 0)
             return 0.0F;
 
         return Mth.clamp(progress / maxProgress, 0.0F, 1.0F);
     }
 
-    public int getProgressScaled() {
-        return Mth.ceil(getProgressPercent() * 24);
+    public int getTemperature() {
+        return (int) this.blockEntity.getHeatStorage().getAmount();
     }
 }

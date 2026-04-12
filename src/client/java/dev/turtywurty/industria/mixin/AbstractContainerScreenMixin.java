@@ -21,12 +21,11 @@ public abstract class AbstractContainerScreenMixin extends Screen {
     private void industria$drawSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (DebugRenderingRegistry.debugRendering) {
             String text = String.valueOf(slot.index);
-            graphics.text(this.font,
+            graphics.centeredText(this.font,
                     text,
                     slot.x + (this.font.width(text) / 2),
                     slot.y + (this.font.lineHeight / 2),
-                    0x101010,
-                    false);
+                    0xFF101010);
         }
     }
 }

@@ -138,7 +138,7 @@ public class EnergyWidget implements Renderable, LayoutElement {
         private final EnergyStorage energyStorage;
         private int x, y;
         private int width, height;
-        private int color;
+        private int color = 0xFFD4AF37;
         private Orientation orientation = Orientation.VERTICAL;
 
         public Builder(EnergyStorage energyStorage) {

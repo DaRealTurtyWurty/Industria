@@ -26,25 +26,55 @@ public record AlloyFurnaceRecipe(IndustriaIngredient inputA, IndustriaIngredient
                                  int smeltTime) implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
-        ItemStack stackA = input.getItem(0);
-        ItemStack stackB = input.getItem(1);
-        return (this.inputA.testForRecipe(stackA) && this.inputB.testForRecipe(stackB)) ||
-                (this.inputA.testForRecipe(stackB) && this.inputB.testForRecipe(stackA));
+        ItemStack matchedA = ItemStack.EMPTY;
+        ItemStack matchedB = ItemStack.EMPTY;
+
+        for (int slot = 0; slot < input.size(); slot++) {
+            ItemStack stack = input.getItem(slot);
+            if (stack.isEmpty())
+                continue;
+
+            if (matchedA.isEmpty() && this.inputA.testForRecipe(stack)) {
+                matchedA = stack;
+                continue;
+            }
+
+            if (matchedB.isEmpty() && this.inputB.testForRecipe(stack)) {
+                matchedB = stack;
+                continue;
+            }
+
+            return false;
+        }
+
+        return !matchedA.isEmpty() && !matchedB.isEmpty();
     }
 
     @Override
     public ItemStack assemble(RecipeSimpleInventory inventory) {
-        // extract the inventory stacks
-        ItemStack stackA = this.inputA.testForRecipe(inventory.getItem(0)) ? inventory.getItem(0) : inventory.getItem(1);
-        ItemStack stackB = this.inputB.testForRecipe(inventory.getItem(0)) ? inventory.getItem(0) : inventory.getItem(1);
+        int slotA = -1;
+        int slotB = -1;
 
-        // remove the input stacks
-        stackA.shrink(this.inputA.stackData().count());
-        stackB.shrink(this.inputB.stackData().count());
+        for (int slot = 0; slot < inventory.size(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (slotA == -1 && this.inputA.testForRecipe(stack)) {
+                slotA = slot;
+            } else if (slotB == -1 && this.inputB.testForRecipe(stack)) {
+                slotB = slot;
+            }
+        }
 
-        // set the stacks back into the inventory
-        inventory.setItem(0, stackA);
-        inventory.setItem(1, stackB);
+        if (slotA != -1) {
+            ItemStack stackA = inventory.getItem(slotA);
+            stackA.shrink(this.inputA.stackData().count());
+            inventory.setItem(slotA, stackA);
+        }
+
+        if (slotB != -1) {
+            ItemStack stackB = inventory.getItem(slotB);
+            stackB.shrink(this.inputB.stackData().count());
+            inventory.setItem(slotB, stackB);
+        }
 
         return this.output.create();
     }

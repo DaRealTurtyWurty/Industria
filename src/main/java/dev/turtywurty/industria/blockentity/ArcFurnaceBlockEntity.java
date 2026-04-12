@@ -1,7 +1,11 @@
 package dev.turtywurty.industria.blockentity;
 
 import com.mojang.serialization.Codec;
+import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.gasapi.api.storage.SingleGasStorage;
+import dev.turtywurty.heatapi.api.HeatStorage;
+import dev.turtywurty.heatapi.api.base.NoLimitHeatStorage;
+import dev.turtywurty.heatapi.api.base.SimpleHeatStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
@@ -12,12 +16,14 @@ import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.gas.InputGasStorage;
 import dev.turtywurty.industria.blockentity.util.gas.WrappedGasStorage;
+import dev.turtywurty.industria.blockentity.util.heat.WrappedHeatStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.OutputSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.RecipeSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.GasInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
@@ -28,6 +34,8 @@ import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -62,11 +70,19 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
     private static final int INPUT_PORT_X = 2;
     private static final int OUTPUT_PORT_Z = 2;
     private static final int AUX_INPUT_PORT_X = -1;
+    private static final double COOLANT_TEMPERATURE_THRESHOLD = 500.0D; // Kelvin
+    private static final double COOLANT_VISCOSITY_THRESHOLD = 7500.0D;
+    private static final double MAX_RUNNING_TEMPERATURE = 250.0D; // Celsius
+    private static final double PASSIVE_COOLING_MULTIPLIER = 0.35D;
+    private static final double COOLANT_USAGE_MULTIPLIER = 100.0D;
+    private static final double ACTIVE_HEAT_GAIN = 0.15D;
+    private static final double COOLANT_EQUILIBRIUM_OFFSET = 2.0D;
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SingleFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedGasStorage<SingleGasStorage> wrappedGasStorage = new WrappedGasStorage<>();
+    private final WrappedHeatStorage<SimpleHeatStorage> wrappedHeatStorage = new WrappedHeatStorage<>();
 
     private final RecipeManager.CachedCheck<SingleRecipeInput, BlastingRecipe> blastingMatchGetter;
     private final RecipeManager.CachedCheck<RecipeSimpleInventory, AlloyFurnaceRecipe> alloyingMatchGetter;
@@ -75,6 +91,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
     private final NonNullList<ItemStack> bufferedOutputs = NonNullList.withSize(9, ItemStack.EMPTY);
     private final int[] progress = new int[9], maxProgress = new int[9];
     private Mode mode = Mode.BLASTING;
+    private boolean hasOverheated = false;
     private final ContainerData propertyDelegate = new ContainerData() {
         @Override
         public int getCount() {
@@ -86,7 +103,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
             return switch (index) {
                 case 0 -> mode.ordinal();
                 case 1, 2, 3, 4, 5, 6, 7, 8, 9 -> progress[index - 1];
-                case 10, 11, 12, 13, 14, 15, 16, 17, 18 -> maxProgress[index - 10];
+                case 10, 11, 12, 13, 14, 15, 16, 17, 18 -> getEffectiveMaxProgress(index - 10);
                 default -> throw new IndexOutOfBoundsException("Invalid index: " + index);
             };
         }
@@ -107,9 +124,10 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
 
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 9), Direction.WEST);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.SOUTH);
-        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000_000, 1_000_000, 0), Direction.EAST);
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.EAST);
-        this.wrappedGasStorage.addStorage(new InputGasStorage(this, FluidConstants.BUCKET * 5), Direction.EAST);
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000_000, 1_000_000, 0));
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidConstants.BUCKET * 10, this::isCoolantFluid));
+        this.wrappedGasStorage.addStorage(new InputGasStorage(this, FluidConstants.BUCKET * 5, gas -> gas.is(GasInit.OXYGEN)));
+        this.wrappedHeatStorage.addStorage(new NoLimitHeatStorage(true, false));
 
         this.blastingMatchGetter = RecipeManager.createCheck(RecipeType.BLASTING);
         this.alloyingMatchGetter = RecipeManager.createCheck(RecipeTypeInit.ALLOY_FURNACE);
@@ -126,19 +144,19 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         if (level == null || level.isClientSide())
             return;
 
-        if (hasBufferedOutput()) {
-            attemptOutputBufferInsertion();
-            return;
+        // TODO: Remove when gas pipes are implemented, this is just for testing purposes
+        InputGasStorage gasStorage = getGasStorage();
+        gasStorage.variant = GasVariant.of(GasInit.OXYGEN);
+        gasStorage.amount = FluidConstants.BUCKET * 5;
+
+        SimpleHeatStorage heatStorage = getHeatStorage();
+        if (heatStorage.getAmount() > 0) {
+            handlePassiveTemperatureChanges(heatStorage);
         }
 
-        SimpleEnergyStorage energyStorage = getEnergyStorage();
-        if (energyStorage.getAmount() < mode.getEnergyCostPerTick())
-            return;
-
         List<ResourceKey<Recipe<?>>> matchingRecipeIds = calculateCurrentRecipeIds();
-        if (matchingRecipeIds.isEmpty()) {
-            this.currentRecipeIds.clear();
-            for (int index = 0; index < this.progress.length; index++) {
+        for (int index = 0; index < this.progress.length; index++) {
+            if (index >= matchingRecipeIds.size() || matchingRecipeIds.get(index) == null) {
                 if (this.progress[index] > 0) {
                     this.progress[index]--;
                     if (this.progress[index] <= 0) {
@@ -148,20 +166,38 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                     update();
                 }
             }
+        }
+
+        if (hasBufferedOutput()) {
+            attemptOutputBufferInsertion();
+            return;
+        }
+
+        SimpleEnergyStorage energyStorage = getEnergyStorage();
+        if (energyStorage.getAmount() < mode.getEnergyCostPerTick())
+            return;
+
+        if (heatStorage.getAmount() > MAX_RUNNING_TEMPERATURE) {
+            hasOverheated = true;
+            heatStorage.setAmount(MAX_RUNNING_TEMPERATURE);
+            update();
 
             return;
         }
+
+        if (hasOverheated)
+            return;
 
         for (int index = 0; index < matchingRecipeIds.size(); index++) {
             if (index > 0 && this.mode == Mode.ALLOYING)
                 break;
 
-            handleRecipeProcessing(matchingRecipeIds, index, energyStorage);
+            handleRecipeProcessing(matchingRecipeIds, index, energyStorage, heatStorage);
         }
     }
 
     @SuppressWarnings("DataFlowIssue") // We already check when this method is called if the server level is null
-    private void handleRecipeProcessing(List<ResourceKey<Recipe<?>>> matchingRecipeIds, int index, SimpleEnergyStorage energyStorage) {
+    private void handleRecipeProcessing(List<ResourceKey<Recipe<?>>> matchingRecipeIds, int index, SimpleEnergyStorage energyStorage, SimpleHeatStorage heatStorage) {
         ResourceKey<Recipe<?>> recipeId = matchingRecipeIds.get(index);
         if (recipeId == null)
             return;
@@ -180,8 +216,13 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
             return;
 
         Recipe<?> recipe = recipeOpt.get();
-        if (this.currentRecipeIds.size() <= index || !this.currentRecipeIds.get(index).equals(recipeId)) {
-            this.currentRecipeIds.add(index, recipeId);
+
+        if (this.currentRecipeIds.size() <= index || !Objects.equals(this.currentRecipeIds.get(index), recipeId)) {
+            while (this.currentRecipeIds.size() <= index) {
+                this.currentRecipeIds.add(null);
+            }
+
+            this.currentRecipeIds.set(index, recipeId);
             this.progress[index] = 0;
             this.maxProgress[index] = switch (mode) {
                 case BLASTING -> ((BlastingRecipe) recipe).cookingTime() / 2;
@@ -190,14 +231,17 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
             };
             update();
         } else {
-            if (this.progress[index] < this.maxProgress[index]) {
+            int effectiveMaxProgress = getEffectiveMaxProgress(index);
+            if (this.progress[index] < effectiveMaxProgress) {
                 energyStorage.amount -= mode.getEnergyCostPerTick();
                 this.progress[index]++;
+
+                handleTemperatureChanges(heatStorage);
                 update();
                 return;
             }
 
-            if (this.progress[index] >= this.maxProgress[index]) {
+            if (this.progress[index] >= effectiveMaxProgress) {
                 List<ItemStack> output = switch (mode) {
                     case BLASTING -> List.of(((BlastingRecipe) recipe).assemble(singleRecipeInput));
                     case ALLOYING -> List.of(((AlloyFurnaceRecipe) recipe).assemble(inputInventory));
@@ -230,9 +274,74 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                 }
 
                 this.progress[index] = 0;
+                this.maxProgress[index] = 0;
+                while (this.currentRecipeIds.size() <= index) {
+                    this.currentRecipeIds.add(null);
+                }
+
+                this.currentRecipeIds.set(index, null);
+
                 update();
             }
         }
+    }
+
+    private int getEffectiveMaxProgress(int index) {
+        int baseMaxProgress = this.maxProgress[index];
+        if (this.mode != Mode.ALLOYING)
+            return baseMaxProgress;
+
+        InputGasStorage gasStorage = getGasStorage();
+        double ratio = Math.clamp((double) gasStorage.getAmount() / gasStorage.getCapacity(), 0.0D, 1.0D);
+        double speedMultiplier = 1.0D + (ratio * 2.0D); // Up to 3x speed at full gas
+        return (int) Math.ceil(baseMaxProgress / speedMultiplier);
+    }
+
+    private void handleTemperatureChanges(SimpleHeatStorage heatStorage) {
+        applyCooling(heatStorage, 0.0D, true);
+    }
+
+    private void handlePassiveTemperatureChanges(SimpleHeatStorage heatStorage) {
+        applyCooling(heatStorage, PASSIVE_COOLING_MULTIPLIER, false);
+    }
+
+    private void applyCooling(SimpleHeatStorage heatStorage, double passiveMultiplier, boolean includeHeatGain) {
+        InputFluidStorage fluidStorage = getFluidStorage();
+        if (fluidStorage.amount <= 0)
+            return;
+
+        double temperatureFactor = Math.clamp(heatStorage.getAmount() / MAX_RUNNING_TEMPERATURE, 0.0D, 1.0D);
+
+        FluidVariantAttributeHandler handler = FluidVariantAttributes.getHandlerOrDefault(fluidStorage.variant.getFluid());
+        double coolantTemperature = handler.getTemperature(fluidStorage.variant) - 273.15D;
+        double currentTemperature = heatStorage.getAmount();
+        double targetTemperature = coolantTemperature + COOLANT_EQUILIBRIUM_OFFSET;
+        if (currentTemperature <= targetTemperature && !includeHeatGain)
+            return;
+
+        double fluidViscosity = handler.getViscosity(fluidStorage.variant, this.level);
+        double viscosityFactor = 1.0D - Math.clamp(fluidViscosity / COOLANT_VISCOSITY_THRESHOLD, 0.0D, 1.0D);
+        double amountFactor = Math.clamp((double) fluidStorage.amount / fluidStorage.getCapacity(), 0.0D, 1.0D);
+
+        double heatGain = includeHeatGain ? ACTIVE_HEAT_GAIN : 0.0D;
+        double coolingEffect = passiveMultiplier
+                * (1.0D + temperatureFactor * 2.0D)
+                * viscosityFactor
+                * amountFactor;
+        double newTemperature = currentTemperature + heatGain - coolingEffect;
+        if (newTemperature < targetTemperature) {
+            newTemperature = targetTemperature;
+        }
+        heatStorage.setAmount(Math.max(newTemperature, 0.0D));
+
+        long coolantUsed = Math.min(fluidStorage.amount, (long) Math.ceil(coolingEffect * COOLANT_USAGE_MULTIPLIER));
+        fluidStorage.amount -= coolantUsed;
+        if (fluidStorage.amount <= 0) {
+            fluidStorage.amount = 0;
+            fluidStorage.variant = FluidVariant.blank();
+        }
+
+        update();
     }
 
     private void attemptOutputBufferInsertion() {
@@ -269,14 +378,14 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         SyncingSimpleInventory inputInventory = getInputInventory();
         return switch (this.mode) {
             case BLASTING -> {
-                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>();
+                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>(Collections.nCopies(inputInventory.getContainerSize(), null));
 
                 for (int slot = 0; slot < inputInventory.getContainerSize(); slot++) {
                     var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(slot));
                     Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.blastingMatchGetter.getRecipeFor(singleRecipeInput, level)
                             .map(RecipeHolder::id);
                     if (recipeKeyOpt.isPresent()) {
-                        recipeIds.add(slot, recipeKeyOpt.get());
+                        recipeIds.set(slot, recipeKeyOpt.get());
                     }
                 }
 
@@ -287,14 +396,14 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                     .map(RecipeHolder::id)
                     .toList();
             case RECYCLING -> {
-                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>();
+                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>(Collections.nCopies(inputInventory.getContainerSize(), null));
 
                 for (int slot = 0; slot < inputInventory.getContainerSize(); slot++) {
                     var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(slot));
                     Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.recyclingMatchGetter.getRecipeFor(singleRecipeInput, level)
                             .map(RecipeHolder::id);
                     if (recipeKeyOpt.isPresent()) {
-                        recipeIds.add(slot, recipeKeyOpt.get());
+                        recipeIds.set(slot, recipeKeyOpt.get());
                     }
                 }
 
@@ -310,10 +419,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         view.putString("Mode", this.mode.getSerializedName());
         view.putIntArray("Progress", this.progress);
         view.putIntArray("MaxProgress", this.maxProgress);
-
-        if (!this.currentRecipeIds.isEmpty()) {
-            view.store("CurrentRecipeIds", ExtraCodecs.listOf(RECIPE_CODEC), this.currentRecipeIds);
-        }
+        view.putBoolean("HasOverheated", this.hasOverheated);
 
         if (hasBufferedOutput()) {
             view.store("BufferedOutputs", ExtraCodecs.listOf(ItemStack.CODEC),
@@ -326,6 +432,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "GasTank", this.wrappedGasStorage);
+        ViewUtils.putChild(view, "Heat", this.wrappedHeatStorage);
     }
 
     @Override
@@ -340,8 +447,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         int[] maxProgressArray = view.getIntArray("MaxProgress").orElse(new int[0]);
         Arrays.setAll(this.maxProgress, index -> index < maxProgressArray.length ? maxProgressArray[index] : 0);
 
-        this.currentRecipeIds.clear();
-        view.read("CurrentRecipeIds", ExtraCodecs.listOf(RECIPE_CODEC)).ifPresent(this.currentRecipeIds::addAll);
+        this.hasOverheated = view.getBooleanOr("HasOverheated", false);
 
         this.bufferedOutputs.clear();
         view.read("BufferedOutputs", ExtraCodecs.listOf(ItemStack.CODEC)).ifPresent(buff -> {
@@ -354,6 +460,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "GasTank", this.wrappedGasStorage);
+        ViewUtils.readChild(view, "Heat", this.wrappedHeatStorage);
     }
 
     @Override
@@ -383,6 +490,11 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
             return isAuxInputPort(getLocalOffsetFromController(worldPos)) ? getGasStorage() : null;
 
         return side == Direction.EAST ? getGasStorage() : null;
+    }
+
+    @Override
+    protected @Nullable HeatStorage getHeatStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
+        return isAuxInputPort(localOffset) ? getHeatStorage() : null;
     }
 
     @Override
@@ -426,6 +538,10 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         return this.wrappedGasStorage.getStorage(side);
     }
 
+    public SimpleHeatStorage getHeatProvider(Direction side) {
+        return this.wrappedHeatStorage.getStorage(side);
+    }
+
     public SyncingSimpleInventory getInputInventory() {
         return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(Direction.WEST);
     }
@@ -446,14 +562,13 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         return (InputGasStorage) getGasProvider(Direction.EAST);
     }
 
-    public Mode getMode() {
-        return this.mode;
+    public NoLimitHeatStorage getHeatStorage() {
+        return (NoLimitHeatStorage) getHeatProvider(Direction.EAST);
     }
 
     public void setMode(Mode mode) {
-        if (this.mode == mode) {
+        if (this.mode == mode)
             return;
-        }
 
         this.mode = mode;
         this.currentRecipeIds.clear();
@@ -472,6 +587,18 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
 
     private boolean isAuxInputPort(BlockPos localOffset) {
         return localOffset.getX() == AUX_INPUT_PORT_X;
+    }
+
+    private boolean isCoolantFluid(FluidVariant fluidVariant) {
+        FluidVariantAttributeHandler handler = FluidVariantAttributes.getHandlerOrDefault(fluidVariant.getFluid());
+
+        double temperature = handler.getTemperature(fluidVariant);
+        double viscosity = handler.getViscosity(fluidVariant, this.level);
+
+        double temperatureScore = Math.clamp((COOLANT_TEMPERATURE_THRESHOLD - temperature) / COOLANT_TEMPERATURE_THRESHOLD, 0.0D, 1.0D);
+        double viscosityScore = Math.clamp((COOLANT_VISCOSITY_THRESHOLD - viscosity) / COOLANT_VISCOSITY_THRESHOLD, 0.0D, 1.0D);
+
+        return (temperatureScore * 0.75D) + (viscosityScore * 0.25D) > 0.5D;
     }
 
     public enum Mode implements IndustriaEnum<Mode> {

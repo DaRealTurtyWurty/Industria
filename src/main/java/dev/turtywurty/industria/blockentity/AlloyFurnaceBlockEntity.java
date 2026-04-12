@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -221,7 +222,9 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.ALLOY_FURNACE, getInventory(), this.level);
+        Container inventory = getInventory();
+        var recipeInventory = new RecipeSimpleInventory(inventory.getItem(INPUT_SLOT_0), inventory.getItem(INPUT_SLOT_1));
+        return serverWorld.recipeAccess().getRecipeFor(RecipeTypeInit.ALLOY_FURNACE, recipeInventory, this.level);
     }
 
     @Override

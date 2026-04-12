@@ -1,10 +1,7 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.heatapi.api.HeatStorage;
-import dev.turtywurty.industria.blockentity.ElectrolyzerBlockEntity;
-import dev.turtywurty.industria.blockentity.FractionalDistillationControllerBlockEntity;
-import dev.turtywurty.industria.blockentity.IndustriaMultiblockControllerBlockEntity;
-import dev.turtywurty.industria.blockentity.InductionHeaterBlockEntity;
+import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.multiblock.TransferType;
@@ -20,6 +17,8 @@ public class HeatStorageInit {
         HeatStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getHeatProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
         HeatStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getHeatProvider, BlockEntityTypeInit.INDUCTION_HEATER);
         HeatStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getHeatProvider, BlockEntityTypeInit.ELECTROLYZER);
+        HeatStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getHeatProvider, BlockEntityTypeInit.ARC_FURNACE);
+
         HeatStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getHeatStorageForExternal(pos, side) : null;

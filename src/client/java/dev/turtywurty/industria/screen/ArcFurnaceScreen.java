@@ -15,7 +15,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 
 import java.util.Map;
 
@@ -63,6 +65,49 @@ public class ArcFurnaceScreen extends AbstractContainerScreen<ArcFurnaceScreenHa
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 83, this.topPos + 37, 176, 14, this.menu.getProgressScaled(), 17);
+
+        int temperature = this.menu.getTemperature();
+        int temperatureColor = getTemperatureColor(temperature);
+        int textX = this.leftPos + 8;
+        int textY = this.topPos + 6;
+        context.text(this.font, temperature + " C", textX, textY, temperatureColor, false);
+
+        boolean alloying = this.menu.getMode() == ArcFurnaceBlockEntity.Mode.ALLOYING;
+        float sharedProgress = alloying ? this.menu.getProgressPercent(0) : 0.0F;
+        for (int index = 0; index < 9; index++) {
+            Slot slot = this.menu.slots.get(index);
+            if(!slot.hasItem())
+                continue;
+
+            float progress = alloying ? sharedProgress : this.menu.getProgressPercent(index);
+
+            int x0 = this.leftPos + slot.x;
+            int y0 = this.topPos + slot.y + 14;
+            int x1 = x0 + (int) (16 * progress);
+            int y1 = y0 + 2;
+
+            context.fill(x0, y0, x1, y1, getProgressColor(progress));
+        }
+    }
+
+    private static int getProgressColor(float progress) {
+        progress = Math.clamp(progress, 0.0F, 1.0F);
+
+        int red = (int) ((1.0F - progress) * 255.0F);
+        int green = (int) (progress * 255.0F);
+
+        return 0xFF000000
+                | (red << 16)
+                | (green << 8);
+    }
+
+    private static int getTemperatureColor(int temperature) {
+        float progress = Mth.clamp(temperature / 250.0F, 0.0F, 1.0F);
+        int red = 255;
+        int green = (int) (255.0F * (1.0F - progress));
+
+        return 0xFF000000
+                | (red << 16)
+                | (green << 8);
     }
 }
