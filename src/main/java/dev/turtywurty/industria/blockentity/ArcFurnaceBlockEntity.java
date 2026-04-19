@@ -253,7 +253,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                         if (getOutputInventory().canAddItem(stack)) {
                             getOutputInventory().addItem(stack);
                         } else {
-                            this.bufferedOutputs.add(stack);
+                            addBufferedOutput(stack);
                         }
                     }
                 }
@@ -364,6 +364,42 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         for (int index = 0; index < this.bufferedOutputs.size(); index++) {
             this.bufferedOutputs.set(index, index < newBufferedOutputs.size() ? newBufferedOutputs.get(index) : ItemStack.EMPTY);
         }
+    }
+
+    private void addBufferedOutput(ItemStack stack) {
+        for (ItemStack bufferedStack : this.bufferedOutputs) {
+            if (!bufferedStack.isEmpty() && ItemStack.isSameItemSameComponents(bufferedStack, stack)) {
+                int transferable = Math.min(stack.getCount(), bufferedStack.getMaxStackSize() - bufferedStack.getCount());
+                if (transferable > 0) {
+                    bufferedStack.grow(transferable);
+                    stack.shrink(transferable);
+                    if (stack.isEmpty())
+                        return;
+                }
+            }
+        }
+
+        for (int index = 0; index < this.bufferedOutputs.size(); index++) {
+            if (this.bufferedOutputs.get(index).isEmpty()) {
+                this.bufferedOutputs.set(index, stack);
+                return;
+            }
+        }
+
+        // Buffer full. Merge into the last slot if possible; otherwise replace it.
+        int lastIndex = this.bufferedOutputs.size() - 1;
+        ItemStack lastStack = this.bufferedOutputs.get(lastIndex);
+        if (!lastStack.isEmpty() && ItemStack.isSameItemSameComponents(lastStack, stack)) {
+            int transferable = Math.min(stack.getCount(), lastStack.getMaxStackSize() - lastStack.getCount());
+            if (transferable > 0) {
+                lastStack.grow(transferable);
+                stack.shrink(transferable);
+                if (stack.isEmpty())
+                    return;
+            }
+        }
+
+        this.bufferedOutputs.set(lastIndex, stack);
     }
 
     private boolean hasBufferedOutput() {
