@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -16,6 +17,7 @@ public class ItemGroupInit {
             .displayItems((displayContext, entries) ->
                     BuiltInRegistries.ITEM.registryKeySet().stream()
                             .filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
+                            .filter(key -> FabricLoader.getInstance().isDevelopmentEnvironment() || !key.identifier().getPath().equals("multiblock_exporter"))
                             .map(BuiltInRegistries.ITEM::getValueOrThrow)
                             .forEach(entries::accept))
             .build());

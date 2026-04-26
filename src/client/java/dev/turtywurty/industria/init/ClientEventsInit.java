@@ -7,6 +7,7 @@ import dev.turtywurty.industria.renderer.conveyor.FeederConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.HatchConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.world.ConveyorNetworkLevelRenderer;
 import dev.turtywurty.industria.renderer.world.FluidPocketLevelRenderer;
+import dev.turtywurty.industria.renderer.world.MultiblockExportSelectionRenderer;
 import dev.turtywurty.industria.renderer.world.PipeNetworkLevelRenderer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
@@ -38,6 +39,9 @@ public class ClientEventsInit {
 
         var pipeNetworkLevelRenderer = new PipeNetworkLevelRenderer();
         LevelRenderEvents.AFTER_SOLID_FEATURES.register(pipeNetworkLevelRenderer::render);
+
+        var multiblockExportSelectionRenderer = new MultiblockExportSelectionRenderer();
+        LevelRenderEvents.AFTER_SOLID_FEATURES.register(multiblockExportSelectionRenderer::render);
 
         var conveyorNetworkLevelRenderer = new ConveyorNetworkLevelRenderer();
         LevelRenderEvents.COLLECT_SUBMITS.register(conveyorNetworkLevelRenderer::render);

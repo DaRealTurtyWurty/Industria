@@ -127,6 +127,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.FLUID_TANK, "Fluid Tank");
         addText(translationBuilder, FluidTankBlockEntity.TITLE, "Fluid Tank");
 
+        translationBuilder.add(ItemInit.MULTIBLOCK_EXPORTER, "Multiblock Exporter");
         translationBuilder.add(ItemInit.ROTARY_KILN, "Rotary Kiln");
 
         translationBuilder.add(BlockInit.SHAKING_TABLE, "Shaking Table");
