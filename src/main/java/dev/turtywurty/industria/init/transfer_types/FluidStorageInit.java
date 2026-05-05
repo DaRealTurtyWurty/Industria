@@ -29,6 +29,8 @@ public class FluidStorageInit {
         FluidStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getFluidProvider, BlockEntityTypeInit.SHAKING_TABLE);
         FluidStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getFluidProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
         FluidStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getFluidProvider, BlockEntityTypeInit.ARC_FURNACE);
+        FluidStorage.SIDED.registerForBlockEntity(TreeTapBlockEntity::getFluidProvider, BlockEntityTypeInit.TREE_TAP);
+
         FluidStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getFluidStorageForExternal(pos) : null;

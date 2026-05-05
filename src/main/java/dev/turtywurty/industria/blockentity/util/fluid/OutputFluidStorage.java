@@ -7,10 +7,10 @@ import java.util.function.Predicate;
 
 public class OutputFluidStorage extends PredicateFluidStorage {
     public OutputFluidStorage(BlockEntity blockEntity, long capacity, Predicate<FluidVariant> canExtract) {
-        super(blockEntity, capacity, $ -> false, canExtract);
+        super(blockEntity, capacity, _ -> false, canExtract);
     }
 
     public OutputFluidStorage(BlockEntity blockEntity, long capacity) {
-        this(blockEntity, capacity, $ -> true);
+        this(blockEntity, capacity, _ -> true);
     }
 }

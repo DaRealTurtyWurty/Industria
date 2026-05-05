@@ -23,5 +23,8 @@ public class FluidAttributesInit {
 
         FluidVariantAttributes.register(FluidInit.SODIUM_ALUMINATE.still(), commonFluidAttributes);
         FluidVariantAttributes.register(FluidInit.SODIUM_ALUMINATE.flowing(), commonFluidAttributes);
+
+        FluidVariantAttributes.register(FluidInit.LATEX.still(), commonFluidAttributes);
+        FluidVariantAttributes.register(FluidInit.LATEX.flowing(), commonFluidAttributes);
     }
 }

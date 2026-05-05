@@ -171,6 +171,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.capturing"), "Capturing");
         addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.idle"), "Waiting for mob");
         addText(translationBuilder, ContainmentConveyorScreen.PROGRESS_TOOLTIP_TEXT, "Progress: %s%%");
+        translationBuilder.add(BlockInit.TREE_TAP, "Tree Tap");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");

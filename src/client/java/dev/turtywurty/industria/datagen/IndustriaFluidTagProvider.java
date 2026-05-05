@@ -26,5 +26,9 @@ public class IndustriaFluidTagProvider extends FabricTagsProvider.FluidTagsProvi
         valueLookupBuilder(TagList.Fluids.SODIUM_ALUMINATE)
                 .add(FluidInit.SODIUM_ALUMINATE.still())
                 .add(FluidInit.SODIUM_ALUMINATE.flowing());
+
+        valueLookupBuilder(TagList.Fluids.LATEX)
+                .add(FluidInit.LATEX.still())
+                .add(FluidInit.LATEX.flowing());
     }
 }

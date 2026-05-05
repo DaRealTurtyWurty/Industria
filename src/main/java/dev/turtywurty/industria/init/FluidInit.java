@@ -20,6 +20,7 @@ public class FluidInit {
     public static final FluidRegistryObject<?, ?> SODIUM_ALUMINATE = registerFluid("sodium_aluminate");
     public static final FluidRegistryObject<?, ?> MOLTEN_ALUMINIUM = registerMoltenFluid("molten_aluminium");
     public static final FluidRegistryObject<?, ?> MOLTEN_CRYOLITE = registerMoltenFluid("molten_cryolite");
+    public static final FluidRegistryObject<?, ?> LATEX = registerFluid("latex");
 
     public static FluidRegistryObject<MoltenFluid.Still, MoltenFluid.Flowing> registerMoltenFluid(String name) {
         return registerFluid(name, MoltenFluid.Still::new, MoltenFluid.Flowing::new);
@@ -47,5 +48,6 @@ public class FluidInit {
         return Registry.register(BuiltInRegistries.FLUID, Industria.id(name), fluid);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }

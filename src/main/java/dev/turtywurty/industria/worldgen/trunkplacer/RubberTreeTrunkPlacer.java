@@ -92,6 +92,6 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     @Override
     protected boolean placeLog(WorldGenLevel world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, BlockPos pos, TreeConfiguration config) {
         return placeLog(world, replacer, random, pos, config,
-                state -> state.setValue(LatexBlock.LATEX_LEVEL, random.nextIntBetweenInclusive(1, 5)));
+                state -> state.setValue(LatexBlock.LATEX_LEVEL, random.nextIntBetweenInclusive(6, 9)));
     }
 }

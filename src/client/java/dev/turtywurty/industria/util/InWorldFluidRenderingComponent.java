@@ -157,60 +157,94 @@ public class InWorldFluidRenderingComponent {
                                         TextureAtlasSprite sprite,
                                         int color,
                                         int light, int overlay) {
-        float tileSize = 1.0f; // Maximum tile size in world space
-        int tileCountX = Math.max(1, Math.round((x2 - x1) / tileSize));
-        int tileCountZ = Math.max(1, Math.round((z2 - z1) / tileSize));
+        float tileSize = 1.0f;
+        int fullTilesX = (int) ((x2 - x1) / tileSize);
+        int fullTilesZ = (int) ((z2 - z1) / tileSize);
+        float leftoverX = (x2 - x1) - (fullTilesX * tileSize);
+        float leftoverZ = (z2 - z1) - (fullTilesZ * tileSize);
 
-        float tileWidth = (x2 - x1) / tileCountX;
-        float tileDepth = (z2 - z1) / tileCountZ;
-
-        float u0 = sprite.getU0();
-        float v0 = sprite.getV0();
-        float u1 = sprite.getU1();
-        float v1 = sprite.getV1();
-
-        float tileUSize = (u1 - u0);
-        float tileVSize = (v1 - v0);
-
-        for (int i = 0; i < tileCountX; i++) {
-            for (int j = 0; j < tileCountZ; j++) {
-                float xStart = x1 + i * tileWidth;
-                float xEnd = xStart + tileWidth;
-                float zStart = z1 + j * tileDepth;
-                float zEnd = zStart + tileDepth;
-
-                float uEnd = u0 + tileUSize;
-                float vEnd = v0 + tileVSize;
-
-                vertexConsumer.addVertex(entry, xStart, y, zStart)
-                        .setColor(color)
-                        .setUv(u0, v0)
-                        .setLight(light)
-                        .setOverlay(overlay)
-                        .setNormal(0.0F, 1.0F, 0.0F);
-
-                vertexConsumer.addVertex(entry, xStart, y, zEnd)
-                        .setColor(color)
-                        .setUv(u0, vEnd)
-                        .setLight(light)
-                        .setOverlay(overlay)
-                        .setNormal(0.0F, 1.0F, 0.0F);
-
-                vertexConsumer.addVertex(entry, xEnd, y, zEnd)
-                        .setColor(color)
-                        .setUv(uEnd, vEnd)
-                        .setLight(light)
-                        .setOverlay(overlay)
-                        .setNormal(0.0F, 1.0F, 0.0F);
-
-                vertexConsumer.addVertex(entry, xEnd, y, zStart)
-                        .setColor(color)
-                        .setUv(uEnd, v0)
-                        .setLight(light)
-                        .setOverlay(overlay)
-                        .setNormal(entry, 0.0F, 1.0F, 0.0F);
+        for (int i = 0; i < fullTilesX; i++) {
+            for (int j = 0; j < fullTilesZ; j++) {
+                float xStart = x1 + i * tileSize;
+                float xEnd = xStart + tileSize;
+                float zStart = z1 + j * tileSize;
+                float zEnd = zStart + tileSize;
+                drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
+                        sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(),
+                        color, light, overlay);
             }
         }
+
+        if (leftoverX > 0) {
+            for (int j = 0; j < fullTilesZ; j++) {
+                float xStart = x1 + fullTilesX * tileSize;
+                float xEnd = xStart + leftoverX;
+                float zStart = z1 + j * tileSize;
+                float zEnd = zStart + tileSize;
+                drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
+                        sprite.getU0(), sprite.getV0(), sprite.getU(leftoverX), sprite.getV(tileSize),
+                        color, light, overlay);
+            }
+        }
+
+        if (leftoverZ > 0) {
+            for (int i = 0; i < fullTilesX; i++) {
+                float xStart = x1 + i * tileSize;
+                float xEnd = xStart + tileSize;
+                float zStart = z1 + fullTilesZ * tileSize;
+                float zEnd = zStart + leftoverZ;
+                drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
+                        sprite.getU0(), sprite.getV0(), sprite.getU(tileSize), sprite.getV(leftoverZ),
+                        color, light, overlay);
+            }
+
+            if (leftoverX > 0) {
+                float xStart = x1 + fullTilesX * tileSize;
+                float xEnd = xStart + leftoverX;
+                float zStart = z1 + fullTilesZ * tileSize;
+                float zEnd = zStart + leftoverZ;
+                drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
+                        sprite.getU0(), sprite.getV0(), sprite.getU(leftoverX), sprite.getV(leftoverZ),
+                        color, light, overlay);
+            }
+        }
+    }
+
+    private static void drawTopQuad(VertexConsumer vertexConsumer,
+                                    PoseStack.Pose entry,
+                                    float x1, float y, float z1,
+                                    float x2, float z2,
+                                    float minU, float minV,
+                                    float maxU, float maxV,
+                                    int color,
+                                    int light, int overlay) {
+        vertexConsumer.addVertex(entry, x1, y, z1)
+                .setColor(color)
+                .setUv(minU, minV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(0.0F, 1.0F, 0.0F);
+
+        vertexConsumer.addVertex(entry, x1, y, z2)
+                .setColor(color)
+                .setUv(minU, maxV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(0.0F, 1.0F, 0.0F);
+
+        vertexConsumer.addVertex(entry, x2, y, z2)
+                .setColor(color)
+                .setUv(maxU, maxV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(0.0F, 1.0F, 0.0F);
+
+        vertexConsumer.addVertex(entry, x2, y, z1)
+                .setColor(color)
+                .setUv(maxU, minV)
+                .setLight(light)
+                .setOverlay(overlay)
+                .setNormal(entry, 0.0F, 1.0F, 0.0F);
     }
 
     public void drawTiledXYQuadOnly(@Nullable FluidVariant fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {

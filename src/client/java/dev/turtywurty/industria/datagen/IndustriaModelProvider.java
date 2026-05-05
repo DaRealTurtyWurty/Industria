@@ -35,6 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM;
@@ -564,6 +565,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerCustomCube(blockStateModelGenerator, BlockInit.ROTARY_KILN_CONTROLLER, Industria.id("block/rotary_kiln"));
         registerCustomCube(blockStateModelGenerator, BlockInit.SHAKING_TABLE, Industria.id("block/shaking_table"));
         registerCustomCube(blockStateModelGenerator, BlockInit.UPGRADE_STATION, Industria.id("block/upgrade_station"));
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(BlockInit.TREE_TAP);
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
@@ -743,12 +745,34 @@ public class IndustriaModelProvider extends FabricModelProvider {
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
 
-        final List<Item> exclusionList = List.of(ItemInit.SEISMIC_SCANNER, ItemInit.SIMPLE_DRILL_HEAD, ItemInit.BLOCK_BUILDER_DRILL_HEAD, ItemInit.EMPTY_MOB_JAR);
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.ARC_FURNACE,
+                new IndustriaBlockEntityItemRenderer.Unbaked(ArcFurnaceModel.LAYER_LOCATION, ArcFurnaceModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
+
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.TREE_TAP,
+                new IndustriaBlockEntityItemRenderer.Unbaked(TreeTapModel.LAYER_LOCATION, TreeTapModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
+
+        final List<Item> exclusionList = List.of(
+                ItemInit.SEISMIC_SCANNER,
+                ItemInit.SIMPLE_DRILL_HEAD,
+                ItemInit.BLOCK_BUILDER_DRILL_HEAD,
+                ItemInit.MULTIBLOCK_EXPORTER,
+                ItemInit.EMPTY_MOB_JAR);
 
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                 .map(BuiltInRegistries.ITEM::getValue)
                 .filter(entry -> !(entry instanceof BlockItem))
                 .filter(entry -> !exclusionList.contains(entry))
+                .filter(Objects::nonNull)
                 .forEach(entry -> itemModelGenerator.generateFlatItem(entry, FLAT_ITEM));
     }
 

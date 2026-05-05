@@ -1,14 +1,14 @@
 {
   "model": {
     "type": "minecraft:special",
-    "base": "industria:item/arc_furnace",
+    "base": "industria:item/tree_tap",
     "model": {
       "type": "industria:block_entity_item",
       "model_layer": {
-        "id": "industria:arc_furnace",
+        "id": "industria:tree_tap",
         "name": "main"
       },
-      "texture": "minecraft:textures/block/iron_block.png"
+      "texture": "industria:textures/block/tree_tap.png"
     }
   }
 }
