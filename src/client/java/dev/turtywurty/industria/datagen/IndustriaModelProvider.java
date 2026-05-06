@@ -766,7 +766,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
                 ItemInit.SIMPLE_DRILL_HEAD,
                 ItemInit.BLOCK_BUILDER_DRILL_HEAD,
                 ItemInit.MULTIBLOCK_EXPORTER,
-                ItemInit.EMPTY_MOB_JAR);
+                ItemInit.EMPTY_MOB_JAR
+        );
 
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                 .map(BuiltInRegistries.ITEM::getValue)

@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "AbstractContainerScreenMixin",
-    "HumanoidModelMixin"
+    "HumanoidModelMixin",
+    "GuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1

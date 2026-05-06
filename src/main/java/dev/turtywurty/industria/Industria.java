@@ -64,6 +64,7 @@ public class Industria implements ModInitializer {
         FluidAttributesInit.init();
         FluidDataInit.init();
         GasAttributesInit.init();
+        ConsumeEffectTypeInit.init();
 
         LOGGER.info("Industria has finished loading!");
     }

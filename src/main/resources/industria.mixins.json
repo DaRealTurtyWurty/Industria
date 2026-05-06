@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "BlockEntityTypeAccessor",
+    "FoodDataMixin",
+    "PlayerMixin",
     "fluid.AbstractBoatMixin",
     "fluid.BoatDispenseItemBehaviorMixin",
     "fluid.BucketItemMixin",

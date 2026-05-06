@@ -1,12 +1,14 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.init.list.FoodList;
 import dev.turtywurty.industria.item.*;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 import java.util.function.Function;
 
@@ -133,6 +135,10 @@ public class ItemInit {
     public static final Item EMPTY_MOB_JAR = register("mob_jar", Item::new);
     public static final MobJarItem FILLED_MOB_JAR = register("filled_mob_jar",
             settings -> new MobJarItem(settings.craftRemainder(ItemInit.EMPTY_MOB_JAR)));
+    public static final Item BOTTLE_FORMIC_ACID = registerWithSettings("bottle_formic_acid",
+            settings -> settings.craftRemainder(Items.GLASS_BOTTLE)
+                    .stacksTo(16)
+                    .food(FoodList.FORMIC_ACID_FOOD, FoodList.FORMIC_ACID_CONSUMABLE));
 
     public static Item register(String name) {
         return registerItem(name, new Item(new Item.Properties()
@@ -154,7 +160,8 @@ public class ItemInit {
         return register(name, constructor, settings -> settings);
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 
     private static <T extends Item> T registerItem(String name, T item) {
         return Registry.register(BuiltInRegistries.ITEM, Industria.id(name), item);

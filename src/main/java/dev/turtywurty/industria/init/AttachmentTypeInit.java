@@ -8,16 +8,11 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.world.level.material.Fluid;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("UnstableApiUsage")
 public class AttachmentTypeInit {
     public static final AttachmentType<Map<BlockPos, MultiblockData>> MULTIBLOCK_ATTACHMENT =
             AttachmentRegistry.create(Industria.id("multiblock"),
@@ -25,13 +20,11 @@ public class AttachmentTypeInit {
                             .syncWith(ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, MultiblockData.STREAM_CODEC),
                                     AttachmentSyncPredicate.all()));
 
-    public static final AttachmentType<Map<String, Holder<Fluid>>> FLUID_MAP_ATTACHMENT =
-            AttachmentRegistry.create(Industria.id("fluid_map"),
-                    mapBuilder -> mapBuilder.persistent(Codec.unboundedMap(Codec.STRING, BuiltInRegistries.FLUID.holderByNameCodec()))
-                            .syncWith(ByteBufCodecs.map(HashMap::new,
-                                            ByteBufCodecs.STRING_UTF8,
-                                            ByteBufCodecs.holderRegistry(Registries.FLUID)),
-                                    AttachmentSyncPredicate.all()));
+    public static final AttachmentType<Integer> STOMACH_DESTRUCTION_ATTACHMENT =
+            AttachmentRegistry.create(Industria.id("stomach_destruction"),
+                    builder -> builder.persistent(Codec.INT)
+                            .syncWith(ByteBufCodecs.INT, AttachmentSyncPredicate.targetOnly()));
 
-    public static void init() {}
+    public static void init() {
+    }
 }
