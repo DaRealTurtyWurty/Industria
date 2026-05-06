@@ -38,7 +38,7 @@ public class DestroyStomachConsumeEffect implements ConsumeEffect {
         if (maxHealth == null)
             return false;
 
-        int destructionLevel = player.getAttachedOrGet(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, () -> 0) + 1;
+        int destructionLevel = player.getAttachedOrElse(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, 0) + 1;
         player.setAttached(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, destructionLevel);
 
         int maxFood = 20 - destructionLevel * 2;

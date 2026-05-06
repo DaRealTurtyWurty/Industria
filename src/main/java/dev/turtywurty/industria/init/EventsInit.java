@@ -94,7 +94,7 @@ public class EventsInit {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, _) -> {
             if (entity instanceof Player player) {
-                if (player.getAttachedOrGet(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, () -> 0) > 0) {
+                if (player.getAttachedOrElse(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, 0) > 0) {
                     player.setAttached(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, 0);
 
                     AttributeInstance attribute = player.getAttribute(Attributes.MAX_HEALTH);

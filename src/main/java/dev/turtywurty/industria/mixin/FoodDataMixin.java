@@ -37,7 +37,7 @@ public abstract class FoodDataMixin implements IHasPlayer {
 
     @Unique
     private int industria$getStomachDestructionLevel() {
-        return this.industria$player.getAttachedOrGet(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, () -> 0);
+        return this.industria$player.getAttachedOrElse(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, 0);
     }
 
     @ModifyExpressionValue(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))

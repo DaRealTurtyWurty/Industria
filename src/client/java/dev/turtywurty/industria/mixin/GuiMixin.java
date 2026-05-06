@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public abstract class GuiMixin {
     @ModifyConstant(method = "extractFood", constant = @Constant(intValue = 10))
     private int industria$modifyFoodIconCount(int original, GuiGraphicsExtractor graphics, Player player) {
-        int stomachDestructionLevel = player.getAttachedOrGet(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, () -> 0);
+        int stomachDestructionLevel = player.getAttachedOrElse(AttachmentTypeInit.STOMACH_DESTRUCTION_ATTACHMENT, 0);
         int maxFood = 20 - stomachDestructionLevel * 2;
         return (maxFood + 1) / 2;
     }

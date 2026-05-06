@@ -5,7 +5,9 @@
   "client": [
     "AbstractContainerScreenMixin",
     "HumanoidModelMixin",
-    "GuiMixin"
+    "GuiMixin",
+    "AvatarRenderStateMixin",
+    "AvatarRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
