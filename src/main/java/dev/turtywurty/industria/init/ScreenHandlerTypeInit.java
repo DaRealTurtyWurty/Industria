@@ -95,6 +95,9 @@ public class ScreenHandlerTypeInit {
     public static final MenuType<ContainmentConveyorScreenHandler> CONTAINMENT_CONVEYOR =
             register("containment_conveyor", ContainmentConveyorScreenHandler::new, BlockPosPayload.CODEC);
 
+    public static final MenuType<AgitatorScreenHandler> AGITATOR =
+            register("agitator", AgitatorScreenHandler::new, BlockPosPayload.CODEC);
+
     public static <T extends AbstractContainerMenu, D extends CustomPacketPayload> ExtendedMenuType<T, D> register(String name, ExtendedMenuType.ExtendedFactory<T, D> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> codec) {
         return Registry.register(BuiltInRegistries.MENU, Industria.id(name), new ExtendedMenuType<>(factory, codec));
     }

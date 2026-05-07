@@ -1,0 +1,27 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:agitator",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 1, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "minecraft:iron_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"]
+      ],
+      [
+        ["minecraft:glass", "industria:fluid_pipe", "minecraft:glass"],
+        ["minecraft:hopper", "industria:agitator", "minecraft:cauldron"],
+        ["minecraft:glass", "industria:fluid_tank", "minecraft:glass"]
+      ],
+      [
+        ["minecraft:glass", "minecraft:glass", "minecraft:glass"],
+        ["minecraft:glass", "minecraft:iron_bars", "minecraft:glass"],
+        ["minecraft:glass", "minecraft:glass", "minecraft:glass"]
+      ]
+    ]
+  }
+}

@@ -65,6 +65,11 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true)
                     .shapes(CentrifugalConcentratorBlock.VOXEL_SHAPE));
 
+    public static final MultiblockType<AgitatorBlockEntity> AGITATOR = register("agitator",
+            new MultiblockType.Builder<AgitatorBlockEntity>(26) // 3x3x3
+                    .setHasDirectionProperty(true)
+                    .shapes(AgitatorBlock.VOXEL_SHAPE));
+
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }

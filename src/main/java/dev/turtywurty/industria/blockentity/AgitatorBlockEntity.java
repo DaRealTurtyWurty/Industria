@@ -11,7 +11,9 @@ import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
+import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
+import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.gas.InputGasStorage;
 import dev.turtywurty.industria.blockentity.util.gas.OutputGasStorage;
 import dev.turtywurty.industria.blockentity.util.gas.WrappedGasStorage;
@@ -20,11 +22,18 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.InputSlurryStorage;
 import dev.turtywurty.industria.blockentity.util.slurry.OutputSlurryStorage;
+import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.init.RecipeTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.recipe.AgitatorRecipe;
+import dev.turtywurty.industria.recipe.input.AgitatorPortStack;
+import dev.turtywurty.industria.recipe.input.AgitatorRecipeInput;
+import dev.turtywurty.industria.screenhandler.AgitatorScreenHandler;
 import dev.turtywurty.industria.util.AgitatorPortType;
+import dev.turtywurty.industria.util.OutputItemStack;
 import dev.turtywurty.industria.util.ViewUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -34,12 +43,19 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -51,6 +67,7 @@ import team.reborn.energy.api.EnergyStorage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("agitator");
@@ -89,6 +106,32 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     private final OutputGasStorage[] outputGasStorages = new OutputGasStorage[OUTPUT_PORT_COUNT];
     private final AgitatorPortType[] inputModes = new AgitatorPortType[INPUT_PORT_COUNT];
     private final AgitatorPortType[] outputModes = new AgitatorPortType[OUTPUT_PORT_COUNT];
+    private final ContainerData properties = new ContainerData() {
+        @Override
+        public int get(int index) {
+            return switch (index) {
+                case 0 -> progress;
+                case 1 -> maxProgress;
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index) {
+                case 0 -> progress = value;
+                case 1 -> maxProgress = value;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    };
+    private ResourceKey<Recipe<?>> currentRecipeId;
+    private int progress;
+    private int maxProgress;
 
     public AgitatorBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.AGITATOR, BlockEntityTypeInit.AGITATOR, pos, state);
@@ -140,6 +183,48 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     public void onTick() {
         if (this.level == null || this.level.isClientSide())
             return;
+
+        AgitatorRecipeInput recipeInput = createRecipeInput();
+        if (this.currentRecipeId == null) {
+            Optional<RecipeHolder<AgitatorRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+            if (recipeEntry.isPresent() && canOutput(recipeEntry.get().value())) {
+                this.currentRecipeId = recipeEntry.get().id();
+                this.maxProgress = recipeEntry.get().value().processTime();
+                this.progress = 0;
+                update();
+            }
+
+            return;
+        }
+
+        Optional<RecipeHolder<AgitatorRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
+        if (recipeEntry.isEmpty()
+                || !recipeEntry.get().id().equals(this.currentRecipeId)
+                || !canOutput(recipeEntry.get().value())) {
+            this.currentRecipeId = null;
+            this.progress = 0;
+            this.maxProgress = 0;
+            update();
+            return;
+        }
+
+        AgitatorRecipe recipe = recipeEntry.get().value();
+        SyncingEnergyStorage energyStorage = getEnergyStorage();
+        if (this.progress >= this.maxProgress) {
+            outputRecipe(recipe);
+            consumeInputs(recipe);
+            this.currentRecipeId = null;
+            this.progress = 0;
+            this.maxProgress = 0;
+            update();
+            return;
+        }
+
+        if (energyStorage.amount >= recipe.energyCost()) {
+            energyStorage.amount -= recipe.energyCost();
+            this.progress++;
+            update();
+        }
     }
 
     @Override
@@ -174,7 +259,7 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-        return null;
+        return new AgitatorScreenHandler(containerId, inventory, this, this.wrappedContainerStorage, this.properties);
     }
 
     @Override
@@ -187,6 +272,12 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         output.putIntArray("OutputModes", Arrays.stream(this.outputModes)
                 .mapToInt(AgitatorPortType::ordinal)
                 .toArray());
+        output.putInt("Progress", this.progress);
+        output.putInt("MaxProgress", this.maxProgress);
+
+        if (this.currentRecipeId != null) {
+            output.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+        }
 
         ViewUtils.putChild(output, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(output, "FluidStorage", this.wrappedFluidStorage);
@@ -208,6 +299,9 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         for (int index = 0; index < this.outputModes.length; index++) {
             this.outputModes[index] = AgitatorPortType.fromOrdinal(index < outputModes.length ? outputModes[index] : AgitatorPortType.ITEM.ordinal());
         }
+        this.progress = input.getIntOr("Progress", 0);
+        this.maxProgress = input.getIntOr("MaxProgress", 0);
+        this.currentRecipeId = input.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE)).orElse(null);
 
         ViewUtils.readChild(input, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(input, "FluidStorage", this.wrappedFluidStorage);
@@ -258,6 +352,22 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
     public boolean isOutputPortEmpty(int index) {
         validateOutputIndex(index);
+        return isOutputStorageEmpty(index);
+    }
+
+    public int getProgress() {
+        return this.progress;
+    }
+
+    public int getMaxProgress() {
+        return this.maxProgress;
+    }
+
+    public boolean isProcessing() {
+        return this.currentRecipeId != null;
+    }
+
+    private boolean isOutputStorageEmpty(int index) {
         return switch (this.outputModes[index]) {
             case ITEM -> this.outputItemStorages[index].isEmpty();
             case FLUID -> this.outputFluidStorages[index].isResourceBlank() || this.outputFluidStorages[index].amount <= 0;
@@ -468,5 +578,159 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     private static void validateOutputIndex(int index) {
         if (index < 0 || index >= OUTPUT_PORT_COUNT)
             throw new IndexOutOfBoundsException("Output port index out of bounds: " + index);
+    }
+
+    private Optional<RecipeHolder<AgitatorRecipe>> getCurrentRecipe(AgitatorRecipeInput recipeInput) {
+        if (!(this.level instanceof ServerLevel serverLevel))
+            return Optional.empty();
+
+        return serverLevel.recipeAccess().getRecipeFor(RecipeTypeInit.AGITATOR, recipeInput, serverLevel);
+    }
+
+    private AgitatorRecipeInput createRecipeInput() {
+        List<AgitatorPortStack> inputs = new ArrayList<>(INPUT_PORT_COUNT);
+        for (int index = 0; index < INPUT_PORT_COUNT; index++) {
+            inputs.add(createPortStack(index));
+        }
+
+        return new AgitatorRecipeInput(inputs);
+    }
+
+    private AgitatorPortStack createPortStack(int index) {
+        return switch (this.inputModes[index]) {
+            case ITEM -> new AgitatorPortStack(
+                    AgitatorPortType.ITEM,
+                    this.inputItemStorages[index].getItem(0).copy(),
+                    FluidStack.EMPTY,
+                    GasStack.EMPTY,
+                    SlurryStack.EMPTY
+            );
+            case FLUID -> new AgitatorPortStack(
+                    AgitatorPortType.FLUID,
+                    ItemStack.EMPTY,
+                    new FluidStack(this.inputFluidStorages[index].variant, this.inputFluidStorages[index].amount),
+                    GasStack.EMPTY,
+                    SlurryStack.EMPTY
+            );
+            case GAS -> new AgitatorPortStack(
+                    AgitatorPortType.GAS,
+                    ItemStack.EMPTY,
+                    FluidStack.EMPTY,
+                    new GasStack(this.inputGasStorages[index].variant, this.inputGasStorages[index].amount),
+                    SlurryStack.EMPTY
+            );
+            case SLURRY -> new AgitatorPortStack(
+                    AgitatorPortType.SLURRY,
+                    ItemStack.EMPTY,
+                    FluidStack.EMPTY,
+                    GasStack.EMPTY,
+                    new SlurryStack(this.inputSlurryStorages[index].variant, this.inputSlurryStorages[index].amount)
+            );
+        };
+    }
+
+    private boolean canOutput(AgitatorRecipe recipe) {
+        for (int index = 0; index < OUTPUT_PORT_COUNT; index++) {
+            if (!canOutput(index, recipe.outputs().get(index)))
+                return false;
+        }
+
+        return true;
+    }
+
+    private boolean canOutput(int index, AgitatorRecipe.AgitatorOutput output) {
+        if (isEmpty(output))
+            return true;
+
+        if (this.outputModes[index] != output.type())
+            return false;
+
+        return switch (output.type()) {
+            case ITEM -> canInsertItemOutput(index, output.item());
+            case FLUID -> this.outputFluidStorages[index].canInsert(output.fluid());
+            case GAS -> this.outputGasStorages[index].canInsert(output.gas());
+            case SLURRY -> this.outputSlurryStorages[index].canInsert(output.slurry());
+        };
+    }
+
+    private void outputRecipe(AgitatorRecipe recipe) {
+        for (int index = 0; index < OUTPUT_PORT_COUNT; index++) {
+            AgitatorRecipe.AgitatorOutput output = recipe.outputs().get(index);
+            if (isEmpty(output))
+                continue;
+
+            switch (output.type()) {
+                case ITEM -> insertItemOutput(index, createOutputItemStack(output.item()));
+                case FLUID -> insertFluidOutput(index, output.fluid());
+                case GAS -> insertGasOutput(index, output.gas());
+                case SLURRY -> insertSlurryOutput(index, output.slurry());
+            }
+        }
+    }
+
+    private void consumeInputs(AgitatorRecipe recipe) {
+        for (int index = 0; index < INPUT_PORT_COUNT; index++) {
+            AgitatorRecipe.AgitatorInput input = recipe.inputs().get(index);
+            if (input.isEmpty())
+                continue;
+
+            switch (input.type()) {
+                case ITEM -> this.inputItemStorages[index].getItem(0).shrink(input.item().stackData().count());
+                case FLUID -> this.inputFluidStorages[index].amount -= input.fluid().amount();
+                case GAS -> this.inputGasStorages[index].amount -= input.gas().amount();
+                case SLURRY -> this.inputSlurryStorages[index].amount -= input.slurry().amount();
+            }
+        }
+    }
+
+    private static boolean isEmpty(AgitatorRecipe.AgitatorOutput output) {
+        return switch (output.type()) {
+            case ITEM -> output.item() == OutputItemStack.EMPTY;
+            case FLUID -> output.fluid().isEmpty();
+            case GAS -> output.gas().isEmpty();
+            case SLURRY -> output.slurry().isEmpty();
+        };
+    }
+
+    private boolean canInsertItemOutput(int index, OutputItemStack output) {
+        if (output == OutputItemStack.EMPTY || output.item() == null || output.count().maxInclusive() <= 0)
+            return true;
+
+        return this.outputItemStorages[index].canAddItem(new ItemStack(output.item(), output.count().maxInclusive()));
+    }
+
+    private void insertItemOutput(int index, ItemStack stack) {
+        if (stack.isEmpty())
+            return;
+
+        this.outputItemStorages[index].addItem(stack);
+    }
+
+    private void insertFluidOutput(int index, FluidStack stack) {
+        if (stack.isEmpty())
+            return;
+
+        this.outputFluidStorages[index].variant = stack.variant();
+        this.outputFluidStorages[index].amount += stack.amount();
+    }
+
+    private void insertGasOutput(int index, GasStack stack) {
+        if (stack.isEmpty())
+            return;
+
+        this.outputGasStorages[index].variant = stack.variant();
+        this.outputGasStorages[index].amount += stack.amount();
+    }
+
+    private void insertSlurryOutput(int index, SlurryStack stack) {
+        if (stack.isEmpty())
+            return;
+
+        this.outputSlurryStorages[index].variant = stack.variant();
+        this.outputSlurryStorages[index].amount += stack.amount();
+    }
+
+    private ItemStack createOutputItemStack(OutputItemStack output) {
+        return this.level == null ? ItemStack.EMPTY : output.createStack(this.level.getRandom());
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AgitatorBlock extends IndustriaBlock {
-    private static final VoxelShape VOXEL_SHAPE = Shapes.block();
+    public static final VoxelShape VOXEL_SHAPE = Shapes.block();
 
     public AgitatorBlock(Properties settings) {
         super(settings, new BlockProperties()

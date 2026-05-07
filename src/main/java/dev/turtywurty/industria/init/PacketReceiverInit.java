@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.blockentity.DrillBlockEntity;
 import dev.turtywurty.industria.blockentity.MotorBlockEntity;
+import dev.turtywurty.industria.blockentity.AgitatorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.ConveyorFilterAccess;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.network.conveyor.SetConveyorBlacklistModePayload;
@@ -137,6 +138,18 @@ public class PacketReceiverInit {
             ConveyorFilterAccess blockEntity = getConveyorFilterAccess(context.player());
             if (blockEntity != null) {
                 blockEntity.setTagFiltering(payload.tagFiltering());
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(AgitatorSetPortModePayload.ID, (payload, context) -> {
+            ServerPlayer player = context.player();
+            if (player.containerMenu instanceof AgitatorScreenHandler handler) {
+                AgitatorBlockEntity blockEntity = handler.getBlockEntity();
+                if (payload.output()) {
+                    blockEntity.setOutputMode(payload.index(), payload.portType());
+                } else {
+                    blockEntity.setInputMode(payload.index(), payload.portType());
+                }
             }
         });
     }

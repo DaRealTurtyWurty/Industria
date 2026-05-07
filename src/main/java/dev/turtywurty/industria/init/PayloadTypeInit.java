@@ -43,6 +43,7 @@ public class PayloadTypeInit {
         registerServerbound(SetConveyorMatchComponentsPayload.ID, SetConveyorMatchComponentsPayload.CODEC);
         registerServerbound(SetConveyorFilterTagPayload.ID, SetConveyorFilterTagPayload.CODEC);
         registerServerbound(SetConveyorTagFilteringPayload.ID, SetConveyorTagFilteringPayload.CODEC);
+        registerServerbound(AgitatorSetPortModePayload.ID, AgitatorSetPortModePayload.CODEC);
     }
 
     private static void registerS2C() {
