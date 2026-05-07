@@ -540,6 +540,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.SODIUM_ALUMINATE.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.MOLTEN_ALUMINIUM.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.MOLTEN_CRYOLITE.block());
+        blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.DILUTED_FORMIC_ACID.block());
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
         blockStateModelGenerator.createFurnace(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
@@ -550,6 +551,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.INDUCTION_HEATER);
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.FLUID_PUMP);
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.FLUID_TANK);
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(BlockInit.TREE_TAP);
 
         // Multiblock controllers and segments should have a visible fallback block model while unformed.
         registerCustomCube(blockStateModelGenerator, BlockInit.ARC_FURNACE, Industria.id("block/steel_block"));
@@ -565,7 +567,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerCustomCube(blockStateModelGenerator, BlockInit.ROTARY_KILN_CONTROLLER, Industria.id("block/rotary_kiln"));
         registerCustomCube(blockStateModelGenerator, BlockInit.SHAKING_TABLE, Industria.id("block/shaking_table"));
         registerCustomCube(blockStateModelGenerator, BlockInit.UPGRADE_STATION, Industria.id("block/upgrade_station"));
-        blockStateModelGenerator.createNonTemplateHorizontalBlock(BlockInit.TREE_TAP);
+        registerCustomCube(blockStateModelGenerator, BlockInit.AGITATOR, Industria.id("block/agitator"));
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
@@ -760,6 +762,14 @@ public class IndustriaModelProvider extends FabricModelProvider {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);
                             displaySettings.setScale(0.275f, 0.275f, 0.275f);
                         }));
+
+//        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.AGITATOR,
+//                new IndustriaBlockEntityItemRenderer.Unbaked(AgitatorModel.LAYER_LOCATION, AgitatorModel.TEXTURE_LOCATION),
+//                BuiltinEntityModelBuilder.defaultBlock()
+//                        .copyModifyGui(displaySettings -> {
+//                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+//                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+//                        }));
 
         final List<Item> exclusionList = List.of(
                 ItemInit.SEISMIC_SCANNER,

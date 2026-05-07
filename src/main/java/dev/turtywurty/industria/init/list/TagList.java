@@ -33,6 +33,7 @@ public class TagList {
         public static final TagKey<Fluid> MOLTEN_CRYOLITE = of("molten_cryolite");
         public static final TagKey<Fluid> LATEX = of("latex");
         public static final TagKey<Fluid> METHANOL = of("methanol");
+        public static final TagKey<Fluid> DILUTED_FORMIC_ACID = of("diluted_formic_acid");
 
         public static TagKey<Fluid> of(String id) {
             return TagKey.create(Registries.FLUID, Industria.id(id));

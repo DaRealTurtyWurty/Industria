@@ -127,5 +127,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootSubProvider 
         dropSelf(BlockInit.CENTRIFUGAL_CONCENTRATOR);
         dropSelf(BlockInit.ARC_FURNACE);
         dropSelf(BlockInit.TREE_TAP);
+        dropSelf(BlockInit.AGITATOR);
     }
 }

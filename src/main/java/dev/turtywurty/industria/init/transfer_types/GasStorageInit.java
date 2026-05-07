@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.gasapi.api.storage.GasStorage;
+import dev.turtywurty.industria.blockentity.AgitatorBlockEntity;
 import dev.turtywurty.industria.blockentity.ArcFurnaceBlockEntity;
 import dev.turtywurty.industria.blockentity.ElectrolyzerBlockEntity;
 import dev.turtywurty.industria.blockentity.IndustriaMultiblockControllerBlockEntity;
@@ -15,6 +16,7 @@ public class GasStorageInit {
     public static void init() {
         GasStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getGasProvider, BlockEntityTypeInit.ELECTROLYZER);
         GasStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getGasProvider, BlockEntityTypeInit.ARC_FURNACE);
+        GasStorage.SIDED.registerForBlockEntity(AgitatorBlockEntity::getGasProvider, BlockEntityTypeInit.AGITATOR);
         GasStorage.SIDED.registerForBlocks((level, pos, _, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getGasStorageForExternal(pos, side) : null;

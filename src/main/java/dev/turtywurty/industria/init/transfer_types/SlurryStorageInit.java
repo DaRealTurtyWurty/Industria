@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.fabricslurryapi.api.storage.SlurryStorage;
+import dev.turtywurty.industria.blockentity.AgitatorBlockEntity;
 import dev.turtywurty.industria.blockentity.CentrifugalConcentratorBlockEntity;
 import dev.turtywurty.industria.blockentity.DigesterBlockEntity;
 import dev.turtywurty.industria.blockentity.IndustriaMultiblockControllerBlockEntity;
@@ -22,6 +23,7 @@ public class SlurryStorageInit {
         SlurryStorage.SIDED.registerForBlockEntity(DigesterBlockEntity::getSlurryProvider, BlockEntityTypeInit.DIGESTER);
         SlurryStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getSlurryProvider, BlockEntityTypeInit.SHAKING_TABLE);
         SlurryStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getSlurryProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
+        SlurryStorage.SIDED.registerForBlockEntity(AgitatorBlockEntity::getSlurryProvider, BlockEntityTypeInit.AGITATOR);
         SlurryStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getSlurryStorageForExternal(pos, side) : null;

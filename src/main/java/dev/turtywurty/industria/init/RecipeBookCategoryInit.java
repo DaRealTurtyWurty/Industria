@@ -18,6 +18,7 @@ public class RecipeBookCategoryInit {
     public static final RecipeBookCategory SHAKING_TABLE = register("shaking_table");
     public static final RecipeBookCategory CENTRIFUGAL_CONCENTRATOR = register("centrifugal_concentrator");
     public static final RecipeBookCategory RECYCLING = register("recycling");
+    public static final RecipeBookCategory AGITATOR = register("agitator");
 
     public static RecipeBookCategory register(String name) {
         return Registry.register(BuiltInRegistries.RECIPE_BOOK_CATEGORY, Industria.id(name), new RecipeBookCategory());

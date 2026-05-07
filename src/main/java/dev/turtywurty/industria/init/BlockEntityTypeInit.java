@@ -162,6 +162,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(TreeTapBlockEntity::new, BlockInit.TREE_TAP)
                     .build());
 
+    public static final BlockEntityType<AgitatorBlockEntity> AGITATOR = register("agitator",
+            FabricBlockEntityTypeBuilder.create(AgitatorBlockEntity::new, BlockInit.AGITATOR)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

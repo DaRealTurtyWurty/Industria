@@ -172,6 +172,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.idle"), "Waiting for mob");
         addText(translationBuilder, ContainmentConveyorScreen.PROGRESS_TOOLTIP_TEXT, "Progress: %s%%");
         translationBuilder.add(BlockInit.TREE_TAP, "Tree Tap");
+        translationBuilder.add(BlockInit.AGITATOR, "Agitator");
+        addText(translationBuilder, AgitatorBlockEntity.TITLE, "Agitator");
 
         translationBuilder.add(FluidInit.CRUDE_OIL.block(), "Crude Oil");
         translationBuilder.add(FluidInit.CRUDE_OIL.bucket(), "Bucket of Crude Oil");
@@ -337,6 +339,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(FluidInit.LATEX.bucket(), "Bucket of Latex");
         translationBuilder.add(FluidInit.METHANOL.block(), "Methanol");
         translationBuilder.add(FluidInit.METHANOL.bucket(), "Bucket of Methanol");
+        translationBuilder.add(FluidInit.DILUTED_FORMIC_ACID.block(), "Diluted Formic Acid");
+        translationBuilder.add(FluidInit.DILUTED_FORMIC_ACID.bucket(), "Bucket of Diluted Formic Acid");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Component text, String value) {

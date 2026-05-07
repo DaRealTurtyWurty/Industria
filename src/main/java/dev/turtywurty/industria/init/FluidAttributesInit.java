@@ -29,5 +29,8 @@ public class FluidAttributesInit {
 
         FluidVariantAttributes.register(FluidInit.METHANOL.still(), commonFluidAttributes);
         FluidVariantAttributes.register(FluidInit.METHANOL.flowing(), commonFluidAttributes);
+
+        FluidVariantAttributes.register(FluidInit.DILUTED_FORMIC_ACID.still(), commonFluidAttributes);
+        FluidVariantAttributes.register(FluidInit.DILUTED_FORMIC_ACID.flowing(), commonFluidAttributes);
     }
 }

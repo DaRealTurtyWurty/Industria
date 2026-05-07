@@ -22,6 +22,7 @@ public class FluidInit {
     public static final FluidRegistryObject<?, ?> MOLTEN_CRYOLITE = registerMoltenFluid("molten_cryolite");
     public static final FluidRegistryObject<?, ?> LATEX = registerFluid("latex");
     public static final FluidRegistryObject<?, ?> METHANOL = registerFluid("methanol");
+    public static final FluidRegistryObject<?, ?> DILUTED_FORMIC_ACID = registerFluid("diluted_formic_acid");
 
     public static FluidRegistryObject<MoltenFluid.Still, MoltenFluid.Flowing> registerMoltenFluid(String name) {
         return registerFluid(name, MoltenFluid.Still::new, MoltenFluid.Flowing::new);

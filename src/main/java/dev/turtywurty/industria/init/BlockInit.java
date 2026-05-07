@@ -329,6 +329,9 @@ public class BlockInit {
     public static final TreeTapBlock TREE_TAP = registerWithItemCopy("tree_tap",
             TreeTapBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final AgitatorBlock AGITATOR = registerWithItemCopy("agitator",
+            AgitatorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(
                 settingsApplier.apply(BlockBehaviour.Properties.of()

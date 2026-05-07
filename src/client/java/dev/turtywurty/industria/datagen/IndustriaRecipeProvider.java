@@ -7,6 +7,8 @@ import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.recipe.AgitatorRecipe;
+import dev.turtywurty.industria.util.AgitatorPortType;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
 import dev.turtywurty.industria.util.WoodRegistrySet;
@@ -430,6 +432,25 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         new OutputItemStack(ItemInit.CASSITERITE_CONCENTRATE, 1, 1),
                         new SlurryStack(SlurryVariant.of(SlurryInit.CLAY_SLURRY), FluidConstants.BUCKET / 4),
                         200, 500, RecipeCategory.MISC);
+
+                offerAgitatorRecipe(output,
+                        List.of(
+                                new AgitatorRecipe.AgitatorInput(AgitatorPortType.GAS, IndustriaIngredient.EMPTY, FluidStack.EMPTY,
+                                        new GasStack(GasInit.CARBON_MONOXIDE, FluidConstants.BOTTLE), SlurryStack.EMPTY),
+                                new AgitatorRecipe.AgitatorInput(AgitatorPortType.FLUID, IndustriaIngredient.EMPTY,
+                                        new FluidStack(FluidVariant.of(FluidInit.METHANOL.still()), FluidConstants.BOTTLE),
+                                        GasStack.EMPTY, SlurryStack.EMPTY),
+                                new AgitatorRecipe.AgitatorInput(AgitatorPortType.ITEM, IndustriaIngredient.EMPTY,
+                                        FluidStack.EMPTY, GasStack.EMPTY, SlurryStack.EMPTY)
+                        ),
+                        List.of(
+                                new AgitatorRecipe.AgitatorOutput(AgitatorPortType.FLUID, OutputItemStack.EMPTY,
+                                        new FluidStack(FluidVariant.of(FluidInit.DILUTED_FORMIC_ACID.still()), FluidConstants.BOTTLE),
+                                        GasStack.EMPTY, SlurryStack.EMPTY),
+                                new AgitatorRecipe.AgitatorOutput(AgitatorPortType.GAS, OutputItemStack.EMPTY,
+                                        FluidStack.EMPTY, new GasStack(GasInit.HYDROGEN, FluidConstants.BOTTLE), SlurryStack.EMPTY)
+                        ),
+                        200, 1_000, "carbon_monoxide_and_methanol");
             }
         };
     }
@@ -484,6 +505,14 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
     private static void offerCentrifugalConcentratorRecipe(RecipeOutput exporter, IndustriaIngredient input, OutputItemStack output, @Nullable SlurryStack outputSlurry, int processTime, int rpm, RecipeCategory category) {
         new CentrifugalConcentratorRecipeBuilder(input, output, outputSlurry, processTime, rpm, category)
                 .save(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("centrifugal_concentrator_" + RecipeProvider.getSimpleRecipeName(output.item()))));
+    }
+
+    private static void offerAgitatorRecipe(RecipeOutput exporter,
+                                            List<AgitatorRecipe.AgitatorInput> inputs,
+                                            List<AgitatorRecipe.AgitatorOutput> outputs,
+                                            int processTime, int energyCost, String name) {
+        new AgitatorRecipeBuilder(inputs, outputs, processTime, energyCost)
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("agitator_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {
