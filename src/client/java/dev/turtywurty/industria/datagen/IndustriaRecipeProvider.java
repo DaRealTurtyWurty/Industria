@@ -201,6 +201,16 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, BlockInit.GAS_PIPE, 8)
+                        .pattern("III")
+                        .pattern("IGI")
+                        .pattern("III")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('G', Items.GLASS_BOTTLE)
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(Items.GLASS_BOTTLE), has(Items.GLASS_BOTTLE))
+                        .save(output);
+
                 shaped(RecipeCategory.MISC, BlockInit.CONVEYOR, 8)
                         .pattern("III")
                         .pattern("RRR")

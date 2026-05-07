@@ -99,6 +99,7 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootSubProvider 
         dropSelf(BlockInit.CABLE);
         dropSelf(BlockInit.FLUID_PIPE);
         dropSelf(BlockInit.SLURRY_PIPE);
+        dropSelf(BlockInit.GAS_PIPE);
         dropSelf(BlockInit.HEAT_PIPE);
         dropSelf(BlockInit.CONVEYOR);
         dropSelf(BlockInit.SPLITTER_CONVEYOR);

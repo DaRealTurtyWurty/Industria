@@ -141,6 +141,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(BlockInit.CABLE, "Cable");
         translationBuilder.add(BlockInit.FLUID_PIPE, "Fluid Pipe");
         translationBuilder.add(BlockInit.SLURRY_PIPE, "Slurry Pipe");
+        translationBuilder.add(BlockInit.GAS_PIPE, "Gas Pipe");
         translationBuilder.add(BlockInit.HEAT_PIPE, "Heat Pipe");
         translationBuilder.add(BlockInit.CONVEYOR, "Conveyor");
         translationBuilder.add(BlockInit.SPLITTER_CONVEYOR, "Splitter Conveyor");

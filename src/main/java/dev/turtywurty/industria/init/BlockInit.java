@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 
 import java.util.function.Function;
@@ -198,7 +199,8 @@ public class BlockInit {
             UpgradeStationBlock::new, Blocks.ANVIL, BlockBehaviour.Properties::noOcclusion);
 
     public static final ElectricFurnaceBlock ELECTRIC_FURNACE = registerWithItemCopy("electric_furnace",
-            ElectricFurnaceBlock::new, Blocks.FURNACE);
+            ElectricFurnaceBlock::new, Blocks.FURNACE,
+            settings -> settings.lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 13 : 0));
 
     public static final FractionalDistillationControllerBlock FRACTIONAL_DISTILLATION_CONTROLLER = registerWithItemCopy("fractional_distillation_controller",
             FractionalDistillationControllerBlock::new, Blocks.IRON_BLOCK);
@@ -217,6 +219,9 @@ public class BlockInit {
 
     public static final SlurryPipeBlock SLURRY_PIPE = registerWithItemCopy("slurry_pipe",
             SlurryPipeBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final GasPipeBlock GAS_PIPE = registerWithItemCopy("gas_pipe",
+            GasPipeBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final FluidPumpBlock FLUID_PUMP = registerWithItemCopy("fluid_pump",
             FluidPumpBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);

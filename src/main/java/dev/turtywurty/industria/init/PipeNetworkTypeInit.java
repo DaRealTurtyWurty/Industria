@@ -2,12 +2,14 @@ package dev.turtywurty.industria.init;
 
 import com.mojang.serialization.Codec;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkType;
 import dev.turtywurty.industria.pipe.impl.network.CableNetwork;
 import dev.turtywurty.industria.pipe.impl.network.FluidPipeNetwork;
+import dev.turtywurty.industria.pipe.impl.network.GasPipeNetwork;
 import dev.turtywurty.industria.pipe.impl.network.HeatPipeNetwork;
 import dev.turtywurty.industria.pipe.impl.network.SlurryPipeNetwork;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
@@ -45,6 +47,9 @@ public class PipeNetworkTypeInit {
 
     public static final PipeNetworkType<Storage<SlurryVariant>, SlurryPipeNetwork> SLURRY = register("slurry",
             new PipeNetworkType<>(SlurryPipeNetwork.CODEC, SlurryPipeNetwork.STREAM_CODEC));
+
+    public static final PipeNetworkType<Storage<GasVariant>, GasPipeNetwork> GAS = register("gas",
+            new PipeNetworkType<>(GasPipeNetwork.CODEC, GasPipeNetwork.STREAM_CODEC));
 
     public static <S, N extends PipeNetwork<S>, T extends PipeNetworkType<S, N>> T register(String name, T type) {
         return Registry.register(PIPE_NETWORK_TYPES, Industria.id(name), type);

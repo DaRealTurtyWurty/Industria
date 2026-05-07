@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import com.mojang.serialization.Codec;
 import dev.turtywurty.fabricslurryapi.api.SlurryVariant;
+import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.multiblock.TransferType;
@@ -9,10 +10,12 @@ import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManagerType;
 import dev.turtywurty.industria.pipe.impl.manager.CableNetworkManager;
 import dev.turtywurty.industria.pipe.impl.manager.FluidPipeNetworkManager;
+import dev.turtywurty.industria.pipe.impl.manager.GasPipeNetworkManager;
 import dev.turtywurty.industria.pipe.impl.manager.HeatPipeNetworkManager;
 import dev.turtywurty.industria.pipe.impl.manager.SlurryPipeNetworkManager;
 import dev.turtywurty.industria.pipe.impl.network.CableNetwork;
 import dev.turtywurty.industria.pipe.impl.network.FluidPipeNetwork;
+import dev.turtywurty.industria.pipe.impl.network.GasPipeNetwork;
 import dev.turtywurty.industria.pipe.impl.network.HeatPipeNetwork;
 import dev.turtywurty.industria.pipe.impl.network.SlurryPipeNetwork;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
@@ -59,6 +62,13 @@ public class PipeNetworkManagerTypeInit {
                     SlurryPipeNetworkManager::new,
                     SlurryPipeNetworkManager.CODEC,
                     SlurryPipeNetworkManager.STREAM_CODEC));
+
+    public static final PipeNetworkManagerType<Storage<GasVariant>, GasPipeNetwork> GAS =
+            register("gas", new PipeNetworkManagerType<>(
+                    TransferType.GAS,
+                    GasPipeNetworkManager::new,
+                    GasPipeNetworkManager.CODEC,
+                    GasPipeNetworkManager.STREAM_CODEC));
 
     public static final PipeNetworkManagerType<HeatStorage, HeatPipeNetwork> HEAT =
             register("heat", new PipeNetworkManagerType<>(

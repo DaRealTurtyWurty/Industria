@@ -326,6 +326,7 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return false;
 
         this.inputModes[index] = portType;
+        notifyPortModeChanged(INPUT_OFFSETS[index]);
         update();
         return true;
     }
@@ -336,6 +337,7 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return false;
 
         this.outputModes[index] = portType;
+        notifyPortModeChanged(OUTPUT_OFFSETS[index]);
         update();
         return true;
     }
@@ -578,6 +580,35 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     private static void validateOutputIndex(int index) {
         if (index < 0 || index >= OUTPUT_PORT_COUNT)
             throw new IndexOutOfBoundsException("Output port index out of bounds: " + index);
+    }
+
+    private void notifyPortModeChanged(BlockPos localOffset) {
+        if (this.level == null || this.level.isClientSide())
+            return;
+
+        if (!isFormed()) {
+            BlockState state = getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, Block.UPDATE_ALL);
+            this.level.updateNeighborsAt(this.worldPosition, state.getBlock());
+            return;
+        }
+
+        BlockPos worldPos = getWorldPosFromLocalOffset(localOffset);
+        BlockState state = this.level.getBlockState(worldPos);
+        this.level.sendBlockUpdated(worldPos, state, state, Block.UPDATE_ALL);
+        this.level.updateNeighborsAt(worldPos, state.getBlock());
+    }
+
+    private BlockPos getWorldPosFromLocalOffset(BlockPos localOffset) {
+        BlockPos worldOffset = switch (getControllerFacing()) {
+            case NORTH -> localOffset;
+            case SOUTH -> new BlockPos(-localOffset.getX(), localOffset.getY(), -localOffset.getZ());
+            case WEST -> new BlockPos(-localOffset.getZ(), localOffset.getY(), localOffset.getX());
+            case EAST -> new BlockPos(localOffset.getZ(), localOffset.getY(), -localOffset.getX());
+            default -> localOffset;
+        };
+
+        return this.worldPosition.offset(worldOffset);
     }
 
     private Optional<RecipeHolder<AgitatorRecipe>> getCurrentRecipe(AgitatorRecipeInput recipeInput) {
