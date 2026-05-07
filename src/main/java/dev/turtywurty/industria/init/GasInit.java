@@ -9,6 +9,7 @@ public class GasInit {
     public static final Gas HYDROGEN = register("hydrogen");
     public static final Gas CARBON_DIOXIDE = register("carbon_dioxide");
     public static final Gas METHANE = register("methane");
+    public static final Gas CARBON_MONOXIDE = register("carbon_monoxide");
 
     public static Gas register(String name) {
         return GasApi.register(Industria.id(name));

@@ -26,5 +26,8 @@ public class FluidAttributesInit {
 
         FluidVariantAttributes.register(FluidInit.LATEX.still(), commonFluidAttributes);
         FluidVariantAttributes.register(FluidInit.LATEX.flowing(), commonFluidAttributes);
+
+        FluidVariantAttributes.register(FluidInit.METHANOL.still(), commonFluidAttributes);
+        FluidVariantAttributes.register(FluidInit.METHANOL.flowing(), commonFluidAttributes);
     }
 }

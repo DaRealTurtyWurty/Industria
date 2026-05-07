@@ -27,8 +27,20 @@ public class IndustriaFluidTagProvider extends FabricTagsProvider.FluidTagsProvi
                 .add(FluidInit.SODIUM_ALUMINATE.still())
                 .add(FluidInit.SODIUM_ALUMINATE.flowing());
 
+        valueLookupBuilder(TagList.Fluids.MOLTEN_ALUMINIUM)
+                .add(FluidInit.MOLTEN_ALUMINIUM.still())
+                .add(FluidInit.MOLTEN_ALUMINIUM.flowing());
+
+        valueLookupBuilder(TagList.Fluids.MOLTEN_CRYOLITE)
+                .add(FluidInit.MOLTEN_CRYOLITE.still())
+                .add(FluidInit.MOLTEN_CRYOLITE.flowing());
+
         valueLookupBuilder(TagList.Fluids.LATEX)
                 .add(FluidInit.LATEX.still())
                 .add(FluidInit.LATEX.flowing());
+
+        valueLookupBuilder(TagList.Fluids.METHANOL)
+                .add(FluidInit.METHANOL.still())
+                .add(FluidInit.METHANOL.flowing());
     }
 }

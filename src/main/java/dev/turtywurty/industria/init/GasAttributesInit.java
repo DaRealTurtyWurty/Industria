@@ -14,5 +14,7 @@ public class GasAttributesInit {
         GasVariantAttributes.register(GasInit.CARBON_DIOXIDE, gasVariant -> carbonDioxideText);
         Component methaneText = Component.translatable("gas." + Industria.MOD_ID + ".methane");
         GasVariantAttributes.register(GasInit.METHANE, gasVariant -> methaneText);
+        Component carbonMonoxideText = Component.translatable("gas." + Industria.MOD_ID + ".carbon_monoxide");
+        GasVariantAttributes.register(GasInit.CARBON_MONOXIDE, gasVariant -> carbonMonoxideText);
     }
 }

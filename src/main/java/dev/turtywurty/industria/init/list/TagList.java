@@ -29,7 +29,10 @@ public class TagList {
         public static final TagKey<Fluid> CRUDE_OIL = of("crude_oil");
         public static final TagKey<Fluid> DIRTY_SODIUM_ALUMINATE = of("dirty_sodium_aluminate");
         public static final TagKey<Fluid> SODIUM_ALUMINATE = of("sodium_aluminate");
+        public static final TagKey<Fluid> MOLTEN_ALUMINIUM = of("molten_aluminium");
+        public static final TagKey<Fluid> MOLTEN_CRYOLITE = of("molten_cryolite");
         public static final TagKey<Fluid> LATEX = of("latex");
+        public static final TagKey<Fluid> METHANOL = of("methanol");
 
         public static TagKey<Fluid> of(String id) {
             return TagKey.create(Registries.FLUID, Industria.id(id));

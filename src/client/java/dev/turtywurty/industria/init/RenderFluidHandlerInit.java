@@ -14,6 +14,7 @@ public class RenderFluidHandlerInit {
         registerFluidModel("molten_aluminium", FluidInit.MOLTEN_ALUMINIUM.still(), FluidInit.MOLTEN_ALUMINIUM.flowing());
         registerFluidModel("molten_cryolite", FluidInit.MOLTEN_CRYOLITE.still(), FluidInit.MOLTEN_CRYOLITE.flowing());
         registerFluidModel("fluid_latex", FluidInit.LATEX.still(), FluidInit.LATEX.flowing());
+        registerFluidModel("methanol", FluidInit.METHANOL.still(), FluidInit.METHANOL.flowing());
     }
 
     private static void registerFluidModel(String name, Fluid still, Fluid flowing) {

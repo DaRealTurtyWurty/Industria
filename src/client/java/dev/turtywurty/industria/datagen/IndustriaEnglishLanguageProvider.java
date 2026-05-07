@@ -333,6 +333,10 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(FluidInit.MOLTEN_CRYOLITE.bucket(), "Bucket of Molten Cryolite");
         translationBuilder.add(ItemInit.CARBON_ROD, "Carbon Rod");
         translationBuilder.add(ItemInit.BOTTLE_FORMIC_ACID, "Bottle of Formic Acid");
+        translationBuilder.add(FluidInit.LATEX.block(), "Latex");
+        translationBuilder.add(FluidInit.LATEX.bucket(), "Bucket of Latex");
+        translationBuilder.add(FluidInit.METHANOL.block(), "Methanol");
+        translationBuilder.add(FluidInit.METHANOL.bucket(), "Bucket of Methanol");
     }
 
     private static void addText(TranslationBuilder translationBuilder, Component text, String value) {

@@ -9,5 +9,6 @@ public class GasRenderHandlerInit {
         GasRenderHandlerRegistry.register(GasInit.HYDROGEN, new SimpleGasRenderHandler(0x80DDDDDD));
         GasRenderHandlerRegistry.register(GasInit.CARBON_DIOXIDE, new SimpleGasRenderHandler(0x80CCCCCC));
         GasRenderHandlerRegistry.register(GasInit.METHANE, new SimpleGasRenderHandler(0x80FFCC00));
+        GasRenderHandlerRegistry.register(GasInit.CARBON_MONOXIDE, new SimpleGasRenderHandler(0x80FF0000));
     }
 }
