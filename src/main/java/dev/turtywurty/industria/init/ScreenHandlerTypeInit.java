@@ -50,9 +50,6 @@ public class ScreenHandlerTypeInit {
     public static final MenuType<ElectricFurnaceScreenHandler> ELECTRIC_FURNACE =
             register("electric_furnace", ElectricFurnaceScreenHandler::new, BlockPosPayload.CODEC);
 
-    public static final MenuType<FractionalDistillationControllerScreenHandler> FRACTIONAL_DISTILLATION_CONTROLLER =
-            register("fractional_distillation_controller", FractionalDistillationControllerScreenHandler::new, BlockPosPayload.CODEC);
-
     public static final MenuType<InductionHeaterScreenHandler> INDUCTION_HEATER =
             register("induction_heater", InductionHeaterScreenHandler::new, BlockPosPayload.CODEC);
 

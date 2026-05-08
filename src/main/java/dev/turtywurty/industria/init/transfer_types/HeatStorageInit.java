@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class HeatStorageInit {
     public static void init() {
-        HeatStorage.SIDED.registerForBlockEntity(FractionalDistillationControllerBlockEntity::getHeatProvider, BlockEntityTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER);
         HeatStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getHeatProvider, BlockEntityTypeInit.INDUCTION_HEATER);
         HeatStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getHeatProvider, BlockEntityTypeInit.ELECTROLYZER);
         HeatStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getHeatProvider, BlockEntityTypeInit.ARC_FURNACE);

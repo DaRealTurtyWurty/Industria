@@ -202,14 +202,8 @@ public class BlockInit {
             ElectricFurnaceBlock::new, Blocks.FURNACE,
             settings -> settings.lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 13 : 0));
 
-    public static final FractionalDistillationControllerBlock FRACTIONAL_DISTILLATION_CONTROLLER = registerWithItemCopy("fractional_distillation_controller",
-            FractionalDistillationControllerBlock::new, Blocks.IRON_BLOCK);
-
     public static final InductionHeaterBlock INDUCTION_HEATER = registerWithItemCopy("induction_heater",
             InductionHeaterBlock::new, Blocks.IRON_BLOCK);
-
-    public static final FractionalDistillationTowerBlock FRACTIONAL_DISTILLATION_TOWER = registerWithItemCopy("fractional_distillation_tower",
-            FractionalDistillationTowerBlock::new, Blocks.IRON_BLOCK);
 
     public static final CableBlock CABLE = registerWithItemCopy("cable",
             CableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);

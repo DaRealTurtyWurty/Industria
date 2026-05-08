@@ -62,14 +62,6 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(ElectricFurnaceBlockEntity::new, BlockInit.ELECTRIC_FURNACE)
                     .build());
 
-    public static final BlockEntityType<FractionalDistillationControllerBlockEntity> FRACTIONAL_DISTILLATION_CONTROLLER = register("fractional_distillation_controller",
-            FabricBlockEntityTypeBuilder.create(FractionalDistillationControllerBlockEntity::new, BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER)
-                    .build());
-
-    public static final BlockEntityType<FractionalDistillationTowerBlockEntity> FRACTIONAL_DISTILLATION_TOWER = register("fractional_distillation_tower",
-            FabricBlockEntityTypeBuilder.create(FractionalDistillationTowerBlockEntity::new, BlockInit.FRACTIONAL_DISTILLATION_TOWER)
-                    .build());
-
     public static final BlockEntityType<InductionHeaterBlockEntity> INDUCTION_HEATER = register("induction_heater",
             FabricBlockEntityTypeBuilder.create(InductionHeaterBlockEntity::new, BlockInit.INDUCTION_HEATER)
                     .build());

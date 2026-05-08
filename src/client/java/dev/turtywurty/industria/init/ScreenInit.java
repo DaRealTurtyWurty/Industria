@@ -17,7 +17,6 @@ public class ScreenInit {
         MenuScreens.register(ScreenHandlerTypeInit.MOTOR, MotorScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.UPGRADE_STATION, UpgradeStationScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.ELECTRIC_FURNACE, ElectricFurnaceScreen::new);
-        MenuScreens.register(ScreenHandlerTypeInit.FRACTIONAL_DISTILLATION_CONTROLLER, FractionalDistillationControllerScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.INDUCTION_HEATER, InductionHeaterScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.FLUID_PUMP, FluidPumpScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.MIXER, MixerScreen::new);

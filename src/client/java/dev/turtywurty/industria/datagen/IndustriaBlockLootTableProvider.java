@@ -91,8 +91,6 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootSubProvider 
         dropSelf(BlockInit.DRILL_TUBE);
         dropSelf(BlockInit.UPGRADE_STATION);
         dropSelf(BlockInit.ELECTRIC_FURNACE);
-        dropSelf(BlockInit.FRACTIONAL_DISTILLATION_CONTROLLER);
-        dropSelf(BlockInit.FRACTIONAL_DISTILLATION_TOWER);
         dropSelf(BlockInit.INDUCTION_HEATER);
         dropSelf(BlockInit.FLUID_PUMP);
 
