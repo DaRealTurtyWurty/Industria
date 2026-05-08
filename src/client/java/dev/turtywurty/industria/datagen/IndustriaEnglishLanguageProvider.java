@@ -340,6 +340,8 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         translationBuilder.add(FluidInit.LATEX.bucket(), "Bucket of Latex");
         translationBuilder.add(FluidInit.METHANOL.block(), "Methanol");
         translationBuilder.add(FluidInit.METHANOL.bucket(), "Bucket of Methanol");
+        translationBuilder.add(FluidInit.FORMIC_ACID.block(), "Formic Acid");
+        translationBuilder.add(FluidInit.FORMIC_ACID.bucket(), "Bucket of Formic Acid");
         translationBuilder.add(FluidInit.DILUTED_FORMIC_ACID.block(), "Diluted Formic Acid");
         translationBuilder.add(FluidInit.DILUTED_FORMIC_ACID.bucket(), "Bucket of Diluted Formic Acid");
     }

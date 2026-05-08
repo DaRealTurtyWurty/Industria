@@ -540,6 +540,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.SODIUM_ALUMINATE.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.MOLTEN_ALUMINIUM.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.MOLTEN_CRYOLITE.block());
+        blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.FORMIC_ACID.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.DILUTED_FORMIC_ACID.block());
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.DRILL_TUBE);
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));

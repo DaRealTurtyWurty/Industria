@@ -43,6 +43,10 @@ public class IndustriaFluidTagProvider extends FabricTagsProvider.FluidTagsProvi
                 .add(FluidInit.METHANOL.still())
                 .add(FluidInit.METHANOL.flowing());
 
+        valueLookupBuilder(TagList.Fluids.FORMIC_ACID)
+                .add(FluidInit.FORMIC_ACID.still())
+                .add(FluidInit.FORMIC_ACID.flowing());
+
         valueLookupBuilder(TagList.Fluids.DILUTED_FORMIC_ACID)
                 .add(FluidInit.DILUTED_FORMIC_ACID.still())
                 .add(FluidInit.DILUTED_FORMIC_ACID.flowing());
