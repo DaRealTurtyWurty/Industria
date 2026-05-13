@@ -49,6 +49,7 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(LadderConveyorTopPlatformModel.LAYER_LOCATION, LadderConveyorTopPlatformModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(ArcFurnaceModel.LAYER_LOCATION, ArcFurnaceModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(TreeTapModel.LAYER_LOCATION, TreeTapModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(DistillationTowerModel.LAYER_LOCATION, DistillationTowerModel::createMainLayer);
 
         for (WoodRegistrySet woodSet : WoodRegistrySet.getWoodSets()) {
             var normalLayer = new ModelLayerLocation(Industria.id("boat/" + woodSet.getName()), "main");

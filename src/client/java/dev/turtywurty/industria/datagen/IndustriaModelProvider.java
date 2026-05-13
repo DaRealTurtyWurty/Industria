@@ -565,6 +565,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerCustomCube(blockStateModelGenerator, BlockInit.SHAKING_TABLE, Industria.id("block/shaking_table"));
         registerCustomCube(blockStateModelGenerator, BlockInit.UPGRADE_STATION, Industria.id("block/upgrade_station"));
         registerCustomCube(blockStateModelGenerator, BlockInit.AGITATOR, Industria.id("block/agitator"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.DISTILLATION_TOWER, Industria.id("block/steel_block"));
 
         registerPipe(blockStateModelGenerator, BlockInit.CABLE, "cable");
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
@@ -768,6 +769,13 @@ public class IndustriaModelProvider extends FabricModelProvider {
 //                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
 //                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
 //                        }));
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.DISTILLATION_TOWER,
+                new IndustriaBlockEntityItemRenderer.Unbaked(DistillationTowerModel.LAYER_LOCATION, DistillationTowerModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-2.0f, -2.75f, 0);
+                            displaySettings.setScale(0.225f, 0.225f, 0.225f);
+                        }));
 
         final List<Item> exclusionList = List.of(
                 ItemInit.SEISMIC_SCANNER,

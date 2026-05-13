@@ -21,5 +21,6 @@ public final class MultiblockLibIntegrationInit {
         MultiblockLib.registerControllerBlock(BlockInit.CENTRIFUGAL_CONCENTRATOR, false);
         MultiblockLib.registerControllerBlock(BlockInit.ARC_FURNACE, false);
         MultiblockLib.registerControllerBlock(BlockInit.AGITATOR, false);
+        MultiblockLib.registerControllerBlock(BlockInit.DISTILLATION_TOWER, false);
     }
 }

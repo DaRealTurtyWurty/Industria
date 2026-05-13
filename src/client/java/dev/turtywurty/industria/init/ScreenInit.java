@@ -32,5 +32,6 @@ public class ScreenInit {
         MenuScreens.register(ScreenHandlerTypeInit.DETECTOR_CONVEYOR, DetectorConveyorScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.CONTAINMENT_CONVEYOR, ContainmentConveyorScreen::new);
         MenuScreens.register(ScreenHandlerTypeInit.AGITATOR, AgitatorScreen::new);
+        MenuScreens.register(ScreenHandlerTypeInit.DISTILLATION_TOWER, DistillationTowerScreen::new);
     }
 }

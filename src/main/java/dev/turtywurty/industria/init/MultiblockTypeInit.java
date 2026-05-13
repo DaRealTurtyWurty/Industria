@@ -70,6 +70,11 @@ public class MultiblockTypeInit {
                     .setHasDirectionProperty(true)
                     .shapes(AgitatorBlock.VOXEL_SHAPE));
 
+    public static final MultiblockType<DistillationTowerBlockEntity> DISTILLATION_TOWER = register("distillation_tower",
+            new MultiblockType.Builder<DistillationTowerBlockEntity>(63) // 3x3x7
+                    .setHasDirectionProperty(true)
+                    .shapes(DistillationTowerBlock.VOXEL_SHAPE));
+
     public static <T extends BlockEntity> MultiblockType<T> register(String name, MultiblockType.Builder<T> builder) {
         return Registry.register(IndustriaRegistries.MULTIBLOCK_TYPES, Industria.id(name), builder.build());
     }

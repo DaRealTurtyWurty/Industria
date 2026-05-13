@@ -47,6 +47,9 @@ public class RecipeSerializerInit {
     public static final RecipeSerializer<AgitatorRecipe> AGITATOR =
             register("agitator", AgitatorRecipe.SERIALIZER);
 
+    public static final RecipeSerializer<DistillationTowerRecipe> DISTILLATION_TOWER =
+            register("distillation_tower", DistillationTowerRecipe.SERIALIZER);
+
     public static <T extends Recipe<?>> RecipeSerializer<T> register(String name, RecipeSerializer<T> serializer) {
         return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Industria.id(name), serializer);
     }

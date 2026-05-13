@@ -48,6 +48,9 @@ public class RecipeTypeInit {
     public static final RecipeType<AgitatorRecipe> AGITATOR =
             register("agitator", AgitatorRecipe.Type.INSTANCE);
 
+    public static final RecipeType<DistillationTowerRecipe> DISTILLATION_TOWER =
+            register("distillation_tower", DistillationTowerRecipe.Type.INSTANCE);
+
     public static <T extends Recipe<?>> RecipeType<T> register(String name, RecipeType<T> type) {
         return Registry.register(BuiltInRegistries.RECIPE_TYPE, Industria.id(name), type);
     }

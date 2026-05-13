@@ -158,6 +158,10 @@ public class BlockEntityTypeInit {
             FabricBlockEntityTypeBuilder.create(AgitatorBlockEntity::new, BlockInit.AGITATOR)
                     .build());
 
+    public static final BlockEntityType<DistillationTowerBlockEntity> DISTILLATION_TOWER = register("distillation_tower",
+            FabricBlockEntityTypeBuilder.create(DistillationTowerBlockEntity::new, BlockInit.DISTILLATION_TOWER)
+                    .build());
+
     public static <T extends BlockEntity> BlockEntityType<T> register(String name, BlockEntityType<T> type) {
         return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Industria.id(name), type);
     }

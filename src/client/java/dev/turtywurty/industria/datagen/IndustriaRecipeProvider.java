@@ -291,6 +291,22 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                         .unlockedBy(getHasName(BlockInit.CONVEYOR), has(BlockInit.CONVEYOR))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, BlockInit.DISTILLATION_TOWER)
+                        .pattern("IGI")
+                        .pattern("TMT")
+                        .pattern("IPI")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('G', Blocks.GLASS)
+                        .define('T', BlockInit.FLUID_TANK)
+                        .define('M', BlockInit.MOTOR)
+                        .define('P', BlockInit.FLUID_PIPE)
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(Blocks.GLASS), has(Blocks.GLASS))
+                        .unlockedBy(getHasName(BlockInit.FLUID_TANK), has(BlockInit.FLUID_TANK))
+                        .unlockedBy(getHasName(BlockInit.MOTOR), has(BlockInit.MOTOR))
+                        .unlockedBy(getHasName(BlockInit.FLUID_PIPE), has(BlockInit.FLUID_PIPE))
+                        .save(output);
+
                 shaped(RecipeCategory.MISC, BlockInit.FILTER_CONVEYOR, 8)
                         .pattern("CCC")
                         .pattern("CPC")
@@ -461,6 +477,14 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                                         FluidStack.EMPTY, new GasStack(GasInit.HYDROGEN, FluidConstants.BOTTLE), SlurryStack.EMPTY)
                         ),
                         200, 1_000, "carbon_monoxide_and_methanol");
+
+                offerDistillationTower(output,
+                        new FluidStack(FluidVariant.of(FluidInit.DILUTED_FORMIC_ACID.still()), FluidConstants.BUCKET),
+                        new FluidStack(FluidVariant.of(FluidInit.FORMIC_ACID.still()), FluidConstants.BOTTLE * 3),
+                        new FluidStack(FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE),
+                        240,
+                        40,
+                        "diluted_formic_acid");
             }
         };
     }
@@ -523,6 +547,12 @@ public class IndustriaRecipeProvider extends FabricRecipeProvider {
                                             int processTime, int energyCost, String name) {
         new AgitatorRecipeBuilder(inputs, outputs, processTime, energyCost)
                 .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("agitator_" + name)));
+    }
+
+    private static void offerDistillationTower(RecipeOutput exporter, FluidStack inputFluid, FluidStack primaryOutputFluid,
+                                               FluidStack secondaryOutputFluid, int processTime, int energyCost, String name) {
+        new DistillationTowerRecipeBuilder(inputFluid, primaryOutputFluid, secondaryOutputFluid, processTime, energyCost)
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("distillation_tower_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {
