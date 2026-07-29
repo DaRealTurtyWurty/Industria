@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.init.transfer_types;
 
+import dev.turtywurty.industria.block.FluidPumpBlock;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
@@ -8,6 +9,7 @@ import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.multiblocklib.MultiblockLib;
 import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import team.reborn.energy.api.EnergyStorage;
@@ -32,6 +34,16 @@ public class EnergyStorageInit {
         EnergyStorage.SIDED.registerForBlockEntity(ShakingTableBlockEntity::getEnergyProvider, BlockEntityTypeInit.SHAKING_TABLE);
         EnergyStorage.SIDED.registerForBlockEntity(CentrifugalConcentratorBlockEntity::getEnergyProvider, BlockEntityTypeInit.CENTRIFUGAL_CONCENTRATOR);
         EnergyStorage.SIDED.registerForBlockEntity(ArcFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ARC_FURNACE);
+        EnergyStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
+            if (side != Direction.UP)
+                return null;
+
+            BlockPos controllerPos = FluidPumpBlock.getControllerPos(pos, state);
+            BlockEntity controller = level.getBlockEntity(controllerPos);
+            return controller instanceof FluidPumpBlockEntity fluidPump
+                    ? fluidPump.getEnergyProvider(side)
+                    : null;
+        }, BlockInit.FLUID_PUMP);
         EnergyStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getEnergyStorageForExternal(pos) : null;

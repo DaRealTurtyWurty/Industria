@@ -546,7 +546,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.DRILL_TUBE, Industria.id("block/drill_tube"));
         blockStateModelGenerator.createFurnace(BlockInit.ELECTRIC_FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.INDUCTION_HEATER);
-        blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.FLUID_PUMP);
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(BlockInit.FLUID_PUMP);
         blockStateModelGenerator.createNonTemplateModelBlock(BlockInit.FLUID_TANK);
         blockStateModelGenerator.createNonTemplateHorizontalBlock(BlockInit.TREE_TAP);
 

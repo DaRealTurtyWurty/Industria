@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: Fix direction of fluid output vs where the pipe thinks a connection is
 public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("fluid_pump");
 
@@ -51,7 +50,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     public FluidPumpBlockEntity(BlockPos pos, BlockState state) {
         super(BlockInit.FLUID_PUMP, BlockEntityTypeInit.FLUID_PUMP, pos, state);
-        this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.SOUTH);
+        this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidConstants.BUCKET * 10), Direction.EAST);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0), Direction.UP);
     }
 
@@ -89,11 +88,11 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         if (this.level == null || this.level.isClientSide())
             return;
 
-        SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(Direction.SOUTH);
+        SingleFluidStorage fluidStorage = this.wrappedFluidStorage.getStorage(Direction.EAST);
         if (!isEmpty(fluidStorage)) {
-            Direction relativeSouth = MathUtils.getRelativeDirection(Direction.SOUTH, getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
-            BlockPos southPos = this.worldPosition.relative(relativeSouth);
-            Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.level, southPos, relativeSouth.getOpposite());
+            Direction outputDirection = getFluidOutputDirection();
+            BlockPos outputPos = this.worldPosition.relative(outputDirection);
+            Storage<FluidVariant> storage = FluidStorage.SIDED.find(this.level, outputPos, outputDirection.getOpposite());
             if (storage != null) {
                 try (Transaction transaction = Transaction.openOuter()) {
                     long inserted = storage.insert(fluidStorage.variant, fluidStorage.amount, transaction);
@@ -182,12 +181,16 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
     }
 
-    public SingleFluidStorage getFluidProvider(Direction side) {
-        return this.wrappedFluidStorage.getStorage(side);
+    public @Nullable SingleFluidStorage getFluidProvider(Direction side) {
+        return side == getFluidOutputDirection()
+                ? this.wrappedFluidStorage.getStorage(Direction.EAST)
+                : null;
     }
 
-    public EnergyStorage getEnergyProvider(Direction side) {
-        return this.wrappedEnergyStorage.getStorage(side);
+    public @Nullable EnergyStorage getEnergyProvider(Direction side) {
+        return side == Direction.UP
+                ? this.wrappedEnergyStorage.getStorage(Direction.UP)
+                : null;
     }
 
     public EnergyStorage getEnergyStorage() {
@@ -195,6 +198,12 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
     }
 
     public SingleFluidStorage getFluidTank() {
-        return getFluidProvider(Direction.SOUTH);
+        return this.wrappedFluidStorage.getStorage(Direction.EAST);
+    }
+
+    private Direction getFluidOutputDirection() {
+        return MathUtils.getRelativeDirection(
+                Direction.EAST,
+                getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
     }
 }
