@@ -2,12 +2,12 @@
   "multipart": [
     {
       "apply": {
-        "model": "industria:block/gas_pipe_dot"
+        "model": "industria:block/gas_pipe_center"
       }
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe"
+        "model": "industria:block/gas_pipe_continuous"
       },
       "when": {
         "north": "pipe"
@@ -15,7 +15,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe",
+        "model": "industria:block/gas_pipe_continuous",
         "y": 90
       },
       "when": {
@@ -24,7 +24,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe",
+        "model": "industria:block/gas_pipe_continuous",
         "y": 180
       },
       "when": {
@@ -33,7 +33,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe",
+        "model": "industria:block/gas_pipe_continuous",
         "y": 270
       },
       "when": {
@@ -42,8 +42,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe",
-        "x": 270
+        "model": "industria:block/gas_pipe_continuous_up"
       },
       "when": {
         "up": "pipe"
@@ -51,8 +50,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe",
-        "x": 90
+        "model": "industria:block/gas_pipe_continuous_down"
       },
       "when": {
         "down": "pipe"
@@ -60,7 +58,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe_connected"
+        "model": "industria:block/gas_pipe_connection"
       },
       "when": {
         "north": "block"
@@ -68,7 +66,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe_connected",
+        "model": "industria:block/gas_pipe_connection",
         "y": 90
       },
       "when": {
@@ -77,7 +75,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe_connected",
+        "model": "industria:block/gas_pipe_connection",
         "y": 180
       },
       "when": {
@@ -86,7 +84,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe_connected",
+        "model": "industria:block/gas_pipe_connection",
         "y": 270
       },
       "when": {
@@ -95,8 +93,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe_connected",
-        "x": 270
+        "model": "industria:block/gas_pipe_connection_up"
       },
       "when": {
         "up": "block"
@@ -104,8 +101,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/gas_pipe_connected",
-        "x": 90
+        "model": "industria:block/gas_pipe_connection_down"
       },
       "when": {
         "down": "block"

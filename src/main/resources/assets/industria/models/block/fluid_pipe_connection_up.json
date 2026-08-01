@@ -1,0 +1,39 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "industria:block/fluid_pipe",
+		"particle": "industria:block/fluid_pipe"
+	},
+	"elements": [
+		{
+			"name": "Face",
+			"from": [5, 15, 5],
+			"to": [11, 16, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 16, 8]},
+			"faces": {
+				"north": {"uv": [1.5, 3.25, 3, 3.5], "texture": "#0"},
+				"east": {"uv": [0, 3.25, 1.5, 3.5], "texture": "#0"},
+				"south": {"uv": [4.5, 3.25, 6, 3.5], "texture": "#0"},
+				"west": {"uv": [3, 3.25, 4.5, 3.5], "texture": "#0"},
+				"up": {"uv": [3, 3.25, 1.5, 1.75], "texture": "#0"},
+				"down": {"uv": [4.5, 1.75, 3, 3.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Cube",
+			"from": [6, 10, 6],
+			"to": [10, 15, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 10, 7]},
+			"faces": {
+				"north": {"uv": [13, 11.25, 14, 12.5], "texture": "#0"},
+				"east": {"uv": [12, 11.25, 13, 12.5], "texture": "#0"},
+				"south": {"uv": [15, 11.25, 16, 12.5], "texture": "#0"},
+				"west": {"uv": [14, 11.25, 15, 12.5], "texture": "#0"},
+				"up": {"uv": [14, 11.25, 13, 10.25], "texture": "#0"},
+				"down": {"uv": [15, 10.25, 14, 11.25], "texture": "#0"}
+			}
+		}
+	]
+}

@@ -107,7 +107,12 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
 
     private static void registerPipe(BlockModelGenerators blockStateModelGenerator, Block block, String name) {
-        BlockModelDefinitionGenerator pipeSupplier = createPipeBlockModelDefinitionCreator(block, name);
+        BlockModelDefinitionGenerator pipeSupplier = createPipeBlockModelDefinitionCreator(block, name, true);
+        blockStateModelGenerator.blockStateOutput.accept(pipeSupplier);
+    }
+
+    private static void registerLegacyPipe(BlockModelGenerators blockStateModelGenerator, Block block, String name) {
+        BlockModelDefinitionGenerator pipeSupplier = createPipeBlockModelDefinitionCreator(block, name, false);
         blockStateModelGenerator.blockStateOutput.accept(pipeSupplier);
     }
 
@@ -175,50 +180,58 @@ public class IndustriaModelProvider extends FabricModelProvider {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
     }
 
-    private static BlockModelDefinitionGenerator createPipeBlockModelDefinitionCreator(Block block, String name) {
-        Identifier blockModelId = Industria.id("block/" + name);
-        Identifier connectedBlockModelId = Industria.id("block/" + name + "_connected");
+    private static BlockModelDefinitionGenerator createPipeBlockModelDefinitionCreator(Block block, String name,
+                                                                                         boolean separatedModels) {
+        Identifier centerModelId = Industria.id("block/" + name + (separatedModels ? "_center" : "_dot"));
+        Identifier continuousModelId = Industria.id("block/" + name + (separatedModels ? "_continuous" : ""));
+        Identifier continuousUpModelId = Industria.id("block/" + name + (separatedModels ? "_continuous_up" : ""));
+        Identifier continuousDownModelId = Industria.id("block/" + name + (separatedModels ? "_continuous_down" : ""));
+        Identifier connectionModelId = Industria.id("block/" + name + (separatedModels ? "_connection" : "_connected"));
+        Identifier connectionUpModelId = Industria.id("block/" + name + (separatedModels ? "_connection_up" : "_connected"));
+        Identifier connectionDownModelId = Industria.id("block/" + name + (separatedModels ? "_connection_down" : "_connected"));
+
+        Variant.SimpleModelState upState = separatedModels
+                ? Variant.SimpleModelState.DEFAULT
+                : Variant.SimpleModelState.DEFAULT.withX(Quadrant.R270);
+        Variant.SimpleModelState downState = separatedModels
+                ? Variant.SimpleModelState.DEFAULT
+                : Variant.SimpleModelState.DEFAULT.withX(Quadrant.R90);
+
         return MultiPartGenerator.multiPart(block)
-                .with(createWeightedVariant(Industria.id("block/" + name + "_dot"), Variant.SimpleModelState.DEFAULT))
+                .with(createWeightedVariant(centerModelId, Variant.SimpleModelState.DEFAULT))
                 .with(new ConditionBuilder().term(PipeBlock.NORTH, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId, Variant.SimpleModelState.DEFAULT))
+                        createWeightedVariant(continuousModelId, Variant.SimpleModelState.DEFAULT))
                 .with(new ConditionBuilder().term(PipeBlock.EAST, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId,
+                        createWeightedVariant(continuousModelId,
                                 Variant.SimpleModelState.DEFAULT
                                         .withY(Quadrant.R90)))
                 .with(new ConditionBuilder().term(PipeBlock.SOUTH, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId,
+                        createWeightedVariant(continuousModelId,
                                 Variant.SimpleModelState.DEFAULT
                                         .withY(Quadrant.R180)))
                 .with(new ConditionBuilder().term(PipeBlock.WEST, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId,
+                        createWeightedVariant(continuousModelId,
                                 Variant.SimpleModelState.DEFAULT
                                         .withY(Quadrant.R270)))
                 .with(new ConditionBuilder().term(PipeBlock.UP, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId,
-                                Variant.SimpleModelState.DEFAULT
-                                        .withX(Quadrant.R270)))
+                        createWeightedVariant(continuousUpModelId, upState))
                 .with(new ConditionBuilder().term(PipeBlock.DOWN, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(blockModelId,
-                                Variant.SimpleModelState.DEFAULT
-                                        .withX(Quadrant.R90)))
+                        createWeightedVariant(continuousDownModelId, downState))
                 .with(new ConditionBuilder().term(PipeBlock.NORTH, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT))
+                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT))
                 .with(new ConditionBuilder().term(PipeBlock.EAST, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT
+                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT
                                 .withY(Quadrant.R90)))
                 .with(new ConditionBuilder().term(PipeBlock.SOUTH, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT
+                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT
                                 .withY(Quadrant.R180)))
                 .with(new ConditionBuilder().term(PipeBlock.WEST, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT
+                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT
                                 .withY(Quadrant.R270)))
                 .with(new ConditionBuilder().term(PipeBlock.UP, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT
-                                .withX(Quadrant.R270)))
+                        createWeightedVariant(connectionUpModelId, upState))
                 .with(new ConditionBuilder().term(PipeBlock.DOWN, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectedBlockModelId, Variant.SimpleModelState.DEFAULT
-                                .withX(Quadrant.R90)));
+                        createWeightedVariant(connectionDownModelId, downState));
     }
 
     private static BlockModelDefinitionGenerator createConveyorBlockModelDefinitionCreator(BasicConveyorBlock block, String name) {
@@ -571,7 +584,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         registerPipe(blockStateModelGenerator, BlockInit.FLUID_PIPE, "fluid_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.SLURRY_PIPE, "slurry_pipe");
         registerPipe(blockStateModelGenerator, BlockInit.GAS_PIPE, "gas_pipe");
-        registerPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
+        registerLegacyPipe(blockStateModelGenerator, BlockInit.HEAT_PIPE, "heat_pipe");
         registerConveyor(blockStateModelGenerator);
         registerSplitterConveyor(blockStateModelGenerator);
         registerMergerConveyor(blockStateModelGenerator);

@@ -1,0 +1,39 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"3": "industria:block/power_cable",
+		"particle": "industria:block/power_cable"
+	},
+	"elements": [
+		{
+			"name": "Face",
+			"from": [6, 13, 6],
+			"to": [10, 16, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 14, 9]},
+			"faces": {
+				"north": {"uv": [1, 5, 2, 5.75], "texture": "#3"},
+				"east": {"uv": [0, 5, 1, 5.75], "texture": "#3"},
+				"south": {"uv": [3, 5, 4, 5.75], "texture": "#3"},
+				"west": {"uv": [2, 5, 3, 5.75], "texture": "#3"},
+				"up": {"uv": [2, 5, 1, 4], "texture": "#3"},
+				"down": {"uv": [3, 4, 2, 5], "texture": "#3"}
+			}
+		},
+		{
+			"name": "Cube",
+			"from": [6.5, 9.5, 6.5],
+			"to": [9.5, 15.5, 9.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 10, 7]},
+			"faces": {
+				"north": {"uv": [0.75, 6.5, 1.5, 8], "texture": "#3"},
+				"east": {"uv": [0, 6.5, 0.75, 8], "texture": "#3"},
+				"south": {"uv": [2.25, 6.5, 3, 8], "texture": "#3"},
+				"west": {"uv": [1.5, 6.5, 2.25, 8], "texture": "#3"},
+				"up": {"uv": [1.5, 6.5, 0.75, 5.75], "texture": "#3"},
+				"down": {"uv": [2.25, 5.75, 1.5, 6.5], "texture": "#3"}
+			}
+		}
+	]
+}

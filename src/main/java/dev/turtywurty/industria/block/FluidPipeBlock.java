@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 
 public class FluidPipeBlock extends PipeBlock<Storage<FluidVariant>, FluidPipeNetwork, Long> {
     public FluidPipeBlock(Properties settings) {
-        super(settings, 6, TransferType.FLUID);
+        super(settings, FLUID_PIPE_SHAPE, TransferType.FLUID);
     }
 
     @Override

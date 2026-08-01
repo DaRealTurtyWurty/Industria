@@ -25,7 +25,6 @@ public class EnergyStorageInit {
         EnergyStorage.SIDED.registerForBlockEntity(MotorBlockEntity::getEnergyProvider, BlockEntityTypeInit.MOTOR);
         EnergyStorage.SIDED.registerForBlockEntity(ElectricFurnaceBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTRIC_FURNACE);
         EnergyStorage.SIDED.registerForBlockEntity(InductionHeaterBlockEntity::getEnergyProvider, BlockEntityTypeInit.INDUCTION_HEATER);
-        EnergyStorage.SIDED.registerForBlockEntity(FluidPumpBlockEntity::getEnergyProvider, BlockEntityTypeInit.FLUID_PUMP);
         EnergyStorage.SIDED.registerForBlockEntity(MixerBlockEntity::getEnergyProvider, BlockEntityTypeInit.MIXER);
         EnergyStorage.SIDED.registerForBlockEntity(ElectrolyzerBlockEntity::getEnergyProvider, BlockEntityTypeInit.ELECTROLYZER);
         EnergyStorage.SIDED.registerForBlockEntity(OilPumpJackBlockEntity::getEnergyProvider, BlockEntityTypeInit.OIL_PUMP_JACK);

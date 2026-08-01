@@ -7,7 +7,7 @@ import dev.turtywurty.industria.pipe.impl.network.HeatPipeNetwork;
 
 public class HeatPipeBlock extends PipeBlock<HeatStorage, HeatPipeNetwork, Double> {
     public HeatPipeBlock(Properties settings) {
-        super(settings, 6, TransferType.HEAT);
+        super(settings, LEGACY_PIPE_SHAPE, TransferType.HEAT);
     }
 
     @Override

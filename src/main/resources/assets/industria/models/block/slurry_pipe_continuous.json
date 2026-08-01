@@ -1,0 +1,25 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "industria:block/slurry_pipe",
+		"particle": "industria:block/slurry_pipe"
+	},
+	"elements": [
+		{
+			"name": "North",
+			"from": [10, 4, 0],
+			"to": [14, 12, 8],
+			"rotation": {"x": 0, "y": -90, "z": 0, "origin": [11, 4, 1]},
+			"faces": {
+				"north": {"uv": [2, 8, 3, 10], "texture": "#0"},
+				"east": {"uv": [0, 8, 2, 10], "texture": "#0"},
+				"south": {"uv": [5, 8, 6, 10], "texture": "#0"},
+				"west": {"uv": [3, 8, 5, 10], "texture": "#0"},
+				"up": {"uv": [3, 8, 2, 6], "texture": "#0"},
+				"down": {"uv": [4, 6, 3, 8], "texture": "#0"}
+			}
+		}
+	]
+}

@@ -1,0 +1,25 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "industria:block/slurry_pipe",
+		"particle": "industria:block/slurry_pipe"
+	},
+	"elements": [
+		{
+			"name": "Down",
+			"from": [4, 0, 4],
+			"to": [12, 4, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [5, 0, 5]},
+			"faces": {
+				"north": {"uv": [2, 5, 4, 6], "texture": "#0"},
+				"east": {"uv": [0, 5, 2, 6], "texture": "#0"},
+				"south": {"uv": [6, 5, 8, 6], "texture": "#0"},
+				"west": {"uv": [4, 5, 6, 6], "texture": "#0"},
+				"up": {"uv": [4, 5, 2, 3], "texture": "#0"},
+				"down": {"uv": [6, 3, 4, 5], "texture": "#0"}
+			}
+		}
+	]
+}

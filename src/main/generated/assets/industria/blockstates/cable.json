@@ -2,12 +2,12 @@
   "multipart": [
     {
       "apply": {
-        "model": "industria:block/cable_dot"
+        "model": "industria:block/cable_center"
       }
     },
     {
       "apply": {
-        "model": "industria:block/cable"
+        "model": "industria:block/cable_continuous"
       },
       "when": {
         "north": "pipe"
@@ -15,7 +15,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/cable_continuous",
         "y": 90
       },
       "when": {
@@ -24,7 +24,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/cable_continuous",
         "y": 180
       },
       "when": {
@@ -33,7 +33,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
+        "model": "industria:block/cable_continuous",
         "y": 270
       },
       "when": {
@@ -42,8 +42,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
-        "x": 270
+        "model": "industria:block/cable_continuous_up"
       },
       "when": {
         "up": "pipe"
@@ -51,8 +50,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable",
-        "x": 90
+        "model": "industria:block/cable_continuous_down"
       },
       "when": {
         "down": "pipe"
@@ -60,7 +58,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected"
+        "model": "industria:block/cable_connection"
       },
       "when": {
         "north": "block"
@@ -68,7 +66,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/cable_connection",
         "y": 90
       },
       "when": {
@@ -77,7 +75,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/cable_connection",
         "y": 180
       },
       "when": {
@@ -86,7 +84,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
+        "model": "industria:block/cable_connection",
         "y": 270
       },
       "when": {
@@ -95,8 +93,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
-        "x": 270
+        "model": "industria:block/cable_connection_up"
       },
       "when": {
         "up": "block"
@@ -104,8 +101,7 @@
     },
     {
       "apply": {
-        "model": "industria:block/cable_connected",
-        "x": 90
+        "model": "industria:block/cable_connection_down"
       },
       "when": {
         "down": "block"

@@ -6,7 +6,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 public class CableBlock extends PipeBlock<EnergyStorage, CableNetwork, Long> {
     public CableBlock(Properties settings) {
-        super(settings, 6, TransferType.ENERGY);
+        super(settings, CABLE_SHAPE, TransferType.ENERGY);
     }
 
     @Override

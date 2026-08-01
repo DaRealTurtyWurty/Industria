@@ -41,6 +41,12 @@ import java.text.DecimalFormat;
 import java.util.Locale;
 
 public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> extends Block implements SimpleWaterloggedBlock {
+    protected static final ShapeProfile CABLE_SHAPE = new ShapeProfile(6.5, 9.5, 6.5, 9.5, 6, 10, 3);
+    protected static final ShapeProfile FLUID_PIPE_SHAPE = new ShapeProfile(6, 10, 6, 10, 5, 11, 1);
+    protected static final ShapeProfile GAS_PIPE_SHAPE = new ShapeProfile(6, 10, 6, 10, 4, 12, 1.5);
+    protected static final ShapeProfile SLURRY_PIPE_SHAPE = new ShapeProfile(4, 12, 4, 12, 2.5, 13.5, 2);
+    protected static final ShapeProfile LEGACY_PIPE_SHAPE = new ShapeProfile(6.4, 9.6, 6, 10, 4, 12, 2);
+
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public static final EnumProperty<ConnectorType> NORTH = EnumProperty.create("north", ConnectorType.class);
@@ -57,7 +63,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
 
     private final TransferType<S, ?, A> transferType;
 
-    public PipeBlock(Properties settings, int diameter, TransferType<S, ?, A> transferType) {
+    public PipeBlock(Properties settings, ShapeProfile shapeProfile, TransferType<S, ?, A> transferType) {
         super(settings);
         registerDefaultState(defaultBlockState()
                 .setValue(NORTH, ConnectorType.NONE)
@@ -71,16 +77,16 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         this.transferType = transferType;
 
         for (Direction direction : Direction.values()) {
-            pipeShapes[direction.ordinal()] = createCableShape(direction, diameter);
-            blockConnectorShapes[direction.ordinal()] = createBlockConnectorShape(direction);
+            pipeShapes[direction.ordinal()] = createPipeShape(direction, shapeProfile);
+            blockConnectorShapes[direction.ordinal()] = createBlockConnectorShape(direction, shapeProfile);
         }
 
-        createShapeCache();
+        createShapeCache(shapeProfile);
     }
 
-    private static VoxelShape createCableShape(Direction direction, int diameter) {
-        double min = diameter / 16.0;
-        double max = 1 - min;
+    private static VoxelShape createPipeShape(Direction direction, ShapeProfile profile) {
+        double min = pixels(profile.armMin());
+        double max = pixels(profile.armMax());
 
         return switch (direction) {
             case NORTH -> Shapes.box(min, min, 0, max, max, min);
@@ -92,18 +98,23 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         };
     }
 
-    private static VoxelShape createBlockConnectorShape(Direction direction) {
-        double min = 0.25;
-        double max = 0.75;
+    private static VoxelShape createBlockConnectorShape(Direction direction, ShapeProfile profile) {
+        double min = pixels(profile.connectorMin());
+        double max = pixels(profile.connectorMax());
+        double depth = pixels(profile.connectorDepth());
 
         return switch (direction) {
-            case NORTH -> Shapes.box(min, min, 0, max, max, 0.125);
-            case SOUTH -> Shapes.box(min, min, 0.875, max, max, 1);
-            case WEST -> Shapes.box(0, min, min, 0.125, max, max);
-            case EAST -> Shapes.box(0.875, min, min, 1, max, max);
-            case UP -> Shapes.box(min, max, min, max, 1, max);
-            case DOWN -> Shapes.box(min, 0, min, max, 0.125, max);
+            case NORTH -> Shapes.box(min, min, 0, max, max, depth);
+            case SOUTH -> Shapes.box(min, min, 1 - depth, max, max, 1);
+            case WEST -> Shapes.box(0, min, min, depth, max, max);
+            case EAST -> Shapes.box(1 - depth, min, min, 1, max, max);
+            case UP -> Shapes.box(min, 1 - depth, min, max, 1, max);
+            case DOWN -> Shapes.box(min, 0, min, max, depth, max);
         };
+    }
+
+    private static double pixels(double value) {
+        return value / 16.0;
     }
 
     protected static VoxelShape combineShape(VoxelShape shape, ConnectorType connectorType, VoxelShape cableShape, VoxelShape blockShape) {
@@ -129,7 +140,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         return this.transferType;
     }
 
-    protected void createShapeCache() {
+    protected void createShapeCache(ShapeProfile shapeProfile) {
         for (ConnectorType up : ConnectorType.VALUES) {
             for (ConnectorType down : ConnectorType.VALUES) {
                 for (ConnectorType north : ConnectorType.VALUES) {
@@ -137,7 +148,7 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
                         for (ConnectorType east : ConnectorType.VALUES) {
                             for (ConnectorType west : ConnectorType.VALUES) {
                                 int idx = calculateShapeIndex(north, south, west, east, up, down);
-                                shapeCache[idx] = createShape(north, south, west, east, up, down);
+                                shapeCache[idx] = createShape(shapeProfile, north, south, west, east, up, down);
                             }
                         }
                     }
@@ -146,8 +157,10 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         }
     }
 
-    private VoxelShape createShape(ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
-        VoxelShape shape = Shapes.box(.4, .4, .4, .6, .6, .6);
+    private VoxelShape createShape(ShapeProfile profile, ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
+        VoxelShape shape = Shapes.box(
+                pixels(profile.centerMin()), pixels(profile.centerMin()), pixels(profile.centerMin()),
+                pixels(profile.centerMax()), pixels(profile.centerMax()), pixels(profile.centerMax()));
         shape = combineShape(shape, north, pipeShapes[Direction.NORTH.ordinal()], blockConnectorShapes[Direction.NORTH.ordinal()]);
         shape = combineShape(shape, south, pipeShapes[Direction.SOUTH.ordinal()], blockConnectorShapes[Direction.SOUTH.ordinal()]);
         shape = combineShape(shape, west, pipeShapes[Direction.WEST.ordinal()], blockConnectorShapes[Direction.WEST.ordinal()]);
@@ -155,6 +168,10 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         shape = combineShape(shape, up, pipeShapes[Direction.UP.ordinal()], blockConnectorShapes[Direction.UP.ordinal()]);
         shape = combineShape(shape, down, pipeShapes[Direction.DOWN.ordinal()], blockConnectorShapes[Direction.DOWN.ordinal()]);
         return shape;
+    }
+
+    protected record ShapeProfile(double centerMin, double centerMax, double armMin, double armMax,
+                                  double connectorMin, double connectorMax, double connectorDepth) {
     }
 
     protected ConnectorType getConnectorType(Level world, BlockPos connectorPos, Direction facing) {

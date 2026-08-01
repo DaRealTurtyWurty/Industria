@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 
 public class GasPipeBlock extends PipeBlock<Storage<GasVariant>, GasPipeNetwork, Long> {
     public GasPipeBlock(Properties settings) {
-        super(settings, 6, TransferType.GAS);
+        super(settings, GAS_PIPE_SHAPE, TransferType.GAS);
     }
 
     @Override
