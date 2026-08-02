@@ -24,5 +24,6 @@ public class BlockEntityRendererInit {
         BlockEntityRenderers.register(BlockEntityTypeInit.ARC_FURNACE, ArcFurnaceBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.TREE_TAP, TreeTapBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.DISTILLATION_TOWER, DistillationTowerBlockEntityRenderer::new);
+        BlockEntityRenderers.register(BlockEntityTypeInit.FLUID_PUMP, FluidPumpBlockEntityRenderer::new);
     }
 }

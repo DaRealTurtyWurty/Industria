@@ -6,18 +6,35 @@ import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class InWorldFluidRenderingComponent {
+    private static final Function<Identifier, RenderType> ENTITY_TRANSLUCENT_CULL = Util.memoize(texture -> {
+        RenderSetup setup = RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT_CULL)
+                .withTexture("Sampler0", texture)
+                .useLightmap()
+                .useOverlay()
+                .affectsCrumbling()
+                .sortOnUpload()
+                .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
+                .createRenderSetup();
+        return RenderType.create("industria_entity_translucent_cull", setup);
+    });
+
     private boolean shouldDebugAmount = false;
 
     public void setShouldDebugAmount(boolean shouldDebugAmount) {
@@ -262,7 +279,7 @@ public class InWorldFluidRenderingComponent {
         int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
         TextureAtlasSprite stillSprite = renderData.stillSprite();
 
-        RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
+        RenderType renderLayer = ENTITY_TRANSLUCENT_CULL.apply(stillSprite.atlasLocation());
 
         matrices.pushPose();
         matrices.mulPose(Axis.XP.rotationDegrees(180));
