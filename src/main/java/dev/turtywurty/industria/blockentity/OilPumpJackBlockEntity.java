@@ -10,10 +10,12 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorageHolder;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.init.FluidInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.OilPumpJackScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -189,15 +191,10 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
     }
 
     @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getZ() == -4 && localOffset.getY() == 0 && localOffset.getX() >= -1 && localOffset.getX() <= 2
-                ? getEnergyStorage()
-                : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(offset -> offset.getZ() == -4 && offset.getY() == 0
+                        && offset.getX() >= -1 && offset.getX() <= 2);
     }
 
     public void removeWellhead() {

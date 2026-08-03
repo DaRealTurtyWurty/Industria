@@ -13,11 +13,13 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CrystallizerRecipe;
 import dev.turtywurty.industria.recipe.input.CrystallizerRecipeInput;
 import dev.turtywurty.industria.screenhandler.CrystallizerScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -374,24 +376,16 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
     }
 
     @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        if (localOffset.getY() == 3 && localOffset.getX() == 0 && localOffset.getZ() == 0)
-            return getCrystalFluidStorage();
-
-        return localOffset.getY() == 3 && localOffset.getZ() == 1 ? getWaterFluidStorage() : null;
-    }
-
-    @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        if (localOffset.getY() != 0)
-            return null;
-
-        if (localOffset.getX() == -1)
-            return this.wrappedContainerStorage.getStorage(getLeftDirection());
-
-        if (localOffset.getZ() == -1)
-            return this.wrappedContainerStorage.getStorage(getFrontDirection());
-
-        return localOffset.getX() == 1 ? this.wrappedContainerStorage.getStorage(getRightDirection()) : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.FLUID, this::getCrystalFluidStorage)
+                .at(new BlockPos(0, 3, 0));
+        ports.input(TransferType.FLUID, this::getWaterFluidStorage)
+                .wherePosition(offset -> offset.getY() == 3 && offset.getZ() == 1);
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
+                .wherePosition(offset -> offset.getY() == 0 && offset.getX() == -1);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.NORTH))
+                .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == -1);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.EAST))
+                .wherePosition(offset -> offset.getY() == 0 && offset.getX() == 1);
     }
 }

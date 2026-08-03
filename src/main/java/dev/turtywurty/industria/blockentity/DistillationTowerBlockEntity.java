@@ -11,11 +11,13 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DistillationTowerRecipe;
 import dev.turtywurty.industria.recipe.input.DistillationTowerRecipeInput;
 import dev.turtywurty.industria.screenhandler.DistillationTowerScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -267,28 +269,15 @@ public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerB
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        if (localOffset.getX() == 1 && localOffset.getY() == 6 && localOffset.getZ() == 1)
-            return getInputFluidTank();
-
-        if (localOffset.getX() == 1 && localOffset.getY() == 1 && localOffset.getZ() == 0)
-            return getPrimaryOutputFluidTank();
-
-        return localOffset.getX() == 1 && localOffset.getY() == 1 && localOffset.getZ() == 2
-                ? getSecondaryOutputFluidTank()
-                : null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getX() == 1 && localOffset.getY() == 1 && localOffset.getZ() == 1
-                ? getEnergyStorage()
-                : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.FLUID, this::getInputFluidTank)
+                .at(new BlockPos(1, 6, 1));
+        ports.output(TransferType.FLUID, this::getPrimaryOutputFluidTank)
+                .at(new BlockPos(1, 1, 0));
+        ports.output(TransferType.FLUID, this::getSecondaryOutputFluidTank)
+                .at(new BlockPos(1, 1, 2));
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .at(new BlockPos(1, 1, 1));
     }
 
     @Override

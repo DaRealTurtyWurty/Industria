@@ -13,12 +13,14 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.init.DamageTypeInit;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.screenhandler.DrillScreenHandler;
 import dev.turtywurty.industria.util.DrillHeadable;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -260,27 +262,18 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        if (localOffset.getY() == 0 && (localOffset.getX() != 0 || localOffset.getZ() != 0))
-            return this.wrappedContainerStorage.getStorage(Direction.DOWN);
-
-        if (localOffset.getY() == 1 && localOffset.getX() == -1 && localOffset.getZ() == 0)
-            return this.wrappedContainerStorage.getStorage(Direction.UP);
-
-        if (localOffset.getY() == 1 && localOffset.getX() == 1 && localOffset.getZ() == 0)
-            return this.wrappedContainerStorage.getStorage(getFrontDirection());
-
-        if (localOffset.getY() == 2)
-            return this.wrappedContainerStorage.getStorage(getBackDirection());
-
-        return null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getX() == 0 && localOffset.getZ() == 0 && localOffset.getY() == 2
-                ? getEnergyStorage()
-                : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
+                .wherePosition(offset -> offset.getY() == 0
+                        && (offset.getX() != 0 || offset.getZ() != 0));
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.UP))
+                .at(new BlockPos(-1, 1, 0));
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(getFrontDirection()))
+                .at(new BlockPos(1, 1, 0));
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(getBackDirection()))
+                .wherePosition(offset -> offset.getY() == 2);
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .at(new BlockPos(0, 2, 0));
     }
 
     @Override

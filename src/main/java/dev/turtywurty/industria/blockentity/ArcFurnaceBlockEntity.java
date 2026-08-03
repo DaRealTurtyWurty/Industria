@@ -25,12 +25,14 @@ import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.GasInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyFurnaceRecipe;
 import dev.turtywurty.industria.recipe.RecyclingRecipe;
 import dev.turtywurty.industria.screenhandler.ArcFurnaceScreenHandler;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import dev.turtywurty.industria.util.enums.IndustriaEnum;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -500,37 +502,19 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        if (isItemInputPort(localOffset))
-            return this.wrappedContainerStorage.getStorage(Direction.WEST);
-
-        if (isItemOutputPort(localOffset))
-            return this.wrappedContainerStorage.getStorage(Direction.SOUTH);
-
-        return null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return isAuxInputPort(localOffset) ? getFluidStorage() : null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return isAuxInputPort(localOffset) ? getEnergyStorage() : null;
-    }
-
-    @Override
-    public @Nullable SingleGasStorage getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
-        if (isFormed())
-            return isAuxInputPort(getLocalOffsetFromController(worldPos)) ? getGasStorage() : null;
-
-        return side == Direction.EAST ? getGasStorage() : null;
-    }
-
-    @Override
-    protected @Nullable HeatStorage getHeatStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return isAuxInputPort(localOffset) ? getHeatStorage() : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
+                .wherePosition(this::isItemInputPort);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.SOUTH))
+                .wherePosition(this::isItemOutputPort);
+        ports.input(TransferType.FLUID, this::getFluidStorage)
+                .wherePosition(this::isAuxInputPort);
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(this::isAuxInputPort);
+        ports.input(TransferType.GAS, this::getGasStorage)
+                .wherePosition(this::isAuxInputPort);
+        ports.input(TransferType.HEAT, this::getHeatStorage)
+                .wherePosition(this::isAuxInputPort);
     }
 
     @Override

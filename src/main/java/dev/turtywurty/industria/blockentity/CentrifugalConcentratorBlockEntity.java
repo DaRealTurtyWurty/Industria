@@ -24,12 +24,14 @@ import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.CentrifugalConcentratorRecipe;
 import dev.turtywurty.industria.recipe.input.CentrifugalConcentratorRecipeInput;
 import dev.turtywurty.industria.screenhandler.CentrifugalConcentratorScreenHandler;
 import dev.turtywurty.industria.util.TransferUtils;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -424,25 +426,17 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 0 || localOffset.getY() == 2
-                ? this.wrappedContainerStorage.getCombinedStorage()
-                : null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 2 ? getInputFluidTank() : null;
-    }
-
-    @Override
-    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return localOffset.getY() == 0 ? getOutputSlurryTank() : null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 0 ? getEnergyStorage() : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.both(TransferType.ITEM, this.wrappedContainerStorage::getCombinedStorage)
+                .wherePosition(offset -> offset.getY() == 0 || offset.getY() == 2);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
+                .wherePosition(offset -> offset.getY() == 0);
+        ports.input(TransferType.FLUID, this::getInputFluidTank)
+                .wherePosition(offset -> offset.getY() == 2);
+        ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
+                .wherePosition(offset -> offset.getY() == 0);
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(offset -> offset.getY() == 0);
     }
 
     public int getProgress() {

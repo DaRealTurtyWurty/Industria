@@ -11,11 +11,13 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ClarifierRecipe;
 import dev.turtywurty.industria.recipe.input.ClarifierRecipeInput;
 import dev.turtywurty.industria.screenhandler.ClarifierScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -286,20 +288,13 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 0 && localOffset.getX() == 0 && localOffset.getZ() == 1
-                ? this.wrappedContainerStorage.getStorage(Direction.SOUTH)
-                : null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        if (localOffset.getY() == 1 && localOffset.getX() == 0 && localOffset.getZ() == 0)
-            return getInputFluidTank();
-
-        return localOffset.getY() == 0 && localOffset.getX() == 0 && localOffset.getZ() == -1
-                ? getOutputFluidTank()
-                : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.SOUTH))
+                .at(new BlockPos(0, 0, 1));
+        ports.input(TransferType.FLUID, this::getInputFluidTank)
+                .at(new BlockPos(0, 1, 0));
+        ports.output(TransferType.FLUID, this::getOutputFluidTank)
+                .at(new BlockPos(0, 0, -1));
     }
 
     @Override

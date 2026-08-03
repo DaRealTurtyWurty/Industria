@@ -45,7 +45,7 @@ public class EnergyStorageInit {
         }, BlockInit.FLUID_PUMP);
         EnergyStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
-            return controller != null ? controller.getEnergyStorageForExternal(pos) : null;
+            return controller != null ? controller.getEnergyStorageForExternal(pos, side) : null;
         }, MultiblockLib.MULTIBLOCK_PART);
         EnergyStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerLevel serverWorld) {

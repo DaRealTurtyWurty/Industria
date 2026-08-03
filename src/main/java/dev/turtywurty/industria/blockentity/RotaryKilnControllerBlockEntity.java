@@ -12,9 +12,11 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -339,10 +341,9 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getX() == 0 && localOffset.getZ() == 0 && localOffset.getY() == 4
-                ? this.wrappedContainerStorage.getStorage(Direction.UP)
-                : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.UP))
+                .at(new BlockPos(0, 4, 0));
     }
 
     public List<BlockPos> getKilnSegments() {

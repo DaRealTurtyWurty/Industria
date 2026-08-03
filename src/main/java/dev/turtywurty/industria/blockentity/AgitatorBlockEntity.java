@@ -27,6 +27,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AgitatorRecipe;
 import dev.turtywurty.industria.recipe.input.AgitatorPortStack;
@@ -35,6 +36,7 @@ import dev.turtywurty.industria.screenhandler.AgitatorScreenHandler;
 import dev.turtywurty.industria.util.AgitatorPortType;
 import dev.turtywurty.industria.util.OutputItemStack;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
@@ -475,65 +477,49 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        Integer inputIndex = getInputPortIndex(localOffset);
-        if (inputIndex != null && this.inputModes[inputIndex] == AgitatorPortType.ITEM)
-            return this.wrappedContainerStorage.getStorage(INPUT_DIRECTIONS[inputIndex]);
+    protected void definePorts(PortRegistrar ports) {
+        for (int index = 0; index < INPUT_OFFSETS.length; index++) {
+            int portIndex = index;
+            ports.input(TransferType.ITEM,
+                            () -> this.wrappedContainerStorage.getStorage(INPUT_DIRECTIONS[portIndex]))
+                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.inputModes[portIndex] == AgitatorPortType.ITEM);
+            ports.input(TransferType.FLUID, () -> this.inputFluidStorages[portIndex])
+                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.inputModes[portIndex] == AgitatorPortType.FLUID);
+            ports.input(TransferType.SLURRY, () -> this.inputSlurryStorages[portIndex])
+                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.inputModes[portIndex] == AgitatorPortType.SLURRY);
+            ports.input(TransferType.GAS, () -> this.inputGasStorages[portIndex])
+                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.inputModes[portIndex] == AgitatorPortType.GAS);
+        }
 
-        Integer outputIndex = getOutputPortIndex(localOffset);
-        if (outputIndex != null && this.outputModes[outputIndex] == AgitatorPortType.ITEM)
-            return this.wrappedContainerStorage.getStorage(OUTPUT_DIRECTIONS[outputIndex]);
+        for (int index = 0; index < OUTPUT_OFFSETS.length; index++) {
+            int portIndex = index;
+            ports.output(TransferType.ITEM,
+                            () -> this.wrappedContainerStorage.getStorage(OUTPUT_DIRECTIONS[portIndex]))
+                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.outputModes[portIndex] == AgitatorPortType.ITEM);
+            ports.output(TransferType.FLUID, () -> this.outputFluidStorages[portIndex])
+                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.outputModes[portIndex] == AgitatorPortType.FLUID);
+            ports.output(TransferType.SLURRY, () -> this.outputSlurryStorages[portIndex])
+                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.outputModes[portIndex] == AgitatorPortType.SLURRY);
+            ports.output(TransferType.GAS, () -> this.outputGasStorages[portIndex])
+                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                            && this.outputModes[portIndex] == AgitatorPortType.GAS);
+        }
 
-        return null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        Integer inputIndex = getInputPortIndex(localOffset);
-        if (inputIndex != null && this.inputModes[inputIndex] == AgitatorPortType.FLUID)
-            return this.inputFluidStorages[inputIndex];
-
-        Integer outputIndex = getOutputPortIndex(localOffset);
-        if (outputIndex != null && this.outputModes[outputIndex] == AgitatorPortType.FLUID)
-            return this.outputFluidStorages[outputIndex];
-
-        return null;
-    }
-
-    @Override
-    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        Integer inputIndex = getInputPortIndex(localOffset);
-        if (inputIndex != null && this.inputModes[inputIndex] == AgitatorPortType.SLURRY)
-            return this.inputSlurryStorages[inputIndex];
-
-        Integer outputIndex = getOutputPortIndex(localOffset);
-        if (outputIndex != null && this.outputModes[outputIndex] == AgitatorPortType.SLURRY)
-            return this.outputSlurryStorages[outputIndex];
-
-        return null;
+        ports.input(TransferType.ENERGY, this::getEnergyStorage).at(ENERGY_OFFSET);
     }
 
     @Override
     public @Nullable SingleGasStorage getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
         if (!isFormed())
             return side == null ? null : getGasProvider(side);
-
-        BlockPos localOffset = getLocalOffsetFromController(worldPos);
-
-        Integer inputIndex = getInputPortIndex(localOffset);
-        if (inputIndex != null && this.inputModes[inputIndex] == AgitatorPortType.GAS)
-            return this.inputGasStorages[inputIndex];
-
-        Integer outputIndex = getOutputPortIndex(localOffset);
-        if (outputIndex != null && this.outputModes[outputIndex] == AgitatorPortType.GAS)
-            return this.outputGasStorages[outputIndex];
-
-        return null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return ENERGY_OFFSET.equals(localOffset) ? getEnergyStorage() : null;
+        return super.getGasStorageForExternal(worldPos, side);
     }
 
     private static Integer getInputPortIndex(Direction side) {

@@ -8,6 +8,7 @@ import dev.turtywurty.gasapi.api.storage.GasStorage;
 import dev.turtywurty.heatapi.api.HeatStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.util.TransferUtils;
+import dev.turtywurty.multiblocklib.port.PortTransfer;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -37,7 +38,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TransferType<S, V, A extends Number> {
+public class TransferType<S, V, A extends Number> implements PortTransfer<S> {
     private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
     public static final TransferType<Storage<ItemVariant>, ItemVariant, Long> ITEM =
@@ -198,23 +199,36 @@ public class TransferType<S, V, A extends Number> {
         if (secondaryStorage == null || !supportsInsert.test(secondaryStorage))
             return;
 
+        move(primaryStorage, secondaryStorage);
+    }
+
+    @Override
+    public @Nullable S find(Level level, BlockPos pos, @Nullable Direction side) {
+        return lookup(level, pos, side);
+    }
+
+    @Override
+    public void move(S source, S target) {
+        if (!supportsExtract.test(source) || !supportsInsert.test(target))
+            return;
+
         try (Transaction transaction = Transaction.openOuter()) {
-            V value = valueGetter.apply(primaryStorage);
+            V value = valueGetter.apply(source);
             if (isBlank.test(value))
                 return;
 
             A maxAmount;
-            try (Transaction transaction1 = transaction.openNested()) {
-                maxAmount = extract(primaryStorage, value, this.maxAmount, transaction1);
-                transaction1.abort();
+            try (Transaction nested = transaction.openNested()) {
+                maxAmount = extract(source, value, this.maxAmount, nested);
+                nested.abort();
             }
 
             if (maxAmount.doubleValue() <= 0)
                 return;
 
-            A inserted = insert(secondaryStorage, value, maxAmount, transaction);
+            A inserted = insert(target, value, maxAmount, transaction);
             if (inserted.doubleValue() > 0) {
-                extract(primaryStorage, value, inserted, transaction);
+                extract(source, value, inserted, transaction);
                 transaction.commit();
             }
         }

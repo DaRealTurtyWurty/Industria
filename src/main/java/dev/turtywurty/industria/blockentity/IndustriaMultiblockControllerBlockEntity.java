@@ -9,6 +9,7 @@ import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.UpdateableBlockEntityLike;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.multiblocklib.block.entity.MultiblockControllerBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -113,6 +114,26 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
         };
     }
 
+    @Override
+    protected BlockPos getPortLocalOffset(BlockPos worldPos) {
+        return getLocalOffsetFromController(worldPos);
+    }
+
+    @Override
+    protected @Nullable Direction getPortLocalSide(@Nullable Direction worldSide) {
+        if (worldSide == null || worldSide.getAxis().isVertical()) {
+            return worldSide;
+        }
+
+        return switch (getControllerFacing()) {
+            case NORTH -> worldSide;
+            case SOUTH -> worldSide.getOpposite();
+            case WEST -> worldSide.getCounterClockWise();
+            case EAST -> worldSide.getClockWise();
+            default -> worldSide;
+        };
+    }
+
     protected Direction getControllerFacing() {
         return getBlockState().getOptionalValue(BlockStateProperties.HORIZONTAL_FACING).orElse(Direction.NORTH);
     }
@@ -135,49 +156,41 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
 
     @Override
     public Storage<ItemVariant> getItemStorageForExternal(BlockPos pos) {
-        return !isFormed() ? null : getItemStorageForExternal(pos, getLocalOffsetFromController(pos));
+        return getItemStorageForExternal(pos, null);
+    }
+
+    public Storage<ItemVariant> getItemStorageForExternal(BlockPos pos, @Nullable Direction side) {
+        return getExternalPortStorage(TransferType.ITEM, pos, side);
     }
 
     @Override
     public Storage<FluidVariant> getFluidStorageForExternal(BlockPos pos) {
-        return !isFormed() ? null : getFluidStorageForExternal(pos, getLocalOffsetFromController(pos));
+        return getFluidStorageForExternal(pos, null);
+    }
+
+    public Storage<FluidVariant> getFluidStorageForExternal(BlockPos pos, @Nullable Direction side) {
+        return getExternalPortStorage(TransferType.FLUID, pos, side);
     }
 
     @Override
     public EnergyStorage getEnergyStorageForExternal(BlockPos pos) {
-        return !isFormed() ? null : getEnergyStorageForExternal(pos, getLocalOffsetFromController(pos));
+        return getEnergyStorageForExternal(pos, null);
     }
 
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return null;
-    }
-
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return null;
-    }
-
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return null;
+    public EnergyStorage getEnergyStorageForExternal(BlockPos pos, @Nullable Direction side) {
+        return getExternalPortStorage(TransferType.ENERGY, pos, side);
     }
 
     public @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
-        return !isFormed() ? null : getSlurryStorageForExternal(worldPos, getLocalOffsetFromController(worldPos), side);
-    }
-
-    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return null;
+        return getExternalPortStorage(TransferType.SLURRY, worldPos, side);
     }
 
     public @Nullable SingleGasStorage getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
-        return null;
+        return (SingleGasStorage) getExternalPortStorage(TransferType.GAS, worldPos, side);
     }
 
     public @Nullable HeatStorage getHeatStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
-        return !isFormed() ? null : getHeatStorageForExternal(worldPos, getLocalOffsetFromController(worldPos), side);
-    }
-
-    protected @Nullable HeatStorage getHeatStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return null;
+        return getExternalPortStorage(TransferType.HEAT, worldPos, side);
     }
 
     @Override

@@ -12,11 +12,13 @@ import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventor
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationUpdateRecipesPayload;
 import dev.turtywurty.industria.recipe.UpgradeStationRecipe;
 import dev.turtywurty.industria.screenhandler.UpgradeStationScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -352,8 +354,9 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
     }
 
     @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return getEnergyStorage();
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(offset -> true);
     }
 
     @Override

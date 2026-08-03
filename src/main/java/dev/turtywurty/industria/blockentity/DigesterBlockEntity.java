@@ -23,12 +23,14 @@ import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.DigesterRecipe;
 import dev.turtywurty.industria.recipe.input.DigesterRecipeInput;
 import dev.turtywurty.industria.screenhandler.DigesterScreenHandler;
 import dev.turtywurty.industria.util.TransferUtils;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -328,19 +330,12 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
     }
 
     @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getZ() == -1 ? getEnergyStorage() : null;
-    }
-
-    @Override
-    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return localOffset.getY() == 4 && localOffset.getX() == 0 && localOffset.getZ() == 0
-                ? getInputSlurryStorage()
-                : null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 0 && localOffset.getZ() == 1 ? getOutputFluidStorage() : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(offset -> offset.getZ() == -1);
+        ports.input(TransferType.SLURRY, this::getInputSlurryStorage)
+                .at(new BlockPos(0, 3, 0));
+        ports.output(TransferType.FLUID, this::getOutputFluidStorage)
+                .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == 1);
     }
 }

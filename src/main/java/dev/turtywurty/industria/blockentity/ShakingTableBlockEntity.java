@@ -24,12 +24,14 @@ import dev.turtywurty.industria.blockentity.util.slurry.WrappedSlurryStorage;
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.RecipeTypeInit;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ShakingTableRecipe;
 import dev.turtywurty.industria.recipe.input.ShakingTableRecipeInput;
 import dev.turtywurty.industria.screenhandler.ShakingTableScreenHandler;
 import dev.turtywurty.industria.util.TransferUtils;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -493,24 +495,16 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 0 || localOffset.getY() == 1
-                ? this.wrappedContainerStorage.getCombinedStorage()
-                : null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 1 ? getInputFluidTank() : null;
-    }
-
-    @Override
-    protected @Nullable Storage<SlurryVariant> getSlurryStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return localOffset.getY() == 0 ? getOutputSlurryTank() : null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 0 ? getEnergyStorage() : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.both(TransferType.ITEM, this.wrappedContainerStorage::getCombinedStorage)
+                .wherePosition(offset -> offset.getY() == 0 || offset.getY() == 1);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
+                .wherePosition(offset -> offset.getY() == 0);
+        ports.input(TransferType.FLUID, this::getInputFluidTank)
+                .wherePosition(offset -> offset.getY() == 1);
+        ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
+                .wherePosition(offset -> offset.getY() == 0);
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(offset -> offset.getY() == 0);
     }
 }

@@ -32,7 +32,7 @@ public class ItemStorageInit {
         ItemStorage.SIDED.registerForBlockEntity(AgitatorBlockEntity::getInventoryProvider, BlockEntityTypeInit.AGITATOR);
         ItemStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
-            return controller != null ? controller.getItemStorageForExternal(pos) : null;
+            return controller != null ? controller.getItemStorageForExternal(pos, side) : null;
         }, MultiblockLib.MULTIBLOCK_PART);
         ItemStorage.SIDED.registerForBlocks((level, pos, _, _, _) -> {
                     if (level instanceof ServerLevel serverLevel)

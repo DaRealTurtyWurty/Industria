@@ -24,11 +24,13 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.BlockEntityTypeInit;
 import dev.turtywurty.industria.init.BlockInit;
 import dev.turtywurty.industria.init.list.TagList;
+import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.ElectrolyzerRecipe;
 import dev.turtywurty.industria.recipe.input.ElectrolyzerRecipeInput;
 import dev.turtywurty.industria.screenhandler.ElectrolyzerScreenHandler;
 import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -453,34 +455,25 @@ public class ElectrolyzerBlockEntity extends IndustriaMultiblockControllerBlockE
     }
 
     @Override
-    protected @Nullable Storage<ItemVariant> getItemStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 1
-                || localOffset.getZ() == 0
-                || localOffset.getX() == -1
-                || localOffset.getX() == 1
-                || localOffset.getZ() == -1
-                || localOffset.getY() == 0
-                ? this.wrappedContainerStorage.getCombinedStorage()
-                : null;
-    }
-
-    @Override
-    protected @Nullable Storage<FluidVariant> getFluidStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getZ() == -1 ? getElectrolyteFluidStorage() : null;
-    }
-
-    @Override
-    protected @Nullable EnergyStorage getEnergyStorageForExternal(BlockPos worldPos, BlockPos localOffset) {
-        return localOffset.getY() == 1 ? getEnergyStorage() : null;
-    }
-
-    @Override
-    public @Nullable SingleGasStorage getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
-        return isFormed() && getLocalOffsetFromController(worldPos).getY() == 0 ? getOutputGasStorage() : null;
-    }
-
-    @Override
-    protected @Nullable HeatStorage getHeatStorageForExternal(BlockPos worldPos, BlockPos localOffset, @Nullable Direction side) {
-        return localOffset.getY() == 0 ? getHeatStorage() : null;
+    protected void definePorts(PortRegistrar ports) {
+        ports.both(TransferType.ITEM, this.wrappedContainerStorage::getCombinedStorage)
+                .wherePosition(localOffset -> localOffset.getY() == 1
+                        || localOffset.getZ() == 0
+                        || localOffset.getX() == -1
+                        || localOffset.getX() == 1
+                        || localOffset.getZ() == -1
+                        || localOffset.getY() == 0);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.NORTH))
+                .wherePosition(localOffset -> localOffset.getZ() == -1);
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
+                .wherePosition(localOffset -> localOffset.getY() == 0);
+        ports.input(TransferType.FLUID, this::getElectrolyteFluidStorage)
+                .wherePosition(localOffset -> localOffset.getZ() == -1);
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+                .wherePosition(localOffset -> localOffset.getY() == 1);
+        ports.output(TransferType.GAS, this::getOutputGasStorage)
+                .wherePosition(localOffset -> localOffset.getY() == 0);
+        ports.input(TransferType.HEAT, this::getHeatStorage)
+                .wherePosition(localOffset -> localOffset.getY() == 0);
     }
 }

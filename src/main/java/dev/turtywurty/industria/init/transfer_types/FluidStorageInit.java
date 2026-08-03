@@ -32,7 +32,7 @@ public class FluidStorageInit {
 
         FluidStorage.SIDED.registerForBlocks((level, pos, state, blockEntity, side) -> {
             IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
-            return controller != null ? controller.getFluidStorageForExternal(pos) : null;
+            return controller != null ? controller.getFluidStorageForExternal(pos, side) : null;
         }, MultiblockLib.MULTIBLOCK_PART);
         FluidStorage.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerLevel serverWorld)
