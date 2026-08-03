@@ -9,6 +9,8 @@ import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
 import dev.turtywurty.multiblocklib.MultiblockLib;
+import dev.turtywurty.multiblocklib.block.entity.MultiblockControllerBlockEntity;
+import dev.turtywurty.multiblocklib.data.MultiblockPartEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.model.geom.ModelPart;
@@ -143,7 +145,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             state.movingBlockRenderState = createMovingBlock(blockEntity.getBlockPos(), state.blockState, clientLevel);
         }
 
-        if (state.multiblockFormed && level != null && MultiblockLib.isControllerBlock(blockEntity.getBlockState().getBlock())) {
+        if (state.multiblockFormed && level != null && blockEntity instanceof MultiblockControllerBlockEntity) {
             Vec3 offset = computeMultiblockRenderOffset(level, blockEntity);
             state.multiblockRenderOffsetX = offset.x;
             state.multiblockRenderOffsetZ = offset.z;
@@ -346,13 +348,11 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         if (level == null)
             return false;
 
-        BlockState controllerState = blockEntity.getBlockState();
-        BlockPos controllerPos = blockEntity.getBlockPos();
-        if (MultiblockLib.isControllerBlock(controllerState.getBlock()) && hasNearbyLibPart(level, controllerPos))
-            return true;
+        if (blockEntity instanceof MultiblockControllerBlockEntity controller)
+            return controller.isFormed();
 
         if (!(blockEntity instanceof AutoMultiblockable multiblockable))
-            return !MultiblockLib.isControllerBlock(controllerState.getBlock());
+            return true;
 
         List<BlockPos> positions = multiblockable.getMultiblockPositions();
         if (positions.isEmpty())
@@ -371,35 +371,9 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         return false;
     }
 
-    private static boolean hasNearbyLibPart(final Level level, final BlockPos controllerPos) {
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-
-        for (Direction direction : Direction.values()) {
-            mutablePos.set(controllerPos).move(direction);
-            if (level.getBlockState(mutablePos).is(MultiblockLib.MULTIBLOCK_PART))
-                return true;
-        }
-
-        for (int x = -6; x <= 6; x++) {
-            for (int y = -4; y <= 4; y++) {
-                for (int z = -6; z <= 6; z++) {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
-                    mutablePos.set(controllerPos.getX() + x, controllerPos.getY() + y, controllerPos.getZ() + z);
-                    if (level.getBlockState(mutablePos).is(MultiblockLib.MULTIBLOCK_PART))
-                        return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     private static Vec3 computeMultiblockRenderOffset(final Level level, final BlockEntity blockEntity) {
-        Vec3 libOffset = computeLibMultiblockRenderOffset(level, blockEntity.getBlockPos());
-        if (libOffset != Vec3.ZERO)
-            return libOffset;
+        if (blockEntity instanceof MultiblockControllerBlockEntity controller)
+            return computeLibMultiblockRenderOffset(controller.getParts());
 
         if (blockEntity instanceof AutoMultiblockable multiblockable)
             return computeLegacyMultiblockRenderOffset(level, blockEntity.getBlockPos(), multiblockable.getMultiblockPositions());
@@ -407,36 +381,25 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         return Vec3.ZERO;
     }
 
-    private static Vec3 computeLibMultiblockRenderOffset(final Level level, final BlockPos controllerPos) {
-        int minX = controllerPos.getX();
-        int maxX = controllerPos.getX();
-        int minZ = controllerPos.getZ();
-        int maxZ = controllerPos.getZ();
-        boolean foundPart = false;
-
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        for (int x = -10; x <= 10; x++) {
-            for (int y = -6; y <= 6; y++) {
-                for (int z = -10; z <= 10; z++) {
-                    mutablePos.set(controllerPos.getX() + x, controllerPos.getY() + y, controllerPos.getZ() + z);
-                    if (!level.getBlockState(mutablePos).is(MultiblockLib.MULTIBLOCK_PART))
-                        continue;
-
-                    foundPart = true;
-                    minX = Math.min(minX, mutablePos.getX());
-                    maxX = Math.max(maxX, mutablePos.getX());
-                    minZ = Math.min(minZ, mutablePos.getZ());
-                    maxZ = Math.max(maxZ, mutablePos.getZ());
-                }
-            }
-        }
-
-        if (!foundPart)
+    private static Vec3 computeLibMultiblockRenderOffset(final List<MultiblockPartEntry> parts) {
+        if (parts.isEmpty())
             return Vec3.ZERO;
+
+        int minX = 0;
+        int maxX = 0;
+        int minZ = 0;
+        int maxZ = 0;
+        for (MultiblockPartEntry entry : parts) {
+            BlockPos offset = entry.offset();
+            minX = Math.min(minX, offset.getX());
+            maxX = Math.max(maxX, offset.getX());
+            minZ = Math.min(minZ, offset.getZ());
+            maxZ = Math.max(maxZ, offset.getZ());
+        }
 
         double centerX = (minX + maxX) * 0.5D;
         double centerZ = (minZ + maxZ) * 0.5D;
-        return new Vec3(centerX - controllerPos.getX(), 0.0D, centerZ - controllerPos.getZ());
+        return new Vec3(centerX, 0.0D, centerZ);
     }
 
     private static Vec3 computeLegacyMultiblockRenderOffset(final Level level, final BlockPos controllerPos, final List<BlockPos> positions) {
