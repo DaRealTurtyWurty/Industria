@@ -1,0 +1,121 @@
+texture work:
+- raw bauxite block
+- wrench (maybe)
+- fluid pipe connection piece looks weird without vertical connection
+- bauxite slurry (fluid)
+- dirty sodium aluminate (fluid)
+- sodium aluminate (fluid)
+- electrolyzer gui
+- argentite ore may need some work
+- raw argentite block
+- raw cassiterite block
+- clay slurry (fluid)
+- arc furnace gui
+- aluminium plate
+- crushed bauxite
+- ilmenite
+- raw ilmenite block
+- crushed ilmenite
+- ilmenite concentrate
+- sphalerite (needs some work)
+- raw sphalerite block
+- raw cobaltite block
+- cobalt nugget
+- raw pentlandite block
+- rubber
+- steel plate
+- lead plate
+- tin plate
+
+
+model work:
+- mixer
+- wind turbine
+- digester
+- clarifier
+- crystallizer
+- conveyor
+- splitter conveyor
+- merger conveyor
+- alternator conveyor
+- feeder conveyor
+- hatch conveyor
+- side injector conveyor
+- ladder conveyor
+- filter conveyor
+- magnetic conveyor
+- detector conveyor
+- drop chute conveyor
+- count conveyor
+- delay conveyor
+- containment conveyor
+- rotary kiln (controller, tube, output, bunsen burner)
+- electrolyzer
+- crusher
+- shaking table
+- centrifugal concentrator
+- arc furnace
+- agitator
+- distillation unit
+
+
+issues/changes:
+- with multiblocks, the controller should not be used in constructing the actual multiblock, it should exist only when the multiblock is already created. the important thing about this is that we will have to redesign the multiblock system to allow constructing the multiblock by clicking a different non-controller block with the wrench
+- initial mixer block rendering does not work.
+- wrench needs handheld model
+- when placing or breaking a cable connected to the mixer (or probably other multiblocks too), it causes all connected cables to flash briefly (this may not be fixable or may be very hard to fix)
+- wind turbine should only allow cable connections from the back at the bottom
+- item rendering on mixer will need redoing when model is recreated
+- fix in-gui item model positioning for fluid pump
+- fluid pump voxel shape is incorrect, very buggy
+- remove fluid pump gui
+- investigate weird white/transparent specs on energy cable (I think this is z-fighting with the inner faces, so look into culling them)
+- find a better way to display particles for custom block models
+- output slurry in mixer gui does not display amount/capacity
+- custom pipe/cable connection models per machine to remove the gap between them
+- redo multiblock patterns for all the multiblocks (confide in community for this cuz im shit builder)
+- constructing multiple multiblocks, moves the models of all the multiblocks into one place
+- rendering for I/O ports in debug view no longer works
+- create an abstraction for machines so that logic can be unified and more maintainable
+- digester is not rendering slurry input or fluid outputs
+- catalyst for crystallizer cannot be put in item slot
+- fix weird rendering issue with crystallizer when looking at internal fluid from below angle (this is an issue with transparency sorting, so it may be fixed in 26.2/3)
+- flaps on hatch did not render until initial interaction with an item
+- fix conveyor placement
+- split rotary kiln into the necessary sections. this will require redesigning how the placement works as well.
+- implement Bunsen burner for rotary kiln
+- buckets in electrolyzer throw exceptions
+- quick move stack in electrolyzer doesn't correctly position items
+- rebalance energy usage for electrolyzer
+- electrolyzer does not consume cryolite for making molten cryolite
+- validate consumption of cathode and anode in electrolyzer (determine when they should consume vs not, something that the recipe json should be able to specify)
+- ore blocks are missing particles (this is because of the texture layering system)
+- make crusher a multiblock
+- jei/nei/emi/whatever support
+-centrifugal concentrator bubbles should not appear until it starts spinning
+- balance centrifugal concentrator energy usage
+- add stages of concentration to cassiterite concentrate and make the shaking table and centrifugal concentrator reflect this
+- add recipe for arc furnace to turn cassiterite concentrate into molten tin
+- shouldn't be able to open arc furnace gui until the multiblock has been formed
+- multiblock for arc furnace is refusing to form
+- make lithium go boom boom
+- add tin plate
+- add lead plate
+- add steel plate
+- hearts from drinking formic acid reset when reloading the world
+- add agitator recipe for sodium carbonate + sulfuric acid -> diluted sodium bisulfate + carbon dioxide
+- add distillation recipe for diluted formic acid -> formic acid + water
+- add distillation recipe for diluted sodium bisulfate -> sodium bisulfate + water
+
+design decisions:
+- red mud usage
+- sodium carbonate usage
+decide how placement for the rotary kiln should work (from the player's perspective)
+- think about size of electrolyzer (is 3x2x2 correct?)
+- design a casting system (similar to tinkers construct???)
+- usage for clay slurry
+- figure out processing line for lithium (currently spodumene, but there's no ore for this. and what about brine?)
+- consider silver plate
+- come up with the proper process for steam reformation
+- come up with the proper process for gasification
+

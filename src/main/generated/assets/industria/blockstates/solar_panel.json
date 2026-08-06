@@ -1,19 +1,82 @@
 {
-  "variants": {
-    "facing=east": {
-      "model": "industria:block/solar_panel",
-      "y": 90
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/solar_panel"
+      },
+      "when": {
+        "facing": "north",
+        "on_stair": "false"
+      }
     },
-    "facing=north": {
-      "model": "industria:block/solar_panel"
+    {
+      "apply": {
+        "model": "industria:block/solar_panel_stair",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "on_stair": "true"
+      }
     },
-    "facing=south": {
-      "model": "industria:block/solar_panel",
-      "y": 180
+    {
+      "apply": {
+        "model": "industria:block/solar_panel",
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "on_stair": "false"
+      }
     },
-    "facing=west": {
-      "model": "industria:block/solar_panel",
-      "y": 270
+    {
+      "apply": {
+        "model": "industria:block/solar_panel_stair",
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "on_stair": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/solar_panel",
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "on_stair": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/solar_panel_stair"
+      },
+      "when": {
+        "facing": "south",
+        "on_stair": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/solar_panel",
+        "y": 270
+      },
+      "when": {
+        "facing": "west",
+        "on_stair": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/solar_panel_stair",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "on_stair": "true"
+      }
     }
-  }
+  ]
 }

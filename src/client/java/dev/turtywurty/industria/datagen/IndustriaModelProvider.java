@@ -4,6 +4,7 @@ import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
+import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.BlockInit;
@@ -33,6 +34,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
 import java.util.Objects;
@@ -178,6 +180,26 @@ public class IndustriaModelProvider extends FabricModelProvider {
 
     public static MultiVariant createWeightedVariant(Identifier id, Variant.SimpleModelState modelState) {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
+    }
+
+    private static BlockModelDefinitionGenerator createSolarPanelBlockModelDefinitionCreator(SolarPanelBlock block) {
+        Identifier normalModelId = Industria.id("block/solar_panel");
+        Identifier stairModelId = Industria.id("block/solar_panel_stair");
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            Variant.SimpleModelState rotation = rotationFor(direction);
+            generator.with(new ConditionBuilder()
+                            .term(BlockStateProperties.HORIZONTAL_FACING, direction)
+                            .term(SolarPanelBlock.ON_STAIR, false),
+                    createWeightedVariant(normalModelId, rotation));
+            generator.with(new ConditionBuilder()
+                            .term(BlockStateProperties.HORIZONTAL_FACING, direction)
+                            .term(SolarPanelBlock.ON_STAIR, true),
+                    createWeightedVariant(stairModelId, rotationFor(direction.getOpposite())));
+        }
+
+        return generator;
     }
 
     private static BlockModelDefinitionGenerator createPipeBlockModelDefinitionCreator(Block block, String name,
@@ -546,7 +568,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
         createBattery(blockStateModelGenerator, BlockInit.ULTIMATE_BATTERY);
         createBattery(blockStateModelGenerator, BlockInit.CREATIVE_BATTERY);
         blockStateModelGenerator.createFurnace(BlockInit.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE_ONLY_TOP);
-        blockStateModelGenerator.createNonTemplateHorizontalBlock(BlockInit.SOLAR_PANEL);
+        blockStateModelGenerator.blockStateOutput.accept(createSolarPanelBlockModelDefinitionCreator(BlockInit.SOLAR_PANEL));
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.CRUDE_OIL.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.DIRTY_SODIUM_ALUMINATE.block());
