@@ -83,6 +83,7 @@ public class IndustriaBlockLootTableProvider extends FabricBlockLootSubProvider 
         dropSelf(BlockInit.CREATIVE_BATTERY);
         dropSelf(BlockInit.COMBUSTION_GENERATOR);
         dropSelf(BlockInit.SOLAR_PANEL);
+        dropSelf(BlockInit.ADVANCED_SOLAR_PANEL);
         dropSelf(BlockInit.CRUSHER);
         dropSelf(BlockInit.WIND_TURBINE);
         dropSelf(BlockInit.OIL_PUMP_JACK);

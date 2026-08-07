@@ -3,6 +3,7 @@ package dev.turtywurty.industria;
 import dev.turtywurty.industria.data.ClientConveyorNetworks;
 import dev.turtywurty.industria.data.ClientPipeNetworks;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.pipe.PipeConnectionModelLoading;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import net.fabricmc.api.ClientModInitializer;
 
@@ -18,6 +19,7 @@ public class IndustriaClient implements ClientModInitializer {
         GasRenderHandlerInit.init();
         ClientPacketsInit.init();
         ClientEventsInit.init();
+        PipeConnectionModelLoading.init();
         ModelInit.init();
         ArmPositionInit.init();
         DrillHeadInit.init();

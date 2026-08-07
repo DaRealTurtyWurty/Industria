@@ -7,8 +7,8 @@
 		64
 	],
 	"textures": {
-		"1": "industria:block/power_cable",
-		"particle": "industria:block/power_cable"
+		"1": "industria:block/cable",
+		"particle": "industria:block/cable"
 	},
 	"elements": [
 		{

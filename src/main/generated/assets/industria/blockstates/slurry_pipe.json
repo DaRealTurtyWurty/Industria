@@ -55,57 +55,6 @@
       "when": {
         "down": "pipe"
       }
-    },
-    {
-      "apply": {
-        "model": "industria:block/slurry_pipe_connection"
-      },
-      "when": {
-        "north": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/slurry_pipe_connection",
-        "y": 90
-      },
-      "when": {
-        "east": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/slurry_pipe_connection",
-        "y": 180
-      },
-      "when": {
-        "south": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/slurry_pipe_connection",
-        "y": 270
-      },
-      "when": {
-        "west": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/slurry_pipe_connection_up"
-      },
-      "when": {
-        "up": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/slurry_pipe_connection_down"
-      },
-      "when": {
-        "down": "block"
-      }
     }
   ]
 }

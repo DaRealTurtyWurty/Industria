@@ -170,8 +170,8 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         return shape;
     }
 
-    protected record ShapeProfile(double centerMin, double centerMax, double armMin, double armMax,
-                                  double connectorMin, double connectorMax, double connectorDepth) {
+    public record ShapeProfile(double centerMin, double centerMax, double armMin, double armMax,
+                               double connectorMin, double connectorMax, double connectorDepth) {
     }
 
     protected ConnectorType getConnectorType(Level world, BlockPos connectorPos, Direction facing) {
@@ -333,6 +333,17 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
                 .setValue(EAST, east)
                 .setValue(UP, up)
                 .setValue(DOWN, down);
+    }
+
+    public static EnumProperty<ConnectorType> propertyFor(Direction direction) {
+        return switch (direction) {
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case WEST -> WEST;
+            case EAST -> EAST;
+            case UP -> UP;
+            case DOWN -> DOWN;
+        };
     }
 
     public enum ConnectorType implements StringRepresentable {

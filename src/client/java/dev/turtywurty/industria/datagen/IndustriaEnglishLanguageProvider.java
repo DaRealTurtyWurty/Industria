@@ -57,6 +57,7 @@ public class IndustriaEnglishLanguageProvider extends FabricLanguageProvider {
         addText(translationBuilder, CombustionGeneratorBlockEntity.TITLE, "Combustion Generator");
 
         translationBuilder.add(BlockInit.SOLAR_PANEL, "Solar Panel");
+        translationBuilder.add(BlockInit.ADVANCED_SOLAR_PANEL, "Advanced Solar Panel");
         addText(translationBuilder, SolarPanelBlockEntity.TITLE, "Solar Panel");
 
         translationBuilder.add(BlockInit.CRUSHER, "Crusher");

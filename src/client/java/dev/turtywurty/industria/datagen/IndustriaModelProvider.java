@@ -213,10 +213,6 @@ public class IndustriaModelProvider extends FabricModelProvider {
         Identifier continuousModelId = Industria.id("block/" + name + (separatedModels ? "_continuous" : ""));
         Identifier continuousUpModelId = Industria.id("block/" + name + (separatedModels ? "_continuous_up" : ""));
         Identifier continuousDownModelId = Industria.id("block/" + name + (separatedModels ? "_continuous_down" : ""));
-        Identifier connectionModelId = Industria.id("block/" + name + (separatedModels ? "_connection" : "_connected"));
-        Identifier connectionUpModelId = Industria.id("block/" + name + (separatedModels ? "_connection_up" : "_connected"));
-        Identifier connectionDownModelId = Industria.id("block/" + name + (separatedModels ? "_connection_down" : "_connected"));
-
         Variant.SimpleModelState upState = separatedModels
                 ? Variant.SimpleModelState.DEFAULT
                 : Variant.SimpleModelState.DEFAULT.withX(Quadrant.R270);
@@ -243,22 +239,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
                 .with(new ConditionBuilder().term(PipeBlock.UP, PipeBlock.ConnectorType.PIPE),
                         createWeightedVariant(continuousUpModelId, upState))
                 .with(new ConditionBuilder().term(PipeBlock.DOWN, PipeBlock.ConnectorType.PIPE),
-                        createWeightedVariant(continuousDownModelId, downState))
-                .with(new ConditionBuilder().term(PipeBlock.NORTH, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT))
-                .with(new ConditionBuilder().term(PipeBlock.EAST, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT
-                                .withY(Quadrant.R90)))
-                .with(new ConditionBuilder().term(PipeBlock.SOUTH, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT
-                                .withY(Quadrant.R180)))
-                .with(new ConditionBuilder().term(PipeBlock.WEST, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectionModelId, Variant.SimpleModelState.DEFAULT
-                                .withY(Quadrant.R270)))
-                .with(new ConditionBuilder().term(PipeBlock.UP, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectionUpModelId, upState))
-                .with(new ConditionBuilder().term(PipeBlock.DOWN, PipeBlock.ConnectorType.BLOCK),
-                        createWeightedVariant(connectionDownModelId, downState));
+                        createWeightedVariant(continuousDownModelId, downState));
     }
 
     private static BlockModelDefinitionGenerator createConveyorBlockModelDefinitionCreator(BasicConveyorBlock block, String name) {
@@ -575,6 +556,8 @@ public class IndustriaModelProvider extends FabricModelProvider {
         blockStateModelGenerator.createFurnace(BlockInit.COMBUSTION_GENERATOR, TexturedModel.ORIENTABLE_ONLY_TOP);
         blockStateModelGenerator.blockStateOutput.accept(createSolarPanelBlockModelDefinitionCreator(BlockInit.SOLAR_PANEL));
         blockStateModelGenerator.registerSimpleItemModel(BlockInit.SOLAR_PANEL, Industria.id("block/solar_panel"));
+        registerCustomCube(blockStateModelGenerator, BlockInit.ADVANCED_SOLAR_PANEL,
+                Industria.id("block/advanced_solar_panel"));
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.CRUDE_OIL.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.DIRTY_SODIUM_ALUMINATE.block());
         blockStateModelGenerator.createNonTemplateModelBlock(FluidInit.SODIUM_ALUMINATE.block());
@@ -668,6 +651,13 @@ public class IndustriaModelProvider extends FabricModelProvider {
         itemModelGenerator.itemModelOutput.accept(ItemInit.SIMPLE_DRILL_HEAD, ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ItemInit.SIMPLE_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
         itemModelGenerator.itemModelOutput.accept(ItemInit.BLOCK_BUILDER_DRILL_HEAD, ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ItemInit.BLOCK_BUILDER_DRILL_HEAD), new DrillHeadItemRenderer.Unbaked()));
         itemModelGenerator.itemModelOutput.accept(ItemInit.EMPTY_MOB_JAR, ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(ItemInit.EMPTY_MOB_JAR)));
+
+        generateSpecialBlockItemModel(itemModelGenerator, BlockInit.ADVANCED_SOLAR_PANEL,
+                new IndustriaBlockEntityItemRenderer.Unbaked(
+                        AdvancedSolarPanelModel.LAYER_LOCATION,
+                        AdvancedSolarPanelModel.TEXTURE_LOCATION
+                ),
+                BuiltinEntityModelBuilder.defaultBlock());
 
         generateSpecialBlockItemModel(itemModelGenerator, BlockInit.WIND_TURBINE,
                 new IndustriaBlockEntityItemRenderer.Unbaked(WindTurbineModel.LAYER_LOCATION, WindTurbineModel.TEXTURE_LOCATION),

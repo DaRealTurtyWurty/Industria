@@ -57,59 +57,6 @@
       "when": {
         "down": "pipe"
       }
-    },
-    {
-      "apply": {
-        "model": "industria:block/heat_pipe_connected"
-      },
-      "when": {
-        "north": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/heat_pipe_connected",
-        "y": 90
-      },
-      "when": {
-        "east": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/heat_pipe_connected",
-        "y": 180
-      },
-      "when": {
-        "south": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/heat_pipe_connected",
-        "y": 270
-      },
-      "when": {
-        "west": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/heat_pipe_connected",
-        "x": 270
-      },
-      "when": {
-        "up": "block"
-      }
-    },
-    {
-      "apply": {
-        "model": "industria:block/heat_pipe_connected",
-        "x": 90
-      },
-      "when": {
-        "down": "block"
-      }
     }
   ]
 }
