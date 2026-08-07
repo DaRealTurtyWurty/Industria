@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 
 public class BlockEntityRendererInit {
     public static void init() {
+        BlockEntityRenderers.register(BlockEntityTypeInit.SOLAR_PANEL, AdvancedSolarPanelBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.CRUSHER, CrusherBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.WIND_TURBINE, WindTurbineBlockEntityRenderer::new);
         BlockEntityRenderers.register(BlockEntityTypeInit.OIL_PUMP_JACK, OilPumpJackBlockEntityRenderer::new);

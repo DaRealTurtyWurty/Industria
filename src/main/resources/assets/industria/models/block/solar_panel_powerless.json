@@ -1,0 +1,7 @@
+{
+  "parent": "industria:block/solar_panel",
+  "textures": {
+    "0": "industria:block/solar_panel_powerless",
+    "particle": "industria:block/solar_panel_powerless"
+  }
+}

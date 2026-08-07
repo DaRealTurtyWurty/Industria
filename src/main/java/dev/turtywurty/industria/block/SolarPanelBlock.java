@@ -9,6 +9,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,16 +25,21 @@ public class SolarPanelBlock extends IndustriaBlock {
     private static final VoxelShape VOXEL_SHAPE = createShape();
 
     public static final BooleanProperty ON_STAIR = BooleanProperty.create("on_stair");
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-    public SolarPanelBlock(Properties settings) {
+    private final boolean isAdvanced;
+
+    public SolarPanelBlock(Properties settings, boolean isAdvanced) {
         super(settings, new BlockProperties()
                 .hasHorizontalFacing()
                 .addStateProperty(ON_STAIR, false)
+                .addStateProperty(POWERED, false)
                 .useRotatedShapes(VOXEL_SHAPE)
                 .canExistAt(SolarPanelBlock::hasSolidGround)
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> BlockEntityTypeInit.SOLAR_PANEL)
                         .shouldTick()
                         .rightClickToOpenGui()));
+        this.isAdvanced = isAdvanced;
     }
 
     private static boolean hasSolidGround(LevelReader level, BlockPos pos) {
@@ -77,6 +83,15 @@ public class SolarPanelBlock extends IndustriaBlock {
         return onStair
                 ? updatedState.setValue(BlockStateProperties.HORIZONTAL_FACING, neighborState.getValue(StairBlock.FACING))
                 : updatedState;
+    }
+
+    public boolean isAdvanced() {
+        return this.isAdvanced;
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return this.isAdvanced ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     private static VoxelShape createShape() {

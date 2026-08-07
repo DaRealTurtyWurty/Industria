@@ -175,7 +175,7 @@ public class BlockInit {
             CombustionGeneratorBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);
 
     public static final SolarPanelBlock SOLAR_PANEL = registerWithItemCopy("solar_panel",
-            SolarPanelBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+            properties -> new SolarPanelBlock(properties, false), Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final CrusherBlock CRUSHER = registerWithItemCopy("crusher",
             CrusherBlock::new, Blocks.FURNACE, settings -> settings.lightLevel(_ -> 0).noOcclusion());
@@ -333,6 +333,9 @@ public class BlockInit {
 
     public static final DistillationTowerBlock DISTILLATION_TOWER = registerWithItemCopy("distillation_tower",
             DistillationTowerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final SolarPanelBlock ADVANCED_SOLAR_PANEL = registerWithItemCopy("advanced_solar_panel",
+            properties -> new SolarPanelBlock(properties, true), Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> T register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, constructor.apply(

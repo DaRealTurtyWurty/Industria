@@ -31,7 +31,8 @@ public class BlockEntityTypeInit {
                     .build());
 
     public static final BlockEntityType<SolarPanelBlockEntity> SOLAR_PANEL = register("solar_panel",
-            FabricBlockEntityTypeBuilder.create(SolarPanelBlockEntity::new, BlockInit.SOLAR_PANEL)
+            FabricBlockEntityTypeBuilder.create(SolarPanelBlockEntity::new,
+                            BlockInit.SOLAR_PANEL, BlockInit.ADVANCED_SOLAR_PANEL)
                     .build());
 
     public static final BlockEntityType<CrusherBlockEntity> CRUSHER = register("crusher",

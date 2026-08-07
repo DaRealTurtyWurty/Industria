@@ -35,7 +35,8 @@ public class SolarPanelScreenHandler extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(this.context, player, BlockInit.SOLAR_PANEL);
+        return stillValid(this.context, player, BlockInit.SOLAR_PANEL)
+                || stillValid(this.context, player, BlockInit.ADVANCED_SOLAR_PANEL);
     }
 
     public SolarPanelBlockEntity getBlockEntity() {
@@ -69,6 +70,6 @@ public class SolarPanelScreenHandler extends AbstractContainerMenu {
         if (output == 0)
             return 0.0F;
 
-        return Mth.clamp(output / 35.0F, 0.0F, 1.0F);
+        return Mth.clamp((float) output / this.blockEntity.getMaximumEnergyOutput(), 0.0F, 1.0F);
     }
 }

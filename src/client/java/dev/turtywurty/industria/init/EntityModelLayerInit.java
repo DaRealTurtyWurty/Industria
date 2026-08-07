@@ -18,6 +18,8 @@ public class EntityModelLayerInit {
 
     public static void init() {
         ModelLayerRegistry.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::getTexturedModelData);
+        ModelLayerRegistry.registerModelLayer(AdvancedSolarPanelModel.LAYER_LOCATION, AdvancedSolarPanelModel::createMainLayer);
+        ModelLayerRegistry.registerModelLayer(AdvancedSolarPanelModel.STAIR_LAYER_LOCATION, AdvancedSolarPanelModel::createStairLayer);
         ModelLayerRegistry.registerModelLayer(WindTurbineModel.LAYER_LOCATION, WindTurbineModel::createMainLayer);
         ModelLayerRegistry.registerModelLayer(OilPumpJackModel.LAYER_LOCATION, OilPumpJackModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(DrillFrameModel.LAYER_LOCATION, DrillFrameModel::getTexturedModelData);

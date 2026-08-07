@@ -183,20 +183,25 @@ public class IndustriaModelProvider extends FabricModelProvider {
     }
 
     private static BlockModelDefinitionGenerator createSolarPanelBlockModelDefinitionCreator(SolarPanelBlock block) {
-        Identifier normalModelId = Industria.id("block/solar_panel");
-        Identifier stairModelId = Industria.id("block/solar_panel_stair");
-
         MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             Variant.SimpleModelState rotation = rotationFor(direction);
-            generator.with(new ConditionBuilder()
-                            .term(BlockStateProperties.HORIZONTAL_FACING, direction)
-                            .term(SolarPanelBlock.ON_STAIR, false),
-                    createWeightedVariant(normalModelId, rotation));
-            generator.with(new ConditionBuilder()
-                            .term(BlockStateProperties.HORIZONTAL_FACING, direction)
-                            .term(SolarPanelBlock.ON_STAIR, true),
-                    createWeightedVariant(stairModelId, rotationFor(direction.getOpposite())));
+            for (boolean powered : List.of(false, true)) {
+                String powerlessSuffix = powered ? "" : "_powerless";
+                Identifier normalModelId = Industria.id("block/solar_panel" + powerlessSuffix);
+                Identifier stairModelId = Industria.id("block/solar_panel_stair" + powerlessSuffix);
+
+                generator.with(new ConditionBuilder()
+                                .term(BlockStateProperties.HORIZONTAL_FACING, direction)
+                                .term(SolarPanelBlock.ON_STAIR, false)
+                                .term(SolarPanelBlock.POWERED, powered),
+                        createWeightedVariant(normalModelId, rotation));
+                generator.with(new ConditionBuilder()
+                                .term(BlockStateProperties.HORIZONTAL_FACING, direction)
+                                .term(SolarPanelBlock.ON_STAIR, true)
+                                .term(SolarPanelBlock.POWERED, powered),
+                        createWeightedVariant(stairModelId, rotationFor(direction.getOpposite())));
+            }
         }
 
         return generator;
