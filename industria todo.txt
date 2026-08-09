@@ -27,7 +27,6 @@ texture work:
 - lead plate
 - tin plate
 
-
 model work:
 - mixer
 - wind turbine
@@ -57,7 +56,6 @@ model work:
 - arc furnace
 - agitator
 - distillation unit
-
 
 issues/changes:
 - with multiblocks, the controller should not be used in constructing the actual multiblock, it should exist only when the multiblock is already created. the important thing about this is that we will have to redesign the multiblock system to allow constructing the multiblock by clicking a different non-controller block with the wrench
@@ -92,7 +90,7 @@ issues/changes:
 - ore blocks are missing particles (this is because of the texture layering system)
 - make crusher a multiblock
 - jei/nei/emi/whatever support
--centrifugal concentrator bubbles should not appear until it starts spinning
+- centrifugal concentrator bubbles should not appear until it starts spinning
 - balance centrifugal concentrator energy usage
 - add stages of concentration to cassiterite concentrate and make the shaking table and centrifugal concentrator reflect this
 - add recipe for arc furnace to turn cassiterite concentrate into molten tin
@@ -110,7 +108,7 @@ issues/changes:
 design decisions:
 - red mud usage
 - sodium carbonate usage
-decide how placement for the rotary kiln should work (from the player's perspective)
+- decide how placement for the rotary kiln should work (from the player's perspective)
 - think about size of electrolyzer (is 3x2x2 correct?)
 - design a casting system (similar to tinkers construct???)
 - usage for clay slurry
