@@ -223,10 +223,10 @@ public abstract class PipeBlock<S, N extends PipeNetwork<S>, A extends Number> e
         BlockState blockState = calculateState(world, pos, state);
         if (blockState != state) {
             world.setBlockAndUpdate(pos, blockState);
+        }
 
-            if (!world.isClientSide() && state.isAir() && world instanceof ServerLevel serverWorld) {
-                getNetworkManager(serverWorld).placePipe(serverWorld, pos);
-            }
+        if (world instanceof ServerLevel serverWorld) {
+            getNetworkManager(serverWorld).refreshConnectedBlocks(serverWorld, pos);
         }
     }
 

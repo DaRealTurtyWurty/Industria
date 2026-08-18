@@ -28,7 +28,7 @@ public class EntityModelLayerInit {
         ModelLayerRegistry.registerModelLayer(DrillMotorModel.LAYER_LOCATION, DrillMotorModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(DrillCableModel.LAYER_LOCATION, DrillCableModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(UpgradeStationModel.LAYER_LOCATION, UpgradeStationModel::getTexturedModelData);
-        ModelLayerRegistry.registerModelLayer(MixerModel.LAYER_LOCATION, MixerModel::getTexturedModelData);
+        ModelLayerRegistry.registerModelLayer(MixerModel.LAYER_LOCATION, MixerModel::getMainLayer);
         ModelLayerRegistry.registerModelLayer(DigesterModel.LAYER_LOCATION, DigesterModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(ClarifierModel.LAYER_LOCATION, ClarifierModel::getTexturedModelData);
         ModelLayerRegistry.registerModelLayer(CrystallizerModel.LAYER_LOCATION, CrystallizerModel::getTexturedModelData);

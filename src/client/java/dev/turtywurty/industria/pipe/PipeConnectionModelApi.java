@@ -36,6 +36,24 @@ public final class PipeConnectionModelApi {
             ConnectionModelSet models,
             int priority
     ) {
+        register(
+                ruleId,
+                pipeBlock,
+                targetBlock,
+                (_, _, state, targetFace) -> targetMatcher.test(state, targetFace),
+                models,
+                priority
+        );
+    }
+
+    public static void register(
+            Identifier ruleId,
+            Block pipeBlock,
+            Block targetBlock,
+            PipeConnectionTargetPredicate targetMatcher,
+            ConnectionModelSet models,
+            int priority
+    ) {
         PipeConnectionModelRegistry.register(
                 new ConnectionModelRule(
                         ruleId,

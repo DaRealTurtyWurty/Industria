@@ -13,6 +13,9 @@ public class MixerRenderState extends IndustriaBlockEntityRenderState {
     public SimpleContainer inputInventory;
     public List<Vec3> mixingItemPositions;
     public SingleFluidStorage fluidTank;
+    public float stirringRotation;
+    public boolean hasItemInputConnection;
+    public boolean hasItemOutputConnection;
 
     public MixerRenderState() {
         super(6);

@@ -97,6 +97,13 @@ public final class ConnectionModelSet {
         return new ConnectionModelSet(id, models);
     }
 
+    public static ConnectionModelSet forDirection(Identifier id, Direction direction, Identifier model) {
+        return new ConnectionModelSet(id, Map.of(
+                direction,
+                reference(id, direction, model, Variant.SimpleModelState.DEFAULT)
+        ));
+    }
+
     public static ConnectionModelSet rotatedFromNorth(Identifier id, Identifier model) {
         Map<Direction, ConnectionModelReference> models = new EnumMap<>(Direction.class);
 

@@ -15,5 +15,7 @@ public class ModelInit {
         ModelLoadingPlugin.register(context -> {
             context.addModel(SEISMIC_SCANNER_MODEL_KEY, SimpleUnbakedExtraModel.blockStateModel(SEISMIC_SCANNER_MODEL_ID));
         });
+
+        PipeConnectionModelInit.init();
     }
 }

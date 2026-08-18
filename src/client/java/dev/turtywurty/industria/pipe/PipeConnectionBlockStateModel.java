@@ -43,7 +43,8 @@ public final class PipeConnectionBlockStateModel extends WrapperBlockStateModel 
             BlockState targetState = level.getBlockState(targetPos);
             Direction targetFace = pipeToTarget.getOpposite();
 
-            ConnectionModelSet models = PipeConnectionModelRegistry.findModel(state, targetState, targetFace);
+            ConnectionModelSet models = PipeConnectionModelRegistry.findModel(
+                    level, targetPos, state, targetState, targetFace);
             if (models == null)
                 continue;
 
@@ -93,12 +94,10 @@ public final class PipeConnectionBlockStateModel extends WrapperBlockStateModel 
         if (state.getValue(PipeBlock.propertyFor(pipeToTarget)) != PipeBlock.ConnectorType.BLOCK)
             return null;
 
-        BlockState targetState = level.getBlockState(pos.relative(pipeToTarget));
+        BlockPos targetPos = pos.relative(pipeToTarget);
+        BlockState targetState = level.getBlockState(targetPos);
         ConnectionModelSet models = PipeConnectionModelRegistry.findModel(
-                state,
-                targetState,
-                pipeToTarget.getOpposite()
-        );
+                level, targetPos, state, targetState, pipeToTarget.getOpposite());
         return models == null ? null : models.id();
     }
 

@@ -1,5 +1,7 @@
 package dev.turtywurty.industria.pipe;
 
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,13 +32,15 @@ public final class PipeConnectionModelRegistry {
     }
 
     @Nullable
-    public static ConnectionModelSet findReplacement(BlockState pipeState, BlockState targetState, Direction targetFace) {
+    public static ConnectionModelSet findReplacement(BlockAndTintGetter level, BlockPos targetPos,
+                                                     BlockState pipeState, BlockState targetState,
+                                                     Direction targetFace) {
         List<ConnectionModelRule> rules = RULES_BY_TARGET.get(targetState.getBlock());
         if (rules == null)
             return null;
 
         for (ConnectionModelRule rule : rules) {
-            if (rule.matches(pipeState, targetState, targetFace))
+            if (rule.matches(level, targetPos, pipeState, targetState, targetFace))
                 return rule.models();
         }
 
@@ -44,8 +48,10 @@ public final class PipeConnectionModelRegistry {
     }
 
     @Nullable
-    public static ConnectionModelSet findModel(BlockState pipeState, BlockState targetState, Direction targetFace) {
-        ConnectionModelSet replacement = findReplacement(pipeState, targetState, targetFace);
+    public static ConnectionModelSet findModel(BlockAndTintGetter level, BlockPos targetPos,
+                                               BlockState pipeState, BlockState targetState,
+                                               Direction targetFace) {
+        ConnectionModelSet replacement = findReplacement(level, targetPos, pipeState, targetState, targetFace);
 
         if (replacement != null)
             return replacement;

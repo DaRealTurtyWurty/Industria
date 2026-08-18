@@ -1,9 +1,13 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.MixerBlockEntity;
 import dev.turtywurty.industria.pipe.ConnectionModelSet;
 import dev.turtywurty.industria.pipe.PipeConnectionModelApi;
 import dev.turtywurty.industria.pipe.PipeConnectionModelRegistry;
+import dev.turtywurty.multiblocklib.MultiblockLib;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -57,6 +61,31 @@ public final class PipeConnectionModelInit {
                 )
         );
 
+        PipeConnectionModelApi.register(
+                Industria.id("mixer_fluid_pipe"),
+                BlockInit.FLUID_PIPE,
+                MultiblockLib.MULTIBLOCK_PART,
+                (level, targetPos, _, targetFace) -> isMixerPort(level, targetPos, targetFace, true),
+                ConnectionModelSet.forDirection(
+                        Industria.id("mixer_fluid_pipe"),
+                        Direction.DOWN,
+                        Industria.id("block/mixer_fluid_pipe_connection")
+                ),
+                100
+        );
+
+        PipeConnectionModelApi.register(
+                Industria.id("mixer_slurry_pipe"),
+                BlockInit.SLURRY_PIPE,
+                MultiblockLib.MULTIBLOCK_PART,
+                (level, targetPos, _, targetFace) -> isMixerPort(level, targetPos, targetFace, false),
+                ConnectionModelSet.rotatedFromNorth(
+                        Industria.id("mixer_slurry_pipe"),
+                        Industria.id("block/mixer_slurry_pipe_connection")
+                ),
+                100
+        );
+
         ConnectionModelSet solarPanelCable = ConnectionModelSet.horizontal(
                 Industria.id("solar_panel_cable"),
                 Industria.id("block/solar_panel_cable_connection")
@@ -85,5 +114,25 @@ public final class PipeConnectionModelInit {
                 solarPanelCable,
                 0
         );
+    }
+
+    private static boolean isMixerPort(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
+        for (int blocksBelow = 0; blocksBelow <= 2; blocksBelow++) {
+            for (int offsetX = -1; offsetX <= 1; offsetX++) {
+                for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                    BlockPos controllerPos = targetPos.offset(offsetX, -blocksBelow, offsetZ);
+                    if (!(level.getBlockEntity(controllerPos) instanceof MixerBlockEntity mixer))
+                        continue;
+
+                    boolean matchesPort = fluid ?
+                            mixer.getFluidStorageForExternal(targetPos, targetFace) != null :
+                            mixer.getSlurryStorageForExternal(targetPos, targetFace) != null;
+                    if (matchesPort)
+                        return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

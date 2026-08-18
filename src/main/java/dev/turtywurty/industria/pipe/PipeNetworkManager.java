@@ -393,6 +393,46 @@ public abstract class PipeNetworkManager<S, N extends PipeNetwork<S>> {
         network.addConnectedBlocks(world, newConnectedBlocks);
     }
 
+    public void refreshConnectedBlocks(ServerLevel world, BlockPos pipePos) {
+        N network = getNetwork(pipePos);
+        if (network == null) {
+            traverseCreateNetwork(world, pipePos);
+            network = getNetwork(pipePos);
+            if (network == null)
+                return;
+        }
+
+        Set<BlockPos> previousConnectedBlocks = new HashSet<>(network.getConnectedBlocks());
+        updateConnectedBlocks(world, network);
+
+        List<CustomPacketPayload> payloads = new ArrayList<>();
+        for (BlockPos connectedBlock : network.getConnectedBlocks()) {
+            if (!previousConnectedBlocks.contains(connectedBlock)) {
+                payloads.add(new ModifyPipeNetworkPayload(
+                        ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK,
+                        world.dimension(),
+                        this.transferType,
+                        network.id,
+                        connectedBlock));
+            }
+        }
+
+        for (BlockPos connectedBlock : previousConnectedBlocks) {
+            if (!network.getConnectedBlocks().contains(connectedBlock)) {
+                payloads.add(new ModifyPipeNetworkPayload(
+                        ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK,
+                        world.dimension(),
+                        this.transferType,
+                        network.id,
+                        connectedBlock));
+            }
+        }
+
+        if (!payloads.isEmpty()) {
+            syncAndSave(world, payloads);
+        }
+    }
+
     protected void floodFill(ServerLevel world, BlockPos pos, Set<BlockPos> visited, Set<BlockPos> connectedComponent) {
         Queue<BlockPos> queue = new LinkedList<>();
         queue.add(pos);

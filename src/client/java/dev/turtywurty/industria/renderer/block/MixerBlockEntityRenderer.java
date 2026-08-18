@@ -18,11 +18,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<MixerBlockEntity, MixerRenderState> {
     private final MixerModel model;
+    private final MixerModel glassModel;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public MixerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
         this.model = new MixerModel(context.bakeLayer(MixerModel.LAYER_LOCATION));
+        this.glassModel = new MixerModel(context.bakeLayer(MixerModel.LAYER_LOCATION), true);
 
         //this.fluidRenderer.setShouldDebugAmount(true);
     }
@@ -44,27 +46,30 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         for (int i = 0; i < 6; i++) {
             state.updateItemRenderState(i, this, blockEntity, state.inputInventory.items.get(i));
         }
+
+        if (state.isMixing) {
+            state.stirringRotation = (state.progress / (float) state.maxProgress) * (float) Math.PI * 2f * 4f;
+        }
+
+        state.hasItemInputConnection = blockEntity.hasItemInputConnection();
+        state.hasItemOutputConnection = blockEntity.hasItemOutputConnection();
     }
 
     @Override
     protected void onRender(MixerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        float stirringRotation = 0f;
-        if(state.isMixing) {
-            stirringRotation = (state.progress / (float) state.maxProgress) * (float) Math.PI * 2f * 4f;
-        }
-
+        var texture = state.isMixing ? MixerModel.CLOSED_TEXTURE_LOCATION : MixerModel.OPEN_TEXTURE_LOCATION;
         queue.submitModel(this.model,
-                new MixerModel.MixerModelRenderState(stirringRotation),
-                matrices, this.model.renderType(MixerModel.TEXTURE_LOCATION),
+                state,
+                matrices, this.model.renderType(texture),
                 light, overlay, 0, state.breakProgress);
 
-        float widthReduction = 2f / 16f;
-        float x1 = -1f + widthReduction;
-        float y1 = -1.25f - (2f / 16f);
-        float z1 = -1f + widthReduction;
-        float x2 = 1f - widthReduction;
-        float maxHeightPixels = 44f;
-        float z2 = 1f - widthReduction;
+        float tankHalfWidth = 13.25f / 16f;
+        float x1 = -tankHalfWidth;
+        float y1 = -1f;
+        float z1 = -tankHalfWidth;
+        float x2 = tankHalfWidth;
+        float maxHeightPixels = 36f;
+        float z2 = tankHalfWidth;
 
         float width = x2 - x1;
         float depth = z2 - z1;
@@ -116,5 +121,10 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                 x1, y1, z1,
                 x2, maxHeightPixels, z2,
                 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+
+        queue.submitModel(this.glassModel,
+                state,
+                matrices, this.glassModel.renderType(texture),
+                light, overlay, 0, state.breakProgress);
     }
 }

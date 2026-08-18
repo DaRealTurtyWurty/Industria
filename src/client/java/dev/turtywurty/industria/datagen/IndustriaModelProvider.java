@@ -713,7 +713,7 @@ public class IndustriaModelProvider extends FabricModelProvider {
                                 displaySettings.rotate(0, 180, 0)));
 
         generateSpecialBlockItemModel(itemModelGenerator, BlockInit.MIXER,
-                new IndustriaBlockEntityItemRenderer.Unbaked(MixerModel.LAYER_LOCATION, MixerModel.TEXTURE_LOCATION),
+                new IndustriaBlockEntityItemRenderer.Unbaked(MixerModel.LAYER_LOCATION, MixerModel.CLOSED_TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
                             displaySettings.setTranslation(-1.5f, -2.75f, 0);

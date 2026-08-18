@@ -38,6 +38,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -436,19 +437,16 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
     @Override
     protected void definePorts(PortRegistrar ports) {
-        ports.both(TransferType.ITEM, this.wrappedContainerStorage::getCombinedStorage)
-                .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == 0 && offset.getX() != 0);
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.EAST))
+                .atSides(new BlockPos(-1, 2, 0), Direction.UP);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
-                .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == 0 && offset.getX() != 0);
+                .at(new BlockPos(-1, 0, 0));
         ports.input(TransferType.FLUID, this::getInputFluidTank)
-                .at(new BlockPos(0, 2, 0));
+                .atSides(new BlockPos(1, 2, 0), Direction.UP);
         ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
-                .wherePosition(offset -> offset.getY() == 0
-                        && (offset.getX() != 0 || offset.getZ() != 0));
+                .at(new BlockPos(1, 0, 0));
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(offset -> (offset.getY() == 2
-                        && (offset.getX() != 0 || offset.getZ() != 0))
-                        || (offset.getY() == 0 && (offset.getX() != 0 || offset.getZ() != 0)));
+                .at(new BlockPos(0, 2, 0));
     }
 
     @Override
@@ -463,5 +461,36 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
     public boolean isMixing() {
         return this.progress > 0 && this.progress < this.maxProgress;
+    }
+
+    public boolean hasItemInputConnection() {
+        if (this.level == null)
+            return false;
+
+        Direction connectionDirection = getWorldSideForLocalSide(Direction.WEST);
+        Storage<ItemVariant> storage = TransferType.ITEM.lookup(this.level,
+                this.worldPosition.relative(connectionDirection).above(3),
+                Direction.DOWN);
+        return storage != null;
+    }
+
+    public boolean hasItemOutputConnection() {
+        if (this.level == null)
+            return false;
+
+        Direction connectionDirection = getWorldSideForLocalSide(Direction.WEST);
+        Storage<ItemVariant> storage = TransferType.ITEM.lookup(this.level,
+                this.worldPosition.relative(connectionDirection, 2),
+                connectionDirection.getOpposite());
+        return storage != null;
+    }
+
+    private Direction getWorldSideForLocalSide(Direction localSide) {
+        for (Direction worldSide : Direction.Plane.HORIZONTAL) {
+            if (getPortLocalSide(worldSide) == localSide)
+                return worldSide;
+        }
+
+        return localSide;
     }
 }
