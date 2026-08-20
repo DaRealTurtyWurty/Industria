@@ -1,137 +1,27 @@
-import org.gradle.api.plugins.JavaPluginExtension
-
 plugins {
-	id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
-	id 'maven-publish'
+    id 'base'
+    id 'net.fabricmc.fabric-loom' version '1.15.5' apply false
+    id 'net.neoforged.moddev' version '2.0.141' apply false
 }
 
-def resolveRunJavaExecutable = {
-	def isWindows = System.getProperty("os.name").toLowerCase().contains("win")
-	def javaPluginExtension = extensions.findByType(JavaPluginExtension)
-	if (javaPluginExtension != null && javaPluginExtension.toolchain.languageVersion.present) {
-		return javaToolchains.launcherFor(javaPluginExtension.toolchain).get().executablePath.asFile
-	}
+allprojects {
+    group = mod_group
+    version = mod_version
 
-	def javaHome = System.getProperty("java.home")
-	return new File(javaHome, "bin/${isWindows ? 'java.exe' : 'java'}")
-}
-
-def supportsJvmArg = { String arg ->
-	def javaExecutable = resolveRunJavaExecutable()
-	if (!javaExecutable.isFile()) {
-		return false
-	}
-
-	def process = new ProcessBuilder(javaExecutable.absolutePath, arg, "-version")
-			.redirectErrorStream(true)
-			.start()
-	process.inputStream.text
-	return process.waitFor() == 0
-}
-
-def allowEnhancedClassRedefinition = supportsJvmArg("-XX:+AllowEnhancedClassRedefinition")
-
-version = project.mod_version
-group = project.maven_group
-
-base {
-	archivesName = project.archives_base_name
-}
-
-repositories {
-    mavenLocal()
-	maven {
-		url = "https://api.modrinth.com/maven"
-	}
-
-	maven { url "https://maven.terraformersmc.com/releases/" }
-
-	maven {
-		url "https://repo.repsy.io/mvn/turtywurty/public"
-	}
-
-    maven {
-        name = 'Ladysnake Mods'
-        url = 'https://maven.ladysnake.org/releases'
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url = 'https://api.modrinth.com/maven' }
+        maven { url = 'https://maven.terraformersmc.com/releases/' }
+        maven { url = 'https://repo.repsy.io/mvn/turtywurty/public' }
+        maven { url = 'https://maven.ladysnake.org/releases' }
     }
 }
 
-loom {
-	splitEnvironmentSourceSets()
-
-	mods {
-		"${archivesName}" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
-	}
-
-	accessWidenerPath = file("src/main/resources/${project.archives_base_name}.accesswidener")
-
-	runConfigs.configureEach {
-		ideConfigGenerated = false
-		if (allowEnhancedClassRedefinition) {
-			vmArg("-XX:+AllowEnhancedClassRedefinition")
-		}
-	}
+tasks.named('assemble') {
+    dependsOn(':common:assemble', ':fabric:assemble', ':neoforge:assemble')
 }
 
-fabricApi {
-	configureDataGeneration() {
-		client = true
-	}
-}
-
-dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	include api("teamreborn:energy:${project.tech_reborn_energy_version}")
-	include api("dev.turtywurty:heatapi:${project.heat_api_version}")
-	include api("dev.turtywurty:slurryapi:${project.slurry_api_version}")
-	include api("dev.turtywurty:gasapi:${project.gas_api_version}")
-	include api("dev.turtywurty:multiblocklib:${project.multiblock_lib_version}")
-
-    //api "com.terraformersmc:modmenu:${project.mod_menu_version}"
-
-	implementation "org.jbox2d:jbox2d-library:2.2.1.1"
-}
-
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 25
-}
-
-java {
-	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
-}
-
-jar {
-	from("LICENSE") {
-		rename { "${it}_${project.base.archivesName.get()}"}
-	}
-}
-
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
-		}
-	}
-
-	repositories {
-
-	}
+tasks.named('check') {
+    dependsOn(':common:check', ':fabric:check', ':neoforge:check')
 }

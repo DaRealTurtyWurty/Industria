@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev'
+}
+
+base {
+    archivesName = "${mod_id}-common-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+}
+
+neoForge {
+    neoFormVersion = neo_form_version
+}
+
+def library = { String artifact ->
+    "${turtymultiloader_group}:${artifact}-${minecraft_version}:${turtymultiloader_version}"
+}
+
+dependencies {
+    compileOnly library('turtymultiloader-common')
+}
+
+sourceSets.main.resources.srcDir('src/generated/resources')

@@ -1,0 +1,78 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev'
+}
+
+base {
+    archivesName = "${mod_id}-neoforge-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+}
+
+sourceSets.main.java.srcDir('../common/src/main/java')
+sourceSets.main.resources.srcDirs(
+    '../common/src/main/resources',
+    '../common/src/generated/resources'
+)
+
+def library = { String artifact ->
+    "${turtymultiloader_group}:${artifact}-${minecraft_version}:${turtymultiloader_version}"
+}
+
+dependencies {
+    implementation library('turtymultiloader-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+}
+
+neoForge {
+    version = neoforge_version
+
+    def accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (accessTransformer.exists())
+        accessTransformers.from(accessTransformer.absolutePath)
+
+    runs {
+        client {
+            client()
+            gameDirectory = file('runs/client')
+        }
+        server {
+            server()
+            gameDirectory = file('runs/server')
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+processResources {
+    def properties = [
+        version                      : project.version,
+        mod_id                       : mod_id,
+        mod_name                     : mod_name,
+        mod_author                   : mod_author,
+        mod_license                  : mod_license,
+        mod_description              : mod_description,
+        minecraft_version_range      : minecraft_version_range,
+        neoforge_version             : neoforge_version,
+        neoforge_loader_version_range: neoforge_loader_version_range,
+        turtymultiloader_version     : turtymultiloader_version
+    ]
+    inputs.properties(properties)
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(properties)
+    }
+}
+
+tasks.named('jar', Jar) {
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+}

@@ -1,10 +1,44 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'Fabric'
+                    url = uri('https://maven.fabricmc.net')
+                }
+            }
+            filter {
+                includeGroupAndSubgroups('net.fabricmc')
+            }
+        }
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'Industria'
+include('common', 'fabric', 'neoforge')
+
+// Use the sibling TurtyMultiloader checkout while Industria is being ported.
+// Explicit substitutions are needed because its project names and published artifact IDs differ.
+def sourceBuild = providers.gradleProperty('turtymultiloaderSource').orNull
+if (sourceBuild != null && !sourceBuild.isBlank()) {
+    includeBuild(sourceBuild) {
+        dependencySubstitution {
+            def libraryGroup = providers.gradleProperty('turtymultiloader_group').get()
+            def minecraftVersion = providers.gradleProperty('minecraft_version').get()
+            [
+                common  : "turtymultiloader-common-${minecraftVersion}",
+                fabric  : "turtymultiloader-fabric-${minecraftVersion}",
+                neoforge: "turtymultiloader-neoforge-${minecraftVersion}"
+            ].each { projectPath, artifact ->
+                substitute(module("${libraryGroup}:${artifact}"))
+                    .using(project(":${projectPath}"))
+            }
+        }
+    }
 }
