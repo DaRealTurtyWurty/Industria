@@ -28,7 +28,7 @@ public class FluidTankScreen extends AbstractContainerScreen<FluidTankScreenHand
         this.inventoryLabelY = this.imageHeight - 94;
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getFluidTank())
-                .bounds(this.leftPos + 79, this.topPos + 14, 20, 46)
+                .bounds(this.leftPos + 78, this.topPos + 14, 20, 46)
                 .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
                 .build());
 
