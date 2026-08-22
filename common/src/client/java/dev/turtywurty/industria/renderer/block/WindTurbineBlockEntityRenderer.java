@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.model.WindTurbineModel;
 import dev.turtywurty.industria.state.WindTurbineRenderState;
@@ -8,12 +9,21 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer<WindTurbineBlockEntity, WindTurbineRenderState> {
+    private static final Identifier ENERGY_BAR_TEXTURE = Industria.id("textures/block/energy_bar.png");
+    private static final float ENERGY_BAR_MIN_X = -4.0F / 16.0F;
+    private static final float ENERGY_BAR_MAX_X = 4.0F / 16.0F;
+    private static final float ENERGY_BAR_MIN_Y = 20.0F / 16.0F;
+    private static final float ENERGY_BAR_MAX_Y = 22.0F / 16.0F;
+    private static final float ENERGY_BAR_Z = -7.01F / 16.0F;
+
     private final WindTurbineModel model;
 
     public WindTurbineBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -31,6 +41,8 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.propellerRotation = blockEntity.getPropellerRotation();
         state.energyOutput = blockEntity.getEnergyOutput();
+        state.energy = blockEntity.getEnergyStorage().getAmount();
+        state.energyCapacity = blockEntity.getEnergyStorage().getCapacity();
     }
 
     @Override
@@ -42,6 +54,22 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
                 new WindTurbineModel.WindTurbineModelRenderState(state.propellerRotation),
                 matrices, this.model.renderType(WindTurbineModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
+
+        renderEnergyBuffer(state, matrices, queue, light, overlay);
+    }
+
+    private static void renderEnergyBuffer(WindTurbineRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+        if (state.energy <= 0L || state.energyCapacity <= 0L)
+            return;
+
+        float fillPercentage = Mth.clamp((float) state.energy / state.energyCapacity, 0.0F, 1.0F);
+        float maxX = Mth.lerp(fillPercentage, ENERGY_BAR_MIN_X, ENERGY_BAR_MAX_X);
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(ENERGY_BAR_TEXTURE), (entry, vertexConsumer) -> {
+            vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, ENERGY_BAR_MIN_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+            vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, ENERGY_BAR_MAX_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+            vertexConsumer.addVertex(entry, maxX, ENERGY_BAR_MAX_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(fillPercentage, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+            vertexConsumer.addVertex(entry, maxX, ENERGY_BAR_MIN_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(fillPercentage, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+        });
     }
 
     @Override
