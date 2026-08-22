@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/motor",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:motor",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/motor.png"
+    }
+  }
+}

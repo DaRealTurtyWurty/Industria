@@ -49,37 +49,72 @@ loom {
     }
 }
 
-sourceSets.main.java.srcDir('../common/src/main/java')
-sourceSets.main.resources.srcDirs(
-    '../common/src/main/resources',
-    '../common/src/generated/resources',
-    'src/main/generated'
-)
+sourceSets.main.resources.srcDir('src/main/generated')
+
+configurations {
+    commonJava {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    commonClientJava {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    commonResources {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
 
 def library = { String artifact ->
     "${turtymultiloader_group}:${artifact}-${minecraft_version}:${turtymultiloader_version}"
 }
 
 dependencies {
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonClientJava project(path: ':common', configuration: 'commonClientJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+    compileOnly project(':common')
+
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
-    // Core multiloader bridge is available immediately. Optional replacement modules are added as their legacy APIs
-    // are removed from Industria, avoiding duplicate gas/slurry/multiblock classes during the transition.
     implementation library('turtymultiloader-fabric')
     include library('turtymultiloader-fabric')
+    implementation library('turtymultiloader-gas-fabric')
+    include library('turtymultiloader-gas-fabric')
+    implementation library('turtymultiloader-multiblock-fabric')
+    include library('turtymultiloader-multiblock-fabric')
+    implementation library('turtymultiloader-slurry-fabric')
+    include library('turtymultiloader-slurry-fabric')
 
     include api("teamreborn:energy:${energy_api_version}")
     include api("dev.turtywurty:heatapi:${heat_api_version}")
-    include api("dev.turtywurty:slurryapi:${slurry_api_version}")
-    include api("dev.turtywurty:gasapi:${gas_api_version}")
-    include api("dev.turtywurty:multiblocklib:${multiblock_lib_version}")
 
     implementation "org.jbox2d:jbox2d-library:${jbox2d_version}"
 }
 
+tasks.named('compileJava', JavaCompile) {
+    dependsOn(configurations.commonJava)
+    source(configurations.commonJava)
+}
+
+tasks.named('compileClientJava', JavaCompile) {
+    dependsOn(configurations.commonClientJava)
+    source(configurations.commonClientJava)
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn(configurations.commonJava, configurations.commonClientJava)
+    from(configurations.commonJava)
+    from(configurations.commonClientJava)
+}
+
 processResources {
+    dependsOn(configurations.commonResources)
+    from(configurations.commonResources)
+
     def properties = [version: project.version]
     inputs.properties(properties)
     filesMatching('fabric.mod.json') {

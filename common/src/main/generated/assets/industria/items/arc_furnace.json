@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/arc_furnace",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:arc_furnace",
+        "name": "main"
+      },
+      "texture": "minecraft:textures/block/iron_block.png"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "industria:block/rubber_slab"
+    },
+    "type=double": {
+      "model": "industria:block/rubber_planks"
+    },
+    "type=top": {
+      "model": "industria:block/rubber_slab_top"
+    }
+  }
+}

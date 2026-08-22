@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/wind_turbine",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:wind_turbine",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/wind_turbine.png"
+    }
+  }
+}

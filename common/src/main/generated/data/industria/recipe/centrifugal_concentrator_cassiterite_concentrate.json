@@ -1,0 +1,19 @@
+{
+  "type": "industria:centrifugal_concentrator",
+  "input": {
+    "ingredients": "industria:cassiterite_concentrate"
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:cassiterite_concentrate"
+  },
+  "output_slurry": {
+    "amount": 20250,
+    "variant": {
+      "slurry": "industria:clay_slurry"
+    }
+  },
+  "process_time": 200,
+  "rpm": 500
+}

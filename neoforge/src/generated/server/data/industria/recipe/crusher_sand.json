@@ -1,0 +1,17 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "ingredients": "minecraft:sand"
+  },
+  "output_a": {
+    "chance": 0.35,
+    "count": 1,
+    "item": "minecraft:gunpowder"
+  },
+  "output_b": {
+    "chance": 1.0,
+    "count": 0,
+    "item": "minecraft:air"
+  },
+  "process_time": 100
+}

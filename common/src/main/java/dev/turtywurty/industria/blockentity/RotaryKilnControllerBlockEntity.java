@@ -1,0 +1,404 @@
+package dev.turtywurty.industria.blockentity;
+
+import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.RotaryKilnBlock;
+import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.inventory.SyncingSimpleInventory;
+import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
+import dev.turtywurty.industria.init.ModBlockEntityTypes;
+import dev.turtywurty.industria.init.ModBlocks;
+import dev.turtywurty.industria.init.ModRecipeTypes;
+import dev.turtywurty.industria.multiblock.TransferType;
+import dev.turtywurty.industria.recipe.RotaryKilnRecipe;
+import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
+import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.multiblocklib.port.PortRegistrar;
+import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
+import dev.turtywurty.turtymultiloader.transfer.TransferService;
+import dev.turtywurty.turtymultiloader.transfer.lookup.StorageKeys;
+import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
+import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
+import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+
+import java.util.*;
+
+public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper {
+    private final List<BlockPos> kilnSegments = new ArrayList<>();
+
+    private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
+
+    private final List<InputRecipeEntry> recipes = new ArrayList<>();
+    private int ticks = 0;
+
+    public RotaryKilnControllerBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlocks.ROTARY_KILN_CONTROLLER.get(), ModBlockEntityTypes.ROTARY_KILN_CONTROLLER.get(), pos, state);
+
+        this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1),
+                Direction.UP, () -> RotaryKilnControllerBlockEntity.this.kilnSegments.size() >= 8);
+    }
+
+    public static RecipeManager getRecipeManager(Level world) {
+        if (world == null || world.isClientSide())
+            return null;
+
+        return !(world instanceof ServerLevel serverWorld) ? null : serverWorld.recipeAccess();
+    }
+
+    @Override
+    public WrappedContainerStorage<?> getWrappedContainerStorage() {
+        return this.wrappedContainerStorage;
+    }
+
+    @Override
+    public Block getBlock() {
+        return getBlockState().getBlock();
+    }
+
+    @Override
+    public List<SyncableStorage> getSyncableStorages() {
+        SyncingSimpleInventory inventory = getInventory();
+        return List.of(inventory);
+    }
+
+    private SyncingSimpleInventory getInventory() {
+        return (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+    }
+
+    public boolean isProcessing() {
+        boolean recipesEmpty = true;
+        for (InputRecipeEntry recipe : this.recipes) {
+            if (recipe != null) {
+                recipesEmpty = false;
+                break;
+            }
+        }
+
+        return this.kilnSegments.size() >= 8 && !recipesEmpty;
+    }
+
+    @Override
+    public void onTick() {
+        if (this.level == null || this.level.isClientSide())
+            return;
+
+        if (this.ticks++ == 0)
+            handleSegmentSearching();
+
+        if (this.kilnSegments.size() < 8)
+            return;
+
+        handleInputStack();
+
+        for (InputRecipeEntry recipe : this.recipes.stream().sorted(Comparator.comparingInt(InputRecipeEntry::getProgress)).toList()) {
+            if (recipe == null) {
+                Industria.LOGGER.warn("Found null recipe in Rotary Kiln Controller at {}. Removing it from the list.", this.worldPosition);
+                this.recipes.remove(null);
+                update();
+                continue;
+            }
+
+            Optional<RecipeHolder<?>> recipeEntry = getRecipe(recipe.registryKey());
+            if (recipeEntry.isEmpty()) {
+                Industria.LOGGER.warn("Recipe entry for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.worldPosition);
+                this.recipes.remove(recipe);
+                update();
+                continue;
+            }
+
+            RotaryKilnRecipe kilnRecipe = (RotaryKilnRecipe) recipeEntry.get().value();
+            if (kilnRecipe == null) {
+                Industria.LOGGER.warn("Recipe for {} not found in Rotary Kiln Controller at {}. Removing it from the list.", recipe.registryKey(), this.worldPosition);
+                this.recipes.remove(recipe);
+                update();
+                continue;
+            }
+
+            if (recipe.getProgress() >= this.kilnSegments.size() * 100) {
+                ItemStack outputStack = kilnRecipe.output().createStack(this.level.getRandom());
+
+                BlockPos endPos = this.kilnSegments.getLast();
+                Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+                BlockPos spawnPos = endPos.relative(facing);
+                if (!tryOutputToStorage(spawnPos, facing, outputStack)) {
+                    Containers.dropItemStack(this.level, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), outputStack);
+                }
+
+                this.recipes.remove(recipe);
+
+                update();
+                continue;
+            }
+
+            recipe.incrementProgress();
+            update();
+        }
+    }
+
+    private void handleInputStack() {
+        SyncingSimpleInventory inventory = getInventory();
+        ItemStack inputStack = inventory.getItem(0).copy();
+        if (inputStack.isEmpty())
+            return;
+
+        Optional<RecipeHolder<RotaryKilnRecipe>> recipeEntry = getMatchingRecipe(inputStack);
+        if (recipeEntry.isEmpty())
+            return;
+
+        RotaryKilnRecipe recipe = recipeEntry.get().value();
+        if (recipe == null)
+            return;
+
+        if (this.recipes.stream().noneMatch(r -> r.progress <= 100)) {
+            InputRecipeEntry inputRecipeEntry = new InputRecipeEntry(recipeEntry.get().id(), inputStack);
+
+            this.recipes.add(inputRecipeEntry);
+
+            inventory.removeItem(0, recipe.input().stackData().count());
+            update();
+        }
+    }
+
+    private boolean tryOutputToStorage(BlockPos spawnPos, Direction facing, ItemStack outputStack) {
+        ResourceStorage<ResourceVariant<Item>> itemStorage = TransferService.get().findBlock(StorageKeys.ITEM, this.level, spawnPos, facing.getOpposite());
+        if (itemStorage == null || !itemStorage.supportsInsertion())
+            return false;
+
+        try (TransferTransaction transaction = TransferTransaction.openRoot()) {
+            long inserted = itemStorage.insert(ResourceVariant.ofItem(outputStack), outputStack.getCount(), transaction);
+            if (inserted == 0)
+                return false;
+
+            transaction.commit();
+            return true;
+        }
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
+        ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
+        view.store("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
+
+        var recipesView = view.childrenList("Recipes");
+        for (InputRecipeEntry inputRecipeEntry : this.recipes) {
+            if (inputRecipeEntry == null)
+                continue;
+
+            var recipeView = recipesView.addChild();
+
+            ResourceKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey;
+            if (registryKey != null && registryKey.identifier() != null) {
+                recipeView.store("RegistryKey", ResourceKey.codec(Registries.RECIPE), registryKey);
+            }
+
+            recipeView.store("InputStack", ItemStack.OPTIONAL_CODEC, inputRecipeEntry.inputStack);
+            recipeView.putInt("Progress", inputRecipeEntry.progress);
+            recipeView.store("UUID", UUIDUtil.CODEC, inputRecipeEntry.uuid);
+        }
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
+        ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
+
+        this.kilnSegments.clear();
+        view.read("KilnSegments", BlockPos.CODEC.listOf()).ifPresent(this.kilnSegments::addAll);
+
+        this.recipes.clear();
+        ValueInput.ValueInputList recipesView = view.childrenListOrEmpty("Recipes");
+        for (ValueInput readView : recipesView) {
+            ResourceKey<Recipe<?>> registryKey = readView.read(
+                            "RegistryKey",
+                            ResourceKey.codec(Registries.RECIPE))
+                    .orElse(null);
+
+            if (registryKey == null && Thread.currentThread().getName().toLowerCase(Locale.ROOT).contains("server")) {
+                Industria.LOGGER.error("Failed to decode recipe registry key for Rotary Kiln at {}. This is likely a bug.", this.worldPosition);
+                continue;
+            }
+
+            ItemStack inputStack = readView.read("InputStack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+            int progress = readView.getIntOr("Progress", 0);
+            Optional<UUID> uuidOpt = readView.read("UUID", UUIDUtil.CODEC);
+            UUID uuid = uuidOpt.orElseGet(UUID::randomUUID);
+
+            var inputRecipeEntry = new InputRecipeEntry(registryKey, inputStack, progress, uuid);
+            this.recipes.add(inputRecipeEntry);
+        }
+    }
+
+    public void handleSegmentSearching() {
+        if (level == null || level.isClientSide())
+            return;
+
+        this.kilnSegments.clear();
+        Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+        MultiblockWorldData multiblockData = this.level instanceof ServerLevel serverLevel
+                ? MultiblockWorldData.get(serverLevel)
+                : null;
+
+        for (int segmentIndex = 1; segmentIndex <= 15; segmentIndex++) {
+            BlockPos offsetPos = worldPosition.relative(facing, segmentIndex);
+            BlockState offsetState = level.getBlockState(offsetPos);
+            boolean isMappedLibPart = multiblockData != null && worldPosition.equals(multiblockData.getControllerFor(offsetPos));
+            if (offsetState.is(ModBlocks.ROTARY_KILN.get()) || isMappedLibPart) {
+                if (offsetState.is(ModBlocks.ROTARY_KILN.get())) {
+                    level.setBlockAndUpdate(offsetPos, offsetState.setValue(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
+                }
+                addKilnSegment(offsetPos);
+            } else {
+                break;
+            }
+        }
+    }
+
+    public void addKilnSegment(BlockPos pos) {
+        if (this.kilnSegments.contains(pos))
+            return;
+
+        this.kilnSegments.add(pos);
+        update();
+    }
+
+    public void removeKilnSegment(BlockPos pos) {
+        int segmentIndex = this.kilnSegments.indexOf(pos);
+        if (segmentIndex != -1) {
+            this.kilnSegments.remove(segmentIndex);
+            update();
+
+            if (segmentIndex > this.recipes.size() - 1)
+                return;
+
+            InputRecipeEntry inputRecipeEntry = this.recipes.stream()
+                    .filter(recipe -> Mth.floor(recipe.getProgress() / 100f) == segmentIndex)
+                    .findFirst()
+                    .orElse(null);
+            if (inputRecipeEntry == null)
+                return;
+
+            if (this.level != null && !this.level.isClientSide()) {
+                Containers.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), inputRecipeEntry.inputStack());
+            }
+
+            this.recipes.remove(inputRecipeEntry);
+        }
+    }
+
+    public Optional<RecipeHolder<?>> getRecipe(ResourceKey<Recipe<?>> recipeKey) {
+        RecipeManager recipeManager = getRecipeManager(this.level);
+        if (recipeManager == null)
+            return Optional.empty();
+
+        return recipeManager.byKey(recipeKey);
+    }
+
+    public Optional<RecipeHolder<RotaryKilnRecipe>> getMatchingRecipe(ItemStack stack) {
+        RecipeManager recipeManager = getRecipeManager(this.level);
+        if (recipeManager == null)
+            return Optional.empty();
+
+        return recipeManager.getRecipeFor(ModRecipeTypes.ROTARY_KILN.get(), SingleItemStackRecipeInput.of(stack), this.level);
+    }
+
+    public ResourceStorage<ResourceVariant<Item>> getInventoryProvider(Direction side) {
+        return this.wrappedContainerStorage.getStorage(side);
+    }
+
+    @Override
+    protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.UP))
+                .at(new BlockPos(0, 4, 0));
+    }
+
+    public List<BlockPos> getKilnSegments() {
+        return this.kilnSegments;
+    }
+
+    public List<InputRecipeEntry> getRecipes() {
+        return this.recipes;
+    }
+
+    public static final class InputRecipeEntry {
+
+        private final UUID uuid;
+        private final ResourceKey<Recipe<?>> registryKey;
+        private final ItemStack inputStack;
+        private int progress;
+
+        public InputRecipeEntry(ResourceKey<Recipe<?>> registryKey, ItemStack inputStack) {
+            this(registryKey, inputStack, 0, UUID.randomUUID());
+        }
+
+        public InputRecipeEntry(ResourceKey<Recipe<?>> registryKey, ItemStack inputStack, int progress, UUID uuid) {
+            this.registryKey = registryKey;
+            this.inputStack = inputStack;
+            this.progress = progress;
+            this.uuid = uuid;
+        }
+
+        public ResourceKey<Recipe<?>> registryKey() {
+            return registryKey;
+        }
+
+        public ItemStack inputStack() {
+            return inputStack;
+        }
+
+        public int getProgress() {
+            return this.progress;
+        }
+
+        public UUID getUuid() {
+            return uuid;
+        }
+
+        public void incrementProgress() {
+            this.progress++;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (InputRecipeEntry) obj;
+
+            return uuid.equals(that.uuid);
+        }
+
+        @Override
+        public int hashCode() {
+            return uuid.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "InputRecipeEntry[" +
+                    "registryKey=" + registryKey + ", " +
+                    "inputStack=" + inputStack + ", " +
+                    "progress=" + progress + ", " +
+                    "uuid=" + uuid + ']';
+        }
+    }
+}

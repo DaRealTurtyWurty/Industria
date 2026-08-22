@@ -32,9 +32,18 @@ if (sourceBuild != null && !sourceBuild.isBlank()) {
             def libraryGroup = providers.gradleProperty('turtymultiloader_group').get()
             def minecraftVersion = providers.gradleProperty('minecraft_version').get()
             [
-                common  : "turtymultiloader-common-${minecraftVersion}",
-                fabric  : "turtymultiloader-fabric-${minecraftVersion}",
-                neoforge: "turtymultiloader-neoforge-${minecraftVersion}"
+                common          : "turtymultiloader-common-${minecraftVersion}",
+                fabric          : "turtymultiloader-fabric-${minecraftVersion}",
+                neoforge        : "turtymultiloader-neoforge-${minecraftVersion}",
+                'gas-common'    : "turtymultiloader-gas-common-${minecraftVersion}",
+                'gas-fabric'    : "turtymultiloader-gas-fabric-${minecraftVersion}",
+                'gas-neoforge'  : "turtymultiloader-gas-neoforge-${minecraftVersion}",
+                'multiblock-common' : "turtymultiloader-multiblock-common-${minecraftVersion}",
+                'multiblock-fabric' : "turtymultiloader-multiblock-fabric-${minecraftVersion}",
+                'multiblock-neoforge': "turtymultiloader-multiblock-neoforge-${minecraftVersion}",
+                'slurry-common' : "turtymultiloader-slurry-common-${minecraftVersion}",
+                'slurry-fabric' : "turtymultiloader-slurry-fabric-${minecraftVersion}",
+                'slurry-neoforge': "turtymultiloader-slurry-neoforge-${minecraftVersion}"
             ].each { projectPath, artifact ->
                 substitute(module("${libraryGroup}:${artifact}"))
                     .using(project(":${projectPath}"))

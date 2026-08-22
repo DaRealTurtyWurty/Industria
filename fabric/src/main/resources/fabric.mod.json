@@ -16,10 +16,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.turtywurty.industria.Industria"
+      "dev.turtywurty.industria.FabricIndustria"
     ],
     "client": [
-      "dev.turtywurty.industria.IndustriaClient"
+      "dev.turtywurty.industria.FabricIndustriaClient"
     ],
     "fabric-datagen": [
       "dev.turtywurty.industria.IndustriaDataGenerator"

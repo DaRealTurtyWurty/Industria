@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/centrifugal_concentrator",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:centrifugal_concentrator",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/centrifugal_concentrator.png"
+    }
+  }
+}

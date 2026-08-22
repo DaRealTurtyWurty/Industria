@@ -11,6 +11,12 @@ displayURL = "https://github.com/DaRealTurtyWurty/Industria"
 authors = "${mod_author}"
 description = '''${mod_description}'''
 
+[[mixins]]
+config = "industria.mixins.json"
+
+[[mixins]]
+config = "industria.client.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
@@ -29,5 +35,26 @@ side = "BOTH"
 modId = "turtymultiloader"
 type = "required"
 versionRange = "[${turtymultiloader_version},)"
-ordering = "BEFORE"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "multiblocklib"
+type = "required"
+versionRange = "[${turtymultiloader_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "gasapi"
+type = "required"
+versionRange = "[${turtymultiloader_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "slurryapi"
+type = "required"
+versionRange = "[${turtymultiloader_version},)"
+ordering = "AFTER"
 side = "BOTH"

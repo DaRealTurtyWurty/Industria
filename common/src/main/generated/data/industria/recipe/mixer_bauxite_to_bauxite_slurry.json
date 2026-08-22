@@ -1,0 +1,34 @@
+{
+  "type": "industria:mixer",
+  "input_fluid": {
+    "amount": 81000,
+    "variant": {
+      "fluid": "minecraft:water"
+    }
+  },
+  "inputs": [
+    {
+      "data": {
+        "count": 4
+      },
+      "ingredients": "industria:bauxite"
+    },
+    {
+      "ingredients": "industria:sodium_hydroxide"
+    }
+  ],
+  "max_temp": 180,
+  "min_temp": 170,
+  "output": {
+    "chance": 1.0,
+    "count": 0,
+    "item": "minecraft:air"
+  },
+  "output_slurry": {
+    "amount": 81000,
+    "variant": {
+      "slurry": "industria:bauxite_slurry"
+    }
+  },
+  "process_time": 200
+}

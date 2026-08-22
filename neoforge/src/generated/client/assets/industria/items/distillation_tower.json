@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/distillation_tower",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:distillation_tower",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/distillation_tower.png"
+    }
+  }
+}

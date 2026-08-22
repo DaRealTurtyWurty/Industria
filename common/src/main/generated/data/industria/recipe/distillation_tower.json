@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "minecraft:glass",
+    "I": "#c:ingots/iron",
+    "M": "industria:motor",
+    "P": "industria:fluid_pipe",
+    "T": "industria:fluid_tank"
+  },
+  "pattern": [
+    "IGI",
+    "TMT",
+    "IPI"
+  ],
+  "result": {
+    "id": "industria:distillation_tower"
+  }
+}

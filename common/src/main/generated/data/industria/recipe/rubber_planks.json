@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#industria:rubber_logs"
+  ],
+  "result": {
+    "count": 4,
+    "id": "industria:rubber_planks"
+  }
+}

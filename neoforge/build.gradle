@@ -12,19 +12,54 @@ java {
     withSourcesJar()
 }
 
-sourceSets.main.java.srcDir('../common/src/main/java')
-sourceSets.main.resources.srcDirs(
-    '../common/src/main/resources',
-    '../common/src/generated/resources'
-)
+configurations {
+    commonJava {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    commonClientJava {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    commonResources {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
 
 def library = { String artifact ->
     "${turtymultiloader_group}:${artifact}-${minecraft_version}:${turtymultiloader_version}"
 }
 
 dependencies {
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonClientJava project(path: ':common', configuration: 'commonClientJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+    compileOnly project(':common')
+
     implementation library('turtymultiloader-neoforge')
     jarJar "${turtymultiloader_group}:turtymultiloader-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    implementation library('turtymultiloader-gas-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-gas-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    implementation library('turtymultiloader-multiblock-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-multiblock-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    implementation library('turtymultiloader-slurry-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-slurry-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+
+    implementation "org.jbox2d:jbox2d-library:${jbox2d_version}"
+    jarJar "org.jbox2d:jbox2d-library:[${jbox2d_version}]"
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn(configurations.commonJava, configurations.commonClientJava)
+    source(configurations.commonJava)
+    source(configurations.commonClientJava)
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn(configurations.commonJava, configurations.commonClientJava)
+    from(configurations.commonJava)
+    from(configurations.commonClientJava)
 }
 
 neoForge {
@@ -43,6 +78,28 @@ neoForge {
             server()
             gameDirectory = file('runs/server')
         }
+        data {
+            clientData()
+            ideName = 'Industria NeoForge Data Generation'
+            gameDirectory = file('runs/datagen')
+            programArguments.addAll(
+                '--mod', mod_id,
+                '--all',
+                '--output', file('src/generated/client').absolutePath,
+                '--existing', file('src/main/resources').absolutePath
+            )
+        }
+        serverData {
+            serverData()
+            ideName = 'Industria NeoForge Server Data Generation'
+            gameDirectory = file('runs/serverDatagen')
+            programArguments.addAll(
+                '--mod', mod_id,
+                '--all',
+                '--output', file('src/generated/server').absolutePath,
+                '--existing', file('src/main/resources').absolutePath
+            )
+        }
     }
 
     mods {
@@ -52,7 +109,15 @@ neoForge {
     }
 }
 
+sourceSets.main.resources {
+    srcDir 'src/generated/client'
+    srcDir 'src/generated/server'
+}
+
 processResources {
+    dependsOn(configurations.commonResources)
+    from(configurations.commonResources)
+
     def properties = [
         version                      : project.version,
         mod_id                       : mod_id,
