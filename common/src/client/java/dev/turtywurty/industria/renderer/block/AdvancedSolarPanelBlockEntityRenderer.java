@@ -6,13 +6,14 @@ import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.blockentity.SolarPanelBlockEntity;
 import dev.turtywurty.industria.model.AdvancedSolarPanelModel;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -47,9 +48,10 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
         Direction facing = state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
         state.yaw = getTrackingYaw(facing) + (state.onStair ? (float) Math.PI : 0.0F);
 
-        Level level = blockEntity.getLevel();
-        state.pitch = level == null ? 0.0F : getTrackingPitch(level.getOverworldClockTime(), tickProgress);
         state.powered = state.blockState.getValue(SolarPanelBlock.POWERED);
+        float sunAngle = Minecraft.getInstance().gameRenderer.getMainCamera().attributeProbe()
+                .getValue(EnvironmentAttributes.SUN_ANGLE, tickProgress);
+        state.pitch = getTrackingPitch(sunAngle);
     }
 
     @Override
@@ -81,20 +83,18 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
         return (90.0F - blockRotation) * Mth.DEG_TO_RAD;
     }
 
-    static float getTrackingPitch(long dayTime, float tickProgress) {
-        float timeOfDay = Math.floorMod(dayTime, 24_000L) + tickProgress;
-        if (timeOfDay <= 12_000.0F) {
-            float dayProgress = timeOfDay / 12_000.0F;
-            return Mth.lerp(dayProgress, MAXIMUM_TILT, -MAXIMUM_TILT);
+    static float getTrackingPitch(float sunAngleDegrees) {
+        float sunAngle = Mth.wrapDegrees(sunAngleDegrees);
+        if (sunAngle >= -90.0F && sunAngle <= 90.0F)
+            return -sunAngle / 90.0F * MAXIMUM_TILT;
+
+        if (sunAngle > 90.0F) {
+            float resetProgress = Mth.clamp((sunAngle - 90.0F) / 15.0F, 0.0F, 1.0F);
+            return Mth.lerp(resetProgress, -MAXIMUM_TILT, 0.0F);
         }
 
-        if (timeOfDay < 13_000.0F)
-            return Mth.lerp((timeOfDay - 12_000.0F) / 1_000.0F, -MAXIMUM_TILT, 0.0F);
-
-        if (timeOfDay < 23_000.0F)
-            return 0.0F;
-
-        return Mth.lerp((timeOfDay - 23_000.0F) / 1_000.0F, 0.0F, MAXIMUM_TILT);
+        float resetProgress = Mth.clamp((sunAngle + 105.0F) / 15.0F, 0.0F, 1.0F);
+        return Mth.lerp(resetProgress, 0.0F, MAXIMUM_TILT);
     }
 
     public static class RenderState extends IndustriaBlockEntityRenderState {

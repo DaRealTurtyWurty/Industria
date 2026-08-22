@@ -12,6 +12,7 @@ import dev.turtywurty.industria.screen.ContainmentConveyorScreen;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.screen.DetectorConveyorScreen;
 import dev.turtywurty.industria.screen.FilterConveyorScreen;
+import dev.turtywurty.industria.screen.SolarPanelScreen;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.turtymultiloader.datagen.language.LanguageGenerationContext;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
@@ -48,6 +49,13 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.ADVANCED_SOLAR_PANEL.get(), "Advanced Solar Panel");
         addText(translationBuilder, SolarPanelBlockEntity.TITLE, "Solar Panel");
         addText(translationBuilder, SolarPanelBlockEntity.ADVANCED_TITLE, "Advanced Solar Panel");
+        translationBuilder.add(SolarPanelScreen.ENERGY_TOOLTIP_KEY, "Energy: %s / %s FE");
+        translationBuilder.add(SolarPanelScreen.ENERGY_OUTPUT_TOOLTIP_KEY, "Energy Output: %s FE/t");
+        translationBuilder.add(SolarPanelScreen.SUNLIGHT_TOOLTIP_KEY, "Sunlight: %s%%");
+        addText(translationBuilder, SolarPanelScreen.NIGHT_NOTICE_TEXT, "Night");
+        addText(translationBuilder, SolarPanelScreen.THUNDERING_NOTICE_TEXT, "Thundering");
+        addText(translationBuilder, SolarPanelScreen.RAINING_NOTICE_TEXT, "Raining");
+        addText(translationBuilder, SolarPanelScreen.LOW_LIGHT_NOTICE_TEXT, "Low Light");
 
         translationBuilder.add(ModBlocks.CRUSHER.get(), "Crusher");
         addText(translationBuilder, CrusherBlockEntity.TITLE, "Crusher");

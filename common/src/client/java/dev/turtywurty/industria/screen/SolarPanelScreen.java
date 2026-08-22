@@ -15,6 +15,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SolarPanelScreen extends Screen {
+    public static final String ENERGY_TOOLTIP_KEY = "container." + Industria.MOD_ID + ".solar_panel.energy";
+    public static final String ENERGY_OUTPUT_TOOLTIP_KEY = "container." + Industria.MOD_ID + ".solar_panel.energy_output";
+    public static final String SUNLIGHT_TOOLTIP_KEY = "container." + Industria.MOD_ID + ".solar_panel.sunlight";
+    public static final Component NIGHT_NOTICE_TEXT = Component.translatable(
+            "container." + Industria.MOD_ID + ".solar_panel.notice.night").withColor(0xFF5555);
+    public static final Component THUNDERING_NOTICE_TEXT = Component.translatable(
+            "container." + Industria.MOD_ID + ".solar_panel.notice.thundering").withColor(0xFF5555);
+    public static final Component RAINING_NOTICE_TEXT = Component.translatable(
+            "container." + Industria.MOD_ID + ".solar_panel.notice.raining").withColor(0xFF5555);
+    public static final Component LOW_LIGHT_NOTICE_TEXT = Component.translatable(
+            "container." + Industria.MOD_ID + ".solar_panel.notice.low_light").withColor(0xFF5555);
+
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/solar_panel.png");
     private static final int BACKGROUND_WIDTH = 176;
     private static final int BACKGROUND_HEIGHT = 90;
@@ -55,31 +67,33 @@ public class SolarPanelScreen extends Screen {
 
     private void extractTooltips(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         if (isHovering(144, 10, 20, 66, mouseX, mouseY)) {
-            context.setTooltipForNextFrame(this.font, Component.literal("Energy: " + getEnergy() + " / " + getMaxEnergy() + " FE"), mouseX, mouseY);
+            context.setTooltipForNextFrame(this.font,
+                    Component.translatable(ENERGY_TOOLTIP_KEY, getEnergy(), getMaxEnergy()), mouseX, mouseY);
         }
 
         if (isHovering(36, 33, 21, 21, mouseX, mouseY)) {
             List<Component> tooltip = new ArrayList<>(List.of(
-                    Component.literal("Energy Output: %s FE/t".formatted(getEnergyPerTick())),
-                    Component.literal("Sunlight: %d%%".formatted((int) Mth.clamp(getEnergyPerTickPercent() * 100, 0, 100)))
+                    Component.translatable(ENERGY_OUTPUT_TOOLTIP_KEY, getEnergyPerTick()),
+                    Component.translatable(SUNLIGHT_TOOLTIP_KEY,
+                            (int) Mth.clamp(getEnergyPerTickPercent() * 100, 0, 100))
             ));
 
             if (this.minecraft != null && this.minecraft.level != null) {
                 Level level = this.minecraft.level;
                 List<Component> notices = new ArrayList<>();
                 if (level.isDarkOutside()) {
-                    notices.add(Component.literal("Night").withColor(0xFF5555));
+                    notices.add(NIGHT_NOTICE_TEXT);
                 }
 
                 if (level.isThundering()) {
-                    notices.add(Component.literal("Thundering").withColor(0xFF5555));
+                    notices.add(THUNDERING_NOTICE_TEXT);
                 } else if (level.isRaining()) {
-                    notices.add(Component.literal("Raining").withColor(0xFF5555));
+                    notices.add(RAINING_NOTICE_TEXT);
                 }
 
                 int brightness = level.getBrightness(LightLayer.SKY, this.blockEntity.getBlockPos().above());
                 if (brightness < 15) {
-                    notices.add(Component.literal("Low Light").withColor(0xFF5555));
+                    notices.add(LOW_LIGHT_NOTICE_TEXT);
                 }
 
                 if (!notices.isEmpty()) {
