@@ -240,7 +240,11 @@ public class MixerModel extends Model<MixerRenderState> {
 
         itemExitPortNoPipe.addOrReplaceChild("itemPortR1", CubeListBuilder.create().texOffs(56, 66).addBox(-1.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-15.0F, -8.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
-        main.addOrReplaceChild("itemExitPipe", CubeListBuilder.create().texOffs(0, 118).addBox(-24.0F, -10.0F, -2.0F, 8.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        PartDefinition itemExitPipe = main.addOrReplaceChild("itemExitPipe", CubeListBuilder.create()
+                .texOffs(76, 72).addBox(-14.0F, -12.0F, -4.0F, 2.0F, 4.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 118).addBox(-24.0F, -10.0F, -2.0F, 8.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        itemExitPipe.addOrReplaceChild("itemPortR1", CubeListBuilder.create().texOffs(56, 66).addBox(-1.0F, -3.0F, -3.0F, 2.0F, 6.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-15.0F, -8.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
         PartDefinition itemInputPipe = main.addOrReplaceChild("itemInputPipe", CubeListBuilder.create().texOffs(108, 39).addBox(-18.0F, -48.0F, -2.0F, 6.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 

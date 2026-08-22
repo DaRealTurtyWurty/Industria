@@ -47,6 +47,7 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.SOLAR_PANEL.get(), "Solar Panel");
         translationBuilder.add(ModBlocks.ADVANCED_SOLAR_PANEL.get(), "Advanced Solar Panel");
         addText(translationBuilder, SolarPanelBlockEntity.TITLE, "Solar Panel");
+        addText(translationBuilder, SolarPanelBlockEntity.ADVANCED_TITLE, "Advanced Solar Panel");
 
         translationBuilder.add(ModBlocks.CRUSHER.get(), "Crusher");
         addText(translationBuilder, CrusherBlockEntity.TITLE, "Crusher");

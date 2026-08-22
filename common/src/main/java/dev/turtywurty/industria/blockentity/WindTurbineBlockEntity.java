@@ -1,7 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
@@ -9,8 +8,6 @@ import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
-import dev.turtywurty.industria.menu.WindTurbineScreenHandler;
-import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
@@ -20,12 +17,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,13 +26,12 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class WindTurbineBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
+public class WindTurbineBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader {
     public static final Component TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
@@ -134,22 +126,6 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
         }
 
         spread(this.level, this.worldPosition, storage);
-    }
-
-    @Override
-    public BlockPosPayload getMenuOpeningData(ServerPlayer player) {
-        return new BlockPosPayload(this.worldPosition);
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return TITLE;
-    }
-
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new WindTurbineScreenHandler(syncId, playerInventory, this);
     }
 
     @Override

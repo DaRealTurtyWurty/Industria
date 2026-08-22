@@ -6,6 +6,8 @@ import dev.turtywurty.industria.pipe.ConnectionModelSet;
 import dev.turtywurty.industria.pipe.PipeConnectionModelApi;
 import dev.turtywurty.industria.pipe.PipeConnectionModelRegistry;
 import dev.turtywurty.multiblocklib.MultiblockLib;
+import com.mojang.math.Quadrant;
+import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +41,8 @@ public final class ModPipeConnectionModels {
     private static final ConnectionModelSet MIXER_FLUID_PIPE = ConnectionModelSet.forDirection(
             Industria.id("mixer_fluid_pipe"),
             Direction.DOWN,
-            Industria.id("block/mixer_fluid_pipe_connection")
+            Industria.id("block/mixer_fluid_pipe_connection"),
+            Variant.SimpleModelState.DEFAULT.withY(Quadrant.R180)
     );
     private static final ConnectionModelSet MIXER_SLURRY_PIPE = ConnectionModelSet.rotatedFromNorth(
             Industria.id("mixer_slurry_pipe"),

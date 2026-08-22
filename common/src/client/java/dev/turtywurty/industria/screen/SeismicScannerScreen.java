@@ -58,11 +58,11 @@ public class SeismicScannerScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         super.extractRenderState(context, mouseX, mouseY, delta);
-        context.text(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, this.y + 8, 0x404040, false);
+        context.text(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, this.y + 8, 0xFF404040, false);
 
         if (this.fluidPockets.isEmpty()) {
             extractMenuBackground(context);
-            context.text(this.font, Component.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFF, true);
+            context.text(this.font, Component.literal("No fluid pockets found"), this.width / 2, this.height / 2, 0xFFFFFFFF, true);
             return;
         }
 

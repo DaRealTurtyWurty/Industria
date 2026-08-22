@@ -1,13 +1,12 @@
 package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
-import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.client.ClientScreenHooks;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -96,23 +95,6 @@ public class WindTurbineBlock extends IndustriaBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide()) {
-            BlockPos blockEntityPos = pos;
-            if (state.getValue(PART) != 0) {
-                blockEntityPos = pos.below(state.getValue(PART));
-            }
-
-            if (player instanceof ServerPlayer serverPlayer &&
-                    level.getBlockEntity(blockEntityPos) instanceof WindTurbineBlockEntity windTurbine) {
-                windTurbine.openMenu(serverPlayer);
-            }
-        }
-
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
     public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (state.getValue(PART) != 0)
             return;
@@ -121,6 +103,15 @@ public class WindTurbineBlock extends IndustriaBlock {
             BlockPos blockPos = pos.above(i);
             world.setBlockAndUpdate(blockPos, state.setValue(PART, i));
         }
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide()) {
+            ClientScreenHooks.openWindTurbine(level, pos.below(state.getValue(PART)));
+        }
+
+        return InteractionResult.SUCCESS;
     }
 
     @Override

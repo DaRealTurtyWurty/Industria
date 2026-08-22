@@ -2,15 +2,12 @@ package dev.turtywurty.industria.blockentity;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.SolarPanelBlock;
-import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
-import dev.turtywurty.industria.menu.SolarPanelScreenHandler;
-import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
@@ -19,24 +16,20 @@ import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
-public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload> {
+public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader {
     public static final Component TITLE = Industria.containerTitle("solar_panel");
+    public static final Component ADVANCED_TITLE = Industria.containerTitle("advanced_solar_panel");
     public static final int BASIC_MAX_OUTPUT = 60;
     public static final int ADVANCED_MAX_OUTPUT = 160;
 
@@ -111,22 +104,6 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
         }
 
         spread(this.level, this.worldPosition, energyStorage);
-    }
-
-    @Override
-    public BlockPosPayload getMenuOpeningData(ServerPlayer player) {
-        return new BlockPosPayload(this.worldPosition);
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return TITLE;
-    }
-
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new SolarPanelScreenHandler(syncId, playerInventory, this);
     }
 
     @Override

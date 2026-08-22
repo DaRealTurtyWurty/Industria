@@ -25,14 +25,8 @@ public class ModMenuTypes {
     public static final ExtendedMenuRegistration<CombustionGeneratorScreenHandler, BlockPosPayload> COMBUSTION_GENERATOR =
             register("combustion_generator", CombustionGeneratorScreenHandler::new, BlockPosPayload.CODEC);
 
-    public static final ExtendedMenuRegistration<SolarPanelScreenHandler, BlockPosPayload> SOLAR_PANEL =
-            register("solar_panel", SolarPanelScreenHandler::new, BlockPosPayload.CODEC);
-
     public static final ExtendedMenuRegistration<CrusherScreenHandler, BlockPosPayload> CRUSHER =
             register("crusher", CrusherScreenHandler::new, BlockPosPayload.CODEC);
-
-    public static final ExtendedMenuRegistration<WindTurbineScreenHandler, BlockPosPayload> WIND_TURBINE =
-            register("wind_turbine", WindTurbineScreenHandler::new, BlockPosPayload.CODEC);
 
     public static final ExtendedMenuRegistration<OilPumpJackScreenHandler, BlockPosPayload> OIL_PUMP_JACK =
             register("oil_pump_jack", OilPumpJackScreenHandler::new, BlockPosPayload.CODEC);

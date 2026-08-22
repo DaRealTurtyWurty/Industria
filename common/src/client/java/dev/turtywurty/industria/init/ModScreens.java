@@ -9,9 +9,7 @@ public class ModScreens {
         ClientMenus.register(ModMenuTypes.THERMAL_GENERATOR, ThermalGeneratorScreen::new);
         ClientMenus.register(ModMenuTypes.BATTERY, BatteryScreen::new);
         ClientMenus.register(ModMenuTypes.COMBUSTION_GENERATOR, CombustionGeneratorScreen::new);
-        ClientMenus.register(ModMenuTypes.SOLAR_PANEL, SolarPanelScreen::new);
         ClientMenus.register(ModMenuTypes.CRUSHER, CrusherScreen::new);
-        ClientMenus.register(ModMenuTypes.WIND_TURBINE, WindTurbineScreen::new);
         ClientMenus.register(ModMenuTypes.OIL_PUMP_JACK, OilPumpJackScreen::new);
         ClientMenus.register(ModMenuTypes.DRILL, DrillScreen::new);
         ClientMenus.register(ModMenuTypes.MOTOR, MotorScreen::new);
