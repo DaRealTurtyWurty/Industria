@@ -22,6 +22,8 @@ import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
@@ -30,43 +32,24 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
 public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
-    private static final Direction[] CHECK_DIRECTIONS = {Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
+    private static final Direction[] HORIZONTAL_DIRECTIONS = {
+            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
+    };
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
+    private int nextDrainIndex;
 
     public FluidPumpBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.FLUID_PUMP.get(), ModBlockEntityTypes.FLUID_PUMP.get(), pos, state);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidAmounts.BUCKET * 10), Direction.EAST);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0), Direction.UP);
-    }
-
-    private static @Nullable FluidState getMostCommon(Map<Direction, FluidState> fluidStateMap) {
-        FluidState mostCommon = null;
-        int mostCommonCount = 0;
-
-        for (FluidState state : fluidStateMap.values()) {
-            int count = 0;
-            for (FluidState value : fluidStateMap.values()) {
-                if (value.getType() == state.getType())
-                    count++;
-            }
-
-            if (count > mostCommonCount) {
-                mostCommon = state;
-                mostCommonCount = count;
-            }
-        }
-
-        return mostCommon;
     }
 
     private static boolean isEmpty(SyncingFluidStorage storage) {
@@ -75,7 +58,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        return List.of((SyncableStorage) this.wrappedFluidStorage.getStorage(0), (SyncableStorage) this.wrappedEnergyStorage.getStorage(0));
+        return List.of(this.wrappedFluidStorage.getStorage(0), (SyncableStorage) this.wrappedEnergyStorage.getStorage(0));
     }
 
     @Override
@@ -101,53 +84,74 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
             }
         }
 
-        // check surrounding blocks for fluid
-        if (this.level.getGameTime() % 10 == 0) {
-            SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.UP);
-            if (energyStorage.getAmount() <= 10)
-                return;
+        if (this.level.getGameTime() % 10 != 0)
+            return;
 
-            Direction direction = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
-            Map<Direction, FluidState> fluidStateMap = new HashMap<>();
-            for (Direction checkDirection : CHECK_DIRECTIONS) {
-                Direction relative = MathUtils.getRelativeDirection(checkDirection, direction);
-                BlockPos checkPos = this.worldPosition.relative(relative);
-                FluidState fluidState = this.level.getFluidState(checkPos);
-                if (fluidState.isEmpty())
-                    break;
+        SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.UP);
+        if (energyStorage.getAmount() < 10
+                || fluidStorage.getCapacity() - fluidStorage.getAmount() < FluidAmounts.BUCKET)
+            return;
 
-                fluidStateMap.put(relative, fluidState);
-            }
+        Fluid surroundingFluid = getSurroundingFluid(fluidStorage);
+        if (surroundingFluid == null)
+            return;
 
-            long storedFluidAmount = fluidStorage.getAmount();
-            if (storedFluidAmount >= fluidStorage.getCapacity())
-                return;
+        DrainTarget drainTarget = findSourceBlock(surroundingFluid);
+        if (drainTarget == null)
+            return;
 
-            if (!fluidStateMap.isEmpty()) {
-                // find either a fluid that we can insert (assuming we're not empty) or the fluid that is the most common
-                if (isEmpty(fluidStorage)) {
-                    FluidState mostCommon = getMostCommon(fluidStateMap);
+        BlockPos sourcePos = drainTarget.pos();
+        BlockState sourceState = this.level.getBlockState(sourcePos);
+        if (!(sourceState.getBlock() instanceof BucketPickup bucketPickup))
+            return;
 
-                    if (mostCommon != null) {
-                        set(fluidStorage, ResourceTypes.FLUID.of(mostCommon.getType().builtInRegistryHolder()),
-                                Math.min(fluidStorage.getCapacity(), fluidStorage.getAmount() + FluidAmounts.BOTTLE));
-                    }
-                } else {
-                    for (FluidState state : fluidStateMap.values()) {
-                        if (state.getType() == fluidStorage.getResource().value()) {
-                            set(fluidStorage, fluidStorage.getResource(),
-                                    Math.min(fluidStorage.getCapacity(), fluidStorage.getAmount() + FluidAmounts.BOTTLE));
-                            break;
-                        }
-                    }
-                }
-            }
+        ItemStack pickedUp = bucketPickup.pickupBlock(null, this.level, sourcePos, sourceState);
+        if (pickedUp.isEmpty())
+            return;
 
-            if (storedFluidAmount != fluidStorage.getAmount()) {
-                extract(energyStorage, 10);
-                update();
+        this.nextDrainIndex = (drainTarget.index() + 1) % HORIZONTAL_DIRECTIONS.length;
+        FluidState sourceFluidState = sourceState.getFluidState();
+        ResourceVariant<Fluid> pumpedFluid = ResourceTypes.FLUID.of(sourceFluidState.getType().builtInRegistryHolder());
+        set(fluidStorage, pumpedFluid, fluidStorage.getAmount() + FluidAmounts.BUCKET);
+        extract(energyStorage, 10);
+        update();
+    }
+
+    private @Nullable Fluid getSurroundingFluid(SyncingFluidStorage fluidStorage) {
+        Fluid requiredFluid = isEmpty(fluidStorage) ? null : fluidStorage.getResource().value();
+
+        for (Direction direction : HORIZONTAL_DIRECTIONS) {
+            FluidState fluidState = this.level.getFluidState(this.worldPosition.relative(direction));
+            if (fluidState.isEmpty())
+                return null;
+
+            if (requiredFluid == null) {
+                requiredFluid = fluidState.getType();
+            } else if (!requiredFluid.isSame(fluidState.getType())) {
+                return null;
             }
         }
+
+        return requiredFluid;
+    }
+
+    private @Nullable DrainTarget findSourceBlock(Fluid requiredFluid) {
+        for (int checked = 0; checked < HORIZONTAL_DIRECTIONS.length; checked++) {
+            int index = (this.nextDrainIndex + checked) % HORIZONTAL_DIRECTIONS.length;
+            BlockPos candidate = this.worldPosition.relative(HORIZONTAL_DIRECTIONS[index]);
+
+            FluidState fluidState = this.level.getFluidState(candidate);
+            if (!fluidState.isSource() || !requiredFluid.isSame(fluidState.getType()))
+                continue;
+
+            BlockState state = this.level.getBlockState(candidate);
+            if (!(state.getBlock() instanceof BucketPickup))
+                continue;
+
+            return new DrainTarget(candidate, index);
+        }
+
+        return null;
     }
 
     @Override
@@ -186,5 +190,8 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         return MathUtils.getRelativeDirection(
                 Direction.EAST,
                 getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
+    }
+
+    private record DrainTarget(BlockPos pos, int index) {
     }
 }
