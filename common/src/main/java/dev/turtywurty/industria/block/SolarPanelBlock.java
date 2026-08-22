@@ -5,6 +5,7 @@ import dev.turtywurty.industria.client.ClientScreenHooks;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -78,6 +79,11 @@ public class SolarPanelBlock extends IndustriaBlock {
     protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks,
                                      BlockPos pos, Direction direction, BlockPos neighborPos,
                                      BlockState neighborState, RandomSource random) {
+        if (direction == Direction.DOWN && state.getValue(ON_STAIR) && !hasSolidGround(level, pos)) {
+            ticks.scheduleTick(pos, this, 1);
+            return state;
+        }
+
         BlockState updatedState = super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
         if (updatedState.is(Blocks.AIR) || direction != Direction.DOWN)
             return updatedState;
@@ -87,6 +93,13 @@ public class SolarPanelBlock extends IndustriaBlock {
         return onStair
                 ? updatedState.setValue(BlockStateProperties.HORIZONTAL_FACING, neighborState.getValue(StairBlock.FACING))
                 : updatedState;
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (state.getValue(ON_STAIR) && !hasSolidGround(level, pos)) {
+            level.destroyBlock(pos, true);
+        }
     }
 
     public boolean isAdvanced() {
