@@ -46,9 +46,6 @@ public class ModMenuTypes {
     public static final ExtendedMenuRegistration<InductionHeaterScreenHandler, BlockPosPayload> INDUCTION_HEATER =
             register("induction_heater", InductionHeaterScreenHandler::new, BlockPosPayload.CODEC);
 
-    public static final ExtendedMenuRegistration<FluidPumpScreenHandler, BlockPosPayload> FLUID_PUMP =
-            register("fluid_pump", FluidPumpScreenHandler::new, BlockPosPayload.CODEC);
-
     public static final ExtendedMenuRegistration<MixerScreenHandler, BlockPosPayload> MIXER =
             register("mixer", MixerScreenHandler::new, BlockPosPayload.CODEC);
 

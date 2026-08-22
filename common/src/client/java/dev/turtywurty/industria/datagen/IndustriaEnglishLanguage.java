@@ -84,7 +84,6 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, InductionHeaterBlockEntity.TITLE, "Induction Heater");
 
         translationBuilder.add(ModBlocks.FLUID_PUMP.get(), "Fluid Pump");
-        addText(translationBuilder, FluidPumpBlockEntity.TITLE, "Fluid Pump");
 
         translationBuilder.add(ModBlocks.MIXER.get(), "Mixer");
         addText(translationBuilder, MixerBlockEntity.TITLE, "Mixer");

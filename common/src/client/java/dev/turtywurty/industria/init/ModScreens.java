@@ -16,7 +16,6 @@ public class ModScreens {
         ClientMenus.register(ModMenuTypes.UPGRADE_STATION, UpgradeStationScreen::new);
         ClientMenus.register(ModMenuTypes.ELECTRIC_FURNACE, ElectricFurnaceScreen::new);
         ClientMenus.register(ModMenuTypes.INDUCTION_HEATER, InductionHeaterScreen::new);
-        ClientMenus.register(ModMenuTypes.FLUID_PUMP, FluidPumpScreen::new);
         ClientMenus.register(ModMenuTypes.MIXER, MixerScreen::new);
         ClientMenus.register(ModMenuTypes.DIGESTER, DigesterScreen::new);
         ClientMenus.register(ModMenuTypes.CLARIFIER, ClarifierScreen::new);

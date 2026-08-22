@@ -1,7 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
@@ -11,8 +9,6 @@ import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
-import dev.turtywurty.industria.menu.FluidPumpScreenHandler;
-import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.MathUtils;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -26,11 +22,6 @@ import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
@@ -46,9 +37,7 @@ import java.util.Map;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
-public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
-    public static final Component TITLE = Industria.containerTitle("fluid_pump");
-
+public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
     private static final Direction[] CHECK_DIRECTIONS = {Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -159,21 +148,6 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
                 update();
             }
         }
-    }
-
-    @Override
-    public BlockPosPayload getMenuOpeningData(ServerPlayer player) {
-        return new BlockPosPayload(this.worldPosition);
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return TITLE;
-    }
-
-    @Override
-    public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new FluidPumpScreenHandler(syncId, this);
     }
 
     @Override

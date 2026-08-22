@@ -1,17 +1,13 @@
 package dev.turtywurty.industria.block;
 
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
-import dev.turtywurty.industria.blockentity.FluidPumpBlockEntity;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -25,7 +21,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -168,20 +163,6 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
         return state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
                 ? RenderShape.MODEL
                 : RenderShape.INVISIBLE;
-    }
-
-    @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-                                               Player player, BlockHitResult hit) {
-        if (!level.isClientSide()) {
-            BlockPos controllerPos = getControllerPos(pos, state);
-            if (player instanceof ServerPlayer serverPlayer &&
-                    level.getBlockEntity(controllerPos) instanceof FluidPumpBlockEntity fluidPump) {
-                fluidPump.openMenu(serverPlayer);
-            }
-        }
-
-        return InteractionResult.SUCCESS;
     }
 
     @Override
