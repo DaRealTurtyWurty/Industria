@@ -27,8 +27,18 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public class SolarPanelBlock extends IndustriaBlock {
-    private static final VoxelShape VOXEL_SHAPE = createShape();
+    private static final Map<Direction, VoxelShape> SOLAR_PANEL_SHAPES =
+            createRotatedShapes(createSolarPanelShape());
+    private static final Map<Direction, VoxelShape> SOLAR_PANEL_STAIR_SHAPES =
+            createRotatedShapes(createSolarPanelStairShape());
+    private static final Map<Direction, VoxelShape> ADVANCED_SOLAR_PANEL_SHAPES =
+            createRotatedShapes(createAdvancedSolarPanelShape());
+    private static final Map<Direction, VoxelShape> ADVANCED_SOLAR_PANEL_STAIR_SHAPES =
+            createRotatedShapes(createAdvancedSolarPanelStairShape());
 
     public static final BooleanProperty ON_STAIR = BooleanProperty.create("on_stair");
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -36,15 +46,27 @@ public class SolarPanelBlock extends IndustriaBlock {
     private final boolean isAdvanced;
 
     public SolarPanelBlock(Properties settings, boolean isAdvanced) {
-        super(settings, new BlockProperties()
+        super(settings, createBlockProperties(isAdvanced));
+        this.isAdvanced = isAdvanced;
+    }
+
+    private static BlockProperties createBlockProperties(boolean isAdvanced) {
+        Map<Direction, VoxelShape> groundShapes = isAdvanced
+                ? ADVANCED_SOLAR_PANEL_SHAPES
+                : SOLAR_PANEL_SHAPES;
+        Map<Direction, VoxelShape> stairShapes = isAdvanced
+                ? ADVANCED_SOLAR_PANEL_STAIR_SHAPES
+                : SOLAR_PANEL_STAIR_SHAPES;
+
+        return new BlockProperties()
                 .hasHorizontalFacing()
                 .addStateProperty(ON_STAIR, false)
                 .addStateProperty(POWERED, false)
-                .useRotatedShapes(VOXEL_SHAPE)
+                .shapeFactory((state, _, _, _) -> (state.getValue(ON_STAIR) ? stairShapes : groundShapes)
+                        .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)))
                 .canExistAt(SolarPanelBlock::hasSolidGround)
                 .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.SOLAR_PANEL)
-                        .shouldTick()));
-        this.isAdvanced = isAdvanced;
+                        .shouldTick());
     }
 
     private static boolean hasSolidGround(LevelReader level, BlockPos pos) {
@@ -120,16 +142,90 @@ public class SolarPanelBlock extends IndustriaBlock {
         return this.isAdvanced ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
-    private static VoxelShape createShape() {
-        var shape = Shapes.empty();
-        shape = Shapes.join(shape, Shapes.box(0.125, 0, 0.1875, 0.875, 0.375, 0.8125), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.25, 0.375, 0.3125, 0.75, 0.6875, 0.6875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.0625, 0.625, 0.0625, 0.9375, 0.8125, 0.25), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.0625, 0.6875, 0.25, 0.9375, 0.875, 0.4375), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.0625, 0.75, 0.4375, 0.9375, 0.9375, 0.625), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.0625, 0.8125, 0.625, 0.9375, 1, 0.8125), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.25, 0.6875, 0.4375, 0.75, 0.75, 0.6875), BooleanOp.OR);
-        shape = Shapes.join(shape, Shapes.box(0.25, 0.75, 0.625, 0.75, 0.8125, 0.6875), BooleanOp.OR);
+    private static Map<Direction, VoxelShape> createRotatedShapes(VoxelShape shape) {
+        Map<Direction, VoxelShape> rotatedShapes = new EnumMap<>(Direction.class);
+        for (Direction direction : BlockStateProperties.HORIZONTAL_FACING.getPossibleValues()) {
+            rotatedShapes.put(direction, BlockProperties.calculateShape(direction, shape));
+        }
+
+        return rotatedShapes;
+    }
+
+    private static VoxelShape createSolarPanelShape() {
+        VoxelShape shape = Shapes.empty();
+        shape = Shapes.join(shape, Shapes.box(0.125, 0, 0.125, 0.875, 0.375, 0.875), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.875, 0.0625, 0.375, 1, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.4375, 0.375, 0.4375, 0.5625, 0.5625, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.0625, 0.375, 0.125, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.1875, 0.0625, 0.0625, 0.8125, 0.3125, 0.125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.78125, 0.09375, 0.78125, 0.90625, 0.15625, 0.90625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.78125, 0.21875, 0.78125, 0.90625, 0.28125, 0.90625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, 0.21875, 0.15625, 0.28125, 0.28125, 0.28125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, 0.09375, 0.15625, 0.28125, 0.15625, 0.28125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.40625, 0, 1, 0.71875, 1), BooleanOp.OR);
+
+        return shape.optimize();
+    }
+
+    private static VoxelShape createSolarPanelStairShape() {
+        VoxelShape shape = Shapes.empty();
+        shape = Shapes.join(shape, Shapes.box(0.875, 0.0625, 0.375, 1, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.4375, 0.125, 0.4375, 0.5625, 0.5625, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.0625, 0.375, 0.125, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.1875, -0.375, 0.4375, 0.8125, -0.125, 0.5), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, -0.21875, 0.53125, 0.28125, -0.15625, 0.65625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, -0.34375, 0.53125, 0.28125, -0.28125, 0.65625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.125, 0.0625, 0.375, 0.875, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.0625, 0, 0.5, 0.1875, 0.0625, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.8125, 0, 0.5, 0.9375, 0.0625, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.1875, 0.125, 1, 0.3125, 0.25), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.3125, 0.25, 1, 0.4375, 0.375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.4375, 0.375, 1, 0.5625, 0.5), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.5625, 0.5, 1, 0.6875, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.6875, 0.625, 1, 0.8125, 0.75), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.8125, 0.75, 1, 0.9375, 0.875), BooleanOp.OR);
+
+        return shape.optimize();
+    }
+
+    private static VoxelShape createAdvancedSolarPanelShape() {
+        VoxelShape shape = Shapes.empty();
+        shape = Shapes.join(shape, Shapes.box(0.125, 0, 0.125, 0.875, 0.375, 0.875), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.875, 0.0625, 0.375, 1, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.4375, 0.375, 0.4375, 0.5625, 0.5, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.8125, 0, 1, 0.9375, 1), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.0625, 0.375, 0.125, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.1875, 0.0625, 0.0625, 0.8125, 0.3125, 0.125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.78125, 0.09375, 0.78125, 0.90625, 0.15625, 0.90625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.78125, 0.21875, 0.78125, 0.90625, 0.28125, 0.90625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, 0.21875, 0.15625, 0.28125, 0.28125, 0.28125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, 0.09375, 0.15625, 0.28125, 0.15625, 0.28125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.5, 0.4375, 1, 0.625, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.9375, 0.625, 0.4375, 1, 0.8125, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.625, 0.4375, 0.0625, 0.8125, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(-0.03125, 0.78125, 0.40625, 0.09375, 0.96875, 0.59375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.90625, 0.78125, 0.40625, 1.03125, 0.96875, 0.59375), BooleanOp.OR);
+
+        return shape.optimize();
+    }
+
+    private static VoxelShape createAdvancedSolarPanelStairShape() {
+        VoxelShape shape = Shapes.empty();
+        shape = Shapes.join(shape, Shapes.box(0.875, 0.0625, 0.375, 1, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.4375, 0.3125, 0.4375, 0.5625, 0.5, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.8125, 0, 1, 0.9375, 1), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.0625, 0.375, 0.125, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.1875, -0.375, 0.4375, 0.8125, -0.125, 0.5), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, -0.21875, 0.53125, 0.28125, -0.15625, 0.65625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.15625, -0.34375, 0.53125, 0.28125, -0.28125, 0.65625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.5, 0.4375, 1, 0.625, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.9375, 0.625, 0.4375, 1, 0.8125, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0, 0.625, 0.4375, 0.0625, 0.8125, 0.5625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(-0.03125, 0.78125, 0.40625, 0.09375, 0.96875, 0.59375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.90625, 0.78125, 0.40625, 1.03125, 0.96875, 0.59375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.125, 0.0625, 0.375, 0.875, 0.3125, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.0625, 0, 0.5, 0.1875, 0.0625, 0.625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.8125, 0, 0.5, 0.9375, 0.0625, 0.625), BooleanOp.OR);
 
         return shape.optimize();
     }
