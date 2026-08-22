@@ -17,7 +17,7 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "extractSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;isFake()Z"))
+    @Inject(method = "extractSlot", at = @At("HEAD"))
     private void industria$drawSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (DebugRenderingRegistry.debugRendering) {
             String text = String.valueOf(slot.index);

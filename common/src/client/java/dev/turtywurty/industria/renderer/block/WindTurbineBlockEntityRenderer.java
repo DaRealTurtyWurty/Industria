@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +44,17 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
                 light, overlay, 0, state.breakProgress);
     }
 
+    @Override
+    public boolean shouldRender(WindTurbineBlockEntity blockEntity, Vec3 cameraPos) {
+        AABB renderBounds = getWindTurbineRenderBounds(blockEntity);
+        double viewDistance = getViewDistance();
+        return distanceToSqr(renderBounds, cameraPos) < viewDistance * viewDistance;
+    }
+
+    public AABB getRenderBoundingBox(WindTurbineBlockEntity blockEntity) {
+        return getWindTurbineRenderBounds(blockEntity);
+    }
+
     public long getEnergyPerTick(WindTurbineRenderState state) {
         return state.energyOutput;
     }
@@ -53,5 +65,16 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
             return 0.0F;
 
         return Mth.clamp((float) output / 500.0F, 0.0F, 1.0F);
+    }
+
+    private static AABB getWindTurbineRenderBounds(WindTurbineBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).inflate(2.0D, 0.0D, 2.0D).expandTowards(0.0D, 4.0D, 0.0D);
+    }
+
+    private static double distanceToSqr(AABB bounds, Vec3 pos) {
+        double dx = Math.max(Math.max(bounds.minX - pos.x, 0.0D), pos.x - bounds.maxX);
+        double dy = Math.max(Math.max(bounds.minY - pos.y, 0.0D), pos.y - bounds.maxY);
+        double dz = Math.max(Math.max(bounds.minZ - pos.z, 0.0D), pos.z - bounds.maxZ);
+        return dx * dx + dy * dy + dz * dz;
     }
 }

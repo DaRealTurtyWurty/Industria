@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -151,6 +152,26 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             state.multiblockRenderOffsetX = offset.x;
             state.multiblockRenderOffsetZ = offset.z;
         }
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldRender(T blockEntity, Vec3 cameraPos) {
+        AABB renderBounds = createMultiblockRenderBounds(blockEntity);
+        if (renderBounds == null)
+            return BlockEntityRenderer.super.shouldRender(blockEntity, cameraPos);
+
+        double viewDistance = getViewDistance();
+        return distanceToSqr(renderBounds, cameraPos) < viewDistance * viewDistance;
+    }
+
+    public AABB getRenderBoundingBox(T blockEntity) {
+        AABB renderBounds = createMultiblockRenderBounds(blockEntity);
+        return renderBounds != null ? renderBounds : new AABB(blockEntity.getBlockPos());
     }
 
     public static boolean shouldRenderHitboxes() {
@@ -381,6 +402,90 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
             return computeLegacyMultiblockRenderOffset(level, blockEntity.getBlockPos(), multiblockable.getMultiblockPositions());
 
         return Vec3.ZERO;
+    }
+
+    private static AABB createMultiblockRenderBounds(final BlockEntity blockEntity) {
+        if (!isMultiblockFormed(blockEntity))
+            return null;
+
+        Level level = blockEntity.getLevel();
+        BlockPos controllerPos = blockEntity.getBlockPos();
+        if (blockEntity instanceof MultiblockControllerBlockEntity controller)
+            return createLibMultiblockRenderBounds(controllerPos, controller.getParts());
+
+        if (level != null && blockEntity instanceof AutoMultiblockable multiblockable)
+            return createLegacyMultiblockRenderBounds(level, controllerPos, multiblockable.getMultiblockPositions());
+
+        return null;
+    }
+
+    private static AABB createLibMultiblockRenderBounds(final BlockPos controllerPos, final List<MultiblockPartEntry> parts) {
+        if (parts.isEmpty())
+            return null;
+
+        int minX = 0;
+        int minY = 0;
+        int minZ = 0;
+        int maxX = 1;
+        int maxY = 1;
+        int maxZ = 1;
+        for (MultiblockPartEntry entry : parts) {
+            BlockPos offset = entry.offset();
+            minX = Math.min(minX, offset.getX());
+            minY = Math.min(minY, offset.getY());
+            minZ = Math.min(minZ, offset.getZ());
+            maxX = Math.max(maxX, offset.getX() + 1);
+            maxY = Math.max(maxY, offset.getY() + 1);
+            maxZ = Math.max(maxZ, offset.getZ() + 1);
+        }
+
+        return new AABB(
+                controllerPos.getX() + minX,
+                controllerPos.getY() + minY,
+                controllerPos.getZ() + minZ,
+                controllerPos.getX() + maxX,
+                controllerPos.getY() + maxY,
+                controllerPos.getZ() + maxZ
+        ).inflate(2.0D);
+    }
+
+    private static AABB createLegacyMultiblockRenderBounds(final Level level, final BlockPos controllerPos, final List<BlockPos> positions) {
+        if (positions.isEmpty())
+            return null;
+
+        int minX = controllerPos.getX();
+        int minY = controllerPos.getY();
+        int minZ = controllerPos.getZ();
+        int maxX = controllerPos.getX() + 1;
+        int maxY = controllerPos.getY() + 1;
+        int maxZ = controllerPos.getZ() + 1;
+        boolean foundPart = false;
+
+        for (BlockPos pos : positions) {
+            BlockState state = level.getBlockState(pos);
+            if (!(state.is(ModBlocks.AUTO_MULTIBLOCK_BLOCK.get()) || state.is(ModBlocks.AUTO_MULTIBLOCK_IO.get()) || state.is(MultiblockLib.MULTIBLOCK_PART)))
+                continue;
+
+            foundPart = true;
+            minX = Math.min(minX, pos.getX());
+            minY = Math.min(minY, pos.getY());
+            minZ = Math.min(minZ, pos.getZ());
+            maxX = Math.max(maxX, pos.getX() + 1);
+            maxY = Math.max(maxY, pos.getY() + 1);
+            maxZ = Math.max(maxZ, pos.getZ() + 1);
+        }
+
+        if (!foundPart)
+            return null;
+
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ).inflate(2.0D);
+    }
+
+    private static double distanceToSqr(final AABB bounds, final Vec3 pos) {
+        double dx = Math.max(Math.max(bounds.minX - pos.x, 0.0D), pos.x - bounds.maxX);
+        double dy = Math.max(Math.max(bounds.minY - pos.y, 0.0D), pos.y - bounds.maxY);
+        double dz = Math.max(Math.max(bounds.minZ - pos.z, 0.0D), pos.z - bounds.maxZ);
+        return dx * dx + dy * dy + dz * dz;
     }
 
     private static Vec3 computeLibMultiblockRenderOffset(final List<MultiblockPartEntry> parts) {
