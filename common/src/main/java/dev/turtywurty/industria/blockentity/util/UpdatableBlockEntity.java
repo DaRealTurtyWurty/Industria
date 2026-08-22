@@ -30,6 +30,7 @@ public class UpdatableBlockEntity extends BlockEntity implements UpdateableBlock
     }
 
     public void update() {
+        setChanged();
         this.isDirty = true;
         if (!shouldWaitForEndTick()) {
             forceUpdate();
@@ -47,8 +48,11 @@ public class UpdatableBlockEntity extends BlockEntity implements UpdateableBlock
     }
 
     public void forceUpdate() {
+        if (!this.isDirty) {
+            setChanged();
+        }
+
         this.isDirty = false;
-        setChanged(); // TODO: Check that this doesn't do a block update (I think it just marks dirty but not sure)
 
         if (this.level != null && !this.level.isClientSide()) {
             this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);

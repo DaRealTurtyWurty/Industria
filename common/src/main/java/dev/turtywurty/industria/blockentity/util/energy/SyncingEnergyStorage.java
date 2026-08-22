@@ -18,6 +18,7 @@ public class SyncingEnergyStorage extends SimpleEnergyStorage implements Syncabl
     protected void onFinalCommit() {
         super.onFinalCommit();
         this.isDirty = true;
+        sync();
     }
 
     @Override

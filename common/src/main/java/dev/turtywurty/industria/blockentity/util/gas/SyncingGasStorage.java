@@ -32,6 +32,7 @@ public class SyncingGasStorage extends SingleGasStorage implements SyncableStora
     protected void onFinalCommit() {
         super.onFinalCommit();
         this.isDirty = true;
+        sync();
     }
 
     @Override

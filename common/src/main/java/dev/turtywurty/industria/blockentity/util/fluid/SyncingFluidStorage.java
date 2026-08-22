@@ -35,6 +35,7 @@ public class SyncingFluidStorage extends SimpleSingleSlotStorage<ResourceVariant
     protected void onFinalCommit() {
         super.onFinalCommit();
         this.isDirty = true;
+        sync();
     }
 
     @Override
@@ -61,5 +62,6 @@ public class SyncingFluidStorage extends SimpleSingleSlotStorage<ResourceVariant
 
     public void markDirty() {
         this.isDirty = true;
+        sync();
     }
 }

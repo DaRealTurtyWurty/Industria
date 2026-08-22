@@ -73,6 +73,7 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
 
     @Override
     public void update() {
+        setChanged();
         this.isDirty = true;
         if (!shouldWaitForEndTick()) {
             forceUpdate();
@@ -93,8 +94,11 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
 
     @Override
     public void forceUpdate() {
+        if (!this.isDirty) {
+            setChanged();
+        }
+
         this.isDirty = false;
-        setChanged();
 
         if (this.level != null && !this.level.isClientSide()) {
             this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);

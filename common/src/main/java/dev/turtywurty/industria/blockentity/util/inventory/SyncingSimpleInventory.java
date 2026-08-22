@@ -32,6 +32,7 @@ public class SyncingSimpleInventory extends RecipeSimpleInventory implements Syn
     public void setChanged() {
         super.setChanged();
         this.isDirty = true;
+        sync();
     }
 
     public UpdateableBlockEntityLike getBlockEntity() {

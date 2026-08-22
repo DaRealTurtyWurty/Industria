@@ -283,8 +283,8 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         super.saveAdditional(view);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
-        this.wrappedSlurryStorage.writeData(view.child("FluidTank"));
-        this.wrappedFluidStorage.writeData(view.child("SlurryTank"));
+        ViewUtils.putChild(view, "SlurryTank", this.wrappedSlurryStorage);
+        ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 

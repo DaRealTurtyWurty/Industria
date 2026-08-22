@@ -32,6 +32,7 @@ public class SyncingSlurryStorage extends SingleSlurryStorage implements Syncabl
     protected void onFinalCommit() {
         super.onFinalCommit();
         this.isDirty = true;
+        sync();
     }
 
     @Override
