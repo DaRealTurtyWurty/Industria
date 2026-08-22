@@ -2,6 +2,7 @@ package dev.turtywurty.industria.datagen.builder;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -132,25 +133,25 @@ public class BuiltinEntityModelBuilder {
 
                 if(displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0 || displaySetting.rotation.z != 0) {
                     var rotation = new JsonArray();
-                    rotation.add(displaySetting.rotation.x);
-                    rotation.add(displaySetting.rotation.y);
-                    rotation.add(displaySetting.rotation.z);
+                    rotation.add(new JsonPrimitive(displaySetting.rotation.x));
+                    rotation.add(new JsonPrimitive(displaySetting.rotation.y));
+                    rotation.add(new JsonPrimitive(displaySetting.rotation.z));
                     displayObject.add("rotation", rotation);
                 }
 
                 if(displaySetting.translation.x != 0 || displaySetting.translation.y != 0 || displaySetting.translation.z != 0) {
                     var translation = new JsonArray();
-                    translation.add(displaySetting.translation.x);
-                    translation.add(displaySetting.translation.y);
-                    translation.add(displaySetting.translation.z);
+                    translation.add(new JsonPrimitive(displaySetting.translation.x));
+                    translation.add(new JsonPrimitive(displaySetting.translation.y));
+                    translation.add(new JsonPrimitive(displaySetting.translation.z));
                     displayObject.add("translation", translation);
                 }
 
                 if(displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
                     var scale = new JsonArray();
-                    scale.add(displaySetting.scale.x);
-                    scale.add(displaySetting.scale.y);
-                    scale.add(displaySetting.scale.z);
+                    scale.add(new JsonPrimitive(displaySetting.scale.x));
+                    scale.add(new JsonPrimitive(displaySetting.scale.y));
+                    scale.add(new JsonPrimitive(displaySetting.scale.z));
                     displayObject.add("scale", scale);
                 }
 
