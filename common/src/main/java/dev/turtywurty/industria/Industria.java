@@ -37,7 +37,6 @@ public class Industria {
     public static void onInitialize() {
         LOGGER.info("Loading Industria...");
 
-        IndustriaRegistries.init();
         ModItems.init();
         ModBlocks.init();
         ModBlockEntityTypes.init();
@@ -55,7 +54,6 @@ public class Industria {
         ModDataComponentTypes.init();
         ModEntityTypes.init();
         ModRecipeBookCategories.init();
-        ModMultiblockTypes.init();
         ModSlurries.init();
         ModGases.init();
         ModWoodSets.init();

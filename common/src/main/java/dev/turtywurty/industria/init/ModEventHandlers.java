@@ -5,7 +5,6 @@ import dev.turtywurty.industria.command.ResetConveyorNetworksCommand;
 import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.consumeeffect.DestroyStomachConsumeEffect;
 import dev.turtywurty.industria.menu.base.TickableScreenHandler;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
@@ -55,8 +54,6 @@ public class ModEventHandlers {
         });
 
         Events.onStartLevelTick(level -> {
-            AutoMultiblockBlock.SHAPE_CACHE.clear();
-
             for (PipeNetworkManager<?, ?> manager : WorldPipeNetworks.getOrCreate(level).getPipeNetworkManagers()) {
                 manager.tick(level);
             }

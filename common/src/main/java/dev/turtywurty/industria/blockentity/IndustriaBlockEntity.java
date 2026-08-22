@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
 import dev.turtywurty.industria.blockentity.util.UpdatableBlockEntity;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -31,18 +30,8 @@ public abstract class IndustriaBlockEntity extends UpdatableBlockEntity {
         if (isSameBlock)
             return;
 
-        if (blockRef.multiblockType != null) {
-            removeMultiblockOnBreak();
-        }
-
         if (blockRef.dropContentsOnBreak) {
             dropContentsOnBreak();
-        }
-    }
-
-    protected void removeMultiblockOnBreak() {
-        if (this instanceof AutoMultiblockable multiblockable && !multiblockable.getMultiblockPositions().isEmpty()) {
-            this.blockRef.multiblockType.onMultiblockBreak(level, worldPosition);
         }
     }
 

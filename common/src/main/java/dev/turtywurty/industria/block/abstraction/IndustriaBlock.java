@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Function4;
 import dev.turtywurty.industria.block.abstraction.state.StateProperties;
 import dev.turtywurty.industria.block.abstraction.state.StateProperty;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
-import dev.turtywurty.industria.multiblock.old.MultiblockType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,7 +53,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
     public final Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput;
     public final RenderShape renderType;
     public final ShapeFactory shapeFactory;
-    public final MultiblockType<?> multiblockType;
     public final boolean rightClickToOpenGui;
     public final BiPredicate<LevelReader, BlockPos> canExistAt;
     public final Map<Direction, VoxelShape> cachedDirectionalShapes;
@@ -84,17 +82,11 @@ public class IndustriaBlock extends Block implements EntityBlock {
             this.rightClickToOpenGui = properties.blockEntityProperties.rightClickToOpenGui;
             this.dropContentsOnBreak = properties.blockEntityProperties.dropContentsOnBreak;
 
-            if (properties.blockEntityProperties.multiblockProperties != null) {
-                this.multiblockType = properties.blockEntityProperties.multiblockProperties.type;
-            } else {
-                this.multiblockType = null;
-            }
         } else {
             this.blockEntityTypeSupplier = null;
             this.shouldTick = false;
             this.blockEntityFactory = null;
             this.blockEntityTicker = null;
-            this.multiblockType = null;
             this.rightClickToOpenGui = false;
             this.dropContentsOnBreak = false;
         }
@@ -206,14 +198,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (this.multiblockType != null) {
-            if (!level.isClientSide()) {
-                this.multiblockType.onPrimaryBlockUse(level, player, hit, pos);
-            }
-
-            return InteractionResult.SUCCESS;
-        }
-
         if (this.rightClickToOpenGui) {
             if (!level.isClientSide()) {
                 BlockEntity blockEntity = level.getBlockEntity(pos);
@@ -456,7 +440,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
             public boolean shouldTick = false;
             public BlockEntityFactory<T> blockEntityFactory;
             public BlockEntityTickerFactory<T> blockEntityTicker = (world, state, type) -> TickableBlockEntity.createTicker(world);
-            public MultiblockProperties<T> multiblockProperties;
             public boolean rightClickToOpenGui = false;
             public boolean dropContentsOnBreak = false;
 
@@ -490,10 +473,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 return this;
             }
 
-            public MultiblockProperties<T> multiblockProperties(MultiblockType<T> type) {
-                return new MultiblockProperties<>(this, type);
-            }
-
             public BlockBlockEntityProperties<T> rightClickToOpenGui() {
                 return rightClickToOpenGui(true);
             }
@@ -512,20 +491,6 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 return this;
             }
 
-            public static class MultiblockProperties<T extends BlockEntity> {
-                private final BlockBlockEntityProperties<T> blockEntityProperties;
-                private final MultiblockType<T> type;
-
-                public MultiblockProperties(BlockBlockEntityProperties<T> blockEntityProperties, MultiblockType<T> type) {
-                    this.blockEntityProperties = blockEntityProperties;
-                    this.type = type;
-                }
-
-                public BlockBlockEntityProperties<T> build() {
-                    this.blockEntityProperties.multiblockProperties = this;
-                    return this.blockEntityProperties;
-                }
-            }
         }
     }
 }

@@ -10,7 +10,6 @@ import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.WrappedFluidStorage;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.SimpleContainer;
@@ -44,13 +43,7 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
         }
 
         BlockState newState = level.getBlockState(pos);
-        if (blockRef.multiblockType != null) {
-            if (!oldState.is(newState.getBlock())) {
-                if (this instanceof AutoMultiblockable multiblockable && !multiblockable.getMultiblockPositions().isEmpty()) {
-                    blockRef.multiblockType.onMultiblockBreak(level, pos);
-                }
-            }
-        } else if (blockRef.dropContentsOnBreak) {
+        if (blockRef.dropContentsOnBreak) {
             if (!oldState.is(newState.getBlock())) {
                 if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component access maybe?
                     blockEntityWithInventory.dropContents(level, pos);

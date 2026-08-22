@@ -40,7 +40,7 @@ public class BlockBuilderDrillHeadItem extends Item implements DrillHeadable {
         }
 
         boolean isThis = false;
-        if (state.is(ModBlocks.AUTO_MULTIBLOCK_BLOCK.get()) || state.is(ModBlocks.DRILL.get())) {
+        if (state.is(ModBlocks.DRILL.get())) {
             drillYOffset -= 0.1F;
             isThis = true;
         }

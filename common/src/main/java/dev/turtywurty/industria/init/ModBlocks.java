@@ -3,8 +3,6 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.*;
 import dev.turtywurty.industria.conveyor.block.impl.*;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockIOBlock;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
 import dev.turtywurty.turtymultiloader.registration.VanillaBlockPredicates;
@@ -229,12 +227,6 @@ public class ModBlocks {
 
     public static final RegistrationHandle<Block, DigesterBlock> DIGESTER = registerWithItemCopy("digester",
             DigesterBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
-
-    public static final RegistrationHandle<Block, AutoMultiblockBlock> AUTO_MULTIBLOCK_BLOCK = registerWithCopy("auto_multiblock",
-            AutoMultiblockBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
-
-    public static final RegistrationHandle<Block, AutoMultiblockIOBlock> AUTO_MULTIBLOCK_IO = registerWithCopy("auto_multiblock_io",
-            AutoMultiblockIOBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final RegistrationHandle<Block, ClarifierBlock> CLARIFIER = registerWithItemCopy("clarifier",
             ClarifierBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);

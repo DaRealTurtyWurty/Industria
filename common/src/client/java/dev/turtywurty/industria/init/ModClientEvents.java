@@ -1,7 +1,6 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEntity;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
 import dev.turtywurty.industria.renderer.block.RotaryKilnBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.conveyor.FeederConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.HatchConveyorSpecialRenderer;
@@ -15,7 +14,6 @@ import dev.turtywurty.turtymultiloader.event.client.RenderStage;
 public class ModClientEvents {
     public static void init() {
         ClientEvents.onStartLevelTick(level -> {
-            AutoMultiblockBlock.SHAPE_CACHE.clear();
             FeederConveyorSpecialRenderer.INSTANCE.onTick(level);
             HatchConveyorSpecialRenderer.INSTANCE.onTick(level);
         });

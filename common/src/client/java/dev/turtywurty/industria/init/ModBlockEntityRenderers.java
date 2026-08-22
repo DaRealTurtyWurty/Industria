@@ -14,7 +14,6 @@ public class ModBlockEntityRenderers {
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.UPGRADE_STATION, UpgradeStationBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.MIXER, MixerBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.DIGESTER, DigesterBlockEntityRenderer::new);
-        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.AUTO_MULTIBLOCK_IO, MultiblockIOBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CLARIFIER, ClarifierBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CRYSTALLIZER, CrystallizerBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.ROTARY_KILN_CONTROLLER, RotaryKilnBlockEntityRenderer::new);

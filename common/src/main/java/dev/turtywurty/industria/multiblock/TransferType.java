@@ -3,7 +3,6 @@ package dev.turtywurty.industria.multiblock;
 import com.mojang.serialization.Codec;
 import dev.turtywurty.gasapi.api.Gas;
 import dev.turtywurty.gasapi.api.storage.GasStorage;
-import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.multiblocklib.port.PortTransfer;
 import dev.turtywurty.slurryapi.api.Slurry;
 import dev.turtywurty.slurryapi.api.storage.SlurryStorage;
@@ -157,14 +156,6 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
 
     public String getName() {
         return this.name;
-    }
-
-    public void registerForMultiblockIo() {
-        TransferService.get().registerBlockEntityProvider(
-                this.lookup,
-                ModBlockEntityTypes.AUTO_MULTIBLOCK_IO,
-                (blockEntity, direction) -> blockEntity.getProvider(this, direction)
-        );
     }
 
     public void pushTo(Level level, BlockPos primaryPos, BlockPos secondaryPos, @Nullable Direction side) {

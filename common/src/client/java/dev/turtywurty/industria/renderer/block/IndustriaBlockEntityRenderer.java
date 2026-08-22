@@ -3,13 +3,9 @@ package dev.turtywurty.industria.renderer.block;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.mixin.ModelPartAccessor;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockBlock;
-import dev.turtywurty.industria.multiblock.old.AutoMultiblockable;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
-import dev.turtywurty.multiblocklib.MultiblockLib;
 import dev.turtywurty.multiblocklib.block.entity.MultiblockControllerBlockEntity;
 import dev.turtywurty.multiblocklib.data.MultiblockPartEntry;
 import net.minecraft.client.Minecraft;
@@ -148,7 +144,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         }
 
         if (state.multiblockFormed && level != null && blockEntity instanceof MultiblockControllerBlockEntity) {
-            Vec3 offset = computeMultiblockRenderOffset(level, blockEntity);
+            Vec3 offset = computeMultiblockRenderOffset(blockEntity);
             state.multiblockRenderOffsetX = offset.x;
             state.multiblockRenderOffsetZ = offset.z;
         }
@@ -310,9 +306,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
      * <p>
      * This method uses the client crosshair target to determine if the player is looking at the block entity.
      * It achieves this by checking if the crosshair target is a block hit result and if the block position of the
-     * hit result is equal to the block entity position. If the block position is not equal to the block entity
-     * position, it will check if the block at the hit position is a multiblock block and if the primary position
-     * of the multiblock is equal to the block entity position.
+     * hit result is equal to the block entity position.
      * </p>
      *
      * @param bePos The block entity position
@@ -325,20 +319,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         if (hitResult.getType() == HitResult.Type.MISS)
             return false;
 
-        BlockPos hitPos = hitResult.getBlockPos();
-        if (Objects.equals(hitPos, bePos))
-            return true;
-
-        Level world = Minecraft.getInstance().level;
-        if (world == null)
-            return false;
-
-        BlockState state = world.getBlockState(hitPos);
-        if (state.isAir() || !state.is(ModBlocks.AUTO_MULTIBLOCK_BLOCK.get()) || !world.getWorldBorder().isWithinBounds(hitPos))
-            return false;
-
-        BlockPos primaryPos = AutoMultiblockBlock.getPrimaryPos(world, hitPos);
-        return Objects.equals(primaryPos, bePos);
+        return Objects.equals(hitResult.getBlockPos(), bePos);
     }
 
     /**
@@ -367,39 +348,15 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     private static boolean isMultiblockFormed(final BlockEntity blockEntity) {
-        Level level = blockEntity.getLevel();
-        if (level == null)
-            return false;
-
         if (blockEntity instanceof MultiblockControllerBlockEntity controller)
             return controller.isFormed();
 
-        if (!(blockEntity instanceof AutoMultiblockable multiblockable))
-            return true;
-
-        List<BlockPos> positions = multiblockable.getMultiblockPositions();
-        if (positions.isEmpty())
-            return false;
-
-        return hasFormedLegacyMultiblockPart(level, positions);
+        return true;
     }
 
-    private static boolean hasFormedLegacyMultiblockPart(final Level level, final List<BlockPos> positions) {
-        for (BlockPos pos : positions) {
-            BlockState state = level.getBlockState(pos);
-            if (state.is(ModBlocks.AUTO_MULTIBLOCK_BLOCK.get()) || state.is(ModBlocks.AUTO_MULTIBLOCK_IO.get()) || state.is(MultiblockLib.MULTIBLOCK_PART))
-                return true;
-        }
-
-        return false;
-    }
-
-    private static Vec3 computeMultiblockRenderOffset(final Level level, final BlockEntity blockEntity) {
+    private static Vec3 computeMultiblockRenderOffset(final BlockEntity blockEntity) {
         if (blockEntity instanceof MultiblockControllerBlockEntity controller)
             return computeLibMultiblockRenderOffset(controller.getParts());
-
-        if (blockEntity instanceof AutoMultiblockable multiblockable)
-            return computeLegacyMultiblockRenderOffset(level, blockEntity.getBlockPos(), multiblockable.getMultiblockPositions());
 
         return Vec3.ZERO;
     }
@@ -408,13 +365,9 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         if (!isMultiblockFormed(blockEntity))
             return null;
 
-        Level level = blockEntity.getLevel();
         BlockPos controllerPos = blockEntity.getBlockPos();
         if (blockEntity instanceof MultiblockControllerBlockEntity controller)
             return createLibMultiblockRenderBounds(controllerPos, controller.getParts());
-
-        if (level != null && blockEntity instanceof AutoMultiblockable multiblockable)
-            return createLegacyMultiblockRenderBounds(level, controllerPos, multiblockable.getMultiblockPositions());
 
         return null;
     }
@@ -449,38 +402,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         ).inflate(2.0D);
     }
 
-    private static AABB createLegacyMultiblockRenderBounds(final Level level, final BlockPos controllerPos, final List<BlockPos> positions) {
-        if (positions.isEmpty())
-            return null;
-
-        int minX = controllerPos.getX();
-        int minY = controllerPos.getY();
-        int minZ = controllerPos.getZ();
-        int maxX = controllerPos.getX() + 1;
-        int maxY = controllerPos.getY() + 1;
-        int maxZ = controllerPos.getZ() + 1;
-        boolean foundPart = false;
-
-        for (BlockPos pos : positions) {
-            BlockState state = level.getBlockState(pos);
-            if (!(state.is(ModBlocks.AUTO_MULTIBLOCK_BLOCK.get()) || state.is(ModBlocks.AUTO_MULTIBLOCK_IO.get()) || state.is(MultiblockLib.MULTIBLOCK_PART)))
-                continue;
-
-            foundPart = true;
-            minX = Math.min(minX, pos.getX());
-            minY = Math.min(minY, pos.getY());
-            minZ = Math.min(minZ, pos.getZ());
-            maxX = Math.max(maxX, pos.getX() + 1);
-            maxY = Math.max(maxY, pos.getY() + 1);
-            maxZ = Math.max(maxZ, pos.getZ() + 1);
-        }
-
-        if (!foundPart)
-            return null;
-
-        return new AABB(minX, minY, minZ, maxX, maxY, maxZ).inflate(2.0D);
-    }
-
     private static double distanceToSqr(final AABB bounds, final Vec3 pos) {
         double dx = Math.max(Math.max(bounds.minX - pos.x, 0.0D), pos.x - bounds.maxX);
         double dy = Math.max(Math.max(bounds.minY - pos.y, 0.0D), pos.y - bounds.maxY);
@@ -507,36 +428,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         double centerX = (minX + maxX) * 0.5D;
         double centerZ = (minZ + maxZ) * 0.5D;
         return new Vec3(centerX, 0.0D, centerZ);
-    }
-
-    private static Vec3 computeLegacyMultiblockRenderOffset(final Level level, final BlockPos controllerPos, final List<BlockPos> positions) {
-        if (positions.isEmpty())
-            return Vec3.ZERO;
-
-        int minX = controllerPos.getX();
-        int maxX = controllerPos.getX();
-        int minZ = controllerPos.getZ();
-        int maxZ = controllerPos.getZ();
-        boolean foundPart = false;
-
-        for (BlockPos pos : positions) {
-            BlockState state = level.getBlockState(pos);
-            if (!(state.is(ModBlocks.AUTO_MULTIBLOCK_BLOCK.get()) || state.is(ModBlocks.AUTO_MULTIBLOCK_IO.get()) || state.is(MultiblockLib.MULTIBLOCK_PART)))
-                continue;
-
-            foundPart = true;
-            minX = Math.min(minX, pos.getX());
-            maxX = Math.max(maxX, pos.getX());
-            minZ = Math.min(minZ, pos.getZ());
-            maxZ = Math.max(maxZ, pos.getZ());
-        }
-
-        if (!foundPart)
-            return Vec3.ZERO;
-
-        double centerX = (minX + maxX) * 0.5D;
-        double centerZ = (minZ + maxZ) * 0.5D;
-        return new Vec3(centerX - controllerPos.getX(), 0.0D, centerZ - controllerPos.getZ());
     }
 
     public final void renderForItem(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {

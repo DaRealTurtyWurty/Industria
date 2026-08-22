@@ -67,9 +67,6 @@ public class ModBlockEntityTypes {
     public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<DigesterBlockEntity>> DIGESTER = register("digester",
             DigesterBlockEntity::new, builder -> builder.validBlock(ModBlocks.DIGESTER));
 
-    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<MultiblockIOBlockEntity>> AUTO_MULTIBLOCK_IO = register("multiblock_io",
-            MultiblockIOBlockEntity::new, builder -> builder.validBlock(ModBlocks.AUTO_MULTIBLOCK_IO));
-
     public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<ClarifierBlockEntity>> CLARIFIER = register("clarifier",
             ClarifierBlockEntity::new, builder -> builder.validBlock(ModBlocks.CLARIFIER));
 
