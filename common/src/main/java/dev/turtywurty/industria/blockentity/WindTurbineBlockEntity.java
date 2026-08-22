@@ -3,7 +3,7 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
+import dev.turtywurty.industria.blockentity.util.energy.ChainedGeneratorEnergyOutput;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
@@ -31,7 +31,7 @@ import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class WindTurbineBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader {
+public class WindTurbineBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, ChainedGeneratorEnergyOutput {
     public static final Component TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
@@ -153,7 +153,9 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     public ResourceStorage<ResourceVariant<UnitResource>> getEnergyProvider(Direction direction) {
-        return this.energy.getStorage(direction);
+        return isEnergyOutputDirection(direction)
+                ? this.energy.getStorage(direction)
+                : null;
     }
 
     public int getEnergyOutput() {

@@ -27,9 +27,21 @@ public interface EnergySpreader {
 
     default void spread(Level world, BlockPos pos, SimpleEnergyStorage energyStorage) {
         List<ResourceStorage<ResourceVariant<UnitResource>>> storages = new ArrayList<>();
-        for (Direction direction : Direction.values()) {
+        for (Direction direction : getEnergyOutputDirections(world, pos)) {
+            BlockPos outputPos = pos.relative(direction);
+            while (world.isLoaded(outputPos)) {
+                BlockEntity blockEntity = world.getBlockEntity(outputPos);
+                if (!canEnergyPassThrough(blockEntity, direction))
+                    break;
+
+                outputPos = outputPos.relative(direction);
+            }
+
+            if (!world.isLoaded(outputPos))
+                continue;
+
             ResourceStorage<ResourceVariant<UnitResource>> storage = TransferType.ENERGY.lookup(
-                    world, pos.relative(direction), direction.getOpposite());
+                    world, outputPos, direction.getOpposite());
             if (storage == null || !storage.supportsInsertion())
                 continue;
 
@@ -66,5 +78,13 @@ public interface EnergySpreader {
                 }
             }
         }
+    }
+
+    default Iterable<Direction> getEnergyOutputDirections(Level world, BlockPos pos) {
+        return List.of(Direction.values());
+    }
+
+    default boolean canEnergyPassThrough(BlockEntity blockEntity, Direction direction) {
+        return false;
     }
 }

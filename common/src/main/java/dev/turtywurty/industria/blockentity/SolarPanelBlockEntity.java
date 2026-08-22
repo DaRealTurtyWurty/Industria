@@ -4,7 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
 import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
-import dev.turtywurty.industria.blockentity.util.energy.EnergySpreader;
+import dev.turtywurty.industria.blockentity.util.energy.ChainedGeneratorEnergyOutput;
 import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
@@ -27,7 +27,7 @@ import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
-public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader {
+public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, ChainedGeneratorEnergyOutput {
     public static final Component TITLE = Industria.containerTitle("solar_panel");
     public static final Component ADVANCED_TITLE = Industria.containerTitle("advanced_solar_panel");
     public static final int BASIC_MAX_OUTPUT = 60;
@@ -145,6 +145,8 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
     }
 
     public ResourceStorage<ResourceVariant<UnitResource>> getEnergyProvider(Direction direction) {
-        return this.energy.getStorage(direction);
+        return isEnergyOutputDirection(direction)
+                ? this.energy.getStorage(direction)
+                : null;
     }
 }

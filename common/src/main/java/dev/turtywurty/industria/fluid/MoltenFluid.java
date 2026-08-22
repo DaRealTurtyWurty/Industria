@@ -10,7 +10,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,20 +75,19 @@ public abstract class MoltenFluid extends IndustriaFluid {
         }
     }
 
-    private boolean canLightFire(LevelReader world, BlockPos pos) {
+    private boolean canLightFire(Level world, BlockPos pos) {
         Direction[] directions = Direction.values();
 
         for (Direction direction : directions) {
-            if (hasBurnableBlock(world, pos.relative(direction))) {
+            if (hasBurnableBlock(world, pos.relative(direction)))
                 return true;
-            }
         }
 
         return false;
     }
 
-    private boolean hasBurnableBlock(LevelReader world, BlockPos pos) {
-        return (!world.isInsideBuildHeight(pos.getY()) || world.hasChunkAt(pos)) && world.getBlockState(pos).ignitedByLava();
+    private boolean hasBurnableBlock(Level world, BlockPos pos) {
+        return (!world.isInsideBuildHeight(pos.getY()) || world.isLoaded(pos)) && world.getBlockState(pos).ignitedByLava();
     }
 
     public MoltenFluid(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
