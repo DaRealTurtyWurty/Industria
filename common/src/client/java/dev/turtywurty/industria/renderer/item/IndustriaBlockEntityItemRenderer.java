@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.renderer.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -31,14 +32,24 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
             return;
 
         RenderType renderLayer = RenderTypes.entityTranslucent(this.texture);
-        queue.submitCustomGeometry(matrices, renderLayer, (_, vertexConsumer) ->
-                this.modelPart.render(matrices, vertexConsumer, light, overlay));
+        matrices.pushPose();
+        setupTransformations(matrices);
+        queue.submitModelPart(this.modelPart, matrices, renderLayer, light, overlay,
+                null, false, glint, -1, null, i);
+        matrices.popPose();
     }
 
     @Override
     public void getExtents(Consumer<Vector3fc> vertices) {
         var matrices = new PoseStack();
+        setupTransformations(matrices);
         this.modelPart.getExtentsForGui(matrices, vertices);
+    }
+
+    private static void setupTransformations(PoseStack matrices) {
+        matrices.translate(0.5F, 1.5F, 0.5F);
+        matrices.mulPose(Axis.XP.rotationDegrees(180.0F));
+        matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
     }
 
     @Override
