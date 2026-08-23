@@ -38,9 +38,8 @@
     "minecraft": "~26.1.1",
     "java": ">=25",
     "fabric-api": "*",
-    "turtymultiloader": ">=1.0.0",
-    "heatapi": ">=1.3.0",
-    "gasapi": ">=1.4.0",
-    "slurryapi": ">=1.4.0"
+    "turtymultiloader": ">=${turtymultiloader_version}",
+    "gasapi": ">=${turtymultiloader_version}",
+    "slurryapi": ">=${turtymultiloader_version}"
   }
 }

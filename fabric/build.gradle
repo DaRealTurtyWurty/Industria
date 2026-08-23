@@ -75,6 +75,7 @@ dependencies {
     commonClientJava project(path: ':common', configuration: 'commonClientJava')
     commonResources project(path: ':common', configuration: 'commonResources')
     compileOnly project(':common')
+    clientCompileOnly project(path: ':common', configuration: 'clientApiElements')
 
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
@@ -90,7 +91,6 @@ dependencies {
     include library('turtymultiloader-slurry-fabric')
 
     include api("teamreborn:energy:${energy_api_version}")
-    include api("dev.turtywurty:heatapi:${heat_api_version}")
 
     implementation "org.jbox2d:jbox2d-library:${jbox2d_version}"
 }
@@ -115,7 +115,10 @@ processResources {
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 
-    def properties = [version: project.version]
+    def properties = [
+        version                  : project.version,
+        turtymultiloader_version: turtymultiloader_version
+    ]
     inputs.properties(properties)
     filesMatching('fabric.mod.json') {
         expand(properties)

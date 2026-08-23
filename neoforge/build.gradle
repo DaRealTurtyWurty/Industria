@@ -36,6 +36,7 @@ dependencies {
     commonClientJava project(path: ':common', configuration: 'commonClientJava')
     commonResources project(path: ':common', configuration: 'commonResources')
     compileOnly project(':common')
+    compileOnly project(path: ':common', configuration: 'clientApiElements')
 
     implementation library('turtymultiloader-neoforge')
     jarJar "${turtymultiloader_group}:turtymultiloader-neoforge:[${turtymultiloader_version}]"
