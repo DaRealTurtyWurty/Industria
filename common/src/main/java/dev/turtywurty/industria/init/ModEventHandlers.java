@@ -9,6 +9,7 @@ import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import dev.turtywurty.industria.testworld.IndustriaTestWorld;
 import dev.turtywurty.industria.util.StingBottleAfterDamageHandler;
 import dev.turtywurty.turtymultiloader.attachment.AttachmentService;
 import dev.turtywurty.turtymultiloader.attachment.AttachmentTarget;
@@ -23,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 
 public class ModEventHandlers {
     public static void init() {
+        IndustriaTestWorld.init();
+
         Events.onPlayerJoin(sender -> {
             NetworkService.get().sendToPlayer(sender, WorldFluidPocketsState.createSyncPacket(sender.level()));
             WorldPipeNetworks.syncToClient(sender);
