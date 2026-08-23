@@ -67,7 +67,7 @@ configurations {
 }
 
 def library = { String artifact ->
-    "${turtymultiloader_group}:${artifact}-${minecraft_version}:${turtymultiloader_version}"
+    "${turtymultiloader_group}:${artifact}:${turtymultiloader_version}"
 }
 
 dependencies {

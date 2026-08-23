@@ -28,7 +28,7 @@ configurations {
 }
 
 def library = { String artifact ->
-    "${turtymultiloader_group}:${artifact}-${minecraft_version}:${turtymultiloader_version}"
+    "${turtymultiloader_group}:${artifact}:${turtymultiloader_version}"
 }
 
 dependencies {
@@ -38,13 +38,13 @@ dependencies {
     compileOnly project(':common')
 
     implementation library('turtymultiloader-neoforge')
-    jarJar "${turtymultiloader_group}:turtymultiloader-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    jarJar "${turtymultiloader_group}:turtymultiloader-neoforge:[${turtymultiloader_version}]"
     implementation library('turtymultiloader-gas-neoforge')
-    jarJar "${turtymultiloader_group}:turtymultiloader-gas-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    jarJar "${turtymultiloader_group}:turtymultiloader-gas-neoforge:[${turtymultiloader_version}]"
     implementation library('turtymultiloader-multiblock-neoforge')
-    jarJar "${turtymultiloader_group}:turtymultiloader-multiblock-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    jarJar "${turtymultiloader_group}:turtymultiloader-multiblock-neoforge:[${turtymultiloader_version}]"
     implementation library('turtymultiloader-slurry-neoforge')
-    jarJar "${turtymultiloader_group}:turtymultiloader-slurry-neoforge-${minecraft_version}:[${turtymultiloader_version}]"
+    jarJar "${turtymultiloader_group}:turtymultiloader-slurry-neoforge:[${turtymultiloader_version}]"
 
     implementation "org.jbox2d:jbox2d-library:${jbox2d_version}"
     jarJar "org.jbox2d:jbox2d-library:[${jbox2d_version}]"
