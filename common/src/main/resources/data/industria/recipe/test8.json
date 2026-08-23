@@ -1,0 +1,26 @@
+{
+  "type": "industria:upgrade_station",
+  "key": {
+    "A": {
+      "ingredients": "minecraft:apple"
+    },
+    "B": {
+      "ingredients": "minecraft:beetroot",
+      "data": {
+        "count": 2
+      }
+    },
+    "H": {
+      "ingredients": "industria:simple_drill_head"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "BHB",
+    "ABA"
+  ],
+  "output": {
+    "count": 1,
+    "id": "minecraft:bone"
+  }
+}

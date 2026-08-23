@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/shaking_table",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:shaking_table",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/shaking_table.png"
+    }
+  }
+}

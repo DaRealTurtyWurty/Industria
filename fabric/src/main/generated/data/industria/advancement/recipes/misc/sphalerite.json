@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_raw_sphalerite_block": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:raw_sphalerite_block"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "industria:sphalerite"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_raw_sphalerite_block"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:sphalerite"
+    ]
+  }
+}

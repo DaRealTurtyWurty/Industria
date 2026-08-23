@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_c:gems/quartz": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:gems/quartz"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_conveyor": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:conveyor"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "industria:splitter_conveyor"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_c:gems/quartz",
+      "has_conveyor"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:splitter_conveyor"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "industria:block/rubber_planks",
+    "side": "industria:block/rubber_planks",
+    "top": "industria:block/rubber_planks"
+  }
+}

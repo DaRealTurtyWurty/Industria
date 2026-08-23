@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "dev.turtywurty.industria.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "AbstractContainerScreenMixin",
+    "AvatarRenderStateMixin",
+    "AvatarRendererMixin",
+    "GuiMixin",
+    "HumanoidModelMixin",
+    "ModelPartAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

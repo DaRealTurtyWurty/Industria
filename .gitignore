@@ -31,6 +31,7 @@ bin/
 # fabric
 
 run/
+runs/
 
 # java
 
@@ -39,7 +40,7 @@ replay_*.log
 *.hprof
 *.jfr
 
-src/main/generated/.cache
+fabric/src/main/generated/.cache
 mc_source/
 .codex
 diagrams/*.bkp

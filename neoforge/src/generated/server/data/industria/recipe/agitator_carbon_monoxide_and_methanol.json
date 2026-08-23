@@ -1,0 +1,48 @@
+{
+  "type": "industria:agitator",
+  "energy_cost": 1000,
+  "inputs": [
+    {
+      "type": "gas",
+      "gas": {
+        "amount": 27000,
+        "variant": {
+          "id": "industria:carbon_monoxide"
+        }
+      }
+    },
+    {
+      "type": "fluid",
+      "fluid": {
+        "amount": 27000,
+        "variant": {
+          "id": "industria:methanol"
+        }
+      }
+    },
+    {
+      "type": "item"
+    }
+  ],
+  "outputs": [
+    {
+      "type": "fluid",
+      "fluid": {
+        "amount": 27000,
+        "variant": {
+          "id": "industria:diluted_formic_acid"
+        }
+      }
+    },
+    {
+      "type": "gas",
+      "gas": {
+        "amount": 27000,
+        "variant": {
+          "id": "industria:hydrogen"
+        }
+      }
+    }
+  ],
+  "process_time": 200
+}

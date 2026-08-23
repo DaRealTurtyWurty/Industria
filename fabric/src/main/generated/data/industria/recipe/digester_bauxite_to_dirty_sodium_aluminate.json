@@ -1,0 +1,16 @@
+{
+  "type": "industria:digester",
+  "input_slurry": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:bauxite_slurry"
+    }
+  },
+  "output_fluid": {
+    "amount": 27000,
+    "variant": {
+      "id": "industria:dirty_sodium_aluminate"
+    }
+  },
+  "process_time": 200
+}

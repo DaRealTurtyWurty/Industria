@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/tree_tap",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:tree_tap",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/tree_tap.png"
+    }
+  }
+}

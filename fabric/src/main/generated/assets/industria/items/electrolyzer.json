@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/electrolyzer",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:electrolyzer",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/electrolyzer.png"
+    }
+  }
+}

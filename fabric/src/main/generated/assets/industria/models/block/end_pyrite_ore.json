@@ -1,0 +1,7 @@
+{
+  "parent": "industria:block/parent/ore",
+  "textures": {
+    "base": "minecraft:block/end_stone",
+    "ore": "industria:block/pyrite_ore"
+  }
+}

@@ -1,0 +1,364 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "bottom",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "middle",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "top",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "single",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "bottom",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "middle",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "top",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "line_position": "single",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "bottom",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "middle",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180,
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "top",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180,
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "single",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "bottom",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "middle",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "top",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "y": 270
+      },
+      "when": {
+        "facing": "east",
+        "line_position": "single",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "bottom",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "middle",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180,
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "top",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180,
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "single",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor"
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "bottom",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor"
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "middle",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top"
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "top",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top"
+      },
+      "when": {
+        "facing": "south",
+        "line_position": "single",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "bottom",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "middle",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "top",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "single",
+        "upward": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "bottom",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "middle",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "top",
+        "upward": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/ladder_conveyor_top",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "line_position": "single",
+        "upward": "false"
+      }
+    }
+  ]
+}

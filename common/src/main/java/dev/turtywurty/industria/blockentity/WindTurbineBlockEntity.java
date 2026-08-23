@@ -1,0 +1,168 @@
+package dev.turtywurty.industria.blockentity;
+
+import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.SyncableTickableBlockEntity;
+import dev.turtywurty.industria.blockentity.util.energy.ChainedGeneratorEnergyOutput;
+import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
+import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
+import dev.turtywurty.industria.init.ModBlockEntityTypes;
+import dev.turtywurty.industria.init.ModBlocks;
+import dev.turtywurty.industria.util.ViewUtils;
+import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
+import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
+import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
+import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+
+import java.util.List;
+
+import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
+
+public class WindTurbineBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, ChainedGeneratorEnergyOutput {
+    public static final Component TITLE = Industria.containerTitle("wind_turbine");
+
+    private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
+    private float windSpeed = -1F;
+
+    private ImprovedNoise windNoise;
+    private boolean canReceiveWind = true;
+
+    private final float propellerRotation = 0F; // Client side only
+
+    public WindTurbineBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlocks.WIND_TURBINE.get(), ModBlockEntityTypes.WIND_TURBINE.get(), pos, state);
+
+        this.energy.addStorage(new SyncingEnergyStorage(this, 100_000, 0, 500));
+    }
+
+    public static int getEnergyOutput(Level world, BlockPos pos, float windSpeed, boolean canReceiveWind) {
+        if (!canReceiveWind || world == null || pos == null || !world.canSeeSkyFromBelowWater(pos) || pos.getY() < world.getSeaLevel())
+            return 0;
+
+        Holder<Biome> biome = world.getBiome(pos);
+        float biomeModifier = 1.0F;
+        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_MOUNTAIN))
+            biomeModifier = 1.5F;
+        else if (biome.is(BiomeTags.IS_HILL))
+            biomeModifier = 1.25F;
+
+        float heightMultiplier = calculateHeightMultiplier(pos, world);
+        // if the time of day is > 12000, reduce the output by 50%
+        float timeOfDayModifier = world.getGameTime() > 12000 ? 0.5F : 1.0F;
+        float output = biomeModifier * heightMultiplier * windSpeed * timeOfDayModifier * 1000.0F;
+        return (int) output;
+    }
+
+    private static float calculateHeightMultiplier(BlockPos pos, Level world) {
+        int seaLevel = world.getSeaLevel();
+        int worldBottom = world.getMinY();
+        int worldTop = world.getHeight() + worldBottom;
+
+        int fullHeightRange = worldTop - worldBottom;
+        float normalizedHeight = (float) (pos.getY() - seaLevel) / fullHeightRange + 0.5F;
+
+        return Mth.clamp(normalizedHeight, 0.0F, 1.0F);
+    }
+
+    @Override
+    public List<SyncableStorage> getSyncableStorages() {
+        return List.of((SyncableStorage) this.energy.getStorage(null));
+    }
+
+    @Override
+    public void onTick() {
+        if (this.level == null || this.level.isClientSide())
+            return;
+
+        if (this.windNoise == null) {
+            this.windNoise = new ImprovedNoise(this.level.getRandom());
+        }
+
+        if (this.windSpeed == -1F || this.level.getGameTime() % 24000 == 0) {
+            float offset = this.level.getGameTime() / 24000F;
+            this.windSpeed = (float) this.windNoise.noise(
+                    this.worldPosition.getX() + offset,
+                    this.worldPosition.getY() + offset,
+                    this.worldPosition.getZ() + offset) + 1.0F;
+        }
+
+        if (this.level.getGameTime() % 100 == 0) {
+            this.canReceiveWind = true;
+
+            // check 8 blocks in front. if any of them are not air, set canReceiveWind to false
+            for (int i = 1; i <= 8; i++) {
+                BlockPos pos = this.worldPosition.above(3).offset(getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING).getUnitVec3i().multiply(i));
+                if (!this.level.getBlockState(pos).isAir()) {
+                    this.canReceiveWind = false;
+                    break;
+                }
+            }
+
+            update();
+        }
+
+        SimpleEnergyStorage storage = (SimpleEnergyStorage) getEnergyStorage();
+        if (storage == null)
+            return;
+
+        int output = getEnergyOutput();
+        long currentEnergy = storage.getAmount();
+        setEnergy(storage, Mth.clamp(storage.getAmount() + output, 0, storage.getCapacity()));
+        if (currentEnergy != storage.getAmount()) {
+            update();
+        }
+
+        spread(this.level, this.worldPosition, storage);
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
+        ViewUtils.readChild(view, "Energy", this.energy);
+        this.windSpeed = view.getFloatOr("WindSpeed", 0.0F);
+        this.canReceiveWind = view.getBooleanOr("CanReceiveWind", true);
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
+        ViewUtils.putChild(view, "Energy", this.energy);
+        view.putFloat("WindSpeed", this.windSpeed);
+        view.putBoolean("CanReceiveWind", this.canReceiveWind);
+    }
+
+    public SyncingEnergyStorage getEnergyStorage() {
+        return (SyncingEnergyStorage) this.energy.getStorage(null);
+    }
+
+    public float getWindSpeed() {
+        return this.windSpeed;
+    }
+
+    public ResourceStorage<ResourceVariant<UnitResource>> getEnergyProvider(Direction direction) {
+        return isEnergyOutputDirection(direction)
+                ? this.energy.getStorage(direction)
+                : null;
+    }
+
+    public int getEnergyOutput() {
+        return getEnergyOutput(this.level, this.worldPosition.above(3), this.windSpeed, this.canReceiveWind);
+    }
+
+    public float getPropellerRotation() {
+        return this.propellerRotation;
+    }
+}

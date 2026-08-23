@@ -1,0 +1,143 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev'
+}
+
+base {
+    archivesName = "${mod_id}-neoforge-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+}
+
+configurations {
+    commonJava {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    commonClientJava {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    commonResources {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
+def library = { String artifact ->
+    "${turtymultiloader_group}:${artifact}:${turtymultiloader_version}"
+}
+
+dependencies {
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonClientJava project(path: ':common', configuration: 'commonClientJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+    compileOnly project(':common')
+
+    implementation library('turtymultiloader-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-neoforge:[${turtymultiloader_version}]"
+    implementation library('turtymultiloader-gas-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-gas-neoforge:[${turtymultiloader_version}]"
+    implementation library('turtymultiloader-multiblock-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-multiblock-neoforge:[${turtymultiloader_version}]"
+    implementation library('turtymultiloader-slurry-neoforge')
+    jarJar "${turtymultiloader_group}:turtymultiloader-slurry-neoforge:[${turtymultiloader_version}]"
+
+    implementation "org.jbox2d:jbox2d-library:${jbox2d_version}"
+    jarJar "org.jbox2d:jbox2d-library:[${jbox2d_version}]"
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn(configurations.commonJava, configurations.commonClientJava)
+    source(configurations.commonJava)
+    source(configurations.commonClientJava)
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn(configurations.commonJava, configurations.commonClientJava)
+    from(configurations.commonJava)
+    from(configurations.commonClientJava)
+}
+
+neoForge {
+    version = neoforge_version
+
+    def accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (accessTransformer.exists())
+        accessTransformers.from(accessTransformer.absolutePath)
+
+    runs {
+        client {
+            client()
+            gameDirectory = file('runs/client')
+        }
+        server {
+            server()
+            gameDirectory = file('runs/server')
+        }
+        data {
+            clientData()
+            ideName = 'Industria NeoForge Data Generation'
+            gameDirectory = file('runs/datagen')
+            programArguments.addAll(
+                '--mod', mod_id,
+                '--all',
+                '--output', file('src/generated/client').absolutePath,
+                '--existing', file('src/main/resources').absolutePath
+            )
+        }
+        serverData {
+            serverData()
+            ideName = 'Industria NeoForge Server Data Generation'
+            gameDirectory = file('runs/serverDatagen')
+            programArguments.addAll(
+                '--mod', mod_id,
+                '--all',
+                '--output', file('src/generated/server').absolutePath,
+                '--existing', file('src/main/resources').absolutePath
+            )
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/client'
+    srcDir 'src/generated/server'
+}
+
+processResources {
+    dependsOn(configurations.commonResources)
+    from(configurations.commonResources)
+
+    def properties = [
+        version                      : project.version,
+        mod_id                       : mod_id,
+        mod_name                     : mod_name,
+        mod_author                   : mod_author,
+        mod_license                  : mod_license,
+        mod_description              : mod_description,
+        minecraft_version_range      : minecraft_version_range,
+        neoforge_version             : neoforge_version,
+        neoforge_loader_version_range: neoforge_loader_version_range,
+        turtymultiloader_version     : turtymultiloader_version
+    ]
+    inputs.properties(properties)
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(properties)
+    }
+}
+
+tasks.named('jar', Jar) {
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+}

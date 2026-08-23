@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "industria:conveyor",
+    "Q": "#c:gems/quartz"
+  },
+  "pattern": [
+    "CCC",
+    "CQC",
+    "CCC"
+  ],
+  "result": {
+    "count": 8,
+    "id": "industria:splitter_conveyor"
+  }
+}

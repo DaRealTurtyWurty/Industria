@@ -1,0 +1,160 @@
+package dev.turtywurty.industria.block;
+
+import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
+import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.init.ModBlockEntityTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumMap;
+import java.util.Map;
+
+public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedBlock {
+    private static final Map<Direction, Map<DoubleBlockHalf, VoxelShape>> SHAPES = createShapes();
+
+    public FluidPumpBlock(Properties settings) {
+        super(settings, new BlockProperties()
+                .hasHorizontalFacing()
+                .addStateProperty(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
+                .addStateProperty(BlockStateProperties.WATERLOGGED, false)
+                .shapeFactory((state, _, _, _) -> SHAPES
+                        .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
+                        .get(state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)))
+                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.FLUID_PUMP)
+                        .blockEntityFactory((pos, state) ->
+                                state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                                        ? ModBlockEntityTypes.FLUID_PUMP.get().create(pos, state)
+                                        : null)
+                        .shouldTick()
+                        .blockEntityTickerFactory((world, state, type) ->
+                                state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                                        ? TickableBlockEntity.createTicker(world)
+                                        : null)));
+    }
+
+    private static Map<Direction, Map<DoubleBlockHalf, VoxelShape>> createShapes() {
+        Map<Direction, Map<DoubleBlockHalf, VoxelShape>> shapes = new EnumMap<>(Direction.class);
+
+        // The exported shape is opposite the model's native orientation because the model elements are rotated 180°.
+        VoxelShape northShape = BlockProperties.calculateShape(Direction.SOUTH, makeShape());
+        for (Direction direction : BlockStateProperties.HORIZONTAL_FACING.getPossibleValues()) {
+            VoxelShape fullShape = BlockProperties.calculateShape(direction, northShape);
+            Map<DoubleBlockHalf, VoxelShape> halves = new EnumMap<>(DoubleBlockHalf.class);
+            halves.put(DoubleBlockHalf.LOWER,
+                    Shapes.join(fullShape, Shapes.block(), BooleanOp.AND).optimize());
+            halves.put(DoubleBlockHalf.UPPER,
+                    Shapes.join(fullShape.move(0, -1, 0), Shapes.block(), BooleanOp.AND).optimize());
+            shapes.put(direction, halves);
+        }
+
+        return shapes;
+    }
+
+    private static VoxelShape makeShape() {
+        VoxelShape shape = Shapes.empty();
+        shape = Shapes.join(shape, Shapes.box(0.0625, 0, 0.0625, 0.9375, 0.0625, 0.9375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.09375, 0.0625, 0.09375, 0.90625, 0.375, 0.90625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.03125, 0.375, 0.03125, 0.96875, 0.75, 0.96875), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.34375, 0.375, 0, 0.65625, 0.6875, 0.03125), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.125, 0.75, 0.125, 0.875, 0.9375, 0.875), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.09375, 0.9375, 0.09375, 0.90625, 1.875, 0.90625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.34375, 1, 0.0625, 0.65625, 1.75, 0.09375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.34375, 1, 0.90625, 0.65625, 1.75, 0.9375), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.90625, 1, 0.34375, 0.9375, 1.75, 0.65625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.0625, 1, 0.34375, 0.09375, 1.75, 0.65625), BooleanOp.OR);
+        shape = Shapes.join(shape, Shapes.box(0.375, 1.875, 0.375, 0.625, 2, 0.625), BooleanOp.OR);
+        return shape;
+    }
+
+    @Override
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockPos upperPos = context.getClickedPos().above();
+        if (context.getLevel().isOutsideBuildHeight(upperPos)
+                || !context.getLevel().getBlockState(upperPos).canBeReplaced()) {
+            return null;
+        }
+
+        BlockState state = super.getStateForPlacement(context);
+        return state == null
+                ? null
+                : state.setValue(BlockStateProperties.WATERLOGGED,
+                        context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state,
+                            @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+            BlockPos upperPos = pos.above();
+            boolean upperWaterlogged = level.getFluidState(upperPos).getType() == Fluids.WATER;
+            level.setBlock(upperPos,
+                    state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER)
+                            .setValue(BlockStateProperties.WATERLOGGED, upperWaterlogged),
+                    Block.UPDATE_ALL);
+        }
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks,
+                                     BlockPos pos, Direction direction, BlockPos neighborPos,
+                                     BlockState neighborState, RandomSource random) {
+        if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+            ticks.getFluidTicks().schedule(ticks.createTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level)));
+        }
+
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
+    }
+
+    @Override
+    protected FluidState getFluidState(BlockState state) {
+        return state.getValue(BlockStateProperties.WATERLOGGED)
+                ? Fluids.WATER.getSource(false)
+                : super.getFluidState(state);
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                ? RenderShape.MODEL
+                : RenderShape.INVISIBLE;
+    }
+
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean moved) {
+        super.affectNeighborsAfterRemoval(state, level, pos, moved);
+
+        BlockPos otherPos = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                ? pos.above()
+                : pos.below();
+        if (level.getBlockState(otherPos).is(this)) {
+            level.destroyBlock(otherPos, false);
+        }
+    }
+
+    public static BlockPos getControllerPos(BlockPos pos, BlockState state) {
+        return state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER
+                ? pos.below()
+                : pos;
+    }
+}

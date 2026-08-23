@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/mixer",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:mixer",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/mixer_output_closed.png"
+    }
+  }
+}

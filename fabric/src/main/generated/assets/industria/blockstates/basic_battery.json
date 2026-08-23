@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "industria:block/basic_battery_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "industria:block/basic_battery"
+    },
+    "axis=z": {
+      "model": "industria:block/basic_battery_horizontal",
+      "x": 90
+    }
+  }
+}

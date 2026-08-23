@@ -1,0 +1,20 @@
+// 26.1.1	2026-08-22T11:19:11.4495265	Tags for minecraft:block mod id vanilla
+66f23831da642d59d90c602ab0cc8d6ed576e4f1 data/industria/tags/block/battery_blocks.json
+fa71ce7b657088db474bc1eaeb16567b78b2d105 data/industria/tags/block/conveyors.json
+85f082478d0098e14e6a174c9db47b47e1c5e24a data/industria/tags/block/rubber_logs.json
+9cb36d3cd9d44984beeb0a2496daa8f739297723 data/minecraft/tags/block/ceiling_hanging_signs.json
+1dc99ad170b1876f7df6049d6ceaadd005cee3dc data/minecraft/tags/block/fence_gates.json
+1e7946a0c74ce620a83e5e050f535512dbd50cd7 data/minecraft/tags/block/leaves.json
+dae8916191efd7b6a5a6f6dea22417e3aef816c9 data/minecraft/tags/block/logs_that_burn.json
+a5e74e09cae005f48c83f1cfd984d4da5fdeda7a data/minecraft/tags/block/planks.json
+336f9bdb6fc9b50651997b0e057101cdac387901 data/minecraft/tags/block/saplings.json
+3cee032423168002be3bdbbdd1a75df07bef99d1 data/minecraft/tags/block/standing_signs.json
+62a3da433d15608032f51491ab366a9f4bd6625d data/minecraft/tags/block/wall_hanging_signs.json
+58cf354570cd9139b471c11c565aefa9fb5b363d data/minecraft/tags/block/wall_signs.json
+001e54bdd7da42c5726dde4b94ff293558a08beb data/minecraft/tags/block/wooden_buttons.json
+c299c58bcc9b1bfcae689634a78fb5ea44ab5060 data/minecraft/tags/block/wooden_doors.json
+3fd8ba4643288a6ab46df261fd541d6427021a60 data/minecraft/tags/block/wooden_fences.json
+e6fb19c9f61f774f280e74ed984d5b57b59d4bcd data/minecraft/tags/block/wooden_pressure_plates.json
+b1ab3c92fd712e8e24ad08dc128a7fb6e31816f0 data/minecraft/tags/block/wooden_slabs.json
+ed83937ed5ab0f0de861be10f4062c2506e04ccf data/minecraft/tags/block/wooden_stairs.json
+26adf24861a0265c083f7432d30c87f04a765c09 data/minecraft/tags/block/wooden_trapdoors.json

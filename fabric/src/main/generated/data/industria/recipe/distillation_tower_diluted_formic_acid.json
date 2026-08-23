@@ -1,0 +1,23 @@
+{
+  "type": "industria:distillation_tower",
+  "energy_cost": 40,
+  "input_fluid": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:diluted_formic_acid"
+    }
+  },
+  "primary_output_fluid": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:formic_acid"
+    }
+  },
+  "process_time": 240,
+  "secondary_output_fluid": {
+    "amount": 27000,
+    "variant": {
+      "id": "minecraft:water"
+    }
+  }
+}

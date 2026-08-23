@@ -1,0 +1,60 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_center"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_continuous"
+      },
+      "when": {
+        "north": "pipe"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_continuous",
+        "y": 90
+      },
+      "when": {
+        "east": "pipe"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_continuous",
+        "y": 180
+      },
+      "when": {
+        "south": "pipe"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_continuous",
+        "y": 270
+      },
+      "when": {
+        "west": "pipe"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_continuous_up"
+      },
+      "when": {
+        "up": "pipe"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gas_pipe_continuous_down"
+      },
+      "when": {
+        "down": "pipe"
+      }
+    }
+  ]
+}
