@@ -21,6 +21,7 @@ public class IndustriaClient {
         ModModels.init();
         DebugRenderingRegistry.init();
         IndustriaWoodSetClient.init();
+        PipeConnectionModelLoading.init();
         ClientPipeNetworks.init();
         ClientConveyorNetworks.init();
         ModReloadListeners.init();
@@ -34,7 +35,7 @@ public class IndustriaClient {
         ModSlurryRenderHandlers.init();
         ModGasRenderHandlers.init();
         ModPipeConnectionModels.register();
-        PipeConnectionModelLoading.init();
+        PipeConnectionModelLoading.onRegistriesApplied();
         ModArmPositions.init();
         ModDrillHeads.init();
         ModConveyorAnchorProviders.init();

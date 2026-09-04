@@ -112,10 +112,22 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
         return switch (facing) {
             case NORTH -> offset;
             case SOUTH -> new BlockPos(-offset.getX(), offset.getY(), -offset.getZ());
-            case WEST -> new BlockPos(offset.getZ(), offset.getY(), -offset.getX());
-            case EAST -> new BlockPos(-offset.getZ(), offset.getY(), offset.getX());
+            case WEST -> new BlockPos(-offset.getZ(), offset.getY(), offset.getX());
+            case EAST -> new BlockPos(offset.getZ(), offset.getY(), -offset.getX());
             default -> offset;
         };
+    }
+
+    protected BlockPos getWorldPosFromLocalOffset(BlockPos localOffset) {
+        BlockPos worldOffset = switch (getControllerFacing()) {
+            case NORTH -> localOffset;
+            case SOUTH -> new BlockPos(-localOffset.getX(), localOffset.getY(), -localOffset.getZ());
+            case WEST -> new BlockPos(localOffset.getZ(), localOffset.getY(), -localOffset.getX());
+            case EAST -> new BlockPos(-localOffset.getZ(), localOffset.getY(), localOffset.getX());
+            default -> localOffset;
+        };
+
+        return this.worldPosition.offset(worldOffset);
     }
 
     @Override
@@ -132,9 +144,23 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
         return switch (getControllerFacing()) {
             case NORTH -> worldSide;
             case SOUTH -> worldSide.getOpposite();
-            case WEST -> worldSide.getCounterClockWise();
-            case EAST -> worldSide.getClockWise();
+            case WEST -> worldSide.getClockWise();
+            case EAST -> worldSide.getCounterClockWise();
             default -> worldSide;
+        };
+    }
+
+    protected @Nullable Direction getWorldSideForLocalSide(@Nullable Direction localSide) {
+        if (localSide == null || localSide.getAxis().isVertical()) {
+            return localSide;
+        }
+
+        return switch (getControllerFacing()) {
+            case NORTH -> localSide;
+            case SOUTH -> localSide.getOpposite();
+            case WEST -> localSide.getCounterClockWise();
+            case EAST -> localSide.getClockWise();
+            default -> localSide;
         };
     }
 
@@ -163,6 +189,7 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
         return getItemStorageForExternal(pos, null);
     }
 
+    @Override
     public ResourceStorage<ResourceVariant<Item>> getItemStorageForExternal(BlockPos pos, @Nullable Direction side) {
         return getExternalPortStorage(TransferType.ITEM, pos, side);
     }
@@ -172,6 +199,7 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
         return getFluidStorageForExternal(pos, null);
     }
 
+    @Override
     public ResourceStorage<ResourceVariant<Fluid>> getFluidStorageForExternal(BlockPos pos, @Nullable Direction side) {
         return getExternalPortStorage(TransferType.FLUID, pos, side);
     }
@@ -181,6 +209,7 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
         return getEnergyStorageForExternal(pos, null);
     }
 
+    @Override
     public ResourceStorage<ResourceVariant<UnitResource>> getEnergyStorageForExternal(BlockPos pos, @Nullable Direction side) {
         return getExternalPortStorage(TransferType.ENERGY, pos, side);
     }

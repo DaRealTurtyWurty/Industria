@@ -588,18 +588,6 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         this.level.updateNeighborsAt(worldPos, state.getBlock());
     }
 
-    private BlockPos getWorldPosFromLocalOffset(BlockPos localOffset) {
-        BlockPos worldOffset = switch (getControllerFacing()) {
-            case NORTH -> localOffset;
-            case SOUTH -> new BlockPos(-localOffset.getX(), localOffset.getY(), -localOffset.getZ());
-            case WEST -> new BlockPos(-localOffset.getZ(), localOffset.getY(), localOffset.getX());
-            case EAST -> new BlockPos(localOffset.getZ(), localOffset.getY(), -localOffset.getX());
-            default -> localOffset;
-        };
-
-        return this.worldPosition.offset(worldOffset);
-    }
-
     private Optional<RecipeHolder<AgitatorRecipe>> getCurrentRecipe(AgitatorRecipeInput recipeInput) {
         if (!(this.level instanceof ServerLevel serverLevel))
             return Optional.empty();

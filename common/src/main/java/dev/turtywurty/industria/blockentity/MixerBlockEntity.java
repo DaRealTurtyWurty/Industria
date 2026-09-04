@@ -438,13 +438,13 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.EAST))
-                .atSides(new BlockPos(-1, 2, 0), Direction.UP);
-        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
-                .at(new BlockPos(-1, 0, 0));
-        ports.input(TransferType.FLUID, this::getInputFluidTank)
                 .atSides(new BlockPos(1, 2, 0), Direction.UP);
-        ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
+        ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
                 .at(new BlockPos(1, 0, 0));
+        ports.input(TransferType.FLUID, this::getInputFluidTank)
+                .where((offset, side) -> offset.equals(new BlockPos(-1, 2, 0)) && side == Direction.UP);
+        ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
+                .at(new BlockPos(-1, 0, 0));
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
                 .at(new BlockPos(0, 2, 0));
     }
@@ -467,7 +467,7 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         if (this.level == null)
             return false;
 
-        Direction connectionDirection = getWorldSideForLocalSide(Direction.WEST);
+        Direction connectionDirection = getWorldSideForLocalSide(Direction.EAST);
         ResourceStorage<ResourceVariant<Item>> storage = TransferType.ITEM.lookup(this.level,
                 this.worldPosition.relative(connectionDirection).above(3),
                 Direction.DOWN);
@@ -478,19 +478,10 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         if (this.level == null)
             return false;
 
-        Direction connectionDirection = getWorldSideForLocalSide(Direction.WEST);
+        Direction connectionDirection = getWorldSideForLocalSide(Direction.EAST);
         ResourceStorage<ResourceVariant<Item>> storage = TransferType.ITEM.lookup(this.level,
                 this.worldPosition.relative(connectionDirection, 2),
                 connectionDirection.getOpposite());
         return storage != null;
-    }
-
-    private Direction getWorldSideForLocalSide(Direction localSide) {
-        for (Direction worldSide : Direction.Plane.HORIZONTAL) {
-            if (getPortLocalSide(worldSide) == localSide)
-                return worldSide;
-        }
-
-        return localSide;
     }
 }

@@ -21,6 +21,15 @@ public final class PipeConnectionModelLoading {
         if (initialized)
             return;
 
+        ClientRegistrations.registerBlockStateModelAugmenter(
+                state -> state.getBlock() instanceof PipeBlock<?, ?>,
+                new PipeConnectionBlockStateModel()
+        );
+
+        initialized = true;
+    }
+
+    public static synchronized void onRegistriesApplied() {
         Map<ConnectionModelReference, AdditionalModel<BlockStateModel>> models = new LinkedHashMap<>();
         for (ConnectionModelSet modelSet : PipeConnectionModelRegistry.allModelSets()) {
             for (ConnectionModelReference reference : modelSet.references()) {
@@ -29,13 +38,6 @@ public final class PipeConnectionModelLoading {
         }
 
         registeredModels = Map.copyOf(models);
-
-        ClientRegistrations.registerBlockStateModelAugmenter(
-                state -> state.getBlock() instanceof PipeBlock<?, ?>,
-                new PipeConnectionBlockStateModel()
-        );
-
-        initialized = true;
     }
 
     public static @Nullable BlockStateModel getBakedModel(ConnectionModelReference reference) {

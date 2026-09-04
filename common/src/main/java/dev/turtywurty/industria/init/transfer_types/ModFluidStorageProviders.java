@@ -5,13 +5,9 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.multiblock.TransferType;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
-import dev.turtywurty.multiblocklib.MultiblockLib;
-import dev.turtywurty.multiblocklib.world.MultiblockWorldData;
 import dev.turtywurty.turtymultiloader.transfer.TransferService;
 import dev.turtywurty.turtymultiloader.transfer.lookup.StorageKeys;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 public final class ModFluidStorageProviders {
     private ModFluidStorageProviders() {
@@ -35,30 +31,11 @@ public final class ModFluidStorageProviders {
         transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.TREE_TAP, TreeTapBlockEntity::getFluidProvider);
         transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.AGITATOR, AgitatorBlockEntity::getFluidProvider);
 
-        transfers.registerBlockProvider(StorageKeys.FLUID, (level, pos, state, blockEntity, side) -> {
-            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
-            return controller != null ? controller.getFluidStorageForExternal(pos, side) : null;
-        }, MultiblockLib.MULTIBLOCK_PART_HANDLE);
         transfers.registerBlockProvider(StorageKeys.FLUID, (world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerLevel serverWorld)
                 return WorldPipeNetworks.getOrCreate(serverWorld).getStorage(TransferType.FLUID, pos);
 
             return null;
         }, ModBlocks.FLUID_PIPE);
-    }
-
-    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(ServerLevel level, BlockPos pos, BlockEntity blockEntity) {
-        if (blockEntity instanceof IndustriaMultiblockControllerBlockEntity controller)
-            return controller;
-
-        if (level == null)
-            return null;
-
-        BlockPos controllerPos = MultiblockWorldData.get(level).getControllerFor(pos);
-        if (controllerPos == null)
-            return null;
-
-        BlockEntity controllerEntity = level.getBlockEntity(controllerPos);
-        return controllerEntity instanceof IndustriaMultiblockControllerBlockEntity controller ? controller : null;
     }
 }
