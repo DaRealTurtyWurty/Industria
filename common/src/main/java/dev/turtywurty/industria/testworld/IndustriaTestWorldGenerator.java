@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import java.util.List;
 import java.util.UUID;
 
 public final class IndustriaTestWorldGenerator {
@@ -22,14 +23,12 @@ public final class IndustriaTestWorldGenerator {
         energyGenContext.setBlock(0, 0, 0, ModBlocks.WIND_TURBINE);
         energyGenContext.setBlock(1, 0, 0, ModBlocks.WIND_TURBINE);
 
-        energyGenContext.setBlock(-2, 0, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-3, 0, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-4, 0, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-4, 1, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-4, 2, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-4, 3, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-5, 3, 0, ModBlocks.CABLE);
-        energyGenContext.setBlock(-6, 3, 0, ModBlocks.CABLE);
+        energyGenContext.runPipe(List.of(
+                energyGenContext.pos(-2, 0, 0),
+                energyGenContext.pos(-4, 0, 0),
+                energyGenContext.pos(-4, 3, 0),
+                energyGenContext.pos(-6, 3, 0)
+        ), ModBlocks.CABLE);
 
         energyGenContext.setBlock(-3, 0, 1, ModBlocks.SOLAR_PANEL.get().defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
         energyGenContext.setBlock(-3, 0, -1, ModBlocks.ADVANCED_SOLAR_PANEL.get().defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));

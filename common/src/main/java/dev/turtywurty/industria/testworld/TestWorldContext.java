@@ -1,6 +1,8 @@
 package dev.turtywurty.industria.testworld;
 
 import com.mojang.authlib.GameProfile;
+import dev.turtywurty.industria.block.PipeBlock;
+import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.multiblocklib.data.MultiblockDefinition;
 import dev.turtywurty.multiblocklib.match.BlockMatcherList;
 import dev.turtywurty.multiblocklib.pattern.MultiblockPattern;
@@ -21,13 +23,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.PriorityQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public record TestWorldContext(MinecraftServer server, ServerLevel overworld, BlockPos origin) {
+    private static final int MAX_PATHFINDING_NODES = 250_000;
+
     public BlockPos pos(int x, int y, int z) {
         return origin.offset(x, y, z);
     }
@@ -50,6 +60,227 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
 
     public void removeBlock(int x, int y, int z) {
         overworld.removeBlock(pos(x, y, z), false);
+    }
+
+    public List<BlockPos> runPipe(BlockPos start, BlockPos end) {
+        return runPipe(start, end, ModBlocks.FLUID_PIPE);
+    }
+
+    public List<BlockPos> runPipe(BlockPos start, BlockPos end, Supplier<? extends Block> pipeSupplier) {
+        Objects.requireNonNull(pipeSupplier, "pipeSupplier");
+        return placeBlockPath(start, end, pipeSupplier.get());
+    }
+
+    public List<BlockPos> runPipe(BlockPos start, BlockPos end, Block pipe) {
+        return placeBlockPath(start, end, pipe);
+    }
+
+    public List<BlockPos> runPipe(List<BlockPos> positions) {
+        return runPipe(positions, ModBlocks.FLUID_PIPE);
+    }
+
+    public List<BlockPos> runPipe(List<BlockPos> positions, Supplier<? extends Block> pipeSupplier) {
+        Objects.requireNonNull(pipeSupplier, "pipeSupplier");
+        return placeBlockPath(positions, pipeSupplier.get());
+    }
+
+    public List<BlockPos> runPipe(List<BlockPos> positions, Block pipe) {
+        return placeBlockPath(positions, pipe);
+    }
+
+    public List<BlockPos> placeBlockPath(BlockPos start, BlockPos end, Block block) {
+        Objects.requireNonNull(block, "block");
+        return placeBlockPath(start, end, block.defaultBlockState());
+    }
+
+    public List<BlockPos> placeBlockPath(BlockPos start, BlockPos end, BlockState state) {
+        Objects.requireNonNull(state, "state");
+
+        List<BlockPos> path = findShortestPath(start, end, pathPos -> canPlacePathBlock(pathPos, state));
+        placePathBlocks(path, state);
+        return path;
+    }
+
+    public List<BlockPos> placeBlockPath(List<BlockPos> positions, Block block) {
+        Objects.requireNonNull(block, "block");
+        return placeBlockPath(positions, block.defaultBlockState());
+    }
+
+    public List<BlockPos> placeBlockPath(List<BlockPos> positions, BlockState state) {
+        Objects.requireNonNull(positions, "positions");
+        Objects.requireNonNull(state, "state");
+        if (positions.isEmpty())
+            return List.of();
+
+        var path = new LinkedHashSet<BlockPos>();
+        Predicate<BlockPos> canTraverse = pathPos -> canPlacePathBlock(pathPos, state);
+        if (positions.size() == 1) {
+            BlockPos position = positions.getFirst();
+            path.addAll(findShortestPath(position, position, canTraverse));
+        } else {
+            for (int index = 1; index < positions.size(); index++) {
+                path.addAll(findShortestPath(positions.get(index - 1), positions.get(index), canTraverse));
+            }
+        }
+
+        List<BlockPos> result = List.copyOf(path);
+        placePathBlocks(result, state);
+        return result;
+    }
+
+    private boolean canPlacePathBlock(BlockPos pos, BlockState state) {
+        BlockState existingState = overworld.getBlockState(pos);
+        return existingState.canBeReplaced() || existingState.is(state.getBlock());
+    }
+
+    private void placePathBlocks(List<BlockPos> path, BlockState state) {
+        for (BlockPos pathPos : path) {
+            BlockState existingState = overworld.getBlockState(pathPos);
+            if (existingState.is(state.getBlock()))
+                continue;
+
+            overworld.setBlockAndUpdate(pathPos, state);
+            if (state.getBlock() instanceof PipeBlock<?, ?> pipeBlock) {
+                var networkManager = pipeBlock.getNetworkManager(overworld);
+                if (!networkManager.containsPipe(pathPos))
+                    networkManager.placePipe(overworld, pathPos);
+            }
+        }
+    }
+
+    public List<BlockPos> findShortestPath(BlockPos start, BlockPos end, Predicate<BlockPos> canTraverse) {
+        Objects.requireNonNull(start, "start");
+        Objects.requireNonNull(end, "end");
+        Objects.requireNonNull(canTraverse, "canTraverse");
+
+        BlockPos immutableStart = start.immutable();
+        BlockPos immutableEnd = end.immutable();
+        if (overworld.isOutsideBuildHeight(immutableStart) || overworld.isOutsideBuildHeight(immutableEnd))
+            throw new IllegalArgumentException("Path endpoints must be inside the world's build height");
+
+        if (!canTraverse.test(immutableStart))
+            throw new IllegalStateException("Path start is obstructed at " + immutableStart);
+
+        if (!canTraverse.test(immutableEnd))
+            throw new IllegalStateException("Path end is obstructed at " + immutableEnd);
+
+        if (immutableStart.equals(immutableEnd))
+            return List.of(immutableStart);
+
+        long nextSequence = 0;
+        PathNode startNode = new PathNode(
+                new PathState(immutableStart, null),
+                0,
+                0,
+                manhattanDistance(immutableStart, immutableEnd),
+                nextSequence++
+        );
+
+        PriorityQueue<PathNode> open = new PriorityQueue<>();
+        open.add(startNode);
+
+        Map<PathState, PathCost> bestCosts = new HashMap<>();
+        bestCosts.put(startNode.state(), new PathCost(0, 0));
+
+        Map<PathState, PathState> previous = new HashMap<>();
+        int visitedNodes = 0;
+
+        while (!open.isEmpty()) {
+            PathNode current = open.remove();
+            PathCost bestCost = bestCosts.get(current.state());
+            if (bestCost == null || bestCost.steps() != current.steps() || bestCost.turns() != current.turns())
+                continue;
+
+            if (++visitedNodes > MAX_PATHFINDING_NODES)
+                throw new IllegalStateException("Could not find a path from " + immutableStart + " to "
+                        + immutableEnd + " after visiting " + MAX_PATHFINDING_NODES + " nodes");
+
+            if (current.state().pos().equals(immutableEnd))
+                return reconstructPath(current.state(), previous);
+
+            for (Direction direction : Direction.values()) {
+                BlockPos neighbour = current.state().pos().relative(direction);
+                if (overworld.isOutsideBuildHeight(neighbour) || !canTraverse.test(neighbour))
+                    continue;
+
+                int steps = current.steps() + 1;
+                int turns = current.turns();
+                if (current.state().arrivalDirection() != null
+                        && current.state().arrivalDirection() != direction)
+                    turns++;
+
+                PathState neighbourState = new PathState(neighbour, direction);
+                PathCost neighbourCost = new PathCost(steps, turns);
+                PathCost knownCost = bestCosts.get(neighbourState);
+                if (knownCost != null && knownCost.compareTo(neighbourCost) <= 0)
+                    continue;
+
+                bestCosts.put(neighbourState, neighbourCost);
+                previous.put(neighbourState, current.state());
+                open.add(new PathNode(
+                        neighbourState,
+                        steps,
+                        turns,
+                        manhattanDistance(neighbour, immutableEnd),
+                        nextSequence++
+                ));
+            }
+        }
+
+        throw new IllegalStateException("No unobstructed path exists from " + immutableStart + " to " + immutableEnd);
+    }
+
+    private static List<BlockPos> reconstructPath(PathState end, Map<PathState, PathState> previous) {
+        List<BlockPos> reversedPath = new ArrayList<>();
+        PathState current = end;
+        while (current != null) {
+            reversedPath.add(current.pos());
+            current = previous.get(current);
+        }
+
+        return reversedPath.reversed().stream().toList();
+    }
+
+    private static long manhattanDistance(BlockPos first, BlockPos second) {
+        return Math.abs((long) first.getX() - second.getX())
+                + Math.abs((long) first.getY() - second.getY())
+                + Math.abs((long) first.getZ() - second.getZ());
+    }
+
+    private record PathState(BlockPos pos, Direction arrivalDirection) {
+    }
+
+    private record PathCost(int steps, int turns) implements Comparable<PathCost> {
+        @Override
+        public int compareTo(PathCost other) {
+            int stepComparison = Integer.compare(steps, other.steps);
+            return stepComparison != 0 ? stepComparison : Integer.compare(turns, other.turns);
+        }
+    }
+
+    private record PathNode(
+            PathState state,
+            int steps,
+            int turns,
+            long remainingDistance,
+            long sequence
+    ) implements Comparable<PathNode> {
+        @Override
+        public int compareTo(PathNode other) {
+            int distanceComparison = Long.compare(steps + remainingDistance, other.steps + other.remainingDistance);
+            if (distanceComparison != 0)
+                return distanceComparison;
+
+            int turnComparison = Integer.compare(turns, other.turns);
+            if (turnComparison != 0)
+                return turnComparison;
+
+            int remainingComparison = Long.compare(remainingDistance, other.remainingDistance);
+            if (remainingComparison != 0)
+                return remainingComparison;
+
+            return Long.compare(sequence, other.sequence);
+        }
     }
 
     public void fill(
