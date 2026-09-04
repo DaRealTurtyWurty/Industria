@@ -1,0 +1,17 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "ingredients": "industria:aluminium_ingot"
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:aluminium_powder"
+  },
+  "output_b": {
+    "chance": 1.0,
+    "count": 0,
+    "item": "minecraft:air"
+  },
+  "process_time": 100
+}

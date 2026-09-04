@@ -15,7 +15,7 @@
       },
       {
         "state": {
-          "Name": "industria:deepslate_bauxite_ore"
+          "Name": "industria:bauxite_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",

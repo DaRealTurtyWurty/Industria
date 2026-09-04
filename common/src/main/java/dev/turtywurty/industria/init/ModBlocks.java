@@ -28,9 +28,6 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, Block> BAUXITE_ORE = registerWithItemCopy("bauxite_ore",
             Block::new, Blocks.IRON_ORE);
 
-    public static final RegistrationHandle<Block, Block> DEEPSLATE_BAUXITE_ORE = registerWithItemCopy("deepslate_bauxite_ore",
-            Block::new, Blocks.DEEPSLATE_IRON_ORE);
-
     public static final RegistrationHandle<Block, Block> RAW_BAUXITE_BLOCK = registerWithItemCopy("raw_bauxite_block",
             Block::new, Blocks.RAW_IRON_BLOCK);
 

@@ -1,7 +1,15 @@
 {
   "variants": {
-    "": {
-      "model": "industria:block/bauxite_ore"
-    }
+    "": [
+      {
+        "model": "industria:block/bauxite_ore"
+      },
+      {
+        "model": "industria:block/bauxite_ore_1"
+      },
+      {
+        "model": "industria:block/bauxite_ore_2"
+      }
+    ]
   }
 }

@@ -186,6 +186,22 @@ public final class IndustriaModels {
         return new MultiVariant(WeightedList.of(new Variant(id, modelState)));
     }
 
+    private static void registerRandomBauxiteBlock(BlockModelGenerators blockModelGenerator, Block block) {
+        WeightedList.Builder<Variant> variants = WeightedList.builder();
+        for (int index = 0; index < 3; index++) {
+            String suffix = index == 0 ? "" : "_" + index;
+            Identifier texture = Industria.id("block/bauxite_ore" + suffix);
+            TextureMapping textureMapping = TextureMapping.cube(new Material(texture, false));
+            Identifier model = index == 0
+                    ? ModelTemplates.CUBE_ALL.create(block, textureMapping, blockModelGenerator.modelOutput)
+                    : ModelTemplates.CUBE_ALL.createWithSuffix(block, suffix, textureMapping, blockModelGenerator.modelOutput);
+            variants.add(new Variant(model));
+        }
+
+        blockModelGenerator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block,
+                new MultiVariant(variants.build())));
+    }
+
     private static BlockModelDefinitionGenerator createSolarPanelBlockModelDefinitionCreator(SolarPanelBlock block) {
         MultiPartGenerator generator = MultiPartGenerator.multiPart(block);
         for (Direction direction : Direction.Plane.HORIZONTAL) {
@@ -481,8 +497,7 @@ public final class IndustriaModels {
 
     public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
         // Aluminium
-        registerSimpleOreBlock(blockStateModelGenerator, ModBlocks.BAUXITE_ORE.get(), "stone");
-        registerSimpleOreBlock(blockStateModelGenerator, ModBlocks.DEEPSLATE_BAUXITE_ORE.get(), "deepslate");
+        registerRandomBauxiteBlock(blockStateModelGenerator, ModBlocks.BAUXITE_ORE.get());
         blockStateModelGenerator.createTrivialCube(ModBlocks.RAW_BAUXITE_BLOCK.get());
         blockStateModelGenerator.createTrivialCube(ModBlocks.ALUMINIUM_BLOCK.get());
 

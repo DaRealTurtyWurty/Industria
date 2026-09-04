@@ -381,7 +381,7 @@ public final class IndustriaRecipes {
                 nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.CASSITERITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_CASSITERITE_BLOCK.get());
                 nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.SPHALERITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_SPHALERITE_BLOCK.get());
 
-                List<ItemLike> aluminiumOres = List.of(ModBlocks.BAUXITE_ORE.get(), ModBlocks.DEEPSLATE_BAUXITE_ORE.get(), ModItems.BAUXITE.get());
+                List<ItemLike> aluminiumOres = List.of(ModBlocks.BAUXITE_ORE.get(), ModItems.BAUXITE.get());
                 List<ItemLike> tinOres = List.of(ModBlocks.CASSITERITE_ORE.get(), ModBlocks.DEEPSLATE_CASSITERITE_ORE.get(), ModItems.CASSITERITE.get());
                 List<ItemLike> zincOres = List.of(ModBlocks.SPHALERITE_ORE.get(), ModBlocks.DEEPSLATE_SPHALERITE_ORE.get(), ModItems.SPHALERITE.get());
 
@@ -392,6 +392,12 @@ public final class IndustriaRecipes {
                 oreBlasting(aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), 0.7F, 100, "aluminium_ingot");
                 oreBlasting(tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.TIN_INGOT.get(), 0.7F, 100, "tin_ingot");
                 oreBlasting(zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ZINC_INGOT.get(), 0.7F, 100, "zinc_ingot");
+
+                offerCrusher(output, RecipeCategory.MISC,
+                        new IndustriaIngredient(1, ModItems.ALUMINIUM_INGOT.get()),
+                        new OutputItemStack(ModItems.ALUMINIUM_POWDER.get(), 1, 1),
+                        OutputItemStack.EMPTY,
+                        100, "aluminium_ingot_to_powder");
 
                 offerMixer(output, RecipeCategory.MISC, List.of(
                                 new IndustriaIngredient(4, ModItems.BAUXITE.get()),

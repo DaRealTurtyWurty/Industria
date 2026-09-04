@@ -1,7 +1,6 @@
 {
-  "parent": "industria:block/parent/ore",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "base": "minecraft:block/stone",
-    "ore": "industria:block/bauxite_ore"
+    "all": "industria:block/bauxite_ore"
   }
 }

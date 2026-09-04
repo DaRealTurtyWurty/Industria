@@ -55,7 +55,7 @@ public class ModConfiguredFeatures {
 
         List<OreConfiguration.TargetBlockState> bauxiteTargets = List.of(
                 OreConfiguration.target(stoneOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()),
-                OreConfiguration.target(deepslateOreReplaceables, ModBlocks.DEEPSLATE_BAUXITE_ORE.get().defaultBlockState()));
+                OreConfiguration.target(deepslateOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()));
 
         List<OreConfiguration.TargetBlockState> tinTargets = List.of(
                 OreConfiguration.target(stoneOreReplaceables, ModBlocks.CASSITERITE_ORE.get().defaultBlockState()),

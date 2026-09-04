@@ -1,4 +1,4 @@
-// 26.1.1	2026-08-22T11:19:11.4515256	Loot Tables
+// 26.1.1	2026-09-04T20:36:17.3832865	Loot Tables
 13f2dba4361fd243b4faa48a419c15de2c3ee6e4 data/industria/loot_table/blocks/advanced_battery.json
 39d0a9502af1a4b4727661487484aadce6a15381 data/industria/loot_table/blocks/advanced_solar_panel.json
 347fd1257d4ac98b8240e2cd1e86ccb6449af6da data/industria/loot_table/blocks/agitator.json
@@ -23,7 +23,6 @@ f30ad9bad1c0d4475f6ce055b54154e23655a9ae data/industria/loot_table/blocks/convey
 d91879e24086767d9a3b01832665426cec341c03 data/industria/loot_table/blocks/crusher.json
 1f7ca43c95bc006937397e6113e6739f5f0d8e9e data/industria/loot_table/blocks/crystallizer.json
 6124d728eedeb0cc5090b8171b2e6ee01b522e07 data/industria/loot_table/blocks/deepslate_argentite_ore.json
-e366dee56bd1b3896f753adf87dbbc126d86ef73 data/industria/loot_table/blocks/deepslate_bauxite_ore.json
 f57d5261361882e9d003edda4af8195459e4f03d data/industria/loot_table/blocks/deepslate_cassiterite_ore.json
 85326d4ed36e8fb23fd552b0455d2a94959fdcac data/industria/loot_table/blocks/deepslate_cobaltite_ore.json
 ddf7397a404da3c140960b4a2202fb8b74bb7c8a data/industria/loot_table/blocks/deepslate_galena_ore.json

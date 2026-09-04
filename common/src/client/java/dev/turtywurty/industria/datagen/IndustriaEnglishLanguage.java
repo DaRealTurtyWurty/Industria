@@ -183,6 +183,7 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModItems.ALUMINIUM_INGOT.get(), "Aluminium Ingot");
         translationBuilder.add(ModItems.ALUMINIUM_NUGGET.get(), "Aluminium Nugget");
         translationBuilder.add(ModItems.ALUMINIUM_PLATE.get(), "Aluminium Plate");
+        translationBuilder.add(ModItems.ALUMINIUM_POWDER.get(), "Aluminium Powder");
         translationBuilder.add(ModFluids.DIRTY_SODIUM_ALUMINATE.block().get(), "Dirty Sodium Aluminate");
         translationBuilder.add(ModFluids.DIRTY_SODIUM_ALUMINATE.bucket().get(), "Bucket of Dirty Sodium Aluminate");
         translationBuilder.add(ModFluids.SODIUM_ALUMINATE.block().get(), "Sodium Aluminate");
@@ -191,7 +192,6 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModFluids.MOLTEN_ALUMINIUM.bucket().get(), "Bucket of Molten Aluminium");
         addSlurry(translationBuilder, ModSlurries.BAUXITE_SLURRY, "Bauxite Slurry");
         translationBuilder.add(ModBlocks.BAUXITE_ORE.get(), "Bauxite Ore");
-        translationBuilder.add(ModBlocks.DEEPSLATE_BAUXITE_ORE.get(), "Deepslate Bauxite Ore");
         translationBuilder.add(ModBlocks.RAW_BAUXITE_BLOCK.get(), "Raw Bauxite Block");
         translationBuilder.add(ModBlocks.ALUMINIUM_BLOCK.get(), "Block of Aluminium");
 

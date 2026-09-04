@@ -36,6 +36,7 @@ public class ModItems {
     public static final RegistrationHandle<Item, Item> ALUMINIUM_INGOT = register("aluminium_ingot");
     public static final RegistrationHandle<Item, Item> ALUMINIUM_NUGGET = register("aluminium_nugget");
     public static final RegistrationHandle<Item, Item> ALUMINIUM_PLATE = register("aluminium_plate");
+    public static final RegistrationHandle<Item, Item> ALUMINIUM_POWDER = register("aluminium_powder");
 
     // Silver
     public static final RegistrationHandle<Item, Item> ARGENTITE = register("argentite");
