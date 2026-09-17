@@ -21,6 +21,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -170,6 +173,77 @@ public class InWorldFluidRenderingComponent {
         matrices.popPose();
     }
 
+    /**
+     * Draws a horizontal octagonal surface directly in model space (up is negative Y).
+     */
+    public void renderOctagonalTopFaceOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue,
+                                           PoseStack matrices, int light, int overlay, @Nullable Level world, BlockPos pos,
+                                           float y, float radius, float cornerCut) {
+        FluidRenderUtils.GuiFluidRenderData data = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
+        if (data == null || radius <= 0)
+            return;
+
+        int fluidLight = (light & 0xF00000)
+                | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(fluidVariant)) << 4);
+        renderOctagonalTopFaceOnly(data.stillSprite(), data.tintColor(), queue, matrices, fluidLight, overlay, y, radius, cornerCut);
+    }
+
+    /**
+     * Sprite-based overload shared by fluids and slurries. Uses model-space coordinates.
+     */
+    public void renderOctagonalTopFaceOnly(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue,
+                                           PoseStack matrices, int light, int overlay, float y, float radius, float cornerCut) {
+        if (radius <= 0)
+            return;
+
+        float edge = radius - Mth.clamp(cornerCut, 0f, radius);
+        float[][] perimeter = {{-edge, -radius}, {edge, -radius}, {radius, -edge}, {radius, edge},
+                {edge, radius}, {-edge, radius}, {-radius, edge}, {-radius, -edge}};
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()), (pose, vertices) -> {
+            // Clip each block-sized tile to the octagon, keeping every UV inside the atlas sprite.
+            for (float x = -radius; x < radius; x += 1f) {
+                for (float z = -radius; z < radius; z += 1f) {
+                    List<float[]> polygon = new ArrayList<>(Arrays.asList(perimeter));
+                    polygon = clipFluidTile(polygon, 0, x, true);
+                    polygon = clipFluidTile(polygon, 0, Math.min(x + 1f, radius), false);
+                    polygon = clipFluidTile(polygon, 1, z, true);
+                    polygon = clipFluidTile(polygon, 1, Math.min(z + 1f, radius), false);
+                    for (int i = 1; i + 1 < polygon.size(); i++) {
+                        float[][] triangle = {polygon.getFirst(), polygon.get(i), polygon.get(i + 1), polygon.get(i + 1)};
+                        for (float[] point : triangle) {
+                            vertices.addVertex(pose, point[0], y, point[1]).setColor(color)
+                                    .setUv(sprite.getU(Mth.clamp(point[0] - x, 0f, 1f)), sprite.getV(Mth.clamp(point[1] - z, 0f, 1f)))
+                                    .setOverlay(overlay).setLight(light).setNormal(pose, 0, -1, 0);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private static List<float[]> clipFluidTile(List<float[]> polygon, int axis, float boundary, boolean keepAbove) {
+        List<float[]> result = new ArrayList<>();
+        if (polygon.isEmpty())
+            return result;
+
+        float[] previous = polygon.getLast();
+        boolean previousInside = keepAbove ? previous[axis] >= boundary : previous[axis] <= boundary;
+        for (float[] current : polygon) {
+            boolean inside = keepAbove ? current[axis] >= boundary : current[axis] <= boundary;
+            if (inside != previousInside) {
+                float t = (boundary - previous[axis]) / (current[axis] - previous[axis]);
+                result.add(new float[]{Mth.lerp(t, previous[0], current[0]), Mth.lerp(t, previous[1], current[1])});
+            }
+
+            if (inside) {
+                result.add(current);
+            }
+            previous = current;
+            previousInside = inside;
+        }
+        return result;
+    }
+
     public static void drawTiledTopQuad(VertexConsumer vertexConsumer,
                                         PoseStack.Pose entry,
                                         float x1, float y, float z1,
@@ -267,6 +341,41 @@ public class InWorldFluidRenderingComponent {
                 .setNormal(entry, 0.0F, 1.0F, 0.0F);
     }
 
+    /**
+     * Draws exactly one quad in the supplied pose's coordinate system, without additional rotations.
+     * The sprite is stretched across the full bounds and cropped as the fill rises from bottomY to topY.
+     * Decreasing Y bounds support model space, where Y points downwards.
+     */
+    public void drawSingleXYQuadOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue,
+                                     PoseStack matrices, int light, int overlay, @Nullable Level world, BlockPos pos,
+                                     float left, float bottomY, float depth, float right, float topY, float fill) {
+        float progress = Mth.clamp(fill, 0f, 1f);
+        if (!(progress > 0f) || left == right || bottomY == topY)
+            return;
+
+        FluidRenderUtils.GuiFluidRenderData data = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
+        if (data == null)
+            return;
+
+        TextureAtlasSprite sprite = data.stillSprite();
+        float surfaceY = Mth.lerp(progress, bottomY, topY);
+        float surfaceV = sprite.getV(1f - progress);
+        float normalZ = -Math.signum((right - left) * (topY - bottomY));
+        int fluidLight = (light & 0xF00000)
+                | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(fluidVariant)) << 4);
+
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()), (pose, vertices) -> {
+            vertices.addVertex(pose, left, bottomY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU0(), sprite.getV1()).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
+            vertices.addVertex(pose, left, surfaceY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU0(), surfaceV).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
+            vertices.addVertex(pose, right, surfaceY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU1(), surfaceV).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
+            vertices.addVertex(pose, right, bottomY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU1(), sprite.getV1()).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
+        });
+    }
+
     public void drawTiledXYQuadOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
         drawTiledXYQuadOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
     }
@@ -298,6 +407,32 @@ public class InWorldFluidRenderingComponent {
         queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) ->
                 drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F));
 
+        matrices.popPose();
+    }
+
+    /**
+     * Sprite-based tiled face for slurries, with the same Y/Z transform as the fluid overload.
+     */
+    public void drawTiledXYQuadOnly(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices,
+                                    int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2) {
+        drawTiledXYQuadOnly(sprite, color, queue, matrices, light, overlay, x1, y1, z1, x2, y2, z2, false);
+    }
+
+    /**
+     * Reverses winding and normal when the visible side is opposite the default face.
+     */
+    public void drawTiledXYQuadOnly(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices,
+                                    int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2,
+                                    boolean reversed) {
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        queue.submitCustomGeometry(matrices, ENTITY_TRANSLUCENT_CULL.apply(sprite.atlasLocation()), (pose, vertices) -> {
+            if (reversed) {
+                drawReversedTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, 1f);
+            } else {
+                drawTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, -1f);
+            }
+        });
         matrices.popPose();
     }
 

@@ -3,29 +3,30 @@
   "controller_block": "industria:digester",
   "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
   "allow_mirror": false,
-  "controller": [1, 0, 1],
+  "controller": [2, 0, 2],
   "pattern": {
     "type": "multiblocklib:grid",
     "layers": [
       [
-        ["minecraft:stone", "minecraft:stone", "minecraft:stone"],
-        ["minecraft:stone", "industria:digester", "minecraft:stone"],
-        ["minecraft:stone", "minecraft:stone", "minecraft:stone"]
+        ["minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone"],
+        ["minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone"],
+        ["minecraft:stone", "minecraft:stone", "industria:digester", "minecraft:stone", "minecraft:stone"],
+        ["minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone"],
+        ["minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone", "minecraft:stone"]
       ],
       [
-        ["minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block"],
-        ["minecraft:copper_block", "minecraft:cauldron", "minecraft:copper_block"],
-        ["minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block"]
+        ["minecraft:copper_block", "minecraft:copper_block", "minecraft:glass", "minecraft:copper_block", "minecraft:copper_block"],
+        ["minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block"],
+        ["minecraft:copper_block", "minecraft:campfire", "minecraft:cauldron", "minecraft:copper_block", "minecraft:copper_block"],
+        ["minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block"],
+        ["minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block", "minecraft:copper_block"]
       ],
       [
-        ["minecraft:glass", "minecraft:glass", "minecraft:glass"],
-        ["minecraft:glass", "minecraft:composter", "minecraft:glass"],
-        ["minecraft:glass", "minecraft:glass", "minecraft:glass"]
-      ],
-      [
-        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
-        ["industria:steel_block", "minecraft:campfire", "industria:steel_block"],
-        ["industria:steel_block", "industria:steel_block", "industria:steel_block"]
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "minecraft:composter", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block", "industria:steel_block"]
       ]
     ]
   }

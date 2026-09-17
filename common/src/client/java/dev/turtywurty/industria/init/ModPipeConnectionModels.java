@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.DigesterBlockEntity;
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
 import dev.turtywurty.industria.pipe.ConnectionModelSet;
 import dev.turtywurty.industria.pipe.PipeConnectionModelApi;
@@ -51,6 +52,14 @@ public final class ModPipeConnectionModels {
     private static final ConnectionModelSet SOLAR_PANEL_CABLE = ConnectionModelSet.horizontal(
             Industria.id("solar_panel_cable"),
             Industria.id("block/solar_panel_cable_connection")
+    );
+    private static final ConnectionModelSet DIGESTER_FLUID_PIPE = ConnectionModelSet.horizontal(
+            Industria.id("digester_fluid_pipe"),
+            Industria.id("block/digester_fluid_pipe_connection")
+    );
+    private static final ConnectionModelSet DIGESTER_CABLE = ConnectionModelSet.horizontal(
+            Industria.id("digester_cable"),
+            Industria.id("block/digester_cable_connection")
     );
 
     public static void init() {
@@ -108,6 +117,24 @@ public final class ModPipeConnectionModels {
         );
 
         PipeConnectionModelApi.register(
+                Industria.id("digester_fluid_pipe"),
+                ModBlocks.FLUID_PIPE.get(),
+                MultiblockLib.MULTIBLOCK_PART,
+                (level, targetPos, _, targetFace) -> isDigesterPort(level, targetPos, targetFace, true),
+                DIGESTER_FLUID_PIPE,
+                100
+        );
+
+        PipeConnectionModelApi.register(
+                Industria.id("digester_cable"),
+                ModBlocks.CABLE.get(),
+                MultiblockLib.MULTIBLOCK_PART,
+                (level, targetPos, _, targetFace) -> isDigesterPort(level, targetPos, targetFace, false),
+                DIGESTER_CABLE,
+                100
+        );
+
+        PipeConnectionModelApi.register(
                 Industria.id("advanced_solar_panel_cable"),
                 ModBlocks.CABLE.get(),
                 ModBlocks.ADVANCED_SOLAR_PANEL.get(),
@@ -118,6 +145,15 @@ public final class ModPipeConnectionModels {
                 SOLAR_PANEL_CABLE,
                 0
         );
+    }
+
+    private static boolean isDigesterPort(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
+        BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below(fluid ? 0 : 1);
+        if (!(level.getBlockEntity(controllerPos) instanceof DigesterBlockEntity digester))
+            return false;
+
+        return fluid ? digester.getFluidStorageForExternal(targetPos, targetFace) != null :
+                digester.getEnergyStorageForExternal(targetPos, targetFace) != null;
     }
 
     private static boolean isMixerPort(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {

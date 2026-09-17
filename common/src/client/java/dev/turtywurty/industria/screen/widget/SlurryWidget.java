@@ -20,6 +20,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -45,6 +47,9 @@ public class SlurryWidget implements Renderable, LayoutElement {
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         Slurry slurry = this.slurryTank.getResource().value();
         long amount = this.slurryTank.getAmount();
+
+        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY))
+            drawTooltip(context, mouseX, mouseY);
 
         SlurryRenderHandler slurryRenderHandler = SlurryRenderHandlerRegistry.get(slurry);
         if (slurryRenderHandler == null || amount <= 0)
@@ -72,9 +77,6 @@ public class SlurryWidget implements Renderable, LayoutElement {
 
         ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
 
-        if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
-            drawTooltip(context, mouseX, mouseY);
-        }
     }
 
     protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
@@ -84,10 +86,13 @@ public class SlurryWidget implements Renderable, LayoutElement {
         long capacity = this.slurryTank.capacity(0, this.slurryTank.getResource());
 
         Font textRenderer = Minecraft.getInstance().font;
+        List<Component> lines = new ArrayList<>();
         if (slurry != null && amount > 0) {
-            context.setTooltipForNextFrame(textRenderer, Component.translatable("slurry." + slurry.id().getNamespace() + "." + slurry.id().getPath()), mouseX, mouseY);
-            context.setTooltipForNextFrame(textRenderer, Component.literal(((int) (((float) amount / FluidAmounts.BUCKET) * 1000)) + " / " + ((int) (((float) capacity / FluidAmounts.BUCKET) * 1000)) + " mB"), mouseX, mouseY + 10);
+            lines.add(Component.translatable("slurry." + slurry.id().getNamespace() + "." + slurry.id().getPath()));
         }
+        lines.add(Component.literal(((long) ((double) amount / FluidAmounts.BUCKET * 1000))
+                + " / " + ((long) ((double) capacity / FluidAmounts.BUCKET * 1000)) + " mB"));
+        context.setComponentTooltipForNextFrame(textRenderer, lines, mouseX, mouseY);
     }
 
     @Override

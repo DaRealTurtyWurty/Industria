@@ -69,6 +69,9 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert
 // TODO: Make this work with temperature and pressure
 public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("digester");
+    public static final BlockPos ENERGY_PORT = new BlockPos(0, 1, 2);
+    public static final BlockPos SLURRY_INPUT_PORT = new BlockPos(0, 2, 0);
+    public static final BlockPos FLUID_OUTPUT_PORT = new BlockPos(0, 0, -2);
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -117,8 +120,8 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 5_000, 0));
 
-        this.wrappedSlurryStorage.addStorage(new InputSlurryStorage(this, FluidAmounts.BUCKET * 5), Direction.UP);
-        this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidAmounts.BUCKET * 5), Direction.SOUTH);
+        this.wrappedSlurryStorage.addStorage(new InputSlurryStorage(this, FluidAmounts.BUCKET * 20), Direction.UP);
+        this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidAmounts.BUCKET * 20), Direction.SOUTH);
     }
 
     @Override
@@ -258,6 +261,18 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         return getEnergyStorage().getAmount() >= 100;
     }
 
+    public int getProgress() {
+        return this.progress;
+    }
+
+    public int getMaxProgress() {
+        return this.maxProgress;
+    }
+
+    public boolean isRunning() {
+        return isFormed() && this.progress > 0 && this.progress < this.maxProgress && hasEnergy();
+    }
+
     private void consumeEnergy() {
         extract(getEnergyStorage(), 100);
         update();
@@ -334,10 +349,10 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(offset -> offset.getZ() == -1);
+                .where((offset, side) -> offset.equals(ENERGY_PORT) && side == Direction.SOUTH);
         ports.input(TransferType.SLURRY, this::getInputSlurryStorage)
-                .at(new BlockPos(0, 3, 0));
+                .where((offset, side) -> offset.equals(SLURRY_INPUT_PORT) && side == Direction.UP);
         ports.output(TransferType.FLUID, this::getOutputFluidStorage)
-                .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == 1);
+                .where((offset, side) -> offset.equals(FLUID_OUTPUT_PORT) && side == Direction.NORTH);
     }
 }

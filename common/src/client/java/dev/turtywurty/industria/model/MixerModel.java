@@ -1,51 +1,21 @@
 package dev.turtywurty.industria.model;
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.state.MixerRenderState;
-import dev.turtywurty.turtymultiloader.client.registration.ClientRegistrations;
+import dev.turtywurty.industria.util.IndustriaRenderTypes;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 
-import java.util.function.Function;
 
 public class MixerModel extends Model<MixerRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("mixer"), "main");
     public static final Identifier CLOSED_TEXTURE_LOCATION = Industria.id("textures/block/mixer_output_closed.png");
     public static final Identifier OPEN_TEXTURE_LOCATION = Industria.id("textures/block/mixer_output_open.png");
-    private static final RenderPipeline GLASS_PIPELINE = ClientRegistrations.registerRenderPipeline(
-            RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-                    .withLocation(Industria.id("pipeline/mixer_glass"))
-                    .withShaderDefine("ALPHA_CUTOUT", 0.1F)
-                    .withShaderDefine("PER_FACE_LIGHTING")
-                    .withSampler("Sampler1")
-                    .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-                    .withCull(false)
-                    .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
-                    .build());
-    private static final Function<Identifier, RenderType> GLASS_RENDER_TYPE = Util.memoize(texture ->
-            ClientRegistrations.createRenderType("industria_mixer_glass",
-                    RenderSetup.builder(GLASS_PIPELINE)
-                            .withTexture("Sampler0", texture)
-                            .useLightmap()
-                            .useOverlay()
-                            .affectsCrumbling()
-                            .sortOnUpload()
-                            .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
-                            .createRenderSetup()));
     private final boolean glassOnly;
     private final ModelParts parts;
 
@@ -54,7 +24,7 @@ public class MixerModel extends Model<MixerRenderState> {
     }
 
     public MixerModel(ModelPart root, boolean glassOnly) {
-        super(root, glassOnly ? GLASS_RENDER_TYPE : RenderTypes::entityCutout);
+        super(root, glassOnly ? IndustriaRenderTypes.GLASS_RENDER_TYPE : RenderTypes::entityCutout);
         this.glassOnly = glassOnly;
 
         ModelPart main = root.getChild("main");

@@ -592,7 +592,7 @@ public final class IndustriaModels {
         registerCustomCube(blockStateModelGenerator, ModBlocks.CENTRIFUGAL_CONCENTRATOR.get(), Industria.id("block/steel_block"));
         registerCustomCube(blockStateModelGenerator, ModBlocks.CLARIFIER.get(), Industria.id("block/clarifier"));
         registerCustomCube(blockStateModelGenerator, ModBlocks.CRYSTALLIZER.get(), Industria.id("block/crystallizer"));
-        registerCustomCube(blockStateModelGenerator, ModBlocks.DIGESTER.get(), Industria.id("block/digester"));
+        registerCustomCube(blockStateModelGenerator, ModBlocks.DIGESTER.get(), Industria.id("block/steel_block"));
         registerCustomCube(blockStateModelGenerator, ModBlocks.DRILL.get(), Industria.id("block/drill_frame"));
         registerCustomCube(blockStateModelGenerator, ModBlocks.ELECTROLYZER.get(), Industria.id("block/electrolyzer"));
         registerCustomCube(blockStateModelGenerator, ModBlocks.MIXER.get(), Industria.id("block/mixer"));
@@ -739,8 +739,8 @@ public final class IndustriaModels {
                 new IndustriaBlockEntityItemRenderer.Unbaked(DigesterModel.LAYER_LOCATION, DigesterModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
                         .copyModifyGui(displaySettings -> {
-                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
-                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                            displaySettings.setTranslation(0, -2.75f, 0);
+                            displaySettings.setScale(0.18f, 0.18f, 0.18f);
                         }));
 
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.CLARIFIER.get(),

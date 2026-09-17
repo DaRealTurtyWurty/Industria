@@ -57,17 +57,11 @@ public final class IndustriaTestWorldLauncher {
 
     public static void open(Screen titleScreen) {
         Minecraft minecraft = Minecraft.getInstance();
-        boolean worldExists;
         try (LevelStorageSource.LevelStorageAccess access = minecraft.getLevelSource().createAccess(IndustriaTestWorld.WORLD_ID)) {
-            worldExists = access.hasWorldData();
+            access.deleteLevel();
         } catch (IOException exception) {
             SystemToast.onWorldAccessFailure(minecraft, IndustriaTestWorld.WORLD_ID);
             LOGGER.warn("Failed to access Industria test world", exception);
-            return;
-        }
-
-        if (worldExists) {
-            minecraft.createWorldOpenFlows().openWorld(IndustriaTestWorld.WORLD_ID, () -> minecraft.setScreen(titleScreen));
             return;
         }
 
