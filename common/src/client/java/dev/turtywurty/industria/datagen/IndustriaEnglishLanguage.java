@@ -177,7 +177,6 @@ public final class IndustriaEnglishLanguage {
         // Aluminium
         translationBuilder.add(ModItems.BAUXITE.get(), "Bauxite");
         translationBuilder.add(ModItems.CRUSHED_BAUXITE.get(), "Crushed Bauxite");
-        translationBuilder.add(ModItems.SODIUM_ALUMINATE.get(), "Sodium Aluminate");
         translationBuilder.add(ModItems.ALUMINIUM_HYDROXIDE.get(), "Aluminium Hydroxide");
         translationBuilder.add(ModItems.ALUMINA.get(), "Alumina");
         translationBuilder.add(ModItems.ALUMINIUM_INGOT.get(), "Aluminium Ingot");

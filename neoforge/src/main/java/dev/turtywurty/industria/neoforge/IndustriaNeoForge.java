@@ -18,6 +18,7 @@ public final class IndustriaNeoForge {
 
     public IndustriaNeoForge(IEventBus modBus) {
         Industria.onInitialize();
+        NeoForgeFluidTypes.register(modBus);
 
         modBus.addListener(FMLCommonSetupEvent.class, event ->
                 event.enqueueWork(Industria::onRegistriesApplied));

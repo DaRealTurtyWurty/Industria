@@ -30,7 +30,6 @@ public class ModItems {
     // Aluminium
     public static final RegistrationHandle<Item, Item> BAUXITE = register("bauxite");
     public static final RegistrationHandle<Item, Item> CRUSHED_BAUXITE = register("crushed_bauxite");
-    public static final RegistrationHandle<Item, Item> SODIUM_ALUMINATE = register("sodium_aluminate");
     public static final RegistrationHandle<Item, Item> ALUMINIUM_HYDROXIDE = register("aluminium_hydroxide");
     public static final RegistrationHandle<Item, Item> ALUMINA = register("alumina");
     public static final RegistrationHandle<Item, Item> ALUMINIUM_INGOT = register("aluminium_ingot");

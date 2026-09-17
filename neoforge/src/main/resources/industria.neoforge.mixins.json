@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "dev.turtywurty.industria.neoforge.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "IndustriaFluidMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

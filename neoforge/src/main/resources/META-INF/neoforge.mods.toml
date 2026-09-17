@@ -17,6 +17,9 @@ config = "industria.mixins.json"
 [[mixins]]
 config = "industria.client.mixins.json"
 
+[[mixins]]
+config = "industria.neoforge.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
