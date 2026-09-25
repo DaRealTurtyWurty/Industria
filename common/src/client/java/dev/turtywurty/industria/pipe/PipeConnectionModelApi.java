@@ -5,6 +5,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
 import java.util.function.BiPredicate;
 
 public final class PipeConnectionModelApi {
@@ -63,5 +64,18 @@ public final class PipeConnectionModelApi {
                         priority
                 )
         );
+    }
+
+    public static void registerDynamic(
+            Identifier ruleId,
+            Block pipeBlock,
+            Block targetBlock,
+            PipeConnectionModelSelector selector,
+            List<ConnectionModelSet> models,
+            int priority
+    ) {
+        PipeConnectionModelRegistry.register(new ConnectionModelRule(
+                ruleId, pipeBlock, targetBlock, selector, models, priority
+        ));
     }
 }

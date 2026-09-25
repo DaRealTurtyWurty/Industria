@@ -13,6 +13,11 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 public final class ModPipeConnectionModels {
     private static final ConnectionModelSet CABLE = ConnectionModelSet.horizontalAndVertical(
@@ -39,12 +44,7 @@ public final class ModPipeConnectionModels {
             Industria.id("block/gas_pipe_connection_up"),
             Industria.id("block/gas_pipe_connection_down")
     );
-    private static final ConnectionModelSet MIXER_FLUID_PIPE = ConnectionModelSet.forDirection(
-            Industria.id("mixer_fluid_pipe"),
-            Direction.DOWN,
-            Industria.id("block/mixer_fluid_pipe_connection"),
-            Variant.SimpleModelState.DEFAULT.withY(Quadrant.R180)
-    );
+    private static final Map<Direction, ConnectionModelSet> MIXER_FLUID_PIPE = createMixerFluidPipeModels();
     private static final ConnectionModelSet MIXER_SLURRY_PIPE = ConnectionModelSet.rotatedFromNorth(
             Industria.id("mixer_slurry_pipe"),
             Industria.id("block/mixer_slurry_pipe_connection")
@@ -86,12 +86,15 @@ public final class ModPipeConnectionModels {
                 GAS_PIPE
         );
 
-        PipeConnectionModelApi.register(
+        PipeConnectionModelApi.registerDynamic(
                 Industria.id("mixer_fluid_pipe"),
                 ModBlocks.FLUID_PIPE.get(),
                 MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> isMixerPort(level, targetPos, targetFace, true),
-                MIXER_FLUID_PIPE,
+                (level, targetPos, _, targetFace) -> {
+                    Direction facing = findMixerPortFacing(level, targetPos, targetFace, true);
+                    return facing == null ? null : MIXER_FLUID_PIPE.get(facing);
+                },
+                List.copyOf(MIXER_FLUID_PIPE.values()),
                 100
         );
 
@@ -156,7 +159,31 @@ public final class ModPipeConnectionModels {
                 digester.getEnergyStorageForExternal(targetPos, targetFace) != null;
     }
 
+    private static Map<Direction, ConnectionModelSet> createMixerFluidPipeModels() {
+        Map<Direction, ConnectionModelSet> models = new EnumMap<>(Direction.class);
+        for (Direction facing : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
+            Variant.SimpleModelState state = switch (facing) {
+                case NORTH -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R90);
+                case EAST -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R180);
+                case SOUTH -> Variant.SimpleModelState.DEFAULT.withY(Quadrant.R270);
+                case WEST -> Variant.SimpleModelState.DEFAULT;
+                default -> throw new IllegalStateException("Unexpected mixer facing: " + facing);
+            };
+            models.put(facing, ConnectionModelSet.forDirection(
+                    Industria.id("mixer_fluid_pipe/" + facing.getName()),
+                    Direction.DOWN,
+                    Industria.id("block/mixer_fluid_pipe_connection"),
+                    state
+            ));
+        }
+        return Map.copyOf(models);
+    }
+
     private static boolean isMixerPort(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
+        return findMixerPortFacing(level, targetPos, targetFace, fluid) != null;
+    }
+
+    private static @Nullable Direction findMixerPortFacing(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
         for (int blocksBelow = 0; blocksBelow <= 2; blocksBelow++) {
             for (int offsetX = -1; offsetX <= 1; offsetX++) {
                 for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
@@ -168,11 +195,11 @@ public final class ModPipeConnectionModels {
                             mixer.getFluidStorageForExternal(targetPos, targetFace) != null :
                             mixer.getSlurryStorageForExternal(targetPos, targetFace) != null;
                     if (matchesPort)
-                        return true;
+                        return mixer.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
                 }
             }
         }
 
-        return false;
+        return null;
     }
 }

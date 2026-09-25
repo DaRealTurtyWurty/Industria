@@ -40,8 +40,9 @@ public final class PipeConnectionModelRegistry {
             return null;
 
         for (ConnectionModelRule rule : rules) {
-            if (rule.matches(level, targetPos, pipeState, targetState, targetFace))
-                return rule.models();
+            ConnectionModelSet model = rule.resolve(level, targetPos, pipeState, targetState, targetFace);
+            if (model != null)
+                return model;
         }
 
         return null;
@@ -66,7 +67,7 @@ public final class PipeConnectionModelRegistry {
 
         for (List<ConnectionModelRule> rules : RULES_BY_TARGET.values()) {
             for (ConnectionModelRule rule : rules) {
-                models.add(rule.models());
+                models.addAll(rule.models());
             }
         }
 
