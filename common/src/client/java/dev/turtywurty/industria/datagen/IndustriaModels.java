@@ -895,12 +895,19 @@ public final class IndustriaModels {
                     itemModelGenerator.itemModelOutput.accept(entry, ItemModelUtils.plainModel(modelId));
                 });
 
+        Set<Item> handheldItems = Set.of(ModItems.WRENCH.get());
+
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                 .map(BuiltInRegistries.ITEM::getValue)
                 .filter(entry -> !(entry instanceof BlockItem))
                 .filter(entry -> !exclusionList.contains(entry))
                 .filter(Objects::nonNull)
-                .forEach(entry -> itemModelGenerator.generateFlatItem(entry, FLAT_ITEM));
+                .forEach(entry -> itemModelGenerator.generateFlatItem(
+                        entry,
+                        handheldItems.contains(entry)
+                                ? ModelTemplates.FLAT_HANDHELD_ITEM
+                                : FLAT_ITEM
+                ));
     }
 
     private void createBattery(BlockModelGenerators blockStateModelGenerator, BatteryBlock block) {

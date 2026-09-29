@@ -1,4 +1,4 @@
-// 26.1.1	2026-09-04T20:36:16.3332644	Vanilla block and item models
+// 26.1.1	2026-09-28T22:39:07.2937555	Vanilla block and item models
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets/industria/blockstates/advanced_battery.json
 97e91a3c27f38fdd330ae2ebcfbe81b2b31b23f9 assets/industria/blockstates/advanced_solar_panel.json
 cf9ac5e96b25ca692a2d479dbb9949f47571029d assets/industria/blockstates/agitator.json
@@ -283,7 +283,6 @@ b34e83e03515d1b65a855e1d76a9bd96c45efff9 assets/industria/items/silicon_pellet.j
 cefe99889096714c3061824e7a0d8ff16e7eab8f assets/industria/items/silver_nugget.json
 fa232092805f8acc8057bfde97565ee951013735 assets/industria/items/simple_drill_head.json
 d9ceb525393a69ffcae4d26bd518cf66e8dea316 assets/industria/items/slurry_pipe.json
-e5958f08ad8666dd0c77a4d44fc21fda561bedee assets/industria/items/sodium_aluminate.json
 8d8005b8978aede20a34858e2469549433949308 assets/industria/items/sodium_aluminate_bucket.json
 33c4d72a716292ed74857f647b26b4ca6370fb2b assets/industria/items/sodium_carbonate.json
 4baee030b5f1f9d51710a25cd24219abafc7c8a5 assets/industria/items/sodium_hydroxide.json
@@ -350,7 +349,7 @@ c156402b8e9005c09f7d4a109d06a74dd3ed5a72 assets/industria/models/block/deepslate
 ae3dfaf5ae75ad67aef25857f909bb0a1cf92419 assets/industria/models/block/deepslate_pentlandite_ore.json
 b80fb95767b2499e943a1fc8907b7cca6c61f4a4 assets/industria/models/block/deepslate_quartz_ore.json
 1ac28915f87669104d3dbd59597fa5f17a7f1210 assets/industria/models/block/deepslate_sphalerite_ore.json
-3b896135114a0113ffc49ec82e65046a828773eb assets/industria/models/block/digester.json
+e449f21654ecab3362acb6aee2ae9f77d189f42a assets/industria/models/block/digester.json
 e449f21654ecab3362acb6aee2ae9f77d189f42a assets/industria/models/block/distillation_tower.json
 d40278bcd95eee4b20fec0da7133561ec64a15ee assets/industria/models/block/drill.json
 cfb7d7f711acc1885f9c65f053706d46fe5f9e9b assets/industria/models/block/electric_furnace.json
@@ -468,7 +467,7 @@ fd019b5da317fb9f12cc5150e524694a2583bea1 assets/industria/models/item/crushed_sp
 288854efe65799d867e180288e8a3f25220f8ca2 assets/industria/models/item/crushed_sulfur.json
 9911bf402a7b5735b49f0b5fbf3c83a95a44dd98 assets/industria/models/item/cryolite.json
 b4cab8424f94033e95320fd6e86cfa63995969ed assets/industria/models/item/crystallizer.json
-8a2e567fefcee2917e47abd60b03dcb1b4b57683 assets/industria/models/item/digester.json
+84ec5e51041b6f782b5fae2c5673a5911f1a24fb assets/industria/models/item/digester.json
 bcdf9eb2ea0baa88a4559841f14b1d40523bdf1d assets/industria/models/item/diluted_formic_acid_bucket.json
 4cfd3c6cd1b18d135be0efe1f7e116957a292f40 assets/industria/models/item/dirty_sodium_aluminate_bucket.json
 6c1088e92bc451174799a33e70181529bb38768b assets/industria/models/item/distillation_tower.json
@@ -519,7 +518,6 @@ b9818b61050f54c84810d8385aad52c7b0c1e979 assets/industria/models/item/silicon_pe
 9d006d50b4234d7322117314008d6d2092d60146 assets/industria/models/item/silver_ingot.json
 1f439f7bb240ac57a39c82a4dfd46c8c038039d9 assets/industria/models/item/silver_nugget.json
 57d555518b46c07931bc78606e1556020e3c7300 assets/industria/models/item/simple_drill_head.json
-b025085d80aa5e15fbb804645834bd19894a7864 assets/industria/models/item/sodium_aluminate.json
 a101a692e91a29f6b49e1a78d80fb06506df96b7 assets/industria/models/item/sodium_aluminate_bucket.json
 77c87a660a95784f2930acdce7bbc3de7d88394b assets/industria/models/item/sodium_carbonate.json
 44837bafd4e19cad4ed7d23d37c3123648602d17 assets/industria/models/item/sodium_hydroxide.json
@@ -539,7 +537,7 @@ b2915fcdbe02b2b1545a03cbd39a8eca4b6a13f6 assets/industria/models/item/tin_ingot.
 d6a87f18912927d532a220c71ebffdc7b6d4e517 assets/industria/models/item/tree_tap.json
 4cf12a261af64057d68f90a648550ca54bfcc9aa assets/industria/models/item/upgrade_station.json
 d50e60a27fd5a34b5343632790890ba406992fd3 assets/industria/models/item/wind_turbine.json
-e21a23ca2f94b7bd60a9ef8265ee38a42718c591 assets/industria/models/item/wrench.json
+2a4792e7e37757541ccc1afdbb6184c6300059ba assets/industria/models/item/wrench.json
 9118cf3a2caa44efe469625b5add583d89c1aceb assets/industria/models/item/zinc_calcine.json
 41f4d3a02036f653cf5e11c2880c58d3a8822072 assets/industria/models/item/zinc_ingot.json
 dd5c98f00d66531da837c23348b454851985c281 assets/industria/models/item/zinc_nugget.json
