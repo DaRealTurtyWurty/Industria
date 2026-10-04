@@ -26,6 +26,7 @@ import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -125,6 +126,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         }
 
         updateTemperature(heating, targetTemperature);
+        emitChimneyParticles(heating);
         processChambers();
     }
 
@@ -138,6 +140,29 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
         if (previousTemperature != this.temperature) {
             setChanged();
+        }
+    }
+
+    private void emitChimneyParticles(boolean heating) {
+        if (!heating
+                || !this.structureReady
+                || !(this.level instanceof ServerLevel serverLevel)
+                || this.level.getGameTime() % 4 != 0)
+            return;
+
+        Set<BlockPos> emittedPositions = new HashSet<>();
+        for (SmelteryChamber chamber : this.chambers) {
+            BlockPos chimneyPos = chamber.chimneyPos;
+            if(chimneyPos == null || !this.level.isLoaded(chimneyPos) || emittedPositions.contains(chimneyPos))
+                continue;
+
+            emittedPositions.add(chimneyPos);
+        }
+
+        for (BlockPos position : emittedPositions) {
+            serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                    position.getX() + 0.5, position.getY() + 1.05, position.getZ() + 0.5,
+                    1, 0.08, 0.08, 0.08, 0.02);
         }
     }
 
@@ -440,7 +465,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 }
             }
 
-            if(!controllerInWall) {
+            if (!controllerInWall) {
                 logValidation("INVALID: controller is not embedded in any chamber wall; deactivating chambers");
                 deactivateChambers();
                 return;
