@@ -13,6 +13,8 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModRecipeTypes;
 import dev.turtywurty.industria.menu.SmelteryControllerMenu;
+import dev.turtywurty.industria.metal.MetalDefinition;
+import dev.turtywurty.industria.metal.MetalRegistry;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.SmelteryRecipe;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
@@ -34,8 +36,11 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
@@ -43,6 +48,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @SuppressWarnings("DataFlowIssue")
 public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
@@ -60,6 +66,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     private BlockPos fireBoxPos = null;
     private boolean structureReady;
     private float temperature = AMBIENT_TEMPERATURE;
+    private boolean keepMolten = false;
     private int fuelSpaceSize;
 
     public SmelteryControllerBlockEntity(BlockPos pos, BlockState state) {
@@ -73,6 +80,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         output.storeNullable("FireBoxPos", BlockPos.CODEC, this.fireBoxPos);
         output.store("RetainedFluids", RetainedChamberFluid.CODEC.listOf(), this.retainedFluids);
         output.putFloat("Temperature", this.temperature);
+        output.putBoolean("KeepMolten", this.keepMolten);
     }
 
     @Override
@@ -91,6 +99,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         this.retainedFluids.addAll(input.read("RetainedFluids", RetainedChamberFluid.CODEC.listOf()).orElseGet(List::of));
 
         this.temperature = Mth.clamp(input.getFloatOr("Temperature", AMBIENT_TEMPERATURE), AMBIENT_TEMPERATURE, MAX_TEMPERATURE);
+        this.keepMolten = input.getBooleanOr("KeepMolten", false);
     }
 
     @Override
@@ -149,7 +158,14 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             int depth = (int) boundingBox.getZsize();
 
             var fluidStack = new FluidStack(storage.getResource(), storage.getAmount());
-            infos.add(new SmelteryControllerMenu.SmelteryChamberInfo(chamber.hatchPos, width, height, depth, fluidStack, storage.getCapacity()));
+            infos.add(new SmelteryControllerMenu.SmelteryChamberInfo(
+                    chamber.hatchPos,
+                    width, height, depth,
+                    fluidStack,
+                    storage.getCapacity(),
+                    getRequiredTemperatureForFluid(fluidStack.variant()),
+                    getSolidBlockForFluid(fluidStack.variant())
+            ));
         }
 
         return List.copyOf(infos);
@@ -181,12 +197,65 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.SMELTERY.get(), SingleItemStackRecipeInput.of(stack), this.level);
     }
 
+    public float getRequiredTemperatureForFluid(ResourceVariant<Fluid> fluid) {
+        if (fluid.isBlank())
+            return -1f;
+
+        Optional<MetalDefinition> metalDefinition = MetalRegistry.findBy(fluid.value());
+        return metalDefinition.map(MetalDefinition::meltingTemperature).orElse(-1f);
+    }
+
+    public BlockState getSolidBlockForFluid(ResourceVariant<Fluid> fluid) {
+        if (fluid.isBlank())
+            return Blocks.AIR.defaultBlockState();
+
+        Optional<MetalDefinition> optMetalDefinition = MetalRegistry.findBy(fluid.value());
+        return optMetalDefinition.map(MetalDefinition::storageBlock)
+                .map(Supplier::get)
+                .map(Block::defaultBlockState)
+                .orElseGet(Blocks.AIR::defaultBlockState);
+    }
+
+    public boolean canTapOutput(BlockPos outletPos) {
+        SmelteryChamber chamber = getChamberForOutlet(outletPos);
+        if (chamber == null)
+            return false;
+
+        SyncingFluidStorage fluidStorage = chamber.getFluidStorage();
+        if (fluidStorage.getAmount() <= 0 || fluidStorage.getResource().isBlank())
+            return false;
+
+        float requiredTemperature = getRequiredTemperatureForFluid(fluidStorage.getResource());
+        return requiredTemperature >= 0 && this.temperature >= requiredTemperature;
+    }
+
+    public boolean isKeepingMolten() {
+        return this.keepMolten;
+    }
+
+    public void setKeepMolten(boolean keepMolten) {
+        if (this.keepMolten != keepMolten) {
+            this.keepMolten = keepMolten;
+            setChanged();
+        }
+    }
+
     private float getTargetTemperature() {
         float target = AMBIENT_TEMPERATURE;
         if (!this.structureReady)
             return target;
 
         for (SmelteryChamber chamber : this.chambers) {
+            if (this.keepMolten) {
+                FluidStack fluidStack = chamber.getFluidStorage().getFluidStack();
+                if (!fluidStack.isEmpty()) {
+                    float requiredTemperature = getRequiredTemperatureForFluid(fluidStack.variant());
+                    if (requiredTemperature > 0) {
+                        target = Math.clamp(requiredTemperature + 5.0f, target, MAX_TEMPERATURE); // Add a small buffer to ensure the fluid stays molten
+                    }
+                }
+            }
+
             if (chamber.hatchPos == null
                     || !this.level.isLoaded(chamber.hatchPos)
                     || !(this.level.getBlockEntity(chamber.hatchPos) instanceof ChargingHatchBlockEntity hatch))

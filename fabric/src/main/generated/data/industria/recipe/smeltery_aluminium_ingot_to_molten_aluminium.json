@@ -11,6 +11,5 @@
     }
   },
   "preferred_temperature": 150,
-  "process_time": 40,
-  "required_temperature": 100
+  "process_time": 200
 }

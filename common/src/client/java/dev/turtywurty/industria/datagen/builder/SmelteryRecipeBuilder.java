@@ -10,16 +10,14 @@ import net.minecraft.world.item.crafting.Recipe;
 public class SmelteryRecipeBuilder {
     private final IndustriaIngredient input;
     private final FluidStack output;
-    private final int requiredTemperature;
     private final int preferredTemperature;
     private final float maxSpeedMultiplier;
     private final int processTime;
 
-    public SmelteryRecipeBuilder(IndustriaIngredient input, FluidStack output, int requiredTemperature,
-                                 int preferredTemperature, float maxSpeedMultiplier, int processTime) {
+    public SmelteryRecipeBuilder(IndustriaIngredient input, FluidStack output, int preferredTemperature,
+                                 float maxSpeedMultiplier, int processTime) {
         this.input = input;
         this.output = output;
-        this.requiredTemperature = requiredTemperature;
         this.preferredTemperature = preferredTemperature;
         this.maxSpeedMultiplier = maxSpeedMultiplier;
         this.processTime = processTime;
@@ -27,8 +25,8 @@ public class SmelteryRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new SmelteryRecipe(this.input, this.output, this.requiredTemperature, this.preferredTemperature,
-                        this.maxSpeedMultiplier, this.processTime),
+                new SmelteryRecipe(this.input, this.output, this.preferredTemperature, this.maxSpeedMultiplier,
+                        this.processTime),
                 null);
     }
 }

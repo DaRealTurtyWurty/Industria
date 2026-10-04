@@ -41,7 +41,7 @@ public class ModClientPackets {
                             && player.containerMenu instanceof SmelteryControllerMenu menu
                             && menu.getControllerPos().equals(payload.controllerPos())
                             && menu.containerId == payload.syncId()) {
-                        menu.applySnapshot(payload.temperature(), payload.structureReady(), payload.chambers());
+                        menu.applySnapshot(payload.temperature(), payload.structureReady(), payload.keepMolten(), payload.chambers());
                     }
                 }));
     }

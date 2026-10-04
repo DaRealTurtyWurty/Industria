@@ -69,7 +69,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
         public TransferSupport support(int index) {
             StoragePreconditions.index(index, 1);
             SyncingFluidStorage storage = getChamberStorage();
-            if (storage == null)
+            if (storage == null || !canTap())
                 return TransferSupport.NONE;
 
             return TransferSupport.EXTRACT_ONLY;
@@ -88,7 +88,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
             StoragePreconditions.check(resource, maxAmount);
 
             SyncingFluidStorage storage = getChamberStorage();
-            if (storage == null)
+            if (storage == null || !canTap())
                 return 0;
 
             return storage.extract(0, resource, maxAmount, transaction);
@@ -108,7 +108,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
             return;
 
         SyncingFluidStorage storage = getChamberStorage();
-        if (storage == null)
+        if (storage == null || !canTap())
             return;
 
         this.pouring = true;
@@ -129,13 +129,25 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
     }
 
     public SmelteryControllerBlockEntity.SmelteryChamber getChamber() {
-        if (this.controllerPos == null || this.level == null || !this.level.isLoaded(this.controllerPos))
-            return null;
-
-        if (!(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
+        if (this.controllerPos == null
+                || this.level == null
+                || !this.level.isLoaded(this.controllerPos)
+                || !(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
             return null;
 
         return controller.getChamberForOutlet(this.worldPosition);
+    }
+
+    private boolean canTap() {
+        if (this.controllerPos == null
+                || this.level == null
+                || !this.level.isLoaded(this.controllerPos)
+                || isRemoved()
+                || !(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller)
+                || controller.isRemoved())
+            return false;
+
+        return controller.canTapOutput(this.worldPosition);
     }
 
     private SyncingFluidStorage getChamberStorage() {
@@ -181,7 +193,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
         }
 
         SyncingFluidStorage storage = getChamberStorage();
-        if (storage == null || storage.amount(0) <= 0) {
+        if (storage == null || storage.amount(0) <= 0 || !canTap()) {
             stopPouring();
             return;
         }
@@ -217,7 +229,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
         }
 
         long moved = this.fluidProvider.moveTo(fluidStorage, resource, FluidAmounts.NUGGET);
-        if(moved > 0) {
+        if (moved > 0) {
             setPouringFluid(resource);
         }
 

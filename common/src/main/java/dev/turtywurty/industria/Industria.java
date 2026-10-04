@@ -49,6 +49,7 @@ public class Industria {
         ModBiomeModifications.init();
         ModFeatures.init();
         ModFluids.init();
+        ModMetals.init();
         ModAttachmentTypes.init();
         ModPositionSourceTypes.init();
         ModDataComponentTypes.init();

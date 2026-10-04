@@ -363,6 +363,11 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, SmelteryControllerScreen.EMPTY_LABEL, "Empty");
         addText(translationBuilder, SmelteryControllerScreen.AMOUNT_LABEL, "Amount: %s mB");
         addText(translationBuilder, SmelteryControllerScreen.CAPACITY_LABEL, "Capacity: %s mB");
+        addText(translationBuilder, SmelteryControllerScreen.UNKNOWN_MELTING_TEMPERATURE, "Unknown Melting Temperature");
+        addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_SOLID, "Solid");
+        addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_MOLTEN, "Molten");
+        addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_ON_LABEL, "Keep Molten: On");
+        addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_OFF_LABEL, "Keep Molten: Off");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,6 +25,8 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 public class FluidWidget implements Renderable, LayoutElement {
+    private Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier;
+
     private final Supplier<FluidStack> fluidSupplier;
     private final LongSupplier capacitySupplier;
     private final Supplier<BlockPos> posSupplier;
@@ -39,10 +42,11 @@ public class FluidWidget implements Renderable, LayoutElement {
             Supplier<BlockPos> posSupplier,
             Orientation orientation
     ) {
-        this(fluidTank::getFluidStack, fluidTank::getCapacity, x, y, width, height, posSupplier, orientation);
+        this(() -> null, fluidTank::getFluidStack, fluidTank::getCapacity, x, y, width, height, posSupplier, orientation);
     }
 
     public FluidWidget(
+            Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier,
             Supplier<FluidStack> fluidSupplier,
             LongSupplier capacitySupplier,
             int x, int y,
@@ -50,6 +54,7 @@ public class FluidWidget implements Renderable, LayoutElement {
             Supplier<BlockPos> posSupplier,
             Orientation orientation
     ) {
+        this.renderDataOverrideSupplier = renderDataOverrideSupplier;
         this.fluidSupplier = fluidSupplier;
         this.capacitySupplier = capacitySupplier;
         this.x = x;
@@ -70,7 +75,11 @@ public class FluidWidget implements Renderable, LayoutElement {
 
         Level world = Minecraft.getInstance().level;
         BlockPos pos = this.posSupplier.get();
-        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluid, world, pos);
+        FluidRenderUtils.GuiFluidRenderData renderData = this.renderDataOverrideSupplier.get();
+        if (renderData == null) {
+            renderData = FluidRenderUtils.getRenderData(fluid, world, pos);
+        }
+
         if (renderData == null)
             return;
 
@@ -140,12 +149,22 @@ public class FluidWidget implements Renderable, LayoutElement {
         return orientation;
     }
 
+    public Supplier<FluidRenderUtils.GuiFluidRenderData> getRenderDataOverrideSupplier() {
+        return renderDataOverrideSupplier;
+    }
+
     public Supplier<FluidStack> getFluidSupplier() {
         return fluidSupplier;
     }
 
     public LongSupplier getCapacitySupplier() {
         return capacitySupplier;
+    }
+
+    public void setRenderDataOverrideSupplier(@Nullable Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier) {
+        this.renderDataOverrideSupplier = renderDataOverrideSupplier == null
+                ? () -> null
+                : renderDataOverrideSupplier;
     }
 
     @Override
@@ -159,6 +178,7 @@ public class FluidWidget implements Renderable, LayoutElement {
     public static class Builder {
         private final Supplier<FluidStack> fluidSupplier;
         private final LongSupplier capacitySupplier;
+        private Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier = () -> null;
         private Supplier<BlockPos> posSupplier = () -> null;
         private int x, y;
         private int width, height;
@@ -172,6 +192,13 @@ public class FluidWidget implements Renderable, LayoutElement {
         public Builder(SyncingFluidStorage fluidTank) {
             this.fluidSupplier = fluidTank::getFluidStack;
             this.capacitySupplier = fluidTank::getCapacity;
+        }
+
+        public Builder renderDataOverrideSupplier(Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier) {
+            this.renderDataOverrideSupplier = renderDataOverrideSupplier == null
+                    ? () -> null
+                    : renderDataOverrideSupplier;
+            return this;
         }
 
         public Builder x(int x) {
@@ -225,7 +252,7 @@ public class FluidWidget implements Renderable, LayoutElement {
         }
 
         public FluidWidget build() {
-            return new FluidWidget(fluidSupplier, capacitySupplier, x, y, width, height, posSupplier, orientation);
+            return new FluidWidget(renderDataOverrideSupplier, fluidSupplier, capacitySupplier, x, y, width, height, posSupplier, orientation);
         }
     }
 }

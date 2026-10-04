@@ -486,10 +486,9 @@ public final class IndustriaRecipes {
                 offerSmelteryRecipe(output,
                         new IndustriaIngredient(1, ModItems.ALUMINIUM_INGOT.get()),
                         new FluidStack(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().holder()), FluidAmounts.INGOT),
-                        100,
                         150,
                         2.0f,
-                        40,
+                        200,
                         "aluminium_ingot_to_molten_aluminium");
 
                 offerCastingBasinRecipe(output,
@@ -567,8 +566,8 @@ public final class IndustriaRecipes {
                 .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("distillation_tower_" + name)));
     }
 
-    private static void offerSmelteryRecipe(RecipeOutput exporter, IndustriaIngredient input, FluidStack output, int requiredTemperature, int preferredTemperature, float maxSpeedMultiplier, int processTime, String name) {
-        new SmelteryRecipeBuilder(input, output, requiredTemperature, preferredTemperature, maxSpeedMultiplier, processTime)
+    private static void offerSmelteryRecipe(RecipeOutput exporter, IndustriaIngredient input, FluidStack output, int preferredTemperature, float maxSpeedMultiplier, int processTime, String name) {
+        new SmelteryRecipeBuilder(input, output, preferredTemperature, maxSpeedMultiplier, processTime)
                 .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("smeltery_" + name)));
     }
 

@@ -8,6 +8,8 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.init.ModRecipeBookCategories;
 import dev.turtywurty.industria.init.ModRecipeSerializers;
 import dev.turtywurty.industria.init.ModRecipeTypes;
+import dev.turtywurty.industria.metal.MetalDefinition;
+import dev.turtywurty.industria.metal.MetalRegistry;
 import dev.turtywurty.industria.recipe.input.SingleItemStackRecipeInput;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -19,9 +21,10 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import java.util.Optional;
 
-public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int requiredTemperature,
-                             int preferredTemperature, float maxSpeedMultiplier, int processTime)
+public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int preferredTemperature,
+                             float maxSpeedMultiplier, int processTime)
         implements Recipe<SingleItemStackRecipeInput> {
     @Override
     public boolean matches(SingleItemStackRecipeInput input, Level world) {
@@ -73,12 +76,23 @@ public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int r
         return ModRecipeBookCategories.SMELTERY.get();
     }
 
+    public float requiredTemperature() {
+        if (this.output.isEmpty())
+            return -1f;
+
+        Optional<MetalDefinition> optMetalDefinition = MetalRegistry.findBy(this.output.variant().value());
+        return optMetalDefinition.map(MetalDefinition::meltingTemperature).orElse(-1f);
+    }
+
     public double getSpeedMultiplier(float temperature) {
-        if(temperature < this.requiredTemperature)
+        float requiredTemperature = this.requiredTemperature();
+        if (requiredTemperature < 0
+                || this.preferredTemperature <= requiredTemperature
+                || temperature < requiredTemperature)
             return 0.0;
 
-        double fraction = Math.clamp((temperature - (double)this.requiredTemperature)
-                / (this.preferredTemperature - (double) this.requiredTemperature), 0.0, 1.0);
+        double fraction = Math.clamp((temperature - (double) requiredTemperature)
+                / (this.preferredTemperature - (double) requiredTemperature), 0.0, 1.0);
 
         return 1.0 + fraction * (this.maxSpeedMultiplier - 1.0);
     }
@@ -98,7 +112,6 @@ public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int r
     private static final MapCodec<SmelteryRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             IndustriaIngredient.CODEC.fieldOf("input").forGetter(SmelteryRecipe::input),
             FluidStack.CODEC.fieldOf("output").forGetter(SmelteryRecipe::output),
-            Codec.INT.fieldOf("required_temperature").forGetter(SmelteryRecipe::requiredTemperature),
             Codec.INT.fieldOf("preferred_temperature").forGetter(SmelteryRecipe::preferredTemperature),
             Codec.FLOAT.fieldOf("max_speed_multiplier").forGetter(SmelteryRecipe::maxSpeedMultiplier),
             Codec.INT.fieldOf("process_time").forGetter(SmelteryRecipe::processTime)
@@ -107,7 +120,6 @@ public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int r
     private static final StreamCodec<RegistryFriendlyByteBuf, SmelteryRecipe> STREAM_CODEC = StreamCodec.composite(
             IndustriaIngredient.STREAM_CODEC, SmelteryRecipe::input,
             FluidStack.STREAM_CODEC, SmelteryRecipe::output,
-            ByteBufCodecs.INT, SmelteryRecipe::requiredTemperature,
             ByteBufCodecs.INT, SmelteryRecipe::preferredTemperature,
             ByteBufCodecs.FLOAT, SmelteryRecipe::maxSpeedMultiplier,
             ByteBufCodecs.INT, SmelteryRecipe::processTime,

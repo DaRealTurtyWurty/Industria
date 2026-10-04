@@ -6,10 +6,13 @@ import dev.turtywurty.industria.menu.SmelteryControllerMenu;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.screen.widget.util.Orientation;
 import dev.turtywurty.industria.util.FluidAmounts;
+import dev.turtywurty.industria.util.FluidRenderUtils;
 import dev.turtywurty.industria.util.ScreenUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -28,11 +31,17 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
     public static final Component EMPTY_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.empty");
     public static final Component AMOUNT_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.amount");
     public static final Component CAPACITY_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.capacity");
+    public static final Component UNKNOWN_MELTING_TEMPERATURE = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.unknown_melting_temperature");
+    public static final Component MOLTEN_STATE_SOLID = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.molten_state_solid");
+    public static final Component MOLTEN_STATE_MOLTEN = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.molten_state_molten");
+    public static final Component KEEP_MOLTEN_ON_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.keep_molten_on");
+    public static final Component KEEP_MOLTEN_OFF_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.keep_molten_off");
 
     private static final Identifier TEXTURE = Industria.id("textures/gui/smeltery_controller.png");
 
     private final Button[] chamberButtons = new Button[5];
     private Button previousPageButton, nextPageButton;
+    private Button keepMoltenButton;
     private int page;
     private BlockPos selectedHatchPos;
 
@@ -80,6 +89,15 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
                 .size(44, 14)
                 .build());
 
+        this.keepMoltenButton = addRenderableWidget(Button.builder(KEEP_MOLTEN_OFF_LABEL, _ -> {
+                    if (this.minecraft.gameMode != null) {
+                        this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
+                    }
+                })
+                .pos(this.leftPos + 129, this.topPos + 173)
+                .size(154, 14)
+                .build());
+
         refreshChamberButtons();
 
         addRenderableOnly(new FluidWidget.Builder(
@@ -99,6 +117,7 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
                 })
                 .bounds(this.leftPos + 129, this.topPos + 139, 154, 31)
                 .posSupplier(this.menu::getControllerPos)
+                .renderDataOverrideSupplier(this::getSolidRenderOverride)
                 .orientation(Orientation.VERTICAL)
                 .build());
     }
@@ -129,6 +148,27 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
         this.nextPageButton.active = this.page < lastPage;
     }
 
+    private FluidRenderUtils.GuiFluidRenderData getSolidRenderOverride() {
+        SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
+        if (selectedChamber == null
+                || selectedChamber.fluid().isEmpty()
+                || selectedChamber.requiredTemperature() <= 0
+                || this.menu.getTemperature() >= selectedChamber.requiredTemperature()
+                || selectedChamber.solidBlock() == null
+                || selectedChamber.solidBlock().isAir())
+            return null;
+
+        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager()
+                .getBlockStateModelSet()
+                .getParticleMaterial(selectedChamber.solidBlock())
+                .sprite();
+
+        return new FluidRenderUtils.GuiFluidRenderData(
+                sprite,
+                0xFFFFFFFF
+        );
+    }
+
     private SmelteryControllerMenu.SmelteryChamberInfo getSelectedChamber() {
         if (this.selectedHatchPos == null)
             return null;
@@ -143,6 +183,7 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
     protected void containerTick() {
         super.containerTick();
         refreshChamberButtons();
+        this.keepMoltenButton.setMessage(this.menu.isKeepingMolten() ? KEEP_MOLTEN_ON_LABEL : KEEP_MOLTEN_OFF_LABEL);
     }
 
     @Override
@@ -180,6 +221,14 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
             double capacityMb = selectedChamber.capacity() * 1000.0 / FluidAmounts.BUCKET;
             graphics.text(this.font, translatable(AMOUNT_LABEL, Math.round(amountMb)), 128, 100, 0xFF404040, false);
             graphics.text(this.font, translatable(CAPACITY_LABEL, Math.round(capacityMb)), 128, 114, 0xFF404040, false);
+
+            if (!fluid.isEmpty()) {
+                graphics.text(this.font, selectedChamber.requiredTemperature() < 0
+                        ? UNKNOWN_MELTING_TEMPERATURE
+                        : (this.menu.getTemperature() < selectedChamber.requiredTemperature()
+                        ? MOLTEN_STATE_SOLID
+                        : MOLTEN_STATE_MOLTEN), 128, 128, 0xFF404040, false);
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-// 26.1.1	2026-10-03T16:34:22.7868303	Recipes
+// 26.1.1	2026-10-04T19:46:02.9987113	Recipes
 e45be0a3360e1a6386203b89ff7f4df6f58e4599 data/industria/advancement/recipes/building_blocks/rubber_planks.json
 4bd0967941310e1dc1dd7de88e4d91ad78a680e0 data/industria/advancement/recipes/building_blocks/rubber_slab.json
 0d23fb0250c3702f4ce78caae3db4601230f221a data/industria/advancement/recipes/building_blocks/rubber_stairs.json
@@ -109,7 +109,7 @@ cbb07a0d1aa8400a60b62024eec304fdcf308eee data/industria/recipe/rubber_stripped_w
 60c2b04cf563363618bb4e2250cc8154b250ef7d data/industria/recipe/rubber_wood.json
 c200c03c1c8e2d5330af9dfba2af87cc92585ebe data/industria/recipe/shaking_table_cassiterite_concentrate.json
 4751ee47424c2a9fdf80f9ff7eaace494b7735b2 data/industria/recipe/side_injector_conveyor.json
-e1e85c21a2637c4cf35c881813100ab748b50240 data/industria/recipe/smeltery_aluminium_ingot_to_molten_aluminium.json
+5cf8f24f8e78a4a056ae6ca9c458fd5d43f316e8 data/industria/recipe/smeltery_aluminium_ingot_to_molten_aluminium.json
 a64a47c0e4bc8719dfc431a4be05f35107ddbaff data/industria/recipe/splitter_conveyor.json
 528691eb3b18e601367d12a207afd586af4d2bb8 data/industria/recipe/thermal_generator.json
 1f24c54dc6717011f8f50579d2b69f9fd8fa54c0 data/minecraft/advancement/recipes/building_blocks/aluminium_block.json
