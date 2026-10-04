@@ -60,6 +60,31 @@ public final class SmelteryValidationTestWorld {
     public static void start(TestWorldContext root) {
         var suite = new Suite(root);
 
+        suite.scenario("glass side walls and vertical corners accepted", 4)
+                .step(60, "replace side wall and corner with glass", s -> {
+                    s.expect(0, s.expected(1, 3, 0));
+                    s.seed(BLOCK);
+                    s.context.setBlock(3, 3, 0, ModBlocks.SMELTERY_GLASS);
+                    s.context.setBlock(0, 4, 0, ModBlocks.SMELTERY_GLASS);
+                })
+                .step(40, "glass sides retain chamber and fluid", s -> s.expect(0, s.expected(1, 3, BLOCK)));
+
+        suite.scenario("glass shared wall accepted", 8, 4)
+                .step(60, "replace shared wall with glass", s -> {
+                    s.expect(0, s.expected(1, 3, 0), s.expected(5, 7, 0));
+                    s.seed(BLOCK, 2 * BLOCK);
+                    s.context.setBlock(4, 3, 2, ModBlocks.SMELTERY_GLASS);
+                })
+                .step(40, "both chambers retain independent fluid", s -> s.expect(0,
+                        s.expected(1, 3, BLOCK), s.expected(5, 7, 2 * BLOCK)));
+
+        invalidStructure(suite, "glass roof rejected", s -> s.context.setBlock(2, 5, 1, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "glass floor rejected", s -> s.context.setBlock(2, 2, 1, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "glass foundation bottom rejected", s -> s.context.setBlock(2, 0, 2, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "glass foundation bottom corner rejected", s -> s.context.setBlock(0, 0, 0, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "glass fuel perimeter rejected", s -> s.context.setBlock(2, 1, 0, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "glass fuel perimeter corner rejected", s -> s.context.setBlock(0, 1, 0, ModBlocks.SMELTERY_GLASS));
+
         suite.scenario("controller embedded rebuild preserves fluid", 4)
                 .step(60, "embedded formation and shared-wall resize", s -> {
                     s.expect(0, s.expected(1, 3, 0));

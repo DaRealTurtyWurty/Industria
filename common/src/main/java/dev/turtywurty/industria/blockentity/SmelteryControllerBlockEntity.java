@@ -153,7 +153,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         Set<BlockPos> emittedPositions = new HashSet<>();
         for (SmelteryChamber chamber : this.chambers) {
             BlockPos chimneyPos = chamber.chimneyPos;
-            if(chimneyPos == null || !this.level.isLoaded(chimneyPos) || emittedPositions.contains(chimneyPos))
+            if (chimneyPos == null || !this.level.isLoaded(chimneyPos) || emittedPositions.contains(chimneyPos))
                 continue;
 
             emittedPositions.add(chimneyPos);
@@ -579,7 +579,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                             || (pos.equals(hatchPos) && state.is(ModBlocks.CHARGING_HATCH.get()))
                             || (pos.equals(this.worldPosition)
                             && state.is(ModBlocks.SMELTERY_CONTROLLER.get())
-                            && isControllerInWall(firstX, lastX, firstY, lastY, firstZ, lastZ)))
+                            && isControllerInWall(firstX, lastX, firstY, lastY, firstZ, lastZ))
+                            || (state.is(ModBlocks.SMELTERY_GLASS.get()) && y > firstY && y < lastY))
                         continue;
 
                     logValidation("REJECT hatch {}: invalid shell block at {} state={}", hatchPos, pos, state);
@@ -598,10 +599,37 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             SearchResult fuelSpaceResult
     ) {
         boolean foundationValid = true;
+        for (int x = firstX; x <= lastX; x++) {
+            for (int z = firstZ; z <= lastZ; z++) {
+                var airPos = new BlockPos(x, firstY - 1, z);
+                var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
+                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos)) {
+                    logValidation("ABORT: foundation unloaded at air={} bottom={}", airPos, firebrickBottomPos);
+                    return SearchResultType.UNLOADED_CHUNK;
+                }
+
+                BlockState firebrickBottomState = this.level.getBlockState(firebrickBottomPos);
+                if (firebrickBottomState.is(ModBlocks.SMELTERY_GLASS.get())) {
+                    logValidation("REJECT hatch {}: foundation bottom={} state={} is smeltery glass", hatchPos, firebrickBottomPos, firebrickBottomState);
+                    foundationValid = false;
+                    break;
+                }
+
+                if (x == firstX || x == lastX || z == firstZ || z == lastZ) {
+                    BlockState fuelPerimeterState = this.level.getBlockState(airPos);
+                    if (fuelPerimeterState.is(ModBlocks.SMELTERY_GLASS.get())) {
+                        logValidation("REJECT hatch {}: foundation perimeter air={} state={} is smeltery glass", hatchPos, airPos, fuelPerimeterState);
+                        foundationValid = false;
+                        break;
+                    }
+                }
+            }
+        }
+
         for (int x = firstX + 1; x < lastX; x++) {
             for (int z = firstZ + 1; z < lastZ; z++) {
-                BlockPos airPos = new BlockPos(x, firstY - 1, z);
-                BlockPos firebrickBottomPos = new BlockPos(x, firstY - 2, z);
+                var airPos = new BlockPos(x, firstY - 1, z);
+                var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
 
                 if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos)) {
                     logValidation("ABORT: foundation unloaded at air={} bottom={}", airPos, firebrickBottomPos);
