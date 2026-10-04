@@ -30,6 +30,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -57,6 +59,36 @@ public final class SmelteryValidationTestWorld {
 
     public static void start(TestWorldContext root) {
         var suite = new Suite(root);
+
+        suite.scenario("controller embedded rebuild preserves fluid", 4)
+                .step(60, "embedded formation and shared-wall resize", s -> {
+                    s.expect(0, s.expected(1, 3, 0));
+                    s.seed(BLOCK);
+                    var controller = s.controller();
+                    s.build(8, 4);
+                    check(s.controller() == controller, "Rebuild replaced the embedded controller");
+                })
+                .step(40, "both chambers use the wall controller", s -> {
+                    s.expect(0, s.expected(1, 3, BLOCK), s.expected(5, 7, 0));
+                    s.build(4);
+                })
+                .step(40, "resize retains original chamber fluid", s -> s.expect(0, s.expected(1, 3, BLOCK)));
+
+        suite.scenario("controller exterior attachment rejected", 4)
+                .step(60, "move controller outside an otherwise valid shell", s -> {
+                    s.expect(0, s.expected(1, 3, 0));
+                    s.context.setBlock(0, 3, 1, ModBlocks.FIREBRICK);
+                    s.context.setBlock(0, 2, -1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
+                            .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
+                })
+                .step(40, "outside controller cannot form chambers", s -> {
+                    var controller = s.context.requireBlockEntity(0, 2, -1, SmelteryControllerBlockEntity.class);
+                    check(!controller.isStructureReady() && controller.getChamberInfos().isEmpty(),
+                            "An exterior controller formed the smeltery");
+                    s.context.removeBlock(0, 2, -1);
+                    s.build(4);
+                })
+                .step(40, "embedded replacement forms again", s -> s.expect(0, s.expected(1, 3, 0)));
 
         suite.scenario("shared walls and common fuel", 8, 4)
                 .step(60, "initial formation", s -> {
@@ -646,7 +678,7 @@ public final class SmelteryValidationTestWorld {
 
         suite.scenario("standalone firebox does not start itself", 4)
                 .step(60, "remove controller before inserting coal", s -> {
-                    s.context.removeBlock(0, 2, -1);
+                    s.context.removeBlock(0, 3, 1);
                     s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
                 })
                 .step(40, "uncontrolled firebox retains all fuel", s -> {
@@ -1815,6 +1847,9 @@ public final class SmelteryValidationTestWorld {
 
         private Scenario scenario(String name, int width, int... partitions) {
             var scenario = new Scenario(this, name, root.at(66, 32, 66 + scenarios.size() * 64));
+            String filter = System.getProperty("industria.test.smeltery.filter", "");
+            if (!filter.isEmpty() && !name.contains(filter))
+                return scenario;
             scenarios.add(scenario);
             scenario.build(width, partitions);
             return scenario;
@@ -1898,10 +1933,10 @@ public final class SmelteryValidationTestWorld {
 
         private void build(int width, int... partitions) {
             structureWidth = width;
-            // All rebuilds retain the same controller block entity outside the edited volume.
-            context.fillAir(0, 0, 0, Math.max(width, 12), 6, 4);
+            // Preserve the controller embedded in the west wall through every rebuild.
+            fillExceptController(0, 0, 0, Math.max(width, 12), 6, 4, Blocks.AIR);
             context.fillAir(1, 3, -1, Math.max(width, 12), 3, -1);
-            context.fill(0, 0, 0, width, 5, 4, ModBlocks.FIREBRICK.get());
+            fillExceptController(0, 0, 0, width, 5, 4, ModBlocks.FIREBRICK.get());
             context.fillAir(1, 1, 1, width - 1, 1, 3);
             context.fillAir(1, 3, 1, width - 1, 4, 3);
             for (int partition : partitions)
@@ -1918,9 +1953,9 @@ public final class SmelteryValidationTestWorld {
             }
             context.setBlock(0, 1, 2, ModBlocks.FIREBOX.get().defaultBlockState()
                     .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
-            if (!(context.overworld().getBlockEntity(context.pos(0, 2, -1)) instanceof SmelteryControllerBlockEntity))
-                context.setBlock(0, 2, -1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
-                        .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
+            if (!(context.overworld().getBlockEntity(context.pos(0, 3, 1)) instanceof SmelteryControllerBlockEntity))
+                context.setBlock(0, 3, 1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
+                        .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
             int startChunk = context.origin().getX() >> 4;
             int endChunk = context.pos(width, 0, 0).getX() >> 4;
             for (int chunk = startChunk; chunk <= endChunk; chunk++) {
@@ -1931,7 +1966,15 @@ public final class SmelteryValidationTestWorld {
         }
 
         private SmelteryControllerBlockEntity controller() {
-            return context.requireBlockEntity(0, 2, -1, SmelteryControllerBlockEntity.class);
+            return context.requireBlockEntity(0, 3, 1, SmelteryControllerBlockEntity.class);
+        }
+
+        private void fillExceptController(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, Block block) {
+            for (int x = minX; x <= maxX; x++)
+                for (int y = minY; y <= maxY; y++)
+                    for (int z = minZ; z <= maxZ; z++)
+                        if (x != 0 || y != 3 || z != 1)
+                            context.setBlock(x, y, z, block);
         }
 
         private ChargingHatchBlockEntity hatch() {

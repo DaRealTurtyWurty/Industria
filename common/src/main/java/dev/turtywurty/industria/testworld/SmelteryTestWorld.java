@@ -41,13 +41,9 @@ public final class SmelteryTestWorld {
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
         context.setBlock(5, 2, 2, ModBlocks.CASTING_BASIN.get());
 
-        // Attach the controller outside the shell rather than replacing a required firebrick.
-        context.setBlock(2, 2, -1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
+        // Embed the controller in the north wall beside the charging hatch.
+        context.setBlock(1, 3, 0, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
-
-        // Steps beside the controller keep the hatch accessible without opening the fuel space.
-        context.setBlock(1, 0, -2, Blocks.COBBLESTONE);
-        context.fill(1, 0, -1, 1, 1, -1, Blocks.COBBLESTONE);
 
         context.setBlock(2, 0, -3, Blocks.CHEST);
         context.configureBlockEntity(2, 0, -3, ChestBlockEntity.class, chest -> {
@@ -62,14 +58,14 @@ public final class SmelteryTestWorld {
         });
 
         LOGGER.info("Smeltery test fixture: controller={}, hatch={}, firebox={}, chimney={}, outlet={}, basin={}, spare parts={}",
-                context.pos(2, 2, -1), context.pos(2, 3, 0), context.pos(0, 1, 2),
+                context.pos(1, 3, 0), context.pos(2, 3, 0), context.pos(0, 1, 2),
                 context.pos(2, 6, 2), context.pos(5, 3, 2), context.pos(5, 2, 2), context.pos(2, 0, -3));
 
         context.afterTicks(40, current -> {
-            if (!(current.overworld().getBlockEntity(current.pos(2, 2, -1)) instanceof SmelteryControllerBlockEntity)) {
+            if (!(current.overworld().getBlockEntity(current.pos(1, 3, 0)) instanceof SmelteryControllerBlockEntity)) {
                 LOGGER.warn("Smeltery test controller at {} has no SmelteryControllerBlockEntity; "
                                 + "configure its block entity and ticker before testing formation.",
-                        current.pos(2, 2, -1));
+                        current.pos(1, 3, 0));
             }
         });
 
@@ -83,7 +79,7 @@ public final class SmelteryTestWorld {
     private static final long TEST_AMOUNT = FluidAmounts.BUCKET * 7 + FluidAmounts.BUCKET / 2;
 
     private static void seedFluid(TestWorldContext context) {
-        var controller = context.requireBlockEntity(2, 2, -1, SmelteryControllerBlockEntity.class);
+        var controller = context.requireBlockEntity(1, 3, 0, SmelteryControllerBlockEntity.class);
         CompoundTag data = controller.saveWithoutMetadata(context.overworld().registryAccess());
         check(data.getListOrEmpty("Chambers").size() == 1, "Expected one formed chamber before seeding");
         check(data.getListOrEmpty("RetainedFluids").isEmpty(), "Expected no initial retained fluid");
@@ -99,7 +95,7 @@ public final class SmelteryTestWorld {
         context.removeBlock(2, 6, 2);
         context.afterTicks(40, current -> runTestStep(current, "broken chamber", () -> {
             verifyFluid(current, 0, 1, "chimney removed");
-            var entity = current.requireBlockEntity(2, 2, -1, SmelteryControllerBlockEntity.class);
+            var entity = current.requireBlockEntity(1, 3, 0, SmelteryControllerBlockEntity.class);
             CompoundTag saved = entity.saveWithoutMetadata(current.overworld().registryAccess());
             entity.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                     current.overworld().registryAccess(), saved));
@@ -120,7 +116,7 @@ public final class SmelteryTestWorld {
     }
 
     private static void verifyFluid(TestWorldContext context, int activeCount, int retainedCount, String stage) {
-        var entity = context.requireBlockEntity(2, 2, -1, SmelteryControllerBlockEntity.class);
+        var entity = context.requireBlockEntity(1, 3, 0, SmelteryControllerBlockEntity.class);
         CompoundTag data = entity.saveWithoutMetadata(context.overworld().registryAccess());
         var active = data.getListOrEmpty("Chambers");
         var retained = data.getListOrEmpty("RetainedFluids");

@@ -431,6 +431,21 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             if (chamberCandidates == null)
                 return;
 
+            boolean controllerInWall = false;
+            for (ChamberCandidate candidate : chamberCandidates) {
+                AABB aabb = candidate.boundingBox();
+                if (isControllerInWall((int) aabb.minX - 1, (int) aabb.maxX, (int) aabb.minY - 1, (int) aabb.maxY, (int) aabb.minZ - 1, (int) aabb.maxZ)) {
+                    controllerInWall = true;
+                    break;
+                }
+            }
+
+            if(!controllerInWall) {
+                logValidation("INVALID: controller is not embedded in any chamber wall; deactivating chambers");
+                deactivateChambers();
+                return;
+            }
+
             logValidation("Discovery finished: candidates={} previousChambers={} previousRetainedRecords={}",
                     chamberCandidates.size(), this.chambers.size(), this.retainedFluids.size());
 
@@ -507,10 +522,19 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         return chamberOutlets;
     }
 
+    private boolean isControllerInWall(int firstX, int lastX, int firstY, int lastY, int firstZ, int lastZ) {
+        int x = this.worldPosition.getX();
+        int y = this.worldPosition.getY();
+        int z = this.worldPosition.getZ();
+
+        return y > firstY && y < lastY
+                && ((x == firstX || x == lastX) && z > firstZ && z < lastZ
+                || (z == firstZ || z == lastZ) && x > firstX && x < lastX);
+    }
+
     private SearchResultType validateChamberShell(
             BlockPos hatchPos,
-            int firstX, int lastX, int firstY, int lastY,
-            int firstZ, int lastZ
+            int firstX, int lastX, int firstY, int lastY, int firstZ, int lastZ
     ) {
         boolean shellValid = true;
         for (int x = firstX; x <= lastX; x++) {
@@ -527,7 +551,10 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                     BlockState state = this.level.getBlockState(pos);
                     if (state.is(ModBlocks.FIREBRICK.get())
-                            || (pos.equals(hatchPos) && state.is(ModBlocks.CHARGING_HATCH.get())))
+                            || (pos.equals(hatchPos) && state.is(ModBlocks.CHARGING_HATCH.get()))
+                            || (pos.equals(this.worldPosition)
+                            && state.is(ModBlocks.SMELTERY_CONTROLLER.get())
+                            && isControllerInWall(firstX, lastX, firstY, lastY, firstZ, lastZ)))
                         continue;
 
                     logValidation("REJECT hatch {}: invalid shell block at {} state={}", hatchPos, pos, state);
