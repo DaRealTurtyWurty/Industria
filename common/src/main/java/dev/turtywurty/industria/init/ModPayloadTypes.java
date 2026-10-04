@@ -182,6 +182,7 @@ public class ModPayloadTypes {
         registerClientbound(AddConveyorNetworkPayload.ID, AddConveyorNetworkPayload.CODEC);
         registerClientbound(ModifyConveyorNetworkPayload.ID, ModifyConveyorNetworkPayload.CODEC);
         registerClientbound(RemoveConveyorNetworkPayload.ID, RemoveConveyorNetworkPayload.CODEC);
+        registerClientbound(SmelteryControllerSnapshotPayload.ID, SmelteryControllerSnapshotPayload.CODEC);
     }
 
     private static <T extends CustomPacketPayload> void registerServerbound(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec, PayloadHandler<T> handler) {

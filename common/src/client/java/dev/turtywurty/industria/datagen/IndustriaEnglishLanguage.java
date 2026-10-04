@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.datagen;
 
+import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.slurryapi.api.Slurry;
 import dev.turtywurty.slurryapi.api.SlurryVariant;
 import dev.turtywurty.slurryapi.api.SlurryVariantAttributes;
@@ -8,11 +9,7 @@ import dev.turtywurty.industria.conveyor.block.impl.entity.ContainmentConveyorBl
 import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
-import dev.turtywurty.industria.screen.ContainmentConveyorScreen;
 import dev.turtywurty.industria.item.SeismicScannerItem;
-import dev.turtywurty.industria.screen.DetectorConveyorScreen;
-import dev.turtywurty.industria.screen.FilterConveyorScreen;
-import dev.turtywurty.industria.screen.SolarPanelScreen;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.turtymultiloader.datagen.language.LanguageGenerationContext;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
@@ -337,6 +334,35 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModFluids.FORMIC_ACID.bucket().get(), "Bucket of Formic Acid");
         translationBuilder.add(ModFluids.DILUTED_FORMIC_ACID.block().get(), "Diluted Formic Acid");
         translationBuilder.add(ModFluids.DILUTED_FORMIC_ACID.bucket().get(), "Bucket of Diluted Formic Acid");
+
+        // Smeltery
+        translationBuilder.add(ModBlocks.UNFIRED_FIREBRICK.get(), "Unfired Firebrick");
+        translationBuilder.add(ModBlocks.FIREBRICK.get(), "Firebrick");
+        translationBuilder.add(ModBlocks.FIREBOX.get(), "Firebox");
+        addText(translationBuilder, FireboxBlockEntity.TITLE, "Firebox");
+        translationBuilder.add(ModBlocks.CHARGING_HATCH.get(), "Charging Hatch");
+        addText(translationBuilder, ChargingHatchBlockEntity.TITLE, "Charging Hatch");
+        translationBuilder.add(ModBlocks.TAPPING_OUTLET.get(), "Tapping Outlet");
+        translationBuilder.add(ModBlocks.SMELTERY_CONTROLLER.get(), "Smeltery Controller");
+        addText(translationBuilder, SmelteryControllerBlockEntity.TITLE, "Smeltery Controller");
+        translationBuilder.add(ModBlocks.CHIMNEY.get(), "Chimney");
+        translationBuilder.add(ModBlocks.SMELTERY_GLASS.get(), "Smeltery Glass");
+        translationBuilder.add(ModBlocks.CASTING_TABLE.get(), "Casting Table");
+        translationBuilder.add(ModBlocks.CASTING_BASIN.get(), "Casting Basin");
+        translationBuilder.add(ModItems.BLANK_SAND_CAST.get(), "Blank Sand Cast");
+        translationBuilder.add(ModItems.BLANK_RED_SAND_CAST.get(), "Blank Red Sand Cast");
+
+        addText(translationBuilder, SmelteryControllerScreen.TEMPERATURE_LABEL, "Temperature: %s°C");
+        addText(translationBuilder, SmelteryControllerScreen.FORMED_LABEL, "Formed");
+        addText(translationBuilder, SmelteryControllerScreen.INCOMPLETE_LABEL, "Incomplete");
+        addText(translationBuilder, SmelteryControllerScreen.CHAMBERS_LABEL, "Chambers: %s");
+        addText(translationBuilder, SmelteryControllerScreen.CHAMBER_LABEL, "Chamber %s");
+        addText(translationBuilder, SmelteryControllerScreen.SELECTED_CHAMBER_LABEL, "Selected Chamber: %s");
+        addText(translationBuilder, SmelteryControllerScreen.NO_CHAMBERS_LABEL, "No chambers");
+        addText(translationBuilder, SmelteryControllerScreen.SIZE_LABEL, "Size: %s × %s × %s");
+        addText(translationBuilder, SmelteryControllerScreen.EMPTY_LABEL, "Empty");
+        addText(translationBuilder, SmelteryControllerScreen.AMOUNT_LABEL, "Amount: %s mB");
+        addText(translationBuilder, SmelteryControllerScreen.CAPACITY_LABEL, "Capacity: %s mB");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

@@ -143,6 +143,10 @@ public class ModItems {
                     .stacksTo(16)
                     .food(FoodList.FORMIC_ACID_FOOD, FoodList.FORMIC_ACID_CONSUMABLE));
 
+    // Casting/Smeltery
+    public static final RegistrationHandle<Item, Item> BLANK_SAND_CAST = register("blank_sand_cast");
+    public static final RegistrationHandle<Item, Item> BLANK_RED_SAND_CAST = register("blank_red_sand_cast");
+
     public static RegistrationHandle<Item, Item> register(String name) {
         return registerItem(name, () -> new Item(new Item.Properties()
                 .setId(ResourceKey.create(Registries.ITEM, Industria.id(name)))));

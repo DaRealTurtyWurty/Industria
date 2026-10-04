@@ -630,6 +630,24 @@ public final class IndustriaModels {
         blockStateModelGenerator.registerSimpleItemModel(ModBlocks.DELAY_CONVEYOR.get(), Industria.id("block/conveyor"));
         registerContainmentConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(ModBlocks.CONTAINMENT_CONVEYOR.get(), Industria.id("block/conveyor"));
+
+        // Smeltery
+        blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
+        blockStateModelGenerator.createTrivialCube(ModBlocks.FIREBRICK.get());
+        blockStateModelGenerator.createTrivialCube(ModBlocks.SMELTERY_GLASS.get());
+        TexturedModel.Provider firebrickFront = TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(mapping ->
+                mapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get()))
+                        .put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get())));
+        blockStateModelGenerator.createFurnace(ModBlocks.FIREBOX.get(), firebrickFront);
+        firebrickFront.create(ModBlocks.CHARGING_HATCH.get(), blockStateModelGenerator.modelOutput);
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.CHARGING_HATCH.get());
+        firebrickFront.create(ModBlocks.SMELTERY_CONTROLLER.get(), blockStateModelGenerator.modelOutput);
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.SMELTERY_CONTROLLER.get());
+        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CHIMNEY.get());
+        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_BASIN.get());
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.TAPPING_OUTLET.get());
+        registerCustomCube(blockStateModelGenerator, ModBlocks.CASTING_TABLE.get(),
+                TextureMapping.getBlockTexture(Blocks.DEEPSLATE_BRICKS).sprite());
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {

@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.datagen;
 
-import dev.turtywurty.slurryapi.api.SlurryVariant;
 import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -10,12 +9,12 @@ import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.recipe.AgitatorRecipe;
 import dev.turtywurty.industria.util.AgitatorPortType;
+import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import dev.turtywurty.industria.util.FluidAmounts;
+import dev.turtywurty.slurryapi.api.SlurryVariant;
 import dev.turtywurty.turtymultiloader.datagen.convention.ConventionTags;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
-import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -483,6 +482,21 @@ public final class IndustriaRecipes {
                         240,
                         40,
                         "diluted_formic_acid");
+
+                offerSmelteryRecipe(output,
+                        new IndustriaIngredient(1, ModItems.ALUMINIUM_INGOT.get()),
+                        new FluidStack(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().holder()), FluidAmounts.INGOT),
+                        100,
+                        150,
+                        2.0f,
+                        40,
+                        "aluminium_ingot_to_molten_aluminium");
+
+                offerCastingBasinRecipe(output,
+                        new FluidStack(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().holder()), FluidAmounts.BLOCK),
+                        new OutputItemStack(ModBlocks.ALUMINIUM_BLOCK.get().asItem(), 1, 1),
+                        100,
+                        "molten_aluminium_to_aluminium_block");
             }
         }.buildRecipes();
     }
@@ -551,6 +565,16 @@ public final class IndustriaRecipes {
                                                FluidStack secondaryOutputFluid, int processTime, int energyCost, String name) {
         new DistillationTowerRecipeBuilder(inputFluid, primaryOutputFluid, secondaryOutputFluid, processTime, energyCost)
                 .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("distillation_tower_" + name)));
+    }
+
+    private static void offerSmelteryRecipe(RecipeOutput exporter, IndustriaIngredient input, FluidStack output, int requiredTemperature, int preferredTemperature, float maxSpeedMultiplier, int processTime, String name) {
+        new SmelteryRecipeBuilder(input, output, requiredTemperature, preferredTemperature, maxSpeedMultiplier, processTime)
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("smeltery_" + name)));
+    }
+
+    private static void offerCastingBasinRecipe(RecipeOutput exporter, FluidStack inputFluid, OutputItemStack output, int coolingTime, String name) {
+        new CastingBasinRecipeBuilder(inputFluid, output, coolingTime)
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("casting_basin_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {

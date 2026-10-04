@@ -23,6 +23,16 @@ public final class IndustriaTestWorldGenerator {
     }
 
     public static void generate(TestWorldContext context) {
+        if (Boolean.getBoolean("industria.test.smeltery.validation") && context.server().isDedicatedServer()) {
+            SmelteryValidationTestWorld.start(context);
+            return;
+        }
+
+        if (Boolean.getBoolean("industria.test.smeltery.retention") && context.server().isDedicatedServer()) {
+            SmelteryTestWorld.place(context.at(8, 8, -10));
+            return;
+        }
+
         TestWorldContext energyGenContext = context.at(0, 0, 5);
         energyGenContext.setBlock(-1, 0, 0, ModBlocks.WIND_TURBINE);
         energyGenContext.setBlock(0, 0, 0, ModBlocks.WIND_TURBINE);
@@ -57,6 +67,7 @@ public final class IndustriaTestWorldGenerator {
         addMixerItemFeed(mixerContext);
 
         connectMachines(energyGenContext, poolContext, mixerContext, digesterContext);
+        SmelteryTestWorld.place(context.at(8, 0, -10));
     }
 
     private static void connectMachines(TestWorldContext energyGenContext, TestWorldContext poolContext,

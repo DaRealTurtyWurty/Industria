@@ -54,6 +54,12 @@ public class ModRecipeSerializers {
     public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<DistillationTowerRecipe>> DISTILLATION_TOWER =
             register("distillation_tower", () -> DistillationTowerRecipe.SERIALIZER);
 
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<SmelteryRecipe>> SMELTERY =
+            register("smeltery", () -> SmelteryRecipe.SERIALIZER);
+
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<CastingBasinRecipe>> CASTING_BASIN =
+            register("casting_basin", () -> CastingBasinRecipe.SERIALIZER);
+
     public static <T extends Recipe<?>> RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<T>> register(String name, Supplier<RecipeSerializer<T>> serializer) {
         return REGISTRIES.registerRecipeSerializer(Industria.id(name), serializer);
     }

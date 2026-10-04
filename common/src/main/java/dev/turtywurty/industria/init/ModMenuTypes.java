@@ -3,6 +3,7 @@ package dev.turtywurty.industria.init;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.menu.*;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.network.ChargingHatchOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.turtymultiloader.menu.ExtendedMenuFactory;
 import dev.turtywurty.turtymultiloader.menu.ExtendedMenuRegistration;
@@ -87,6 +88,15 @@ public class ModMenuTypes {
 
     public static final ExtendedMenuRegistration<DistillationTowerScreenHandler, BlockPosPayload> DISTILLATION_TOWER =
             register("distillation_tower", DistillationTowerScreenHandler::new, BlockPosPayload.CODEC);
+
+    public static final ExtendedMenuRegistration<ChargingHatchMenu, ChargingHatchOpenPayload> CHARGING_HATCH =
+            register("charging_hatch", ChargingHatchMenu::new, ChargingHatchOpenPayload.CODEC);
+
+    public static final ExtendedMenuRegistration<FireboxMenu, BlockPosPayload> FIREBOX =
+            register("firebox", FireboxMenu::new, BlockPosPayload.CODEC);
+
+    public static final ExtendedMenuRegistration<SmelteryControllerMenu, BlockPosPayload> SMELTERY_CONTROLLER =
+            register("smeltery_controller", SmelteryControllerMenu::new, BlockPosPayload.CODEC);
 
     public static <T extends AbstractContainerMenu, D extends CustomPacketPayload> ExtendedMenuRegistration<T, D> register(String name, ExtendedMenuFactory<T, D> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> codec) {
         return Menus.registerExtended(Industria.id(name), factory, codec);

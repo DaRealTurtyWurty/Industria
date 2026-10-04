@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "industria:block/smeltery_controller",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "industria:block/smeltery_controller"
+    },
+    "facing=south": {
+      "model": "industria:block/smeltery_controller",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industria:block/smeltery_controller",
+      "y": 270
+    }
+  }
+}

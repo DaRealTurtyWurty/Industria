@@ -152,6 +152,7 @@ public class WrappedContainerStorage<T extends SimpleContainer>
 
         @Override
         public void readData(ValueInput view) {
+            this.inventory.getItems().clear();
             ContainerHelper.loadAllItems(view, this.inventory.getItems());
         }
     }

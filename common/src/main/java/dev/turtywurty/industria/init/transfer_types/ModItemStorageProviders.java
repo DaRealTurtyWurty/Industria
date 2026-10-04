@@ -47,5 +47,9 @@ public final class ModItemStorageProviders {
 
             return null;
         }, ModBlocks.FEEDER_CONVEYOR);
+
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CHARGING_HATCH, ChargingHatchBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.FIREBOX, FireboxBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntity::getInventoryProvider);
     }
 }

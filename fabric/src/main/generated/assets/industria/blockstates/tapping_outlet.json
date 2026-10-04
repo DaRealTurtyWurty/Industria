@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "industria:block/tapping_outlet",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "industria:block/tapping_outlet"
+    },
+    "facing=south": {
+      "model": "industria:block/tapping_outlet",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "industria:block/tapping_outlet",
+      "y": 270
+    }
+  }
+}

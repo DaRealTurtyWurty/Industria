@@ -64,4 +64,8 @@ public class SyncingFluidStorage extends SimpleSingleSlotStorage<ResourceVariant
         this.isDirty = true;
         sync();
     }
+
+    public FluidStack getFluidStack() {
+        return new FluidStack(getResource(), getAmount());
+    }
 }

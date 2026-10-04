@@ -127,6 +127,21 @@ public class ModBlockEntityTypes {
     public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<DistillationTowerBlockEntity>> DISTILLATION_TOWER = register("distillation_tower",
             DistillationTowerBlockEntity::new, builder -> builder.validBlock(ModBlocks.DISTILLATION_TOWER));
 
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<SmelteryControllerBlockEntity>> SMELTERY_CONTROLLER = register("smeltery_controller",
+            SmelteryControllerBlockEntity::new, builder -> builder.validBlock(ModBlocks.SMELTERY_CONTROLLER));
+
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<ChargingHatchBlockEntity>> CHARGING_HATCH = register("charging_hatch",
+            ChargingHatchBlockEntity::new, builder -> builder.validBlock(ModBlocks.CHARGING_HATCH));
+
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<FireboxBlockEntity>> FIREBOX = register("firebox",
+            FireboxBlockEntity::new, builder -> builder.validBlock(ModBlocks.FIREBOX));
+
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<TappingOutletBlockEntity>> TAPPING_OUTLET = register("tapping_outlet",
+            TappingOutletBlockEntity::new, builder -> builder.validBlock(ModBlocks.TAPPING_OUTLET));
+
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<CastingBasinBlockEntity>> CASTING_BASIN = register("casting_basin",
+            CastingBasinBlockEntity::new, builder -> builder.validBlock(ModBlocks.CASTING_BASIN));
+
     public static <T extends BlockEntity> RegistrationHandle<BlockEntityType<?>, BlockEntityType<T>> register(
             String name,
             BiFunction<BlockPos, BlockState, T> factory,
