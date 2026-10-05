@@ -193,6 +193,21 @@ public class InWorldFluidRenderingComponent {
         matrices.popPose();
     }
 
+    public void renderTexturedCuboid(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2) {
+        if(sprite == null || x2 <= x1 || y2 <= y1 || z2 <= z1)
+            return;
+
+        RenderType renderType = RenderTypes.entityTranslucent(sprite.atlasLocation());
+        // North `(0,0,-1)`, South `(0,0,1)`, West `(-1,0,0)`, East `(1,0,0)`
+        queue.submitCustomGeometry(matrices, renderType, (entry, vertexConsumer) -> {
+            drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z1, sprite, color, light, overlay, 0.0F, 0.0F, -1.0F);
+            drawReversedTiledXYQuad(vertexConsumer, entry, x1, y1, z2, x2, y2, z2, sprite, color, light, overlay, 0.0F, 0.0F, 1.0F);
+            drawReversedTiledYZQuad(vertexConsumer, entry, x1, y1, z1, y2, z2, sprite, color, light, overlay, -1.0F, 0.0F, 0.0F);
+            drawTiledYZQuad(vertexConsumer, entry, x2, y1, z1, y2, z2, sprite, color, light, overlay,1.0F , 0.0F , 0.0F);
+            drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1, x2, z2, sprite, color, light, overlay);
+        });
+    }
+
     /**
      * Draws a horizontal octagonal surface directly in model space (up is negative Y).
      */

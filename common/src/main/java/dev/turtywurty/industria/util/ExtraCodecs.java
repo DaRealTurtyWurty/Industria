@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class ExtraCodecs {
     public static final Codec<Set<BlockPos>> BLOCK_POS_SET_CODEC = setOf(BlockPos.CODEC);
-    public static final Codec<AABB> BOX_CODEC = Codec.DOUBLE
+    public static final Codec<AABB> AABB_CODEC = Codec.DOUBLE
             .listOf()
             .xmap(
                     list -> new AABB(

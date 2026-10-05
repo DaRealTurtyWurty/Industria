@@ -345,8 +345,8 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, Block> CHIMNEY = registerWithItemCopy("chimney",
             Block::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
 
-    public static final RegistrationHandle<Block, TintedGlassBlock> SMELTERY_GLASS = registerWithItemCopy("smeltery_glass",
-            TintedGlassBlock::new, Blocks.TINTED_GLASS);
+    public static final RegistrationHandle<Block, SmelteryGlassBlock> SMELTERY_GLASS = registerWithItemCopy("smeltery_glass",
+            SmelteryGlassBlock::new, Blocks.GLASS);
 
     public static final RegistrationHandle<Block, CastingTableBlock> CASTING_TABLE = registerWithItemCopy("casting_table",
             CastingTableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);

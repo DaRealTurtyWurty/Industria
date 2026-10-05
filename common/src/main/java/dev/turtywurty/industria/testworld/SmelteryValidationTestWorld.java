@@ -2163,7 +2163,7 @@ public final class SmelteryValidationTestWorld {
             for (var entry : data.getListOrEmpty("Chambers"))
                 tags.add((CompoundTag) entry);
             var ops = context.overworld().registryAccess().createSerializationContext(NbtOps.INSTANCE);
-            tags.sort(Comparator.comparingDouble(t -> ExtraCodecs.BOX_CODEC.parse(ops, t.get("bounding_box")).getOrThrow().minX));
+            tags.sort(Comparator.comparingDouble(t -> ExtraCodecs.AABB_CODEC.parse(ops, t.get("bounding_box")).getOrThrow().minX));
             check(tags.size() == amounts.length, "Cannot seed: expected " + amounts.length + " chambers, got " + tags.size());
             check(data.getListOrEmpty("RetainedFluids").isEmpty(), "Unexpected reserves before seeding");
             for (int i = 0; i < amounts.length; i++) {
@@ -2186,7 +2186,7 @@ public final class SmelteryValidationTestWorld {
             var active = new ArrayList<Chamber>();
             for (var entry : data.getListOrEmpty("Chambers")) {
                 var tag = (CompoundTag) entry;
-                active.add(new Chamber(ExtraCodecs.BOX_CODEC.parse(ops, tag.get("bounding_box")).getOrThrow(),
+                active.add(new Chamber(ExtraCodecs.AABB_CODEC.parse(ops, tag.get("bounding_box")).getOrThrow(),
                         tag.getLongOr("capacity", 0), FluidStack.CODEC.codec().parse(ops, tag.get("fluid")).getOrThrow()));
             }
             active.sort(Comparator.comparingDouble(c -> c.bounds().minX));

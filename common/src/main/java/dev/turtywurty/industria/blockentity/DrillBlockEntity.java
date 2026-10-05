@@ -223,7 +223,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
         this.targetRotationSpeed = view.getFloatOr("TargetRotationSpeed", 0.0F);
 
-        this.drillHeadAABB = view.read("DrillHeadAABB", ExtraCodecs.BOX_CODEC)
+        this.drillHeadAABB = view.read("DrillHeadAABB", ExtraCodecs.AABB_CODEC)
                 .orElseGet(() -> AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(this.worldPosition)));
     }
 
@@ -252,7 +252,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         view.putFloat("TargetRotationSpeed", this.targetRotationSpeed);
 
         if (this.drillHeadAABB != null) {
-            view.store("DrillHeadAABB", ExtraCodecs.BOX_CODEC, this.drillHeadAABB);
+            view.store("DrillHeadAABB", ExtraCodecs.AABB_CODEC, this.drillHeadAABB);
         }
     }
 

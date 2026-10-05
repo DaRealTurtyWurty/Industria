@@ -27,5 +27,6 @@ public class ModBlockEntityRenderers {
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.FLUID_PUMP, FluidPumpBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.TAPPING_OUTLET, TappingOutletBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.SMELTERY_CONTROLLER, SmelteryControllerBlockEntityRenderer::new);
     }
 }
