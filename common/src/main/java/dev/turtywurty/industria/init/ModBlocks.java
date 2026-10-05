@@ -348,6 +348,9 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, SmelteryGlassBlock> SMELTERY_GLASS = registerWithItemCopy("smeltery_glass",
             SmelteryGlassBlock::new, Blocks.GLASS);
 
+    public static final RegistrationHandle<Block, MoldingTableBlock> MOLDING_TABLE = registerWithItemCopy("molding_table",
+            MoldingTableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static final RegistrationHandle<Block, CastingTableBlock> CASTING_TABLE = registerWithItemCopy("casting_table",
             CastingTableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 

@@ -25,6 +25,7 @@ public class FireboxScreen extends AbstractContainerScreen<FireboxMenu> {
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         if(this.menu.isBurning()) {

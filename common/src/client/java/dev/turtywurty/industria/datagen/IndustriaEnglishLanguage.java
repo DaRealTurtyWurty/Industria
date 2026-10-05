@@ -351,6 +351,8 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.CASTING_BASIN.get(), "Casting Basin");
         translationBuilder.add(ModItems.BLANK_SAND_CAST.get(), "Blank Sand Cast");
         translationBuilder.add(ModItems.BLANK_RED_SAND_CAST.get(), "Blank Red Sand Cast");
+        translationBuilder.add(ModItems.BLANK_CLAY_CAST.get(), "Blank Clay Cast");
+        translationBuilder.add(ModItems.BLANK_GOLD_CAST.get(), "Blank Gold Cast");
 
         addText(translationBuilder, SmelteryControllerScreen.TEMPERATURE_LABEL, "Temperature: %s°C");
         addText(translationBuilder, SmelteryControllerScreen.FORMED_LABEL, "Formed");
@@ -368,6 +370,9 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_MOLTEN, "Molten");
         addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_ON_LABEL, "Keep Molten: On");
         addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_OFF_LABEL, "Keep Molten: Off");
+
+        translationBuilder.add(ModBlocks.MOLDING_TABLE.get(), "Molding Table");
+        addText(translationBuilder, MoldingTableBlockEntity.TITLE, "Molding Table");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

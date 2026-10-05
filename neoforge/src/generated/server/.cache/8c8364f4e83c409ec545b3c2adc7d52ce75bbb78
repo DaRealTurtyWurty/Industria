@@ -1,5 +1,6 @@
-// 26.1.1	2026-08-22T11:19:11.4505255	Tags for minecraft:item mod id vanilla
+// 26.1.1	2026-10-05T22:21:14.6932771	Tags for minecraft:item mod id vanilla
 977f68b16c19a84ac1b31415de441afc77b254cb data/c/tags/item/ingots.json
+bef9a01930f137060dee41f5cde26101d698a718 data/industria/tags/item/blank_molds.json
 d355e222e0a78a497a37ee977f7c874088df60b4 data/industria/tags/item/electrolysis_rods.json
 85f082478d0098e14e6a174c9db47b47e1c5e24a data/industria/tags/item/rubber_logs.json
 a50ce9ba6b6022450ccb09ea70eb24c095e5bce7 data/minecraft/tags/item/boats.json

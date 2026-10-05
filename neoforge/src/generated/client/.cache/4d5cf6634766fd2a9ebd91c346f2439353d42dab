@@ -1,4 +1,4 @@
-// 26.1.1	2026-10-02T13:57:53.5597378	Vanilla block and item models
+// 26.1.1	2026-10-05T22:21:29.8767201	Vanilla block and item models
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets/industria/blockstates/advanced_battery.json
 97e91a3c27f38fdd330ae2ebcfbe81b2b31b23f9 assets/industria/blockstates/advanced_solar_panel.json
 cf9ac5e96b25ca692a2d479dbb9949f47571029d assets/industria/blockstates/agitator.json
@@ -144,6 +144,8 @@ c4aff485d4046a2f34e7e8b20089c55f0ff7a144 assets/industria/items/aluminium_powder
 cd8dea6c492105e51b93eef3b5ea5528e59fa770 assets/industria/items/basic_battery.json
 89e9f4d8ce2325307223522beb59c25e9c7b293b assets/industria/items/bauxite.json
 2f91fdb9415a5339ac1bb94845ea2faeb00d6d0e assets/industria/items/bauxite_ore.json
+c49fa05b8f96df5a17c208b9258e9979f0f46667 assets/industria/items/blank_clay_cast.json
+4dba4a6b9bf4a38acc337ee8c4d611178c2d9a5a assets/industria/items/blank_gold_cast.json
 cd6df7d95d67a373c82f1ee12bdcce21e4a121dc assets/industria/items/blank_red_sand_cast.json
 f6bef7bb275269ab3718c55a2d73a963812a9141 assets/industria/items/blank_sand_cast.json
 6b75750eac910406af185adc000b5d509a4a61aa assets/industria/items/block_builder_drill_head.json
@@ -244,6 +246,7 @@ f0d5d5543baf131a7aae1b7a586ace2ea5dd7c67 assets/industria/items/lead_ingot.json
 3324f7262969e62a8c335dc71c6b9ad4e7998a8e assets/industria/items/methanol_bucket.json
 c4114c5ef2a40c9f69c6fe0df99a11f7ec23888a assets/industria/items/mixer.json
 a64584a33897586803e638daec4544c8271bc1e0 assets/industria/items/mob_jar.json
+feca105ddf8059f4fa02d368a0ec077be3f8d570 assets/industria/items/molding_table.json
 893cccc945160b8647bed2406556d98deb2dd364 assets/industria/items/molten_aluminium_bucket.json
 e72d5b9d45b719ffe1b875aa1bdce65adf36d11a assets/industria/items/molten_cryolite_bucket.json
 5894b0a0ca161281a5cb6d8675c5b2b42c19b147 assets/industria/items/motor.json
@@ -472,6 +475,8 @@ ee659d1946e83842f9325b9c1bcb650613b816b3 assets/industria/models/item/aluminium_
 2582af37e708615ba0bc79e91625659224950b49 assets/industria/models/item/argentite.json
 653634c3a52523efaa2451a8243cc17df17f52b2 assets/industria/models/item/argentite_concentrate.json
 4797ea7f9a75f21c7f184def7c9f809337f065bb assets/industria/models/item/bauxite.json
+832831ec501a6aa5d63485e63fe3a363431a62b8 assets/industria/models/item/blank_clay_cast.json
+b6d5562ded70689459d28a7a4f453a4150b69a8a assets/industria/models/item/blank_gold_cast.json
 db618a544fd1d8fc3bbf7b111c45937c860f1e22 assets/industria/models/item/blank_red_sand_cast.json
 ee73fb88bd1ed2a98aac1f9ded2892e3a96cb77c assets/industria/models/item/blank_sand_cast.json
 57d555518b46c07931bc78606e1556020e3c7300 assets/industria/models/item/block_builder_drill_head.json

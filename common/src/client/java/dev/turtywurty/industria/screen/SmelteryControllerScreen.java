@@ -188,6 +188,7 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(
                 context, TEXTURE,
                 this.leftPos, this.topPos,

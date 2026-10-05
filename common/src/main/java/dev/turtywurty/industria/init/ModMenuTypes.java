@@ -98,6 +98,9 @@ public class ModMenuTypes {
     public static final ExtendedMenuRegistration<SmelteryControllerMenu, BlockPosPayload> SMELTERY_CONTROLLER =
             register("smeltery_controller", SmelteryControllerMenu::new, BlockPosPayload.CODEC);
 
+    public static final ExtendedMenuRegistration<MoldingTableMenu, BlockPosPayload> MOLDING_TABLE =
+            register("molding_table", MoldingTableMenu::new, BlockPosPayload.CODEC);
+
     public static <T extends AbstractContainerMenu, D extends CustomPacketPayload> ExtendedMenuRegistration<T, D> register(String name, ExtendedMenuFactory<T, D> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> codec) {
         return Menus.registerExtended(Industria.id(name), factory, codec);
     }
