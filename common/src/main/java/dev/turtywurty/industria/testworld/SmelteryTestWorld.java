@@ -6,13 +6,10 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.core.Direction;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -44,18 +41,6 @@ public final class SmelteryTestWorld {
         // Embed the controller in the north wall beside the charging hatch.
         context.setBlock(1, 3, 0, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
-
-        context.setBlock(2, 0, -3, Blocks.CHEST);
-        context.configureBlockEntity(2, 0, -3, ChestBlockEntity.class, chest -> {
-            chest.clearContent();
-            chest.setItem(0, new ItemStack(ModBlocks.FIREBRICK.get(), 64));
-            chest.setItem(1, new ItemStack(ModBlocks.CHARGING_HATCH.get(), 4));
-            chest.setItem(2, new ItemStack(ModBlocks.CHIMNEY.get(), 4));
-            chest.setItem(3, new ItemStack(ModBlocks.TAPPING_OUTLET.get(), 4));
-            chest.setItem(4, new ItemStack(ModBlocks.FIREBOX.get(), 4));
-            chest.setItem(5, new ItemStack(ModBlocks.SMELTERY_CONTROLLER.get(), 4));
-            chest.setItem(6, new ItemStack(Blocks.STONE, 16));
-        });
 
         LOGGER.info("Smeltery test fixture: controller={}, hatch={}, firebox={}, chimney={}, outlet={}, basin={}, spare parts={}",
                 context.pos(1, 3, 0), context.pos(2, 3, 0), context.pos(0, 1, 2),

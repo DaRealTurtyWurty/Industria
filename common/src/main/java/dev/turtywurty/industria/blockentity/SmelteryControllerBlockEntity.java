@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.blockentity;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -35,6 +34,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -51,7 +51,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -60,11 +59,11 @@ import java.util.function.Supplier;
 public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("smeltery_controller");
 
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final float AMBIENT_TEMPERATURE = 20.0F;
     private static final float MAX_TEMPERATURE = 4000.0F;
     private static final float HEATING_PER_TICK = 0.5F;
     private static final float COOLING_PER_TICK = 0.1F;
+    private static final float SAFE_ENTITY_TEMPERATURE = 60.0F;
     private final Codec<List<SmelteryChamber>> chambersCodec = SmelteryChamber.codec(this).listOf();
 
     private final List<SmelteryChamber> chambers = new ArrayList<>();
@@ -147,6 +146,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         }
 
         updateTemperature(heating, targetTemperature);
+        applyChamberHeat();
         emitChimneyParticles(heating);
         processChambers();
         if(this.level.getGameTime() % 5 == 0) {
@@ -187,6 +187,26 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
                     position.getX() + 0.5, position.getY() + 1.05, position.getZ() + 0.5,
                     1, 0.08, 0.08, 0.08, 0.02);
+        }
+    }
+
+    private void applyChamberHeat() {
+        if(!this.structureReady
+                || this.temperature < SAFE_ENTITY_TEMPERATURE
+                || !(this.level instanceof ServerLevel serverLevel)
+                || this.level.getGameTime() % 20 != 0)
+            return;
+
+        Set<Entity> affectedEntities = new HashSet<>();
+        for (SmelteryChamber chamber : this.chambers) {
+            List<Entity> entities = serverLevel.getEntities(null, chamber.getBoundingBox());
+            for (Entity entity : entities) {
+                if(!entity.isAlive() || entity.fireImmune() || !affectedEntities.add(entity))
+                    continue;
+
+                entity.igniteForSeconds(10.0F);
+                entity.hurtServer(serverLevel, serverLevel.damageSources().inFire(), 2.0F);
+            }
         }
     }
 
@@ -457,19 +477,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     private void validateStructure() {
         this.structureReady = false;
         this.fuelSpaceSize = 0;
-
-        logValidation("START tick={} activeChambers={} retainedRecords={}",
-                this.level.getGameTime(), this.chambers.size(), this.retainedFluids.size());
         SearchResult result = collectSmelteryBlocks();
-        logValidation("Structure search: result={} connectedBlocks={}", result.type(), result.positions().size());
-        if (result.type() != SearchResultType.VALID)
-            logValidation("ABORT: structure search incomplete or invalid; keeping previous state");
         if (result.type() == SearchResultType.VALID) {
             Set<BlockPos> positions = result.positions();
 
             SmelteryComponents components = collectComponents(positions);
             if (components.controllerPositions().size() != 1) {
-                logValidation("INVALID: expected exactly one controller, found {}; deactivating chambers", components.controllerPositions().size());
                 this.fireBoxPos = null;
                 deactivateChambers();
                 return;
@@ -479,13 +492,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             Set<BlockPos> chimneyPositions = components.chimneyPositions();
             Set<BlockPos> hatchPositions = components.hatchPositions();
             Set<BlockPos> outletPositions = components.outletPositions();
-
-            logValidation("Components: fireboxes={} hatches={} chimneys={} outlets={}",
-                    fireboxPositions, hatchPositions, chimneyPositions, outletPositions);
             if (fireboxPositions.size() == 1) {
                 this.fireBoxPos = fireboxPositions.iterator().next();
             } else {
-                logValidation("INVALID: expected exactly one firebox, found {}; deactivating chambers", fireboxPositions.size());
                 this.fireBoxPos = null;
                 deactivateChambers();
                 return;
@@ -495,18 +504,13 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
             Direction fuelSpaceDirection = this.level.getBlockState(this.fireBoxPos).getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
             BlockPos fuelSpaceStartPos = this.fireBoxPos.relative(fuelSpaceDirection);
-            logValidation("Structure bounds={} firebox={} inwardDirection={} fuelStart={}",
-                    boundingBox, this.fireBoxPos, fuelSpaceDirection, fuelSpaceStartPos);
             SearchResult fuelSpaceResult = floodFillFuelSpace(fuelSpaceStartPos, boundingBox);
-            logValidation("Fuel search: result={} connectedAirBlocks={}", fuelSpaceResult.type(), fuelSpaceResult.positions().size());
             if (fuelSpaceResult.type() == SearchResultType.NOT_FOUND) {
-                logValidation("INVALID: fuel space failed enclosure/sandwich checks; deactivating chambers");
                 deactivateChambers();
                 return;
             }
 
             if (fuelSpaceResult.type() != SearchResultType.VALID) {
-                logValidation("ABORT: fuel search {}; keeping previous state", fuelSpaceResult.type());
                 return;
             }
 
@@ -531,13 +535,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             }
 
             if (!controllerInWall) {
-                logValidation("INVALID: controller is not embedded in any chamber wall; deactivating chambers");
                 deactivateChambers();
                 return;
             }
-
-            logValidation("Discovery finished: candidates={} previousChambers={} previousRetainedRecords={}",
-                    chamberCandidates.size(), this.chambers.size(), this.retainedFluids.size());
 
             reconcileChambers(chamberCandidates, fuelSpaceResult.positions().size());
         }
@@ -635,7 +635,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                     var pos = new BlockPos(x, y, z);
                     if (!this.level.isLoaded(pos)) {
-                        logValidation("ABORT: shell position {} is unloaded", pos);
                         return SearchResultType.UNLOADED_CHUNK;
                     }
 
@@ -647,8 +646,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                             && isControllerInWall(firstX, lastX, firstY, lastY, firstZ, lastZ))
                             || (state.is(ModBlocks.SMELTERY_GLASS.get()) && y > firstY && y < lastY))
                         continue;
-
-                    logValidation("REJECT hatch {}: invalid shell block at {} state={}", hatchPos, pos, state);
                     shellValid = false;
                 }
             }
@@ -669,13 +666,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 var airPos = new BlockPos(x, firstY - 1, z);
                 var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
                 if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos)) {
-                    logValidation("ABORT: foundation unloaded at air={} bottom={}", airPos, firebrickBottomPos);
                     return SearchResultType.UNLOADED_CHUNK;
                 }
 
                 BlockState firebrickBottomState = this.level.getBlockState(firebrickBottomPos);
                 if (firebrickBottomState.is(ModBlocks.SMELTERY_GLASS.get())) {
-                    logValidation("REJECT hatch {}: foundation bottom={} state={} is smeltery glass", hatchPos, firebrickBottomPos, firebrickBottomState);
                     foundationValid = false;
                     break;
                 }
@@ -683,7 +678,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 if (x == firstX || x == lastX || z == firstZ || z == lastZ) {
                     BlockState fuelPerimeterState = this.level.getBlockState(airPos);
                     if (fuelPerimeterState.is(ModBlocks.SMELTERY_GLASS.get())) {
-                        logValidation("REJECT hatch {}: foundation perimeter air={} state={} is smeltery glass", hatchPos, airPos, fuelPerimeterState);
                         foundationValid = false;
                         break;
                     }
@@ -697,7 +691,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
 
                 if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos)) {
-                    logValidation("ABORT: foundation unloaded at air={} bottom={}", airPos, firebrickBottomPos);
                     return SearchResultType.UNLOADED_CHUNK;
                 }
 
@@ -707,9 +700,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 if (!airState.isAir()
                         || !firebrickBottomState.is(ModBlocks.FIREBRICK.get())
                         || !fuelSpaceResult.positions().contains(airPos)) {
-                    logValidation("REJECT hatch {}: foundation air={} state={} bottom={} state={} reachableFromFirebox={}",
-                            hatchPos, airPos, airState, firebrickBottomPos, firebrickBottomState,
-                            fuelSpaceResult.positions().contains(airPos));
                     foundationValid = false;
                     break;
                 }
@@ -734,18 +724,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             BlockState hatchState = this.level.getBlockState(hatchPos);
             Direction insideDirection = hatchState.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
             BlockPos insidePos = hatchPos.relative(insideDirection);
-            logValidation("Hatch {}: facing={} interiorStart={}", hatchPos,
-                    hatchState.getValue(BlockStateProperties.HORIZONTAL_FACING), insidePos);
             SearchResult chamberPositions = floodFillChamber(insidePos, boundingBox);
-            logValidation("Hatch {}: interior search={} airBlocks={}", hatchPos,
-                    chamberPositions.type(), chamberPositions.positions().size());
             if (chamberPositions.type() == SearchResultType.UNLOADED_CHUNK || chamberPositions.type() == SearchResultType.TOO_LARGE) {
-                logValidation("ABORT: incomplete interior search at hatch {}", hatchPos);
                 return null;
             }
 
             if (chamberPositions.type() != SearchResultType.VALID) {
-                logValidation("REJECT hatch {}: no enclosed air interior", hatchPos);
                 continue;
             }
 
@@ -757,11 +741,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
             long expectedCapacity = width * height * depth;
             long actualCapacity = chamberPositions.positions().size();
-            logValidation("Hatch {}: interiorBounds={} dimensions={}x{}x{} expectedBlocks={} actualBlocks={}",
-                    hatchPos, chamberBoundingBox, width, height, depth, expectedCapacity, actualCapacity);
             if (expectedCapacity != actualCapacity) {
                 // The chamber is not a solid rectangular prism, so we skip it
-                logValidation("REJECT hatch {}: interior is not a complete cuboid", hatchPos);
                 continue;
             }
 
@@ -777,31 +758,24 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 return null;
 
             if (shellResult != SearchResultType.VALID) {
-                logValidation("REJECT hatch {}: shell validation failed", hatchPos);
                 continue;
             }
-            logValidation("Hatch {}: shell valid", hatchPos);
 
             BlockPos chamberChimneyPos = findChimney(chimneyPositions, firstX, lastX, lastY, firstZ, lastZ);
             if (chamberChimneyPos == null) {
-                logValidation("REJECT hatch {}: no chimney above roof Y={} within interior footprint", hatchPos, lastY + 1);
                 continue;
             }
-            logValidation("Hatch {}: chimney={}", hatchPos, chamberChimneyPos);
 
             List<BlockPos> chamberOutletPositions = findOutlets(outletPositions, firstX, lastX, firstY, lastY, firstZ, lastZ);
             if (chamberOutletPositions.isEmpty()) {
-                logValidation("REJECT hatch {}: no outlet directly outside a wall", hatchPos);
                 continue;
             }
-            logValidation("Hatch {}: outlets={}", hatchPos, chamberOutletPositions);
 
             SearchResultType foundationResult = validateChamberFoundation(hatchPos, firstX, lastX, firstY, firstZ, lastZ, fuelSpaceResult);
             if (foundationResult == SearchResultType.UNLOADED_CHUNK)
                 return null;
 
             if (foundationResult != SearchResultType.VALID) {
-                logValidation("REJECT hatch {}: foundation validation failed", hatchPos);
                 continue;
             }
 
@@ -811,10 +785,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
             if (chamberCandidates.stream().noneMatch(c -> c.boundingBox().equals(chamber.boundingBox()))) {
                 chamberCandidates.add(chamber);
-                logValidation("ACCEPT candidate: bounds={} hatch={} chimney={} outlets={} fluidCapacity={}",
-                        chamber.boundingBox(), hatchPos, chamberChimneyPos, chamberOutletPositions, chamber.fluidCapacity());
-            } else {
-                logValidation("SKIP duplicate candidate bounds={}", chamber.boundingBox());
             }
         }
 
@@ -937,7 +907,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 var snapshot = new StorageSnapshot<>(List.of(
                         new StorageSnapshot.Entry<>(survivingFluid.variant(), amountToKeep)));
                 if (!snapshot.apply(storage)) {
-                    logValidation("ABORT: group snapshot failed for {}", candidate.boundingBox());
                     return false;
                 }
             }
@@ -970,8 +939,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         }
 
         if (newChambers.size() != chamberCandidates.size()) {
-            logValidation("ABORT: reconciliation count mismatch; candidates={} newChambers={}",
-                    chamberCandidates.size(), newChambers.size());
             return;
         }
 
@@ -1043,7 +1010,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                     var pos = new BlockPos(x, y, z);
                     BlockState state = this.level.getBlockState(pos);
                     if (state.is(ModBlocks.SMELTERY_GLASS.get())) {
-                        logValidation("Glass found in wall at {}", pos);
                         return true;
                     }
                 }
@@ -1101,18 +1067,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         }
 
         setChanged();
-        logValidation("COMMIT: activeChambers={} retainedRecords={}", this.chambers.size(), this.retainedFluids.size());
-        for (SmelteryChamber chamber : this.chambers) {
-            logValidation("ACTIVE: bounds={} hatch={} chimney={} outlets={} resource={} amount={} capacity={}",
-                    chamber.getBoundingBox(), chamber.hatchPos, chamber.chimneyPos, chamber.outletPositions,
-                    chamber.getFluidStorage().getResource(), chamber.getFluidStorage().getAmount(),
-                    chamber.getFluidStorage().getCapacity());
-        }
-    }
-
-    // Temporary verbose diagnostics at INFO so the development console shows them without log configuration.
-    private void logValidation(String message, Object... arguments) {
-        LOGGER.info("[Smeltery " + this.worldPosition + "] " + message, arguments);
     }
 
     private void deactivateChambers() {
@@ -1121,8 +1075,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
         if (this.chambers.isEmpty())
             return;
-
-        logValidation("DEACTIVATE: moving {} active chambers into retained fluid", this.chambers.size());
         for (SmelteryChamber chamber : this.chambers) {
             clearHatchLink(chamber.hatchPos);
             for (BlockPos outletPos : chamber.outletPositions) {
@@ -1133,9 +1085,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             var fluid = new FluidStack(storage.getResource(), storage.getAmount());
             if (fluid.isEmpty())
                 continue;
-
-            logValidation("DEACTIVATE retain: bounds={} resource={} amount={}",
-                    chamber.getBoundingBox(), fluid.variant(), fluid.amount());
             var retainedFluid = new RetainedChamberFluid(chamber.getBoundingBox(), fluid);
             this.retainedFluids.add(retainedFluid);
         }
@@ -1158,19 +1107,14 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private SearchResult floodFillFuelSpace(BlockPos startPos, AABB boundingBox) {
         if (!this.level.isLoaded(startPos) || !this.level.isLoaded(startPos.above()) || !this.level.isLoaded(startPos.below())) {
-            logValidation("Fuel failure: start/ceiling/bottom unloaded at {}", startPos);
             return SearchResult.unloadedChunk();
         }
 
         if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5)) {
-            logValidation("Fuel failure: start {} outside structure bounds {}", startPos, boundingBox);
             return SearchResult.notFound();
         }
 
         if (!isSandwiched(startPos)) {
-            logValidation("Fuel failure: start {} is not sandwiched; above={} middle={} below={}",
-                    startPos, this.level.getBlockState(startPos.above()), this.level.getBlockState(startPos),
-                    this.level.getBlockState(startPos.below()));
             return SearchResult.notFound();
         }
 
@@ -1187,7 +1131,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                     continue;
 
                 if (!this.level.isLoaded(neighborPos)) {
-                    logValidation("Fuel failure: horizontal neighbor {} unloaded", neighborPos);
                     return SearchResult.unloadedChunk();
                 }
 
@@ -1197,8 +1140,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                 if (neighborState.is(ModBlocks.FIREBOX.get())) {
                     if (!neighborPos.equals(this.fireBoxPos) || !currentPos.equals(startPos)) {
-                        logValidation("Fuel failure: firebox {} reached from {} rather than its opening {}",
-                                neighborPos, currentPos, startPos);
                         return SearchResult.notFound();
                     }
 
@@ -1206,24 +1147,18 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 }
 
                 if (!neighborState.isAir()) {
-                    logValidation("Fuel failure: perimeter neighbor {} must be firebrick, air, or firebox opening; state={}",
-                            neighborPos, neighborState);
                     return SearchResult.notFound();
                 }
 
                 if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5)) {
-                    logValidation("Fuel failure: air escapes structure bounds at {}", neighborPos);
                     return SearchResult.notFound();
                 }
 
                 if (!this.level.isLoaded(neighborPos.above()) || !this.level.isLoaded(neighborPos.below())) {
-                    logValidation("Fuel failure: ceiling/bottom unloaded at {}", neighborPos);
                     return SearchResult.unloadedChunk();
                 }
 
                 if (!isSandwiched(neighborPos)) {
-                    logValidation("Fuel failure: air {} lacks firebrick ceiling/bottom; above={} below={}",
-                            neighborPos, this.level.getBlockState(neighborPos.above()), this.level.getBlockState(neighborPos.below()));
                     return SearchResult.notFound();
                 }
 
@@ -1231,7 +1166,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 toVisit.add(neighborPos);
 
                 if (visited.size() > 10_000) {
-                    logValidation("Fuel failure: search budget exceeded at {} visited={}", neighborPos, visited.size());
                     return SearchResult.tooLarge();
                 }
             }
@@ -1242,18 +1176,15 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private SearchResult floodFillChamber(BlockPos startPos, AABB boundingBox) {
         if (!this.level.isLoaded(startPos)) {
-            logValidation("Interior failure: start {} unloaded", startPos);
             return SearchResult.unloadedChunk();
         }
 
         if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5)) {
-            logValidation("Interior failure: start {} outside structure bounds", startPos);
             return SearchResult.notFound();
         }
 
         BlockState startState = this.level.getBlockState(startPos);
         if (!startState.isAir()) {
-            logValidation("Interior failure: start {} is not air; state={}", startPos, startState);
             return SearchResult.notFound();
         }
 
@@ -1270,7 +1201,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                     continue;
 
                 if (!this.level.isLoaded(neighborPos)) {
-                    logValidation("Interior failure: neighbor {} unloaded", neighborPos);
                     return SearchResult.unloadedChunk();
                 }
 
@@ -1279,7 +1209,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                     continue;
 
                 if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5)) {
-                    logValidation("Interior failure: air escapes structure bounds at {}", neighborPos);
                     return SearchResult.notFound();
                 }
 
@@ -1287,7 +1216,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 toVisit.add(neighborPos);
 
                 if (visited.size() > 10_000) {
-                    logValidation("Interior failure: search budget exceeded at {} visited={}", neighborPos, visited.size());
                     return SearchResult.tooLarge();
                 }
             }
@@ -1298,7 +1226,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private SearchResult collectSmelteryBlocks() {
         if (this.level == null) {
-            logValidation("Structure failure: no level attached");
             return SearchResult.notFound();
         }
 
@@ -1315,7 +1242,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                     continue;
 
                 if (!this.level.isLoaded(neighborPos)) {
-                    logValidation("Structure failure: neighbor {} unloaded", neighborPos);
                     return SearchResult.unloadedChunk();
                 }
 
@@ -1327,7 +1253,6 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 toVisit.add(neighborPos);
 
                 if (visited.size() > 10_000) {
-                    logValidation("Structure failure: search budget exceeded at {} visited={}", neighborPos, visited.size());
                     return SearchResult.tooLarge();
                 }
             }
