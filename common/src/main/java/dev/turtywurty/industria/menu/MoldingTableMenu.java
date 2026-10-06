@@ -29,8 +29,13 @@ public class MoldingTableMenu extends IndustriaScreenHandler<MoldingTableBlockEn
     }
 
     @Override
+    protected int getPlayerInventoryY() {
+        return 132;
+    }
+
+    @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
-        addSlot(new Slot(this.wrappedContainerStorage.getInventory(0), 0, 80, 35) {
+        addSlot(new Slot(this.wrappedContainerStorage.getInventory(0), 0, 8, 59) {
             @Override
             public boolean mayPlace(ItemStack itemStack) {
                 return itemStack.is(TagList.Items.BLANK_MOLDS);

@@ -1,16 +1,17 @@
 package dev.turtywurty.industria.datagen;
 
-import dev.turtywurty.industria.screen.*;
-import dev.turtywurty.slurryapi.api.Slurry;
-import dev.turtywurty.slurryapi.api.SlurryVariant;
-import dev.turtywurty.slurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.conveyor.block.impl.entity.ContainmentConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
+import dev.turtywurty.industria.molding.MoldPatterns;
+import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.enums.TextEnum;
+import dev.turtywurty.slurryapi.api.Slurry;
+import dev.turtywurty.slurryapi.api.SlurryVariant;
+import dev.turtywurty.slurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.turtymultiloader.datagen.language.LanguageGenerationContext;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import net.minecraft.network.chat.Component;
@@ -373,6 +374,8 @@ public final class IndustriaEnglishLanguage {
 
         translationBuilder.add(ModBlocks.MOLDING_TABLE.get(), "Molding Table");
         addText(translationBuilder, MoldingTableBlockEntity.TITLE, "Molding Table");
+        addText(translationBuilder, MoldPatterns.INGOT.getDisplayName(), "Ingot");
+        addText(translationBuilder, MoldPatterns.ROD.getDisplayName(), "Rod");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

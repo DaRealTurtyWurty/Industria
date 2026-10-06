@@ -49,4 +49,15 @@ public final class MoldGeometry {
 
         return image;
     }
+
+    public static NativeImage createSilhouette(MoldPattern pattern, int width, int height) {
+        NativeImage image = createMask(pattern, pattern.polygons().size(), width, height);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.setPixel(x, y, image.getPixel(x, y) == 0x00000000 ? 0xFFFFFFFF : 0x00000000);
+            }
+        }
+
+        return image;
+    }
 }

@@ -15,8 +15,9 @@ public class MoldLineRenderState implements GuiElementRenderState {
     private final int color;
     private final Matrix3x2f pose;
     private final @Nullable ScreenRectangle scissorArea;
+    private final RenderPipeline renderPipeline;
 
-    public MoldLineRenderState(float x1, float y1, float x2, float y2, float halfWidth, int color, Matrix3x2fc pose, @Nullable ScreenRectangle scissorArea) {
+    public MoldLineRenderState(float x1, float y1, float x2, float y2, float halfWidth, int color, Matrix3x2fc pose, @Nullable ScreenRectangle scissorArea, RenderPipeline renderPipeline) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -25,6 +26,7 @@ public class MoldLineRenderState implements GuiElementRenderState {
         this.color = color;
         this.pose = new Matrix3x2f(pose);
         this.scissorArea = scissorArea;
+        this.renderPipeline = renderPipeline;
     }
 
     @Override
@@ -58,7 +60,7 @@ public class MoldLineRenderState implements GuiElementRenderState {
 
     @Override
     public RenderPipeline pipeline() {
-        return MoldRenderPipelines.MOLD_LINE;
+        return this.renderPipeline;
     }
 
     @Override
