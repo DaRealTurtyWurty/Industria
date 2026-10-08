@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.screen;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.menu.MoldingTableMenu;
 import dev.turtywurty.industria.molding.*;
@@ -11,7 +10,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.network.chat.Component;
@@ -22,7 +20,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,17 +29,20 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     private static final int CAST_X = 44;
     private static final int CAST_Y = 14;
     private static final int CAST_SIZE = 106;
+    private static final float GROOVE_RADIUS = 4.0f / CAST_SIZE;
     private static final double MAX_DISTANCE = 3.0;
 
     private boolean tracing;
+    private boolean failedCast;
+    private @Nullable MoldTrace moldTrace;
     private int currentEdge;
     private ItemStack lastStack = ItemStack.EMPTY;
     private MoldPattern selectedPattern = MoldPatterns.INGOT;
     private int currentPolygonIndex = 0;
-    private @Nullable DynamicTexture maskTexture;
     private @Nullable MoldGrid moldGrid;
     private boolean moldsVisible;
-    private final List<MoldPoint> groovePoints = new ArrayList<>();
+    private final MoldCastSurface castSurface = new MoldCastSurface();
+    private @Nullable MoldPoint lastGroovePoint;
 
     public MoldingTableScreen(MoldingTableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 213);
@@ -77,6 +77,11 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 .pos(this.leftPos + 8, this.topPos + 14)
                 .size(30, 20)
                 .build());
+
+        addRenderableWidget(Button.builder(Component.literal("Reset"), _ -> resetCast())
+                .pos(this.leftPos + 4, this.topPos + 38)
+                .size(36, 16)
+                .build());
     }
 
     @Override
@@ -92,46 +97,62 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
             return;
 
         TextureAtlasSprite sprite = getSprite(this.lastStack);
-        if (sprite == null || this.maskTexture == null)
+        if (sprite == null)
             return;
 
-        graphics.guiRenderState.addGuiElement(new MoldCastRenderState(
-                sprite, this.maskTexture,
+        graphics.guiRenderState.addPicturesInPictureState(new MoldCastPreviewState(
                 this.leftPos + CAST_X, this.topPos + CAST_Y,
                 CAST_SIZE,
-                graphics.pose(),
+                sprite,
+                this.castSurface.snapshot(),
                 graphics.scissorStack.peek()
         ));
 
-//        for (int i = 1; i < groovePoints.size(); i++) {
-//            MoldPoint p1 = groovePoints.get(i - 1);
-//            MoldPoint p2 = groovePoints.get(i);
-//
-//            float x1 = this.leftPos + CAST_X + p1.x() * CAST_SIZE;
-//            float y1 = this.topPos + CAST_Y + p1.y() * CAST_SIZE;
-//            float x2 = this.leftPos + CAST_X + p2.x() * CAST_SIZE;
-//            float y2 = this.topPos + CAST_Y + p2.y() * CAST_SIZE;
-//
-//            drawLine(graphics, x1, y1, x2, y2, 0xFF806B48, true);
-//        }
+        if (this.failedCast) {
+            graphics.text(this.font, "Failed", this.leftPos + 8, this.topPos + 83, 0xFFAA2222, false);
+        }
 
         for (int polygonIndex = 0; polygonIndex < this.selectedPattern.polygons().size(); polygonIndex++) {
+            if (polygonIndex < this.currentPolygonIndex)
+                continue;
             List<MoldPoint> polygon = this.selectedPattern.polygons().get(polygonIndex);
             for (int i = 0; i < polygon.size(); i++) {
                 MoldPoint p1 = polygon.get(i);
                 MoldPoint p2 = polygon.get((i + 1) % polygon.size());
 
-                int x1 = this.leftPos + CAST_X + (int) (p1.x() * CAST_SIZE);
-                int y1 = this.topPos + CAST_Y + (int) (p1.y() * CAST_SIZE);
-                int x2 = this.leftPos + CAST_X + (int) (p2.x() * CAST_SIZE);
-                int y2 = this.topPos + CAST_Y + (int) (p2.y() * CAST_SIZE);
+                int color = 0xAA55DDFF;
+                if (this.failedCast) {
+                    color = 0xAAFF7777;
+                } else if (polygonIndex == this.currentPolygonIndex && i == this.currentEdge) {
+                    color = 0x5555DDFF;
+                }
+                float position = 0;
+                if (!this.failedCast && polygonIndex == this.currentPolygonIndex && this.moldTrace != null) {
+                    for (MoldTrace.ProgressRange range : this.moldTrace.progress(i)) {
+                        drawGuideSection(graphics, p1, p2, position, range.start(), color);
+                        drawGuideSection(graphics, p1, p2, range.start(), range.end(), 0xFF33EE77);
+                        position = range.end();
+                    }
+                }
+                drawGuideSection(graphics, p1, p2, position, 1, color);
+            }
 
-                drawLine(graphics, x1, y1, x2, y2,
-                        polygonIndex < currentPolygonIndex
-                                || (polygonIndex == currentPolygonIndex && i < currentEdge)
-                                ? 0xFF66FF88
-                                : 0xFF55DDFF,
-                        false);
+            for (int i = 0; i < polygon.size(); i++) {
+                int color = 0xFF55DDFF;
+                if (this.failedCast) {
+                    color = 0xFFFF7777;
+                } else if (polygonIndex == this.currentPolygonIndex && this.moldTrace != null) {
+                    if (i == (this.currentEdge + 1) % polygon.size()) {
+                        color = 0xFFFFD166;
+                    } else if (this.moldTrace.visitedCorner(i)) {
+                        color = 0xFF33EE77;
+                    }
+                }
+                MoldPoint point = polygon.get(i);
+                int x = Math.round(this.leftPos + CAST_X + point.x() * CAST_SIZE);
+                int y = Math.round(this.topPos + CAST_Y + point.y() * CAST_SIZE);
+                graphics.fill(x - 3, y - 3, x + 4, y + 4, 0xFF263238);
+                graphics.fill(x - 2, y - 2, x + 3, y + 3, color);
             }
         }
     }
@@ -140,22 +161,16 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     protected void containerTick() {
         super.containerTick();
         if (!ItemStack.isSameItemSameComponents(this.menu.getSlot(0).getItem(), this.lastStack)) {
-            this.tracing = false;
-            this.currentEdge = 0;
             this.lastStack = this.menu.getSlot(0).getItem().copy();
-            this.currentPolygonIndex = 0;
-            this.groovePoints.clear();
-            updateMaskTexture();
+            resetCast();
         }
     }
 
     @Override
     public void removed() {
         super.removed();
-        if (this.maskTexture != null) {
-            this.maskTexture.close();
-            this.maskTexture = null;
-        }
+        this.tracing = false;
+        this.lastGroovePoint = null;
 
         if (this.moldGrid != null) {
             this.moldGrid.close();
@@ -171,21 +186,26 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         double mouseX = event.x() - this.leftPos;
         double mouseY = event.y() - this.topPos;
 
-        if (this.currentPolygonIndex >= selectedPattern.polygons().size())
+        if (!isOnCast(mouseX, mouseY))
             return super.mouseClicked(event, doubleClick);
 
-        MoldPoint start = this.selectedPattern.polygons().get(this.currentPolygonIndex).getFirst();
-        int startX = CAST_X + (int) (start.x() * CAST_SIZE);
-        int startY = CAST_Y + (int) (start.y() * CAST_SIZE);
-        if (Math.hypot(mouseX - startX, mouseY - startY) <= MAX_DISTANCE) {
-            this.tracing = true;
-            this.currentEdge = 0;
-            this.groovePoints.clear();
-            this.groovePoints.add(new MoldPoint((float) ((mouseX - CAST_X) / CAST_SIZE), (float) ((mouseY - CAST_Y) / CAST_SIZE)));
-            return true;
+        MoldPoint point = toCastPoint(mouseX, mouseY);
+        if (this.currentPolygonIndex < this.selectedPattern.polygons().size()) {
+            if (this.moldTrace == null) {
+                this.moldTrace = new MoldTrace(this.selectedPattern.polygons().get(this.currentPolygonIndex),
+                        (float) MAX_DISTANCE / CAST_SIZE);
+            }
+            this.moldTrace.begin(point);
+            this.failedCast |= this.moldTrace.failed();
+            this.currentEdge = this.moldTrace.edge();
+        } else {
+            this.failedCast = true;
         }
 
-        return super.mouseClicked(event, doubleClick);
+        this.tracing = true;
+        this.lastGroovePoint = point;
+        this.castSurface.carve(point, point, GROOVE_RADIUS);
+        return true;
     }
 
     @Override
@@ -194,6 +214,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
             return super.mouseReleased(event);
 
         this.tracing = false;
+        this.lastGroovePoint = null;
         return true;
     }
 
@@ -202,32 +223,30 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         if (event.button() != 0 || !this.tracing)
             return super.mouseDragged(event, dx, dy);
 
-        List<MoldPoint> polygon = this.selectedPattern.polygons().get(this.currentPolygonIndex);
-        MoldPoint p1 = polygon.get(this.currentEdge);
-        MoldPoint p2 = polygon.get((this.currentEdge + 1) % polygon.size());
-
-        int x1 = CAST_X + (int) (p1.x() * CAST_SIZE);
-        int y1 = CAST_Y + (int) (p1.y() * CAST_SIZE);
-        int x2 = CAST_X + (int) (p2.x() * CAST_SIZE);
-        int y2 = CAST_Y + (int) (p2.y() * CAST_SIZE);
-
         double mouseX = event.x() - this.leftPos;
         double mouseY = event.y() - this.topPos;
 
-        double distance = distanceToSegment(mouseX, mouseY, x1, y1, x2, y2);
-        if (distance > MAX_DISTANCE) {
-            this.tracing = false;
+        if (!isOnCast(mouseX, mouseY)) {
+            this.failedCast = true;
+            this.lastGroovePoint = null;
             return true;
         }
 
-        this.groovePoints.add(new MoldPoint((float) ((mouseX - CAST_X) / CAST_SIZE), (float) ((mouseY - CAST_Y) / CAST_SIZE)));
+        MoldPoint point = toCastPoint(mouseX, mouseY);
+        this.castSurface.carve(this.lastGroovePoint == null ? point : this.lastGroovePoint, point, GROOVE_RADIUS);
+        this.lastGroovePoint = point;
 
-        if (Math.hypot(mouseX - x2, mouseY - y2) <= MAX_DISTANCE) {
-            this.currentEdge = (this.currentEdge + 1) % polygon.size();
-            if (this.currentEdge == 0) {
+        if (this.moldTrace != null) {
+            boolean complete = this.moldTrace.move(point);
+            this.failedCast |= this.moldTrace.failed();
+            this.currentEdge = this.moldTrace.edge();
+            if (complete && !this.failedCast) {
                 this.tracing = false;
+                this.lastGroovePoint = null;
+                this.castSurface.removePolygon(this.selectedPattern, this.currentPolygonIndex);
                 this.currentPolygonIndex++;
-                updateMaskTexture();
+                this.currentEdge = 0;
+                this.moldTrace = null;
             }
         }
 
@@ -239,51 +258,51 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
             return;
 
         this.selectedPattern = pattern;
+        resetCast();
+    }
+
+    private void resetCast() {
         this.currentPolygonIndex = 0;
         this.currentEdge = 0;
         this.tracing = false;
-        this.groovePoints.clear();
-        updateMaskTexture();
+        this.failedCast = false;
+        this.moldTrace = null;
+        this.lastGroovePoint = null;
+        this.castSurface.clear();
     }
 
-    private void updateMaskTexture() {
-        NativeImage mask = MoldGeometry.createMask(this.selectedPattern, this.currentPolygonIndex, CAST_SIZE, CAST_SIZE);
-        if (this.maskTexture == null) {
-            this.maskTexture = new DynamicTexture(() -> "Molding table mask", mask);
-        } else {
-            this.maskTexture.setPixels(mask);
-            this.maskTexture.upload();
-        }
+    private static boolean isOnCast(double mouseX, double mouseY) {
+        return mouseX >= CAST_X - MAX_DISTANCE && mouseX <= CAST_X + CAST_SIZE + MAX_DISTANCE
+                && mouseY >= CAST_Y - MAX_DISTANCE && mouseY <= CAST_Y + CAST_SIZE + MAX_DISTANCE;
     }
 
-    private static double distanceToSegment(double px, double py, double ax, double ay, double bx, double by) {
-        double abx = bx - ax;
-        double aby = by - ay;
-        double apx = px - ax;
-        double apy = py - ay;
-
-        double abSquared = abx * abx + aby * aby;
-        if (abSquared == 0)
-            return Math.hypot(apx, apy);
-
-        double apDotAb = apx * abx + apy * aby;
-
-        double t = Math.clamp(apDotAb / abSquared, 0, 1);
-
-        double closestX = ax + t * abx;
-        double closestY = ay + t * aby;
-
-        return Math.hypot(px - closestX, py - closestY);
+    private static MoldPoint toCastPoint(double mouseX, double mouseY) {
+        return new MoldPoint((float) ((mouseX - CAST_X) / CAST_SIZE), (float) ((mouseY - CAST_Y) / CAST_SIZE));
     }
 
-    private static void drawLine(GuiGraphicsExtractor graphics, float x1, float y1, float x2, float y2, int color, boolean groove) {
+    private void drawGuideSection(GuiGraphicsExtractor graphics, MoldPoint from, MoldPoint to,
+                                  float start, float end, int color) {
+        if (end <= start)
+            return;
+
+        float dx = to.x() - from.x();
+        float dy = to.y() - from.y();
+        drawLine(graphics,
+                this.leftPos + CAST_X + (from.x() + dx * start) * CAST_SIZE,
+                this.topPos + CAST_Y + (from.y() + dy * start) * CAST_SIZE,
+                this.leftPos + CAST_X + (from.x() + dx * end) * CAST_SIZE,
+                this.topPos + CAST_Y + (from.y() + dy * end) * CAST_SIZE,
+                color);
+    }
+
+    private static void drawLine(GuiGraphicsExtractor graphics, float x1, float y1, float x2, float y2, int color) {
         graphics.guiRenderState.addGuiElement(new MoldLineRenderState(
                 x1, y1, x2, y2,
-                groove ? 1.5f : 5.0f,
+                5.0f,
                 color,
                 graphics.pose(),
                 graphics.scissorStack.peek(),
-                groove ? MoldRenderPipelines.MOLD_GROOVE : MoldRenderPipelines.MOLD_LINE));
+                MoldRenderPipelines.MOLD_LINE));
     }
 
     private static @Nullable TextureAtlasSprite getSprite(ItemStack stack) {

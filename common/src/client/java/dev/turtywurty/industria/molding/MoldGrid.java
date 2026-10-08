@@ -23,6 +23,9 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
 
     private static final int COLUMNS = 3;
     private static final int CELL_SIZE = 18;
+    private static final int SCROLLBAR_WIDTH = 12;
+    private static final int SCROLLBAR_HEIGHT = 15;
+    private static final int SCROLLBAR_RIGHT_INSET = 4;
 
     private final List<MoldPattern> patterns;
     private final Consumer<MoldPattern> onSelected;
@@ -46,14 +49,14 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        int scrollbarX = getX() + COLUMNS * CELL_SIZE + 2;
+        int scrollbarX = getScrollbarX();
         int handleOffset = getMaxScrollRow() == 0
                 ? 0
-                : Math.round((scrollRow / (float) getMaxScrollRow()) * (getHeight() - 15));
+                : Math.round((scrollRow / (float) getMaxScrollRow()) * (getScrollbarTrackHeight() - SCROLLBAR_HEIGHT));
         graphics.blitSprite(
                 RenderPipelines.GUI_TEXTURED, getMaxScrollRow() > 0 ? SCROLLER : SCROLLER_DISABLED,
                 scrollbarX, getY() + handleOffset,
-                12, 15
+                SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT
         );
 
         int hoveredIndex = getPatternAt(mouseX, mouseY);
@@ -142,11 +145,11 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
 
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        if (event.x() >= getX() + COLUMNS * CELL_SIZE + 2
-                && event.x() < getX() + COLUMNS * CELL_SIZE + 14
+        if (event.x() >= getScrollbarX()
+                && event.x() < getScrollbarX() + SCROLLBAR_WIDTH
                 && getMaxScrollRow() > 0
                 && event.y() >= getY()
-                && event.y() < getY() + getHeight()) {
+                && event.y() < getY() + getScrollbarTrackHeight()) {
             draggingScrollbar = true;
             scrollToMouse(event.y());
             return;
@@ -171,12 +174,21 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
     }
 
     private void scrollToMouse(double mouseY) {
-        if (getMaxScrollRow() == 0 || getHeight() <= 15)
+        if (getMaxScrollRow() == 0 || getScrollbarTrackHeight() <= SCROLLBAR_HEIGHT)
             return;
 
-        double fraction = (mouseY - getY() - 7.5) / (getHeight() - 15);
+        double fraction = (mouseY - getY() - SCROLLBAR_HEIGHT * 0.5)
+                / (getScrollbarTrackHeight() - SCROLLBAR_HEIGHT);
         fraction = Math.clamp(fraction, 0.0, 1.0);
         scrollRow = (int) Math.round(fraction * getMaxScrollRow());
+    }
+
+    private int getScrollbarX() {
+        return getX() + getWidth() - SCROLLBAR_RIGHT_INSET - SCROLLBAR_WIDTH;
+    }
+
+    private int getScrollbarTrackHeight() {
+        return getHeight() - 1;
     }
 
     public static class Builder {

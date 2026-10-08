@@ -3,21 +3,30 @@ package dev.turtywurty.industria.molding;
 import dev.turtywurty.industria.Industria;
 
 import java.util.List;
+import java.util.Map;
 
 public final class MoldPatterns {
     private MoldPatterns() {
     }
 
+    private static final MoldTextureCutout INGOT_CUTOUT = new MoldTextureCutout(
+            Industria.id("textures/item/steel_ingot.png"), 0, 0, 1, 1);
+
     public static final MoldPattern INGOT = new MoldPattern(
             Industria.id("ingot"),
             List.of(
                     List.of(
-                            new MoldPoint(0.2f, 0.3f),
-                            new MoldPoint(0.8f, 0.3f),
-                            new MoldPoint(0.8f, 0.7f),
-                            new MoldPoint(0.2f, 0.7f)
+                            INGOT_CUTOUT.point(0.625f, 0.125f),
+                            INGOT_CUTOUT.point(0.75f, 0.125f),
+                            INGOT_CUTOUT.point(1, 0.375f),
+                            INGOT_CUTOUT.point(1, 0.625f),
+                            INGOT_CUTOUT.point(0.375f, 0.875f),
+                            INGOT_CUTOUT.point(0.1875f, 0.875f),
+                            INGOT_CUTOUT.point(0, 0.625f),
+                            INGOT_CUTOUT.point(0, 0.375f)
                     )
-            )
+            ),
+            Map.of(0, INGOT_CUTOUT)
     );
 
     public static final MoldPattern ROD = new MoldPattern(
