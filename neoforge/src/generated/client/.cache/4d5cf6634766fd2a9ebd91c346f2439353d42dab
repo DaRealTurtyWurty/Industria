@@ -1,4 +1,4 @@
-// 26.1.1	2026-10-08T21:11:09.1866894	Vanilla block and item models
+// 26.1.1	2026-10-08T23:09:14.7448875	Vanilla block and item models
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets/industria/blockstates/advanced_battery.json
 97e91a3c27f38fdd330ae2ebcfbe81b2b31b23f9 assets/industria/blockstates/advanced_solar_panel.json
 cf9ac5e96b25ca692a2d479dbb9949f47571029d assets/industria/blockstates/agitator.json
@@ -68,6 +68,7 @@ c2c09c435b890bb605d37adc31997a1ad5473ff7 assets/industria/blockstates/lead_block
 18054f4333bda8bb0a298900bce6a1c3f6e40851 assets/industria/blockstates/magnetic_conveyor.json
 dada5a457c25af194f7ce3407db54a146d09e0f8 assets/industria/blockstates/merger_conveyor.json
 4b61f6eed5d4ebd774eecb8e83619bd9f55ad41b assets/industria/blockstates/mixer.json
+c8cb6faf13c8ac365a4e822c2de6bdfe8f6988ea assets/industria/blockstates/molding_table.json
 25fb0d1b21f1a3d0ad6931390e8cf4918a711f70 assets/industria/blockstates/molten_aluminium.json
 0b03bf5a8efbb17e14c06f0a601c1a4010425184 assets/industria/blockstates/molten_cryolite.json
 a928b28d4b1957c76d77734d3694e7c7c8fa3322 assets/industria/blockstates/nether_pyrite_ore.json

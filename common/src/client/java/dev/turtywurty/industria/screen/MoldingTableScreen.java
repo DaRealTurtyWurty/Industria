@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.menu.MoldingTableMenu;
 import dev.turtywurty.industria.molding.*;
 import dev.turtywurty.industria.network.CompleteMoldPayload;
+import dev.turtywurty.industria.network.UpdateMoldVisualPayload;
 import dev.turtywurty.industria.util.ScreenUtils;
 import dev.turtywurty.turtymultiloader.network.NetworkService;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
@@ -24,6 +26,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,6 +55,9 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     private boolean moldsVisible;
     private final MoldCastSurface castSurface = new MoldCastSurface();
     private @Nullable MoldPoint lastGroovePoint;
+    private final List<MoldTableVisualState.Stroke> visualStrokes = new ArrayList<>();
+    private boolean visualDirty;
+    private int visualSyncTicks;
 
     public MoldingTableScreen(MoldingTableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 213);
@@ -167,12 +173,25 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         super.containerTick();
         if (!ItemStack.isSameItemSameComponents(this.menu.getSlot(0).getItem(), this.lastStack)) {
             this.lastStack = this.menu.getSlot(0).getItem().copy();
-            clearCast();
+            if (!restoreVisual()) {
+                clearCast();
+            }
+        }
+        if (++this.visualSyncTicks >= 4) {
+            this.visualSyncTicks = 0;
+            syncVisual();
         }
     }
 
     @Override
+    public void onClose() {
+        syncVisual();
+        super.onClose();
+    }
+
+    @Override
     public void removed() {
+        syncVisual();
         super.removed();
         this.tracing = false;
         this.lastGroovePoint = null;
@@ -212,7 +231,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
         this.tracing = true;
         this.lastGroovePoint = point;
-        this.castSurface.carve(point, point, GROOVE_RADIUS);
+        carve(point, point);
         return true;
     }
 
@@ -223,6 +242,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
         this.tracing = false;
         this.lastGroovePoint = null;
+        syncVisual();
         return true;
     }
 
@@ -236,12 +256,13 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
         if (!isOnCast(mouseX, mouseY)) {
             this.failedCast = true;
+            this.visualDirty = true;
             this.lastGroovePoint = null;
             return true;
         }
 
         MoldPoint point = toCastPoint(mouseX, mouseY);
-        this.castSurface.carve(this.lastGroovePoint == null ? point : this.lastGroovePoint, point, GROOVE_RADIUS);
+        carve(this.lastGroovePoint == null ? point : this.lastGroovePoint, point);
         this.lastGroovePoint = point;
 
         if (this.moldTrace != null) {
@@ -252,12 +273,15 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 this.tracing = false;
                 this.lastGroovePoint = null;
                 this.castSurface.removePolygon(this.selectedPattern, this.currentPolygonIndex);
+                this.visualStrokes.clear();
+                this.visualDirty = true;
                 this.currentPolygonIndex++;
                 this.currentEdge = 0;
                 this.moldTrace = null;
                 updateControls();
 
                 if (isCastFinished()) {
+                    syncVisual();
                     NetworkService.get().sendToServer(
                             new CompleteMoldPayload(this.menu.containerId, this.selectedPattern.id()));
                 }
@@ -289,7 +313,72 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         this.moldTrace = null;
         this.lastGroovePoint = null;
         this.castSurface.clear();
+        this.visualStrokes.clear();
+        this.visualDirty = true;
+        syncVisual();
         updateControls();
+    }
+
+    private void carve(MoldPoint from, MoldPoint to) {
+        this.castSurface.carve(from, to, GROOVE_RADIUS);
+        if (this.visualStrokes.size() < MoldTableVisualState.MAX_STROKES) {
+            this.visualStrokes.add(new MoldTableVisualState.Stroke(from, to, GROOVE_RADIUS));
+        }
+        this.visualDirty = true;
+    }
+
+    private void syncVisual() {
+        if (!this.visualDirty || this.menu.getSlot(0).getItem().isEmpty()) {
+            return;
+        }
+        var visual = new MoldTableVisualState(
+                BuiltInRegistries.ITEM.getKey(this.menu.getSlot(0).getItem().getItem()),
+                this.selectedPattern.id(), this.currentPolygonIndex, this.failedCast, this.visualStrokes);
+        this.menu.getBlockEntity().setVisualState(visual);
+        NetworkService.get().sendToServer(new UpdateMoldVisualPayload(this.menu.containerId, visual));
+        this.visualDirty = false;
+    }
+
+    private boolean restoreVisual() {
+        MoldTableVisualState visual = this.menu.getBlockEntity().getVisualState();
+        if (visual == null || !visual.matches(this.lastStack) || !visual.isValid()) {
+            return false;
+        }
+        this.selectedPattern = MoldPatterns.find(visual.moldId()).orElseThrow();
+        this.currentPolygonIndex = visual.completedPolygons();
+        this.failedCast = visual.failed();
+        this.tracing = false;
+        this.lastGroovePoint = null;
+        this.moldTrace = null;
+        this.currentEdge = 0;
+        this.castSurface.clear();
+        this.visualStrokes.clear();
+        for (int i = 0; i < this.currentPolygonIndex; i++) {
+            this.castSurface.removePolygon(this.selectedPattern, i);
+        }
+        for (MoldTableVisualState.Stroke stroke : visual.strokes()) {
+            this.castSurface.carve(stroke.from(), stroke.to(), stroke.radius());
+            if (this.currentPolygonIndex < this.selectedPattern.polygons().size()) {
+                if (this.moldTrace == null) {
+                    this.moldTrace = new MoldTrace(this.selectedPattern.polygons().get(this.currentPolygonIndex),
+                            (float) MAX_DISTANCE / CAST_SIZE);
+                }
+                if (stroke.from().equals(stroke.to())) {
+                    this.moldTrace.begin(stroke.from());
+                } else {
+                    this.moldTrace.move(stroke.to());
+                }
+                this.failedCast |= this.moldTrace.failed();
+                this.currentEdge = this.moldTrace.edge();
+            }
+        }
+        this.visualStrokes.addAll(visual.strokes());
+        this.visualDirty = false;
+        if (this.moldGrid != null) {
+            this.moldGrid.selectPattern(this.selectedPattern);
+        }
+        updateControls();
+        return true;
     }
 
     private boolean isCastFinished() {

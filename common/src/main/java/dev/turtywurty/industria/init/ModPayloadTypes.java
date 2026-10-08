@@ -30,6 +30,14 @@ public class ModPayloadTypes {
     }
 
     private static void registerC2S() {
+        registerServerbound(UpdateMoldVisualPayload.ID, UpdateMoldVisualPayload.CODEC, (payload, context) ->
+                context.sender().ifPresent(player -> {
+                    if (player.containerMenu instanceof MoldingTableMenu menu
+                            && menu.containerId == payload.containerId() && menu.stillValid(player)) {
+                        menu.getBlockEntity().setVisualState(payload.visual());
+                    }
+                }));
+
         registerServerbound(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC, (payload, context) ->
                 context.sender().ifPresent(player -> {
                     AbstractContainerMenu handler = player.containerMenu;

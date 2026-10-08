@@ -648,6 +648,7 @@ public final class IndustriaModels {
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.SMELTERY_CONTROLLER.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CHIMNEY.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_BASIN.get());
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.MOLDING_TABLE.get());
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.TAPPING_OUTLET.get());
         registerCustomCube(blockStateModelGenerator, ModBlocks.CASTING_TABLE.get(),
                 TextureMapping.getBlockTexture(Blocks.DEEPSLATE_BRICKS).sprite());

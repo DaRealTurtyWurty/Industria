@@ -8,6 +8,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.menu.MoldingTableMenu;
+import dev.turtywurty.industria.molding.MoldTableVisualState;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
@@ -31,10 +32,20 @@ public class MoldingTableBlockEntity extends IndustriaBlockEntity implements Blo
     public static final Component TITLE = Industria.containerTitle("molding_table");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
+    private @Nullable MoldTableVisualState visualState;
 
     public MoldingTableBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.MOLDING_TABLE.get(), ModBlockEntityTypes.MOLDING_TABLE.get(), pos, state);
-        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1));
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1) {
+            @Override
+            public void setChanged() {
+                MoldTableVisualState visual = MoldingTableBlockEntity.this.visualState;
+                if (visual != null && !visual.matches(getItem(0))) {
+                    MoldingTableBlockEntity.this.visualState = null;
+                }
+                super.setChanged();
+            }
+        });
     }
 
     @Override
@@ -66,16 +77,39 @@ public class MoldingTableBlockEntity extends IndustriaBlockEntity implements Blo
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         ViewUtils.putChild(output, "Inventory", this.wrappedContainerStorage);
+        if (this.visualState != null && this.visualState.matches(getInventory().getItem(0))) {
+            output.store("MoldVisual", MoldTableVisualState.CODEC, this.visualState);
+        }
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         ViewUtils.readChild(input, "Inventory", this.wrappedContainerStorage);
+        this.visualState = input.read("MoldVisual", MoldTableVisualState.CODEC)
+                .filter(visual -> visual.matches(getInventory().getItem(0)) && visual.isValid()).orElse(null);
     }
 
     public SimpleContainer getInventory() {
         return this.wrappedContainerStorage.getInventory(0);
+    }
+
+    public @Nullable MoldTableVisualState getVisualState() {
+        return this.visualState;
+    }
+
+    @Override
+    public boolean shouldWaitForEndTick() {
+        return false;
+    }
+
+    public void setVisualState(MoldTableVisualState visual) {
+        if (visual.matches(getInventory().getItem(0)) && visual.isValid() && !visual.equals(this.visualState)) {
+            this.visualState = visual;
+            if (this.level != null && !this.level.isClientSide()) {
+                update();
+            }
+        }
     }
 
     public ResourceStorage<ResourceVariant<Item>> getInventoryProvider(Direction direction) {
