@@ -1,9 +1,11 @@
 package dev.turtywurty.industria.molding;
 
 import dev.turtywurty.industria.Industria;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class MoldPatterns {
     private MoldPatterns() {
@@ -26,7 +28,8 @@ public final class MoldPatterns {
                             INGOT_CUTOUT.point(0, 0.375f)
                     )
             ),
-            Map.of(0, INGOT_CUTOUT)
+            Map.of(0, INGOT_CUTOUT),
+            true
     );
 
     public static final MoldPattern ROD = new MoldPattern(
@@ -42,4 +45,8 @@ public final class MoldPatterns {
     );
 
     public static final List<MoldPattern> ALL = List.of(INGOT, ROD);
+
+    public static Optional<MoldPattern> find(Identifier id) {
+        return ALL.stream().filter(pattern -> pattern.id().equals(id)).findFirst();
+    }
 }

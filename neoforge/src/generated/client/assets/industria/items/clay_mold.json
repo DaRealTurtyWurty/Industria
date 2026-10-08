@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/clay_mold",
+    "model": {
+      "type": "industria:mold"
+    }
+  }
+}

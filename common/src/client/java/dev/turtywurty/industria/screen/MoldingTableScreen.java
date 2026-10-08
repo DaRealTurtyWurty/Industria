@@ -3,7 +3,9 @@ package dev.turtywurty.industria.screen;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.menu.MoldingTableMenu;
 import dev.turtywurty.industria.molding.*;
+import dev.turtywurty.industria.network.CompleteMoldPayload;
 import dev.turtywurty.industria.util.ScreenUtils;
+import dev.turtywurty.turtymultiloader.network.NetworkService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -254,6 +256,11 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 this.currentEdge = 0;
                 this.moldTrace = null;
                 updateControls();
+
+                if (isCastFinished()) {
+                    NetworkService.get().sendToServer(
+                            new CompleteMoldPayload(this.menu.containerId, this.selectedPattern.id()));
+                }
             }
         }
 

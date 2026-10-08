@@ -1,4 +1,4 @@
-// 26.1.1	2026-10-05T22:21:29.8767201	Vanilla block and item models
+// 26.1.1	2026-10-08T21:11:09.1866894	Vanilla block and item models
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets/industria/blockstates/advanced_battery.json
 97e91a3c27f38fdd330ae2ebcfbe81b2b31b23f9 assets/industria/blockstates/advanced_solar_panel.json
 cf9ac5e96b25ca692a2d479dbb9949f47571029d assets/industria/blockstates/agitator.json
@@ -158,9 +158,11 @@ e53d4ee3060d71e2fa853a3e67dd0fda9c548666 assets/industria/items/cassiterite_conc
 8386223dc3a4a7b24cd2ae95f07cf1d3a496f2ff assets/industria/items/casting_basin.json
 c7e0af1161ef640b5b1779034d80fdc126fc8339 assets/industria/items/casting_table.json
 82b013c7a55a161893302fb052e23e9f716a5762 assets/industria/items/centrifugal_concentrator.json
+d1608b4da53805245ae618e2ef63f084dc63ef59 assets/industria/items/ceramic_mold.json
 8f3d6f36790833ee28b6bc4b9c9966b1d1cfcb9d assets/industria/items/charging_hatch.json
 be3d86668b230a6fd4b60965ab9f43f30e781096 assets/industria/items/chimney.json
 cc81d5907a8711f4846a180db2d7626b527f9103 assets/industria/items/clarifier.json
+3cd04823071743f025bd0a3941efd02e18fc58a8 assets/industria/items/clay_mold.json
 d71ef65bc7c2ea160c582fb9ad3a4132c19f12cb assets/industria/items/coagulated_latex.json
 80d964cfbcf5f173db16e98803bc8040f5b17552 assets/industria/items/cobaltite.json
 6f30054658252ae83106631ab465a7ba20293c38 assets/industria/items/cobaltite_ore.json
@@ -223,6 +225,7 @@ f38a7867ee06d875aadf2e6fc5b6c2c9c10802b5 assets/industria/items/formic_acid_buck
 9c04042d2c9fd4e2897d9423a52b30d808b80de4 assets/industria/items/galena_concentrate.json
 afbd31ef06c1affd255186a49e564bef21a95609 assets/industria/items/galena_ore.json
 7913a83b62f63d3abc18bd47016f35e06bedbf2f assets/industria/items/gas_pipe.json
+74f4fee736c5a8ff3964db54a1fb835a75480e3f assets/industria/items/gold_mold.json
 5b74cf5277a369f5320ec3411c5fec326bce904e assets/industria/items/hatch_conveyor.json
 e24d1351020953bb37476d915b99b0a3a9a07dfd assets/industria/items/ilmenite.json
 39d2d80d095312f3fb60f147881b18054ef921ba assets/industria/items/ilmenite_concentrate.json
@@ -272,6 +275,7 @@ b3939b113ef44a4401190013ee32d61c1a51fed2 assets/industria/items/raw_cobaltite_bl
 22bb671768107ef30c9ce2ab0c6c3ea7671748de assets/industria/items/raw_rubber.json
 b136c807e2d8164e8b098a1bea015346af777876 assets/industria/items/raw_sphalerite_block.json
 60305f9a341411e5f857581586658d8391703142 assets/industria/items/red_mud.json
+6b84a4872f1806bf8f3221662856e8c6ddf4ac27 assets/industria/items/red_sand_mold.json
 d0faea4bd5132d612086ffae6693d83ad237a938 assets/industria/items/rotary_kiln.json
 1d54583430f268fd1f6033886ea33219c4559ea0 assets/industria/items/rubber.json
 8dbe3b31dbbe10dffa81fc206146e480952e8210 assets/industria/items/rubber_boat.json
@@ -293,6 +297,7 @@ ece51131dae2942cd83437edad6666820feb1122 assets/industria/items/rubber_stripped_
 ee2ac09f72d590188848e19c5ea42c3636e023b1 assets/industria/items/rubber_stripped_wood.json
 dacc53c29062a9a67c7dab89d6234937d0db488e assets/industria/items/rubber_trapdoor.json
 c58e3eedc8d960d0f180de89b2d25796866aa7f6 assets/industria/items/rubber_wood.json
+5a964b609d71de4ff267a40a9e8343794ab36d67 assets/industria/items/sand_mold.json
 cfbd6e619776c9e6d92c1dc608faaec424b06768 assets/industria/items/seismic_scanner.json
 b940a912bc87fc1a73c8c9b80ea52541007d1726 assets/industria/items/shaking_table.json
 44fb91ec32f6dce8748da726a839409e5d738c76 assets/industria/items/side_injector_conveyor.json
@@ -485,7 +490,9 @@ ee73fb88bd1ed2a98aac1f9ded2892e3a96cb77c assets/industria/models/item/blank_sand
 96210ddf6c78814b0ac63df0c5220b5094dffbc4 assets/industria/models/item/cassiterite.json
 2194364e74cebbee19d43de819c23402cef0c187 assets/industria/models/item/cassiterite_concentrate.json
 2dbef7c7c93ed6c1f3463b8ddf77f54c82881ec0 assets/industria/models/item/centrifugal_concentrator.json
+2af880a1759e845de3f06c1b5c836b0a4829c677 assets/industria/models/item/ceramic_mold.json
 b4819e1c4aeed6a1b9739e5da037ad7221382d9b assets/industria/models/item/clarifier.json
+832831ec501a6aa5d63485e63fe3a363431a62b8 assets/industria/models/item/clay_mold.json
 52c34e8ebbb0502738f0d2f6b7139278845fb2db assets/industria/models/item/coagulated_latex.json
 1d37738b9a090fc54be7d28cb1e6b18aed7707f4 assets/industria/models/item/cobaltite.json
 0d26a172e87b39fab50658f5ae993b7d757d49de assets/industria/models/item/cobalt_ingot.json
@@ -515,6 +522,7 @@ bcdf9eb2ea0baa88a4559841f14b1d40523bdf1d assets/industria/models/item/diluted_fo
 875cf690f3e1e43e0c4665d7a459b5ec3e3cc30c assets/industria/models/item/formic_acid_bucket.json
 f64b25bf7ccd8b5e1d3a2611a303970511376e0b assets/industria/models/item/galena.json
 4065034a1d39c2bbb97bdff670091fbf0c35b1aa assets/industria/models/item/galena_concentrate.json
+b6d5562ded70689459d28a7a4f453a4150b69a8a assets/industria/models/item/gold_mold.json
 6f1b1c0726623a6d12bcdc9c01b8dd5312c20e90 assets/industria/models/item/ilmenite.json
 aa9d468b5f530ca14ceb19102338c1355cab985f assets/industria/models/item/ilmenite_concentrate.json
 17e96ccb404c70db00b2ccb8a6ce9a715a1c881f assets/industria/models/item/iridium_ingot.json
@@ -539,6 +547,7 @@ a3d6c141ea770e4309d99c5d281d53b7389c8dfe assets/industria/models/item/molten_alu
 ac278f0b720b424d41bd2a768a7c0aef74293f09 assets/industria/models/item/pyrite.json
 ef41a8ee02628dc43282add340c6e2281c3064b8 assets/industria/models/item/raw_rubber.json
 24af772aa40fdaf611fbfa1481a23c3be6dbd43c assets/industria/models/item/red_mud.json
+db618a544fd1d8fc3bbf7b111c45937c860f1e22 assets/industria/models/item/red_sand_mold.json
 1cc20200b69a87e0699eaa09703abbb43db8a224 assets/industria/models/item/rotary_kiln.json
 19119058b15f5fe5faa0c35c7a02f5c3f4bb1e21 assets/industria/models/item/rubber.json
 2e99f0d9a3f502aa27f979761b584fee4c90185b assets/industria/models/item/rubber_boat.json
@@ -547,6 +556,7 @@ ad1a405db43d7a61495973350cd0477f577de2ab assets/industria/models/item/rubber_doo
 32d75f2dac618e02a9cb788bb5cc79f7c8d616de assets/industria/models/item/rubber_hanging_sign.json
 cae7973a93da8f9d669c34428eec50d480a9835f assets/industria/models/item/rubber_sapling.json
 2837745137debececcd74bcb33a865182246e196 assets/industria/models/item/rubber_sign.json
+ee73fb88bd1ed2a98aac1f9ded2892e3a96cb77c assets/industria/models/item/sand_mold.json
 3aa5d3ae6ea470e0edfb92b2fb9c400eeae99779 assets/industria/models/item/seismic_scanner.json
 f24012d48bb29f3ea15dcb57af9dea60590f7b3a assets/industria/models/item/shaking_table.json
 8aca768fa9a9c74d20b51c12ab0832a89a68e481 assets/industria/models/item/silicon_ingot.json

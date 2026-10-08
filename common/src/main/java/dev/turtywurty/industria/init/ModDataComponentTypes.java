@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.component.FluidPocketsComponent;
+import dev.turtywurty.industria.component.MoldComponent;
 import dev.turtywurty.industria.component.MultiblockExportSelectionComponent;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
@@ -22,6 +23,12 @@ public class ModDataComponentTypes {
             register("multiblock_export_selection", builder -> builder
                     .persistent(MultiblockExportSelectionComponent.CODEC)
                     .networkSynchronized(MultiblockExportSelectionComponent.STREAM_CODEC)
+                    .cacheEncoding());
+
+    public static final RegistrationHandle<DataComponentType<?>, DataComponentType<MoldComponent>> MOLD =
+            register("mold", builder -> builder
+                    .persistent(MoldComponent.CODEC)
+                    .networkSynchronized(MoldComponent.STREAM_CODEC)
                     .cacheEncoding());
 
     public static <T> RegistrationHandle<DataComponentType<?>, DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {

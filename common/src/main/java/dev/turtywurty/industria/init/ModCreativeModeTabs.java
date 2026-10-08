@@ -1,6 +1,9 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.item.MoldItem;
+import dev.turtywurty.industria.molding.MoldPattern;
+import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.turtymultiloader.platform.Platform;
 import dev.turtywurty.turtymultiloader.registration.CreativeTabBuilder;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
@@ -24,7 +27,15 @@ public class ModCreativeModeTabs {
                             .filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                             .filter(key -> Platform.isDevelopmentEnvironment() || !Objects.equals(key, ModItems.MULTIBLOCK_EXPORTER.key()))
                             .map(BuiltInRegistries.ITEM::getValueOrThrow)
-                            .forEach(output::accept)));
+                            .forEach(item -> {
+                                if (item instanceof MoldItem moldItem) {
+                                    for (MoldPattern pattern : MoldPatterns.ALL) {
+                                        moldItem.createStacks(pattern).forEach(output::accept);
+                                    }
+                                } else {
+                                    output.accept(item);
+                                }
+                            })));
 
     public static RegistrationHandle<CreativeModeTab, CreativeModeTab> register(String name, Consumer<CreativeTabBuilder> group) {
         return REGISTRIES.registerCreativeTab(Industria.id(name), group);

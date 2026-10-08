@@ -1,13 +1,14 @@
 package dev.turtywurty.industria.datagen;
 
+import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.conveyor.block.impl.entity.ContainmentConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
-import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.molding.MoldGrid;
+import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.slurryapi.api.Slurry;
@@ -148,7 +149,7 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, FilterConveyorScreen.MATCH_DURABILITY_LABEL, "Match Durability");
         addText(translationBuilder, FilterConveyorScreen.MATCH_ENCHANTMENTS_LABEL, "Match Enchantments");
         addText(translationBuilder, FilterConveyorScreen.MATCH_COMPONENTS_LABEL, "Match Components");
-        translationBuilder.add(ModBlocks.MAGNETIC_CONVEYOR.get(),  "Magnetic Conveyor");
+        translationBuilder.add(ModBlocks.MAGNETIC_CONVEYOR.get(), "Magnetic Conveyor");
         translationBuilder.add(ModBlocks.DETECTOR_CONVEYOR.get(), "Detector Conveyor");
         addText(translationBuilder, DetectorConveyorBlockEntity.TITLE, "Detector Conveyor");
         addText(translationBuilder, DetectorConveyorScreen.BLACKLIST_MODE_LABEL, "Blacklist Mode");
@@ -355,6 +356,13 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModItems.BLANK_RED_SAND_CAST.get(), "Blank Red Sand Cast");
         translationBuilder.add(ModItems.BLANK_CLAY_CAST.get(), "Blank Clay Cast");
         translationBuilder.add(ModItems.BLANK_GOLD_CAST.get(), "Blank Gold Cast");
+        translationBuilder.add(ModItems.SAND_MOLD.get(), "Sand Mold");
+        translationBuilder.add(ModItems.RED_SAND_MOLD.get(), "Red Sand Mold");
+        translationBuilder.add(ModItems.CLAY_MOLD.get(), "Clay Mold");
+        translationBuilder.add(ModItems.GOLD_MOLD.get(), "Gold Mold");
+        translationBuilder.add(ModItems.CERAMIC_MOLD.get(), "Ceramic Mold");
+        translationBuilder.add("item." + Industria.MOD_ID + ".mold.named", "%1$s (%2$s)");
+        translationBuilder.add("item." + Industria.MOD_ID + ".mold.half", "%1$s - Half %2$s/2");
 
         addText(translationBuilder, SmelteryControllerScreen.TEMPERATURE_LABEL, "Temperature: %s°C");
         addText(translationBuilder, SmelteryControllerScreen.FORMED_LABEL, "Formed");

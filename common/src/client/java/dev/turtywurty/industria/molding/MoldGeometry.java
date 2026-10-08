@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -19,11 +20,11 @@ public final class MoldGeometry {
     }
 
     public static NativeImage createMask(MoldPattern pattern, int completedPolygons, int width, int height) {
-        // Resolve each texture once for this operation, not once per output pixel.
-        var cutouts = new ArrayList<BiPredicate<Float, Float>>();
+        List<BiPredicate<Float, Float>> cutouts = new ArrayList<>();
         for (int i = 0; i < completedPolygons; i++) {
             cutouts.add(createCutout(pattern, i));
         }
+
         var image = new NativeImage(width, height, true);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -63,11 +64,13 @@ public final class MoldGeometry {
                         pixels[y * width + x] = image.getPixel(x, y);
                     }
                 }
+
                 return (x, y) -> cutout.contains(pixels, width, height, x, y);
             } catch (IOException exception) {
                 Industria.LOGGER.error("Unable to load mold cutout texture {}", cutout.texture(), exception);
             }
         }
+
         List<MoldPoint> polygon = pattern.polygons().get(polygonIndex);
         return (x, y) -> MoldPattern.containsPolygon(polygon, x, y);
     }
@@ -81,5 +84,89 @@ public final class MoldGeometry {
         }
 
         return image;
+    }
+
+    public static NativeImage createItemTexture(NativeImage material, MoldPattern pattern) {
+        int width = material.getWidth();
+        int height = material.getHeight();
+        try (NativeImage mask = createMask(pattern, pattern.polygons().size(), width, height)) {
+            var image = new NativeImage(width, height, true);
+
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    if (mask.getPixel(x, y) == 0) {
+                        image.setPixel(x, y, 0);
+                    } else {
+                        image.setPixel(x, y, material.getPixel(x, y));
+                    }
+                }
+            }
+
+            return image;
+        }
+    }
+
+    public static NativeImage createItemTexture(NativeImage material, MoldPattern pattern, MoldPiece piece) {
+        NativeImage image = createItemTexture(material, pattern);
+        if (piece == MoldPiece.WHOLE)
+            return image;
+
+        boolean[] firstPiece = findFirstPiece(image);
+        for (int index = 0; index < firstPiece.length; index++) {
+            int x = index % image.getWidth();
+            int y = index / image.getWidth();
+            boolean belongsToFirst = firstPiece[y * image.getWidth() + x];
+            if ((piece == MoldPiece.HALF_1 && !belongsToFirst) || (piece == MoldPiece.HALF_2 && belongsToFirst)) {
+                image.setPixel(x, y, 0);
+            }
+        }
+
+        return image;
+    }
+
+    private static boolean isSolid(NativeImage image, int x, int y) {
+        if (x < 0 || x >= image.getWidth() || y < 0 || y >= image.getHeight())
+            return false;
+
+        return image.getPixel(x, y) >>> 24 != 0;
+    }
+
+    private static void visitPiecePixel(NativeImage image, int x, int y, boolean[] piece, ArrayDeque<Integer> pending) {
+        if (!isSolid(image, x, y))
+            return;
+
+        int index = y * image.getWidth() + x;
+        if (piece[index])
+            return;
+
+        piece[index] = true;
+        pending.addLast(index);
+    }
+
+    private static boolean[] findFirstPiece(NativeImage image) {
+        boolean[] piece = new boolean[image.getWidth() * image.getHeight()];
+        ArrayDeque<Integer> pending = new ArrayDeque<>();
+
+        for (int index = 0; index < piece.length; index++) {
+            int x = index % image.getWidth();
+            int y = index / image.getWidth();
+            if (isSolid(image, x, y)) {
+                visitPiecePixel(image, x, y, piece, pending);
+                break;
+            }
+        }
+
+        while (!pending.isEmpty()) {
+            int index = pending.removeFirst();
+            int x = index % image.getWidth();
+            int y = index / image.getWidth();
+
+            visitPiecePixel(image, x - 1, y, piece, pending);
+            visitPiecePixel(image, x + 1, y, piece, pending);
+            visitPiecePixel(image, x, y - 1, piece, pending);
+            visitPiecePixel(image, x, y + 1, piece, pending);
+        }
+
+        return piece;
     }
 }

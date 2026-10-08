@@ -6,14 +6,15 @@ import net.minecraft.resources.Identifier;
 import java.util.List;
 import java.util.Map;
 
-public record MoldPattern(Identifier id, List<List<MoldPoint>> polygons, Map<Integer, MoldTextureCutout> cutoutTextures) {
+public record MoldPattern(Identifier id, List<List<MoldPoint>> polygons, Map<Integer, MoldTextureCutout> cutoutTextures,
+                          boolean split) {
     public MoldPattern {
         polygons = polygons.stream().map(List::copyOf).toList();
         cutoutTextures = Map.copyOf(cutoutTextures);
     }
 
     public MoldPattern(Identifier id, List<List<MoldPoint>> polygons) {
-        this(id, polygons, Map.of());
+        this(id, polygons, Map.of(), false);
     }
 
     public static boolean containsPolygon(List<MoldPoint> polygon, float x, float y) {

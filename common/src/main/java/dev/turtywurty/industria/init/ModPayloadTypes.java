@@ -168,6 +168,14 @@ public class ModPayloadTypes {
                         }
                     }
                 }));
+
+        registerServerbound(CompleteMoldPayload.ID, CompleteMoldPayload.CODEC, (payload, context) -> {
+            context.sender().ifPresent(player -> {
+                if (player.containerMenu.containerId == payload.containerId() && player.containerMenu instanceof MoldingTableMenu menu) {
+                    menu.completeMold(player, payload.moldId());
+                }
+            });
+        });
     }
 
     private static void registerS2C() {

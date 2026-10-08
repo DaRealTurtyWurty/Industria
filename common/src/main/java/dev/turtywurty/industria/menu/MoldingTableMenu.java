@@ -5,14 +5,20 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModMenuTypes;
 import dev.turtywurty.industria.init.list.TagList;
+import dev.turtywurty.industria.item.MoldItem;
 import dev.turtywurty.industria.menu.base.IndustriaScreenHandler;
+import dev.turtywurty.industria.molding.MoldPattern;
+import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
+import java.util.Optional;
 
 public class MoldingTableMenu extends IndustriaScreenHandler<MoldingTableBlockEntity, BlockPosPayload> {
     public MoldingTableMenu(int syncId, Inventory playerInventory, BlockPosPayload payload) {
@@ -51,5 +57,24 @@ public class MoldingTableMenu extends IndustriaScreenHandler<MoldingTableBlockEn
     @Override
     protected List<Block> getValidBlocks() {
         return List.of(ModBlocks.MOLDING_TABLE.get());
+    }
+
+    public void completeMold(ServerPlayer player, Identifier moldId) {
+        if (player.containerMenu != this || !stillValid(player))
+            return;
+
+        Optional<MoldPattern> pattern = MoldPatterns.find(moldId);
+        Optional<MoldItem> moldItem = MoldItem.fromBlank(getSlot(0).getItem());
+        if (pattern.isEmpty() || moldItem.isEmpty())
+            return;
+
+        List<ItemStack> results = moldItem.get().createStacks(pattern.get());
+        getSlot(0).remove(1);
+        for (ItemStack result : results) {
+            player.getInventory().placeItemBackInInventory(result);
+        }
+
+        getSlot(0).setChanged();
+        broadcastChanges();
     }
 }
