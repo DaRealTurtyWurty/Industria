@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.molding;
 
+import dev.turtywurty.industria.Industria;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class MoldGrid extends AbstractWidget implements AutoCloseable {
+    public static final Component TITLE = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.molds");
+
     private static final Identifier RECIPE_SELECTED_SPRITE = Identifier.withDefaultNamespace("container/stonecutter/recipe_selected");
     private static final Identifier RECIPE_HIGHLIGHTED_SPRITE = Identifier.withDefaultNamespace("container/stonecutter/recipe_highlighted");
     private static final Identifier RECIPE_SPRITE = Identifier.withDefaultNamespace("container/stonecutter/recipe");
@@ -36,7 +39,7 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
     private boolean draggingScrollbar;
 
     public MoldGrid(int x, int y, int width, int height, List<MoldPattern> patterns, Consumer<MoldPattern> onSelected) {
-        super(x, y, width, height, Component.literal("Molds"));
+        super(x, y, width, height, TITLE);
         this.patterns = List.copyOf(patterns);
         this.onSelected = onSelected;
 

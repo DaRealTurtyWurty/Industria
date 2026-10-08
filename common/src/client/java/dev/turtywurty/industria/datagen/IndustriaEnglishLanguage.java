@@ -7,6 +7,7 @@ import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEn
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.molding.MoldPatterns;
+import dev.turtywurty.industria.molding.MoldGrid;
 import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.slurryapi.api.Slurry;
@@ -374,6 +375,10 @@ public final class IndustriaEnglishLanguage {
 
         translationBuilder.add(ModBlocks.MOLDING_TABLE.get(), "Molding Table");
         addText(translationBuilder, MoldingTableBlockEntity.TITLE, "Molding Table");
+        addText(translationBuilder, MoldingTableScreen.MOLD_TEMPLATES_LABEL, "Mold templates");
+        addText(translationBuilder, MoldingTableScreen.RESET_LABEL, "Reset");
+        addText(translationBuilder, MoldingTableScreen.FAILED_LABEL, "Failed");
+        addText(translationBuilder, MoldGrid.TITLE, "Molds");
         addText(translationBuilder, MoldPatterns.INGOT.getDisplayName(), "Ingot");
         addText(translationBuilder, MoldPatterns.ROD.getDisplayName(), "Rod");
     }

@@ -7,7 +7,9 @@ import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -24,6 +26,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu> {
+    public static final Component MOLD_TEMPLATES_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.templates");
+    public static final Component RESET_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.reset");
+    public static final Component FAILED_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.failed");
+
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/molding_table.png");
 
     private static final int CAST_X = 44;
@@ -40,6 +46,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     private MoldPattern selectedPattern = MoldPatterns.INGOT;
     private int currentPolygonIndex = 0;
     private @Nullable MoldGrid moldGrid;
+    private @Nullable Button resetButton;
     private boolean moldsVisible;
     private final MoldCastSurface castSurface = new MoldCastSurface();
     private @Nullable MoldPoint lastGroovePoint;
@@ -63,25 +70,21 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 .setPatterns(MoldPatterns.ALL)
                 .setOnSelected(this::selectPattern)
                 .build());
-        this.moldGrid.visible = this.moldsVisible;
-        this.moldGrid.active = this.moldsVisible;
         this.moldGrid.selectPattern(this.selectedPattern);
 
-        addRenderableWidget(Button.builder(Component.empty(), _ -> {
+        addRenderableWidget(new ImageButton(
+                this.leftPos + 13, this.topPos + 14, 20, 20,
+                RecipeBookComponent.RECIPE_BUTTON_SPRITES,
+                _ -> {
                     this.moldsVisible = !this.moldsVisible;
-                    if (this.moldGrid != null) {
-                        this.moldGrid.visible = this.moldsVisible;
-                        this.moldGrid.active = this.moldsVisible;
-                    }
-                })
-                .pos(this.leftPos + 8, this.topPos + 14)
-                .size(30, 20)
-                .build());
+                    updateControls();
+                }, MOLD_TEMPLATES_LABEL));
 
-        addRenderableWidget(Button.builder(Component.literal("Reset"), _ -> resetCast())
+        this.resetButton = addRenderableWidget(Button.builder(RESET_LABEL, _ -> resetCast())
                 .pos(this.leftPos + 4, this.topPos + 38)
                 .size(36, 16)
                 .build());
+        updateControls();
     }
 
     @Override
@@ -109,7 +112,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         ));
 
         if (this.failedCast) {
-            graphics.text(this.font, "Failed", this.leftPos + 8, this.topPos + 83, 0xFFAA2222, false);
+            graphics.text(this.font, FAILED_LABEL, this.leftPos + 8, this.topPos + 83, 0xFFAA2222, false);
         }
 
         for (int polygonIndex = 0; polygonIndex < this.selectedPattern.polygons().size(); polygonIndex++) {
@@ -162,7 +165,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         super.containerTick();
         if (!ItemStack.isSameItemSameComponents(this.menu.getSlot(0).getItem(), this.lastStack)) {
             this.lastStack = this.menu.getSlot(0).getItem().copy();
-            resetCast();
+            clearCast();
         }
     }
 
@@ -188,6 +191,9 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
         if (!isOnCast(mouseX, mouseY))
             return super.mouseClicked(event, doubleClick);
+
+        if (isCastFinished())
+            return true;
 
         MoldPoint point = toCastPoint(mouseX, mouseY);
         if (this.currentPolygonIndex < this.selectedPattern.polygons().size()) {
@@ -247,6 +253,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 this.currentPolygonIndex++;
                 this.currentEdge = 0;
                 this.moldTrace = null;
+                updateControls();
             }
         }
 
@@ -254,7 +261,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     }
 
     private void selectPattern(MoldPattern pattern) {
-        if (Objects.equals(pattern, this.selectedPattern))
+        if (isCastFinished() || Objects.equals(pattern, this.selectedPattern))
             return;
 
         this.selectedPattern = pattern;
@@ -262,6 +269,12 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     }
 
     private void resetCast() {
+        if (!isCastFinished()) {
+            clearCast();
+        }
+    }
+
+    private void clearCast() {
         this.currentPolygonIndex = 0;
         this.currentEdge = 0;
         this.tracing = false;
@@ -269,6 +282,23 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         this.moldTrace = null;
         this.lastGroovePoint = null;
         this.castSurface.clear();
+        updateControls();
+    }
+
+    private boolean isCastFinished() {
+        return !this.failedCast && this.currentPolygonIndex >= this.selectedPattern.polygons().size();
+    }
+
+    private void updateControls() {
+        boolean finished = isCastFinished();
+        if (this.resetButton != null) {
+            this.resetButton.active = !finished;
+        }
+
+        if (this.moldGrid != null) {
+            this.moldGrid.visible = this.moldsVisible;
+            this.moldGrid.active = this.moldsVisible && !finished;
+        }
     }
 
     private static boolean isOnCast(double mouseX, double mouseY) {
