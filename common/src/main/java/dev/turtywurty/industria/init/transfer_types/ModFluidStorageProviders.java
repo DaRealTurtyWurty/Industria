@@ -39,5 +39,7 @@ public final class ModFluidStorageProviders {
         }, ModBlocks.FLUID_PIPE);
 
         transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.TAPPING_OUTLET, TappingOutletBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CASTING_TABLE, CastingTableBlockEntity::getFluidProvider);
     }
 }

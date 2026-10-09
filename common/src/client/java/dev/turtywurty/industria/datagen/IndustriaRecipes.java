@@ -7,7 +7,9 @@ import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.recipe.AgitatorRecipe;
+import dev.turtywurty.industria.recipe.CastingRecipe;
 import dev.turtywurty.industria.util.AgitatorPortType;
 import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.IndustriaIngredient;
@@ -22,6 +24,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -491,11 +494,20 @@ public final class IndustriaRecipes {
                         200,
                         "aluminium_ingot_to_molten_aluminium");
 
-                offerCastingBasinRecipe(output,
+                offerCastingRecipe(output,
+                        CastingRecipe.BlockType.BASIN,
                         new FluidStack(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().holder()), FluidAmounts.BLOCK),
                         new OutputItemStack(ModBlocks.ALUMINIUM_BLOCK.get().asItem(), 1, 1),
                         100,
                         "molten_aluminium_to_aluminium_block");
+
+                offerCastingRecipe(output,
+                        CastingRecipe.BlockType.TABLE,
+                        new FluidStack(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().holder()), FluidAmounts.INGOT),
+                        new OutputItemStack(ModItems.ALUMINIUM_INGOT.get(), 1, 1),
+                        100,
+                        "molten_aluminium_to_aluminium_ingot",
+                        MoldPatterns.INGOT.id());
             }
         }.buildRecipes();
     }
@@ -571,9 +583,16 @@ public final class IndustriaRecipes {
                 .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("smeltery_" + name)));
     }
 
-    private static void offerCastingBasinRecipe(RecipeOutput exporter, FluidStack inputFluid, OutputItemStack output, int coolingTime, String name) {
-        new CastingBasinRecipeBuilder(inputFluid, output, coolingTime)
-                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("casting_basin_" + name)));
+    private static void offerCastingRecipe(RecipeOutput exporter, CastingRecipe.BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime, String name) {
+        offerCastingRecipe(exporter, blockType, inputFluid, output, coolingTime, name, null);
+    }
+
+    private static void offerCastingRecipe(RecipeOutput exporter, CastingRecipe.BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime, String name, @Nullable Identifier moldId) {
+        CastingRecipeBuilder builder = new CastingRecipeBuilder(blockType, inputFluid, output, coolingTime);
+        if (moldId != null) {
+            builder.mold(moldId);
+        }
+        builder.offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("casting_" + blockType.getSerializedName() + "_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {

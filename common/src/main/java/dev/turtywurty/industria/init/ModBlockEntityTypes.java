@@ -142,6 +142,9 @@ public class ModBlockEntityTypes {
     public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<CastingBasinBlockEntity>> CASTING_BASIN = register("casting_basin",
             CastingBasinBlockEntity::new, builder -> builder.validBlock(ModBlocks.CASTING_BASIN));
 
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<CastingTableBlockEntity>> CASTING_TABLE = register("casting_table",
+            CastingTableBlockEntity::new, builder -> builder.validBlock(ModBlocks.CASTING_TABLE));
+
     public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<MoldingTableBlockEntity>> MOLDING_TABLE = register("molding_table",
             MoldingTableBlockEntity::new, builder -> builder.validBlock(ModBlocks.MOLDING_TABLE));
 

@@ -1,10 +1,15 @@
 package dev.turtywurty.industria.recipe.input;
 
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.recipe.CastingRecipe;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 
-public record CastingBasinRecipeInput(FluidStack fluidStack) implements RecipeInput {
+import java.util.Optional;
+
+public record CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId)
+        implements RecipeInput {
     @Override
     public ItemStack getItem(int slot) {
         return ItemStack.EMPTY;

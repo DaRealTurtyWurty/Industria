@@ -51,5 +51,6 @@ public final class ModItemStorageProviders {
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CHARGING_HATCH, ChargingHatchBlockEntity::getInventoryProvider);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.FIREBOX, FireboxBlockEntity::getInventoryProvider);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_TABLE, CastingTableBlockEntity::getInventoryProvider);
     }
 }

@@ -57,8 +57,8 @@ public class ModRecipeTypes {
     public static final RegistrationHandle<RecipeType<?>, RecipeType<SmelteryRecipe>> SMELTERY =
             register("smeltery", () -> SmelteryRecipe.Type.INSTANCE);
 
-    public static final RegistrationHandle<RecipeType<?>, RecipeType<CastingBasinRecipe>> CASTING_BASIN =
-            register("casting_basin", () -> CastingBasinRecipe.Type.INSTANCE);
+    public static final RegistrationHandle<RecipeType<?>, RecipeType<CastingRecipe>> CASTING =
+            register("casting", () -> CastingRecipe.Type.INSTANCE);
 
     public static <T extends Recipe<?>> RegistrationHandle<RecipeType<?>, RecipeType<T>> register(String name, Supplier<RecipeType<T>> type) {
         return REGISTRIES.registerRecipeType(Industria.id(name), type);

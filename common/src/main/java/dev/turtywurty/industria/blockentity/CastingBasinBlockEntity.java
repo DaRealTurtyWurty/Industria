@@ -11,8 +11,8 @@ import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStora
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModRecipeTypes;
-import dev.turtywurty.industria.recipe.CastingBasinRecipe;
-import dev.turtywurty.industria.recipe.input.CastingBasinRecipeInput;
+import dev.turtywurty.industria.recipe.CastingRecipe;
+import dev.turtywurty.industria.recipe.input.CastingRecipeInput;
 import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
@@ -103,7 +103,7 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
         return getInventory().isEmpty();
     }
 
-    public ResourceStorage<ResourceVariant<Fluid>> getFluidStorageProvider(Direction direction) {
+    public ResourceStorage<ResourceVariant<Fluid>> getFluidProvider(Direction direction) {
         return wrappedFluidStorage.getStorage(direction);
     }
 
@@ -126,15 +126,15 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
         }
     }
 
-    private Optional<RecipeHolder<CastingBasinRecipe>> getMatchingRecipe() {
+    private Optional<RecipeHolder<CastingRecipe>> getMatchingRecipe() {
         if (!(this.level instanceof ServerLevel serverLevel))
             return Optional.empty();
 
         SyncingFluidStorage storage = getFluidStorage();
         var fluidStack = new FluidStack(storage.resource(0), storage.amount(0));
-        var input = new CastingBasinRecipeInput(fluidStack);
+        var input = new CastingRecipeInput(CastingRecipe.BlockType.BASIN, fluidStack, Optional.empty());
 
-        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING_BASIN.get(), input, serverLevel);
+        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel);
     }
 
     private void resetCoolingProgress() {
@@ -161,14 +161,14 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
             return;
         }
 
-        Optional<RecipeHolder<CastingBasinRecipe>> matchingRecipe = getMatchingRecipe();
+        Optional<RecipeHolder<CastingRecipe>> matchingRecipe = getMatchingRecipe();
         if (matchingRecipe.isEmpty()) {
             resetCoolingProgress();
             return;
         }
 
-        RecipeHolder<CastingBasinRecipe> recipeHolder = matchingRecipe.get();
-        CastingBasinRecipe recipe = recipeHolder.value();
+        RecipeHolder<CastingRecipe> recipeHolder = matchingRecipe.get();
+        CastingRecipe recipe = recipeHolder.value();
         int count = recipe.output().count().maxInclusive();
         if (recipe.inputFluid().isEmpty()
                 || recipe.output().item() == Items.AIR
@@ -219,7 +219,7 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
         );
     }
 
-    private boolean completeCasting(CastingBasinRecipe recipe) {
+    private boolean completeCasting(CastingRecipe recipe) {
         if(!getInventory().isEmpty()
                 || recipe.inputFluid().isEmpty()
                 || !recipe.inputFluid().testForRecipe(getFluidStorage()))

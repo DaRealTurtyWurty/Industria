@@ -1,4 +1,4 @@
-// 26.1.1	2026-10-08T23:09:14.7448875	Vanilla block and item models
+// 26.1.1	2026-10-09T22:02:13.6699617	Vanilla block and item models
 a1e80fcead651a1bb8c3e6e4eb75ecb5ce4627df assets/industria/blockstates/advanced_battery.json
 97e91a3c27f38fdd330ae2ebcfbe81b2b31b23f9 assets/industria/blockstates/advanced_solar_panel.json
 cf9ac5e96b25ca692a2d479dbb9949f47571029d assets/industria/blockstates/agitator.json
@@ -362,7 +362,6 @@ ea1705797fd3a9fa12f1370ced2cd5f057703915 assets/industria/models/block/basic_bat
 9d909076150f5f4761338e162c94a8305080cbb3 assets/industria/models/block/bauxite_ore_1.json
 296ff6b8dcb95d090b304a839ea6020035ba3ac9 assets/industria/models/block/bauxite_ore_2.json
 4675da4626512397218cfa706888033e8d8a8000 assets/industria/models/block/cassiterite_ore.json
-c26dc92a268a47c425882960c2705a24f7df73df assets/industria/models/block/casting_table.json
 e449f21654ecab3362acb6aee2ae9f77d189f42a assets/industria/models/block/centrifugal_concentrator.json
 159d65078a8bfbc292a40f858d3395541b761fab assets/industria/models/block/charging_hatch.json
 24fa7e92da972ba74f0037911b65eb6e1f6d9526 assets/industria/models/block/clarifier.json

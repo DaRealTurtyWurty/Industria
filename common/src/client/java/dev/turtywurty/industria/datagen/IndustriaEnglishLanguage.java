@@ -363,6 +363,7 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModItems.CERAMIC_MOLD.get(), "Ceramic Mold");
         translationBuilder.add("item." + Industria.MOD_ID + ".mold.named", "%1$s (%2$s)");
         translationBuilder.add("item." + Industria.MOD_ID + ".mold.half", "%1$s - Half %2$s/2");
+        addText(translationBuilder, CastingTableBlockEntity.TITLE, "Casting Table");
 
         addText(translationBuilder, SmelteryControllerScreen.TEMPERATURE_LABEL, "Temperature: %s°C");
         addText(translationBuilder, SmelteryControllerScreen.FORMED_LABEL, "Formed");

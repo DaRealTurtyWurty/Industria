@@ -23,7 +23,7 @@ public class ModRecipeBookCategories {
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> AGITATOR = register("agitator");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> DISTILLATION_TOWER = register("distillation_tower");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> SMELTERY = register("smeltery");
-    public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> CASTING_BASIN = register("casting_basin");
+    public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> CASTING = register("casting");
 
     public static RegistrationHandle<RecipeBookCategory, RecipeBookCategory> register(String name) {
         return REGISTRIES.registerRecipeBookCategory(Industria.id(name), RecipeBookCategory::new);
