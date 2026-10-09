@@ -16,8 +16,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class MoldItem extends Item {
-    public MoldItem(Properties properties) {
-        super(properties);
+    private final int maxUses;
+
+    public MoldItem(Properties properties, int maxUses) {
+        super(maxUses > 1 ? properties.durability(maxUses) : properties);
+        this.maxUses = maxUses;
+    }
+
+    public int getMaxUses() {
+        return maxUses;
     }
 
     public ItemStack createStack(Identifier moldId, MoldPiece piece) {

@@ -233,7 +233,8 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
             setPouringFluid(resource);
         }
 
-        if (moved == 0 || storage.getAmount() <= 0 || fluidStorage.getAmount() >= fluidStorage.capacity(0, resource)) {
+        if (moved == 0 || storage.getAmount() <= 0 || !receiver.isAcceptingFluid()
+                || fluidStorage.getAmount() >= fluidStorage.capacity(0, resource)) {
             stopPouring();
         }
     }

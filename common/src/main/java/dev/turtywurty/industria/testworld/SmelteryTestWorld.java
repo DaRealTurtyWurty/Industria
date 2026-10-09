@@ -37,14 +37,19 @@ public final class SmelteryTestWorld {
         context.setBlock(5, 3, 2, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
         context.setBlock(5, 2, 2, ModBlocks.CASTING_BASIN.get());
+        context.setBlock(5, 3, 3, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
+                .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
+        context.setBlock(5, 2, 3, ModBlocks.CASTING_TABLE.get().defaultBlockState()
+                .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
 
         // Embed the controller in the north wall beside the charging hatch.
         context.setBlock(1, 3, 0, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
 
-        LOGGER.info("Smeltery test fixture: controller={}, hatch={}, firebox={}, chimney={}, outlet={}, basin={}, spare parts={}",
+        LOGGER.info("Smeltery test fixture: controller={}, hatch={}, firebox={}, chimney={}, outlet={}, basin={}, table outlet={}, casting table={}, spare parts={}",
                 context.pos(1, 3, 0), context.pos(2, 3, 0), context.pos(0, 1, 2),
-                context.pos(2, 6, 2), context.pos(5, 3, 2), context.pos(5, 2, 2), context.pos(2, 0, -3));
+                context.pos(2, 6, 2), context.pos(5, 3, 2), context.pos(5, 2, 2),
+                context.pos(5, 3, 3), context.pos(5, 2, 3), context.pos(2, 0, -3));
 
         context.afterTicks(40, current -> {
             if (!(current.overworld().getBlockEntity(current.pos(1, 3, 0)) instanceof SmelteryControllerBlockEntity)) {

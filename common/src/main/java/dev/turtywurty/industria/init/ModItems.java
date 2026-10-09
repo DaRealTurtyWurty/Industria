@@ -148,11 +148,11 @@ public class ModItems {
     public static final RegistrationHandle<Item, Item> BLANK_RED_SAND_CAST = register("blank_red_sand_cast");
     public static final RegistrationHandle<Item, Item> BLANK_CLAY_CAST = register("blank_clay_cast");
     public static final RegistrationHandle<Item, Item> BLANK_GOLD_CAST = register("blank_gold_cast");
-    public static final RegistrationHandle<Item, MoldItem> SAND_MOLD = register("sand_mold", MoldItem::new);
-    public static final RegistrationHandle<Item, MoldItem> RED_SAND_MOLD = register("red_sand_mold", MoldItem::new);
-    public static final RegistrationHandle<Item, MoldItem> CLAY_MOLD = register("clay_mold", MoldItem::new);
-    public static final RegistrationHandle<Item, MoldItem> GOLD_MOLD = register("gold_mold", MoldItem::new);
-    public static final RegistrationHandle<Item, MoldItem> CERAMIC_MOLD = register("ceramic_mold", MoldItem::new);
+    public static final RegistrationHandle<Item, MoldItem> SAND_MOLD = register("sand_mold", properties -> new MoldItem(properties, 1));
+    public static final RegistrationHandle<Item, MoldItem> RED_SAND_MOLD = register("red_sand_mold", properties -> new MoldItem(properties, 1));
+    public static final RegistrationHandle<Item, MoldItem> CLAY_MOLD = register("clay_mold", properties -> new MoldItem(properties, 1));
+    public static final RegistrationHandle<Item, MoldItem> CERAMIC_MOLD = register("ceramic_mold", properties -> new MoldItem(properties, 4));
+    public static final RegistrationHandle<Item, MoldItem> GOLD_MOLD = register("gold_mold", properties -> new MoldItem(properties, 256));
 
     public static RegistrationHandle<Item, Item> register(String name) {
         return registerItem(name, () -> new Item(new Item.Properties()

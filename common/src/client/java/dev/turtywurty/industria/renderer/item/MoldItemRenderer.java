@@ -79,7 +79,7 @@ public class MoldItemRenderer implements SpecialModelRenderer<MoldItemRenderer.R
         TEXTURES.clear();
     }
 
-    private static Identifier getTexture(RenderData data) {
+    public static Identifier getTexture(RenderData data) {
         Identifier id = TEXTURES.get(data);
         if (id != null)
             return id;

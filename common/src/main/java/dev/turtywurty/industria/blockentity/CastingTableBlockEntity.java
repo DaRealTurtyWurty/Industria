@@ -29,6 +29,7 @@ import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.storage.ContainerStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
+import dev.turtywurty.turtymultiloader.transfer.transaction.TransferContext;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,6 +68,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
     private int coolingDuration;
     private ItemStack castingItemStack = ItemStack.EMPTY;
     private ResourceKey<Recipe<?>> currentRecipeId;
+    private long requiredFluidAmount;
 
     public CastingTableBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.CASTING_TABLE.get(), ModBlockEntityTypes.CASTING_TABLE.get(), pos, state);
@@ -82,11 +84,44 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
                 return 1;
             }
         }, Direction.DOWN);
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET), Direction.UP);
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET) {
+            @Override
+            public long insert(int index, ResourceVariant<Fluid> fluid, long maxAmount, TransferContext transaction) {
+                long required = CastingTableBlockEntity.this.getFluidRequirement(fluid);
+                long remaining = Math.max(0, required - getAmount());
+                return super.insert(index, fluid, Math.min(maxAmount, remaining), transaction);
+            }
+        }, Direction.UP);
     }
 
     public ItemStack getCastingItemStack() {
         return this.castingItemStack;
+    }
+
+    public long getRequiredFluidAmount() {
+        return this.requiredFluidAmount;
+    }
+
+    private void updateRequiredFluidAmount() {
+        long required = getFluidRequirement(getFluidStorage().getResource());
+        if (required != this.requiredFluidAmount) {
+            this.requiredFluidAmount = required;
+            update();
+        }
+    }
+
+    private long getFluidRequirement(ResourceVariant<Fluid> fluid) {
+        if (!(this.level instanceof ServerLevel serverLevel) || fluid.isBlank() || !getOutputInventory().isEmpty()) {
+            return 0;
+        }
+        Optional<MoldPattern> mold = getAssembledMold();
+        if (mold.isEmpty()) {
+            return 0;
+        }
+        var input = new CastingRecipeInput(CastingRecipe.BlockType.TABLE,
+                new FluidStack(fluid, Long.MAX_VALUE), mold.map(MoldPattern::id));
+        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel)
+                .map(holder -> holder.value().inputFluid().amount()).orElse(0L);
     }
 
     public float getCoolingFraction() {
@@ -98,22 +133,11 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
 
     @Override
     public boolean isAcceptingFluid() {
-        return getAssembledMold().isPresent() && getOutputInventory().isEmpty();
-    }
-
-    public void collectOutput(Player player) {
-        if (this.level == null || this.level.isClientSide())
-            return;
-
-        ItemStack outputStack = getOutputInventory().getItem(0);
-        if (outputStack.isEmpty())
-            return;
-
-        ItemStack removed = getOutputInventory().removeItem(0, outputStack.getCount());
-        if (!removed.isEmpty()) {
-            player.getInventory().placeItemBackInInventory(removed);
-            setChanged();
+        if (getAssembledMold().isEmpty() || !getOutputInventory().isEmpty()) {
+            return false;
         }
+        return getFluidStorage().getAmount() == 0
+                || getFluidStorage().getAmount() < getFluidRequirement(getFluidStorage().getResource());
     }
 
     private Optional<RecipeHolder<CastingRecipe>> getMatchingRecipe() {
@@ -150,6 +174,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
         if (this.level == null || this.level.isClientSide())
             return;
 
+        updateRequiredFluidAmount();
         if (!getOutputInventory().isEmpty() || getAssembledMold().isEmpty()) {
             resetCoolingProgress();
             return;
@@ -280,8 +305,28 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
             }
 
             transaction.commit();
+            useMolds();
             return true;
         }
+    }
+
+    private void useMolds() {
+        for (int slot = 0; slot < getInputInventory().size(); slot++) {
+            ItemStack stack = getInputInventory().getItem(slot);
+            if (stack.isEmpty())
+                continue;
+
+            MoldItem moldItem = (MoldItem) stack.getItem();
+            if (moldItem.getMaxUses() <= 1) {
+                stack.shrink(1);
+                continue;
+            }
+
+            stack.hurtAndBreak(1, (ServerLevel) this.level, null, _ -> {
+            });
+        }
+
+        getInputInventory().setChanged();
     }
 
     @Override
@@ -312,6 +357,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+        output.putLong("RequiredFluidAmount", this.requiredFluidAmount);
         ViewUtils.putChild(output, "FluidStorage", this.wrappedFluidStorage);
         ViewUtils.putChild(output, "Inventory", this.wrappedContainerStorage);
         output.putInt("CoolingProgress", this.coolingProgress);
@@ -323,6 +369,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+        this.requiredFluidAmount = Math.max(0, input.getLongOr("RequiredFluidAmount", 0));
         ViewUtils.readChild(input, "FluidStorage", this.wrappedFluidStorage);
         ViewUtils.readChild(input, "Inventory", this.wrappedContainerStorage);
         this.coolingProgress = Math.max(0, input.getIntOr("CoolingProgress", 0));

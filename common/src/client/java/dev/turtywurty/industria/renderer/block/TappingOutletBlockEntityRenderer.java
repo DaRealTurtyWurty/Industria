@@ -2,6 +2,7 @@ package dev.turtywurty.industria.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.TappingOutletBlockEntity;
+import dev.turtywurty.industria.blockentity.CastingTableBlockEntity;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
@@ -31,7 +32,7 @@ public class TappingOutletBlockEntityRenderer extends IndustriaBlockEntityRender
 
         this.fluidRenderer.renderStream(state.fluidVariant,
                 queue, matrices, light, overlay, level, state.blockPos,
-                -2f / 16f, -38f / 16f, 0f,
+                -2f / 16f, state.streamBottom, 0f,
                 2f / 16f, -16f / 16f, 2f / 16f,
                 false);
 
@@ -51,10 +52,16 @@ public class TappingOutletBlockEntityRenderer extends IndustriaBlockEntityRender
     public void extractRenderState(TappingOutletBlockEntity blockEntity, TappingOutletRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.fluidVariant = blockEntity.getPouringFluid();
+        state.streamBottom = -38f / 16f;
+        if (blockEntity.getLevel() != null
+                && blockEntity.getLevel().getBlockEntity(blockEntity.getBlockPos().below()) instanceof CastingTableBlockEntity table) {
+            state.streamBottom = CastingTableBlockEntityRenderer.receivingHeight(table) - 2.5f;
+        }
     }
 
     public static class TappingOutletRenderState extends IndustriaBlockEntityRenderState {
         public ResourceVariant<Fluid> fluidVariant = ResourceTypes.FLUID.empty();
+        public float streamBottom = -38f / 16f;
 
         public TappingOutletRenderState() {
             super(0);
