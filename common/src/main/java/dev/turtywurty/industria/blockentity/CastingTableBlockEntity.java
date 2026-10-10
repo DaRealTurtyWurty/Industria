@@ -111,13 +111,16 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
     }
 
     private long getFluidRequirement(ResourceVariant<Fluid> fluid) {
-        if (!(this.level instanceof ServerLevel serverLevel) || fluid.isBlank() || !getOutputInventory().isEmpty()) {
+        if (!(this.level instanceof ServerLevel serverLevel)
+                || fluid.isBlank()
+                || !getOutputInventory().isEmpty()
+                || !canCast(fluid.value()))
             return 0;
-        }
+
         Optional<MoldPattern> mold = getAssembledMold();
-        if (mold.isEmpty()) {
+        if (mold.isEmpty())
             return 0;
-        }
+
         var input = new CastingRecipeInput(CastingRecipe.BlockType.TABLE,
                 new FluidStack(fluid, Long.MAX_VALUE), mold.map(MoldPattern::id));
         return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel)
@@ -133,9 +136,9 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
 
     @Override
     public boolean isAcceptingFluid() {
-        if (getAssembledMold().isEmpty() || !getOutputInventory().isEmpty()) {
+        if (getAssembledMold().isEmpty() || !getOutputInventory().isEmpty())
             return false;
-        }
+
         return getFluidStorage().getAmount() == 0
                 || getFluidStorage().getAmount() < getFluidRequirement(getFluidStorage().getResource());
     }
@@ -145,6 +148,9 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
             return Optional.empty();
 
         SyncingFluidStorage storage = getFluidStorage();
+        if (!canCast(storage.resource(0).value()))
+            return Optional.empty();
+
         var fluidStack = new FluidStack(storage.resource(0), storage.amount(0));
         var input = new CastingRecipeInput(
                 CastingRecipe.BlockType.TABLE,
@@ -278,7 +284,8 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
     private boolean completeCasting(CastingRecipe recipe) {
         if (!getInventory().isEmpty()
                 || recipe.inputFluid().isEmpty()
-                || !recipe.inputFluid().testForRecipe(getFluidStorage()))
+                || !recipe.inputFluid().testForRecipe(getFluidStorage())
+                || !canCast(recipe.inputFluid().variant().value()))
             return false;
 
         var outputStorage = ContainerStorage.of(getInventory(), null);
@@ -327,6 +334,22 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
         }
 
         getInputInventory().setChanged();
+    }
+
+    private boolean canCast(Fluid fluid) {
+        if (getAssembledMold().isEmpty())
+            return false;
+
+        for (ItemStack stack : getInputInventory()) {
+            if (stack.isEmpty())
+                continue;
+
+            MoldItem moldItem = (MoldItem) stack.getItem();
+            if (!moldItem.canCast(fluid))
+                return false;
+        }
+
+        return true;
     }
 
     @Override

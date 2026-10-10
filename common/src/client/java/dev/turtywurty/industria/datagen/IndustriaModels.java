@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -578,8 +579,13 @@ public final class IndustriaModels {
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.CRUDE_OIL.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.DIRTY_SODIUM_ALUMINATE.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.SODIUM_ALUMINATE.block().get());
-        blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.MOLTEN_ALUMINIUM.block().get());
-        blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.MOLTEN_CRYOLITE.block().get());
+        ModFluids.getMoltenFluids().values().forEach(fluid -> {
+            if (fluid != ModFluids.MOLTEN_ALUMINIUM && fluid != ModFluids.MOLTEN_CRYOLITE) {
+                var model = new ModelTemplate(Optional.of(Industria.id("block/molten_aluminium")), Optional.empty());
+                model.create(fluid.block().get(), new TextureMapping(), blockStateModelGenerator.modelOutput);
+            }
+            blockStateModelGenerator.createNonTemplateModelBlock(fluid.block().get());
+        });
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.FORMIC_ACID.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.DILUTED_FORMIC_ACID.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.DRILL_TUBE.get());
@@ -916,11 +922,21 @@ public final class IndustriaModels {
                     itemModelGenerator.itemModelOutput.accept(entry, ItemModelUtils.plainModel(modelId));
                 });
 
+        Set<Item> sharedMoltenBuckets = new HashSet<>();
+        ModFluids.getMoltenFluids().values().forEach(fluid -> {
+            if (fluid != ModFluids.MOLTEN_ALUMINIUM && fluid != ModFluids.MOLTEN_CRYOLITE) {
+                Item bucket = fluid.bucket().get();
+                sharedMoltenBuckets.add(bucket);
+                itemModelGenerator.itemModelOutput.accept(bucket,
+                        ItemModelUtils.plainModel(Industria.id("item/molten_aluminium_bucket")));
+            }
+        });
         Set<Item> handheldItems = Set.of(ModItems.WRENCH.get());
 
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                 .map(BuiltInRegistries.ITEM::getValue)
                 .filter(entry -> !(entry instanceof BlockItem))
+                .filter(entry -> !sharedMoltenBuckets.contains(entry))
                 .filter(entry -> !(entry instanceof MoldItem))
                 .filter(entry -> !exclusionList.contains(entry))
                 .filter(Objects::nonNull)

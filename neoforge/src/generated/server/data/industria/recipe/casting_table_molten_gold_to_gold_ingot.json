@@ -1,0 +1,17 @@
+{
+  "type": "industria:casting",
+  "block_type": "table",
+  "cooling_time": 100,
+  "input_fluid": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:molten_gold"
+    }
+  },
+  "mold": "industria:ingot",
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "minecraft:gold_ingot"
+  }
+}

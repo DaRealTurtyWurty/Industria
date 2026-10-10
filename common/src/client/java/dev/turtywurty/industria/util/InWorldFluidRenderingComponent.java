@@ -265,8 +265,8 @@ public class InWorldFluidRenderingComponent {
             return;
 
         int fluidColor = renderData.tintColor();
-        TextureAtlasSprite stillSprite = renderData.stillSprite();
-        RenderType renderLayer = RenderTypes.entityTranslucent(stillSprite.atlasLocation());
+        TextureAtlasSprite flowingSprite = renderData.flowingSprite();
+        RenderType renderLayer = RenderTypes.entityTranslucent(flowingSprite.atlasLocation());
 
         matrices.pushPose();
         matrices.mulPose(Axis.XP.rotationDegrees(180));
@@ -284,28 +284,28 @@ public class InWorldFluidRenderingComponent {
             drawTiledXYQuad(vertexConsumer, entry,
                     x1, y1, z1 + 0.001F,
                     x2, y2, z1 + 0.001F,
-                    stillSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
+                    flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
 
             // Back (XY plane, z constant)
             drawReversedTiledXYQuad(vertexConsumer, entry,
                     x1, y1, z2 - 0.001F,
                     x2, y2, z2 - 0.001F,
-                    stillSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
+                    flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
 
             // Left (YZ plane, x constant)
             drawReversedTiledYZQuad(vertexConsumer, entry,
                     x1 + 0.001F, y1, z1,
                     y2, z2,
-                    stillSprite, fluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
+                    flowingSprite, fluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
 
             // Right (YZ plane, x constant)
             drawTiledYZQuad(vertexConsumer, entry,
                     x2 - 0.001F, y1, z1,
                     y2, z2,
-                    stillSprite, fluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
+                    flowingSprite, fluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
 
             if (includeTopFace) {
-                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, newLight, overlay);
+                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, renderData.stillSprite(), fluidColor, newLight, overlay);
             }
         });
 

@@ -3,6 +3,7 @@ package dev.turtywurty.industria.item;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.component.MoldComponent;
 import dev.turtywurty.industria.init.ModDataComponentTypes;
+import dev.turtywurty.industria.init.ModFluids;
 import dev.turtywurty.industria.init.ModItems;
 import dev.turtywurty.industria.molding.MoldPattern;
 import dev.turtywurty.industria.molding.MoldPatterns;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +33,13 @@ public class MoldItem extends Item {
         var stack = new ItemStack(this);
         stack.set(ModDataComponentTypes.MOLD.get(), new MoldComponent(moldId, piece));
         return stack;
+    }
+
+    public boolean canCast(Fluid fluid) {
+        if (this != ModItems.GOLD_MOLD.get())
+            return true;
+
+        return fluid != ModFluids.MOLTEN_GOLD.still().get() && fluid != ModFluids.MOLTEN_GOLD.flowing().get();
     }
 
     public static Optional<MoldItem> fromBlank(ItemStack stack) {

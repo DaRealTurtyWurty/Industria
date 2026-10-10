@@ -29,10 +29,21 @@ public class ModFluidData {
         FluidData.registerFluidData(ModFluids.SODIUM_ALUMINATE.still().get(), commonFluidData);
         FluidData.registerFluidData(ModFluids.SODIUM_ALUMINATE.flowing().get(), commonFluidData);
 
-        FluidData.registerFluidData(ModFluids.MOLTEN_ALUMINIUM.still().get(), commonFluidData);
-        FluidData.registerFluidData(ModFluids.MOLTEN_ALUMINIUM.flowing().get(), commonFluidData);
-
-        FluidData.registerFluidData(ModFluids.MOLTEN_CRYOLITE.still().get(), commonFluidData);
-        FluidData.registerFluidData(ModFluids.MOLTEN_CRYOLITE.flowing().get(), commonFluidData);
+        ModFluids.getMoltenFluids().forEach((name, fluid) -> {
+            var data = new FluidData.Builder(TagList.Fluids.of(name))
+                    .preventsBlockSpreading()
+                    .canSwim()
+                    .fluidMovementSpeed((_, _) -> 0.01F)
+                    .applyWaterMovement()
+                    .applyBuoyancy(entity -> entity.setDeltaMovement(entity.getDeltaMovement().add(0, 0.01, 0)))
+                    .canCauseDrowning()
+                    .shouldWitchDrinkWaterBreathing()
+                    .affectsBlockBreakSpeed()
+                    .bubbleParticle(ParticleTypes.ASH)
+                    .splashParticle(ParticleTypes.HEART)
+                    .build();
+            FluidData.registerFluidData(fluid.still().get(), data);
+            FluidData.registerFluidData(fluid.flowing().get(), data);
+        });
     }
 }

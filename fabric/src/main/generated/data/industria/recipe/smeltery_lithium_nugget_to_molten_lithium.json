@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:lithium_nugget"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 1000,
+    "variant": {
+      "id": "industria:molten_lithium"
+    }
+  },
+  "preferred_temperature": 231,
+  "process_time": 200
+}

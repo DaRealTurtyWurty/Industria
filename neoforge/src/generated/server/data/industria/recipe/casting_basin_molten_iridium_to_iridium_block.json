@@ -1,0 +1,16 @@
+{
+  "type": "industria:casting",
+  "block_type": "basin",
+  "cooling_time": 100,
+  "input_fluid": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:molten_iridium"
+    }
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:iridium_block"
+  }
+}

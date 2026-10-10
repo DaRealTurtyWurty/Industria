@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:iridium_block"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:molten_iridium"
+    }
+  },
+  "preferred_temperature": 2496,
+  "process_time": 200
+}

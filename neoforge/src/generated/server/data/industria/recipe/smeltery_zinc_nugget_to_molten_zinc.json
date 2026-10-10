@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:zinc_nugget"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 1000,
+    "variant": {
+      "id": "industria:molten_zinc"
+    }
+  },
+  "preferred_temperature": 470,
+  "process_time": 200
+}

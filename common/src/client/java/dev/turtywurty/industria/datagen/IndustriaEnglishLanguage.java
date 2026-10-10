@@ -27,6 +27,12 @@ public final class IndustriaEnglishLanguage {
 
     public static void generate(LanguageGenerationContext translationBuilder) {
         addText(translationBuilder, ModCreativeModeTabs.MAIN_TITLE, "Industria");
+        ModFluids.getMoltenFluids().forEach((name, fluid) -> {
+            String metal = name.substring("molten_".length());
+            String displayName = Character.toUpperCase(metal.charAt(0)) + metal.substring(1);
+            translationBuilder.add(fluid.block().get(), "Molten " + displayName);
+            translationBuilder.add(fluid.bucket().get(), "Bucket of Molten " + displayName);
+        });
 
         translationBuilder.add(ModBlocks.ALLOY_FURNACE.get(), "Alloy Furnace");
         addText(translationBuilder, AlloyFurnaceBlockEntity.TITLE, "Alloy Furnace");
@@ -187,8 +193,6 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModFluids.DIRTY_SODIUM_ALUMINATE.bucket().get(), "Bucket of Dirty Sodium Aluminate");
         translationBuilder.add(ModFluids.SODIUM_ALUMINATE.block().get(), "Sodium Aluminate");
         translationBuilder.add(ModFluids.SODIUM_ALUMINATE.bucket().get(), "Bucket of Sodium Aluminate");
-        translationBuilder.add(ModFluids.MOLTEN_ALUMINIUM.block().get(), "Molten Aluminium");
-        translationBuilder.add(ModFluids.MOLTEN_ALUMINIUM.bucket().get(), "Bucket of Molten Aluminium");
         addSlurry(translationBuilder, ModSlurries.BAUXITE_SLURRY, "Bauxite Slurry");
         translationBuilder.add(ModBlocks.BAUXITE_ORE.get(), "Bauxite Ore");
         translationBuilder.add(ModBlocks.RAW_BAUXITE_BLOCK.get(), "Raw Bauxite Block");
@@ -325,8 +329,6 @@ public final class IndustriaEnglishLanguage {
         // Miscellaneous
         translationBuilder.add(ModItems.RED_MUD.get(), "Red Mud");
         translationBuilder.add(ModItems.CRYOLITE.get(), "Cryolite");
-        translationBuilder.add(ModFluids.MOLTEN_CRYOLITE.block().get(), "Molten Cryolite");
-        translationBuilder.add(ModFluids.MOLTEN_CRYOLITE.bucket().get(), "Bucket of Molten Cryolite");
         translationBuilder.add(ModItems.CARBON_ROD.get(), "Carbon Rod");
         translationBuilder.add(ModItems.BOTTLE_FORMIC_ACID.get(), "Bottle of Formic Acid");
         translationBuilder.add(ModFluids.LATEX.block().get(), "Latex");

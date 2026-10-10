@@ -42,7 +42,7 @@ public final class MetalRegistry {
         Objects.requireNonNull(storageBlock, "storageBlock cannot be null");
 
         return METALS.values().stream()
-                .filter(definition -> definition.storageBlock().get() == storageBlock)
+                .filter(definition -> definition.storageBlock() != null && definition.storageBlock().get() == storageBlock)
                 .findFirst();
     }
 
