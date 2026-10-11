@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/red_sand_mold",
+    "model": {
+      "type": "industria:mold"
+    }
+  }
+}

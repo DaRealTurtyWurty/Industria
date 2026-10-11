@@ -26,7 +26,7 @@ public final class FluidRenderUtils {
         FluidModel model = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState);
         BlockState blockState = fluidState.createLegacyBlock();
         int tintColor = getTintColor(model.tintSource(), blockState, level, pos);
-        return new GuiFluidRenderData(model.stillMaterial().sprite(), tintColor);
+        return new GuiFluidRenderData(model.stillMaterial().sprite(), model.flowingMaterial().sprite(), tintColor);
     }
 
     public static @Nullable GuiFluidRenderData getRenderData(@Nullable ResourceVariant<Fluid> fluidVariant, @Nullable Level level, @Nullable BlockPos pos) {
@@ -50,6 +50,9 @@ public final class FluidRenderUtils {
         return 0xFF000000 | (tintColor & 0xFFFFFF);
     }
 
-    public record GuiFluidRenderData(TextureAtlasSprite stillSprite, int tintColor) {
+    public record GuiFluidRenderData(TextureAtlasSprite stillSprite, TextureAtlasSprite flowingSprite, int tintColor) {
+        public GuiFluidRenderData(TextureAtlasSprite sprite, int tintColor) {
+            this(sprite, sprite, tintColor);
+        }
     }
 }

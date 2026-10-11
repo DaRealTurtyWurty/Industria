@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.block.abstraction;
 
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.network.ChargingHatchOpenPayload;
 import dev.turtywurty.industria.network.UpgradeStationOpenPayload;
 import dev.turtywurty.turtymultiloader.menu.ExtendedMenuProvider;
 import dev.turtywurty.turtymultiloader.menu.MenuService;
@@ -18,6 +19,8 @@ public interface BlockEntityWithGui<T extends CustomPacketPayload> extends Exten
             return MenuService.get().openExtendedMenu(player, this, payload, BlockPosPayload.CODEC);
         } else if (openingData instanceof UpgradeStationOpenPayload payload) {
             return MenuService.get().openExtendedMenu(player, this, payload, UpgradeStationOpenPayload.CODEC);
+        } else if(openingData instanceof ChargingHatchOpenPayload payload) {
+            return MenuService.get().openExtendedMenu(player, this, payload, ChargingHatchOpenPayload.CODEC);
         }
 
         throw new IllegalStateException("Unsupported menu opening payload: " + openingData.type().id());

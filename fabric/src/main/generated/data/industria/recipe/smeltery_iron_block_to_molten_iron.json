@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "minecraft:iron_block"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:molten_iron"
+    }
+  },
+  "preferred_temperature": 1588,
+  "process_time": 200
+}

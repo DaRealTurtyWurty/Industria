@@ -10,6 +10,7 @@ import net.minecraft.world.level.material.Fluid;
 public class TagList {
     public static class Items {
         public static final TagKey<Item> ELECTROLYSIS_RODS = of("electrolysis_rods");
+        public static final TagKey<Item> BLANK_MOLDS = of("blank_molds");
 
         public static TagKey<Item> of(String id) {
             return TagKey.create(Registries.ITEM, Industria.id(id));

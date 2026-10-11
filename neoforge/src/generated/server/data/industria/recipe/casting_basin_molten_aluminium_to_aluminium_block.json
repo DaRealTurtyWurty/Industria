@@ -1,0 +1,16 @@
+{
+  "type": "industria:casting",
+  "block_type": "basin",
+  "cooling_time": 100,
+  "input_fluid": {
+    "amount": 81000,
+    "variant": {
+      "id": "industria:molten_aluminium"
+    }
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:aluminium_block"
+  }
+}

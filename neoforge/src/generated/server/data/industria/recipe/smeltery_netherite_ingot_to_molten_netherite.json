@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "minecraft:netherite_ingot"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:molten_netherite"
+    }
+  },
+  "preferred_temperature": 2050,
+  "process_time": 200
+}

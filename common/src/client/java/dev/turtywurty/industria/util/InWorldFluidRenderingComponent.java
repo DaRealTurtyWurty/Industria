@@ -173,6 +173,41 @@ public class InWorldFluidRenderingComponent {
         matrices.popPose();
     }
 
+    public void renderTexturedTopFace(
+            TextureAtlasSprite sprite, int color,
+            SubmitNodeCollector queue, PoseStack matrices,
+            int light, int overlay,
+            float x1, float y, float z1, float x2, float z2
+    ) {
+        if (sprite == null)
+            return;
+
+        RenderType renderLayer = RenderTypes.entityTranslucent(sprite.atlasLocation());
+
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
+
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) ->
+                drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, sprite, color, light, overlay));
+
+        matrices.popPose();
+    }
+
+    public void renderTexturedCuboid(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2) {
+        if(sprite == null || x2 <= x1 || y2 <= y1 || z2 <= z1)
+            return;
+
+        RenderType renderType = RenderTypes.entityTranslucent(sprite.atlasLocation());
+        // North `(0,0,-1)`, South `(0,0,1)`, West `(-1,0,0)`, East `(1,0,0)`
+        queue.submitCustomGeometry(matrices, renderType, (entry, vertexConsumer) -> {
+            drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z1, sprite, color, light, overlay, 0.0F, 0.0F, -1.0F);
+            drawReversedTiledXYQuad(vertexConsumer, entry, x1, y1, z2, x2, y2, z2, sprite, color, light, overlay, 0.0F, 0.0F, 1.0F);
+            drawReversedTiledYZQuad(vertexConsumer, entry, x1, y1, z1, y2, z2, sprite, color, light, overlay, -1.0F, 0.0F, 0.0F);
+            drawTiledYZQuad(vertexConsumer, entry, x2, y1, z1, y2, z2, sprite, color, light, overlay,1.0F , 0.0F , 0.0F);
+            drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1, x2, z2, sprite, color, light, overlay);
+        });
+    }
+
     /**
      * Draws a horizontal octagonal surface directly in model space (up is negative Y).
      */
@@ -219,6 +254,62 @@ public class InWorldFluidRenderingComponent {
                 }
             }
         });
+    }
+
+    public void renderStream(ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level level, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, boolean includeTopFace) {
+        if (fluidVariant == null || fluidVariant.isBlank())
+            return;
+
+        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, level, pos);
+        if (renderData == null)
+            return;
+
+        int fluidColor = renderData.tintColor();
+        TextureAtlasSprite flowingSprite = renderData.flowingSprite();
+        RenderType renderLayer = RenderTypes.entityTranslucent(flowingSprite.atlasLocation());
+
+        matrices.pushPose();
+        matrices.mulPose(Axis.XP.rotationDegrees(180));
+
+        if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
+            matrices.mulPose(Axis.XP.rotationDegrees(180));
+        }
+
+        int blockLight = (light >> 4) & 0xF;
+        int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
+        int newLight = (light & 0xF00000) | (luminosity << 4);
+
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
+            // Front (XY plane, z constant)
+            drawTiledXYQuad(vertexConsumer, entry,
+                    x1, y1, z1 + 0.001F,
+                    x2, y2, z1 + 0.001F,
+                    flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
+
+            // Back (XY plane, z constant)
+            drawReversedTiledXYQuad(vertexConsumer, entry,
+                    x1, y1, z2 - 0.001F,
+                    x2, y2, z2 - 0.001F,
+                    flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
+
+            // Left (YZ plane, x constant)
+            drawReversedTiledYZQuad(vertexConsumer, entry,
+                    x1 + 0.001F, y1, z1,
+                    y2, z2,
+                    flowingSprite, fluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
+
+            // Right (YZ plane, x constant)
+            drawTiledYZQuad(vertexConsumer, entry,
+                    x2 - 0.001F, y1, z1,
+                    y2, z2,
+                    flowingSprite, fluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
+
+            if (includeTopFace) {
+                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, renderData.stillSprite(), fluidColor, newLight, overlay);
+            }
+        });
+
+        matrices.popPose();
     }
 
     private static List<float[]> clipFluidTile(List<float[]> polygon, int axis, float boundary, boolean keepAbove) {

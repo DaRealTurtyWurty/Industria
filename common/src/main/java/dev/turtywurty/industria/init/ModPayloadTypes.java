@@ -30,6 +30,14 @@ public class ModPayloadTypes {
     }
 
     private static void registerC2S() {
+        registerServerbound(UpdateMoldVisualPayload.ID, UpdateMoldVisualPayload.CODEC, (payload, context) ->
+                context.sender().ifPresent(player -> {
+                    if (player.containerMenu instanceof MoldingTableMenu menu
+                            && menu.containerId == payload.containerId() && menu.stillValid(player)) {
+                        menu.getBlockEntity().setVisualState(payload.visual());
+                    }
+                }));
+
         registerServerbound(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC, (payload, context) ->
                 context.sender().ifPresent(player -> {
                     AbstractContainerMenu handler = player.containerMenu;
@@ -168,6 +176,14 @@ public class ModPayloadTypes {
                         }
                     }
                 }));
+
+        registerServerbound(CompleteMoldPayload.ID, CompleteMoldPayload.CODEC, (payload, context) -> {
+            context.sender().ifPresent(player -> {
+                if (player.containerMenu.containerId == payload.containerId() && player.containerMenu instanceof MoldingTableMenu menu) {
+                    menu.completeMold(player, payload.moldId());
+                }
+            });
+        });
     }
 
     private static void registerS2C() {
@@ -182,6 +198,7 @@ public class ModPayloadTypes {
         registerClientbound(AddConveyorNetworkPayload.ID, AddConveyorNetworkPayload.CODEC);
         registerClientbound(ModifyConveyorNetworkPayload.ID, ModifyConveyorNetworkPayload.CODEC);
         registerClientbound(RemoveConveyorNetworkPayload.ID, RemoveConveyorNetworkPayload.CODEC);
+        registerClientbound(SmelteryControllerSnapshotPayload.ID, SmelteryControllerSnapshotPayload.CODEC);
     }
 
     private static <T extends CustomPacketPayload> void registerServerbound(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec, PayloadHandler<T> handler) {

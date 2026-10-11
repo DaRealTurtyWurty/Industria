@@ -6,6 +6,7 @@ import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 
 import java.util.function.Supplier;
 
@@ -53,6 +54,15 @@ public class ModRecipeSerializers {
 
     public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<DistillationTowerRecipe>> DISTILLATION_TOWER =
             register("distillation_tower", () -> DistillationTowerRecipe.SERIALIZER);
+
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<SmelteryRecipe>> SMELTERY =
+            register("smeltery", () -> SmelteryRecipe.SERIALIZER);
+
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<CastingRecipe>> CASTING =
+            register("casting", () -> CastingRecipe.SERIALIZER);
+
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<SmeltingRecipe>> CLAY_MOLD_SMELTING =
+            register("clay_mold_smelting", () -> ClayMoldSmeltingRecipe.SERIALIZER);
 
     public static <T extends Recipe<?>> RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<T>> register(String name, Supplier<RecipeSerializer<T>> serializer) {
         return REGISTRIES.registerRecipeSerializer(Industria.id(name), serializer);

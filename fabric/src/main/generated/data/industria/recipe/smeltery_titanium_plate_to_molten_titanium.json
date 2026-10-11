@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:titanium_plate"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:molten_titanium"
+    }
+  },
+  "preferred_temperature": 1720,
+  "process_time": 200
+}

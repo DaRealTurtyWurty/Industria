@@ -1,5 +1,7 @@
 package dev.turtywurty.industria.util.enums;
 
+import com.mojang.serialization.Codec;
+
 import java.util.Objects;
 
 public interface StringRepresentable {
@@ -17,5 +19,10 @@ public interface StringRepresentable {
         }
 
         return null;
+    }
+
+    static <T extends Enum<?> & StringRepresentable> Codec<T> fromEnum(Class<T> enumClass) {
+        T[] values = enumClass.getEnumConstants();
+        return Codec.STRING.xmap(serializedName -> getEnumByName(values, serializedName), StringRepresentable::getSerializedName);
     }
 }

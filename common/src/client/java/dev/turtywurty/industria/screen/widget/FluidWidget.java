@@ -1,10 +1,11 @@
 package dev.turtywurty.industria.screen.widget;
 
+import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.screen.widget.util.Orientation;
+import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.FluidRenderUtils;
 import dev.turtywurty.industria.util.ScreenUtils;
-import dev.turtywurty.industria.util.FluidAmounts;
-import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,21 +17,46 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 public class FluidWidget implements Renderable, LayoutElement {
-    private final SyncingFluidStorage fluidTank;
+    private Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier;
+
+    private final Supplier<FluidStack> fluidSupplier;
+    private final LongSupplier capacitySupplier;
     private final Supplier<BlockPos> posSupplier;
     private final Orientation orientation;
 
     private final int width, height;
     private int x, y;
 
-    public FluidWidget(SyncingFluidStorage fluidTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier, Orientation orientation) {
-        this.fluidTank = fluidTank;
+    public FluidWidget(
+            SyncingFluidStorage fluidTank,
+            int x, int y,
+            int width, int height,
+            Supplier<BlockPos> posSupplier,
+            Orientation orientation
+    ) {
+        this(() -> null, fluidTank::getFluidStack, fluidTank::getCapacity, x, y, width, height, posSupplier, orientation);
+    }
+
+    public FluidWidget(
+            Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier,
+            Supplier<FluidStack> fluidSupplier,
+            LongSupplier capacitySupplier,
+            int x, int y,
+            int width, int height,
+            Supplier<BlockPos> posSupplier,
+            Orientation orientation
+    ) {
+        this.renderDataOverrideSupplier = renderDataOverrideSupplier;
+        this.fluidSupplier = fluidSupplier;
+        this.capacitySupplier = capacitySupplier;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -41,20 +67,24 @@ public class FluidWidget implements Renderable, LayoutElement {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        Fluid fluid = this.fluidTank.getResource().value();
-        long fluidAmount = this.fluidTank.getAmount();
+        Fluid fluid = this.fluidSupplier.get().variant().value();
+        long fluidAmount = this.fluidSupplier.get().amount();
 
         if (fluidAmount <= 0)
             return;
 
         Level world = Minecraft.getInstance().level;
         BlockPos pos = this.posSupplier.get();
-        FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluid, world, pos);
+        FluidRenderUtils.GuiFluidRenderData renderData = this.renderDataOverrideSupplier.get();
+        if (renderData == null) {
+            renderData = FluidRenderUtils.getRenderData(fluid, world, pos);
+        }
+
         if (renderData == null)
             return;
 
-        long fluidCapacity = this.fluidTank.getCapacity();
-        float percentage = (float) fluidAmount / fluidCapacity;
+        long fluidCapacity = this.capacitySupplier.getAsLong();
+        float percentage = Math.clamp((float) fluidAmount / fluidCapacity, 0.0f, 1.0f);
         int fillX = this.x, fillY = this.y, fillWidth = this.width, fillHeight = this.height;
         if (orientation == Orientation.VERTICAL) {
             fillHeight = (int) (height * percentage);
@@ -71,16 +101,16 @@ public class FluidWidget implements Renderable, LayoutElement {
     }
 
     protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
-        Fluid fluid = this.fluidTank.getResource().value();
+        Fluid fluid = this.fluidSupplier.get().variant().value();
 
-        long fluidAmount = this.fluidTank.getAmount();
-        long fluidCapacity = this.fluidTank.getCapacity();
+        long fluidAmount = this.fluidSupplier.get().amount();
+        long fluidCapacity = this.capacitySupplier.getAsLong();
 
         Font textRenderer = Minecraft.getInstance().font;
         if (fluid != null && fluidAmount > 0) {
             List<Component> texts = List.of(
                     Component.translatable(fluid.defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()),
-                    Component.literal(((int) (((float) fluidAmount / FluidAmounts.BUCKET) * 1000)) + " / " + ((int) (((float) fluidCapacity / FluidAmounts.BUCKET) * 1000)) + " mB"));
+                    Component.literal(Math.round(fluidAmount * 1000.0 / FluidAmounts.BUCKET) + " / " + Math.round(fluidCapacity * 1000.0 / FluidAmounts.BUCKET) + " mB"));
             context.setComponentTooltipForNextFrame(textRenderer, texts, mouseX, mouseY);
         }
     }
@@ -115,8 +145,26 @@ public class FluidWidget implements Renderable, LayoutElement {
         return height;
     }
 
-    public SyncingFluidStorage getFluidTank() {
-        return fluidTank;
+    public Orientation getOrientation() {
+        return orientation;
+    }
+
+    public Supplier<FluidRenderUtils.GuiFluidRenderData> getRenderDataOverrideSupplier() {
+        return renderDataOverrideSupplier;
+    }
+
+    public Supplier<FluidStack> getFluidSupplier() {
+        return fluidSupplier;
+    }
+
+    public LongSupplier getCapacitySupplier() {
+        return capacitySupplier;
+    }
+
+    public void setRenderDataOverrideSupplier(@Nullable Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier) {
+        this.renderDataOverrideSupplier = renderDataOverrideSupplier == null
+                ? () -> null
+                : renderDataOverrideSupplier;
     }
 
     @Override
@@ -128,14 +176,29 @@ public class FluidWidget implements Renderable, LayoutElement {
     }
 
     public static class Builder {
-        private final SyncingFluidStorage fluidTank;
+        private final Supplier<FluidStack> fluidSupplier;
+        private final LongSupplier capacitySupplier;
+        private Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier = () -> null;
         private Supplier<BlockPos> posSupplier = () -> null;
         private int x, y;
         private int width, height;
         private Orientation orientation = Orientation.VERTICAL;
 
+        public Builder(Supplier<FluidStack> fluidSupplier, LongSupplier capacitySupplier) {
+            this.fluidSupplier = fluidSupplier;
+            this.capacitySupplier = capacitySupplier;
+        }
+
         public Builder(SyncingFluidStorage fluidTank) {
-            this.fluidTank = fluidTank;
+            this.fluidSupplier = fluidTank::getFluidStack;
+            this.capacitySupplier = fluidTank::getCapacity;
+        }
+
+        public Builder renderDataOverrideSupplier(Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier) {
+            this.renderDataOverrideSupplier = renderDataOverrideSupplier == null
+                    ? () -> null
+                    : renderDataOverrideSupplier;
+            return this;
         }
 
         public Builder x(int x) {
@@ -189,7 +252,7 @@ public class FluidWidget implements Renderable, LayoutElement {
         }
 
         public FluidWidget build() {
-            return new FluidWidget(fluidTank, x, y, width, height, posSupplier, orientation);
+            return new FluidWidget(renderDataOverrideSupplier, fluidSupplier, capacitySupplier, x, y, width, height, posSupplier, orientation);
         }
     }
 }

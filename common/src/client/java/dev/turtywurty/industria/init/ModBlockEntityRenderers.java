@@ -25,5 +25,10 @@ public class ModBlockEntityRenderers {
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.TREE_TAP, TreeTapBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.DISTILLATION_TOWER, DistillationTowerBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.FLUID_PUMP, FluidPumpBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CASTING_TABLE, CastingTableBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.TAPPING_OUTLET, TappingOutletBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.SMELTERY_CONTROLLER, SmelteryControllerBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.MOLDING_TABLE, MoldingTableBlockEntityRenderer::new);
     }
 }

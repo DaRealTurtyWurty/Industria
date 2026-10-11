@@ -11,9 +11,12 @@ import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModFluids;
 import dev.turtywurty.industria.init.ModItems;
 import dev.turtywurty.industria.init.ModWoodSets;
+import dev.turtywurty.industria.item.MoldItem;
 import dev.turtywurty.industria.model.*;
-import dev.turtywurty.industria.renderer.item.IndustriaBlockEntityItemRenderer;
+import dev.turtywurty.industria.molding.MoldItemTextures;
 import dev.turtywurty.industria.renderer.item.DrillHeadItemRenderer;
+import dev.turtywurty.industria.renderer.item.IndustriaBlockEntityItemRenderer;
+import dev.turtywurty.industria.renderer.item.MoldItemRenderer;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
@@ -35,6 +38,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -228,7 +232,7 @@ public final class IndustriaModels {
     }
 
     private static BlockModelDefinitionGenerator createPipeBlockModelDefinitionCreator(Block block, String name,
-                                                                                         boolean separatedModels) {
+                                                                                       boolean separatedModels) {
         Identifier centerModelId = Industria.id("block/" + name + (separatedModels ? "_center" : "_dot"));
         Identifier continuousModelId = Industria.id("block/" + name + (separatedModels ? "_continuous" : ""));
         Identifier continuousUpModelId = Industria.id("block/" + name + (separatedModels ? "_continuous_up" : ""));
@@ -575,8 +579,13 @@ public final class IndustriaModels {
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.CRUDE_OIL.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.DIRTY_SODIUM_ALUMINATE.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.SODIUM_ALUMINATE.block().get());
-        blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.MOLTEN_ALUMINIUM.block().get());
-        blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.MOLTEN_CRYOLITE.block().get());
+        ModFluids.getMoltenFluids().values().forEach(fluid -> {
+            if (fluid != ModFluids.MOLTEN_ALUMINIUM && fluid != ModFluids.MOLTEN_CRYOLITE) {
+                var model = new ModelTemplate(Optional.of(Industria.id("block/molten_aluminium")), Optional.empty());
+                model.create(fluid.block().get(), new TextureMapping(), blockStateModelGenerator.modelOutput);
+            }
+            blockStateModelGenerator.createNonTemplateModelBlock(fluid.block().get());
+        });
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.FORMIC_ACID.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.DILUTED_FORMIC_ACID.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.DRILL_TUBE.get());
@@ -630,6 +639,24 @@ public final class IndustriaModels {
         blockStateModelGenerator.registerSimpleItemModel(ModBlocks.DELAY_CONVEYOR.get(), Industria.id("block/conveyor"));
         registerContainmentConveyor(blockStateModelGenerator);
         blockStateModelGenerator.registerSimpleItemModel(ModBlocks.CONTAINMENT_CONVEYOR.get(), Industria.id("block/conveyor"));
+
+        // Smeltery
+        blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
+        blockStateModelGenerator.createTrivialCube(ModBlocks.FIREBRICK.get());
+        blockStateModelGenerator.createTrivialCube(ModBlocks.SMELTERY_GLASS.get());
+        TexturedModel.Provider firebrickFront = TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(mapping ->
+                mapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get()))
+                        .put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get())));
+        blockStateModelGenerator.createFurnace(ModBlocks.FIREBOX.get(), firebrickFront);
+        firebrickFront.create(ModBlocks.CHARGING_HATCH.get(), blockStateModelGenerator.modelOutput);
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.CHARGING_HATCH.get());
+        firebrickFront.create(ModBlocks.SMELTERY_CONTROLLER.get(), blockStateModelGenerator.modelOutput);
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.SMELTERY_CONTROLLER.get());
+        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CHIMNEY.get());
+        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_BASIN.get());
+        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_TABLE.get());
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.MOLDING_TABLE.get());
+        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.TAPPING_OUTLET.get());
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
@@ -677,34 +704,34 @@ public final class IndustriaModels {
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.WIND_TURBINE.get(),
                 new IndustriaBlockEntityItemRenderer.Unbaked(WindTurbineModel.LAYER_LOCATION, WindTurbineModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
-                .copyModifyGui(displaySettings -> {
-                    displaySettings.setTranslation(-2.5f, -2.5f, 0);
-                    displaySettings.setScale(0.5f, 0.5f, 0.5f);
-                }));
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-2.5f, -2.5f, 0);
+                            displaySettings.setScale(0.5f, 0.5f, 0.5f);
+                        }));
 
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.OIL_PUMP_JACK.get(),
                 new IndustriaBlockEntityItemRenderer.Unbaked(OilPumpJackModel.LAYER_LOCATION, OilPumpJackModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
-                .copyModifyGui(displaySettings -> {
-                    displaySettings.setTranslation(-1.5f, -2.75f, 0);
-                    displaySettings.setScale(0.275f, 0.275f, 0.275f);
-                }));
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
 
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.DRILL.get(),
                 new IndustriaBlockEntityItemRenderer.Unbaked(DrillFrameModel.LAYER_LOCATION, DrillFrameModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
-                .copyModifyGui(displaySettings -> {
-                    displaySettings.setTranslation(-2.5f, -2.5f, 0);
-                    displaySettings.setScale(0.5f, 0.5f, 0.5f);
-                }));
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-2.5f, -2.5f, 0);
+                            displaySettings.setScale(0.5f, 0.5f, 0.5f);
+                        }));
 
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.UPGRADE_STATION.get(),
                 new IndustriaBlockEntityItemRenderer.Unbaked(UpgradeStationModel.LAYER_LOCATION, UpgradeStationModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock()
-                .copyModifyGui(displaySettings -> {
-                    displaySettings.setTranslation(-1.5f, -2.75f, 0);
-                    displaySettings.setScale(0.275f, 0.275f, 0.275f);
-                }));
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(-1.5f, -2.75f, 0);
+                            displaySettings.setScale(0.275f, 0.275f, 0.275f);
+                        }));
 
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.MOTOR.get(),
                 new IndustriaBlockEntityItemRenderer.Unbaked(MotorModel.LAYER_LOCATION, MotorModel.TEXTURE_LOCATION),
@@ -895,11 +922,22 @@ public final class IndustriaModels {
                     itemModelGenerator.itemModelOutput.accept(entry, ItemModelUtils.plainModel(modelId));
                 });
 
+        Set<Item> sharedMoltenBuckets = new HashSet<>();
+        ModFluids.getMoltenFluids().values().forEach(fluid -> {
+            if (fluid != ModFluids.MOLTEN_ALUMINIUM && fluid != ModFluids.MOLTEN_CRYOLITE) {
+                Item bucket = fluid.bucket().get();
+                sharedMoltenBuckets.add(bucket);
+                itemModelGenerator.itemModelOutput.accept(bucket,
+                        ItemModelUtils.plainModel(Industria.id("item/molten_aluminium_bucket")));
+            }
+        });
         Set<Item> handheldItems = Set.of(ModItems.WRENCH.get());
 
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
                 .map(BuiltInRegistries.ITEM::getValue)
                 .filter(entry -> !(entry instanceof BlockItem))
+                .filter(entry -> !sharedMoltenBuckets.contains(entry))
+                .filter(entry -> !(entry instanceof MoldItem))
                 .filter(entry -> !exclusionList.contains(entry))
                 .filter(Objects::nonNull)
                 .forEach(entry -> itemModelGenerator.generateFlatItem(
@@ -908,9 +946,30 @@ public final class IndustriaModels {
                                 ? ModelTemplates.FLAT_HANDHELD_ITEM
                                 : FLAT_ITEM
                 ));
+
+        BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
+                .map(BuiltInRegistries.ITEM::getValue)
+                .filter(MoldItem.class::isInstance)
+                .map(MoldItem.class::cast)
+                .filter(entry -> !exclusionList.contains(entry))
+                .forEach(entry -> generateMoldItemModel(
+                        itemModelGenerator,
+                        entry
+                ));
     }
 
-    private void createBattery(BlockModelGenerators blockStateModelGenerator, BatteryBlock block) {
+    private static void generateMoldItemModel(ItemModelGenerators generator, MoldItem item) {
+        generator.itemModelOutput.accept(item, ItemModelUtils.specialModel(BuiltinEntityModelBuilder.getItemModelLocation(item), new MoldItemRenderer.Unbaked()));
+        Identifier materialTexture = MoldItemTextures.getMaterialTexture(item);
+        if (materialTexture == null)
+            throw new IllegalStateException("Mold item " + BuiltInRegistries.ITEM.getKey(item) + " has no material texture");
+
+        ModelTemplates.FLAT_ITEM.create(item, new TextureMapping()
+                        .put(TextureSlot.LAYER0, new Material(textureToSprite(materialTexture), false)),
+                generator.modelOutput);
+    }
+
+    private static void createBattery(BlockModelGenerators blockStateModelGenerator, BatteryBlock block) {
         blockStateModelGenerator.woodProvider(block).logWithHorizontal(block);
     }
 

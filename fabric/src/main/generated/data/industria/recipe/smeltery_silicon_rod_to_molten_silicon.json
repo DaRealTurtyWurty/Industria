@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:silicon_rod"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 4500,
+    "variant": {
+      "id": "industria:molten_silicon"
+    }
+  },
+  "preferred_temperature": 1464,
+  "process_time": 200
+}

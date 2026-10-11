@@ -13,6 +13,11 @@ public final class IndustriaItemTags {
 
         tags.tag(TagList.Items.ELECTROLYSIS_RODS)
                 .add(ModItems.CARBON_ROD.get().builtInRegistryHolder().key());
+
+        tags.tag(TagList.Items.BLANK_MOLDS)
+                .add(ModItems.BLANK_SAND_CAST.get().builtInRegistryHolder().key())
+                .add(ModItems.BLANK_RED_SAND_CAST.get().builtInRegistryHolder().key())
+                .add(ModItems.BLANK_CLAY_CAST.get().builtInRegistryHolder().key());
     }
 
     private IndustriaItemTags() {

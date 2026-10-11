@@ -1,19 +1,19 @@
 package dev.turtywurty.industria.datagen;
 
-import dev.turtywurty.slurryapi.api.Slurry;
-import dev.turtywurty.slurryapi.api.SlurryVariant;
-import dev.turtywurty.slurryapi.api.SlurryVariantAttributes;
+import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.conveyor.block.impl.entity.ContainmentConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
-import dev.turtywurty.industria.screen.ContainmentConveyorScreen;
 import dev.turtywurty.industria.item.SeismicScannerItem;
-import dev.turtywurty.industria.screen.DetectorConveyorScreen;
-import dev.turtywurty.industria.screen.FilterConveyorScreen;
-import dev.turtywurty.industria.screen.SolarPanelScreen;
+import dev.turtywurty.industria.molding.MoldGrid;
+import dev.turtywurty.industria.molding.MoldPatterns;
+import dev.turtywurty.industria.screen.*;
 import dev.turtywurty.industria.util.enums.TextEnum;
+import dev.turtywurty.slurryapi.api.Slurry;
+import dev.turtywurty.slurryapi.api.SlurryVariant;
+import dev.turtywurty.slurryapi.api.SlurryVariantAttributes;
 import dev.turtywurty.turtymultiloader.datagen.language.LanguageGenerationContext;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import net.minecraft.network.chat.Component;
@@ -27,6 +27,12 @@ public final class IndustriaEnglishLanguage {
 
     public static void generate(LanguageGenerationContext translationBuilder) {
         addText(translationBuilder, ModCreativeModeTabs.MAIN_TITLE, "Industria");
+        ModFluids.getMoltenFluids().forEach((name, fluid) -> {
+            String metal = name.substring("molten_".length());
+            String displayName = Character.toUpperCase(metal.charAt(0)) + metal.substring(1);
+            translationBuilder.add(fluid.block().get(), "Molten " + displayName);
+            translationBuilder.add(fluid.bucket().get(), "Bucket of Molten " + displayName);
+        });
 
         translationBuilder.add(ModBlocks.ALLOY_FURNACE.get(), "Alloy Furnace");
         addText(translationBuilder, AlloyFurnaceBlockEntity.TITLE, "Alloy Furnace");
@@ -149,7 +155,7 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, FilterConveyorScreen.MATCH_DURABILITY_LABEL, "Match Durability");
         addText(translationBuilder, FilterConveyorScreen.MATCH_ENCHANTMENTS_LABEL, "Match Enchantments");
         addText(translationBuilder, FilterConveyorScreen.MATCH_COMPONENTS_LABEL, "Match Components");
-        translationBuilder.add(ModBlocks.MAGNETIC_CONVEYOR.get(),  "Magnetic Conveyor");
+        translationBuilder.add(ModBlocks.MAGNETIC_CONVEYOR.get(), "Magnetic Conveyor");
         translationBuilder.add(ModBlocks.DETECTOR_CONVEYOR.get(), "Detector Conveyor");
         addText(translationBuilder, DetectorConveyorBlockEntity.TITLE, "Detector Conveyor");
         addText(translationBuilder, DetectorConveyorScreen.BLACKLIST_MODE_LABEL, "Blacklist Mode");
@@ -187,8 +193,6 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModFluids.DIRTY_SODIUM_ALUMINATE.bucket().get(), "Bucket of Dirty Sodium Aluminate");
         translationBuilder.add(ModFluids.SODIUM_ALUMINATE.block().get(), "Sodium Aluminate");
         translationBuilder.add(ModFluids.SODIUM_ALUMINATE.bucket().get(), "Bucket of Sodium Aluminate");
-        translationBuilder.add(ModFluids.MOLTEN_ALUMINIUM.block().get(), "Molten Aluminium");
-        translationBuilder.add(ModFluids.MOLTEN_ALUMINIUM.bucket().get(), "Bucket of Molten Aluminium");
         addSlurry(translationBuilder, ModSlurries.BAUXITE_SLURRY, "Bauxite Slurry");
         translationBuilder.add(ModBlocks.BAUXITE_ORE.get(), "Bauxite Ore");
         translationBuilder.add(ModBlocks.RAW_BAUXITE_BLOCK.get(), "Raw Bauxite Block");
@@ -325,8 +329,6 @@ public final class IndustriaEnglishLanguage {
         // Miscellaneous
         translationBuilder.add(ModItems.RED_MUD.get(), "Red Mud");
         translationBuilder.add(ModItems.CRYOLITE.get(), "Cryolite");
-        translationBuilder.add(ModFluids.MOLTEN_CRYOLITE.block().get(), "Molten Cryolite");
-        translationBuilder.add(ModFluids.MOLTEN_CRYOLITE.bucket().get(), "Bucket of Molten Cryolite");
         translationBuilder.add(ModItems.CARBON_ROD.get(), "Carbon Rod");
         translationBuilder.add(ModItems.BOTTLE_FORMIC_ACID.get(), "Bottle of Formic Acid");
         translationBuilder.add(ModFluids.LATEX.block().get(), "Latex");
@@ -337,6 +339,59 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModFluids.FORMIC_ACID.bucket().get(), "Bucket of Formic Acid");
         translationBuilder.add(ModFluids.DILUTED_FORMIC_ACID.block().get(), "Diluted Formic Acid");
         translationBuilder.add(ModFluids.DILUTED_FORMIC_ACID.bucket().get(), "Bucket of Diluted Formic Acid");
+
+        // Smeltery
+        translationBuilder.add(ModBlocks.UNFIRED_FIREBRICK.get(), "Unfired Firebrick");
+        translationBuilder.add(ModBlocks.FIREBRICK.get(), "Firebrick");
+        translationBuilder.add(ModBlocks.FIREBOX.get(), "Firebox");
+        addText(translationBuilder, FireboxBlockEntity.TITLE, "Firebox");
+        translationBuilder.add(ModBlocks.CHARGING_HATCH.get(), "Charging Hatch");
+        addText(translationBuilder, ChargingHatchBlockEntity.TITLE, "Charging Hatch");
+        translationBuilder.add(ModBlocks.TAPPING_OUTLET.get(), "Tapping Outlet");
+        translationBuilder.add(ModBlocks.SMELTERY_CONTROLLER.get(), "Smeltery Controller");
+        addText(translationBuilder, SmelteryControllerBlockEntity.TITLE, "Smeltery Controller");
+        translationBuilder.add(ModBlocks.CHIMNEY.get(), "Chimney");
+        translationBuilder.add(ModBlocks.SMELTERY_GLASS.get(), "Smeltery Glass");
+        translationBuilder.add(ModBlocks.CASTING_TABLE.get(), "Casting Table");
+        translationBuilder.add(ModBlocks.CASTING_BASIN.get(), "Casting Basin");
+        translationBuilder.add(ModItems.BLANK_SAND_CAST.get(), "Blank Sand Cast");
+        translationBuilder.add(ModItems.BLANK_RED_SAND_CAST.get(), "Blank Red Sand Cast");
+        translationBuilder.add(ModItems.BLANK_CLAY_CAST.get(), "Blank Clay Cast");
+        translationBuilder.add(ModItems.BLANK_GOLD_CAST.get(), "Blank Gold Cast");
+        translationBuilder.add(ModItems.SAND_MOLD.get(), "Sand Mold");
+        translationBuilder.add(ModItems.RED_SAND_MOLD.get(), "Red Sand Mold");
+        translationBuilder.add(ModItems.CLAY_MOLD.get(), "Clay Mold");
+        translationBuilder.add(ModItems.GOLD_MOLD.get(), "Gold Mold");
+        translationBuilder.add(ModItems.CERAMIC_MOLD.get(), "Ceramic Mold");
+        translationBuilder.add("item." + Industria.MOD_ID + ".mold.named", "%1$s (%2$s)");
+        translationBuilder.add("item." + Industria.MOD_ID + ".mold.half", "%1$s - Half %2$s/2");
+        addText(translationBuilder, CastingTableBlockEntity.TITLE, "Casting Table");
+
+        addText(translationBuilder, SmelteryControllerScreen.TEMPERATURE_LABEL, "Temperature: %s°C");
+        addText(translationBuilder, SmelteryControllerScreen.FORMED_LABEL, "Formed");
+        addText(translationBuilder, SmelteryControllerScreen.INCOMPLETE_LABEL, "Incomplete");
+        addText(translationBuilder, SmelteryControllerScreen.CHAMBERS_LABEL, "Chambers: %s");
+        addText(translationBuilder, SmelteryControllerScreen.CHAMBER_LABEL, "Chamber %s");
+        addText(translationBuilder, SmelteryControllerScreen.SELECTED_CHAMBER_LABEL, "Selected Chamber: %s");
+        addText(translationBuilder, SmelteryControllerScreen.NO_CHAMBERS_LABEL, "No chambers");
+        addText(translationBuilder, SmelteryControllerScreen.SIZE_LABEL, "Size: %s × %s × %s");
+        addText(translationBuilder, SmelteryControllerScreen.EMPTY_LABEL, "Empty");
+        addText(translationBuilder, SmelteryControllerScreen.AMOUNT_LABEL, "Amount: %s mB");
+        addText(translationBuilder, SmelteryControllerScreen.CAPACITY_LABEL, "Capacity: %s mB");
+        addText(translationBuilder, SmelteryControllerScreen.UNKNOWN_MELTING_TEMPERATURE, "Unknown Melting Temperature");
+        addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_SOLID, "Solid");
+        addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_MOLTEN, "Molten");
+        addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_ON_LABEL, "Keep Molten: On");
+        addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_OFF_LABEL, "Keep Molten: Off");
+
+        translationBuilder.add(ModBlocks.MOLDING_TABLE.get(), "Molding Table");
+        addText(translationBuilder, MoldingTableBlockEntity.TITLE, "Molding Table");
+        addText(translationBuilder, MoldingTableScreen.MOLD_TEMPLATES_LABEL, "Mold templates");
+        addText(translationBuilder, MoldingTableScreen.RESET_LABEL, "Reset");
+        addText(translationBuilder, MoldingTableScreen.FAILED_LABEL, "Failed");
+        addText(translationBuilder, MoldGrid.TITLE, "Molds");
+        addText(translationBuilder, MoldPatterns.INGOT.getDisplayName(), "Ingot");
+        addText(translationBuilder, MoldPatterns.ROD.getDisplayName(), "Rod");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

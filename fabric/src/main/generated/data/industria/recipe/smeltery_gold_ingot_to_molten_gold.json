@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "minecraft:gold_ingot"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:molten_gold"
+    }
+  },
+  "preferred_temperature": 1114,
+  "process_time": 200
+}

@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:tin_ingot"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:molten_tin"
+    }
+  },
+  "preferred_temperature": 282,
+  "process_time": 200
+}

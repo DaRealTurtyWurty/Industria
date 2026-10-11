@@ -11,10 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.DropExperienceBlock;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
@@ -326,6 +323,39 @@ public class ModBlocks {
 
     public static final RegistrationHandle<Block, SolarPanelBlock> ADVANCED_SOLAR_PANEL = registerWithItemCopy("advanced_solar_panel",
             properties -> new SolarPanelBlock(properties, true), Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, Block> UNFIRED_FIREBRICK = registerWithItemCopy("unfired_firebrick",
+            Block::new, Blocks.CLAY);
+
+    public static final RegistrationHandle<Block, Block> FIREBRICK = registerWithItemCopy("firebrick",
+            Block::new, Blocks.BRICKS);
+
+    public static final RegistrationHandle<Block, FireboxBlock> FIREBOX = registerWithItemCopy("firebox",
+            FireboxBlock::new, Blocks.BRICKS);
+
+    public static final RegistrationHandle<Block, ChargingHatchBlock> CHARGING_HATCH = registerWithItemCopy("charging_hatch",
+            ChargingHatchBlock::new, Blocks.BRICKS);
+
+    public static final RegistrationHandle<Block, TappingOutletBlock> TAPPING_OUTLET = registerWithItemCopy("tapping_outlet",
+            TappingOutletBlock::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, SmelteryControllerBlock> SMELTERY_CONTROLLER = registerWithItemCopy("smeltery_controller",
+            SmelteryControllerBlock::new, Blocks.BRICKS);
+
+    public static final RegistrationHandle<Block, Block> CHIMNEY = registerWithItemCopy("chimney",
+            Block::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, SmelteryGlassBlock> SMELTERY_GLASS = registerWithItemCopy("smeltery_glass",
+            SmelteryGlassBlock::new, Blocks.GLASS);
+
+    public static final RegistrationHandle<Block, MoldingTableBlock> MOLDING_TABLE = registerWithItemCopy("molding_table",
+            MoldingTableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, CastingTableBlock> CASTING_TABLE = registerWithItemCopy("casting_table",
+            CastingTableBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, CastingBasinBlock> CASTING_BASIN = registerWithItemCopy("casting_basin",
+            CastingBasinBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> RegistrationHandle<Block, T> register(String name, Function<BlockBehaviour.Properties, T> constructor, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> settingsApplier) {
         return registerBlock(name, () -> constructor.apply(

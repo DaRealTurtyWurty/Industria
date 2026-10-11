@@ -1,6 +1,5 @@
 package dev.turtywurty.industria.datagen;
 
-import dev.turtywurty.slurryapi.api.SlurryVariant;
 import dev.turtywurty.gasapi.api.GasVariant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
@@ -8,14 +7,20 @@ import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.metal.MetalDefinition;
+import dev.turtywurty.industria.metal.MetalForm;
+import dev.turtywurty.industria.metal.MetalRegistry;
+import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.recipe.AgitatorRecipe;
+import dev.turtywurty.industria.recipe.CastingRecipe;
+import dev.turtywurty.industria.recipe.ClayMoldSmeltingRecipe;
 import dev.turtywurty.industria.util.AgitatorPortType;
+import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
-import dev.turtywurty.industria.util.FluidAmounts;
+import dev.turtywurty.slurryapi.api.SlurryVariant;
 import dev.turtywurty.turtymultiloader.datagen.convention.ConventionTags;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
-import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +28,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -30,7 +36,10 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
@@ -48,6 +57,13 @@ public final class IndustriaRecipes {
         new RecipeProvider(wrapperLookup, exporter) {
             @Override
             public void buildRecipes() {
+                output.accept(ResourceKey.create(Registries.RECIPE, Industria.id("clay_mold_to_ceramic_mold")),
+                        new ClayMoldSmeltingRecipe(new Recipe.CommonInfo(true),
+                                new AbstractCookingRecipe.CookingBookInfo(CookingBookCategory.MISC, "industria:ceramic_molds"),
+                                Ingredient.of(ModItems.CLAY_MOLD.get()),
+                                new ItemStackTemplate(ModItems.CERAMIC_MOLD.get()),
+                                0.1f, 200), null);
+
                 HolderGetter<Item> itemLookup = wrapperLookup.lookupOrThrow(Registries.ITEM);
 
                 shaped(RecipeCategory.MISC, ModBlocks.ALLOY_FURNACE.get())
@@ -402,7 +418,7 @@ public final class IndustriaRecipes {
                 offerMixer(output, RecipeCategory.MISC, List.of(
                                 new IndustriaIngredient(4, ModItems.BAUXITE.get()),
                                 new IndustriaIngredient(1, ModItems.SODIUM_HYDROXIDE.get())),
-                        new FluidStack(ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()), FluidAmounts.BUCKET),
+                        new FluidStack(ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER)), FluidAmounts.BUCKET),
                         170, 180,
                         OutputItemStack.EMPTY,
                         new SlurryStack(SlurryVariant.of(ModSlurries.BAUXITE_SLURRY.holder()), FluidAmounts.BUCKET),
@@ -417,7 +433,7 @@ public final class IndustriaRecipes {
                         new OutputItemStack(ModItems.RED_MUD.get(), UniformInt.of(1, 3), 1),
                         500, "dirty_sodium_aluminate_to_sodium_aluminate");
 
-                offerCrystallizerRecipe(output, new FluidStack(ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()), FluidAmounts.BUCKET * 5),
+                offerCrystallizerRecipe(output, new FluidStack(ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER)), FluidAmounts.BUCKET * 5),
                         new FluidStack(ResourceTypes.FLUID.of(ModFluids.SODIUM_ALUMINATE.still().holder()), FluidAmounts.BUCKET),
                         new IndustriaIngredient(1, ModItems.ALUMINIUM_HYDROXIDE.get()),
                         new OutputItemStack(ModItems.ALUMINIUM_HYDROXIDE.get(), 8, 1),
@@ -479,12 +495,62 @@ public final class IndustriaRecipes {
                 offerDistillationTower(output,
                         new FluidStack(ResourceTypes.FLUID.of(ModFluids.DILUTED_FORMIC_ACID.still().holder()), FluidAmounts.BUCKET),
                         new FluidStack(ResourceTypes.FLUID.of(ModFluids.FORMIC_ACID.still().holder()), FluidAmounts.BOTTLE * 3),
-                        new FluidStack(ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()), FluidAmounts.BOTTLE),
+                        new FluidStack(ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(Fluids.WATER)), FluidAmounts.BOTTLE),
                         240,
                         40,
                         "diluted_formic_acid");
+
+                offerMetalRecipes(output);
             }
         }.buildRecipes();
+    }
+
+    private static void offerMetalRecipes(RecipeOutput exporter) {
+        for (MetalDefinition metal : MetalRegistry.getAll()) {
+            String fluidName = getRecipeName(metal.moltenFluid().still().get());
+            int preferredTemperature = Math.round(metal.meltingTemperature() + 50);
+
+            for (MetalForm form : MetalForm.values()) {
+                metal.getItem(form).ifPresent(item -> {
+                    long amount = switch (form) {
+                        case NUGGET -> FluidAmounts.NUGGET;
+                        case ROD -> FluidAmounts.INGOT / 2;
+                        case WIRE -> FluidAmounts.INGOT / 4;
+                        case INGOT, PLATE, POWDER -> FluidAmounts.INGOT;
+                    };
+                    var fluid = new FluidStack(
+                            ResourceTypes.FLUID.of(metal.moltenFluid().still().holder()), amount);
+                    String itemName = getSimpleRecipeName(item);
+
+                    offerSmelteryRecipe(exporter, new IndustriaIngredient(1, item), fluid,
+                            preferredTemperature, 2.0f, 200, itemName + "_to_" + fluidName);
+
+                    Identifier moldId = switch (form) {
+                        case INGOT -> MoldPatterns.INGOT.id();
+                        case ROD -> MoldPatterns.ROD.id();
+                        default -> null;
+                    };
+                    if (moldId != null) {
+                        offerCastingRecipe(exporter, CastingRecipe.BlockType.TABLE, fluid,
+                                new OutputItemStack(item, 1, 1), 100,
+                                fluidName + "_to_" + itemName, moldId);
+                    }
+                });
+            }
+
+            if (metal.storageBlock() != null) {
+                Item blockItem = metal.storageBlock().get().asItem();
+                String blockName = getSimpleRecipeName(blockItem);
+                var fluid = new FluidStack(
+                        ResourceTypes.FLUID.of(metal.moltenFluid().still().holder()), FluidAmounts.BLOCK);
+
+                offerSmelteryRecipe(exporter, new IndustriaIngredient(1, blockItem), fluid,
+                        preferredTemperature, 2.0f, 200, blockName + "_to_" + fluidName);
+                offerCastingRecipe(exporter, CastingRecipe.BlockType.BASIN, fluid,
+                        new OutputItemStack(blockItem, 1, 1), 100,
+                        fluidName + "_to_" + blockName);
+            }
+        }
     }
 
     private static void offerAlloySmelting(RecipeOutput exporter, RecipeCategory category, IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStackTemplate output, int smeltTime) {
@@ -551,6 +617,23 @@ public final class IndustriaRecipes {
                                                FluidStack secondaryOutputFluid, int processTime, int energyCost, String name) {
         new DistillationTowerRecipeBuilder(inputFluid, primaryOutputFluid, secondaryOutputFluid, processTime, energyCost)
                 .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("distillation_tower_" + name)));
+    }
+
+    private static void offerSmelteryRecipe(RecipeOutput exporter, IndustriaIngredient input, FluidStack output, int preferredTemperature, float maxSpeedMultiplier, int processTime, String name) {
+        new SmelteryRecipeBuilder(input, output, preferredTemperature, maxSpeedMultiplier, processTime)
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("smeltery_" + name)));
+    }
+
+    private static void offerCastingRecipe(RecipeOutput exporter, CastingRecipe.BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime, String name) {
+        offerCastingRecipe(exporter, blockType, inputFluid, output, coolingTime, name, null);
+    }
+
+    private static void offerCastingRecipe(RecipeOutput exporter, CastingRecipe.BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime, String name, @Nullable Identifier moldId) {
+        CastingRecipeBuilder builder = new CastingRecipeBuilder(blockType, inputFluid, output, coolingTime);
+        if (moldId != null) {
+            builder.mold(moldId);
+        }
+        builder.offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("casting_" + blockType.getSerializedName() + "_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {

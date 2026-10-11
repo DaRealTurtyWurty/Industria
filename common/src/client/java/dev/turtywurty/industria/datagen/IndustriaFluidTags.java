@@ -19,13 +19,8 @@ public final class IndustriaFluidTags {
                 .add(ModFluids.SODIUM_ALUMINATE.still().key())
                 .add(ModFluids.SODIUM_ALUMINATE.flowing().key());
 
-        tags.tag(TagList.Fluids.MOLTEN_ALUMINIUM)
-                .add(ModFluids.MOLTEN_ALUMINIUM.still().key())
-                .add(ModFluids.MOLTEN_ALUMINIUM.flowing().key());
-
-        tags.tag(TagList.Fluids.MOLTEN_CRYOLITE)
-                .add(ModFluids.MOLTEN_CRYOLITE.still().key())
-                .add(ModFluids.MOLTEN_CRYOLITE.flowing().key());
+        ModFluids.getMoltenFluids().forEach((name, fluid) -> tags.tag(TagList.Fluids.of(name))
+                .add(fluid.still().key()).add(fluid.flowing().key()));
 
         tags.tag(TagList.Fluids.LATEX)
                 .add(ModFluids.LATEX.still().key())

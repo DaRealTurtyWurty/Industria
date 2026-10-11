@@ -1,0 +1,15 @@
+{
+  "type": "industria:smeltery",
+  "input": {
+    "ingredients": "industria:aluminium_powder"
+  },
+  "max_speed_multiplier": 2.0,
+  "output": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:molten_aluminium"
+    }
+  },
+  "preferred_temperature": 710,
+  "process_time": 200
+}
