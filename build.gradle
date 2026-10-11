@@ -15,7 +15,7 @@ allprojects {
         maven { url = 'https://api.modrinth.com/maven' }
         maven { url = 'https://maven.terraformersmc.com/releases/' }
         maven {
-            url = 'https://repo.repsy.io/mvn/turtywurty/public'
+            url = 'https://dl.cloudsmith.io/public/turtywurty/turtymultiloader/maven/'
             content {
                 includeGroup(turtymultiloader_group)
                 includeGroup('dev.turtywurty')
