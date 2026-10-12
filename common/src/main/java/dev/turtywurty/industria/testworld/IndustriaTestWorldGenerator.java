@@ -64,9 +64,11 @@ public final class IndustriaTestWorldGenerator {
         }
 
         TestWorldContext digesterContext = DigesterTestWorld.placeMachines(context, mixerContext, player);
+        TestWorldContext clarifierContext = ClarifierTestWorld.placeMachines(digesterContext, player);
         addMixerItemFeed(mixerContext);
 
         connectMachines(energyGenContext, poolContext, mixerContext, digesterContext);
+        ClarifierTestWorld.connectMachines(clarifierContext, digesterContext);
         SmelteryTestWorld.place(context.at(8, 0, -10));
     }
 

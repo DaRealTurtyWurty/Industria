@@ -30,6 +30,7 @@ public final class IndustriaRenderTypes {
     public static final Function<Identifier, RenderType> GLASS_RENDER_TYPE = Util.memoize(texture ->
             ClientRegistrations.createRenderType("industria_machine_glass",
                     RenderSetup.builder(GLASS_PIPELINE)
+                            .setOitPipelines(RenderPipelines.OIT_ENTITY)
                             .withTexture("Sampler0", texture)
                             .useLightmap()
                             .useOverlay()

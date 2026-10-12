@@ -5,6 +5,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
 public class ClarifierRenderState extends IndustriaBlockEntityRenderState {
+    public float bladeRotation;
     public SimpleContainer outputInventory;
     public ItemStack nextOutputStack = ItemStack.EMPTY;
     public int progress = 0;

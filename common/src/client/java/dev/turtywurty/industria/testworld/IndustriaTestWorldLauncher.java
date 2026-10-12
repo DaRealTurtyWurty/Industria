@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.slf4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public final class IndustriaTestWorldLauncher {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -42,6 +44,48 @@ public final class IndustriaTestWorldLauncher {
 
     public static boolean isVanillaTestWorldButton(Button button) {
         return button.getMessage().equals(VANILLA_BUTTON_LABEL);
+    }
+
+    public static boolean isIndustriaTestWorldButton(Button button) {
+        return button.getMessage().equals(INDUSTRIA_BUTTON_LABEL);
+    }
+
+    public static @Nullable Button createFallbackButton(Screen screen, List<? extends AbstractWidget> widgets) {
+        if (widgets.stream().filter(Button.class::isInstance).map(Button.class::cast)
+                .anyMatch(IndustriaTestWorldLauncher::isIndustriaTestWorldButton))
+            return null;
+
+        Button singleplayer = findButton(widgets, "menu.singleplayer");
+        Button realms = findButton(widgets, "menu.online");
+        if (singleplayer == null || realms == null)
+            return null;
+
+        int firstRowY = singleplayer.getY();
+        int lastRowY = realms.getY();
+        var menuWidgets = widgets.stream()
+                .filter(widget -> widget.getHeight() >= 20 && widget.getY() >= firstRowY)
+                .toList();
+        var rows = menuWidgets.stream().map(AbstractWidget::getY).distinct().sorted().toList();
+        int insertedRow = rows.indexOf(lastRowY) + 1;
+        int rowCount = rows.size() + 1;
+        // Keep the menu below the logo and above the footer, tightening gaps on small screens.
+        int bottom = screen.height - 16;
+        int top = Math.max(89, Math.min(firstRowY, bottom - 20 - 24 * (rowCount - 1)));
+        int spacing = Math.min(24, (bottom - top - 20) / (rowCount - 1));
+        for (AbstractWidget widget : menuWidgets) {
+            int row = rows.indexOf(widget.getY());
+            if (row >= insertedRow)
+                row++;
+            widget.setY(top + row * spacing);
+        }
+        return createButton(screen, singleplayer.getX(), top + insertedRow * spacing,
+                singleplayer.getWidth(), singleplayer.getHeight());
+    }
+
+    private static @Nullable Button findButton(List<? extends AbstractWidget> widgets, String translationKey) {
+        Component label = Component.translatable(translationKey);
+        return widgets.stream().filter(Button.class::isInstance).map(Button.class::cast)
+                .filter(button -> button.getMessage().equals(label)).findFirst().orElse(null);
     }
 
     public static Button replacementFor(Button original, Screen titleScreen) {

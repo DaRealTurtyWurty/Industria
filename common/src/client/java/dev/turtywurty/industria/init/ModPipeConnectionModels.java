@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.ClarifierBlockEntity;
 import dev.turtywurty.industria.blockentity.DigesterBlockEntity;
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
 import dev.turtywurty.industria.pipe.ConnectionModelSet;
@@ -61,11 +62,40 @@ public final class ModPipeConnectionModels {
             Industria.id("digester_cable"),
             Industria.id("block/digester_cable_connection")
     );
+    private static final ConnectionModelSet CLARIFIER_FLUID_INPUT = ConnectionModelSet.horizontal(
+            Industria.id("clarifier_fluid_input"),
+            Industria.id("block/clarifier_fluid_pipe_input_connection")
+    );
+    private static final ConnectionModelSet CLARIFIER_FLUID_OUTPUT = ConnectionModelSet.horizontal(
+            Industria.id("clarifier_fluid_output"),
+            Industria.id("block/clarifier_fluid_pipe_output_connection")
+    );
+    private static final ConnectionModelSet CLARIFIER_CABLE = ConnectionModelSet.horizontal(
+            Industria.id("clarifier_cable"),
+            Industria.id("block/clarifier_cable_connection")
+    );
 
     public static void init() {
     }
 
     public static void register() {
+        PipeConnectionModelApi.register(
+                Industria.id("clarifier_cable"), ModBlocks.CABLE.get(), MultiblockLib.MULTIBLOCK_PART,
+                (level, targetPos, _, targetFace) -> {
+                    BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below();
+                    return level.getBlockEntity(controllerPos) instanceof ClarifierBlockEntity clarifier
+                            && clarifier.getEnergyStorageForExternal(targetPos, targetFace) != null;
+                },
+                CLARIFIER_CABLE, 100
+        );
+        PipeConnectionModelApi.registerDynamic(
+                Industria.id("clarifier_fluid_pipe"),
+                ModBlocks.FLUID_PIPE.get(),
+                MultiblockLib.MULTIBLOCK_PART,
+                (level, targetPos, _, targetFace) -> findClarifierFluidModel(level, targetPos, targetFace),
+                List.of(CLARIFIER_FLUID_INPUT, CLARIFIER_FLUID_OUTPUT),
+                100
+        );
         PipeConnectionModelRegistry.registerDefault(
                 ModBlocks.CABLE.get(),
                 CABLE
@@ -157,6 +187,23 @@ public final class ModPipeConnectionModels {
 
         return fluid ? digester.getFluidStorageForExternal(targetPos, targetFace) != null :
                 digester.getEnergyStorageForExternal(targetPos, targetFace) != null;
+    }
+
+    private static @Nullable ConnectionModelSet findClarifierFluidModel(BlockAndTintGetter level, BlockPos targetPos,
+                                                                       Direction targetFace) {
+        for (int height : new int[]{0, 2}) {
+            BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below(height);
+            if (!(level.getBlockEntity(controllerPos) instanceof ClarifierBlockEntity clarifier))
+                continue;
+            var storage = clarifier.getFluidStorageForExternal(targetPos, targetFace);
+            if (storage == null)
+                continue;
+            if (storage.supportsInsertion())
+                return CLARIFIER_FLUID_INPUT;
+            if (storage.supportsExtraction())
+                return CLARIFIER_FLUID_OUTPUT;
+        }
+        return null;
     }
 
     private static Map<Direction, ConnectionModelSet> createMixerFluidPipeModels() {

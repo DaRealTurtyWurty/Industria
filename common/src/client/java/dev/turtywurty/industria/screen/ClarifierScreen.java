@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.screen.widget.EnergyWidget;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
 import dev.turtywurty.industria.menu.ClarifierScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
@@ -22,6 +23,11 @@ public class ClarifierScreen extends AbstractContainerScreen<ClarifierScreenHand
     protected void init() {
         super.init();
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+
+        addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
+                .bounds(this.leftPos + 8, this.topPos + 10, 12, 66)
+                .color(0xFFD4AF37)
+                .build());
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getInputFluidTank())
                 .bounds(this.leftPos + 24, this.topPos + 10, 20, 66)

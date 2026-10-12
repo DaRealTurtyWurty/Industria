@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 public class InWorldFluidRenderingComponent {
     private static final Function<Identifier, RenderType> ENTITY_TRANSLUCENT_CULL = Util.memoize(texture -> {
         RenderSetup setup = RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT_CULL)
+                .setOitPipelines(RenderPipelines.OIT_ENTITY_CULL)
                 .withTexture("Sampler0", texture)
                 .useLightmap()
                 .useOverlay()

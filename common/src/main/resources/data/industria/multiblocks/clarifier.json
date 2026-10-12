@@ -1,21 +1,168 @@
 {
   "trigger_item": "industria:wrench",
   "controller_block": "industria:clarifier",
-  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allowed_rotations": [
+    "none",
+    "cw_90",
+    "cw_180",
+    "cw_270"
+  ],
   "allow_mirror": false,
-  "controller": [1, 0, 1],
+  "controller": [
+    2,
+    0,
+    2
+  ],
   "pattern": {
     "type": "multiblocklib:grid",
     "layers": [
       [
-        ["minecraft:smooth_stone", "minecraft:smooth_stone", "minecraft:smooth_stone"],
-        ["minecraft:smooth_stone", "industria:clarifier", "minecraft:smooth_stone"],
-        ["minecraft:smooth_stone", "minecraft:smooth_stone", "minecraft:smooth_stone"]
+        [
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone"
+        ],
+        [
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone"
+        ],
+        [
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "industria:clarifier",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone"
+        ],
+        [
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone"
+        ],
+        [
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone",
+          "minecraft:smooth_stone"
+        ]
       ],
       [
-        ["minecraft:glass", "minecraft:glass", "minecraft:glass"],
-        ["minecraft:hopper", "minecraft:water_cauldron", "minecraft:hopper"],
-        ["minecraft:glass", "minecraft:glass", "minecraft:glass"]
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:hopper",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:water_cauldron",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ]
+      ],
+      [
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:hopper",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ],
+        [
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass",
+          "minecraft:glass"
+        ]
+      ],
+      [
+        [
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block"
+        ],
+        [
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block"
+        ],
+        [
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block"
+        ],
+        [
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block"
+        ],
+        [
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block",
+          "industria:steel_block"
+        ]
       ]
     ]
   }

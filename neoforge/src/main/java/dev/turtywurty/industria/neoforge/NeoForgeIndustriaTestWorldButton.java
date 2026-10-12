@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.neoforge;
 
 import dev.turtywurty.industria.testworld.IndustriaTestWorldLauncher;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.neoforged.neoforge.client.event.ScreenEvent;
@@ -19,8 +20,14 @@ public final class NeoForgeIndustriaTestWorldButton {
                 .filter(IndustriaTestWorldLauncher::isVanillaTestWorldButton)
                 .findFirst()
                 .orElse(null);
-        if (original == null)
+        if (original == null) {
+            var widgets = event.getListenersList().stream()
+                    .filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
+            Button fallback = IndustriaTestWorldLauncher.createFallbackButton(event.getScreen(), widgets);
+            if (fallback != null)
+                event.addListener(fallback);
             return;
+        }
 
         event.removeListener(original);
         event.addListener(IndustriaTestWorldLauncher.replacementFor(original, event.getScreen()));

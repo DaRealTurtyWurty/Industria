@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** The digester stage of the test world's mixer-to-fluid process line. */
+/** The digester stage of the test world's aluminium production line. */
 public final class DigesterTestWorld {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -32,7 +32,8 @@ public final class DigesterTestWorld {
         digester.constructMultiblockPattern(-2, 0, -2,
                 MultiblockLib.DEFINITION_MANAGER.get(Industria.id("digester")));
         digester.useItemOnBlock(0, 0, 0, player, ModItems.WRENCH, InteractionHand.MAIN_HAND);
-        digester.setBlock(0, 0, -6, ModBlocks.FLUID_TANK);
+        if (digester.overworld().getBlockState(digester.pos(0, 0, -6)).is(ModBlocks.FLUID_TANK.get()))
+            digester.removeBlock(0, 0, -6);
         return digester;
     }
 
@@ -51,11 +52,6 @@ public final class DigesterTestWorld {
                 digester.pos(0, 1, 7),
                 digester.pos(0, 1, 3)
         ), ModBlocks.CABLE);
-
-        connect(digester, List.of(
-                digester.pos(0, 0, -3),
-                digester.pos(0, 0, -5)
-        ), ModBlocks.FLUID_PIPE);
 
         digester.afterTicks(20, current -> validate(current, Direction.NORTH,
                 DigesterBlockEntity.FLUID_OUTPUT_PORT, DigesterBlockEntity.ENERGY_PORT,
