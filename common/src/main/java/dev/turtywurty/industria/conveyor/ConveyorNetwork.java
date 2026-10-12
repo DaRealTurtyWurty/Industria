@@ -33,43 +33,41 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ConveyorNetwork {
     private static final String LEGACY_OUTPUT_ID = "out";
     private static final Codec<Map<BlockPos, Map<String, BlockPos>>> CONNECTED_BLOCKS_CODEC = Codec.either(
-            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.unboundedMap(Codec.STRING, BlockPos.CODEC)),
-            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, BlockPos.CODEC)
-    ).xmap(
-            connectedBlocks -> connectedBlocks.map(ConveyorNetwork::copyConnectedBlocks, ConveyorNetwork::upgradeLegacyConnectedBlocks),
-            connectedBlocks -> Either.left(copyConnectedBlocks(connectedBlocks))
-    );
-    private static final StreamCodec<ByteBuf, Map<BlockPos, Map<String, BlockPos>>> CONNECTED_BLOCKS_STREAM_CODEC =
-            ByteBufCodecs.map(HashMap::new, BlockPos.STREAM_CODEC, ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, BlockPos.STREAM_CODEC));
+        Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.unboundedMap(Codec.STRING, BlockPos.CODEC)),
+        Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, BlockPos.CODEC)).xmap(
+            connectedBlocks -> connectedBlocks.map(ConveyorNetwork::copyConnectedBlocks,
+                ConveyorNetwork::upgradeLegacyConnectedBlocks),
+            connectedBlocks -> Either.left(copyConnectedBlocks(connectedBlocks)));
+    private static final StreamCodec<ByteBuf, Map<BlockPos, Map<String, BlockPos>>> CONNECTED_BLOCKS_STREAM_CODEC = ByteBufCodecs
+        .map(HashMap::new, BlockPos.STREAM_CODEC,
+            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, BlockPos.STREAM_CODEC));
 
-    public static final MapCodec<ConveyorNetwork> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    UUIDUtil.CODEC.fieldOf("id").forGetter(ConveyorNetwork::getId),
-                    BlockPos.CODEC.listOf().fieldOf("conveyors").forGetter(ConveyorNetwork::getConveyors),
-                    CONNECTED_BLOCKS_CODEC.fieldOf("connectedBlocks").forGetter(ConveyorNetwork::getConnectedBlocks),
-                    ConveyorNetworkStorage.CODEC.fieldOf("storage").forGetter(network -> network.storage)
-            ).apply(instance, (id, conveyors, connectedBlocks, storage) -> {
-                var network = new ConveyorNetwork(id);
-                network.conveyors.addAll(conveyors);
-                network.connectedBlocks.putAll(connectedBlocks);
-                network.storage.loadFrom(storage);
+    public static final MapCodec<ConveyorNetwork> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        UUIDUtil.CODEC.fieldOf("id").forGetter(ConveyorNetwork::getId),
+        BlockPos.CODEC.listOf().fieldOf("conveyors").forGetter(ConveyorNetwork::getConveyors),
+        CONNECTED_BLOCKS_CODEC.fieldOf("connectedBlocks").forGetter(ConveyorNetwork::getConnectedBlocks),
+        ConveyorNetworkStorage.CODEC.fieldOf("storage").forGetter(network -> network.storage))
+        .apply(instance, (id, conveyors, connectedBlocks, storage) -> {
+            var network = new ConveyorNetwork(id);
+            network.conveyors.addAll(conveyors);
+            network.connectedBlocks.putAll(connectedBlocks);
+            network.storage.loadFrom(storage);
 
-                return network;
-            }));
+            return network;
+        }));
     public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorNetwork> STREAM_CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, ConveyorNetwork::getId,
-            ExtraStreamCodecs.listOf(BlockPos.STREAM_CODEC), ConveyorNetwork::getConveyors,
-            CONNECTED_BLOCKS_STREAM_CODEC, ConveyorNetwork::getConnectedBlocks,
-            ConveyorNetworkStorage.STREAM_CODEC, ConveyorNetwork::getStorage,
-            (id, conveyors, connectedBlocks, storage) -> {
-                var network = new ConveyorNetwork(id);
-                network.conveyors.addAll(conveyors);
-                network.connectedBlocks.putAll(connectedBlocks);
-                network.storage.loadFrom(storage);
+        UUIDUtil.STREAM_CODEC, ConveyorNetwork::getId,
+        ExtraStreamCodecs.listOf(BlockPos.STREAM_CODEC), ConveyorNetwork::getConveyors,
+        CONNECTED_BLOCKS_STREAM_CODEC, ConveyorNetwork::getConnectedBlocks,
+        ConveyorNetworkStorage.STREAM_CODEC, ConveyorNetwork::getStorage,
+        (id, conveyors, connectedBlocks, storage) -> {
+            var network = new ConveyorNetwork(id);
+            network.conveyors.addAll(conveyors);
+            network.connectedBlocks.putAll(connectedBlocks);
+            network.storage.loadFrom(storage);
 
-                return network;
-            }
-    );
+            return network;
+        });
 
     protected UUID id;
     protected final List<BlockPos> conveyors = new CopyOnWriteArrayList<>();
@@ -87,10 +85,10 @@ public class ConveyorNetwork {
     public ConveyorNetwork copy() {
         var network = new ConveyorNetwork(this.id);
         network.conveyors.addAll(this.conveyors);
-        this.connectedBlocks.forEach((conveyorPos, attachments) ->
-                network.connectedBlocks.put(conveyorPos, new ConcurrentHashMap<>(attachments)));
-        this.storage.getStorages().forEach((pos, conveyorStorage) ->
-                network.storage.getStorages().put(pos, conveyorStorage.copy()));
+        this.connectedBlocks.forEach((conveyorPos, attachments) -> network.connectedBlocks.put(conveyorPos,
+            new ConcurrentHashMap<>(attachments)));
+        this.storage.getStorages()
+            .forEach((pos, conveyorStorage) -> network.storage.getStorages().put(pos, conveyorStorage.copy()));
         return network;
     }
 
@@ -147,8 +145,8 @@ public class ConveyorNetwork {
     }
 
     public void addConnectedBlocks(Level level, ConveyorNetwork network) {
-        network.connectedBlocks.forEach((conveyorPos, attachments) ->
-                this.connectedBlocks.computeIfAbsent(conveyorPos, _ -> new ConcurrentHashMap<>()).putAll(attachments));
+        network.connectedBlocks.forEach((conveyorPos, attachments) -> this.connectedBlocks
+            .computeIfAbsent(conveyorPos, _ -> new ConcurrentHashMap<>()).putAll(attachments));
         onConnectedBlocksChanged(level);
     }
 
@@ -216,7 +214,13 @@ public class ConveyorNetwork {
         return hash;
     }
 
-    private static void handleItemProgress(Level level, ConveyorStorage conveyorStorage, ConveyorItem item, int itemProgress, BlockPos pos) {
+    private static void handleItemProgress(
+        Level level,
+        ConveyorStorage conveyorStorage,
+        ConveyorItem item,
+        int itemProgress,
+        BlockPos pos
+    ) {
         int newProgress = Math.clamp(itemProgress + getConveyorSpeed(level, pos), 0, ConveyorStorage.MAX_PROGRESS);
         if (conveyorStorage.canMove(item, itemProgress, newProgress)) {
             item.setProgress(newProgress);
@@ -225,7 +229,13 @@ public class ConveyorNetwork {
         }
     }
 
-    private void handleItemMaxProgress(ConveyorStorage conveyorStorage, ConveyorItem item, Level level, BlockPos conveyorPos, ConveyorRoutingState routingState) {
+    private void handleItemMaxProgress(
+        ConveyorStorage conveyorStorage,
+        ConveyorItem item,
+        Level level,
+        BlockPos conveyorPos,
+        ConveyorRoutingState routingState
+    ) {
         BlockState state = level.getBlockState(conveyorPos);
         SelectedOutput selectedOutput = selectOutput(level, conveyorPos, state, item, routingState);
         if (selectedOutput == null)
@@ -237,8 +247,8 @@ public class ConveyorNetwork {
             BlockState nextState = level.getBlockState(nextPos);
             BlockPos nextInputPos = selectedOutput.output().expectedInputPos();
             if (nextStorage != null
-                    && canTargetAcceptIncomingItem(level, nextPos, nextState, item, nextInputPos, routingState)
-                    && nextStorage.addItem(item)) {
+                && canTargetAcceptIncomingItem(level, nextPos, nextState, item, nextInputPos, routingState)
+                && nextStorage.addItem(item)) {
                 onIncomingItemAccepted(level, nextPos, nextState, item, nextInputPos, routingState);
                 prepareItemForInputRoute(level, nextPos, item, selectedOutput.output().expectedInputPos());
                 prepareItemForConveyor(level, nextPos, item, routingState);
@@ -252,14 +262,16 @@ public class ConveyorNetwork {
         ItemStack stack = item.getStack();
         BlockPos connectedBlock = getConnectedBlock(conveyorPos, selectedOutput.output());
         if (connectedBlock != null
-                && connectedBlock.equals(selectedOutput.output().deliveryPos())
-                && canOutputToStorage(level, conveyorPos, state, item, selectedOutput.output(), connectedBlock, routingState)) {
+            && connectedBlock.equals(selectedOutput.output().deliveryPos())
+            && canOutputToStorage(level, conveyorPos, state, item, selectedOutput.output(), connectedBlock,
+                routingState)) {
             Direction insertSide = selectedOutput.output().inventoryInsertSide();
-            ResourceStorage<ResourceVariant<Item>> connectedBlockStorage =
-                    TransferType.ITEM.lookup(level, connectedBlock, insertSide);
+            ResourceStorage<ResourceVariant<Item>> connectedBlockStorage = TransferType.ITEM.lookup(level,
+                connectedBlock, insertSide);
             if (connectedBlockStorage != null) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                    long inserted = connectedBlockStorage.insert(ResourceVariant.ofItem(stack), stack.getCount(), transaction);
+                    long inserted = connectedBlockStorage.insert(ResourceVariant.ofItem(stack), stack.getCount(),
+                        transaction);
                     if (inserted >= stack.getCount()) {
                         conveyorStorage.removeItems(item);
                         transaction.commit();
@@ -301,19 +313,25 @@ public class ConveyorNetwork {
     private static int getConveyorSpeed(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         return state.getBlock() instanceof ConveyorLike conveyorBlock
-                ? conveyorBlock.getSpeed(level, pos, state)
-                : 0;
+            ? conveyorBlock.getSpeed(level, pos, state)
+            : 0;
     }
 
     @Nullable
     private static ConveyorTopology getTopology(Level level, BlockPos pos, BlockState state) {
         return state.getBlock() instanceof ConveyorLike conveyor
-                ? conveyor.getTopology(level, pos, state)
-                : null;
+            ? conveyor.getTopology(level, pos, state)
+            : null;
     }
 
     @Nullable
-    private SelectedOutput selectOutput(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, ConveyorRoutingState routingState) {
+    private SelectedOutput selectOutput(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorRoutingState routingState
+    ) {
         if (!isConveyor(state) || !(state.getBlock() instanceof ConveyorLike conveyor))
             return null;
 
@@ -342,32 +360,63 @@ public class ConveyorNetwork {
         return null;
     }
 
-    private static void onOutputUsed(Level level, BlockPos conveyorPos, BlockState state, ConveyorOutput output, ConveyorItem item, ConveyorRoutingState routingState) {
+    private static void onOutputUsed(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState state,
+        ConveyorOutput output,
+        ConveyorItem item,
+        ConveyorRoutingState routingState
+    ) {
         if (state.getBlock() instanceof ConveyorLike conveyor) {
             conveyor.onOutputUsed(level, conveyorPos, state, output, item, routingState);
         }
     }
 
-    private boolean canTargetAcceptIncomingItem(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, BlockPos inputPos,
-                                                ConveyorRoutingState routingState) {
+    private boolean canTargetAcceptIncomingItem(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState state,
+        ConveyorItem item,
+        BlockPos inputPos,
+        ConveyorRoutingState routingState
+    ) {
         return state.getBlock() instanceof ConveyorLike conveyor
-                && conveyor.canAcceptIncomingItem(level, conveyorPos, state, item, inputPos, this, routingState);
+            && conveyor.canAcceptIncomingItem(level, conveyorPos, state, item, inputPos, this, routingState);
     }
 
-    private void onIncomingItemAccepted(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, BlockPos inputPos,
-                                        ConveyorRoutingState routingState) {
+    private void onIncomingItemAccepted(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState state,
+        ConveyorItem item,
+        BlockPos inputPos,
+        ConveyorRoutingState routingState
+    ) {
         if (state.getBlock() instanceof ConveyorLike conveyor) {
             conveyor.onIncomingItemAccepted(level, conveyorPos, state, item, inputPos, this, routingState);
         }
     }
 
-    private boolean canOutputToStorage(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item, ConveyorOutput output,
-                                       BlockPos storagePos, ConveyorRoutingState routingState) {
+    private boolean canOutputToStorage(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorOutput output,
+        BlockPos storagePos,
+        ConveyorRoutingState routingState
+    ) {
         return state.getBlock() instanceof ConveyorLike conveyor
-                && conveyor.canOutputToStorage(level, conveyorPos, state, item, output, storagePos, this, routingState);
+            && conveyor.canOutputToStorage(level, conveyorPos, state, item, output, storagePos, this, routingState);
     }
 
-    private void prepareItemForConveyor(Level level, BlockPos conveyorPos, ConveyorItem item, ConveyorRoutingState routingState) {
+    private void prepareItemForConveyor(
+        Level level,
+        BlockPos conveyorPos,
+        ConveyorItem item,
+        ConveyorRoutingState routingState
+    ) {
         BlockState state = level.getBlockState(conveyorPos);
         if (!(state.getBlock() instanceof ConveyorLike conveyor)) {
             item.setSelectedOutputId(null);
@@ -424,7 +473,13 @@ public class ConveyorNetwork {
         return false;
     }
 
-    private boolean targetsConveyor(Level level, BlockPos sourcePos, BlockState sourceState, ConveyorItem item, BlockPos targetPos) {
+    private boolean targetsConveyor(
+        Level level,
+        BlockPos sourcePos,
+        BlockState sourceState,
+        ConveyorItem item,
+        BlockPos targetPos
+    ) {
         ConveyorOutput output = getSelectedOutputForItem(level, sourcePos, sourceState, item);
         if (output == null)
             return false;
@@ -434,7 +489,12 @@ public class ConveyorNetwork {
     }
 
     @Nullable
-    private ConveyorOutput getSelectedOutputForItem(Level level, BlockPos conveyorPos, BlockState state, ConveyorItem item) {
+    private ConveyorOutput getSelectedOutputForItem(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState state,
+        ConveyorItem item
+    ) {
         if (!isConveyor(state) || !(state.getBlock() instanceof ConveyorLike conveyor))
             return null;
 
@@ -473,16 +533,19 @@ public class ConveyorNetwork {
         return null;
     }
 
-    private static Map<BlockPos, Map<String, BlockPos>> upgradeLegacyConnectedBlocks(Map<BlockPos, BlockPos> legacyConnectedBlocks) {
+    private static Map<BlockPos, Map<String, BlockPos>> upgradeLegacyConnectedBlocks(
+        Map<BlockPos, BlockPos> legacyConnectedBlocks
+    ) {
         Map<BlockPos, Map<String, BlockPos>> upgraded = new HashMap<>();
         legacyConnectedBlocks.forEach((conveyorPos, connectedBlock) -> upgraded.put(
-                conveyorPos,
-                new HashMap<>(Map.of(LEGACY_OUTPUT_ID, connectedBlock))
-        ));
+            conveyorPos,
+            new HashMap<>(Map.of(LEGACY_OUTPUT_ID, connectedBlock))));
         return upgraded;
     }
 
-    private static Map<BlockPos, Map<String, BlockPos>> copyConnectedBlocks(Map<BlockPos, Map<String, BlockPos>> connectedBlocks) {
+    private static Map<BlockPos, Map<String, BlockPos>> copyConnectedBlocks(
+        Map<BlockPos, Map<String, BlockPos>> connectedBlocks
+    ) {
         Map<BlockPos, Map<String, BlockPos>> copy = new HashMap<>();
         connectedBlocks.forEach((conveyorPos, attachments) -> copy.put(conveyorPos, new HashMap<>(attachments)));
         return copy;

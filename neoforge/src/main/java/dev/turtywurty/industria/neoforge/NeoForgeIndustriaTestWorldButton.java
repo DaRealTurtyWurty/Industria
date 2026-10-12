@@ -15,17 +15,18 @@ public final class NeoForgeIndustriaTestWorldButton {
             return;
 
         Button original = event.getListenersList().stream()
-                .filter(Button.class::isInstance)
-                .map(Button.class::cast)
-                .filter(IndustriaTestWorldLauncher::isVanillaTestWorldButton)
-                .findFirst()
-                .orElse(null);
+            .filter(Button.class::isInstance)
+            .map(Button.class::cast)
+            .filter(IndustriaTestWorldLauncher::isVanillaTestWorldButton)
+            .findFirst()
+            .orElse(null);
         if (original == null) {
             var widgets = event.getListenersList().stream()
-                    .filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
+                .filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
             Button fallback = IndustriaTestWorldLauncher.createFallbackButton(event.getScreen(), widgets);
-            if (fallback != null)
+            if (fallback != null) {
                 event.addListener(fallback);
+            }
             return;
         }
 

@@ -19,7 +19,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class FluidPumpBlockEntityRenderer extends IndustriaBlockEntityRenderer<FluidPumpBlockEntity, FluidPumpBlockEntityRenderer.FluidPumpRenderState> {
+public class FluidPumpBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<FluidPumpBlockEntity, FluidPumpBlockEntityRenderer.FluidPumpRenderState> {
     private static final float START_HEIGHT = 17f / 16f;
     private static final float START_WIDTH = 6.5f / 16f;
     private static final float DEPTH = 1f / 16f;
@@ -33,7 +35,13 @@ public class FluidPumpBlockEntityRenderer extends IndustriaBlockEntityRenderer<F
     }
 
     @Override
-    protected void onRender(FluidPumpRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        FluidPumpRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || state.fluidVariant == null || state.amount <= 0)
             return;
@@ -55,12 +63,11 @@ public class FluidPumpBlockEntityRenderer extends IndustriaBlockEntityRenderer<F
             matrices.translate(0f, 1.5f, 0.5f);
 
             this.inWorldFluidRenderer.drawTiledXYQuadOnly(
-                    state.fluidVariant, queue, matrices,
-                    light, overlay,
-                    level, state.blockPos,
-                    x0, START_HEIGHT, DEPTH - 0.001f,
-                    x1, y1, DEPTH - 0.001f
-            );
+                state.fluidVariant, queue, matrices,
+                light, overlay,
+                level, state.blockPos,
+                x0, START_HEIGHT, DEPTH - 0.001f,
+                x1, y1, DEPTH - 0.001f);
             matrices.popPose();
         }
     }
@@ -71,7 +78,13 @@ public class FluidPumpBlockEntityRenderer extends IndustriaBlockEntityRenderer<F
     }
 
     @Override
-    public void extractRenderState(FluidPumpBlockEntity blockEntity, FluidPumpRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        FluidPumpBlockEntity blockEntity,
+        FluidPumpRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         SyncingFluidStorage fluidTank = blockEntity.getFluidTank();
         state.fluidVariant = fluidTank.getResource();

@@ -2,7 +2,8 @@ package dev.turtywurty.industria.consumeeffect;
 
 import com.mojang.serialization.MapCodec;
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.init.ModAttachmentTypes;import dev.turtywurty.industria.init.ModConsumeEffectTypes;
+import dev.turtywurty.industria.init.ModAttachmentTypes;
+import dev.turtywurty.industria.init.ModConsumeEffectTypes;
 import dev.turtywurty.turtymultiloader.attachment.AttachmentService;
 import dev.turtywurty.turtymultiloader.attachment.AttachmentTarget;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -20,8 +21,8 @@ import net.minecraft.world.level.Level;
 
 public class DestroyStomachConsumeEffect implements ConsumeEffect {
     public static final MapCodec<DestroyStomachConsumeEffect> CODEC = MapCodec.unit(DestroyStomachConsumeEffect::new);
-    public static final StreamCodec<RegistryFriendlyByteBuf, DestroyStomachConsumeEffect> STREAM_CODEC =
-            StreamCodec.unit(new DestroyStomachConsumeEffect());
+    public static final StreamCodec<RegistryFriendlyByteBuf, DestroyStomachConsumeEffect> STREAM_CODEC = StreamCodec
+        .unit(new DestroyStomachConsumeEffect());
 
     public static final Identifier STOMACH_DESTRUCTION_HEALTH_MODIFIER = Industria.id("stomach_destruction_health");
 
@@ -40,8 +41,10 @@ public class DestroyStomachConsumeEffect implements ConsumeEffect {
             return false;
 
         AttachmentService attachmentService = AttachmentService.get();
-        int destructionLevel = attachmentService.getOrCreate(AttachmentTarget.entity(player), ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT, 0) + 1;
-        attachmentService.set(AttachmentTarget.entity(player), ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT, destructionLevel);
+        int destructionLevel = attachmentService.getOrCreate(AttachmentTarget.entity(player),
+            ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT, 0) + 1;
+        attachmentService.set(AttachmentTarget.entity(player), ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT,
+            destructionLevel);
 
         int maxFood = 20 - destructionLevel * 2;
         if (maxFood <= 0) {
@@ -54,10 +57,9 @@ public class DestroyStomachConsumeEffect implements ConsumeEffect {
         double amount = -2.0 * destructionLevel;
         if (amount != 0.0) {
             maxHealth.addOrUpdateTransientModifier(new AttributeModifier(
-                    STOMACH_DESTRUCTION_HEALTH_MODIFIER,
-                    amount,
-                    AttributeModifier.Operation.ADD_VALUE
-            ));
+                STOMACH_DESTRUCTION_HEALTH_MODIFIER,
+                amount,
+                AttributeModifier.Operation.ADD_VALUE));
         }
 
         if (player.getHealth() > player.getMaxHealth()) {

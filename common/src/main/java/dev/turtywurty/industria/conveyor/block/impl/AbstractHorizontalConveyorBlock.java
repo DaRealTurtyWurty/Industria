@@ -38,15 +38,22 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
 
     protected AbstractHorizontalConveyorBlock(Properties settings, IndustriaBlock.BlockProperties properties) {
         super(settings, properties
-                .addStateProperty(FACING, Direction.NORTH)
-                .addStateProperty(WATERLOGGED, false)
-                .notPlaceFacingOpposite()
-                .hasComparatorOutput());
+            .addStateProperty(FACING, Direction.NORTH)
+            .addStateProperty(WATERLOGGED, false)
+            .notPlaceFacingOpposite()
+            .hasComparatorOutput());
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player,
-                                          InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(
+        ItemStack itemStack,
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        InteractionHand hand,
+        BlockHitResult hitResult
+    ) {
         if (itemStack.isEmpty())
             return super.useItemOn(itemStack, state, level, pos, player, hand, hitResult);
 
@@ -68,14 +75,15 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
             if (storageAt == null || !storageAt.canAcceptIncomingItem())
                 return InteractionResult.PASS;
 
-            ConveyorItem conveyorItem = new ConveyorItem(pos, itemStack.copyWithCount(1));
+            var conveyorItem = new ConveyorItem(pos, itemStack.copyWithCount(1));
             if (!storageAt.addItem(conveyorItem))
                 return InteractionResult.PASS;
 
             selectOutput(level, pos, state, conveyorItem, networkAt, networkManager);
 
-            if (!player.isCreative())
+            if (!player.isCreative()) {
                 itemStack.shrink(1);
+            }
 
             networkManager.syncNetwork(serverLevel, networkAt);
             LevelConveyorNetworks.getOrCreate(serverLevel).setDirty();
@@ -86,7 +94,13 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (player.isShiftKeyDown()) {
             if (level.isClientSide())
                 return InteractionResult.SUCCESS;
@@ -95,8 +109,8 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
                 ConveyorNetworkManager networkManager = getNetworkManager(serverLevel);
                 boolean recreated = networkManager.recreateNetworkAt(serverLevel, pos);
                 player.sendSystemMessage(Component.literal(recreated
-                        ? "Recreated conveyor network."
-                        : "Failed to recreate conveyor network."));
+                    ? "Recreated conveyor network."
+                    : "Failed to recreate conveyor network."));
 
                 return InteractionResult.SUCCESS_SERVER;
             }
@@ -116,7 +130,7 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
         Level level = context.getLevel();
         FluidState fluidState = level.getFluidState(context.getClickedPos());
         return state.setValue(FACING, facing)
-                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+            .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
     @Override
@@ -132,9 +146,16 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
-                                     Direction directionToNeighbour, BlockPos neighbourPos, BlockState neighbourState,
-                                     RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader level,
+        ScheduledTickAccess ticks,
+        BlockPos pos,
+        Direction directionToNeighbour,
+        BlockPos neighbourPos,
+        BlockState neighbourState,
+        RandomSource random
+    ) {
         if (state.getValue(WATERLOGGED)) {
             ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
@@ -161,7 +182,12 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+    protected void affectNeighborsAfterRemoval(
+        BlockState state,
+        ServerLevel level,
+        BlockPos pos,
+        boolean movedByPiston
+    ) {
         BlockState newState = level.getBlockState(pos);
         if (!state.is(newState.getBlock())) {
             getNetworkManager(level).removeConveyor(level, pos);
@@ -183,8 +209,8 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
     @Override
     protected FluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED)
-                ? Fluids.WATER.getSource(false)
-                : super.getFluidState(state);
+            ? Fluids.WATER.getSource(false)
+            : super.getFluidState(state);
     }
 
     public ConveyorNetworkManager getNetworkManager(ServerLevel level) {

@@ -95,7 +95,10 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert
 //                        .incrementProgress()
 //                        .build());
 //    }
-public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("mixer");
 
     public final List<Vec3> mixingItemPositions = NonNullList.withSize(6, new Vec3(0, 1, 0));
@@ -138,18 +141,19 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 6), Direction.EAST);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.WEST);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createFluidPredicate(() -> {
-                    SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                    return new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount());
-                })), Direction.NORTH);
+            PredicateSimpleInventory.createFluidPredicate(() -> {
+                SyncingFluidStorage inputFluidTank = getInputFluidTank();
+                return new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount());
+            })), Direction.NORTH);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().getResource())), Direction.SOUTH);
+            PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().getResource())),
+            Direction.SOUTH);
 
         this.wrappedFluidStorage.addStorage(
-                new InputFluidStorage(this, FluidAmounts.BUCKET * 10), Direction.UP);
+            new InputFluidStorage(this, FluidAmounts.BUCKET * 10), Direction.UP);
 
         this.wrappedSlurryStorage.addStorage(
-                new OutputSlurryStorage(this, FluidAmounts.BUCKET * 10), Direction.DOWN);
+            new OutputSlurryStorage(this, FluidAmounts.BUCKET * 10), Direction.DOWN);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000, 1_000, 0));
     }
@@ -166,7 +170,8 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
         SyncingEnergyStorage energy = getEnergyStorage();
 
-        return List.of(inputInventory, outputInventory, bucketInputInventory, bucketOutputInventory, inputFluidTank, outputSlurryTank, energy);
+        return List.of(inputInventory, outputInventory, bucketInputInventory, bucketOutputInventory, inputFluidTank,
+            outputSlurryTank, energy);
     }
 
     @Override
@@ -177,11 +182,12 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
         if (!bucketInputInventory.isEmpty()) {
             ItemStack bucket = bucketInputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Fluid>> storage =
-                    MutableItemContext.ofContainerSlot(bucketInputInventory, 0).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> storage = MutableItemContext
+                .ofContainerSlot(bucketInputInventory, 0).find(StorageKeys.FLUID);
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                Optional<ResourceVariant<Fluid>> optVariant = TransferUtils.findFirstVariant(storage, inputFluidTank.getResource());
+                Optional<ResourceVariant<Fluid>> optVariant = TransferUtils.findFirstVariant(storage,
+                    inputFluidTank.getResource());
                 optVariant.filter(variant -> !variant.isBlank()).ifPresent(variant -> {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                         long extracted = storage.extract(variant, FluidAmounts.BUCKET, transaction);
@@ -198,13 +204,14 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
         if (!bucketOutputInventory.isEmpty()) {
             ItemStack bucket = bucketOutputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Slurry>> storage =
-                    MutableItemContext.ofContainerSlot(bucketOutputInventory, 0).find(SlurryStorage.KEY);
+            ResourceStorage<ResourceVariant<Slurry>> storage = MutableItemContext
+                .ofContainerSlot(bucketOutputInventory, 0).find(SlurryStorage.KEY);
             if (storage != null && storage.supportsInsertion()) {
                 SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
                 if (outputSlurryTank.getAmount() > 0) {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                        long inserted = storage.insert(outputSlurryTank.getResource(), FluidAmounts.BUCKET, transaction);
+                        long inserted = storage.insert(outputSlurryTank.getResource(), FluidAmounts.BUCKET,
+                            transaction);
                         if (inserted > 0) {
                             outputSlurryTank.extractInternal(outputSlurryTank.getResource(), inserted, transaction);
                         }
@@ -228,7 +235,8 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         if (!this.outputSlurryStack.isEmpty()) {
             SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
             if (outputSlurryTank.canInsert(this.outputSlurryStack)) {
-                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(), this.outputSlurryStack.amount());
+                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(),
+                    this.outputSlurryStack.amount());
                 insert(outputSlurryTank, this.outputSlurryStack.variant(), inserted);
                 this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
                 update();
@@ -283,7 +291,8 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
                 SlurryStack outputSlurry = recipe.outputSlurry();
                 if (outputSlurryTank.canInsert(outputSlurry)) {
-                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(), outputSlurry.amount());
+                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(),
+                        outputSlurry.amount());
                     insert(outputSlurryTank, outputSlurry.variant(), inserted);
                     outputSlurry = outputSlurry.withAmount(outputSlurry.amount() - inserted);
                 }
@@ -332,16 +341,16 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         this.maxProgress = view.getIntOr("MaxProgress", 0);
         this.temperature = view.getIntOr("Temperature", 0);
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
-                .orElse(null);
+            .orElse(null);
 
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "SlurryTank", this.wrappedSlurryStorage);
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
-                .orElse(ItemStack.EMPTY);
+            .orElse(ItemStack.EMPTY);
         this.outputSlurryStack = view.read("OutputSlurry", SlurryStack.CODEC.codec())
-                .orElse(SlurryStack.EMPTY);
+            .orElse(SlurryStack.EMPTY);
     }
 
     private boolean hasEnergy() {
@@ -373,7 +382,8 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
     private MixerRecipeInput createRecipeInput() {
         SyncingFluidStorage inputFluidTank = getInputFluidTank();
-        return new MixerRecipeInput(getInputInventory(), new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount()), this.temperature);
+        return new MixerRecipeInput(getInputInventory(),
+            new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount()), this.temperature);
     }
 
     @Override
@@ -438,15 +448,15 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.EAST))
-                .atSides(new BlockPos(1, 2, 0), Direction.UP);
+            .atSides(new BlockPos(1, 2, 0), Direction.UP);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
-                .at(new BlockPos(1, 0, 0));
+            .at(new BlockPos(1, 0, 0));
         ports.input(TransferType.FLUID, this::getInputFluidTank)
-                .where((offset, side) -> offset.equals(new BlockPos(-1, 2, 0)) && side == Direction.UP);
+            .where((offset, side) -> offset.equals(new BlockPos(-1, 2, 0)) && side == Direction.UP);
         ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
-                .at(new BlockPos(-1, 0, 0));
+            .at(new BlockPos(-1, 0, 0));
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .at(new BlockPos(0, 2, 0));
+            .at(new BlockPos(0, 2, 0));
     }
 
     @Override
@@ -469,8 +479,8 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
         Direction connectionDirection = getWorldSideForLocalSide(Direction.EAST);
         ResourceStorage<ResourceVariant<Item>> storage = TransferType.ITEM.lookup(this.level,
-                this.worldPosition.relative(connectionDirection).above(3),
-                Direction.DOWN);
+            this.worldPosition.relative(connectionDirection).above(3),
+            Direction.DOWN);
         return storage != null;
     }
 
@@ -480,8 +490,8 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity i
 
         Direction connectionDirection = getWorldSideForLocalSide(Direction.EAST);
         ResourceStorage<ResourceVariant<Item>> storage = TransferType.ITEM.lookup(this.level,
-                this.worldPosition.relative(connectionDirection, 2),
-                connectionDirection.getOpposite());
+            this.worldPosition.relative(connectionDirection, 2),
+            connectionDirection.getOpposite());
         return storage != null;
     }
 }

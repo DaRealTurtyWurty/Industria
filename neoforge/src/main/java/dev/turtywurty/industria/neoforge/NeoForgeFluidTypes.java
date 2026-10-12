@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public final class NeoForgeFluidTypes {
-    private static final DeferredRegister<FluidType> TYPES =
-            DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, Industria.MOD_ID);
+    private static final DeferredRegister<FluidType> TYPES = DeferredRegister
+        .create(NeoForgeRegistries.Keys.FLUID_TYPES, Industria.MOD_ID);
     private static final Map<Identifier, Supplier<FluidType>> BY_SOURCE = new HashMap<>();
 
     private NeoForgeFluidTypes() {
@@ -39,7 +39,7 @@ public final class NeoForgeFluidTypes {
     private static void register(FluidRegistryObject<?, ?> fluid) {
         Identifier id = fluid.still().id();
         BY_SOURCE.put(id, TYPES.register(id.getPath(), () -> new FluidType(
-                FluidType.Properties.create().descriptionId("block." + id.getNamespace() + "." + id.getPath()))));
+            FluidType.Properties.create().descriptionId("block." + id.getNamespace() + "." + id.getPath()))));
     }
 
     public static FluidType get(IndustriaFluid fluid) {

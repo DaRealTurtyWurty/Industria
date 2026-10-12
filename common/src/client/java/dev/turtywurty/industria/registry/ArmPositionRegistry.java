@@ -26,7 +26,8 @@ public class ArmPositionRegistry {
         return armPositions;
     }
 
-    public record Entry(Predicate<ItemStack> predicate, DynamicArmPosition armPosition) {}
+    public record Entry(Predicate<ItemStack> predicate, DynamicArmPosition armPosition) {
+    }
 
     @FunctionalInterface
     public interface DynamicArmPosition {

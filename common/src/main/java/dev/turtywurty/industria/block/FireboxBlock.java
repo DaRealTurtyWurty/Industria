@@ -6,12 +6,12 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class FireboxBlock extends IndustriaBlock {
     public FireboxBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
-                        ModBlockEntityTypes.FIREBOX)
-                        .dropContentsOnBreak()
-                        .rightClickToOpenGui()
-                        .shouldTick())
-                .hasHorizontalFacing()
-                .hasLitProperty());
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
+                ModBlockEntityTypes.FIREBOX)
+                .dropContentsOnBreak()
+                .rightClickToOpenGui()
+                .shouldTick())
+            .hasHorizontalFacing()
+            .hasLitProperty());
     }
 }

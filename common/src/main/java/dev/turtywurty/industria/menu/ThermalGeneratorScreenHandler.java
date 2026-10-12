@@ -11,12 +11,20 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluid;
 
-public class ThermalGeneratorScreenHandler extends IndustriaScreenHandler<ThermalGeneratorBlockEntity, BlockPosPayload> {
+public class ThermalGeneratorScreenHandler
+    extends
+        IndustriaScreenHandler<ThermalGeneratorBlockEntity, BlockPosPayload> {
     public ThermalGeneratorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ModMenuTypes.THERMAL_GENERATOR.get(), syncId, playerInventory, payload, ThermalGeneratorBlockEntity.class);
+        super(ModMenuTypes.THERMAL_GENERATOR.get(), syncId, playerInventory, payload,
+            ThermalGeneratorBlockEntity.class);
     }
 
-    public ThermalGeneratorScreenHandler(int syncId, Inventory playerInventory, ThermalGeneratorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public ThermalGeneratorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        ThermalGeneratorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.THERMAL_GENERATOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
@@ -28,7 +36,7 @@ public class ThermalGeneratorScreenHandler extends IndustriaScreenHandler<Therma
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
         addSlot(new PredicateSlot(this.wrappedContainerStorage.getInventory(0), 0, 80, 35,
-                itemStack -> this.blockEntity.isValid(itemStack, 0)));
+            itemStack -> this.blockEntity.isValid(itemStack, 0)));
     }
 
     @Override

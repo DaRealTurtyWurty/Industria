@@ -15,10 +15,9 @@ public class DebugRenderingRegistry {
         ClientEvents.onDisconnection(_ -> DebugRenderingRegistry.debugRendering = false);
 
         KeyMapping toggleDebugRenderingKey = ClientEvents.registerKeyMapping(new KeyMapping(
-                "key." + Industria.MOD_ID + ".toggle_debug_rendering",
-                InputConstants.KEY_F6,
-                ModKeyBindings.CATEGORY
-        ));
+            "key." + Industria.MOD_ID + ".toggle_debug_rendering",
+            InputConstants.KEY_F6,
+            ModKeyBindings.CATEGORY));
 
         ClientEvents.onEndClientTick(client -> {
             if (toggleDebugRenderingKey.consumeClick()) {
@@ -29,7 +28,8 @@ public class DebugRenderingRegistry {
                     return;
                 }
 
-                player.sendSystemMessage(Component.literal("Debug rendering: " + (debugRendering ? "[ENABLED]" : "[DISABLED]")));
+                player.sendSystemMessage(
+                    Component.literal("Debug rendering: " + (debugRendering ? "[ENABLED]" : "[DISABLED]")));
             }
         });
     }

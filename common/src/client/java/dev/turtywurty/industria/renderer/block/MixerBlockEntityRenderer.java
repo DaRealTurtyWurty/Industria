@@ -27,7 +27,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         this.model = new MixerModel(context.bakeLayer(MixerModel.LAYER_LOCATION));
         this.glassModel = new MixerModel(context.bakeLayer(MixerModel.LAYER_LOCATION), true);
 
-        //this.fluidRenderer.setShouldDebugAmount(true);
+        // this.fluidRenderer.setShouldDebugAmount(true);
     }
 
     @Override
@@ -36,7 +36,13 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
     }
 
     @Override
-    public void extractRenderState(MixerBlockEntity blockEntity, MixerRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        MixerBlockEntity blockEntity,
+        MixerRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.isMixing = blockEntity.isMixing();
         state.progress = blockEntity.getProgress();
@@ -57,12 +63,18 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
     }
 
     @Override
-    protected void onRender(MixerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        MixerRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         var texture = state.isMixing ? MixerModel.CLOSED_TEXTURE_LOCATION : MixerModel.OPEN_TEXTURE_LOCATION;
         ModelSubmitUtils.submitModel(queue, this.model,
-                state,
-                matrices, this.model.renderType(texture),
-                light, overlay, 0, state.breakProgress);
+            state,
+            matrices, this.model.renderType(texture),
+            light, overlay, 0, state.breakProgress);
 
         float tankHalfWidth = 13.25f / 16f;
         float x1 = -tankHalfWidth;
@@ -86,7 +98,11 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                 Vec3 position = state.mixingItemPositions.get(index);
 
                 if (state.isMixing) {
-                    float angle = (float) (2 * Math.PI * index / state.inputInventory.getContainerSize()); // Evenly space items around circle
+                    float angle = (float) (2 * Math.PI * index / state.inputInventory.getContainerSize()); // Evenly
+                                                                                                           // space
+                                                                                                           // items
+                                                                                                           // around
+                                                                                                           // circle
                     float rotationSpeed = 0.1f;
                     float timeAngle = (float) world.getGameTime() * rotationSpeed;
 
@@ -103,7 +119,8 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                 matrices.scale(0.5f, 0.5f, 0.5f);
 
                 if (state.isMixing) {
-                    matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead (maybe? :3)
+                    matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead
+                                                                                 // (maybe? :3)
                     matrices.rotate(Axis.YP.rotation(world.getGameTime() * 0.25f));
                     matrices.rotate(Axis.XP.rotation(world.getGameTime() * 0.25f));
                     matrices.rotate(Axis.ZP.rotation(world.getGameTime() * 0.25f));
@@ -116,16 +133,16 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
 
         // TODO: Temperature-based color
         this.fluidRenderer.render(state.fluidTank,
-                queue, matrices,
-                light, overlay,
-                world, state.blockPos,
-                x1, y1, z1,
-                x2, maxHeightPixels, z2,
-                0xFFFFFFFF, ColorMode.MULTIPLICATION);
+            queue, matrices,
+            light, overlay,
+            world, state.blockPos,
+            x1, y1, z1,
+            x2, maxHeightPixels, z2,
+            0xFFFFFFFF, ColorMode.MULTIPLICATION);
 
         ModelSubmitUtils.submitModel(queue, this.glassModel,
-                state,
-                matrices, this.glassModel.renderType(texture),
-                light, overlay, 0, state.breakProgress);
+            state,
+            matrices, this.glassModel.renderType(texture),
+            light, overlay, 0, state.breakProgress);
     }
 }

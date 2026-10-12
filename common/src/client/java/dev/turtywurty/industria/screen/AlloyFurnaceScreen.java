@@ -31,6 +31,7 @@ public class AlloyFurnaceScreen extends AbstractContainerScreen<AlloyFurnaceScre
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 79, this.topPos + 34, 176, 14, progress, 17);
 
         int burnTime = Mth.ceil(this.menu.getBurnTimePercent() * 14);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 56, this.topPos + 36 + 14 - burnTime, 176, 14 - burnTime, 14, burnTime);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 56, this.topPos + 36 + 14 - burnTime, 176,
+            14 - burnTime, 14, burnTime);
     }
 }

@@ -22,11 +22,15 @@ public final class ModGasStorageProviders {
 
     public static void init() {
         TransferService transfers = TransferService.get();
-        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.ELECTROLYZER, ElectrolyzerBlockEntity::getGasProvider);
-        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.ARC_FURNACE, ArcFurnaceBlockEntity::getGasProvider);
-        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.AGITATOR, AgitatorBlockEntity::getGasProvider);
+        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.ELECTROLYZER,
+            ElectrolyzerBlockEntity::getGasProvider);
+        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.ARC_FURNACE,
+            ArcFurnaceBlockEntity::getGasProvider);
+        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.AGITATOR,
+            AgitatorBlockEntity::getGasProvider);
         transfers.registerBlockProvider(GasStorage.KEY, (level, pos, _, blockEntity, side) -> {
-            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
+            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(
+                level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getGasStorageForExternal(pos, side) : null;
         }, MultiblockLib.MULTIBLOCK_PART_HANDLE);
         transfers.registerBlockProvider(GasStorage.KEY, (world, pos, state, blockEntity, context) -> {
@@ -37,7 +41,11 @@ public final class ModGasStorageProviders {
         }, ModBlocks.GAS_PIPE);
     }
 
-    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(ServerLevel level, BlockPos pos, BlockEntity blockEntity) {
+    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(
+        ServerLevel level,
+        BlockPos pos,
+        BlockEntity blockEntity
+    ) {
         if (blockEntity instanceof IndustriaMultiblockControllerBlockEntity controller)
             return controller;
 

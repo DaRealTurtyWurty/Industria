@@ -28,11 +28,12 @@ public class BatteryScreen extends AbstractContainerScreen<BatteryScreenHandler>
 
         BatteryBlockEntity blockEntity = this.menu.getBlockEntity();
 
-        addRenderableWidget(CycleButton.onOffBuilder(blockEntity.getChargeMode() == BatteryBlockEntity.ChargeMode.CHARGE)
-                .displayOnlyValue()
-                .create(this.leftPos + 144, this.topPos + 10, 20, 20, BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT,
-                        (_, _) ->
-                                NetworkService.get().sendToServer(new BatteryChargeModePayload(BatteryScreen.this.menu.getChargeMode().next()))));
+        addRenderableWidget(CycleButton
+            .onOffBuilder(blockEntity.getChargeMode() == BatteryBlockEntity.ChargeMode.CHARGE)
+            .displayOnlyValue()
+            .create(this.leftPos + 144, this.topPos + 10, 20, 20, BatteryBlockEntity.CHARGE_MODE_BUTTON_TOOLTIP_TEXT,
+                (_, _) -> NetworkService.get()
+                    .sendToServer(new BatteryChargeModePayload(BatteryScreen.this.menu.getChargeMode().next()))));
     }
 
     @Override
@@ -40,7 +41,8 @@ public class BatteryScreen extends AbstractContainerScreen<BatteryScreenHandler>
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
-        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66, 0xFFD4AF37);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66,
+            0xFFD4AF37);
     }
 
     @Override
@@ -49,7 +51,8 @@ public class BatteryScreen extends AbstractContainerScreen<BatteryScreenHandler>
 
         int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
         if (isHovering(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {
-            context.setTooltipForNextFrame(this.font, Component.literal(this.menu.getEnergy() + " / " + this.menu.getMaxEnergy() + " FE"), mouseX, mouseY);
+            context.setTooltipForNextFrame(this.font,
+                Component.literal(this.menu.getEnergy() + " / " + this.menu.getMaxEnergy() + " FE"), mouseX, mouseY);
         }
     }
 }

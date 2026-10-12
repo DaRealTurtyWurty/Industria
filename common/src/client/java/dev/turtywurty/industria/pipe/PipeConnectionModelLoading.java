@@ -22,9 +22,8 @@ public final class PipeConnectionModelLoading {
             return;
 
         ClientRegistrations.registerBlockStateModelAugmenter(
-                state -> state.getBlock() instanceof PipeBlock<?, ?>,
-                new PipeConnectionBlockStateModel()
-        );
+            state -> state.getBlock() instanceof PipeBlock<?, ?>,
+            new PipeConnectionBlockStateModel());
 
         initialized = true;
     }

@@ -43,11 +43,12 @@ public class MobJarItem extends Item {
         BlockPos clickedPos = context.getClickedPos();
         Direction clickedFace = context.getClickedFace();
         BlockPos spawnPos = level.getBlockState(clickedPos).getCollisionShape(level, clickedPos).isEmpty()
-                ? clickedPos
-                : clickedPos.relative(clickedFace);
+            ? clickedPos
+            : clickedPos.relative(clickedFace);
         boolean alignToSurface = !spawnPos.equals(clickedPos) && clickedFace == Direction.UP;
 
-        if (entityType.spawn(serverLevel, stack, context.getPlayer(), spawnPos, EntitySpawnReason.SPAWN_ITEM_USE, true, alignToSurface) == null)
+        if (entityType.spawn(serverLevel, stack, context.getPlayer(), spawnPos, EntitySpawnReason.SPAWN_ITEM_USE, true,
+            alignToSurface) == null)
             return InteractionResult.FAIL;
 
         ItemStackTemplate craftingRemainder = getCraftingRemainder();
@@ -59,7 +60,13 @@ public class MobJarItem extends Item {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void appendHoverText(ItemStack itemStack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
+    public void appendHoverText(
+        ItemStack itemStack,
+        TooltipContext context,
+        TooltipDisplay display,
+        Consumer<Component> builder,
+        TooltipFlag tooltipFlag
+    ) {
         TypedEntityData<EntityType<?>> typedEntityData = itemStack.get(DataComponents.ENTITY_DATA);
         if (typedEntityData != null && display.shows(DataComponents.ENTITY_DATA)) {
             builder.accept(typedEntityData.type().getDescription().copy());

@@ -67,7 +67,10 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
 // TODO: Make this work with temperature and pressure
-public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("digester");
     public static final BlockPos ENERGY_PORT = new BlockPos(0, 1, 2);
     public static final BlockPos SLURRY_INPUT_PORT = new BlockPos(0, 2, 0);
@@ -111,12 +114,12 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         super(ModBlocks.DIGESTER.get(), ModBlockEntityTypes.DIGESTER.get(), pos, state);
 
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createSlurryPredicate(() -> {
-                    SyncingSlurryStorage inputSlurryTank = getInputSlurryStorage();
-                    return new SlurryStack(inputSlurryTank.getResource(), inputSlurryTank.getAmount());
-                })), Direction.UP);
+            PredicateSimpleInventory.createSlurryPredicate(() -> {
+                SyncingSlurryStorage inputSlurryTank = getInputSlurryStorage();
+                return new SlurryStack(inputSlurryTank.getResource(), inputSlurryTank.getAmount());
+            })), Direction.UP);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createEmptyFluidPredicate(() -> getOutputFluidStorage().getResource())));
+            PredicateSimpleInventory.createEmptyFluidPredicate(() -> getOutputFluidStorage().getResource())));
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 5_000, 0));
 
@@ -132,7 +135,8 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         InputSlurryStorage inputSlurryStorage = getInputSlurryStorage();
         OutputFluidStorage outputFluidStorage = getOutputFluidStorage();
 
-        return List.of(inputSlurryInventory, outputFluidInventory, energyStorage, inputSlurryStorage, outputFluidStorage);
+        return List.of(inputSlurryInventory, outputFluidInventory, energyStorage, inputSlurryStorage,
+            outputFluidStorage);
     }
 
     public PredicateSimpleInventory getInputSlurryInventory() {
@@ -163,11 +167,12 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         SyncingSimpleInventory bucketInputInventory = getInputSlurryInventory();
         if (!bucketInputInventory.isEmpty()) {
             ItemStack bucket = bucketInputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Slurry>> storage =
-                    MutableItemContext.ofContainerSlot(bucketInputInventory, 0).find(SlurryStorage.KEY);
+            ResourceStorage<ResourceVariant<Slurry>> storage = MutableItemContext
+                .ofContainerSlot(bucketInputInventory, 0).find(SlurryStorage.KEY);
             if (storage != null && storage.supportsExtraction()) {
                 SyncingSlurryStorage inputSlurryTank = getInputSlurryStorage();
-                Optional<ResourceVariant<Slurry>> optVariant = TransferUtils.findFirstVariant(storage, inputSlurryTank.getResource());
+                Optional<ResourceVariant<Slurry>> optVariant = TransferUtils.findFirstVariant(storage,
+                    inputSlurryTank.getResource());
                 optVariant.filter(variant -> !variant.isBlank()).ifPresent(variant -> {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                         long extracted = storage.extract(variant, FluidAmounts.BUCKET, transaction);
@@ -184,8 +189,8 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         SyncingSimpleInventory bucketOutputInventory = getOutputFluidInventory();
         if (!bucketOutputInventory.isEmpty()) {
             ItemStack bucket = bucketOutputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Fluid>> storage =
-                    MutableItemContext.ofContainerSlot(bucketOutputInventory, 0).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> storage = MutableItemContext
+                .ofContainerSlot(bucketOutputInventory, 0).find(StorageKeys.FLUID);
             if (storage != null && storage.supportsInsertion()) {
                 SyncingFluidStorage outputFluidTank = getOutputFluidStorage();
                 if (outputFluidTank.getAmount() > 0) {
@@ -254,7 +259,9 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return Optional.empty();
 
         InputSlurryStorage slurryStorage = getInputSlurryStorage();
-        return serverWorld.recipeAccess().getRecipeFor(ModRecipeTypes.DIGESTER.get(), new DigesterRecipeInput(new SlurryStack(slurryStorage.getResource(), slurryStorage.getAmount())), this.level);
+        return serverWorld.recipeAccess().getRecipeFor(ModRecipeTypes.DIGESTER.get(),
+            new DigesterRecipeInput(new SlurryStack(slurryStorage.getResource(), slurryStorage.getAmount())),
+            this.level);
     }
 
     private boolean hasEnergy() {
@@ -321,7 +328,7 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
         this.maxProgress = view.getIntOr("MaxProgress", 0);
 
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
-                .orElse(null);
+            .orElse(null);
     }
 
     @Override
@@ -349,10 +356,10 @@ public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntit
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .where((offset, side) -> offset.equals(ENERGY_PORT) && side == Direction.SOUTH);
+            .where((offset, side) -> offset.equals(ENERGY_PORT) && side == Direction.SOUTH);
         ports.input(TransferType.SLURRY, this::getInputSlurryStorage)
-                .where((offset, side) -> offset.equals(SLURRY_INPUT_PORT) && side == Direction.UP);
+            .where((offset, side) -> offset.equals(SLURRY_INPUT_PORT) && side == Direction.UP);
         ports.output(TransferType.FLUID, this::getOutputFluidStorage)
-                .where((offset, side) -> offset.equals(FLUID_OUTPUT_PORT) && side == Direction.NORTH);
+            .where((offset, side) -> offset.equals(FLUID_OUTPUT_PORT) && side == Direction.NORTH);
     }
 }

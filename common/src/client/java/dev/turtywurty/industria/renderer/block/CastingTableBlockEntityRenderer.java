@@ -34,8 +34,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<CastingTableBlockEntity,
-        CastingTableBlockEntityRenderer.CastingTableRenderState> {
+public class CastingTableBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<CastingTableBlockEntity, CastingTableBlockEntityRenderer.CastingTableRenderState> {
     private static final MoldCastSurface.Snapshot FLAT = new MoldCastSurface().snapshot();
     private static final float TRAY_HEIGHT = 15f / 16f;
     private static final float MOLD_SIZE = 14f / 16f;
@@ -56,9 +57,13 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    public void extractRenderState(CastingTableBlockEntity blockEntity, CastingTableRenderState state,
-                                   float tickProgress, Vec3 cameraPos,
-                                   ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        CastingTableBlockEntity blockEntity,
+        CastingTableRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.pieces.clear();
         for (int slot = 0; slot < 2; slot++) {
@@ -72,18 +77,19 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         Optional<MoldPattern> mold = blockEntity.getAssembledMold();
         state.assembled = mold.isPresent();
         state.cavity = mold.isPresent() && !state.pieces.isEmpty()
-                ? getCavity(mold.get(), state.pieces.getFirst()) : null;
+            ? getCavity(mold.get(), state.pieces.getFirst())
+            : null;
         SyncingFluidStorage fluid = blockEntity.getFluidStorage();
         long required = blockEntity.getRequiredFluidAmount();
         state.fill = fill(fluid.getAmount(), required > 0 ? required : fluid.getCapacity());
         state.fluidSprite = null;
         FluidRenderUtils.GuiFluidRenderData fluidData = FluidRenderUtils.getRenderData(
-                fluid.getResource(), blockEntity.getLevel(), blockEntity.getBlockPos());
+            fluid.getResource(), blockEntity.getLevel(), blockEntity.getBlockPos());
         if (fluidData != null && fluid.getAmount() > 0) {
             state.fluidSprite = fluidData.stillSprite();
             state.fluidColor = fluidData.tintColor();
             int luminosity = Math.max((state.lightCoords >> 4) & 15,
-                    FluidVariantAttributes.getLuminance(fluid.getResource()));
+                FluidVariantAttributes.getLuminance(fluid.getResource()));
             state.fluidLight = (state.lightCoords & 0xF00000) | (luminosity << 4);
         }
 
@@ -98,7 +104,7 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         if (!visible.isEmpty() && outputMaterial != null) {
             state.outputSprite = outputMaterial.sprite();
             state.outputMesh = this.outputMeshes.computeIfAbsent(state.outputSprite,
-                    CastingTableBlockEntityRenderer::createOutputMesh);
+                CastingTableBlockEntityRenderer::createOutputMesh);
         }
     }
 
@@ -138,7 +144,8 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             return cached.mesh;
 
         boolean[] opaque = new boolean[material.width * material.height];
-        try (NativeImage mask = MoldGeometry.createMask(pattern, pattern.polygons().size(), material.width, material.height)) {
+        try (NativeImage mask = MoldGeometry.createMask(pattern, pattern.polygons().size(), material.width,
+            material.height)) {
             for (int y = 0; y < material.height; y++) {
                 for (int x = 0; x < material.width; x++) {
                     opaque[y * material.width + x] = mask.getPixel(x, y) == 0;
@@ -165,8 +172,13 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(CastingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue,
-                            int light, int overlay) {
+    protected void onRender(
+        CastingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         boolean separate = !state.assembled && state.pieces.size() > 1;
         for (int i = 0; i < state.pieces.size(); i++) {
             PieceMesh piece = state.pieces.get(i);
@@ -174,45 +186,62 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             float x = separate ? (i == 0 ? -0.225f : 0.225f) : 0;
             float top = MOLD_BOTTOM + size * MoldWorldMesh.THICKNESS;
             draw(meshState(piece.mesh, RenderTypes.entityCutout(piece.texture), null, -1, light),
-                    matrices, queue, x, top, size, size, overlay);
+                matrices, queue, x, top, size, size, overlay);
         }
 
         if (state.cavity != null && state.fluidSprite != null && state.fill > 0 && !state.hasOutput) {
             float top = MOLD_BOTTOM + MOLD_HEIGHT * state.fill;
             draw(meshState(state.cavity, RenderTypes.entityTranslucent(state.fluidSprite.atlasLocation()),
-                            state.fluidSprite, state.fluidColor, state.fluidLight),
-                    matrices, queue, 0, top, MOLD_SIZE, MOLD_SIZE * state.fill, overlay);
+                state.fluidSprite, state.fluidColor, state.fluidLight),
+                matrices, queue, 0, top, MOLD_SIZE, MOLD_SIZE * state.fill, overlay);
         }
 
         if (state.outputMesh != null && state.outputSprite != null && state.cooling > 0) {
             int alpha = Math.round(state.cooling * 255);
             draw(meshState(state.outputMesh, RenderTypes.entityTranslucent(state.outputSprite.atlasLocation()),
-                            state.outputSprite, (alpha << 24) | 0xFFFFFF, light),
-                    matrices, queue, 0, MOLD_TOP + 0.001f, MOLD_SIZE, MOLD_SIZE, overlay);
+                state.outputSprite, (alpha << 24) | 0xFFFFFF, light),
+                matrices, queue, 0, MOLD_TOP + 0.001f, MOLD_SIZE, MOLD_SIZE, overlay);
         }
     }
 
-    private static MeshDraw meshState(MoldWorldMesh mesh, RenderType type, @Nullable TextureAtlasSprite sprite,
-                                      int color, int light) {
+    private static MeshDraw meshState(
+        MoldWorldMesh mesh,
+        RenderType type,
+        @Nullable TextureAtlasSprite sprite,
+        int color,
+        int light
+    ) {
         return new MeshDraw(mesh, type, sprite, color, light);
     }
 
-    private static void draw(MeshDraw draw, PoseStack matrices, SubmitNodeCollector queue,
-                             float x, float top, float size, float depthSize, int overlay) {
+    private static void draw(
+        MeshDraw draw,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        float x,
+        float top,
+        float size,
+        float depthSize,
+        int overlay
+    ) {
         matrices.pushPose();
         matrices.translate(x, 1.5f - top, 0);
         matrices.rotate(Axis.XP.rotationDegrees(90));
         matrices.scale(size, size, depthSize);
         queue.submitCustomGeometry(matrices, draw.type, (pose, buffer) -> {
             for (MoldWorldMesh.Vertex vertex : draw.mesh.vertices()) {
-                float u = draw.sprite == null ? vertex.u() : Mth.lerp(vertex.u(), draw.sprite.getU0(), draw.sprite.getU1());
-                float v = draw.sprite == null ? vertex.v() : Mth.lerp(vertex.v(), draw.sprite.getV0(), draw.sprite.getV1());
+                float u = draw.sprite == null
+                    ? vertex.u()
+                    : Mth.lerp(vertex.u(), draw.sprite.getU0(), draw.sprite.getU1());
+                float v = draw.sprite == null
+                    ? vertex.v()
+                    : Mth.lerp(vertex.v(), draw.sprite.getV0(), draw.sprite.getV1());
                 buffer.addVertex(pose, vertex.x(), vertex.y(), vertex.z())
-                        .setColor(draw.color)
-                        .setUv(u, v)
-                        .setOverlay(overlay)
-                        .setLight(draw.light)
-                        .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
+                    .setColor(draw.color)
+                    .setUv(u, v)
+                    .setOverlay(overlay)
+                    .setLight(draw.light)
+                    .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
             }
         });
         matrices.popPose();
@@ -224,7 +253,7 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
 
         long required = table.getRequiredFluidAmount();
         return MOLD_BOTTOM + MOLD_HEIGHT * fill(table.getFluidStorage().getAmount(),
-                required > 0 ? required : table.getFluidStorage().getCapacity());
+            required > 0 ? required : table.getFluidStorage().getCapacity());
     }
 
     private static float fill(long amount, long required) {
@@ -255,7 +284,12 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     private record CavityMesh(Identifier texture, MoldWorldMesh mesh) {
     }
 
-    private record MeshDraw(MoldWorldMesh mesh, RenderType type, @Nullable TextureAtlasSprite sprite, int color,
-                            int light) {
+    private record MeshDraw(
+        MoldWorldMesh mesh,
+        RenderType type,
+        @Nullable TextureAtlasSprite sprite,
+        int color,
+        int light
+    ) {
     }
 }

@@ -10,9 +10,9 @@ public class FluidTankBlock extends IndustriaBlock {
 
     public FluidTankBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .constantShape(VOXEL_SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.FLUID_TANK)
-                        .rightClickToOpenGui()
-                        .shouldTick()));
+            .constantShape(VOXEL_SHAPE)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.FLUID_TANK)
+                .rightClickToOpenGui()
+                .shouldTick()));
     }
 }

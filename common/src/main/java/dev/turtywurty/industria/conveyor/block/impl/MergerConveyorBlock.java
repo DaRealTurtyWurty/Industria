@@ -28,17 +28,22 @@ public class MergerConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction right = facing.getClockWise();
 
         return new ConveyorTopology(
-                List.of(
-                        new ConveyorInput(LEFT_INPUT_ID, pos.relative(left)),
-                        new ConveyorInput(RIGHT_INPUT_ID, pos.relative(right))
-                ),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(
+                new ConveyorInput(LEFT_INPUT_ID, pos.relative(left)),
+                new ConveyorInput(RIGHT_INPUT_ID, pos.relative(right))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 
     @Override
-    public boolean canAcceptIncomingItem(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
-                                         ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public boolean canAcceptIncomingItem(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        BlockPos inputPos,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         ConveyorTopology topology = getTopology(level, pos, state);
         if (topology.inputs().size() <= 1)
             return true;
@@ -56,8 +61,15 @@ public class MergerConveyorBlock extends AbstractPoweredConveyorBlock {
     }
 
     @Override
-    public void onIncomingItemAccepted(Level level, BlockPos pos, BlockState state, ConveyorItem item, BlockPos inputPos,
-                                       ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public void onIncomingItemAccepted(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        BlockPos inputPos,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         ConveyorTopology topology = getTopology(level, pos, state);
         if (topology.inputs().size() <= 1)
             return;

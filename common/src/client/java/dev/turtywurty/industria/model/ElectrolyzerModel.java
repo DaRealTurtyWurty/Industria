@@ -12,7 +12,8 @@ import net.minecraft.resources.Identifier;
 
 public class ElectrolyzerModel extends Model<IndustriaBlockEntityRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/electrolyzer.png");
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("electrolyzer"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("electrolyzer"),
+        "main");
 
     public ElectrolyzerModel(ModelPart root) {
         super(root, RenderTypes::entityCutout);
@@ -22,10 +23,10 @@ public class ElectrolyzerModel extends Model<IndustriaBlockEntityRenderState> {
         var modelData = new MeshDefinition();
         PartDefinition modelPartData = modelData.getRoot();
         modelPartData.addOrReplaceChild("main", CubeListBuilder.create()
-                        .texOffs(0, 0)
-                        .addBox(-23.0F, -32.0F, -1.0F, 48.0F, 32.0F, 32.0F,
-                                new CubeDeformation(0.0F)),
-                PartPose.offset(-1.0F, 24.0F, -7.0F));
+            .texOffs(0, 0)
+            .addBox(-23.0F, -32.0F, -1.0F, 48.0F, 32.0F, 32.0F,
+                new CubeDeformation(0.0F)),
+            PartPose.offset(-1.0F, 24.0F, -7.0F));
 
         return LayerDefinition.create(modelData, 256, 256);
     }

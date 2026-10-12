@@ -29,13 +29,15 @@ public class CombustionGeneratorScreen extends AbstractContainerScreen<Combustio
         long energy = this.menu.getEnergy();
         long maxEnergy = this.menu.getMaxEnergy();
         int energyBarSize = Math.round((float) energy / maxEnergy * 66);
-        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energyBarSize, this.leftPos + 164, this.topPos + 10 + 66, 0xFFD4AF37);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energyBarSize, this.leftPos + 164,
+            this.topPos + 10 + 66, 0xFFD4AF37);
 
         int burnTime = this.menu.getBurnTime();
         int fuelTime = this.menu.getFuelTime();
         float burnTimePercentage = (float) burnTime / fuelTime;
         int burnTimeSize = Math.round(burnTimePercentage * 14);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 82, this.topPos + 25 + 14 - burnTimeSize, 176, 14 - burnTimeSize, 14, burnTimeSize);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 82, this.topPos + 25 + 14 - burnTimeSize, 176,
+            14 - burnTimeSize, 14, burnTimeSize);
     }
 
     @Override
@@ -45,7 +47,8 @@ public class CombustionGeneratorScreen extends AbstractContainerScreen<Combustio
         if (isHovering(144, 10, 20, 66, mouseX, mouseY)) {
             long energy = this.menu.getEnergy();
             long maxEnergy = this.menu.getMaxEnergy();
-            context.setTooltipForNextFrame(this.font, Component.literal(energy + " / " + maxEnergy + " FE"), mouseX, mouseY);
+            context.setTooltipForNextFrame(this.font, Component.literal(energy + " / " + maxEnergy + " FE"), mouseX,
+                mouseY);
         }
     }
 }

@@ -25,19 +25,31 @@ public class MotorBlockEntityRenderer extends IndustriaBlockEntityRenderer<Motor
     }
 
     @Override
-    public void extractRenderState(MotorBlockEntity blockEntity, MotorRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        MotorBlockEntity blockEntity,
+        MotorRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.rodRotation = blockEntity.rodRotation;
         state.rotationSpeed = blockEntity.getRotationSpeed();
     }
 
     @Override
-    public void onRender(MotorRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    public void onRender(
+        MotorRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         state.rodRotation += state.rotationSpeed * state.tickProgress;
 
         ModelSubmitUtils.submitModel(queue, this.model,
-                new MotorModel.MotorModelRenderState(state.rodRotation),
-                matrices, this.model.renderType(MotorModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            new MotorModel.MotorModelRenderState(state.rodRotation),
+            matrices, this.model.renderType(MotorModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
     }
 }

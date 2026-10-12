@@ -16,44 +16,51 @@ public enum ColorMode {
         return modifyColor(color, redModifier, greenModifier, blueModifier, alphaModifier, mode);
     }
 
-    public static int modifyColor(int color, float redModifier, float greenModifier, float blueModifier, float alphaModifier, ColorMode mode) {
+    public static int modifyColor(
+        int color,
+        float redModifier,
+        float greenModifier,
+        float blueModifier,
+        float alphaModifier,
+        ColorMode mode
+    ) {
         float r = (color >> 16 & 0xFF) / 255.0F;
         float g = (color >> 8 & 0xFF) / 255.0F;
         float b = (color & 0xFF) / 255.0F;
         float a = (color >> 24 & 0xFF) / 255.0F;
 
         switch (mode) {
-            case ADDITION:
+            case ADDITION :
                 r += redModifier;
                 g += greenModifier;
                 b += blueModifier;
                 a += alphaModifier;
                 break;
-            case MULTIPLICATION:
+            case MULTIPLICATION :
                 r *= redModifier;
                 g *= greenModifier;
                 b *= blueModifier;
                 a *= alphaModifier;
                 break;
-            case SUBTRACTION:
+            case SUBTRACTION :
                 r -= redModifier;
                 g -= greenModifier;
                 b -= blueModifier;
                 a -= alphaModifier;
                 break;
-            case DIVISION:
+            case DIVISION :
                 r /= redModifier;
                 g /= greenModifier;
                 b /= blueModifier;
                 a /= alphaModifier;
                 break;
-            case REPLACE:
+            case REPLACE :
                 r = redModifier;
                 g = greenModifier;
                 b = blueModifier;
                 a = alphaModifier;
                 break;
-            default:
+            default :
                 throw new UnsupportedOperationException("Unexpected value: " + mode);
         }
 

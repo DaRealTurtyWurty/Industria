@@ -17,8 +17,9 @@ public class ResetConveyorNetworksCommand {
         levelConveyorNetworks.setDirty();
 
         context.getSource().sendSuccess(
-                () -> Component.literal("Reset conveyor networks: cleared " + networkCount + " network(s) and " + conveyorCount + " mapped conveyor(s)."),
-                false);
+            () -> Component.literal("Reset conveyor networks: cleared " + networkCount + " network(s) and "
+                + conveyorCount + " mapped conveyor(s)."),
+            false);
 
         return networkCount;
     }

@@ -23,7 +23,9 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<ShakingTableBlockEntity, ShakingTableRenderState> {
+public class ShakingTableBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<ShakingTableBlockEntity, ShakingTableRenderState> {
     private final ShakingTableModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
@@ -38,7 +40,13 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    public void extractRenderState(ShakingTableBlockEntity blockEntity, ShakingTableRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        ShakingTableBlockEntity blockEntity,
+        ShakingTableRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.recipeFrequency = blockEntity.getRecipeFrequency();
         state.progress = blockEntity.getProgress();
@@ -51,7 +59,13 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(ShakingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        ShakingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         Level world = Minecraft.getInstance().level;
 
         float shakeOffset = 0.0f;
@@ -66,9 +80,9 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         state.shakeOffset = shakeOffset;
 
         ModelSubmitUtils.submitModel(queue, this.model,
-                new ShakingTableModel.ShakingTableModelRenderState(state.shakeOffset),
-                matrices, this.model.renderType(ShakingTableModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            new ShakingTableModel.ShakingTableModelRenderState(state.shakeOffset),
+            matrices, this.model.renderType(ShakingTableModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
 
         renderGutterFluids(state, matrices, queue, light, overlay, shakeOffset);
         Vec2 fluidEnd = renderSurfaceFluid(state, matrices, queue, light, overlay, shakeOffset);
@@ -76,7 +90,13 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void postRender(ShakingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void postRender(
+        ShakingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         if (DebugRenderingRegistry.debugRendering && state.shakeBox != null) {
             Gizmos.cuboid(state.shakeBox, GizmoStyle.stroke(0xFFFF0000));
         }
@@ -84,7 +104,16 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
 
     // TODO: Figure out why the items start off centered in the middle of the table
     // and then move to the left side of the table when the shaking starts.
-    private void renderItemStacks(ShakingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, float shakeOffset, float surfaceFluidX, float surfaceFluidY) {
+    private void renderItemStacks(
+        ShakingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay,
+        float shakeOffset,
+        float surfaceFluidX,
+        float surfaceFluidY
+    ) {
         if (state.processingStack.isEmpty())
             return;
 
@@ -109,7 +138,14 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         matrices.popPose();
     }
 
-    private Vec2 renderSurfaceFluid(ShakingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, float shakeOffset) {
+    private Vec2 renderSurfaceFluid(
+        ShakingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay,
+        float shakeOffset
+    ) {
         float progress = state.progress / (float) state.maxProgress;
 
         if (progress <= 0.0f)
@@ -130,13 +166,13 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         matrices.translate(0, 0.0f, shakeOffset / 16f);
 
         this.fluidRenderer.render(state.inputFluidTank,
-                queue, matrices,
-                light, overlay,
-                Minecraft.getInstance().level, state.blockPos,
-                fluidX, -4 / 16f, -2.0f - 2f / 16f,
-                minX, height, 1 + 2f / 16f,
-                0xFFFFFFFF, ColorMode.MULTIPLICATION,
-                IndeterminateBoolean.TRUE);
+            queue, matrices,
+            light, overlay,
+            Minecraft.getInstance().level, state.blockPos,
+            fluidX, -4 / 16f, -2.0f - 2f / 16f,
+            minX, height, 1 + 2f / 16f,
+            0xFFFFFFFF, ColorMode.MULTIPLICATION,
+            IndeterminateBoolean.TRUE);
 
         matrices.popPose();
 
@@ -144,7 +180,14 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         return new Vec2(fluidX, endY);
     }
 
-    private void renderGutterFluids(ShakingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, float shakeOffset) {
+    private void renderGutterFluids(
+        ShakingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay,
+        float shakeOffset
+    ) {
         matrices.pushPose();
         matrices.translate(0.0f, 0.0f, shakeOffset / 16f);
         {
@@ -154,12 +197,12 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             float x2 = 1f + 1f / 16f;
             float z2 = -5f / 16f;
             this.fluidRenderer.render(state.inputFluidTank,
-                    queue, matrices,
-                    light, overlay,
-                    Minecraft.getInstance().level, state.blockPos,
-                    x1, y1, z1, x2, 1.999f, z2,
-                    0xFFFFFFFF, ColorMode.MULTIPLICATION,
-                    IndeterminateBoolean.TRUE);
+                queue, matrices,
+                light, overlay,
+                Minecraft.getInstance().level, state.blockPos,
+                x1, y1, z1, x2, 1.999f, z2,
+                0xFFFFFFFF, ColorMode.MULTIPLICATION,
+                IndeterminateBoolean.TRUE);
         }
 
         {
@@ -169,12 +212,12 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             float x2 = 1f + 1f / 16f;
             float z2 = 1 + 2f / 16f;
             this.fluidRenderer.render(state.inputFluidTank,
-                    queue, matrices,
-                    light, overlay,
-                    Minecraft.getInstance().level, state.blockPos,
-                    x1, y1, z1, x2, 1.999f, z2,
-                    0xFFFFFFFF, ColorMode.MULTIPLICATION,
-                    IndeterminateBoolean.TRUE);
+                queue, matrices,
+                light, overlay,
+                Minecraft.getInstance().level, state.blockPos,
+                x1, y1, z1, x2, 1.999f, z2,
+                0xFFFFFFFF, ColorMode.MULTIPLICATION,
+                IndeterminateBoolean.TRUE);
         }
 
         matrices.popPose();

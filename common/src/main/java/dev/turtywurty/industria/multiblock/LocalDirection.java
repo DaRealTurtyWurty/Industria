@@ -8,12 +8,16 @@ import net.minecraft.core.Direction;
  * The directions are defined in relation to the facing direction of the structure.
  */
 public enum LocalDirection {
-    UP, DOWN, FRONT, BACK, LEFT, RIGHT;
+    UP,
+    DOWN,
+    FRONT,
+    BACK,
+    LEFT,
+    RIGHT;
 
     public static final Codec<LocalDirection> CODEC = Codec.STRING.xmap(
-            LocalDirection::valueOf,
-            LocalDirection::name
-    );
+        LocalDirection::valueOf,
+        LocalDirection::name);
 
     /**
      * Converts this local direction to a world direction based on the given facing direction.
@@ -23,22 +27,22 @@ public enum LocalDirection {
      */
     public Direction toWorld(Direction facing) {
         return switch (this) {
-            case UP    -> Direction.UP;
-            case DOWN  -> Direction.DOWN;
+            case UP -> Direction.UP;
+            case DOWN -> Direction.DOWN;
             case FRONT -> facing;
-            case BACK  -> facing.getOpposite();
-            case LEFT  -> facing.getCounterClockWise();
+            case BACK -> facing.getOpposite();
+            case LEFT -> facing.getCounterClockWise();
             case RIGHT -> facing.getClockWise();
         };
     }
 
     public Direction toWorld(LocalDirection facing) {
         return switch (this) {
-            case UP    -> Direction.UP;
-            case DOWN  -> Direction.DOWN;
+            case UP -> Direction.UP;
+            case DOWN -> Direction.DOWN;
             case FRONT -> facing.toWorld(Direction.NORTH);
-            case BACK  -> facing.toWorld(Direction.SOUTH);
-            case LEFT  -> facing.toWorld(Direction.WEST);
+            case BACK -> facing.toWorld(Direction.SOUTH);
+            case LEFT -> facing.toWorld(Direction.WEST);
             case RIGHT -> facing.toWorld(Direction.EAST);
         };
     }

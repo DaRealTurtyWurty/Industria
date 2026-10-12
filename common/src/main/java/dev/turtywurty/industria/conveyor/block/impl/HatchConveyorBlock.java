@@ -21,13 +21,18 @@ public class HatchConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 
     @Override
-    public boolean canAttachToStorageOutput(Level level, BlockPos pos, BlockState state, ConveyorOutput output, BlockPos storagePos) {
+    public boolean canAttachToStorageOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorOutput output,
+        BlockPos storagePos
+    ) {
         return true;
     }
 }

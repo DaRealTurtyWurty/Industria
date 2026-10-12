@@ -50,7 +50,12 @@ import java.util.Optional;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
-public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, RecipeExperienceBlockEntity, BlockEntityContentsDropper {
+public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload>,
+        RecipeExperienceBlockEntity,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("electric_furnace");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -86,15 +91,17 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
             this.progress = 0;
             this.maxProgress = 0;
 
-            if (currentProgress > 0)
+            if (currentProgress > 0) {
                 update();
+            }
 
             return;
         }
 
         var recipeInput = new SingleRecipeInput(inputStack);
 
-        Optional<RecipeHolder<SmeltingRecipe>> recipe = this.matchGetter.getRecipeFor(recipeInput, (ServerLevel) this.level);
+        Optional<RecipeHolder<SmeltingRecipe>> recipe = this.matchGetter.getRecipeFor(recipeInput,
+            (ServerLevel) this.level);
         if (recipe.isEmpty())
             return;
 
@@ -129,8 +136,10 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
             return;
 
         boolean running = this.progress > 0;
-        if (getBlockState().getValue(BlockStateProperties.LIT) != running)
-            this.level.setBlock(this.worldPosition, getBlockState().setValue(BlockStateProperties.LIT, running), Block.UPDATE_ALL);
+        if (getBlockState().getValue(BlockStateProperties.LIT) != running) {
+            this.level.setBlock(this.worldPosition, getBlockState().setValue(BlockStateProperties.LIT, running),
+                Block.UPDATE_ALL);
+        }
     }
 
     private boolean canAcceptOutput(RecipeHolder<SmeltingRecipe> recipeEntry, SingleRecipeInput recipeInput) {
@@ -146,7 +155,8 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
         if (!ItemStack.isSameItemSameComponents(outputStack, output))
             return false;
 
-        return (outputStack.getCount() + output.getCount() <= output.getMaxStackSize()) && (outputStack.getCount() + output.getCount() <= outputInventory.getMaxStackSize());
+        return (outputStack.getCount() + output.getCount() <= output.getMaxStackSize())
+            && (outputStack.getCount() + output.getCount() <= outputInventory.getMaxStackSize());
     }
 
     @Override
@@ -200,10 +210,10 @@ public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements 
             world.recipeAccess().byKey(entry.getKey()).ifPresent(recipe -> {
                 list.add(recipe);
                 RecipeExperienceBlockEntity.dropExperience(
-                        world,
-                        pos,
-                        entry.getIntValue(),
-                        ((AbstractCookingRecipe) recipe.value()).experience());
+                    world,
+                    pos,
+                    entry.getIntValue(),
+                    ((AbstractCookingRecipe) recipe.value()).experience());
             });
         }
 

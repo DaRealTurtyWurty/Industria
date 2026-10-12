@@ -61,18 +61,21 @@ public class MultiblockExportItem extends Item {
 
         MultiblockExportSelectionComponent selection = getSelection(stack);
         if (selection.positions().size() >= 3) {
-            player.sendSystemMessage(Component.literal("Selection is complete. Sneak-right-click air to export, or sneak-right-click any block to clear."));
+            player.sendSystemMessage(Component.literal(
+                "Selection is complete. Sneak-right-click air to export, or sneak-right-click any block to clear."));
             return InteractionResult.PASS;
         }
 
         List<BlockPos> positions = new ArrayList<>(selection.positions());
         positions.add(context.getClickedPos());
-        stack.set(ModDataComponentTypes.MULTIBLOCK_EXPORT_SELECTION.get(), new MultiblockExportSelectionComponent(positions));
+        stack.set(ModDataComponentTypes.MULTIBLOCK_EXPORT_SELECTION.get(),
+            new MultiblockExportSelectionComponent(positions));
 
         if (positions.size() == 1) {
             player.sendSystemMessage(Component.literal("Selected controller/base position 1/3."));
-        } else if (positions.size() == 2) player.sendSystemMessage(Component.literal("Selected footprint corner 2/3."));
-        else {
+        } else if (positions.size() == 2) {
+            player.sendSystemMessage(Component.literal("Selected footprint corner 2/3."));
+        } else {
             player.sendSystemMessage(Component.literal("Selected height corner 3/3. Sneak-right-click air to export."));
         }
 
@@ -106,7 +109,13 @@ public class MultiblockExportItem extends Item {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(
+        ItemStack stack,
+        TooltipContext context,
+        TooltipDisplay display,
+        Consumer<Component> tooltip,
+        TooltipFlag flag
+    ) {
         tooltip.accept(Component.literal("Right-click 3 positions to define a multiblock."));
         tooltip.accept(Component.literal("1: controller/base, 2: footprint corner, 3: height corner."));
         tooltip.accept(Component.literal("Sneak-right-click air to export the selection."));
@@ -114,7 +123,8 @@ public class MultiblockExportItem extends Item {
     }
 
     public static MultiblockExportSelectionComponent getSelection(ItemStack stack) {
-        return stack.getOrDefault(ModDataComponentTypes.MULTIBLOCK_EXPORT_SELECTION.get(), MultiblockExportSelectionComponent.EMPTY);
+        return stack.getOrDefault(ModDataComponentTypes.MULTIBLOCK_EXPORT_SELECTION.get(),
+            MultiblockExportSelectionComponent.EMPTY);
     }
 
     public static int getSelectionStage(ItemStack stack) {
@@ -153,7 +163,8 @@ public class MultiblockExportItem extends Item {
         BlockState controllerState = level.getBlockState(bounds.controller());
         Block controllerBlock = controllerState.getBlock();
         if (controllerState.isAir()) {
-            player.sendSystemMessage(Component.literal("The controller position is air. Select a real controller block first."));
+            player.sendSystemMessage(
+                Component.literal("The controller position is air. Select a real controller block first."));
             return InteractionResult.FAIL;
         }
 
@@ -197,8 +208,9 @@ public class MultiblockExportItem extends Item {
         pattern.add("layers", layers);
         root.add("pattern", pattern);
 
-        Path exportDir =Platform.gameDirectory().resolve("industria_multiblock_exports");
-        String fileName = sanitizeFileName(BuiltInRegistries.BLOCK.getKey(controllerBlock).getPath()) + "_" + FILE_NAME_FORMAT.format(LocalDateTime.now()) + ".json";
+        Path exportDir = Platform.gameDirectory().resolve("industria_multiblock_exports");
+        String fileName = sanitizeFileName(BuiltInRegistries.BLOCK.getKey(controllerBlock).getPath()) + "_"
+            + FILE_NAME_FORMAT.format(LocalDateTime.now()) + ".json";
         Path exportPath = exportDir.resolve(fileName);
 
         try {

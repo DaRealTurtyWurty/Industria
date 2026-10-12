@@ -17,12 +17,15 @@ import java.util.function.Consumer;
 public class MoldGrid extends AbstractWidget implements AutoCloseable {
     public static final Component TITLE = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.molds");
 
-    private static final Identifier RECIPE_SELECTED_SPRITE = Identifier.withDefaultNamespace("container/stonecutter/recipe_selected");
-    private static final Identifier RECIPE_HIGHLIGHTED_SPRITE = Identifier.withDefaultNamespace("container/stonecutter/recipe_highlighted");
+    private static final Identifier RECIPE_SELECTED_SPRITE = Identifier
+        .withDefaultNamespace("container/stonecutter/recipe_selected");
+    private static final Identifier RECIPE_HIGHLIGHTED_SPRITE = Identifier
+        .withDefaultNamespace("container/stonecutter/recipe_highlighted");
     private static final Identifier RECIPE_SPRITE = Identifier.withDefaultNamespace("container/stonecutter/recipe");
 
     private static final Identifier SCROLLER = Identifier.withDefaultNamespace("container/stonecutter/scroller");
-    private static final Identifier SCROLLER_DISABLED = Identifier.withDefaultNamespace("container/stonecutter/scroller_disabled");
+    private static final Identifier SCROLLER_DISABLED = Identifier
+        .withDefaultNamespace("container/stonecutter/scroller_disabled");
 
     private static final int COLUMNS = 3;
     private static final int CELL_SIZE = 18;
@@ -45,8 +48,8 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
 
         for (MoldPattern pattern : this.patterns) {
             silhouettes.add(new DynamicTexture(
-                    () -> "Mold silhouette " + pattern.id(),
-                    MoldGeometry.createSilhouette(pattern, 96, 96)));
+                () -> "Mold silhouette " + pattern.id(),
+                MoldGeometry.createSilhouette(pattern, 96, 96)));
         }
     }
 
@@ -54,13 +57,12 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         int scrollbarX = getScrollbarX();
         int handleOffset = getMaxScrollRow() == 0
-                ? 0
-                : Math.round((scrollRow / (float) getMaxScrollRow()) * (getScrollbarTrackHeight() - SCROLLBAR_HEIGHT));
+            ? 0
+            : Math.round((scrollRow / (float) getMaxScrollRow()) * (getScrollbarTrackHeight() - SCROLLBAR_HEIGHT));
         graphics.blitSprite(
-                RenderPipelines.GUI_TEXTURED, getMaxScrollRow() > 0 ? SCROLLER : SCROLLER_DISABLED,
-                scrollbarX, getY() + handleOffset,
-                SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT
-        );
+            RenderPipelines.GUI_TEXTURED, getMaxScrollRow() > 0 ? SCROLLER : SCROLLER_DISABLED,
+            scrollbarX, getY() + handleOffset,
+            SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT);
 
         int hoveredIndex = getPatternAt(mouseX, mouseY);
         for (int cell = 0; cell < (getHeight() / CELL_SIZE) * COLUMNS; cell++) {
@@ -71,21 +73,20 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
             int x = getX() + (cell % COLUMNS) * CELL_SIZE;
             int y = getY() + (cell / COLUMNS) * CELL_SIZE;
             Identifier texture = patternIndex == selectedIndex
-                    ? RECIPE_SELECTED_SPRITE
-                    : hoveredIndex == patternIndex
+                ? RECIPE_SELECTED_SPRITE
+                : hoveredIndex == patternIndex
                     ? RECIPE_HIGHLIGHTED_SPRITE
                     : RECIPE_SPRITE;
 
             graphics.blitSprite(
-                    RenderPipelines.GUI_TEXTURED, texture,
-                    x, y,
-                    CELL_SIZE, CELL_SIZE
-            );
+                RenderPipelines.GUI_TEXTURED, texture,
+                x, y,
+                CELL_SIZE, CELL_SIZE);
 
             DynamicTexture silhouette = silhouettes.get(patternIndex);
             graphics.blit(silhouette.getTextureView(), silhouette.getSampler(),
-                    x + 1, y + 1, x + 17, y + 17,
-                    0.0f, 1.0f, 0.0f, 1.0f);
+                x + 1, y + 1, x + 17, y + 17,
+                0.0f, 1.0f, 0.0f, 1.0f);
         }
     }
 
@@ -124,7 +125,8 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
     private int getPatternAt(double mouseX, double mouseY) {
         double relativeX = mouseX - getX();
         double relativeY = mouseY - getY();
-        if (relativeX < 0 || relativeY < 0 || relativeX >= COLUMNS * CELL_SIZE || relativeY >= (getHeight() / CELL_SIZE) * CELL_SIZE)
+        if (relativeX < 0 || relativeY < 0 || relativeX >= COLUMNS * CELL_SIZE
+            || relativeY >= (getHeight() / CELL_SIZE) * CELL_SIZE)
             return -1;
 
         int column = (int) (relativeX / CELL_SIZE);
@@ -149,10 +151,10 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
         if (event.x() >= getScrollbarX()
-                && event.x() < getScrollbarX() + SCROLLBAR_WIDTH
-                && getMaxScrollRow() > 0
-                && event.y() >= getY()
-                && event.y() < getY() + getScrollbarTrackHeight()) {
+            && event.x() < getScrollbarX() + SCROLLBAR_WIDTH
+            && getMaxScrollRow() > 0
+            && event.y() >= getY()
+            && event.y() < getY() + getScrollbarTrackHeight()) {
             draggingScrollbar = true;
             scrollToMouse(event.y());
             return;
@@ -181,7 +183,7 @@ public class MoldGrid extends AbstractWidget implements AutoCloseable {
             return;
 
         double fraction = (mouseY - getY() - SCROLLBAR_HEIGHT * 0.5)
-                / (getScrollbarTrackHeight() - SCROLLBAR_HEIGHT);
+            / (getScrollbarTrackHeight() - SCROLLBAR_HEIGHT);
         fraction = Math.clamp(fraction, 0.0, 1.0);
         scrollRow = (int) Math.round(fraction * getMaxScrollRow());
     }

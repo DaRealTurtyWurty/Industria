@@ -94,9 +94,8 @@ public final class MoldTrace {
     private void addProgress(int edge, float from, float to) {
         float start = Math.min(from, to);
         float end = Math.max(from, to);
-        if (start == end) {
+        if (start == end)
             return;
-        }
         List<ProgressRange> ranges = progress.get(edge);
         for (int i = ranges.size() - 1; i >= 0; i--) {
             ProgressRange range = ranges.get(i);
@@ -116,7 +115,9 @@ public final class MoldTrace {
         float dx = b.x() - a.x();
         float dy = b.y() - a.y();
         float lengthSquared = dx * dx + dy * dy;
-        return lengthSquared == 0 ? 0 : Math.clamp(
+        return lengthSquared == 0
+            ? 0
+            : Math.clamp(
                 ((point.x() - a.x()) * dx + (point.y() - a.y()) * dy) / lengthSquared, 0, 1);
     }
 
@@ -144,7 +145,9 @@ public final class MoldTrace {
         float dx = b.x() - a.x();
         float dy = b.y() - a.y();
         float lengthSquared = dx * dx + dy * dy;
-        float t = lengthSquared == 0 ? 0 : Math.clamp(
+        float t = lengthSquared == 0
+            ? 0
+            : Math.clamp(
                 ((point.x() - a.x()) * dx + (point.y() - a.y()) * dy) / lengthSquared, 0, 1);
         return (float) Math.hypot(point.x() - a.x() - t * dx, point.y() - a.y() - t * dy);
     }

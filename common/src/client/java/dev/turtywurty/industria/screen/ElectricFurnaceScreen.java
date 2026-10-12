@@ -24,9 +24,9 @@ public class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurna
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 144, this.topPos + 10, 20, 66)
-                .color(0xFFD4AF37)
-                .build());
+            .bounds(this.leftPos + 144, this.topPos + 10, 20, 66)
+            .color(0xFFD4AF37)
+            .build());
     }
 
     @Override

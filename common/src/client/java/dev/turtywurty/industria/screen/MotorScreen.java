@@ -29,7 +29,8 @@ public class MotorScreen extends AbstractContainerScreen<MotorScreenHandler> imp
         super.init();
 
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
-        this.targetRPMField = addRenderableWidget(createWidget(this.font, this.leftPos + 10, this.topPos + 10, 100, 20));
+        this.targetRPMField = addRenderableWidget(
+            createWidget(this.font, this.leftPos + 10, this.topPos + 10, 100, 20));
     }
 
     @Override
@@ -44,7 +45,8 @@ public class MotorScreen extends AbstractContainerScreen<MotorScreenHandler> imp
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int energy = Mth.ceil(this.menu.getEnergyPercentage() * 66);
-        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66, 0xFFD4AF37);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66,
+            0xFFD4AF37);
     }
 
     @Override
@@ -54,7 +56,9 @@ public class MotorScreen extends AbstractContainerScreen<MotorScreenHandler> imp
         int energy = Mth.ceil(this.menu.getEnergyPercentage() * 66);
         if (isHovering(144, 10 + 66 - energy, 20, energy, mouseX, mouseY)) {
             SimpleEnergyStorage energyStorage = this.menu.getBlockEntity().getEnergyStorage();
-            context.setTooltipForNextFrame(this.font, Component.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"), mouseX, mouseY);
+            context.setTooltipForNextFrame(this.font,
+                Component.literal(energyStorage.getAmount() + " / " + energyStorage.getCapacity() + " FE"), mouseX,
+                mouseY);
         }
     }
 

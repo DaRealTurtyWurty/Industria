@@ -117,9 +117,9 @@ processResources {
     from(configurations.commonResources)
 
     def properties = [
-        version                  : project.version,
-        minecraft_version        : minecraft_version,
-        fabric_loader_version    : fabric_loader_version,
+        version : project.version,
+        minecraft_version : minecraft_version,
+        fabric_loader_version : fabric_loader_version,
         turtymultiloader_version: turtymultiloader_version
     ]
     inputs.properties(properties)

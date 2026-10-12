@@ -44,16 +44,15 @@ public class ModEventHandlers {
 
         Events.onCommandRegistration(dispatcher -> {
             dispatcher.register(
-                    Commands.literal(Industria.MOD_ID)
-                            .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
-                            .then(Commands.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build())
-            );
+                Commands.literal(Industria.MOD_ID)
+                    .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                    .then(Commands.literal("reset_pipe_networks").executes(ResetPipeNetworksCommand::execute).build()));
 
             dispatcher.register(
-                    Commands.literal(Industria.MOD_ID)
-                            .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
-                            .then(Commands.literal("reset_conveyor_networks").executes(ResetConveyorNetworksCommand::execute).build())
-            );
+                Commands.literal(Industria.MOD_ID)
+                    .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                    .then(Commands.literal("reset_conveyor_networks").executes(ResetConveyorNetworksCommand::execute)
+                        .build()));
         });
 
         Events.onStartLevelTick(level -> {
@@ -72,14 +71,14 @@ public class ModEventHandlers {
             }
         });
 
-        Events.onLivingDamaged((entity, source, _) ->
-                StingBottleAfterDamageHandler.handle(entity, source));
+        Events.onLivingDamaged((entity, source, _) -> StingBottleAfterDamageHandler.handle(entity, source));
 
         Events.onLivingKilled((entity, _) -> {
             if (entity instanceof Player player) {
                 AttachmentService attachmentService = AttachmentService.get();
                 AttachmentTarget attachmentTarget = AttachmentTarget.entity(player);
-                if (attachmentService.getOrCreate(attachmentTarget, ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT, 0) > 0) {
+                if (attachmentService.getOrCreate(attachmentTarget, ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT,
+                    0) > 0) {
                     attachmentService.set(attachmentTarget, ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT, 0);
 
                     AttributeInstance attribute = player.getAttribute(Attributes.MAX_HEALTH);

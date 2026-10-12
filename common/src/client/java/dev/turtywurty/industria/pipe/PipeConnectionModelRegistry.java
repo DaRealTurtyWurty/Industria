@@ -25,16 +25,19 @@ public final class PipeConnectionModelRegistry {
         List<ConnectionModelRule> rules = RULES_BY_TARGET.computeIfAbsent(rule.targetBlock(), _ -> new ArrayList<>());
         rules.add(rule);
         rules.sort(
-                Comparator.comparingInt(ConnectionModelRule::priority)
-                        .reversed()
-                        .thenComparing(ruleEntry -> ruleEntry.id().toString())
-        );
+            Comparator.comparingInt(ConnectionModelRule::priority)
+                .reversed()
+                .thenComparing(ruleEntry -> ruleEntry.id().toString()));
     }
 
     @Nullable
-    public static ConnectionModelSet findReplacement(BlockAndTintGetter level, BlockPos targetPos,
-                                                     BlockState pipeState, BlockState targetState,
-                                                     Direction targetFace) {
+    public static ConnectionModelSet findReplacement(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        BlockState pipeState,
+        BlockState targetState,
+        Direction targetFace
+    ) {
         List<ConnectionModelRule> rules = RULES_BY_TARGET.get(targetState.getBlock());
         if (rules == null)
             return null;
@@ -49,9 +52,13 @@ public final class PipeConnectionModelRegistry {
     }
 
     @Nullable
-    public static ConnectionModelSet findModel(BlockAndTintGetter level, BlockPos targetPos,
-                                               BlockState pipeState, BlockState targetState,
-                                               Direction targetFace) {
+    public static ConnectionModelSet findModel(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        BlockState pipeState,
+        BlockState targetState,
+        Direction targetFace
+    ) {
         ConnectionModelSet replacement = findReplacement(level, targetPos, pipeState, targetState, targetFace);
 
         if (replacement != null)

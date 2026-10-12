@@ -22,10 +22,10 @@ public abstract class AbstractContainerScreenMixin extends Screen {
         if (DebugRenderingRegistry.debugRendering) {
             String text = String.valueOf(slot.index);
             graphics.centeredText(this.font,
-                    text,
-                    slot.x + (this.font.width(text) / 2),
-                    slot.y + (this.font.lineHeight / 2),
-                    0xFF101010);
+                text,
+                slot.x + (this.font.width(text) / 2),
+                slot.y + (this.font.lineHeight / 2),
+                0xFF101010);
         }
     }
 }

@@ -44,33 +44,44 @@ public final class ModConveyorSpecialRenderers {
     }
 
     public static void init() {
-        registerSimple(ModBlocks.FEEDER_CONVEYOR.get(), () ->
-                ConveyorSpecialRendererEntry.builder(FeederConveyorSpecialRenderer.INSTANCE)
-                        .afterItemRendering(true)
-                        .build());
-        registerSimple(ModBlocks.HATCH_CONVEYOR.get(), () ->
-                ConveyorSpecialRendererEntry.builder(HatchConveyorSpecialRenderer.INSTANCE)
-                        .afterItemRendering(true)
-                        .build());
-        registerSimple(ModBlocks.LADDER_CONVEYOR.get(), () ->
-                ConveyorSpecialRendererEntry.builder(LadderConveyorSpecialRenderer.INSTANCE)
-                        .overrideItemRendering(true)
-                        .afterItemRendering(true)
-                        .build());
-        registerSimple(ModBlocks.CONTAINMENT_CONVEYOR.get(), () ->
-                ConveyorSpecialRendererEntry.builder(ContainmentConveyorSpecialRenderer.INSTANCE)
-                        .build());
+        registerSimple(ModBlocks.FEEDER_CONVEYOR.get(),
+            () -> ConveyorSpecialRendererEntry.builder(FeederConveyorSpecialRenderer.INSTANCE)
+                .afterItemRendering(true)
+                .build());
+        registerSimple(ModBlocks.HATCH_CONVEYOR.get(),
+            () -> ConveyorSpecialRendererEntry.builder(HatchConveyorSpecialRenderer.INSTANCE)
+                .afterItemRendering(true)
+                .build());
+        registerSimple(ModBlocks.LADDER_CONVEYOR.get(),
+            () -> ConveyorSpecialRendererEntry.builder(LadderConveyorSpecialRenderer.INSTANCE)
+                .overrideItemRendering(true)
+                .afterItemRendering(true)
+                .build());
+        registerSimple(ModBlocks.CONTAINMENT_CONVEYOR.get(),
+            () -> ConveyorSpecialRendererEntry.builder(ContainmentConveyorSpecialRenderer.INSTANCE)
+                .build());
     }
 
-    public record RenderContext(LevelRenderContext levelRenderContext, float partialTick, long gameTime,
-                                ConveyorNetworkManager manager, ConveyorNetwork network,
-                                ConveyorNetworkStorage networkStorage, BlockPos conveyorPos, int lightCoords,
-                                ConveyorStorage conveyorStorage, BlockState conveyorState,
-                                AtomicReference<Map<ConveyorItem, Pair<List<Vector3d>, Float>>> itemRenderData) {
+    public record RenderContext(
+        LevelRenderContext levelRenderContext,
+        float partialTick,
+        long gameTime,
+        ConveyorNetworkManager manager,
+        ConveyorNetwork network,
+        ConveyorNetworkStorage networkStorage,
+        BlockPos conveyorPos,
+        int lightCoords,
+        ConveyorStorage conveyorStorage,
+        BlockState conveyorState,
+        AtomicReference<Map<ConveyorItem, Pair<List<Vector3d>, Float>>> itemRenderData
+    ) {
     }
 
-    public record ConveyorSpecialRendererEntry(ConveyorSpecialRenderer renderer, boolean overrideItemRendering,
-                                               boolean afterItemRendering) {
+    public record ConveyorSpecialRendererEntry(
+        ConveyorSpecialRenderer renderer,
+        boolean overrideItemRendering,
+        boolean afterItemRendering
+    ) {
         public ConveyorSpecialRendererEntry {
             if (renderer == null)
                 throw new IllegalArgumentException("Renderer cannot be null");

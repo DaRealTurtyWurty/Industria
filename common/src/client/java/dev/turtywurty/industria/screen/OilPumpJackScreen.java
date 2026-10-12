@@ -25,16 +25,15 @@ public class OilPumpJackScreen extends AbstractContainerScreen<OilPumpJackScreen
         super.init();
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 8, this.topPos + 16, 16, 54)
-                .color(0xFFD4AF37)
-                .build());
+            .bounds(this.leftPos + 8, this.topPos + 16, 16, 54)
+            .color(0xFFD4AF37)
+            .build());
 
         addRenderableWidget(new ToggleButton.Builder(this.leftPos + 32, this.topPos + 16)
-                .onPress((_, toggled) ->
-                        NetworkService.get().sendToServer(new OilPumpJackSetRunningPayload(toggled)))
-                .textures(ToggleButton.DEFAULT_COLOURED_TEXTURES)
-                .toggledByDefault(this.menu.getBlockEntity().isRunning())
-                .build());
+            .onPress((_, toggled) -> NetworkService.get().sendToServer(new OilPumpJackSetRunningPayload(toggled)))
+            .textures(ToggleButton.DEFAULT_COLOURED_TEXTURES)
+            .toggledByDefault(this.menu.getBlockEntity().isRunning())
+            .build());
     }
 
     @Override

@@ -30,7 +30,15 @@ public class GasWidget implements Renderable, LayoutElement {
     private final int width, height;
     private int x, y;
 
-    public GasWidget(SingleGasStorage gasTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier, Orientation orientation) {
+    public GasWidget(
+        SingleGasStorage gasTank,
+        int x,
+        int y,
+        int width,
+        int height,
+        Supplier<BlockPos> posSupplier,
+        Orientation orientation
+    ) {
         this.gasTank = gasTank;
         this.x = x;
         this.y = y;
@@ -83,9 +91,10 @@ public class GasWidget implements Renderable, LayoutElement {
         Font textRenderer = Minecraft.getInstance().font;
         if (gas != null && gasAmount > 0) {
             context.setComponentTooltipForNextFrame(textRenderer, List.of(
-                            gasVariantAttributeHandler.getName(this.gasTank.getResource()),
-                            Component.literal((((float) gasAmount / FluidAmounts.BUCKET) * 1000) + " / " + ((int) (((float) gasCapacity / FluidAmounts.BUCKET) * 1000)) + " mB")),
-                    mouseX, mouseY);
+                gasVariantAttributeHandler.getName(this.gasTank.getResource()),
+                Component.literal((((float) gasAmount / FluidAmounts.BUCKET) * 1000) + " / "
+                    + ((int) (((float) gasCapacity / FluidAmounts.BUCKET) * 1000)) + " mB")),
+                mouseX, mouseY);
         }
     }
 

@@ -20,22 +20,34 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryControllerMenu> {
-    public static final Component TEMPERATURE_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.temperature");
+    public static final Component TEMPERATURE_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.temperature");
     public static final Component FORMED_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.formed");
-    public static final Component INCOMPLETE_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.incomplete");
-    public static final Component CHAMBERS_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.chambers");
-    public static final Component CHAMBER_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.chamber");
-    public static final Component SELECTED_CHAMBER_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.selected_chamber");
-    public static final Component NO_CHAMBERS_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.no_chambers");
+    public static final Component INCOMPLETE_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.incomplete");
+    public static final Component CHAMBERS_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.chambers");
+    public static final Component CHAMBER_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.chamber");
+    public static final Component SELECTED_CHAMBER_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.selected_chamber");
+    public static final Component NO_CHAMBERS_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.no_chambers");
     public static final Component SIZE_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.size");
     public static final Component EMPTY_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.empty");
     public static final Component AMOUNT_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.amount");
-    public static final Component CAPACITY_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.capacity");
-    public static final Component UNKNOWN_MELTING_TEMPERATURE = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.unknown_melting_temperature");
-    public static final Component MOLTEN_STATE_SOLID = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.molten_state_solid");
-    public static final Component MOLTEN_STATE_MOLTEN = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.molten_state_molten");
-    public static final Component KEEP_MOLTEN_ON_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.keep_molten_on");
-    public static final Component KEEP_MOLTEN_OFF_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".smeltery.keep_molten_off");
+    public static final Component CAPACITY_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.capacity");
+    public static final Component UNKNOWN_MELTING_TEMPERATURE = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.unknown_melting_temperature");
+    public static final Component MOLTEN_STATE_SOLID = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.molten_state_solid");
+    public static final Component MOLTEN_STATE_MOLTEN = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.molten_state_molten");
+    public static final Component KEEP_MOLTEN_ON_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.keep_molten_on");
+    public static final Component KEEP_MOLTEN_OFF_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".smeltery.keep_molten_off");
 
     private static final Identifier TEXTURE = Industria.id("textures/gui/smeltery_controller.png");
 
@@ -57,69 +69,69 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
         for (int row = 0; row < this.chamberButtons.length; row++) {
             int buttonRow = row;
             chamberButtons[buttonRow] = addRenderableWidget(Button.builder(Component.empty(), _ -> {
-                        int index = this.page * 5 + buttonRow;
-                        if (index < 0 || index >= this.menu.getChambers().size())
-                            return;
+                int index = this.page * 5 + buttonRow;
+                if (index < 0 || index >= this.menu.getChambers().size())
+                    return;
 
-                        this.selectedHatchPos = this.menu.getChambers().get(index).hatchPos();
-                        refreshChamberButtons();
-                    })
-                    .pos(this.leftPos + 14, this.topPos + 62 + buttonRow * 20)
-                    .size(92, 18)
-                    .build());
+                this.selectedHatchPos = this.menu.getChambers().get(index).hatchPos();
+                refreshChamberButtons();
+            })
+                .pos(this.leftPos + 14, this.topPos + 62 + buttonRow * 20)
+                .size(92, 18)
+                .build());
         }
 
         this.previousPageButton = addRenderableWidget(Button.builder(Component.literal("<"), _ -> {
-                    if (this.page > 0) {
-                        this.page--;
-                        refreshChamberButtons();
-                    }
-                })
-                .pos(this.leftPos + 14, this.topPos + 164)
-                .size(44, 14)
-                .build());
+            if (this.page > 0) {
+                this.page--;
+                refreshChamberButtons();
+            }
+        })
+            .pos(this.leftPos + 14, this.topPos + 164)
+            .size(44, 14)
+            .build());
 
         this.nextPageButton = addRenderableWidget(Button.builder(Component.literal(">"), _ -> {
-                    if ((this.page + 1) * 5 < this.menu.getChambers().size()) {
-                        this.page++;
-                        refreshChamberButtons();
-                    }
-                })
-                .pos(this.leftPos + 62, this.topPos + 164)
-                .size(44, 14)
-                .build());
+            if ((this.page + 1) * 5 < this.menu.getChambers().size()) {
+                this.page++;
+                refreshChamberButtons();
+            }
+        })
+            .pos(this.leftPos + 62, this.topPos + 164)
+            .size(44, 14)
+            .build());
 
         this.keepMoltenButton = addRenderableWidget(Button.builder(KEEP_MOLTEN_OFF_LABEL, _ -> {
-                    if (this.minecraft.gameMode != null) {
-                        this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
-                    }
-                })
-                .pos(this.leftPos + 129, this.topPos + 173)
-                .size(154, 14)
-                .build());
+            if (this.minecraft.gameMode != null) {
+                this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, 0);
+            }
+        })
+            .pos(this.leftPos + 129, this.topPos + 173)
+            .size(154, 14)
+            .build());
 
         refreshChamberButtons();
 
         addRenderableOnly(new FluidWidget.Builder(
-                () -> {
-                    SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
-                    if (selectedChamber == null)
-                        return FluidStack.EMPTY;
+            () -> {
+                SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
+                if (selectedChamber == null)
+                    return FluidStack.EMPTY;
 
-                    return selectedChamber.fluid();
-                },
-                () -> {
-                    SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
-                    if (selectedChamber == null)
-                        return 0;
+                return selectedChamber.fluid();
+            },
+            () -> {
+                SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
+                if (selectedChamber == null)
+                    return 0;
 
-                    return selectedChamber.capacity();
-                })
-                .bounds(this.leftPos + 129, this.topPos + 139, 154, 31)
-                .posSupplier(this.menu::getControllerPos)
-                .renderDataOverrideSupplier(this::getSolidRenderOverride)
-                .orientation(Orientation.VERTICAL)
-                .build());
+                return selectedChamber.capacity();
+            })
+            .bounds(this.leftPos + 129, this.topPos + 139, 154, 31)
+            .posSupplier(this.menu::getControllerPos)
+            .renderDataOverrideSupplier(this::getSolidRenderOverride)
+            .orientation(Orientation.VERTICAL)
+            .build());
     }
 
     private void refreshChamberButtons() {
@@ -127,10 +139,10 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
         this.page = Math.clamp(this.page, 0, lastPage);
 
         if (this.menu.getChambers().stream()
-                .noneMatch(chamber -> chamber.hatchPos().equals(this.selectedHatchPos))) {
+            .noneMatch(chamber -> chamber.hatchPos().equals(this.selectedHatchPos))) {
             this.selectedHatchPos = this.menu.getChambers().isEmpty()
-                    ? null
-                    : this.menu.getChambers().getFirst().hatchPos();
+                ? null
+                : this.menu.getChambers().getFirst().hatchPos();
         }
 
         for (int row = 0; row < this.chamberButtons.length; row++) {
@@ -151,22 +163,21 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
     private FluidRenderUtils.GuiFluidRenderData getSolidRenderOverride() {
         SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
         if (selectedChamber == null
-                || selectedChamber.fluid().isEmpty()
-                || selectedChamber.requiredTemperature() <= 0
-                || this.menu.getTemperature() >= selectedChamber.requiredTemperature()
-                || selectedChamber.solidBlock() == null
-                || selectedChamber.solidBlock().isAir())
+            || selectedChamber.fluid().isEmpty()
+            || selectedChamber.requiredTemperature() <= 0
+            || this.menu.getTemperature() >= selectedChamber.requiredTemperature()
+            || selectedChamber.solidBlock() == null
+            || selectedChamber.solidBlock().isAir())
             return null;
 
         TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager()
-                .getBlockStateModelSet()
-                .getParticleMaterial(selectedChamber.solidBlock())
-                .sprite();
+            .getBlockStateModelSet()
+            .getParticleMaterial(selectedChamber.solidBlock())
+            .sprite();
 
         return new FluidRenderUtils.GuiFluidRenderData(
-                sprite,
-                0xFFFFFFFF
-        );
+            sprite,
+            0xFFFFFFFF);
     }
 
     private SmelteryControllerMenu.SmelteryChamberInfo getSelectedChamber() {
@@ -174,9 +185,9 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
             return null;
 
         return this.menu.getChambers().stream()
-                .filter(chamber -> chamber.hatchPos().equals(this.selectedHatchPos))
-                .findFirst()
-                .orElse(null);
+            .filter(chamber -> chamber.hatchPos().equals(this.selectedHatchPos))
+            .findFirst()
+            .orElse(null);
     }
 
     @Override
@@ -190,33 +201,40 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         super.extractBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(
-                context, TEXTURE,
-                this.leftPos, this.topPos,
-                0, 0,
-                this.imageWidth, this.imageHeight,
-                512, 256
-        );
+            context, TEXTURE,
+            this.leftPos, this.topPos,
+            0, 0,
+            this.imageWidth, this.imageHeight,
+            512, 256);
     }
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
         graphics.text(this.font, this.title, this.titleLabelX, 8, 0xFF404040, false);
-        graphics.text(this.font, translatable(TEMPERATURE_LABEL, Math.round(this.menu.getTemperature())), 8, 24, 0xFF404040, false);
-        graphics.text(this.font, this.menu.isStructureReady() ? FORMED_LABEL : INCOMPLETE_LABEL, 220, 24, this.menu.isStructureReady() ? 0xFF80D080 : 0xFFFF9090, false);
-        graphics.text(this.font, translatable(CHAMBERS_LABEL, this.menu.getChambers().size()), 14, 46, 0xFF404040, false);
+        graphics.text(this.font, translatable(TEMPERATURE_LABEL, Math.round(this.menu.getTemperature())), 8, 24,
+            0xFF404040, false);
+        graphics.text(this.font, this.menu.isStructureReady() ? FORMED_LABEL : INCOMPLETE_LABEL, 220, 24,
+            this.menu.isStructureReady() ? 0xFF80D080 : 0xFFFF9090, false);
+        graphics.text(this.font, translatable(CHAMBERS_LABEL, this.menu.getChambers().size()), 14, 46, 0xFF404040,
+            false);
 
         SmelteryControllerMenu.SmelteryChamberInfo selectedChamber = getSelectedChamber();
         if (selectedChamber == null) {
             graphics.text(this.font, NO_CHAMBERS_LABEL, 128, 46, 0xFF404040, false);
         } else {
-            graphics.text(this.font, translatable(SELECTED_CHAMBER_LABEL, this.menu.getChambers().indexOf(selectedChamber) + 1), 128, 46, 0xFF404040, false);
-            graphics.text(this.font, translatable(SIZE_LABEL, selectedChamber.width(), selectedChamber.height(), selectedChamber.depth()), 128, 64, 0xFF404040, false);
+            graphics.text(this.font,
+                translatable(SELECTED_CHAMBER_LABEL, this.menu.getChambers().indexOf(selectedChamber) + 1), 128, 46,
+                0xFF404040, false);
+            graphics.text(this.font,
+                translatable(SIZE_LABEL, selectedChamber.width(), selectedChamber.height(), selectedChamber.depth()),
+                128, 64, 0xFF404040, false);
 
             FluidStack fluid = selectedChamber.fluid();
             graphics.text(this.font, fluid.isEmpty()
-                            ? EMPTY_LABEL
-                            : Component.translatable(fluid.variant().value().defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()),
-                    128, 82, 0xFF404040, false);
+                ? EMPTY_LABEL
+                : Component.translatable(
+                    fluid.variant().value().defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()),
+                128, 82, 0xFF404040, false);
 
             double amountMb = fluid.amount() * 1000.0 / FluidAmounts.BUCKET;
             double capacityMb = selectedChamber.capacity() * 1000.0 / FluidAmounts.BUCKET;
@@ -225,18 +243,18 @@ public class SmelteryControllerScreen extends AbstractContainerScreen<SmelteryCo
 
             if (!fluid.isEmpty()) {
                 graphics.text(this.font, selectedChamber.requiredTemperature() < 0
-                        ? UNKNOWN_MELTING_TEMPERATURE
-                        : (this.menu.getTemperature() < selectedChamber.requiredTemperature()
+                    ? UNKNOWN_MELTING_TEMPERATURE
+                    : (this.menu.getTemperature() < selectedChamber.requiredTemperature()
                         ? MOLTEN_STATE_SOLID
-                        : MOLTEN_STATE_MOLTEN), 128, 128, 0xFF404040, false);
+                        : MOLTEN_STATE_MOLTEN),
+                    128, 128, 0xFF404040, false);
             }
         }
     }
 
     private static Component translatable(Component key, Object... args) {
         return Component.translatable(
-                key.getContents() instanceof TranslatableContents contents ? contents.getKey() : key.getString(),
-                args
-        );
+            key.getContents() instanceof TranslatableContents contents ? contents.getKey() : key.getString(),
+            args);
     }
 }

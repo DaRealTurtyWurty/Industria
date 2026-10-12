@@ -23,8 +23,7 @@ public class DropChuteConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("down", pos.below(), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("down", pos.below(), pos)));
     }
 }

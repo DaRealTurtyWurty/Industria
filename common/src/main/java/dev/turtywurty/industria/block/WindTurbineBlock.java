@@ -33,17 +33,19 @@ public class WindTurbineBlock extends IndustriaBlock {
 
     public WindTurbineBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .addStateProperty(PART, 0)
-                .hasBlockEntityRenderer()
-                .shapeFactory((state, world, pos, context) ->
-                        SHAPES.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)).get(state.getValue(PART)))
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.WIND_TURBINE)
-                        .blockEntityFactory((pos, state) ->
-                                state.getValue(PART) == 0 ? ModBlockEntityTypes.WIND_TURBINE.get().create(pos, state) : null)
-                        .shouldTick()
-                        .blockEntityTickerFactory((world, state, type) ->
-                                state.getValue(PART) == 0 ? TickableBlockEntity.createTicker(world) : null)));
+            .hasHorizontalFacing()
+            .addStateProperty(PART, 0)
+            .hasBlockEntityRenderer()
+            .shapeFactory((state, world, pos, context) -> SHAPES
+                .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)).get(state.getValue(PART)))
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.WIND_TURBINE)
+                .blockEntityFactory((pos, state) -> state.getValue(PART) == 0
+                    ? ModBlockEntityTypes.WIND_TURBINE.get().create(pos, state)
+                    : null)
+                .shouldTick()
+                .blockEntityTickerFactory((world, state, type) -> state.getValue(PART) == 0
+                    ? TickableBlockEntity.createTicker(world)
+                    : null)));
 
         VoxelShape shape = createShape();
         Map<Direction, VoxelShape> directionalShapes = runShapeCalculation(shape);
@@ -51,7 +53,7 @@ public class WindTurbineBlock extends IndustriaBlock {
             VoxelShape directionalShape = directionalShapes.get(direction);
             for (int part = 0; part <= 3; part++) {
                 SHAPES.computeIfAbsent(direction, _ -> new ArrayList<>())
-                        .add(directionalShape.move(0, -part, 0));
+                    .add(directionalShape.move(0, -part, 0));
             }
         }
     }
@@ -70,9 +72,8 @@ public class WindTurbineBlock extends IndustriaBlock {
 
         final int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
         for (int i = 0; i < times; i++) {
-            buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
-                    buffer[1] = Shapes.or(buffer[1],
-                            Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+            buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1],
+                Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
             buffer[0] = buffer[1];
             buffer[1] = Shapes.empty();
         }
@@ -106,7 +107,13 @@ public class WindTurbineBlock extends IndustriaBlock {
     }
 
     @Override
-    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(
+        Level world,
+        BlockPos pos,
+        BlockState state,
+        @Nullable LivingEntity placer,
+        ItemStack itemStack
+    ) {
         if (state.getValue(PART) != 0)
             return;
 
@@ -117,7 +124,13 @@ public class WindTurbineBlock extends IndustriaBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (level.isClientSide()) {
             ClientScreenHooks.openWindTurbine(level, pos.below(state.getValue(PART)));
         }

@@ -16,7 +16,8 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
     private MoldCastSurface.Snapshot lastSurface;
     private TextureAtlasSprite lastSprite;
 
-    public MoldCastPreviewRenderer() {}
+    public MoldCastPreviewRenderer() {
+    }
 
     @Override
     public Class<MoldCastPreviewState> getRenderStateClass() {
@@ -24,29 +25,43 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
     }
 
     @Override
-    protected void renderToTexture(MoldCastPreviewState moldCastPreviewState, PoseStack poseStack, SubmitNodeCollector collector) {
+    protected void renderToTexture(
+        MoldCastPreviewState moldCastPreviewState,
+        PoseStack poseStack,
+        SubmitNodeCollector collector
+    ) {
         TextureAtlasSprite sprite = moldCastPreviewState.getSprite();
         MoldCastSurface.Snapshot surface = moldCastPreviewState.surface();
-        collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(sprite.atlasLocation()), (pose, buffer) -> {
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int column = 0; column < GRID_SIZE; column++) {
-                if (surface.removed(column, row))
-                    continue;
+        collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(sprite.atlasLocation()),
+            (pose, buffer) -> {
+                for (int row = 0; row < GRID_SIZE; row++) {
+                    for (int column = 0; column < GRID_SIZE; column++) {
+                        if (surface.removed(column, row))
+                            continue;
 
-                triangle(buffer, pose, sprite, surface,
-                        column, row, column, row + 1, column + 1, row + 1);
-                triangle(buffer, pose, sprite, surface,
-                        column, row, column + 1, row + 1, column + 1, row);
-            }
-        }
-        });
+                        triangle(buffer, pose, sprite, surface,
+                            column, row, column, row + 1, column + 1, row + 1);
+                        triangle(buffer, pose, sprite, surface,
+                            column, row, column + 1, row + 1, column + 1, row);
+                    }
+                }
+            });
         this.lastSurface = surface;
         this.lastSprite = sprite;
     }
 
-    private static void triangle(VertexConsumer buffer, PoseStack.Pose pose, TextureAtlasSprite sprite,
-                                 MoldCastSurface.Snapshot surface,
-                                 int ax, int ay, int bx, int by, int cx, int cy) {
+    private static void triangle(
+        VertexConsumer buffer,
+        PoseStack.Pose pose,
+        TextureAtlasSprite sprite,
+        MoldCastSurface.Snapshot surface,
+        int ax,
+        int ay,
+        int bx,
+        int by,
+        int cx,
+        int cy
+    ) {
         float abx = surface.positionX(bx, by) - surface.positionX(ax, ay);
         float aby = surface.positionY(bx, by) - surface.positionY(ax, ay);
         float abz = surface.depth(bx, by) - surface.depth(ax, ay);
@@ -68,9 +83,15 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
         vertex(buffer, pose, sprite, surface, cx, cy, wallFacing);
     }
 
-    private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, TextureAtlasSprite sprite,
-                               MoldCastSurface.Snapshot surface, int column, int row,
-                               float wallFacing) {
+    private static void vertex(
+        VertexConsumer buffer,
+        PoseStack.Pose pose,
+        TextureAtlasSprite sprite,
+        MoldCastSurface.Snapshot surface,
+        int column,
+        int row,
+        float wallFacing
+    ) {
         float x = column / (float) GRID_SIZE;
         float y = row / (float) GRID_SIZE;
         float visibility = surface.illumination(column, row);
@@ -78,12 +99,12 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
         int overlay = OverlayTexture.pack(MoldCastLighting.highlight(wallFacing, visibility), false);
 
         buffer.addVertex(pose, surface.positionX(column, row) - 0.5f,
-                        surface.positionY(column, row) - 0.5f, surface.depth(column, row))
-                .setColor(shade, shade, shade, 255)
-                .setUv(Mth.lerp(x, sprite.getU0(), sprite.getU1()), Mth.lerp(y, sprite.getV0(), sprite.getV1()))
-                .setOverlay(overlay)
-                .setLight(0xF000F0)
-                .setNormal(pose, 0, 0, -1);
+            surface.positionY(column, row) - 0.5f, surface.depth(column, row))
+            .setColor(shade, shade, shade, 255)
+            .setUv(Mth.lerp(x, sprite.getU0(), sprite.getU1()), Mth.lerp(y, sprite.getV0(), sprite.getV1()))
+            .setOverlay(overlay)
+            .setLight(0xF000F0)
+            .setNormal(pose, 0, 0, -1);
     }
 
     @Override

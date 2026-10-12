@@ -17,16 +17,23 @@ public abstract class AbstractPoweredConveyorBlock extends AbstractHorizontalCon
 
     protected AbstractPoweredConveyorBlock(Properties settings, IndustriaBlock.BlockProperties properties) {
         super(settings, properties
-                .addStateProperty(ENABLED, true));
+            .addStateProperty(ENABLED, true));
     }
 
     protected BlockState applyPlacementState(BlockState state, BlockPlaceContext context, Direction facing) {
         return super.applyPlacementState(state, context, facing)
-                .setValue(ENABLED, !context.getLevel().hasNeighborSignal(context.getClickedPos()));
+            .setValue(ENABLED, !context.getLevel().hasNeighborSignal(context.getClickedPos()));
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Block block,
+        @Nullable Orientation orientation,
+        boolean movedByPiston
+    ) {
         super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
 
         if (level.isClientSide())
@@ -40,7 +47,7 @@ public abstract class AbstractPoweredConveyorBlock extends AbstractHorizontalCon
     protected BlockState resolveState(ServerLevel level, BlockPos pos, BlockState current) {
         boolean enabled = !level.hasNeighborSignal(pos);
         return super.resolveState(level, pos, current)
-                .setValue(ENABLED, enabled);
+            .setValue(ENABLED, enabled);
     }
 
     @Override

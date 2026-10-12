@@ -18,7 +18,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRenderer<CrystallizerBlockEntity, CrystallizerRenderState> {
+public class CrystallizerBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<CrystallizerBlockEntity, CrystallizerRenderState> {
     private static final Vec3[] OUTPUT_ITEM_POSITIONS = new Vec3[64];
 
     static {
@@ -52,12 +54,19 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
         return false;
     }
 
-    private static Vec3 generatePosition(Random random, float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    private static Vec3 generatePosition(
+        Random random,
+        float minX,
+        float minY,
+        float minZ,
+        float maxX,
+        float maxY,
+        float maxZ
+    ) {
         return new Vec3(
-                minX + random.nextFloat() * (maxX - minX),
-                minY + random.nextFloat() * (maxY - minY),
-                minZ + random.nextFloat() * (maxZ - minZ)
-        );
+            minX + random.nextFloat() * (maxX - minX),
+            minY + random.nextFloat() * (maxY - minY),
+            minZ + random.nextFloat() * (maxZ - minZ));
     }
 
     private final CrystallizerModel model;
@@ -74,7 +83,13 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    public void extractRenderState(CrystallizerBlockEntity blockEntity, CrystallizerRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        CrystallizerBlockEntity blockEntity,
+        CrystallizerRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
@@ -85,16 +100,28 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        CrystallizerRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ModelSubmitUtils.submitModel(queue, this.model, null,
-                matrices, this.model.renderType(CrystallizerModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            matrices, this.model.renderType(CrystallizerModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
 
         renderNextOutputItem(state, matrices, queue, light, overlay);
         renderFluids(state, matrices, queue, light, overlay);
     }
 
-    private void renderNextOutputItem(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    private void renderNextOutputItem(
+        CrystallizerRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ItemStack itemStack = state.nextOutputItemStack;
         if (itemStack.isEmpty())
             return;
@@ -119,20 +146,26 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
         }
     }
 
-    private void renderFluids(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    private void renderFluids(
+        CrystallizerRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         Level world = Minecraft.getInstance().level;
         this.fluidRenderer.render(state.crystalFluidStorage,
-                queue, matrices,
-                light, overlay,
-                world, state.blockPos,
-                -18f / 16f, -0.5001f, -18f / 16f,
-                18f / 16f, 46f, 18f / 16f - 0.001f, 0x40000000, ColorMode.SUBTRACTION);
+            queue, matrices,
+            light, overlay,
+            world, state.blockPos,
+            -18f / 16f, -0.5001f, -18f / 16f,
+            18f / 16f, 46f, 18f / 16f - 0.001f, 0x40000000, ColorMode.SUBTRACTION);
 
         this.fluidRenderer.render(state.waterFluidStorage,
-                queue, matrices,
-                light, overlay,
-                world, state.blockPos,
-                -18f / 16f, -0.5f, -18f / 16f,
-                18f / 16f, 46f, 18f / 16f);
+            queue, matrices,
+            light, overlay,
+            world, state.blockPos,
+            -18f / 16f, -0.5f, -18f / 16f,
+            18f / 16f, 46f, 18f / 16f);
     }
 }

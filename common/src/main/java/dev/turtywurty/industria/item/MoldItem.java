@@ -74,15 +74,15 @@ public class MoldItem extends Item {
             return baseName;
 
         Component name = Component.translatable(
-                "item." + Industria.MOD_ID + ".mold.named",
-                baseName,
-                pattern.get().getDisplayName());
+            "item." + Industria.MOD_ID + ".mold.named",
+            baseName,
+            pattern.get().getDisplayName());
         if (data.piece() == MoldPiece.WHOLE)
             return name;
 
         return Component.translatable(
-                "item." + Industria.MOD_ID + ".mold.half",
-                name,
-                data.piece() == MoldPiece.HALF_1 ? 1 : 2);
+            "item." + Industria.MOD_ID + ".mold.half",
+            name,
+            data.piece() == MoldPiece.HALF_1 ? 1 : 2);
     }
 }

@@ -29,49 +29,51 @@ public class ModPlacedFeatures {
         HolderGetter<Feature> registryLookup = context.lookup(Registries.FEATURE);
 
         register(context, CRUDE_OIL_POCKET, registryLookup.getOrThrow(ModConfiguredFeatures.CRUDE_OIL_POCKET),
-                Modifiers.modifiersCount(1,
-                        HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(64))));
+            Modifiers.modifiersCount(1,
+                HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(64))));
 
         register(context, BAUXITE_ORE, registryLookup.getOrThrow(ModConfiguredFeatures.BAUXITE_ORE),
-                Modifiers.modifiersCount(10,
-                        HeightRangePlacement.uniform(VerticalAnchor.absolute(32), VerticalAnchor.absolute(128))));
+            Modifiers.modifiersCount(10,
+                HeightRangePlacement.uniform(VerticalAnchor.absolute(32), VerticalAnchor.absolute(128))));
 
         register(context, CASSITERITE_ORE, registryLookup.getOrThrow(ModConfiguredFeatures.CASSITERITE_ORE),
-                Modifiers.modifiersCount(7,
-                        HeightRangePlacement.uniform(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(32))));
+            Modifiers.modifiersCount(7,
+                HeightRangePlacement.uniform(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(32))));
 
         register(context, ZINC_ORE, registryLookup.getOrThrow(ModConfiguredFeatures.ZINC_ORE),
-                Modifiers.modifiersCount(7,
-                        HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(0))));
+            Modifiers.modifiersCount(7,
+                HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(0))));
 
         register(context, RUBBER_TREE, registryLookup.getOrThrow(ModConfiguredFeatures.RUBBER_TREE),
-                List.of(
-                        CountPlacement.of(2),
-                        InSquarePlacement.spread(),
-                        HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR),
-                        BiomeFilter.biome(),
-                        BlockPredicateFilter.forPredicate(
-                                BlockPredicate.wouldSurvive(
-                                        ModWoodSets.RUBBER.sapling().get()
-                                )
-                        ),
-                        BlockPredicateFilter.forPredicate(BlockPredicate.matchesTag(BlockTags.AIR))
-                ));
+            List.of(
+                CountPlacement.of(2),
+                InSquarePlacement.spread(),
+                HeightmapPlacement.onHeightmap(Heightmap.Types.OCEAN_FLOOR),
+                BiomeFilter.biome(),
+                BlockPredicateFilter.forPredicate(
+                    BlockPredicate.wouldSurvive(
+                        ModWoodSets.RUBBER.sapling().get())),
+                BlockPredicateFilter.forPredicate(BlockPredicate.matchesTag(BlockTags.AIR))));
     }
 
     private static ResourceKey<PlacedFeature> registerKey(String name) {
         return ResourceKey.create(Registries.PLACED_FEATURE, Industria.id(name));
     }
 
-    private static void register(BootstrapContext<PlacedFeature> context,
-                                 ResourceKey<PlacedFeature> key,
-                                 Holder<Feature> config,
-                                 List<PlacementModifier> modifiers) {
+    private static void register(
+        BootstrapContext<PlacedFeature> context,
+        ResourceKey<PlacedFeature> key,
+        Holder<Feature> config,
+        List<PlacementModifier> modifiers
+    ) {
         context.register(key, new PlacedFeature(config, List.copyOf(modifiers)));
     }
 
     public static class Modifiers {
-        public static List<PlacementModifier> modifiers(PlacementModifier countModifier, PlacementModifier heightModifier) {
+        public static List<PlacementModifier> modifiers(
+            PlacementModifier countModifier,
+            PlacementModifier heightModifier
+        ) {
             return List.of(countModifier, InSquarePlacement.spread(), heightModifier, BiomeFilter.biome());
         }
 

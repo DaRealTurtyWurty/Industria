@@ -35,7 +35,8 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
     public static final ContainmentConveyorSpecialRenderer INSTANCE = new ContainmentConveyorSpecialRenderer();
     private static final double ENTITY_BASE_Y_OFFSET = 2.0D / 16.0D;
     private static final double JAR_Y_OFFSET = 3.0D / 16.0D;
-    private static final AABB JAR_BOUNDING_BOX = new AABB(3.0 / 16.0, 0, 3.0 / 16.0, 13.0 / 16.0, 10.0 / 16.0, 13.0 / 16.0);
+    private static final AABB JAR_BOUNDING_BOX = new AABB(3.0 / 16.0, 0, 3.0 / 16.0, 13.0 / 16.0, 10.0 / 16.0,
+        13.0 / 16.0);
 
     @Override
     public void render(ModConveyorSpecialRenderers.RenderContext context) {
@@ -63,24 +64,35 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
 
         poseStack.pushPose();
         poseStack.translate(relativePosition.x, relativePosition.y, relativePosition.z);
-        poseStack.rotate(Axis.YP.rotationDegrees(-conveyorState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()));
+        poseStack
+            .rotate(Axis.YP.rotationDegrees(-conveyorState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()));
         poseStack.translate(-0.5D, ENTITY_BASE_Y_OFFSET, 0.5D);
 
         renderEntity(context, entity, poseStack, blockEntity, nodeCollector, renderContext);
         renderMobJar(nodeCollector, poseStack, lightCoords);
 
         Gizmos.cuboid(JAR_BOUNDING_BOX.move(0D, JAR_Y_OFFSET, 0D).move(pos), GizmoStyle.stroke(0xFF0000FF));
-        Gizmos.cuboid(entity.getBoundingBox().move(entity.position().reverse()).move(0.5D, (2.0/16.0D), 0.5D).move(pos), GizmoStyle.stroke(0xFFFF0000));
+        Gizmos.cuboid(
+            entity.getBoundingBox().move(entity.position().reverse()).move(0.5D, (2.0 / 16.0D), 0.5D).move(pos),
+            GizmoStyle.stroke(0xFFFF0000));
 
         AABB entityBoundingBox = entity.getBoundingBox().move(entity.position().reverse());
         float renderScale = computeRenderScale(blockEntity, entityBoundingBox);
-        Gizmos.cuboid(createRenderedEntityBounds(entityBoundingBox, renderScale, pos, conveyorState), GizmoStyle.stroke(0xFFFFFF00));
+        Gizmos.cuboid(createRenderedEntityBounds(entityBoundingBox, renderScale, pos, conveyorState),
+            GizmoStyle.stroke(0xFFFFFF00));
 
         poseStack.popPose();
     }
 
     @SuppressWarnings("unchecked")
-    private void renderEntity(ModConveyorSpecialRenderers.RenderContext context, LivingEntity entity, PoseStack poseStack, ContainmentConveyorBlockEntity blockEntity, SubmitNodeCollector nodeCollector, LevelRenderContext renderContext) {
+    private void renderEntity(
+        ModConveyorSpecialRenderers.RenderContext context,
+        LivingEntity entity,
+        PoseStack poseStack,
+        ContainmentConveyorBlockEntity blockEntity,
+        SubmitNodeCollector nodeCollector,
+        LevelRenderContext renderContext
+    ) {
         EntityPoseSnapshot poseSnapshot = EntityPoseSnapshot.capture(entity);
         try {
             EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -94,11 +106,12 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
             poseStack.translate(0.0D, computeEntityYOffset(blockEntity, entityBoundingBox), 0.0D);
             poseStack.scale(renderScale, renderScale, renderScale);
 
-            EntityRenderState renderState = ((EntityRenderer<LivingEntity, EntityRenderState>) entityRenderDispatcher.getRenderer(entity))
-                    .createRenderState(entity, context.partialTick());
+            EntityRenderState renderState = ((EntityRenderer<LivingEntity, EntityRenderState>) entityRenderDispatcher
+                .getRenderer(entity))
+                .createRenderState(entity, context.partialTick());
             entityRenderDispatcher.submit(renderState, cameraRenderState, 0.0, 0.0, 0.0, poseStack, nodeCollector);
             poseStack.popPose();
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         } finally {
             poseSnapshot.restore(entity);
         }
@@ -133,12 +146,20 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
         return Mth.lerp(shrinkProgress, 0.0D, targetYOffset);
     }
 
-    private static AABB createRenderedEntityBounds(AABB entityBoundingBox, float renderScale, BlockPos pos, BlockState conveyorState) {
+    private static AABB createRenderedEntityBounds(
+        AABB entityBoundingBox,
+        float renderScale,
+        BlockPos pos,
+        BlockState conveyorState
+    ) {
         Matrix4f transform = new Matrix4f()
-                .translate(pos.getX(), pos.getY(), pos.getZ())
-                .rotateY((float) Math.toRadians(-conveyorState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()))
-                .translate(-0.5F, (float) (ENTITY_BASE_Y_OFFSET + JAR_Y_OFFSET - ENTITY_BASE_Y_OFFSET - (entityBoundingBox.minY * computeFittedScale(entityBoundingBox))), 0.5F)
-                .scale(renderScale);
+            .translate(pos.getX(), pos.getY(), pos.getZ())
+            .rotateY((float) Math.toRadians(-conveyorState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()))
+            .translate(-0.5F,
+                (float) (ENTITY_BASE_Y_OFFSET + JAR_Y_OFFSET - ENTITY_BASE_Y_OFFSET
+                    - (entityBoundingBox.minY * computeFittedScale(entityBoundingBox))),
+                0.5F)
+            .scale(renderScale);
 
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
@@ -184,11 +205,19 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
         poseStack.popPose();
     }
 
-    private record EntityPoseSnapshot(float yRot, float yRotO, float xRot, float xRotO,
-                                      float yBodyRot, float yBodyRotO, float yHeadRot, float yHeadRotO) {
+    private record EntityPoseSnapshot(
+        float yRot,
+        float yRotO,
+        float xRot,
+        float xRotO,
+        float yBodyRot,
+        float yBodyRotO,
+        float yHeadRot,
+        float yHeadRotO
+    ) {
         private static EntityPoseSnapshot capture(LivingEntity entity) {
             return new EntityPoseSnapshot(entity.getYRot(), entity.yRotO, entity.getXRot(), entity.xRotO,
-                    entity.yBodyRot, entity.yBodyRotO, entity.yHeadRot, entity.yHeadRotO);
+                entity.yBodyRot, entity.yBodyRotO, entity.yHeadRot, entity.yHeadRotO);
         }
 
         private void applyStablePose(LivingEntity entity) {

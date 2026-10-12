@@ -23,20 +23,21 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerScre
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getWaterFluidStorage())
-                .bounds(this.leftPos + 8, this.topPos + 12, 20, 66)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 8, this.topPos + 12, 20, 66)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getCrystalFluidStorage())
-                .bounds(this.leftPos + 31, this.topPos + 12, 20, 66)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 31, this.topPos + 12, 20, 66)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
     }
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 94, this.topPos + 38, 176, 0, this.menu.getProgressScaled(), 17);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 94, this.topPos + 38, 176, 0,
+            this.menu.getProgressScaled(), 17);
 
         float catalystUsesPercent = this.menu.getCatalystUsesPercent();
         if (catalystUsesPercent > 0) {

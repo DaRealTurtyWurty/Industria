@@ -6,12 +6,13 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class ThermalGeneratorBlock extends IndustriaBlock {
     public ThermalGeneratorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasLitProperty()
-                .hasComparatorOutput()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.THERMAL_GENERATOR)
-                        .shouldTick()
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()));
+            .hasHorizontalFacing()
+            .hasLitProperty()
+            .hasComparatorOutput()
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.THERMAL_GENERATOR)
+                    .shouldTick()
+                    .rightClickToOpenGui()
+                    .dropContentsOnBreak()));
     }
 }

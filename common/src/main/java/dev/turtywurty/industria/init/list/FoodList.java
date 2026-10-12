@@ -11,7 +11,7 @@ public final class FoodList {
 
     public static final FoodProperties FORMIC_ACID_FOOD = new FoodProperties.Builder().alwaysEdible().build();
     public static final Consumable FORMIC_ACID_CONSUMABLE = Consumable.builder()
-            .animation(ItemUseAnimation.DRINK)
-            .onConsume(new DestroyStomachConsumeEffect())
-            .build();
+        .animation(ItemUseAnimation.DRINK)
+        .onConsume(new DestroyStomachConsumeEffect())
+        .build();
 }

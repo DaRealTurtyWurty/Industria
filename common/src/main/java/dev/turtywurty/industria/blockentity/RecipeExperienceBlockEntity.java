@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface RecipeExperienceBlockEntity {
-    Codec<Map<ResourceKey<Recipe<?>>, Integer>> RECIPES_USED_CODEC =
-            Codec.unboundedMap(ResourceKey.codec(Registries.RECIPE), Codec.INT);
+    Codec<Map<ResourceKey<Recipe<?>>, Integer>> RECIPES_USED_CODEC = Codec
+        .unboundedMap(ResourceKey.codec(Registries.RECIPE), Codec.INT);
 
     static void dropExperience(ServerLevel world, Vec3 pos, int multiplier, float experience) {
         int i = Mth.floor((float) multiplier * experience);
@@ -32,11 +32,19 @@ public interface RecipeExperienceBlockEntity {
         ExperienceOrb.award(world, pos, i);
     }
 
-    static void writeRecipesUsed(ValueOutput view, String name, Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed) {
+    static void writeRecipesUsed(
+        ValueOutput view,
+        String name,
+        Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed
+    ) {
         view.store(name, RECIPES_USED_CODEC, recipesUsed);
     }
 
-    static void readRecipesUsed(ValueInput view, String name, Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed) {
+    static void readRecipesUsed(
+        ValueInput view,
+        String name,
+        Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed
+    ) {
         recipesUsed.clear();
         view.read(name, RECIPES_USED_CODEC).ifPresent(recipesUsed::putAll);
     }

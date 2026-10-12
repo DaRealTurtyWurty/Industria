@@ -14,10 +14,10 @@ import java.util.UUID;
 
 public class GasPipeNetworkManager extends PipeNetworkManager<ResourceVariant<Gas>, GasPipeNetwork> {
     public static final MapCodec<GasPipeNetworkManager> CODEC = PipeNetworkManager.createCodec(
-            GasPipeNetwork.CODEC.codec(), GasPipeNetworkManager::new);
+        GasPipeNetwork.CODEC.codec(), GasPipeNetworkManager::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, GasPipeNetworkManager> STREAM_CODEC =
-            PipeNetworkManager.createPacketCodec(GasPipeNetwork.STREAM_CODEC, GasPipeNetworkManager::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, GasPipeNetworkManager> STREAM_CODEC = PipeNetworkManager
+        .createPacketCodec(GasPipeNetwork.STREAM_CODEC, GasPipeNetworkManager::new);
 
     public GasPipeNetworkManager() {
         super(ModPipeNetworkManagerTypes.GAS.get(), TransferType.GAS);

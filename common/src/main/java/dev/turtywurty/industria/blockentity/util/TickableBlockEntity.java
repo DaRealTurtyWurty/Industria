@@ -10,11 +10,10 @@ public interface TickableBlockEntity {
     }
 
     static <T extends BlockEntity> BlockEntityTicker<T> createTicker(Level level, boolean allowClient) {
-        if (allowClient) {
+        if (allowClient)
             return (_, _, _, blockEntity) -> ((TickableBlockEntity) blockEntity).tick();
-        } else {
+        else
             return createTicker(level);
-        }
     }
 
     void tick();

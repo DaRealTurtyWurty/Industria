@@ -12,23 +12,26 @@ public final class PipeStorageUtil {
     public static <V extends ResourceVariant<?>> long amount(ResourceStorage<V> storage) {
         requireIndexed(storage);
         long amount = 0;
-        for (int index = 0; index < storage.size(); index++)
+        for (int index = 0; index < storage.size(); index++) {
             amount = saturatedAdd(amount, storage.amount(index));
+        }
         return amount;
     }
 
     public static <V extends ResourceVariant<?>> long capacity(ResourceStorage<V> storage) {
         requireIndexed(storage);
         long capacity = 0;
-        for (int index = 0; index < storage.size(); index++)
+        for (int index = 0; index < storage.size(); index++) {
             capacity = saturatedAdd(capacity, storage.capacity(index, storage.resource(index)));
+        }
         return capacity;
     }
 
     public static <V extends ResourceVariant<?>> void restore(
-            MutableResourceStorage<V> storage,
-            V resource,
-            long amount) {
+        MutableResourceStorage<V> storage,
+        V resource,
+        long amount
+    ) {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             if (!storage.set(0, resource, amount, transaction))
                 throw new IllegalArgumentException("Stored pipe contents exceed the pipe network capacity");
@@ -41,7 +44,7 @@ public final class PipeStorageUtil {
             return 0;
         try {
             return Math.multiplyExact((long) pipeCount, capacityPerPipe);
-        } catch (ArithmeticException ignored) {
+        } catch (ArithmeticException _) {
             return Long.MAX_VALUE;
         }
     }

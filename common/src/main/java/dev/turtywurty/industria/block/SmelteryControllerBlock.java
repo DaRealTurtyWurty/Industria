@@ -6,11 +6,11 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class SmelteryControllerBlock extends IndustriaBlock {
     public SmelteryControllerBlock(Properties properties) {
         super(properties, new BlockProperties()
-                .blockEntityProperties(
-                        new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.SMELTERY_CONTROLLER)
-                                .shouldTick()
-                                .rightClickToOpenGui())
-                .hasHorizontalFacing()
-                .hasLitProperty());
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.SMELTERY_CONTROLLER)
+                    .shouldTick()
+                    .rightClickToOpenGui())
+            .hasHorizontalFacing()
+            .hasLitProperty());
     }
 }

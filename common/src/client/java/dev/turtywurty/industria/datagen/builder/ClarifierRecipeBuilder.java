@@ -14,7 +14,12 @@ public class ClarifierRecipeBuilder {
     private final OutputItemStack outputItem;
     private final int processTime;
 
-    public ClarifierRecipeBuilder(@NotNull FluidStack inputFluid, @NotNull FluidStack outputFluid, @NotNull OutputItemStack outputItem, int processTime) {
+    public ClarifierRecipeBuilder(
+        @NotNull FluidStack inputFluid,
+        @NotNull FluidStack outputFluid,
+        @NotNull OutputItemStack outputItem,
+        int processTime
+    ) {
         this.inputFluid = inputFluid;
         this.outputFluid = outputFluid;
         this.outputItem = outputItem;
@@ -23,7 +28,7 @@ public class ClarifierRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new ClarifierRecipe(this.inputFluid, this.outputFluid, this.outputItem, this.processTime),
-                null);
+            new ClarifierRecipe(this.inputFluid, this.outputFluid, this.outputItem, this.processTime),
+            null);
     }
 }

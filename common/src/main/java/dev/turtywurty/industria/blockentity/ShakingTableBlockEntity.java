@@ -73,7 +73,10 @@ import org.jetbrains.annotations.Nullable;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
-public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("shaking_table");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -117,13 +120,16 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
         this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
         this.wrappedContainerStorage.addExtractOnlyInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createFluidPredicate(() -> {
-                    SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                    return new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount());
-                })), Direction.NORTH);
+            PredicateSimpleInventory.createFluidPredicate(() -> {
+                SyncingFluidStorage inputFluidTank = getInputFluidTank();
+                return new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount());
+            })), Direction.NORTH);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().getResource())), Direction.SOUTH);
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER), Direction.UP);
+            PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().getResource())),
+            Direction.SOUTH);
+        this.wrappedFluidStorage.addStorage(
+            new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER),
+            Direction.UP);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 10_000, 0));
         this.wrappedSlurryStorage.addStorage(new OutputSlurryStorage(this, FluidAmounts.BUCKET * 10), Direction.DOWN);
 
@@ -144,26 +150,26 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
 
         double dx1, dz1, dx2, dz2;
         switch (facing) {
-            case NORTH:
+            case NORTH :
                 dx1 = x1;
                 dz1 = z2;
                 dx2 = x2;
                 dz2 = z1;
                 break;
-            case SOUTH:
+            case SOUTH :
                 dx1 = x1;
                 dz1 = -z1;
                 dx2 = x2;
                 dz2 = -z2;
                 break;
-            case WEST:
+            case WEST :
                 dx1 = z1;
                 dz1 = x1;
                 dx2 = z2;
                 dz2 = x2;
                 break;
-            case EAST:
-            default:
+            case EAST :
+            default :
                 dx1 = -z2;
                 dz1 = x1;
                 dx2 = -z1;
@@ -172,13 +178,12 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
         }
 
         return new AABB(
-                topCenter.x() + dx1,
-                topCenter.y() + y1,
-                topCenter.z() + dz1,
-                topCenter.x() + dx2,
-                topCenter.y() + y2,
-                topCenter.z() + dz2
-        );
+            topCenter.x() + dx1,
+            topCenter.y() + y1,
+            topCenter.z() + dz1,
+            topCenter.x() + dx2,
+            topCenter.y() + y2,
+            topCenter.z() + dz2);
     }
 
     @Override
@@ -196,8 +201,8 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
         SyncableStorage outputSlurryTank = getOutputSlurryTank();
         SyncableStorage energyStorage = getEnergyStorage();
         return List.of(ContainerStorage, outputContainerStorage, bucketInputInventory, bucketOutputInventory,
-                inputFluidTank, outputSlurryTank,
-                energyStorage);
+            inputFluidTank, outputSlurryTank,
+            energyStorage);
     }
 
     @Override
@@ -208,11 +213,12 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
         if (!bucketInputInventory.isEmpty()) {
             ItemStack bucket = bucketInputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Fluid>> storage =
-                    MutableItemContext.ofContainerSlot(bucketInputInventory, 0).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> storage = MutableItemContext
+                .ofContainerSlot(bucketInputInventory, 0).find(StorageKeys.FLUID);
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                Optional<ResourceVariant<Fluid>> optVariant = TransferUtils.findFirstVariant(storage, inputFluidTank.getResource());
+                Optional<ResourceVariant<Fluid>> optVariant = TransferUtils.findFirstVariant(storage,
+                    inputFluidTank.getResource());
                 optVariant.filter(variant -> !variant.isBlank()).ifPresent(variant -> {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                         long extracted = storage.extract(variant, FluidAmounts.BUCKET, transaction);
@@ -229,13 +235,14 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
         if (!bucketOutputInventory.isEmpty()) {
             ItemStack bucket = bucketOutputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Slurry>> storage =
-                    MutableItemContext.ofContainerSlot(bucketOutputInventory, 0).find(SlurryStorage.KEY);
+            ResourceStorage<ResourceVariant<Slurry>> storage = MutableItemContext
+                .ofContainerSlot(bucketOutputInventory, 0).find(SlurryStorage.KEY);
             if (storage != null && storage.supportsInsertion()) {
                 SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
                 if (outputSlurryTank.getAmount() > 0) {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                        long inserted = storage.insert(outputSlurryTank.getResource(), FluidAmounts.BUCKET, transaction);
+                        long inserted = storage.insert(outputSlurryTank.getResource(), FluidAmounts.BUCKET,
+                            transaction);
                         if (inserted > 0) {
                             outputSlurryTank.extractInternal(outputSlurryTank.getResource(), inserted, transaction);
                         }
@@ -258,8 +265,10 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
 
         if (!this.outputSlurryStack.isEmpty()) {
             SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
-            if (Objects.equals(outputSlurryTank.getResource(), this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.getAmount() >= 0) {
-                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(), this.outputSlurryStack.amount());
+            if (Objects.equals(outputSlurryTank.getResource(), this.outputSlurryStack.variant())
+                && outputSlurryTank.getCapacity() - outputSlurryTank.getAmount() >= 0) {
+                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(),
+                    this.outputSlurryStack.amount());
                 insert(outputSlurryTank, this.outputSlurryStack.variant(), inserted);
                 this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
                 update();
@@ -321,7 +330,8 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
 
                 SlurryStack outputSlurry = recipe.outputSlurry();
                 if (outputSlurryTank.canInsert(outputSlurry)) {
-                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(), outputSlurry.amount());
+                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(),
+                        outputSlurry.amount());
                     insert(outputSlurryTank, outputSlurry.variant(), inserted);
                     outputSlurry = outputSlurry.withAmount(outputSlurry.amount() - inserted);
                 }
@@ -345,10 +355,11 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
 
             Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
             Vec3 shakeDirection = facing.getAxis() == Direction.Axis.X
-                    ? new Vec3(amountToShake, 0, 0)
-                    : new Vec3(0, 0, amountToShake);
+                ? new Vec3(amountToShake, 0, 0)
+                : new Vec3(0, 0, amountToShake);
 
-            for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.shakeBox, entity -> true)) {
+            for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.shakeBox,
+                entity -> true)) {
                 livingEntity.push(shakeDirection);
                 livingEntity.needsSync = true;
             }
@@ -434,7 +445,8 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new ShakingTableScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
+        return new ShakingTableScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.properties);
     }
 
     public int getRecipeFrequency() {
@@ -496,14 +508,14 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.both(TransferType.ITEM, this.wrappedContainerStorage::getCombinedStorage)
-                .wherePosition(offset -> offset.getY() == 0 || offset.getY() == 1);
+            .wherePosition(offset -> offset.getY() == 0 || offset.getY() == 1);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
-                .wherePosition(offset -> offset.getY() == 0);
+            .wherePosition(offset -> offset.getY() == 0);
         ports.input(TransferType.FLUID, this::getInputFluidTank)
-                .wherePosition(offset -> offset.getY() == 1);
+            .wherePosition(offset -> offset.getY() == 1);
         ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
-                .wherePosition(offset -> offset.getY() == 0);
+            .wherePosition(offset -> offset.getY() == 0);
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(offset -> offset.getY() == 0);
+            .wherePosition(offset -> offset.getY() == 0);
     }
 }

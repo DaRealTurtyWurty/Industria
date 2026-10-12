@@ -68,7 +68,10 @@ import java.util.Optional;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.*;
 
-public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("agitator");
 
     private static final int INPUT_PORT_COUNT = 3;
@@ -79,13 +82,13 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     private static final Direction[] OUTPUT_DIRECTIONS = {Direction.SOUTH, Direction.EAST};
 
     private static final BlockPos[] INPUT_OFFSETS = {
-            new BlockPos(0, 0, -1),
-            new BlockPos(-1, 0, 0),
-            new BlockPos(0, 1, 0)
+        new BlockPos(0, 0, -1),
+        new BlockPos(-1, 0, 0),
+        new BlockPos(0, 1, 0)
     };
     private static final BlockPos[] OUTPUT_OFFSETS = {
-            new BlockPos(0, 0, 1),
-            new BlockPos(1, 0, 0)
+        new BlockPos(0, 0, 1),
+        new BlockPos(1, 0, 0)
     };
     private static final BlockPos ENERGY_OFFSET = new BlockPos(0, -1, 0);
 
@@ -198,8 +201,8 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
         Optional<RecipeHolder<AgitatorRecipe>> recipeEntry = getCurrentRecipe(recipeInput);
         if (recipeEntry.isEmpty()
-                || !recipeEntry.get().id().equals(this.currentRecipeId)
-                || !canOutput(recipeEntry.get().value())) {
+            || !recipeEntry.get().id().equals(this.currentRecipeId)
+            || !canOutput(recipeEntry.get().value())) {
             this.currentRecipeId = null;
             this.progress = 0;
             this.maxProgress = 0;
@@ -266,11 +269,11 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         super.saveAdditional(output);
 
         output.putIntArray("InputModes", Arrays.stream(this.inputModes)
-                .mapToInt(AgitatorPortType::ordinal)
-                .toArray());
+            .mapToInt(AgitatorPortType::ordinal)
+            .toArray());
         output.putIntArray("OutputModes", Arrays.stream(this.outputModes)
-                .mapToInt(AgitatorPortType::ordinal)
-                .toArray());
+            .mapToInt(AgitatorPortType::ordinal)
+            .toArray());
         output.putInt("Progress", this.progress);
         output.putInt("MaxProgress", this.maxProgress);
 
@@ -291,12 +294,14 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
         int[] inputModes = input.getIntArray("InputModes").orElse(new int[0]);
         for (int index = 0; index < this.inputModes.length; index++) {
-            this.inputModes[index] = AgitatorPortType.fromOrdinal(index < inputModes.length ? inputModes[index] : AgitatorPortType.ITEM.ordinal());
+            this.inputModes[index] = AgitatorPortType
+                .fromOrdinal(index < inputModes.length ? inputModes[index] : AgitatorPortType.ITEM.ordinal());
         }
 
         int[] outputModes = input.getIntArray("OutputModes").orElse(new int[0]);
         for (int index = 0; index < this.outputModes.length; index++) {
-            this.outputModes[index] = AgitatorPortType.fromOrdinal(index < outputModes.length ? outputModes[index] : AgitatorPortType.ITEM.ordinal());
+            this.outputModes[index] = AgitatorPortType
+                .fromOrdinal(index < outputModes.length ? outputModes[index] : AgitatorPortType.ITEM.ordinal());
         }
         this.progress = input.getIntOr("Progress", 0);
         this.maxProgress = input.getIntOr("MaxProgress", 0);
@@ -346,11 +351,13 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         return switch (this.inputModes[index]) {
             case ITEM -> this.inputItemStorages[index].isEmpty();
             case FLUID ->
-                    this.inputFluidStorages[index].getResource().isBlank() || this.inputFluidStorages[index].getAmount() <= 0;
+                this.inputFluidStorages[index].getResource().isBlank()
+                    || this.inputFluidStorages[index].getAmount() <= 0;
             case GAS ->
-                    this.inputGasStorages[index].getResource().isBlank() || this.inputGasStorages[index].getAmount() <= 0;
+                this.inputGasStorages[index].getResource().isBlank() || this.inputGasStorages[index].getAmount() <= 0;
             case SLURRY ->
-                    this.inputSlurryStorages[index].getResource().isBlank() || this.inputSlurryStorages[index].getAmount() <= 0;
+                this.inputSlurryStorages[index].getResource().isBlank()
+                    || this.inputSlurryStorages[index].getAmount() <= 0;
         };
     }
 
@@ -375,11 +382,13 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         return switch (this.outputModes[index]) {
             case ITEM -> this.outputItemStorages[index].isEmpty();
             case FLUID ->
-                    this.outputFluidStorages[index].getResource().isBlank() || this.outputFluidStorages[index].getAmount() <= 0;
+                this.outputFluidStorages[index].getResource().isBlank()
+                    || this.outputFluidStorages[index].getAmount() <= 0;
             case GAS ->
-                    this.outputGasStorages[index].getResource().isBlank() || this.outputGasStorages[index].getAmount() <= 0;
+                this.outputGasStorages[index].getResource().isBlank() || this.outputGasStorages[index].getAmount() <= 0;
             case SLURRY ->
-                    this.outputSlurryStorages[index].getResource().isBlank() || this.outputSlurryStorages[index].getAmount() <= 0;
+                this.outputSlurryStorages[index].getResource().isBlank()
+                    || this.outputSlurryStorages[index].getAmount() <= 0;
         };
     }
 
@@ -484,42 +493,45 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         for (int index = 0; index < INPUT_OFFSETS.length; index++) {
             int portIndex = index;
             ports.input(TransferType.ITEM,
-                            () -> this.wrappedContainerStorage.getStorage(INPUT_DIRECTIONS[portIndex]))
-                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.inputModes[portIndex] == AgitatorPortType.ITEM);
+                () -> this.wrappedContainerStorage.getStorage(INPUT_DIRECTIONS[portIndex]))
+                .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.inputModes[portIndex] == AgitatorPortType.ITEM);
             ports.input(TransferType.FLUID, () -> this.inputFluidStorages[portIndex])
-                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.inputModes[portIndex] == AgitatorPortType.FLUID);
+                .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.inputModes[portIndex] == AgitatorPortType.FLUID);
             ports.input(TransferType.SLURRY, () -> this.inputSlurryStorages[portIndex])
-                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.inputModes[portIndex] == AgitatorPortType.SLURRY);
+                .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.inputModes[portIndex] == AgitatorPortType.SLURRY);
             ports.input(TransferType.GAS, () -> this.inputGasStorages[portIndex])
-                    .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.inputModes[portIndex] == AgitatorPortType.GAS);
+                .wherePosition(localOffset -> INPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.inputModes[portIndex] == AgitatorPortType.GAS);
         }
 
         for (int index = 0; index < OUTPUT_OFFSETS.length; index++) {
             int portIndex = index;
             ports.output(TransferType.ITEM,
-                            () -> this.wrappedContainerStorage.getStorage(OUTPUT_DIRECTIONS[portIndex]))
-                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.outputModes[portIndex] == AgitatorPortType.ITEM);
+                () -> this.wrappedContainerStorage.getStorage(OUTPUT_DIRECTIONS[portIndex]))
+                .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.outputModes[portIndex] == AgitatorPortType.ITEM);
             ports.output(TransferType.FLUID, () -> this.outputFluidStorages[portIndex])
-                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.outputModes[portIndex] == AgitatorPortType.FLUID);
+                .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.outputModes[portIndex] == AgitatorPortType.FLUID);
             ports.output(TransferType.SLURRY, () -> this.outputSlurryStorages[portIndex])
-                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.outputModes[portIndex] == AgitatorPortType.SLURRY);
+                .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.outputModes[portIndex] == AgitatorPortType.SLURRY);
             ports.output(TransferType.GAS, () -> this.outputGasStorages[portIndex])
-                    .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
-                            && this.outputModes[portIndex] == AgitatorPortType.GAS);
+                .wherePosition(localOffset -> OUTPUT_OFFSETS[portIndex].equals(localOffset)
+                    && this.outputModes[portIndex] == AgitatorPortType.GAS);
         }
 
         ports.input(TransferType.ENERGY, this::getEnergyStorage).at(ENERGY_OFFSET);
     }
 
     @Override
-    public @Nullable ResourceStorage<ResourceVariant<Gas>> getGasStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
+    public @Nullable ResourceStorage<ResourceVariant<Gas>> getGasStorageForExternal(
+        BlockPos worldPos,
+        @Nullable Direction side
+    ) {
         if (!isFormed())
             return side == null ? null : getGasProvider(side);
         return super.getGasStorageForExternal(worldPos, side);
@@ -607,33 +619,31 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     private AgitatorPortStack createPortStack(int index) {
         return switch (this.inputModes[index]) {
             case ITEM -> new AgitatorPortStack(
-                    AgitatorPortType.ITEM,
-                    this.inputItemStorages[index].getItem(0).copy(),
-                    FluidStack.EMPTY,
-                    GasStack.EMPTY,
-                    SlurryStack.EMPTY
-            );
+                AgitatorPortType.ITEM,
+                this.inputItemStorages[index].getItem(0).copy(),
+                FluidStack.EMPTY,
+                GasStack.EMPTY,
+                SlurryStack.EMPTY);
             case FLUID -> new AgitatorPortStack(
-                    AgitatorPortType.FLUID,
-                    ItemStack.EMPTY,
-                    new FluidStack(this.inputFluidStorages[index].getResource(), this.inputFluidStorages[index].getAmount()),
-                    GasStack.EMPTY,
-                    SlurryStack.EMPTY
-            );
+                AgitatorPortType.FLUID,
+                ItemStack.EMPTY,
+                new FluidStack(this.inputFluidStorages[index].getResource(),
+                    this.inputFluidStorages[index].getAmount()),
+                GasStack.EMPTY,
+                SlurryStack.EMPTY);
             case GAS -> new AgitatorPortStack(
-                    AgitatorPortType.GAS,
-                    ItemStack.EMPTY,
-                    FluidStack.EMPTY,
-                    new GasStack(this.inputGasStorages[index].getResource(), this.inputGasStorages[index].getAmount()),
-                    SlurryStack.EMPTY
-            );
+                AgitatorPortType.GAS,
+                ItemStack.EMPTY,
+                FluidStack.EMPTY,
+                new GasStack(this.inputGasStorages[index].getResource(), this.inputGasStorages[index].getAmount()),
+                SlurryStack.EMPTY);
             case SLURRY -> new AgitatorPortStack(
-                    AgitatorPortType.SLURRY,
-                    ItemStack.EMPTY,
-                    FluidStack.EMPTY,
-                    GasStack.EMPTY,
-                    new SlurryStack(this.inputSlurryStorages[index].getResource(), this.inputSlurryStorages[index].getAmount())
-            );
+                AgitatorPortType.SLURRY,
+                ItemStack.EMPTY,
+                FluidStack.EMPTY,
+                GasStack.EMPTY,
+                new SlurryStack(this.inputSlurryStorages[index].getResource(),
+                    this.inputSlurryStorages[index].getAmount()));
         };
     }
 
@@ -685,11 +695,11 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             switch (input.type()) {
                 case ITEM -> this.inputItemStorages[index].getItem(0).shrink(input.item().stackData().count());
                 case FLUID -> extract(this.inputFluidStorages[index],
-                        this.inputFluidStorages[index].getResource(), input.fluid().amount());
+                    this.inputFluidStorages[index].getResource(), input.fluid().amount());
                 case GAS -> extract(this.inputGasStorages[index],
-                        this.inputGasStorages[index].getResource(), input.gas().amount());
+                    this.inputGasStorages[index].getResource(), input.gas().amount());
                 case SLURRY -> extract(this.inputSlurryStorages[index],
-                        this.inputSlurryStorages[index].getResource(), input.slurry().amount());
+                    this.inputSlurryStorages[index].getResource(), input.slurry().amount());
             }
         }
     }
@@ -722,7 +732,7 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return;
 
         set(this.outputFluidStorages[index], stack.variant(),
-                this.outputFluidStorages[index].getAmount() + stack.amount());
+            this.outputFluidStorages[index].getAmount() + stack.amount());
     }
 
     private void insertGasOutput(int index, GasStack stack) {
@@ -730,7 +740,7 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return;
 
         set(this.outputGasStorages[index], stack.variant(),
-                this.outputGasStorages[index].getAmount() + stack.amount());
+            this.outputGasStorages[index].getAmount() + stack.amount());
     }
 
     private void insertSlurryOutput(int index, SlurryStack stack) {
@@ -738,7 +748,7 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return;
 
         set(this.outputSlurryStorages[index], stack.variant(),
-                this.outputSlurryStorages[index].getAmount() + stack.amount());
+            this.outputSlurryStorages[index].getAmount() + stack.amount());
     }
 
     private ItemStack createOutputItemStack(OutputItemStack output) {

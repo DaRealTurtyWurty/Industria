@@ -23,9 +23,15 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.Optional;
 
-public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int preferredTemperature,
-                             float maxSpeedMultiplier, int processTime)
-        implements Recipe<SingleItemStackRecipeInput> {
+public record SmelteryRecipe(
+    IndustriaIngredient input,
+    FluidStack output,
+    int preferredTemperature,
+    float maxSpeedMultiplier,
+    int processTime
+)
+    implements
+        Recipe<SingleItemStackRecipeInput> {
     @Override
     public boolean matches(SingleItemStackRecipeInput input, Level world) {
         return this.input.testForRecipe(input.stack());
@@ -87,12 +93,12 @@ public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int p
     public double getSpeedMultiplier(float temperature) {
         float requiredTemperature = this.requiredTemperature();
         if (requiredTemperature < 0
-                || this.preferredTemperature <= requiredTemperature
-                || temperature < requiredTemperature)
+            || this.preferredTemperature <= requiredTemperature
+            || temperature < requiredTemperature)
             return 0.0;
 
         double fraction = Math.clamp((temperature - (double) requiredTemperature)
-                / (this.preferredTemperature - (double) requiredTemperature), 0.0, 1.0);
+            / (this.preferredTemperature - (double) requiredTemperature), 0.0, 1.0);
 
         return 1.0 + fraction * (this.maxSpeedMultiplier - 1.0);
     }
@@ -110,21 +116,19 @@ public record SmelteryRecipe(IndustriaIngredient input, FluidStack output, int p
     }
 
     private static final MapCodec<SmelteryRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(SmelteryRecipe::input),
-            FluidStack.CODEC.fieldOf("output").forGetter(SmelteryRecipe::output),
-            Codec.INT.fieldOf("preferred_temperature").forGetter(SmelteryRecipe::preferredTemperature),
-            Codec.FLOAT.fieldOf("max_speed_multiplier").forGetter(SmelteryRecipe::maxSpeedMultiplier),
-            Codec.INT.fieldOf("process_time").forGetter(SmelteryRecipe::processTime)
-    ).apply(instance, SmelteryRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(SmelteryRecipe::input),
+        FluidStack.CODEC.fieldOf("output").forGetter(SmelteryRecipe::output),
+        Codec.INT.fieldOf("preferred_temperature").forGetter(SmelteryRecipe::preferredTemperature),
+        Codec.FLOAT.fieldOf("max_speed_multiplier").forGetter(SmelteryRecipe::maxSpeedMultiplier),
+        Codec.INT.fieldOf("process_time").forGetter(SmelteryRecipe::processTime)).apply(instance, SmelteryRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, SmelteryRecipe> STREAM_CODEC = StreamCodec.composite(
-            IndustriaIngredient.STREAM_CODEC, SmelteryRecipe::input,
-            FluidStack.STREAM_CODEC, SmelteryRecipe::output,
-            ByteBufCodecs.INT, SmelteryRecipe::preferredTemperature,
-            ByteBufCodecs.FLOAT, SmelteryRecipe::maxSpeedMultiplier,
-            ByteBufCodecs.INT, SmelteryRecipe::processTime,
-            SmelteryRecipe::new
-    );
+        IndustriaIngredient.STREAM_CODEC, SmelteryRecipe::input,
+        FluidStack.STREAM_CODEC, SmelteryRecipe::output,
+        ByteBufCodecs.INT, SmelteryRecipe::preferredTemperature,
+        ByteBufCodecs.FLOAT, SmelteryRecipe::maxSpeedMultiplier,
+        ByteBufCodecs.INT, SmelteryRecipe::processTime,
+        SmelteryRecipe::new);
 
     public static final RecipeSerializer<SmelteryRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 }

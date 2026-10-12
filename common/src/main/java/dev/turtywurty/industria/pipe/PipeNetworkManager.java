@@ -33,40 +33,47 @@ import java.util.function.Supplier;
 // TODO: Splitting output between storages doesn't work
 public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends PipeNetwork<V>> {
     public static final Codec<PipeNetworkManager<?, ?>> CODEC = ModPipeNetworkManagerTypes.CODEC.dispatch(
-            PipeNetworkManager::getType, PipeNetworkManagerType::codec);
+        PipeNetworkManager::getType, PipeNetworkManagerType::codec);
 
-    public static final Codec<List<PipeNetworkManager<?, ?>>> LIST_CODEC = CODEC.listOf().xmap(ArrayList::new, Function.identity());
+    public static final Codec<List<PipeNetworkManager<?, ?>>> LIST_CODEC = CODEC.listOf().xmap(ArrayList::new,
+        Function.identity());
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetworkManager<?, ?>> STREAM_CODEC =
-            ModPipeNetworkManagerTypes.STREAM_CODEC.dispatch(
-                    PipeNetworkManager::getType, PipeNetworkManagerType::packetCodec);
+    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetworkManager<?, ?>> STREAM_CODEC = ModPipeNetworkManagerTypes.STREAM_CODEC
+        .dispatch(
+            PipeNetworkManager::getType, PipeNetworkManagerType::packetCodec);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, List<PipeNetworkManager<?, ?>>> LIST_STREAM_CODEC =
-            ByteBufCodecs.collection(ArrayList::new, STREAM_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, List<PipeNetworkManager<?, ?>>> LIST_STREAM_CODEC = ByteBufCodecs
+        .collection(ArrayList::new, STREAM_CODEC);
 
-    protected static <V extends ResourceVariant<?>, N extends PipeNetwork<V>, M extends PipeNetworkManager<V, N>> MapCodec<M> createCodec(Codec<N> networkCodec, Supplier<M> factory) {
-        return RecordCodecBuilder.mapCodec(instance ->
-                instance.group(
-                        ExtraCodecs.setOf(networkCodec).fieldOf("networks").forGetter(PipeNetworkManager::getNetworks),
-                        ExtraCodecs.BLOCK_POS_TO_UUID_CODEC.fieldOf("pipeToNetworkId").forGetter(PipeNetworkManager::getPipeToNetworkId)
-                ).apply(instance, (networks, pipeToNetworkId) -> {
-                    var manager = factory.get();
-                    manager.networks.addAll(networks);
-                    manager.pipeToNetworkId.putAll(pipeToNetworkId);
-                    return manager;
-                }));
+    protected static <V extends ResourceVariant<?>, N extends PipeNetwork<V>, M extends PipeNetworkManager<V, N>> MapCodec<M> createCodec(
+        Codec<N> networkCodec,
+        Supplier<M> factory
+    ) {
+        return RecordCodecBuilder.mapCodec(instance -> instance.group(
+            ExtraCodecs.setOf(networkCodec).fieldOf("networks").forGetter(PipeNetworkManager::getNetworks),
+            ExtraCodecs.BLOCK_POS_TO_UUID_CODEC.fieldOf("pipeToNetworkId")
+                .forGetter(PipeNetworkManager::getPipeToNetworkId))
+            .apply(instance, (networks, pipeToNetworkId) -> {
+                var manager = factory.get();
+                manager.networks.addAll(networks);
+                manager.pipeToNetworkId.putAll(pipeToNetworkId);
+                return manager;
+            }));
     }
 
-    protected static <V extends ResourceVariant<?>, N extends PipeNetwork<V>, M extends PipeNetworkManager<V, N>> StreamCodec<RegistryFriendlyByteBuf, M> createPacketCodec(StreamCodec<RegistryFriendlyByteBuf, N> networkCodec, Supplier<M> factory) {
+    protected static <V extends ResourceVariant<?>, N extends PipeNetwork<V>, M extends PipeNetworkManager<V, N>> StreamCodec<RegistryFriendlyByteBuf, M> createPacketCodec(
+        StreamCodec<RegistryFriendlyByteBuf, N> networkCodec,
+        Supplier<M> factory
+    ) {
         return StreamCodec.composite(
-                ExtraStreamCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
-                ExtraStreamCodecs.BLOCK_POS_TO_UUID_STREAM_CODEC, PipeNetworkManager::getPipeToNetworkId,
-                (networks, pipeToNetworkId) -> {
-                    var manager = factory.get();
-                    manager.networks.addAll(networks);
-                    manager.pipeToNetworkId.putAll(pipeToNetworkId);
-                    return manager;
-                });
+            ExtraStreamCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
+            ExtraStreamCodecs.BLOCK_POS_TO_UUID_STREAM_CODEC, PipeNetworkManager::getPipeToNetworkId,
+            (networks, pipeToNetworkId) -> {
+                var manager = factory.get();
+                manager.networks.addAll(networks);
+                manager.pipeToNetworkId.putAll(pipeToNetworkId);
+                return manager;
+            });
     }
 
     private static final NetworkService NETWORK = NetworkService.get();
@@ -76,8 +83,10 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
     protected final Set<N> networks = ConcurrentHashMap.newKeySet();
     protected final Map<BlockPos, UUID> pipeToNetworkId = new ConcurrentHashMap<>();
 
-    public PipeNetworkManager(PipeNetworkManagerType<V, N> type,
-                              TransferType<ResourceStorage<V>, V, Long> transferType) {
+    public PipeNetworkManager(
+        PipeNetworkManagerType<V, N> type,
+        TransferType<ResourceStorage<V>, V, Long> transferType
+    ) {
         this.type = type;
         this.transferType = transferType;
     }
@@ -98,9 +107,9 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
 
     public @Nullable N getNetwork(UUID id) {
         return this.networks.stream()
-                .filter(network -> network.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+            .filter(network -> network.getId().equals(id))
+            .findFirst()
+            .orElse(null);
     }
 
     public @Nullable UUID getNetworkId(BlockPos pos) {
@@ -201,43 +210,43 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
         List<CustomPacketPayload> payloads = new ArrayList<>();
         if (isNewNetwork) {
             payloads.add(new AddPipeNetworkPayload(
-                    world.dimension(),
-                    this.transferType,
-                    network));
+                world.dimension(),
+                this.transferType,
+                network));
         }
 
         if (!mergedNetworks.isEmpty()) {
             for (N mergedNetwork : mergedNetworks) {
                 payloads.add(new RemovePipeNetworkPayload(
-                        world.dimension(),
-                        this.transferType,
-                        mergedNetwork.id));
+                    world.dimension(),
+                    this.transferType,
+                    mergedNetwork.id));
             }
 
             payloads.add(new RemovePipeNetworkPayload(
-                    world.dimension(),
-                    this.transferType,
-                    network.id));
+                world.dimension(),
+                this.transferType,
+                network.id));
 
             payloads.add(new AddPipeNetworkPayload(
-                    world.dimension(),
-                    this.transferType,
-                    network));
+                world.dimension(),
+                this.transferType,
+                network));
         } else {
             payloads.add(new ModifyPipeNetworkPayload(
-                    ModifyPipeNetworkPayload.Operation.ADD_PIPE,
-                    world.dimension(),
-                    this.transferType,
-                    network.id,
-                    pos));
+                ModifyPipeNetworkPayload.Operation.ADD_PIPE,
+                world.dimension(),
+                this.transferType,
+                network.id,
+                pos));
 
             for (BlockPos adjacentBlock : adjacentBlocks) {
                 payloads.add(new ModifyPipeNetworkPayload(
-                        ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK,
-                        world.dimension(),
-                        this.transferType,
-                        network.id,
-                        adjacentBlock));
+                    ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK,
+                    world.dimension(),
+                    this.transferType,
+                    network.id,
+                    adjacentBlock));
             }
         }
 
@@ -257,18 +266,18 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
         network.removePipe(pos);
 
         payloads.add(new ModifyPipeNetworkPayload(
-                ModifyPipeNetworkPayload.Operation.REMOVE_PIPE,
-                world.dimension(),
-                this.transferType,
-                networkId,
-                pos));
+            ModifyPipeNetworkPayload.Operation.REMOVE_PIPE,
+            world.dimension(),
+            this.transferType,
+            networkId,
+            pos));
 
         if (network.getPipes().isEmpty()) {
             removeNetwork(network);
             payloads.add(new RemovePipeNetworkPayload(
-                    world.dimension(),
-                    this.transferType,
-                    networkId));
+                world.dimension(),
+                this.transferType,
+                networkId));
 
             syncAndSave(world, payloads);
             return;
@@ -281,19 +290,18 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
 
         for (BlockPos connectedBlock : removedConnectedBlocks) {
             payloads.add(new ModifyPipeNetworkPayload(
-                    ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK,
-                    world.dimension(),
-                    this.transferType,
-                    networkId,
-                    connectedBlock));
+                ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK,
+                world.dimension(),
+                this.transferType,
+                networkId,
+                connectedBlock));
         }
 
         Set<BlockPos> visited = new HashSet<>();
         List<Set<BlockPos>> connectedComponents = new ArrayList<>();
         for (BlockPos pipe : network.getPipes()) {
-            if (visited.contains(pipe)) {
+            if (visited.contains(pipe))
                 continue;
-            }
 
             Set<BlockPos> connectedComponent = new HashSet<>();
             floodFill(world, pipe, visited, connectedComponent);
@@ -308,9 +316,9 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
         }
 
         payloads.add(new RemovePipeNetworkPayload(
-                world.dimension(),
-                this.transferType,
-                networkId));
+            world.dimension(),
+            this.transferType,
+            networkId));
         removeNetwork(network);
 
         int totalPipes = network.getPipes().size();
@@ -332,8 +340,8 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
                 double newFraction = fraction / adjacentPipes.size();
                 for (BlockPos adjacentPipePos : adjacentPipes) {
                     this.transferType.transferFraction(network.getStorage(pos),
-                            newNetwork.getStorage(adjacentPipePos),
-                            newFraction);
+                        newNetwork.getStorage(adjacentPipePos),
+                        newFraction);
                 }
             }
 
@@ -343,9 +351,9 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
             }
 
             payloads.add(new AddPipeNetworkPayload(
-                    world.dimension(),
-                    this.transferType,
-                    newNetwork));
+                world.dimension(),
+                this.transferType,
+                newNetwork));
         }
 
         syncAndSave(world, payloads);
@@ -361,12 +369,15 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
         WorldPipeNetworks.getOrCreate(world).setDirty();
     }
 
-    protected void mergeNetworks(ServerLevel world, Map.Entry<BlockPos, N> targetEntry, Map.Entry<BlockPos, N> sourceEntry) {
+    protected void mergeNetworks(
+        ServerLevel world,
+        Map.Entry<BlockPos, N> targetEntry,
+        Map.Entry<BlockPos, N> sourceEntry
+    ) {
         N target = targetEntry.getValue();
         N source = sourceEntry.getValue();
-        if (target == source || !target.isOfSameType(source)) {
+        if (target == source || !target.isOfSameType(source))
             return;
-        }
 
         target.movePipesFrom(source, source.getPipes());
         target.addConnectedBlocks(world, source);
@@ -376,7 +387,7 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
 
         if (target.hasCentralStorage()) {
             this.transferType.transferAll(source.getStorage(targetEntry.getKey()),
-                    target.getStorage(targetEntry.getKey()));
+                target.getStorage(targetEntry.getKey()));
         }
 
         removeNetwork(source);
@@ -414,22 +425,22 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
         for (BlockPos connectedBlock : network.getConnectedBlocks()) {
             if (!previousConnectedBlocks.contains(connectedBlock)) {
                 payloads.add(new ModifyPipeNetworkPayload(
-                        ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK,
-                        world.dimension(),
-                        this.transferType,
-                        network.id,
-                        connectedBlock));
+                    ModifyPipeNetworkPayload.Operation.ADD_CONNECTED_BLOCK,
+                    world.dimension(),
+                    this.transferType,
+                    network.id,
+                    connectedBlock));
             }
         }
 
         for (BlockPos connectedBlock : previousConnectedBlocks) {
             if (!network.getConnectedBlocks().contains(connectedBlock)) {
                 payloads.add(new ModifyPipeNetworkPayload(
-                        ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK,
-                        world.dimension(),
-                        this.transferType,
-                        network.id,
-                        connectedBlock));
+                    ModifyPipeNetworkPayload.Operation.REMOVE_CONNECTED_BLOCK,
+                    world.dimension(),
+                    this.transferType,
+                    network.id,
+                    connectedBlock));
             }
         }
 
@@ -459,7 +470,7 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
 
     protected boolean isPipe(ServerLevel world, BlockPos pos) {
         return world.getBlockState(pos).getBlock() instanceof PipeBlock<?, ?> pipeBlock
-                && this.transferType.equals(pipeBlock.getTransferType());
+            && this.transferType.equals(pipeBlock.getTransferType());
     }
 
     public void traverseCreateNetwork(ServerLevel world, BlockPos pos) {

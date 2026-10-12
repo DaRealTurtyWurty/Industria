@@ -19,13 +19,13 @@ import java.util.List;
 
 public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
     public static final BooleanProperty UPWARD = BooleanProperty.create("upward");
-    public static final EnumProperty<LinePosition> LINE_POSITION = EnumProperty.create("line_position", LinePosition.class);
+    public static final EnumProperty<LinePosition> LINE_POSITION = EnumProperty.create("line_position",
+        LinePosition.class);
 
     public LadderConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .addStateProperty(UPWARD, false)
-                .addStateProperty(LINE_POSITION, LinePosition.SINGLE)
-        );
+            .addStateProperty(UPWARD, false)
+            .addStateProperty(LINE_POSITION, LinePosition.SINGLE));
     }
 
     @Override
@@ -36,11 +36,18 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
         boolean upward = resolvePlacementUpward(level, pos, context);
 
         return applyPlacementState(defaultBlockState().setValue(UPWARD, upward), context, facing)
-                .setValue(LINE_POSITION, resolveLinePosition(level, pos, facing, upward));
+            .setValue(LINE_POSITION, resolveLinePosition(level, pos, facing, upward));
     }
 
     @Override
-    public ConveyorOutput selectOutput(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public ConveyorOutput selectOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         ConveyorTopology topology = getTopology(level, pos, state);
         ConveyorOutput verticalOutput = null;
         ConveyorOutput horizontalOutput = null;
@@ -72,22 +79,26 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
         BlockPos horizontalOutput = pos.relative(facing);
 
         return new ConveyorTopology(
-                List.of(
-                        new ConveyorInput("vertical", verticalInput),
-                        new ConveyorInput("horizontal", horizontalInput)
-                ),
-                List.of(
-                        new ConveyorOutput("vertical", verticalOutput, pos),
-                        new ConveyorOutput("horizontal", horizontalOutput, pos)
-                )
-        );
+            List.of(
+                new ConveyorInput("vertical", verticalInput),
+                new ConveyorInput("horizontal", horizontalInput)),
+            List.of(
+                new ConveyorOutput("vertical", verticalOutput, pos),
+                new ConveyorOutput("horizontal", horizontalOutput, pos)));
     }
 
-    private boolean isUsableOutput(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorNetwork network) {
+    private boolean isUsableOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorOutput output,
+        ConveyorNetwork network
+    ) {
         if (network.getConnectedBlock(pos, output) != null)
             return true;
 
-        for (BlockPos targetPos : List.of(output.deliveryPos(), output.deliveryPos().above(), output.deliveryPos().below())) {
+        for (BlockPos targetPos : List.of(output.deliveryPos(), output.deliveryPos().above(),
+            output.deliveryPos().below())) {
             BlockState targetState = level.getBlockState(targetPos);
             if (!(targetState.getBlock() instanceof ConveyorLike))
                 continue;
@@ -107,9 +118,9 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
         LinePosition linePosition = resolveLinePosition(level, pos, facing, upward);
 
         return resolved
-                .setValue(FACING, facing)
-                .setValue(UPWARD, upward)
-                .setValue(LINE_POSITION, linePosition);
+            .setValue(FACING, facing)
+            .setValue(UPWARD, upward)
+            .setValue(LINE_POSITION, linePosition);
     }
 
     @Override
@@ -177,7 +188,12 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
         return score;
     }
 
-    private static boolean outputsToPosition(Level level, BlockPos conveyorPos, BlockState conveyorState, BlockPos targetPos) {
+    private static boolean outputsToPosition(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState conveyorState,
+        BlockPos targetPos
+    ) {
         if (!(conveyorState.getBlock() instanceof ConveyorLike conveyor))
             return false;
 
@@ -185,7 +201,12 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
         return topology.outputs().stream().anyMatch(output -> output.deliveryPos().equals(targetPos));
     }
 
-    private static boolean acceptsInputFrom(Level level, BlockPos conveyorPos, BlockState conveyorState, BlockPos sourcePos) {
+    private static boolean acceptsInputFrom(
+        Level level,
+        BlockPos conveyorPos,
+        BlockState conveyorState,
+        BlockPos sourcePos
+    ) {
         if (!(conveyorState.getBlock() instanceof ConveyorLike conveyor))
             return false;
 
@@ -224,8 +245,8 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
 
     private static boolean isMatchingLineSegment(BlockState state, Direction facing, boolean upward) {
         return state.getBlock() instanceof LadderConveyorBlock
-                && state.getValue(FACING) == facing
-                && state.getValue(UPWARD) == upward;
+            && state.getValue(FACING) == facing
+            && state.getValue(UPWARD) == upward;
     }
 
     private static boolean getPlacementUpwardFallback(BlockPlaceContext context) {

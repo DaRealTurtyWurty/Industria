@@ -12,10 +12,13 @@ import java.util.function.Supplier;
 public class ModPositionSourceTypes {
     private static final RegistryService REGISTRIES = RegistryService.get();
 
-    public static final RegistrationHandle<PositionSourceType<?>, PositionSourceType<DoublePositionSource>> DOUBLE_POSITION_SOURCE =
-            register("double_position_source", DoublePositionSource.Type::new);
+    public static final RegistrationHandle<PositionSourceType<?>, PositionSourceType<DoublePositionSource>> DOUBLE_POSITION_SOURCE = register(
+        "double_position_source", DoublePositionSource.Type::new);
 
-    public static <T extends PositionSource> RegistrationHandle<PositionSourceType<?>, PositionSourceType<T>> register(String name, Supplier<PositionSourceType<T>> type) {
+    public static <T extends PositionSource> RegistrationHandle<PositionSourceType<?>, PositionSourceType<T>> register(
+        String name,
+        Supplier<PositionSourceType<T>> type
+    ) {
         return REGISTRIES.registerPositionSourceType(Industria.id(name), type);
     }
 

@@ -41,7 +41,10 @@ import java.util.*;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
-public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder {
+public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        WrappedContainerStorageHolder {
     public static final Component TITLE = Industria.containerTitle("oil_pump_jack");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -91,7 +94,8 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
         if (this.wellheadPos == null)
             return;
 
-        if (this.level.getBlockEntity(this.wellheadPos) instanceof WellheadBlockEntity wellheadBlockEntity && this.running) {
+        if (this.level.getBlockEntity(this.wellheadPos) instanceof WellheadBlockEntity wellheadBlockEntity
+            && this.running) {
             Map<BlockPos, Integer> drillTubes = wellheadBlockEntity.getDrillTubes();
 
             List<BlockPos> orderedPositions = new ArrayList<>(drillTubes.keySet());
@@ -124,8 +128,9 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
                     if (storage != null) {
                         long amountToInsert = Math.min(storage.getCapacity() - storage.getAmount(), amount);
                         if (amountToInsert > 0) {
-                            set(storage, ResourceTypes.FLUID.of(ModFluids.CRUDE_OIL.still().get().builtInRegistryHolder()),
-                                    storage.getAmount() + amountToInsert); // TODO: Temporary solution, pls fix
+                            set(storage,
+                                ResourceTypes.FLUID.of(ModFluids.CRUDE_OIL.still().get().builtInRegistryHolder()),
+                                storage.getAmount() + amountToInsert); // TODO: Temporary solution, pls fix
                             storage.markDirty();
                             drillTubes.put(pos, amount - (int) amountToInsert);
 
@@ -149,7 +154,8 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
     }
 
     private void findWellhead() {
-        BlockPos wellheadPos = this.worldPosition.relative(getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING), 5);
+        BlockPos wellheadPos = this.worldPosition
+            .relative(getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING), 5);
         if (this.level.getBlockEntity(wellheadPos) instanceof WellheadBlockEntity wellheadBlockEntity) {
             if (!wellheadBlockEntity.hasOilPumpJack() && !wellheadBlockEntity.isRemoved()) {
                 wellheadBlockEntity.setOilPumpJackPos(this.worldPosition);
@@ -197,8 +203,8 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(offset -> offset.getZ() == -4 && offset.getY() == 0
-                        && offset.getX() >= -1 && offset.getX() <= 2);
+            .wherePosition(offset -> offset.getZ() == -4 && offset.getY() == 0
+                && offset.getX() >= -1 && offset.getX() <= 2);
     }
 
     public void removeWellhead() {

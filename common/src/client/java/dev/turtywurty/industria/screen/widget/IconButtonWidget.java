@@ -9,15 +9,31 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
 public class IconButtonWidget extends Button {
-    private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"), Identifier.withDefaultNamespace("widget/button_disabled"), Identifier.withDefaultNamespace("widget/button_highlighted"));
+    private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"),
+        Identifier.withDefaultNamespace("widget/button_disabled"),
+        Identifier.withDefaultNamespace("widget/button_highlighted"));
 
     private final Identifier iconTexture;
     private final int u, vNormal, vHover, vDisabled, iconW, iconH, texW, texH;
     private final boolean drawBackground;
 
-    public IconButtonWidget(int x, int y, int width, int height, OnPress onPress, Identifier iconTexture,
-                            int u, int vNormal, int vHover, int vDisabled, int iconW, int iconH, int texW, int texH,
-                            boolean drawBackground) {
+    public IconButtonWidget(
+        int x,
+        int y,
+        int width,
+        int height,
+        OnPress onPress,
+        Identifier iconTexture,
+        int u,
+        int vNormal,
+        int vHover,
+        int vDisabled,
+        int iconW,
+        int iconH,
+        int texW,
+        int texH,
+        boolean drawBackground
+    ) {
         super(x, y, width, height, Component.empty(), onPress, DEFAULT_NARRATION);
         this.iconTexture = iconTexture;
         this.u = u;
@@ -35,31 +51,29 @@ public class IconButtonWidget extends Button {
     protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         if (this.drawBackground) {
             ScreenUtils.drawGuiTexture(
-                    context,
-                    SPRITES.get(this.active, isHoveredOrFocused()),
-                    getX(),
-                    getY(),
-                    getWidth(),
-                    getHeight(),
-                    ARGB.white(this.alpha)
-            );
+                context,
+                SPRITES.get(this.active, isHoveredOrFocused()),
+                getX(),
+                getY(),
+                getWidth(),
+                getHeight(),
+                ARGB.white(this.alpha));
         }
 
         int iconX = getX() + (getWidth() - iconW) / 2;
         int iconY = getY() + (getHeight() - iconH) / 2;
         int v = !this.active ? this.vDisabled : (isHovered() || isFocused() ? this.vHover : this.vNormal);
         ScreenUtils.drawTexture(
-                context,
-                this.iconTexture,
-                iconX,
-                iconY,
-                this.u,
-                v,
-                this.iconW,
-                this.iconH,
-                this.texW,
-                this.texH
-        );
+            context,
+            this.iconTexture,
+            iconX,
+            iconY,
+            this.u,
+            v,
+            this.iconW,
+            this.iconH,
+            this.texW,
+            this.texH);
     }
 
     public static class Builder {
@@ -100,7 +114,17 @@ public class IconButtonWidget extends Button {
             return this;
         }
 
-        public Builder iconStates(Identifier iconTexture, int u, int vNormal, int vHover, int vDisabled, int iconW, int iconH, int texW, int texH) {
+        public Builder iconStates(
+            Identifier iconTexture,
+            int u,
+            int vNormal,
+            int vHover,
+            int vDisabled,
+            int iconW,
+            int iconH,
+            int texW,
+            int texH
+        ) {
             this.iconTexture = iconTexture;
             this.u = u;
             this.vNormal = vNormal;
@@ -119,7 +143,8 @@ public class IconButtonWidget extends Button {
         }
 
         public IconButtonWidget build() {
-            return new IconButtonWidget(x, y, width, height, onPress, iconTexture, u, vNormal, vHover, vDisabled, iconW, iconH, texW, texH, drawBackground);
+            return new IconButtonWidget(x, y, width, height, onPress, iconTexture, u, vNormal, vHover, vDisabled, iconW,
+                iconH, texW, texH, drawBackground);
         }
     }
 }

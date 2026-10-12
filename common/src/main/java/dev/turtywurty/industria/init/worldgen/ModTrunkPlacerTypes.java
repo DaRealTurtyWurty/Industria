@@ -11,10 +11,13 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 public class ModTrunkPlacerTypes {
     private static final RegistryService REGISTRIES = RegistryService.get();
 
-    public static final RegistrationHandle<TrunkPlacerType<?>, TrunkPlacerType<RubberTreeTrunkPlacer>> RUBBER =
-            register("rubber_tree_trunk_placer", RubberTreeTrunkPlacer.CODEC);
+    public static final RegistrationHandle<TrunkPlacerType<?>, TrunkPlacerType<RubberTreeTrunkPlacer>> RUBBER = register(
+        "rubber_tree_trunk_placer", RubberTreeTrunkPlacer.CODEC);
 
-    public static <T extends TrunkPlacer> RegistrationHandle<TrunkPlacerType<?>, TrunkPlacerType<T>> register(String name, MapCodec<T> codec) {
+    public static <T extends TrunkPlacer> RegistrationHandle<TrunkPlacerType<?>, TrunkPlacerType<T>> register(
+        String name,
+        MapCodec<T> codec
+    ) {
         return REGISTRIES.registerTrunkPlacerType(Industria.id(name), codec);
     }
 

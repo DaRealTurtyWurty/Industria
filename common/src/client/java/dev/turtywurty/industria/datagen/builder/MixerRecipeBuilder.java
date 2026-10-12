@@ -31,11 +31,16 @@ public class MixerRecipeBuilder implements RecipeBuilder {
     private final RecipeCategory category;
     private final Map<String, Criterion<?>> criteria = new HashMap<>();
 
-    public MixerRecipeBuilder(Collection<IndustriaIngredient> inputs, @Nullable FluidStack inputFluid,
-                              int minTemperature, int maxTemperature,
-                              OutputItemStack output, @Nullable SlurryStack outputSlurry,
-                              int processTime,
-                              RecipeCategory category) {
+    public MixerRecipeBuilder(
+        Collection<IndustriaIngredient> inputs,
+        @Nullable FluidStack inputFluid,
+        int minTemperature,
+        int maxTemperature,
+        OutputItemStack output,
+        @Nullable SlurryStack outputSlurry,
+        int processTime,
+        RecipeCategory category
+    ) {
         this.inputs.addAll(inputs);
         this.inputFluid = inputFluid;
 
@@ -69,13 +74,15 @@ public class MixerRecipeBuilder implements RecipeBuilder {
     @Override
     public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         Advancement.Builder builder = exporter.advancement()
-                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(exporter.lookup(Registries.RECIPE).getOrThrow(recipeKey)))
-                .rewards(AdvancementRewards.Builder.recipe(recipeKey))
-                .requirements(AdvancementRequirements.Strategy.OR);
+            .addCriterion("has_the_recipe",
+                RecipeUnlockedTrigger.unlocked(exporter.lookup(Registries.RECIPE).getOrThrow(recipeKey)))
+            .rewards(AdvancementRewards.Builder.recipe(recipeKey))
+            .requirements(AdvancementRequirements.Strategy.OR);
         this.criteria.forEach(builder::addCriterion);
 
         exporter.accept(recipeKey,
-                new MixerRecipe(this.inputs, this.inputFluid, this.minTemperature, this.maxTemperature, this.output, this.outputSlurry, this.processTime),
-                builder.build(recipeKey.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+            new MixerRecipe(this.inputs, this.inputFluid, this.minTemperature, this.maxTemperature, this.output,
+                this.outputSlurry, this.processTime),
+            builder.build(recipeKey.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 }

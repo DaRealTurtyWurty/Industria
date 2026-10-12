@@ -31,14 +31,13 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class SolarPanelBlock extends IndustriaBlock {
-    private static final Map<Direction, VoxelShape> SOLAR_PANEL_SHAPES =
-            createRotatedShapes(createSolarPanelShape());
-    private static final Map<Direction, VoxelShape> SOLAR_PANEL_STAIR_SHAPES =
-            createRotatedShapes(createSolarPanelStairShape());
-    private static final Map<Direction, VoxelShape> ADVANCED_SOLAR_PANEL_SHAPES =
-            createRotatedShapes(createAdvancedSolarPanelShape());
-    private static final Map<Direction, VoxelShape> ADVANCED_SOLAR_PANEL_STAIR_SHAPES =
-            createRotatedShapes(createAdvancedSolarPanelStairShape());
+    private static final Map<Direction, VoxelShape> SOLAR_PANEL_SHAPES = createRotatedShapes(createSolarPanelShape());
+    private static final Map<Direction, VoxelShape> SOLAR_PANEL_STAIR_SHAPES = createRotatedShapes(
+        createSolarPanelStairShape());
+    private static final Map<Direction, VoxelShape> ADVANCED_SOLAR_PANEL_SHAPES = createRotatedShapes(
+        createAdvancedSolarPanelShape());
+    private static final Map<Direction, VoxelShape> ADVANCED_SOLAR_PANEL_STAIR_SHAPES = createRotatedShapes(
+        createAdvancedSolarPanelStairShape());
 
     public static final BooleanProperty ON_STAIR = BooleanProperty.create("on_stair");
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -52,35 +51,35 @@ public class SolarPanelBlock extends IndustriaBlock {
 
     private static BlockProperties createBlockProperties(boolean isAdvanced) {
         Map<Direction, VoxelShape> groundShapes = isAdvanced
-                ? ADVANCED_SOLAR_PANEL_SHAPES
-                : SOLAR_PANEL_SHAPES;
+            ? ADVANCED_SOLAR_PANEL_SHAPES
+            : SOLAR_PANEL_SHAPES;
         Map<Direction, VoxelShape> stairShapes = isAdvanced
-                ? ADVANCED_SOLAR_PANEL_STAIR_SHAPES
-                : SOLAR_PANEL_STAIR_SHAPES;
+            ? ADVANCED_SOLAR_PANEL_STAIR_SHAPES
+            : SOLAR_PANEL_STAIR_SHAPES;
 
         return new BlockProperties()
-                .hasHorizontalFacing()
-                .addStateProperty(ON_STAIR, false)
-                .addStateProperty(POWERED, false)
-                .shapeFactory((state, _, _, _) -> (state.getValue(ON_STAIR) ? stairShapes : groundShapes)
-                        .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)))
-                .canExistAt(SolarPanelBlock::hasSolidGround)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.SOLAR_PANEL)
-                        .shouldTick());
+            .hasHorizontalFacing()
+            .addStateProperty(ON_STAIR, false)
+            .addStateProperty(POWERED, false)
+            .shapeFactory((state, _, _, _) -> (state.getValue(ON_STAIR) ? stairShapes : groundShapes)
+                .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)))
+            .canExistAt(SolarPanelBlock::hasSolidGround)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.SOLAR_PANEL)
+                .shouldTick());
     }
 
     private static boolean hasSolidGround(LevelReader level, BlockPos pos) {
         BlockPos groundPos = pos.below();
         BlockState groundState = level.getBlockState(groundPos);
         return StairBlock.isStairs(groundState)
-                ? isValidStair(groundState)
-                : groundState.isFaceSturdy(level, groundPos, Direction.UP);
+            ? isValidStair(groundState)
+            : groundState.isFaceSturdy(level, groundPos, Direction.UP);
     }
 
     private static boolean isValidStair(BlockState state) {
         return StairBlock.isStairs(state)
-                && state.getValue(StairBlock.HALF) == Half.BOTTOM
-                && state.getValue(StairBlock.SHAPE) == StairsShape.STRAIGHT;
+            && state.getValue(StairBlock.HALF) == Half.BOTTOM
+            && state.getValue(StairBlock.SHAPE) == StairsShape.STRAIGHT;
     }
 
     @Override
@@ -93,28 +92,36 @@ public class SolarPanelBlock extends IndustriaBlock {
         boolean onStair = isValidStair(groundState);
         state = state.setValue(ON_STAIR, onStair);
         return onStair
-                ? state.setValue(BlockStateProperties.HORIZONTAL_FACING, groundState.getValue(StairBlock.FACING))
-                : state;
+            ? state.setValue(BlockStateProperties.HORIZONTAL_FACING, groundState.getValue(StairBlock.FACING))
+            : state;
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks,
-                                     BlockPos pos, Direction direction, BlockPos neighborPos,
-                                     BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader level,
+        ScheduledTickAccess ticks,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
         if (direction == Direction.DOWN && state.getValue(ON_STAIR) && !hasSolidGround(level, pos)) {
             ticks.scheduleTick(pos, this, 1);
             return state;
         }
 
-        BlockState updatedState = super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
+        BlockState updatedState = super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState,
+            random);
         if (updatedState.is(Blocks.AIR) || direction != Direction.DOWN)
             return updatedState;
 
         boolean onStair = isValidStair(neighborState);
         updatedState = updatedState.setValue(ON_STAIR, onStair);
         return onStair
-                ? updatedState.setValue(BlockStateProperties.HORIZONTAL_FACING, neighborState.getValue(StairBlock.FACING))
-                : updatedState;
+            ? updatedState.setValue(BlockStateProperties.HORIZONTAL_FACING, neighborState.getValue(StairBlock.FACING))
+            : updatedState;
     }
 
     @Override
@@ -129,7 +136,13 @@ public class SolarPanelBlock extends IndustriaBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (level.isClientSide()) {
             ClientScreenHooks.openSolarPanel(level, pos);
         }

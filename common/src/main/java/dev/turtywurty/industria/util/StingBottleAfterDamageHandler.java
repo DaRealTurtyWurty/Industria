@@ -19,11 +19,10 @@ import java.util.Objects;
 
 public final class StingBottleAfterDamageHandler {
     private static final List<SlotRange> INSERT_SLOT_RANGES = List.of(
-            Objects.requireNonNull(SlotRanges.nameToIds("container.*")),
-            Objects.requireNonNull(SlotRanges.nameToIds("hotbar.*")),
-            Objects.requireNonNull(SlotRanges.nameToIds("inventory.*")),
-            Objects.requireNonNull(SlotRanges.nameToIds("mob.inventory.*"))
-    );
+        Objects.requireNonNull(SlotRanges.nameToIds("container.*")),
+        Objects.requireNonNull(SlotRanges.nameToIds("hotbar.*")),
+        Objects.requireNonNull(SlotRanges.nameToIds("inventory.*")),
+        Objects.requireNonNull(SlotRanges.nameToIds("mob.inventory.*")));
 
     private StingBottleAfterDamageHandler() {
     }
@@ -77,7 +76,7 @@ public final class StingBottleAfterDamageHandler {
                 }
 
                 if (ItemStack.isSameItemSameComponents(inSlot, stack)
-                        && inSlot.getCount() + stack.getCount() <= inSlot.getMaxStackSize()) {
+                    && inSlot.getCount() + stack.getCount() <= inSlot.getMaxStackSize()) {
                     ItemStack copy = inSlot.copy();
                     copy.grow(stack.getCount());
                     if (slotAccess.set(copy))

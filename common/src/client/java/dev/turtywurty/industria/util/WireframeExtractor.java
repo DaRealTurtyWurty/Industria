@@ -5,10 +5,18 @@ import org.joml.Math;
 import org.joml.Vector3fc;
 
 public interface WireframeExtractor {
-    record Line(float x1, float y1, float z1,
-                float x2, float y2, float z2,
-                float normalX, float normalY, float normalZ,
-                int hash) {
+    record Line(
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        float normalX,
+        float normalY,
+        float normalZ,
+        int hash
+    ) {
         /**
          * Creates a line from two points.
          * The normal of the line is calculated by normalising the vector from the first point to the second point.
@@ -61,11 +69,11 @@ public interface WireframeExtractor {
 
             Line line = (Line) obj;
             return Mth.equal(line.x1, x1) &&
-                    Mth.equal(line.y1, y1) &&
-                    Mth.equal(line.z1, z1) &&
-                    Mth.equal(line.x2, x2) &&
-                    Mth.equal(line.y2, y2) &&
-                    Mth.equal(line.z2, z2);
+                Mth.equal(line.y1, y1) &&
+                Mth.equal(line.z1, z1) &&
+                Mth.equal(line.x2, x2) &&
+                Mth.equal(line.y2, y2) &&
+                Mth.equal(line.z2, z2);
         }
     }
 }

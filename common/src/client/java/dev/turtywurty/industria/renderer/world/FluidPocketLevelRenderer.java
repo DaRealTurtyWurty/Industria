@@ -20,7 +20,7 @@ public class FluidPocketLevelRenderer implements IndustriaLevelRenderer {
 
     @Override
     public void render(LevelRenderContext context) {
-        if(!DebugRenderingRegistry.debugRendering)
+        if (!DebugRenderingRegistry.debugRendering)
             return;
 
         Player player = Minecraft.getInstance().player;
@@ -31,14 +31,13 @@ public class FluidPocketLevelRenderer implements IndustriaLevelRenderer {
             return;
 
         List<WorldFluidPocketsState.FluidPocket> nearbyFluidPockets = FLUID_POCKETS.get(player.level().dimension())
-                .stream()
-                .filter(fluidPocket -> fluidPocket.isWithinDistance(player.blockPosition(), 64))
-                .toList();
+            .stream()
+            .filter(fluidPocket -> fluidPocket.isWithinDistance(player.blockPosition(), 64))
+            .toList();
 
         PoseStack matrixStack = context.poseStack();
         if (matrixStack == null)
             return;
-
 
         Level world = player.level();
         if (world == null)

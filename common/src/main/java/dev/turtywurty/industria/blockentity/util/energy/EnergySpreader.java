@@ -18,8 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface EnergySpreader {
-    static long simulateInsertion(ResourceStorage<ResourceVariant<UnitResource>> storage,
-                                  long amount, TransferContext outer) {
+    static long simulateInsertion(
+        ResourceStorage<ResourceVariant<UnitResource>> storage,
+        long amount,
+        TransferContext outer
+    ) {
         try (TransferTransactionScope inner = outer.openNested()) {
             return storage.insert(SimpleEnergyStorage.ENERGY, amount, inner);
         }
@@ -41,7 +44,7 @@ public interface EnergySpreader {
                 continue;
 
             ResourceStorage<ResourceVariant<UnitResource>> storage = TransferType.ENERGY.lookup(
-                    world, outputPos, direction.getOpposite());
+                world, outputPos, direction.getOpposite());
             if (storage == null || !storage.supportsInsertion())
                 continue;
 
@@ -65,8 +68,9 @@ public interface EnergySpreader {
                 totalInserted += inserted;
             }
 
-            if (totalInserted < totalExtractable)
+            if (totalInserted < totalExtractable) {
                 energyStorage.insertInternal(totalExtractable - totalInserted, transaction);
+            }
 
             transaction.commit();
 

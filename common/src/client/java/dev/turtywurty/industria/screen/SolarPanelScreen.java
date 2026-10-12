@@ -16,16 +16,17 @@ import java.util.List;
 
 public class SolarPanelScreen extends Screen {
     public static final String ENERGY_TOOLTIP_KEY = "container." + Industria.MOD_ID + ".solar_panel.energy";
-    public static final String ENERGY_OUTPUT_TOOLTIP_KEY = "container." + Industria.MOD_ID + ".solar_panel.energy_output";
+    public static final String ENERGY_OUTPUT_TOOLTIP_KEY = "container." + Industria.MOD_ID
+        + ".solar_panel.energy_output";
     public static final String SUNLIGHT_TOOLTIP_KEY = "container." + Industria.MOD_ID + ".solar_panel.sunlight";
     public static final Component NIGHT_NOTICE_TEXT = Component.translatable(
-            "container." + Industria.MOD_ID + ".solar_panel.notice.night").withColor(0xFF5555);
+        "container." + Industria.MOD_ID + ".solar_panel.notice.night").withColor(0xFF5555);
     public static final Component THUNDERING_NOTICE_TEXT = Component.translatable(
-            "container." + Industria.MOD_ID + ".solar_panel.notice.thundering").withColor(0xFF5555);
+        "container." + Industria.MOD_ID + ".solar_panel.notice.thundering").withColor(0xFF5555);
     public static final Component RAINING_NOTICE_TEXT = Component.translatable(
-            "container." + Industria.MOD_ID + ".solar_panel.notice.raining").withColor(0xFF5555);
+        "container." + Industria.MOD_ID + ".solar_panel.notice.raining").withColor(0xFF5555);
     public static final Component LOW_LIGHT_NOTICE_TEXT = Component.translatable(
-            "container." + Industria.MOD_ID + ".solar_panel.notice.low_light").withColor(0xFF5555);
+        "container." + Industria.MOD_ID + ".solar_panel.notice.low_light").withColor(0xFF5555);
 
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/solar_panel.png");
     private static final int BACKGROUND_WIDTH = 176;
@@ -52,31 +53,33 @@ public class SolarPanelScreen extends Screen {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
 
         int energySize = Mth.ceil(getEnergyPercent() * 66);
-        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energySize, this.leftPos + 164, this.topPos + 76, 0xFFD4AF37);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energySize, this.leftPos + 164, this.topPos + 76,
+            0xFFD4AF37);
 
         int energyOutputSize = Mth.ceil(getEnergyPerTickPercent() * 21);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 36, this.topPos + 33 + 21 - energyOutputSize, 176, 21 - energyOutputSize, 21, energyOutputSize);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 36, this.topPos + 33 + 21 - energyOutputSize, 176,
+            21 - energyOutputSize, 21, energyOutputSize);
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         super.extractRenderState(context, mouseX, mouseY, delta);
-        context.text(this.font, this.title, this.leftPos + (BACKGROUND_WIDTH - this.font.width(this.title)) / 2, this.topPos + 6, 0xFF404040, false);
+        context.text(this.font, this.title, this.leftPos + (BACKGROUND_WIDTH - this.font.width(this.title)) / 2,
+            this.topPos + 6, 0xFF404040, false);
         extractTooltips(context, mouseX, mouseY);
     }
 
     private void extractTooltips(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         if (isHovering(144, 10, 20, 66, mouseX, mouseY)) {
             context.setTooltipForNextFrame(this.font,
-                    Component.translatable(ENERGY_TOOLTIP_KEY, getEnergy(), getMaxEnergy()), mouseX, mouseY);
+                Component.translatable(ENERGY_TOOLTIP_KEY, getEnergy(), getMaxEnergy()), mouseX, mouseY);
         }
 
         if (isHovering(36, 33, 21, 21, mouseX, mouseY)) {
             List<Component> tooltip = new ArrayList<>(List.of(
-                    Component.translatable(ENERGY_OUTPUT_TOOLTIP_KEY, getEnergyPerTick()),
-                    Component.translatable(SUNLIGHT_TOOLTIP_KEY,
-                            (int) Mth.clamp(getEnergyPerTickPercent() * 100, 0, 100))
-            ));
+                Component.translatable(ENERGY_OUTPUT_TOOLTIP_KEY, getEnergyPerTick()),
+                Component.translatable(SUNLIGHT_TOOLTIP_KEY,
+                    (int) Mth.clamp(getEnergyPerTickPercent() * 100, 0, 100))));
 
             if (this.minecraft != null && this.minecraft.level != null) {
                 Level level = this.minecraft.level;
@@ -113,7 +116,7 @@ public class SolarPanelScreen extends Screen {
 
     private boolean isHovering(int x, int y, int width, int height, double mouseX, double mouseY) {
         return mouseX >= this.leftPos + x && mouseX < this.leftPos + x + width
-                && mouseY >= this.topPos + y && mouseY < this.topPos + y + height;
+            && mouseY >= this.topPos + y && mouseY < this.topPos + y + height;
     }
 
     private long getEnergy() {

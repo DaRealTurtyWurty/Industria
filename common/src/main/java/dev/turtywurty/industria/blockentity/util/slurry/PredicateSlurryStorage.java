@@ -11,9 +11,12 @@ public class PredicateSlurryStorage extends SyncingSlurryStorage {
     private final Predicate<ResourceVariant<Slurry>> canInsert;
     private final Predicate<ResourceVariant<Slurry>> canExtract;
 
-    public PredicateSlurryStorage(BlockEntity blockEntity, long capacity,
-                                  Predicate<ResourceVariant<Slurry>> canInsert,
-                                  Predicate<ResourceVariant<Slurry>> canExtract) {
+    public PredicateSlurryStorage(
+        BlockEntity blockEntity,
+        long capacity,
+        Predicate<ResourceVariant<Slurry>> canInsert,
+        Predicate<ResourceVariant<Slurry>> canExtract
+    ) {
         super(blockEntity, capacity);
         this.canInsert = canInsert;
         this.canExtract = canExtract;

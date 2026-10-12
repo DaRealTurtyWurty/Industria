@@ -20,7 +20,15 @@ public class MoldCastRenderState implements GuiElementRenderState {
     private final Matrix3x2f pose;
     private final @Nullable ScreenRectangle scissorArea;
 
-    public MoldCastRenderState(TextureAtlasSprite sprite, DynamicTexture maskTexture, int x, int y, int size, Matrix3x2fc pose, @Nullable ScreenRectangle scissorArea) {
+    public MoldCastRenderState(
+        TextureAtlasSprite sprite,
+        DynamicTexture maskTexture,
+        int x,
+        int y,
+        int size,
+        Matrix3x2fc pose,
+        @Nullable ScreenRectangle scissorArea
+    ) {
         this.sprite = sprite;
         this.maskTexture = maskTexture;
         this.x = x;
@@ -33,21 +41,21 @@ public class MoldCastRenderState implements GuiElementRenderState {
     @Override
     public void buildVertices(VertexConsumer vertexConsumer) {
         vertexConsumer.addVertexWith2DPose(this.pose, x, y)
-                .setColor(0xFFFFFFFF)
-                .setUv(sprite.getU0(), sprite.getV0())
-                .setUv2(0, 0);
+            .setColor(0xFFFFFFFF)
+            .setUv(sprite.getU0(), sprite.getV0())
+            .setUv2(0, 0);
         vertexConsumer.addVertexWith2DPose(this.pose, x, y + size)
-                .setColor(0xFFFFFFFF)
-                .setUv(sprite.getU0(), sprite.getV1())
-                .setUv2(0, 1);
+            .setColor(0xFFFFFFFF)
+            .setUv(sprite.getU0(), sprite.getV1())
+            .setUv2(0, 1);
         vertexConsumer.addVertexWith2DPose(this.pose, x + size, y + size)
-                .setColor(0xFFFFFFFF)
-                .setUv(sprite.getU1(), sprite.getV1())
-                .setUv2(1, 1);
+            .setColor(0xFFFFFFFF)
+            .setUv(sprite.getU1(), sprite.getV1())
+            .setUv2(1, 1);
         vertexConsumer.addVertexWith2DPose(this.pose, x + size, y)
-                .setColor(0xFFFFFFFF)
-                .setUv(sprite.getU1(), sprite.getV0())
-                .setUv2(1, 0);
+            .setColor(0xFFFFFFFF)
+            .setUv(sprite.getU1(), sprite.getV0())
+            .setUv2(1, 0);
     }
 
     @Override
@@ -59,9 +67,8 @@ public class MoldCastRenderState implements GuiElementRenderState {
     public TextureSetup textureSetup() {
         AbstractTexture atlas = Minecraft.getInstance().getTextureManager().getTexture(this.sprite.atlasLocation());
         return TextureSetup.doubleTexture(
-                atlas.getTextureView(), atlas.getSampler(),
-                this.maskTexture.getTextureView(), this.maskTexture.getSampler()
-        );
+            atlas.getTextureView(), atlas.getSampler(),
+            this.maskTexture.getTextureView(), this.maskTexture.getSampler());
     }
 
     @Override

@@ -58,12 +58,14 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 // output:
 // aluminium hydroxide (gibbsite) (item)
 // sodium carbonate (item) - by-product
-public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crystallizer");
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
-
 
     private int progress;
     private int maxProgress;
@@ -105,8 +107,10 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
     public CrystallizerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.CRYSTALLIZER.get(), ModBlockEntityTypes.CRYSTALLIZER.get(), pos, state);
 
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 5, $ -> !isRunning()), Direction.SOUTH);
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET, $ -> !isRunning()), Direction.UP);
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 5, _ -> !isRunning()),
+            Direction.SOUTH);
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET, _ -> !isRunning()),
+            Direction.UP);
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.NORTH);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.EAST);
@@ -236,7 +240,9 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
 
             update();
         } else {
-            int progressModifier = (this.catalystUsesLeft > 0 && recipe.catalyst().testForRecipe(catalystItemStack)) ? 4 : 1;
+            int progressModifier = (this.catalystUsesLeft > 0 && recipe.catalyst().testForRecipe(catalystItemStack))
+                ? 4
+                : 1;
             this.progress += progressModifier;
 
             int modifiedMaxProgress = this.maxProgress / progressModifier;
@@ -289,19 +295,19 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
         this.maxProgress = view.getIntOr("MaxProgress", 0);
 
         this.currentRecipeId = view.read("CurrentRecipe", RECIPE_CODEC)
-                .orElse(null);
+            .orElse(null);
 
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
-                .orElse(ItemStack.EMPTY);
+            .orElse(ItemStack.EMPTY);
 
         this.byproductItemStack = view.read("ByproductItemStack", ItemStack.CODEC)
-                .orElse(ItemStack.EMPTY);
+            .orElse(ItemStack.EMPTY);
 
         this.catalystUsesLeft = view.getIntOr("CatalystUsesLeft", 0);
         this.maxCatalystUses = view.getIntOr("MaxCatalystUses", 0);
 
         this.nextOutputItemStack = view.read("NextOutputStack", ItemStack.CODEC)
-                .orElse(ItemStack.EMPTY);
+            .orElse(ItemStack.EMPTY);
     }
 
     private Optional<RecipeHolder<CrystallizerRecipe>> getCurrentRecipe(CrystallizerRecipeInput recipeInput) {
@@ -316,9 +322,9 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
             return null;
 
         return (CrystallizerRecipe) serverWorld.recipeAccess()
-                .byKey(recipeId)
-                .map(RecipeHolder::value)
-                .orElse(null);
+            .byKey(recipeId)
+            .map(RecipeHolder::value)
+            .orElse(null);
     }
 
     @Override
@@ -333,7 +339,8 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new CrystallizerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
+        return new CrystallizerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.properties);
     }
 
     public SyncingFluidStorage getFluidProvider(Direction side) {
@@ -379,14 +386,14 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.FLUID, this::getCrystalFluidStorage)
-                .at(new BlockPos(0, 3, 0));
+            .at(new BlockPos(0, 3, 0));
         ports.input(TransferType.FLUID, this::getWaterFluidStorage)
-                .wherePosition(offset -> offset.getY() == 3 && offset.getZ() == 1);
+            .wherePosition(offset -> offset.getY() == 3 && offset.getZ() == 1);
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
-                .wherePosition(offset -> offset.getY() == 0 && offset.getX() == -1);
+            .wherePosition(offset -> offset.getY() == 0 && offset.getX() == -1);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.NORTH))
-                .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == -1);
+            .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == -1);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.EAST))
-                .wherePosition(offset -> offset.getY() == 0 && offset.getX() == 1);
+            .wherePosition(offset -> offset.getY() == 0 && offset.getX() == 1);
     }
 }

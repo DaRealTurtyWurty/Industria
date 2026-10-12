@@ -28,23 +28,25 @@ public class FluidTankScreen extends AbstractContainerScreen<FluidTankScreenHand
         this.inventoryLabelY = this.imageHeight - 94;
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getFluidTank())
-                .bounds(this.leftPos + 78, this.topPos + 14, 20, 46)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 78, this.topPos + 14, 20, 46)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
 
         this.toggleButton = addRenderableWidget(CycleButton.onOffBuilder(this.menu.getBlockEntity().isExtractMode())
-                .displayOnlyValue()
-                .withSprite((_, value) -> value ? Identifier.withDefaultNamespace("widget/locked_button") : Identifier.withDefaultNamespace("widget/unlocked_button"))
-                .create(this.leftPos + 8, this.topPos + 14, 20, 20, Component.empty(),
-                        (_, value) ->
-                                NetworkService.get().sendToServer(new FluidTankChangeExtractModePayload(!value))));
+            .displayOnlyValue()
+            .withSprite((_, value) -> value
+                ? Identifier.withDefaultNamespace("widget/locked_button")
+                : Identifier.withDefaultNamespace("widget/unlocked_button"))
+            .create(this.leftPos + 8, this.topPos + 14, 20, 20, Component.empty(),
+                (_, value) -> NetworkService.get().sendToServer(new FluidTankChangeExtractModePayload(!value))));
     }
 
     @Override
     protected void containerTick() {
         super.containerTick();
-        if (this.toggleButton != null)
+        if (this.toggleButton != null) {
             this.toggleButton.setValue(this.menu.getBlockEntity().isExtractMode());
+        }
     }
 
     @Override

@@ -130,9 +130,9 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
 
     public SmelteryControllerBlockEntity.SmelteryChamber getChamber() {
         if (this.controllerPos == null
-                || this.level == null
-                || !this.level.isLoaded(this.controllerPos)
-                || !(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
+            || this.level == null
+            || !this.level.isLoaded(this.controllerPos)
+            || !(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
             return null;
 
         return controller.getChamberForOutlet(this.worldPosition);
@@ -140,11 +140,11 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
 
     private boolean canTap() {
         if (this.controllerPos == null
-                || this.level == null
-                || !this.level.isLoaded(this.controllerPos)
-                || isRemoved()
-                || !(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller)
-                || controller.isRemoved())
+            || this.level == null
+            || !this.level.isLoaded(this.controllerPos)
+            || isRemoved()
+            || !(this.level.getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller)
+            || controller.isRemoved())
             return false;
 
         return controller.canTapOutput(this.worldPosition);
@@ -234,7 +234,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
         }
 
         if (moved == 0 || storage.getAmount() <= 0 || !receiver.isAcceptingFluid()
-                || fluidStorage.getAmount() >= fluidStorage.capacity(0, resource)) {
+            || fluidStorage.getAmount() >= fluidStorage.capacity(0, resource)) {
             stopPouring();
         }
     }

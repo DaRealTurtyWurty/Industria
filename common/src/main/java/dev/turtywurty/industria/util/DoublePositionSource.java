@@ -20,16 +20,15 @@ import java.util.Optional;
  */
 public record DoublePositionSource(double x, double y, double z) implements PositionSource {
     public static final MapCodec<DoublePositionSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.DOUBLE.fieldOf("x").forGetter(DoublePositionSource::x),
-            Codec.DOUBLE.fieldOf("y").forGetter(DoublePositionSource::y),
-            Codec.DOUBLE.fieldOf("z").forGetter(DoublePositionSource::z)
-    ).apply(instance, DoublePositionSource::new));
+        Codec.DOUBLE.fieldOf("x").forGetter(DoublePositionSource::x),
+        Codec.DOUBLE.fieldOf("y").forGetter(DoublePositionSource::y),
+        Codec.DOUBLE.fieldOf("z").forGetter(DoublePositionSource::z)).apply(instance, DoublePositionSource::new));
 
     public static final StreamCodec<ByteBuf, DoublePositionSource> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.DOUBLE, DoublePositionSource::x,
-            ByteBufCodecs.DOUBLE, DoublePositionSource::y,
-            ByteBufCodecs.DOUBLE, DoublePositionSource::z,
-            DoublePositionSource::new);
+        ByteBufCodecs.DOUBLE, DoublePositionSource::x,
+        ByteBufCodecs.DOUBLE, DoublePositionSource::y,
+        ByteBufCodecs.DOUBLE, DoublePositionSource::z,
+        DoublePositionSource::new);
 
     @Override
     public Optional<Vec3> getPosition(Level world) {

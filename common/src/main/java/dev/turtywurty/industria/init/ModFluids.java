@@ -54,10 +54,9 @@ public class ModFluids {
 
     public static FluidRegistryObject<MoltenFluid.Still, MoltenFluid.Flowing> registerMoltenFluid(String name) {
         var fluid = registerFluid(
-                name,
-                MoltenFluid.Still::new,
-                MoltenFluid.Flowing::new
-        );
+            name,
+            MoltenFluid.Still::new,
+            MoltenFluid.Flowing::new);
         MOLTEN_FLUIDS.put(name, fluid);
         return fluid;
     }
@@ -68,16 +67,15 @@ public class ModFluids {
 
     public static FluidRegistryObject<IndustriaFluid.Still, IndustriaFluid.Flowing> registerFluid(String name) {
         return registerFluid(
-                name,
-                IndustriaFluid.Still::new,
-                IndustriaFluid.Flowing::new
-        );
+            name,
+            IndustriaFluid.Still::new,
+            IndustriaFluid.Flowing::new);
     }
 
     public static <S extends IndustriaFluid, F extends IndustriaFluid> FluidRegistryObject<S, F> registerFluid(
-            String name,
-            FluidRegistryObject.IndustriaFluidFactory<S> stillFactory,
-            FluidRegistryObject.IndustriaFluidFactory<F> flowingFactory
+        String name,
+        FluidRegistryObject.IndustriaFluidFactory<S> stillFactory,
+        FluidRegistryObject.IndustriaFluidFactory<F> flowingFactory
     ) {
         AtomicReference<RegistrationHandle<Fluid, S>> stillRef = new AtomicReference<>();
         AtomicReference<RegistrationHandle<Fluid, F>> flowingRef = new AtomicReference<>();
@@ -85,49 +83,39 @@ public class ModFluids {
         AtomicReference<RegistrationHandle<Block, LiquidBlock>> blockRef = new AtomicReference<>();
 
         var still = REGISTRIES.registerFluid(
-                Industria.id(name),
-                () -> stillFactory.create(
-                        () -> stillRef.get().get(),
-                        () -> flowingRef.get().get(),
-                        () -> bucketRef.get().get(),
-                        () -> blockRef.get().get()
-                )
-        );
+            Industria.id(name),
+            () -> stillFactory.create(
+                () -> stillRef.get().get(),
+                () -> flowingRef.get().get(),
+                () -> bucketRef.get().get(),
+                () -> blockRef.get().get()));
         stillRef.set(still);
 
         var flowing = REGISTRIES.registerFluid(
-                Industria.id("flowing_" + name),
-                () -> flowingFactory.create(
-                        () -> stillRef.get().get(),
-                        () -> flowingRef.get().get(),
-                        () -> bucketRef.get().get(),
-                        () -> blockRef.get().get()
-                )
-        );
+            Industria.id("flowing_" + name),
+            () -> flowingFactory.create(
+                () -> stillRef.get().get(),
+                () -> flowingRef.get().get(),
+                () -> bucketRef.get().get(),
+                () -> blockRef.get().get()));
         flowingRef.set(flowing);
 
-        RegistrationHandle<Item, BucketItem> bucket =
-                REGISTRIES.registerItem(
-                        Industria.id(name + "_bucket"),
-                        () -> new BucketItem(
-                                still.get(),
-                                new Item.Properties()
-                                        .stacksTo(1)
-                                        .craftRemainder(Items.BUCKET)
-                                        .setId(bucketRef.get().key())
-                        )
-                );
+        RegistrationHandle<Item, BucketItem> bucket = REGISTRIES.registerItem(
+            Industria.id(name + "_bucket"),
+            () -> new BucketItem(
+                still.get(),
+                new Item.Properties()
+                    .stacksTo(1)
+                    .craftRemainder(Items.BUCKET)
+                    .setId(bucketRef.get().key())));
         bucketRef.set(bucket);
 
-        RegistrationHandle<Block, LiquidBlock> block =
-                REGISTRIES.registerBlock(
-                        Industria.id(name),
-                        () -> new RegisteredLiquidBlock(
-                                still.get(),
-                                BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)
-                                        .setId(blockRef.get().key())
-                        )
-                );
+        RegistrationHandle<Block, LiquidBlock> block = REGISTRIES.registerBlock(
+            Industria.id(name),
+            () -> new RegisteredLiquidBlock(
+                still.get(),
+                BlockBehaviour.Properties.ofFullCopy(Blocks.WATER)
+                    .setId(blockRef.get().key())));
         blockRef.set(block);
 
         return new FluidRegistryObject<>(still, flowing, bucket, block);

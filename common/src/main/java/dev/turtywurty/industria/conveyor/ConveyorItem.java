@@ -15,39 +15,39 @@ import java.util.UUID;
 
 public class ConveyorItem {
     public static final MapCodec<ConveyorItem> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            UUIDUtil.CODEC.fieldOf("id").forGetter(ConveyorItem::getId),
-            ItemStack.CODEC.fieldOf("stack").forGetter(ConveyorItem::getStack),
-            BlockPos.CODEC.fieldOf("position").forGetter(ConveyorItem::getPosition),
-            Codec.INT.fieldOf("progress").forGetter(ConveyorItem::getProgress),
-            Codec.STRING.optionalFieldOf("selected_output_id", "").forGetter(ConveyorItem::getSerializedSelectedOutputId),
-            Codec.STRING.optionalFieldOf("selected_anchor_route_id", "").forGetter(ConveyorItem::getSerializedSelectedAnchorRouteId)
-    ).apply(instance, (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
-        var item = new ConveyorItem(id);
-        item.setStack(stack);
-        item.setPosition(position);
-        item.setProgress(progress);
-        item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
-        item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
-        return item;
-    }));
+        UUIDUtil.CODEC.fieldOf("id").forGetter(ConveyorItem::getId),
+        ItemStack.CODEC.fieldOf("stack").forGetter(ConveyorItem::getStack),
+        BlockPos.CODEC.fieldOf("position").forGetter(ConveyorItem::getPosition),
+        Codec.INT.fieldOf("progress").forGetter(ConveyorItem::getProgress),
+        Codec.STRING.optionalFieldOf("selected_output_id", "").forGetter(ConveyorItem::getSerializedSelectedOutputId),
+        Codec.STRING.optionalFieldOf("selected_anchor_route_id", "")
+            .forGetter(ConveyorItem::getSerializedSelectedAnchorRouteId))
+        .apply(instance, (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
+            var item = new ConveyorItem(id);
+            item.setStack(stack);
+            item.setPosition(position);
+            item.setProgress(progress);
+            item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
+            item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
+            return item;
+        }));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorItem> STREAM_CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, ConveyorItem::getId,
-            ItemStack.STREAM_CODEC, ConveyorItem::getStack,
-            BlockPos.STREAM_CODEC, ConveyorItem::getPosition,
-            ByteBufCodecs.INT, ConveyorItem::getProgress,
-            ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedOutputId,
-            ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedAnchorRouteId,
-            (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
-                var item = new ConveyorItem(id);
-                item.setStack(stack);
-                item.setPosition(position);
-                item.setProgress(progress);
-                item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
-                item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
-                return item;
-            }
-    );
+        UUIDUtil.STREAM_CODEC, ConveyorItem::getId,
+        ItemStack.STREAM_CODEC, ConveyorItem::getStack,
+        BlockPos.STREAM_CODEC, ConveyorItem::getPosition,
+        ByteBufCodecs.INT, ConveyorItem::getProgress,
+        ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedOutputId,
+        ByteBufCodecs.STRING_UTF8, ConveyorItem::getSerializedSelectedAnchorRouteId,
+        (id, stack, position, progress, selectedOutputId, selectedAnchorRouteId) -> {
+            var item = new ConveyorItem(id);
+            item.setStack(stack);
+            item.setPosition(position);
+            item.setProgress(progress);
+            item.setSelectedOutputId(deserializeSelectedRouteId(selectedOutputId));
+            item.setSelectedAnchorRouteId(deserializeSelectedRouteId(selectedAnchorRouteId));
+            return item;
+        });
 
     private final UUID id;
     private ItemStack stack;

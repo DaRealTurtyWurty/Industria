@@ -22,21 +22,21 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 public final class IndustriaDataGeneration {
     public static final DataGenerationSpec SPEC = DataGeneration.spec(Industria.MOD_ID)
-            .woodSet(ModWoodSets.RUBBER)
-            .recipes(IndustriaRecipes::generate)
-            .lootTables(Set.of(), List.of(new LootTableProvider.SubProviderEntry(
-                    IndustriaBlockLootTables::new,
-                    LootContextParamSets.BLOCK)))
-            .blockTags((registries, tags) -> IndustriaBlockTags.generate(tags))
-            .itemTags((registries, tags) -> IndustriaItemTags.generate(tags))
-            .fluidTags((registries, tags) -> IndustriaFluidTags.generate(tags))
-            .entityTypeTags((registries, tags) -> IndustriaEntityTypeTags.generate(tags))
-            .language("en_us", IndustriaEnglishLanguage::generate)
-            .vanillaModels(IndustriaModels::generate)
-            .damageTypes(ModDamageTypes::bootstrap)
-            .worldGeneration(Registries.FEATURE, ModConfiguredFeatures::bootstrap)
-            .worldGeneration(Registries.PLACED_FEATURE, ModPlacedFeatures::bootstrap)
-            .build();
+        .woodSet(ModWoodSets.RUBBER)
+        .recipes(IndustriaRecipes::generate)
+        .lootTables(Set.of(), List.of(new LootTableProvider.SubProviderEntry(
+            IndustriaBlockLootTables::new,
+            LootContextParamSets.BLOCK)))
+        .blockTags((registries, tags) -> IndustriaBlockTags.generate(tags))
+        .itemTags((registries, tags) -> IndustriaItemTags.generate(tags))
+        .fluidTags((registries, tags) -> IndustriaFluidTags.generate(tags))
+        .entityTypeTags((registries, tags) -> IndustriaEntityTypeTags.generate(tags))
+        .language("en_us", IndustriaEnglishLanguage::generate)
+        .vanillaModels(IndustriaModels::generate)
+        .damageTypes(ModDamageTypes::bootstrap)
+        .worldGeneration(Registries.FEATURE, ModConfiguredFeatures::bootstrap)
+        .worldGeneration(Registries.PLACED_FEATURE, ModPlacedFeatures::bootstrap)
+        .build();
 
     private IndustriaDataGeneration() {
     }

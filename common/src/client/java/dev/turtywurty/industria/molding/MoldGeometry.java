@@ -54,8 +54,8 @@ public final class MoldGeometry {
         MoldTextureCutout cutout = pattern.cutoutTextures().get(polygonIndex);
         if (cutout != null) {
             try (InputStream stream = Minecraft.getInstance().getResourceManager()
-                    .getResourceOrThrow(cutout.texture()).open();
-                 NativeImage image = NativeImage.read(stream)) {
+                .getResourceOrThrow(cutout.texture()).open();
+                NativeImage image = NativeImage.read(stream)) {
                 int width = image.getWidth();
                 int height = image.getHeight();
                 int[] pixels = new int[width * height];

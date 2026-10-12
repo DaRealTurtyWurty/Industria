@@ -12,11 +12,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public record MetalDefinition(
-        Identifier id,
-        float meltingTemperature,
-        @Nullable Supplier<? extends Block> storageBlock,
-        FluidRegistryObject<?, ?> moltenFluid,
-        Map<MetalForm, Supplier<? extends Item>> items
+    Identifier id,
+    float meltingTemperature,
+    @Nullable Supplier<? extends Block> storageBlock,
+    FluidRegistryObject<?, ?> moltenFluid,
+    Map<MetalForm, Supplier<? extends Item>> items
 ) {
     public MetalDefinition {
         Objects.requireNonNull(id, "id cannot be null");

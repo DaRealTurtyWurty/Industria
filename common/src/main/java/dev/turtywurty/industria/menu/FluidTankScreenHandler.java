@@ -33,17 +33,24 @@ public class FluidTankScreenHandler extends AbstractContainerMenu implements Tic
     private final SimpleContainer inventory;
 
     public FluidTankScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        this(syncId, playerInventory, (FluidTankBlockEntity) playerInventory.player.level().getBlockEntity(payload.pos()), new SimpleContainer(1));
+        this(syncId, playerInventory,
+            (FluidTankBlockEntity) playerInventory.player.level().getBlockEntity(payload.pos()),
+            new SimpleContainer(1));
     }
 
     public FluidTankScreenHandler(int syncId, Inventory playerInventory, FluidTankBlockEntity blockEntity) {
         this(syncId, playerInventory, blockEntity, new PredicateSimpleInventory(
-                blockEntity,
-                1,
-                PredicateSimpleInventory.createEmptyFluidPredicate(() -> blockEntity.getFluidTank().getResource())));
+            blockEntity,
+            1,
+            PredicateSimpleInventory.createEmptyFluidPredicate(() -> blockEntity.getFluidTank().getResource())));
     }
 
-    public FluidTankScreenHandler(int syncId, Inventory playerInventory, FluidTankBlockEntity blockEntity, SimpleContainer inventory) {
+    public FluidTankScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        FluidTankBlockEntity blockEntity,
+        SimpleContainer inventory
+    ) {
         super(ModMenuTypes.FLUID_TANK.get(), syncId);
 
         this.blockEntity = blockEntity;
@@ -64,23 +71,20 @@ public class FluidTankScreenHandler extends AbstractContainerMenu implements Tic
     public ItemStack quickMoveStack(Player player, int slotIndex) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasItem()) {
+        if (!slot.hasItem())
             return stack;
-        }
 
         ItemStack stackInSlot = slot.getItem();
         stack = stackInSlot.copy();
 
         if (slotIndex < 1) {
             if (!moveItemStackTo(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
-                if (!moveItemStackTo(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
+                if (!moveItemStackTo(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false))
                     return ItemStack.EMPTY;
-                }
             }
         } else {
-            if (!moveItemStackTo(stackInSlot, 0, 1, false)) {
+            if (!moveItemStackTo(stackInSlot, 0, 1, false))
                 return ItemStack.EMPTY;
-            }
         }
 
         if (stackInSlot.isEmpty()) {
@@ -113,8 +117,8 @@ public class FluidTankScreenHandler extends AbstractContainerMenu implements Tic
             if (stack.isEmpty())
                 return;
 
-            ResourceStorage<ResourceVariant<Fluid>> fluidStorage =
-                    MutableItemContext.ofContainerSlot(this.inventory, 0).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> fluidStorage = MutableItemContext.ofContainerSlot(this.inventory, 0)
+                .find(StorageKeys.FLUID);
             if (fluidStorage == null || !fluidStorage.supportsInsertion())
                 return;
 
@@ -131,18 +135,20 @@ public class FluidTankScreenHandler extends AbstractContainerMenu implements Tic
             if (stack.isEmpty())
                 return;
 
-            ResourceStorage<ResourceVariant<Fluid>> fluidStorage =
-                    MutableItemContext.ofContainerSlot(this.inventory, 0).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> fluidStorage = MutableItemContext.ofContainerSlot(this.inventory, 0)
+                .find(StorageKeys.FLUID);
             if (fluidStorage == null || !fluidStorage.supportsExtraction())
                 return;
 
             try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                Optional<ResourceVariant<Fluid>> variantToExtract = TransferUtils.findFirstVariant(fluidStorage, fluidTank.getResource());
+                Optional<ResourceVariant<Fluid>> variantToExtract = TransferUtils.findFirstVariant(fluidStorage,
+                    fluidTank.getResource());
                 if (variantToExtract.filter(variant -> !variant.isBlank()).isEmpty())
                     return;
 
                 ResourceVariant<Fluid> fluidVariant = variantToExtract.get();
-                long extracted = fluidStorage.extract(fluidVariant, fluidTank.getCapacity() - fluidTank.getAmount(), transaction);
+                long extracted = fluidStorage.extract(fluidVariant, fluidTank.getCapacity() - fluidTank.getAmount(),
+                    transaction);
                 if (extracted > 0) {
                     fluidTank.insertInternal(fluidVariant, extracted, transaction);
                     transaction.commit();

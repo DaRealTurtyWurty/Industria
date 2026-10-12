@@ -14,10 +14,10 @@ import java.util.UUID;
 
 public class SlurryPipeNetworkManager extends PipeNetworkManager<ResourceVariant<Slurry>, SlurryPipeNetwork> {
     public static final MapCodec<SlurryPipeNetworkManager> CODEC = PipeNetworkManager.createCodec(
-            SlurryPipeNetwork.CODEC.codec(), SlurryPipeNetworkManager::new);
+        SlurryPipeNetwork.CODEC.codec(), SlurryPipeNetworkManager::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SlurryPipeNetworkManager> STREAM_CODEC =
-            PipeNetworkManager.createPacketCodec(SlurryPipeNetwork.STREAM_CODEC, SlurryPipeNetworkManager::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SlurryPipeNetworkManager> STREAM_CODEC = PipeNetworkManager
+        .createPacketCodec(SlurryPipeNetwork.STREAM_CODEC, SlurryPipeNetworkManager::new);
 
     public SlurryPipeNetworkManager() {
         super(ModPipeNetworkManagerTypes.SLURRY.get(), TransferType.SLURRY);

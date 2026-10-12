@@ -21,16 +21,15 @@ import java.util.function.Predicate;
 
 public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) {
     public static final Codec<IndustriaIngredient> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(
-            instance -> instance.group(
-                    Ingredient.NON_AIR_HOLDER_SET_CODEC.fieldOf("ingredients").forGetter(IndustriaIngredient::entries),
-                    StackData.CODEC.optionalFieldOf("data", StackData.EMPTY).forGetter(IndustriaIngredient::stackData)
-            ).apply(instance, IndustriaIngredient::new)
-    ));
+        instance -> instance.group(
+            Ingredient.NON_AIR_HOLDER_SET_CODEC.fieldOf("ingredients").forGetter(IndustriaIngredient::entries),
+            StackData.CODEC.optionalFieldOf("data", StackData.EMPTY).forGetter(IndustriaIngredient::stackData))
+            .apply(instance, IndustriaIngredient::new)));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, IndustriaIngredient> STREAM_CODEC =
-            StreamCodec.composite(ByteBufCodecs.holderSet(Registries.ITEM), IndustriaIngredient::entries,
-                    StackData.STREAM_CODEC, IndustriaIngredient::stackData,
-                    IndustriaIngredient::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, IndustriaIngredient> STREAM_CODEC = StreamCodec.composite(
+        ByteBufCodecs.holderSet(Registries.ITEM), IndustriaIngredient::entries,
+        StackData.STREAM_CODEC, IndustriaIngredient::stackData,
+        IndustriaIngredient::new);
 
     public static final IndustriaIngredient EMPTY = new IndustriaIngredient(HolderSet.direct(), StackData.EMPTY);
 
@@ -48,7 +47,8 @@ public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) 
     }
 
     public List<ItemStack> getMatchingStacks() {
-        return this.entries.stream().map(item -> new ItemStack(item, this.stackData.count(), this.stackData.components())).toList();
+        return this.entries.stream()
+            .map(item -> new ItemStack(item, this.stackData.count(), this.stackData.components())).toList();
     }
 
     public boolean testForRecipe(ItemStack stack) {
@@ -56,16 +56,14 @@ public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) 
     }
 
     public boolean testForRecipeIgnoreComponents(ItemStack stack) {
-        return this.entries.stream().anyMatch(item ->
-                stack.getItem() == item.value() &&
-                        this.stackData.count() >= stack.getCount());
+        return this.entries.stream().anyMatch(item -> stack.getItem() == item.value() &&
+            this.stackData.count() >= stack.getCount());
     }
 
     public boolean test(ItemStack stack, boolean matchCount, boolean matchComponents) {
-        return this.entries.stream().anyMatch(item ->
-                stack.getItem() == item.value() &&
-                        (!matchCount || stack.getCount() == this.stackData.count()) &&
-                        (!matchComponents || this.stackData.components().equals(stack.getComponentsPatch())));
+        return this.entries.stream().anyMatch(item -> stack.getItem() == item.value() &&
+            (!matchCount || stack.getCount() == this.stackData.count()) &&
+            (!matchComponents || this.stackData.components().equals(stack.getComponentsPatch())));
     }
 
     public boolean test(ItemStack stack) {
@@ -73,10 +71,9 @@ public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) 
     }
 
     public boolean test(ItemStack stack, Predicate<Integer> countPredicate) {
-        return this.entries.stream().anyMatch(item ->
-                stack.getItem() == item.value() &&
-                        countPredicate.test(stackData().count()) &&
-                        this.stackData.components().equals(stack.getComponentsPatch()));
+        return this.entries.stream().anyMatch(item -> stack.getItem() == item.value() &&
+            countPredicate.test(stackData().count()) &&
+            this.stackData.components().equals(stack.getComponentsPatch()));
     }
 
     public static Predicate<Integer> countEquals(int count) {
@@ -100,15 +97,15 @@ public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) 
     }
 
     public SlotDisplay toDisplay() {
-        if(isEmpty())
+        if (isEmpty())
             return SlotDisplay.Empty.INSTANCE;
 
         return new SlotDisplay.Composite(
-                getMatchingStacks().stream()
-                        .map(ItemStackTemplate::fromNonEmptyStack)
-                        .map(SlotDisplay.ItemStackSlotDisplay::new)
-                        .map(SlotDisplay.class::cast)
-                        .toList());
+            getMatchingStacks().stream()
+                .map(ItemStackTemplate::fromNonEmptyStack)
+                .map(SlotDisplay.ItemStackSlotDisplay::new)
+                .map(SlotDisplay.class::cast)
+                .toList());
     }
 
     public boolean isEmpty() {
@@ -117,16 +114,16 @@ public record IndustriaIngredient(HolderSet<Item> entries, StackData stackData) 
 
     public record StackData(int count, @NotNull DataComponentPatch components) {
         public static final Codec<StackData> CODEC = RecordCodecBuilder.create(
-                instance -> instance.group(
-                        Codec.INT.fieldOf("count").orElse(1).forGetter(StackData::count),
-                        DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(StackData::components)
-                ).apply(instance, StackData::new)
-        );
+            instance -> instance.group(
+                Codec.INT.fieldOf("count").orElse(1).forGetter(StackData::count),
+                DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
+                    .forGetter(StackData::components))
+                .apply(instance, StackData::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, StackData> STREAM_CODEC =
-                StreamCodec.composite(ByteBufCodecs.INT, StackData::count,
-                        DataComponentPatch.STREAM_CODEC, StackData::components,
-                        StackData::new);
+        public static final StreamCodec<RegistryFriendlyByteBuf, StackData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, StackData::count,
+            DataComponentPatch.STREAM_CODEC, StackData::components,
+            StackData::new);
 
         public static final StackData EMPTY = new StackData(1, DataComponentPatch.EMPTY);
 

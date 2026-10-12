@@ -21,23 +21,23 @@ public class CrusherBlock extends IndustriaBlock {
 
     private static final VoxelShape VOXEL_SHAPE = Shapes.box(0, 0, 0, 1, 0.625, 1);
     private static final float[][] PARTICLE_OFFSETS = {
-            {0.25f, 0.25f},
-            {0.75f, 0.25f},
-            {0.25f, 0.75f},
-            {0.75f, 0.75f}
+        {0.25f, 0.25f},
+        {0.75f, 0.25f},
+        {0.25f, 0.75f},
+        {0.75f, 0.75f}
     };
 
     public CrusherBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasComparatorOutput()
-                .constantShape(VOXEL_SHAPE)
-                .hasBlockEntityRenderer()
-                .addStateProperty(RUNNING, false)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.CRUSHER)
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()
-                        .shouldTick()));
+            .hasHorizontalFacing()
+            .hasComparatorOutput()
+            .constantShape(VOXEL_SHAPE)
+            .hasBlockEntityRenderer()
+            .addStateProperty(RUNNING, false)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.CRUSHER)
+                .rightClickToOpenGui()
+                .dropContentsOnBreak()
+                .shouldTick()));
     }
 
     @Override
@@ -46,7 +46,8 @@ public class CrusherBlock extends IndustriaBlock {
             if (blockEntity.getProgress() <= 0)
                 return;
 
-            ItemStack stack = blockEntity.getWrappedContainerStorage().getInventory(CrusherBlockEntity.INPUT_SLOT).getItem(0);
+            ItemStack stack = blockEntity.getWrappedContainerStorage().getInventory(CrusherBlockEntity.INPUT_SLOT)
+                .getItem(0);
             if (stack.isEmpty())
                 return;
 
@@ -54,11 +55,10 @@ public class CrusherBlock extends IndustriaBlock {
             for (float[] offset : PARTICLE_OFFSETS) {
                 for (int i = 0; i < random.nextInt(2) + 1; i++) {
                     world.addParticle(particle,
-                            pos.getX() + offset[0] + Mth.nextFloat(random, -0.1f, 0.1f),
-                            pos.getY() + 0.55 + Mth.nextFloat(random, -0.1f, 0.1f),
-                            pos.getZ() + offset[1] + Mth.nextFloat(random, -0.1f, 0.1f),
-                            0, 0, 0
-                    );
+                        pos.getX() + offset[0] + Mth.nextFloat(random, -0.1f, 0.1f),
+                        pos.getY() + 0.55 + Mth.nextFloat(random, -0.1f, 0.1f),
+                        pos.getZ() + offset[1] + Mth.nextFloat(random, -0.1f, 0.1f),
+                        0, 0, 0);
                 }
             }
         }

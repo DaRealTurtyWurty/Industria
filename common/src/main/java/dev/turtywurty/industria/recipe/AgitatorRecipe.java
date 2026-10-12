@@ -27,8 +27,12 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public record AgitatorRecipe(List<AgitatorInput> inputs, List<AgitatorOutput> outputs,
-                             int processTime, int energyCost) implements Recipe<AgitatorRecipeInput> {
+public record AgitatorRecipe(
+    List<AgitatorInput> inputs,
+    List<AgitatorOutput> outputs,
+    int processTime,
+    int energyCost
+) implements Recipe<AgitatorRecipeInput> {
     public static final int INPUT_COUNT = 3;
     public static final int OUTPUT_COUNT = 2;
 
@@ -57,9 +61,8 @@ public record AgitatorRecipe(List<AgitatorInput> inputs, List<AgitatorOutput> ou
     public ItemStack assemble(AgitatorRecipeInput input) {
         var random = new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong());
         for (AgitatorOutput output : this.outputs) {
-            if (output.type() == AgitatorPortType.ITEM) {
+            if (output.type() == AgitatorPortType.ITEM)
                 return output.item().createStack(random);
-            }
         }
 
         return ItemStack.EMPTY;
@@ -88,12 +91,11 @@ public record AgitatorRecipe(List<AgitatorInput> inputs, List<AgitatorOutput> ou
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new AgitatorRecipeDisplay(
-                this.inputs.stream().map(AgitatorInput::toDisplay).toList(),
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.AGITATOR.get().asItem()),
-                this.outputs.stream().map(AgitatorOutput::toDisplay).toList(),
-                this.processTime,
-                this.energyCost
-        ));
+            this.inputs.stream().map(AgitatorInput::toDisplay).toList(),
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.AGITATOR.get().asItem()),
+            this.outputs.stream().map(AgitatorOutput::toDisplay).toList(),
+            this.processTime,
+            this.energyCost));
     }
 
     @Override
@@ -124,56 +126,64 @@ public record AgitatorRecipe(List<AgitatorInput> inputs, List<AgitatorOutput> ou
     }
 
     private static final MapCodec<AgitatorRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ExtraCodecs.listOf(AgitatorInput.CODEC).fieldOf("inputs").forGetter(AgitatorRecipe::inputs),
-            ExtraCodecs.listOf(AgitatorOutput.CODEC).fieldOf("outputs").forGetter(AgitatorRecipe::outputs),
-            Codec.INT.fieldOf("process_time").orElse(200).forGetter(AgitatorRecipe::processTime),
-            Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(AgitatorRecipe::energyCost)
-    ).apply(instance, AgitatorRecipe::new));
+        ExtraCodecs.listOf(AgitatorInput.CODEC).fieldOf("inputs").forGetter(AgitatorRecipe::inputs),
+        ExtraCodecs.listOf(AgitatorOutput.CODEC).fieldOf("outputs").forGetter(AgitatorRecipe::outputs),
+        Codec.INT.fieldOf("process_time").orElse(200).forGetter(AgitatorRecipe::processTime),
+        Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(AgitatorRecipe::energyCost))
+        .apply(instance, AgitatorRecipe::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorRecipe> STREAM_CODEC = StreamCodec.composite(
-            ExtraStreamCodecs.listOf(AgitatorInput.STREAM_CODEC), AgitatorRecipe::inputs,
-            ExtraStreamCodecs.listOf(AgitatorOutput.STREAM_CODEC), AgitatorRecipe::outputs,
-            ByteBufCodecs.INT, AgitatorRecipe::processTime,
-            ByteBufCodecs.INT, AgitatorRecipe::energyCost,
-            AgitatorRecipe::new
-    );
+        ExtraStreamCodecs.listOf(AgitatorInput.STREAM_CODEC), AgitatorRecipe::inputs,
+        ExtraStreamCodecs.listOf(AgitatorOutput.STREAM_CODEC), AgitatorRecipe::outputs,
+        ByteBufCodecs.INT, AgitatorRecipe::processTime,
+        ByteBufCodecs.INT, AgitatorRecipe::energyCost,
+        AgitatorRecipe::new);
 
     public static final RecipeSerializer<AgitatorRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    public record AgitatorInput(AgitatorPortType type, IndustriaIngredient item, FluidStack fluid, GasStack gas,
-                                SlurryStack slurry) {
+    public record AgitatorInput(
+        AgitatorPortType type,
+        IndustriaIngredient item,
+        FluidStack fluid,
+        GasStack gas,
+        SlurryStack slurry
+    ) {
         public static final MapCodec<AgitatorInput> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                AgitatorPortType.CODEC.fieldOf("type").forGetter(AgitatorInput::type),
-                IndustriaIngredient.CODEC.optionalFieldOf("item", IndustriaIngredient.EMPTY).forGetter(AgitatorInput::item),
-                FluidStack.CODEC.codec().optionalFieldOf("fluid", FluidStack.EMPTY).forGetter(AgitatorInput::fluid),
-                GasStack.CODEC.codec().optionalFieldOf("gas", GasStack.EMPTY).forGetter(AgitatorInput::gas),
-                SlurryStack.CODEC.codec().optionalFieldOf("slurry", SlurryStack.EMPTY).forGetter(AgitatorInput::slurry)
-        ).apply(instance, AgitatorInput::new));
+            AgitatorPortType.CODEC.fieldOf("type").forGetter(AgitatorInput::type),
+            IndustriaIngredient.CODEC.optionalFieldOf("item", IndustriaIngredient.EMPTY).forGetter(AgitatorInput::item),
+            FluidStack.CODEC.codec().optionalFieldOf("fluid", FluidStack.EMPTY).forGetter(AgitatorInput::fluid),
+            GasStack.CODEC.codec().optionalFieldOf("gas", GasStack.EMPTY).forGetter(AgitatorInput::gas),
+            SlurryStack.CODEC.codec().optionalFieldOf("slurry", SlurryStack.EMPTY).forGetter(AgitatorInput::slurry))
+            .apply(instance, AgitatorInput::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorInput> STREAM_CODEC = StreamCodec.composite(
-                AgitatorPortType.STREAM_CODEC, AgitatorInput::type,
-                IndustriaIngredient.STREAM_CODEC, AgitatorInput::item,
-                FluidStack.STREAM_CODEC, AgitatorInput::fluid,
-                GasStack.STREAM_CODEC, AgitatorInput::gas,
-                SlurryStack.STREAM_CODEC, AgitatorInput::slurry,
-                AgitatorInput::new
-        );
+            AgitatorPortType.STREAM_CODEC, AgitatorInput::type,
+            IndustriaIngredient.STREAM_CODEC, AgitatorInput::item,
+            FluidStack.STREAM_CODEC, AgitatorInput::fluid,
+            GasStack.STREAM_CODEC, AgitatorInput::gas,
+            SlurryStack.STREAM_CODEC, AgitatorInput::slurry,
+            AgitatorInput::new);
 
         public AgitatorInput {
-            if (type == null)
+            if (type == null) {
                 type = AgitatorPortType.ITEM;
+            }
 
-            if (item == null)
+            if (item == null) {
                 item = IndustriaIngredient.EMPTY;
+            }
 
-            if (fluid == null)
+            if (fluid == null) {
                 fluid = FluidStack.EMPTY;
+            }
 
-            if (gas == null)
+            if (gas == null) {
                 gas = GasStack.EMPTY;
+            }
 
-            if (slurry == null)
+            if (slurry == null) {
                 slurry = SlurryStack.EMPTY;
+            }
         }
 
         public boolean matches(AgitatorPortStack stack) {
@@ -214,40 +224,50 @@ public record AgitatorRecipe(List<AgitatorInput> inputs, List<AgitatorOutput> ou
         }
     }
 
-    public record AgitatorOutput(AgitatorPortType type, OutputItemStack item, FluidStack fluid, GasStack gas,
-                                 SlurryStack slurry) {
+    public record AgitatorOutput(
+        AgitatorPortType type,
+        OutputItemStack item,
+        FluidStack fluid,
+        GasStack gas,
+        SlurryStack slurry
+    ) {
         public static final MapCodec<AgitatorOutput> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                AgitatorPortType.CODEC.fieldOf("type").forGetter(AgitatorOutput::type),
-                OutputItemStack.CODEC.codec().optionalFieldOf("item", OutputItemStack.EMPTY).forGetter(AgitatorOutput::item),
-                FluidStack.CODEC.codec().optionalFieldOf("fluid", FluidStack.EMPTY).forGetter(AgitatorOutput::fluid),
-                GasStack.CODEC.codec().optionalFieldOf("gas", GasStack.EMPTY).forGetter(AgitatorOutput::gas),
-                SlurryStack.CODEC.codec().optionalFieldOf("slurry", SlurryStack.EMPTY).forGetter(AgitatorOutput::slurry)
-        ).apply(instance, AgitatorOutput::new));
+            AgitatorPortType.CODEC.fieldOf("type").forGetter(AgitatorOutput::type),
+            OutputItemStack.CODEC.codec().optionalFieldOf("item", OutputItemStack.EMPTY)
+                .forGetter(AgitatorOutput::item),
+            FluidStack.CODEC.codec().optionalFieldOf("fluid", FluidStack.EMPTY).forGetter(AgitatorOutput::fluid),
+            GasStack.CODEC.codec().optionalFieldOf("gas", GasStack.EMPTY).forGetter(AgitatorOutput::gas),
+            SlurryStack.CODEC.codec().optionalFieldOf("slurry", SlurryStack.EMPTY).forGetter(AgitatorOutput::slurry))
+            .apply(instance, AgitatorOutput::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorOutput> STREAM_CODEC = StreamCodec.composite(
-                AgitatorPortType.STREAM_CODEC, AgitatorOutput::type,
-                OutputItemStack.STREAM_CODEC, AgitatorOutput::item,
-                FluidStack.STREAM_CODEC, AgitatorOutput::fluid,
-                GasStack.STREAM_CODEC, AgitatorOutput::gas,
-                SlurryStack.STREAM_CODEC, AgitatorOutput::slurry,
-                AgitatorOutput::new
-        );
+            AgitatorPortType.STREAM_CODEC, AgitatorOutput::type,
+            OutputItemStack.STREAM_CODEC, AgitatorOutput::item,
+            FluidStack.STREAM_CODEC, AgitatorOutput::fluid,
+            GasStack.STREAM_CODEC, AgitatorOutput::gas,
+            SlurryStack.STREAM_CODEC, AgitatorOutput::slurry,
+            AgitatorOutput::new);
 
         public AgitatorOutput {
-            if (type == null)
+            if (type == null) {
                 type = AgitatorPortType.ITEM;
+            }
 
-            if (item == null)
+            if (item == null) {
                 item = OutputItemStack.EMPTY;
+            }
 
-            if (fluid == null)
+            if (fluid == null) {
                 fluid = FluidStack.EMPTY;
+            }
 
-            if (gas == null)
+            if (gas == null) {
                 gas = GasStack.EMPTY;
+            }
 
-            if (slurry == null)
+            if (slurry == null) {
                 slurry = SlurryStack.EMPTY;
+            }
         }
 
         public SlotDisplay toDisplay() {
@@ -258,34 +278,40 @@ public record AgitatorRecipe(List<AgitatorInput> inputs, List<AgitatorOutput> ou
         }
     }
 
-    public record AgitatorRecipeDisplay(List<SlotDisplay> inputs, SlotDisplay craftingStation,
-                                        List<SlotDisplay> outputs, int processTime,
-                                        int energyCost) implements RecipeDisplay {
-        public static final MapCodec<AgitatorRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    public record AgitatorRecipeDisplay(
+        List<SlotDisplay> inputs,
+        SlotDisplay craftingStation,
+        List<SlotDisplay> outputs,
+        int processTime,
+        int energyCost
+    ) implements RecipeDisplay {
+        public static final MapCodec<AgitatorRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
+            .group(
                 SlotDisplay.CODEC.listOf().fieldOf("inputs").forGetter(AgitatorRecipeDisplay::inputs),
                 SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(AgitatorRecipeDisplay::craftingStation),
                 SlotDisplay.CODEC.listOf().fieldOf("outputs").forGetter(AgitatorRecipeDisplay::outputs),
                 Codec.INT.fieldOf("process_time").orElse(200).forGetter(AgitatorRecipeDisplay::processTime),
-                Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(AgitatorRecipeDisplay::energyCost)
-        ).apply(instance, AgitatorRecipeDisplay::new));
+                Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(AgitatorRecipeDisplay::energyCost))
+            .apply(instance, AgitatorRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 ExtraStreamCodecs.listOf(SlotDisplay.STREAM_CODEC), AgitatorRecipeDisplay::inputs,
                 SlotDisplay.STREAM_CODEC, AgitatorRecipeDisplay::craftingStation,
                 ExtraStreamCodecs.listOf(SlotDisplay.STREAM_CODEC), AgitatorRecipeDisplay::outputs,
                 ByteBufCodecs.INT, AgitatorRecipeDisplay::processTime,
                 ByteBufCodecs.INT, AgitatorRecipeDisplay::energyCost,
-                AgitatorRecipeDisplay::new
-        );
+                AgitatorRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<AgitatorRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<AgitatorRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+            STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
             return this.outputs.stream()
-                    .filter(display -> display != SlotDisplay.Empty.INSTANCE)
-                    .findFirst()
-                    .orElse(SlotDisplay.Empty.INSTANCE);
+                .filter(display -> display != SlotDisplay.Empty.INSTANCE)
+                .findFirst()
+                .orElse(SlotDisplay.Empty.INSTANCE);
         }
 
         @Override

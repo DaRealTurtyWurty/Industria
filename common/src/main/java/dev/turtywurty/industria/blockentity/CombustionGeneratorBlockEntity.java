@@ -39,7 +39,12 @@ import org.jetbrains.annotations.Nullable;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
-public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
+public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload>,
+        EnergySpreader,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("combustion_generator");
 
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();

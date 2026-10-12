@@ -13,19 +13,41 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public record FluidData(@NotNull TagKey<Fluid> fluidTag, boolean hardensConcrete, boolean canCoralSurvive,
-                        boolean canMoisturizeFarmland, boolean canKelpSurvive, boolean affectsRespawnAnchor,
-                        boolean canSeagrassSurvive, boolean canSpongeAbsorb, boolean preventsBlockSpreading,
-                        boolean canSugarCaneUse, boolean shouldDispenseBoatsAbove, boolean canSwim,
-                        @NotNull BiFunction<Entity, Double, Float> fluidMovementSpeed, boolean applyWaterMovement,
-                        @NotNull Consumer<ItemEntity> applyBuoyancy, boolean canCauseDrowning, boolean canDrownedSpawn,
-                        boolean canEndermanTeleportInto, boolean canGuardianSpawn,
-                        boolean useSkeletonHorseSubmergedSound, boolean canWaterCreatureSpawn,
-                        boolean shouldWitchDrinkWaterBreathing, boolean willZombiesConvert,
-                        boolean canTropicalFishSpawn, boolean shouldTurtlesFavor, boolean shouldTurtleHelmetActivate,
-                        boolean affectsBlockBreakSpeed, boolean canBoatsWork, boolean shouldEvaporateInUltrawarm,
-                        @NotNull ParticleOptions bubbleParticle, @NotNull ParticleOptions splashParticle,
-                        boolean shouldBreakLanding, boolean shouldExtinguish) {
+public record FluidData(
+    @NotNull TagKey<Fluid> fluidTag,
+    boolean hardensConcrete,
+    boolean canCoralSurvive,
+    boolean canMoisturizeFarmland,
+    boolean canKelpSurvive,
+    boolean affectsRespawnAnchor,
+    boolean canSeagrassSurvive,
+    boolean canSpongeAbsorb,
+    boolean preventsBlockSpreading,
+    boolean canSugarCaneUse,
+    boolean shouldDispenseBoatsAbove,
+    boolean canSwim,
+    @NotNull BiFunction<Entity, Double, Float> fluidMovementSpeed,
+    boolean applyWaterMovement,
+    @NotNull Consumer<ItemEntity> applyBuoyancy,
+    boolean canCauseDrowning,
+    boolean canDrownedSpawn,
+    boolean canEndermanTeleportInto,
+    boolean canGuardianSpawn,
+    boolean useSkeletonHorseSubmergedSound,
+    boolean canWaterCreatureSpawn,
+    boolean shouldWitchDrinkWaterBreathing,
+    boolean willZombiesConvert,
+    boolean canTropicalFishSpawn,
+    boolean shouldTurtlesFavor,
+    boolean shouldTurtleHelmetActivate,
+    boolean affectsBlockBreakSpeed,
+    boolean canBoatsWork,
+    boolean shouldEvaporateInUltrawarm,
+    @NotNull ParticleOptions bubbleParticle,
+    @NotNull ParticleOptions splashParticle,
+    boolean shouldBreakLanding,
+    boolean shouldExtinguish
+) {
     public static final Map<Fluid, FluidData> FLUID_DATA = new HashMap<>();
 
     public static void registerFluidData(@NotNull Fluid fluid, @NotNull FluidData.Builder fluidData) {
@@ -237,15 +259,15 @@ public record FluidData(@NotNull TagKey<Fluid> fluidTag, boolean hardensConcrete
 
         public FluidData build() {
             return new FluidData(this.fluidTag, this.hardensConcrete, this.canCoralSurvive, this.canMoisturizeFarmland,
-                    this.canKelpSurvive, this.affectsRespawnAnchor, this.canSeagrassSurvive, this.canSpongeAbsorb,
-                    this.preventsBlockSpreading, this.canSugarCaneUse, this.shouldDispenseBoatsAbove, this.canSwim,
-                    this.fluidMovementSpeed, this.applyWaterMovement, this.applyBuoyancy, this.canCauseDrowning,
-                    this.canDrownedSpawn, this.canEndermanTeleportInto, this.canGuardianSpawn,
-                    this.useSkeletonHorseSubmergedSound, this.canWaterCreatureSpawn, this.shouldWitchDrinkWaterBreathing,
-                    this.willZombiesConvert, this.canTropicalFishSpawn, this.shouldTurtlesFavor,
-                    this.shouldTurtleHelmetActivate, this.affectsBlockBreakSpeed, this.canBoatsWork,
-                    this.shouldEvaporateInUltrawarm, this.bubbleParticle, this.splashParticle, this.shouldBreakLanding,
-                    this.shouldExtinguish);
+                this.canKelpSurvive, this.affectsRespawnAnchor, this.canSeagrassSurvive, this.canSpongeAbsorb,
+                this.preventsBlockSpreading, this.canSugarCaneUse, this.shouldDispenseBoatsAbove, this.canSwim,
+                this.fluidMovementSpeed, this.applyWaterMovement, this.applyBuoyancy, this.canCauseDrowning,
+                this.canDrownedSpawn, this.canEndermanTeleportInto, this.canGuardianSpawn,
+                this.useSkeletonHorseSubmergedSound, this.canWaterCreatureSpawn, this.shouldWitchDrinkWaterBreathing,
+                this.willZombiesConvert, this.canTropicalFishSpawn, this.shouldTurtlesFavor,
+                this.shouldTurtleHelmetActivate, this.affectsBlockBreakSpeed, this.canBoatsWork,
+                this.shouldEvaporateInUltrawarm, this.bubbleParticle, this.splashParticle, this.shouldBreakLanding,
+                this.shouldExtinguish);
         }
     }
 }

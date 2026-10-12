@@ -58,7 +58,10 @@ import org.jetbrains.annotations.Nullable;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("drill");
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -79,20 +82,24 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
     public DrillBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.DRILL.get(), ModBlockEntityTypes.DRILL.get(), pos, state);
 
-        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable) {
-            @Override
-            public int getMaxStackSize() {
-                return 1;
-            }
-        }, Direction.UP);
-        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.is(ModBlocks.MOTOR.get().asItem())) {
-            @Override
-            public int getMaxStackSize() {
-                return 1;
-            }
-        }, Direction.NORTH);
+        this.wrappedContainerStorage.addInventory(
+            new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.getItem() instanceof DrillHeadable) {
+                @Override
+                public int getMaxStackSize() {
+                    return 1;
+                }
+            }, Direction.UP);
+        this.wrappedContainerStorage.addInventory(
+            new PredicateSimpleInventory(this, 1, (stack, slot) -> stack.is(ModBlocks.MOTOR.get().asItem())) {
+                @Override
+                public int getMaxStackSize() {
+                    return 1;
+                }
+            }, Direction.NORTH);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.DOWN);
-        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 3, (stack, slot) -> stack.getItem() instanceof BlockItem), Direction.SOUTH);
+        this.wrappedContainerStorage.addInventory(
+            new PredicateSimpleInventory(this, 3, (stack, slot) -> stack.getItem() instanceof BlockItem),
+            Direction.SOUTH);
 
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0));
     }
@@ -112,8 +119,9 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         if (this.level == null || this.level.isClientSide())
             return;
 
-        if (this.ticks++ == 0)
+        if (this.ticks++ == 0) {
             update();
+        }
 
         if (getDrillStack().isEmpty())
             return;
@@ -143,7 +151,8 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         long previousEnergy = energyStorage.getAmount();
 
         if ((this.drilling || this.retracting) && energyStorage.getAmount() > 0) {
-            long energyRequired = MotorBlockEntity.calculateEnergyForRotation(this.currentRotationSpeed, this.targetRotationSpeed);
+            long energyRequired = MotorBlockEntity.calculateEnergyForRotation(this.currentRotationSpeed,
+                this.targetRotationSpeed);
             if (energyStorage.getAmount() < energyRequired) {
                 this.currentRotationSpeed = MotorBlockEntity.calculateRotationSpeed(energyStorage.getAmount());
                 setEnergy(energyStorage, 0);
@@ -161,15 +170,17 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
             boolean currentPaused = this.isPaused;
             this.isPaused = true;
 
-            if (!currentPaused)
+            if (!currentPaused) {
                 update();
+            }
         }
 
         if (this.isPaused)
             return;
 
-        if (previousRotationSpeed != this.currentRotationSpeed || previousEnergy != energyStorage.getAmount())
+        if (previousRotationSpeed != this.currentRotationSpeed || previousEnergy != energyStorage.getAmount()) {
             update();
+        }
 
         DrillHeadable drillHeadable = (DrillHeadable) getDrillStack().getItem();
 
@@ -181,19 +192,24 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
             this.drillYOffset = drillHeadable.updateRetracting(this, this.drillYOffset);
         }
 
-        if (!this.drilling && !this.retracting && this.drillYOffset != 1.0F && this.overflowMethod == OverflowMethod.PAUSE && this.overflowStacks.isEmpty()) {
+        if (!this.drilling && !this.retracting && this.drillYOffset != 1.0F
+            && this.overflowMethod == OverflowMethod.PAUSE && this.overflowStacks.isEmpty()) {
             this.drilling = true;
             update();
         }
 
         if (this.drillYOffset != currentDrillYOffset) {
-            this.drillHeadAABB = new AABB(this.worldPosition.getX(), this.worldPosition.getY() + 1 + this.drillYOffset, this.worldPosition.getZ(), this.worldPosition.getX() + 1, this.worldPosition.getY() + this.drillYOffset, this.worldPosition.getZ() + 1);
+            this.drillHeadAABB = new AABB(this.worldPosition.getX(), this.worldPosition.getY() + 1 + this.drillYOffset,
+                this.worldPosition.getZ(), this.worldPosition.getX() + 1, this.worldPosition.getY() + this.drillYOffset,
+                this.worldPosition.getZ() + 1);
             update();
         }
 
         if (this.drilling) {
-            for (LivingEntity entity : this.level.getEntitiesOfClass(LivingEntity.class, this.drillHeadAABB, LivingEntity::isAlive)) {
-                entity.hurtServer((ServerLevel) this.level, ModDamageTypes.drillDamageSource(this.level.registryAccess()), 5.0F);
+            for (LivingEntity entity : this.level.getEntitiesOfClass(LivingEntity.class, this.drillHeadAABB,
+                LivingEntity::isAlive)) {
+                entity.hurtServer((ServerLevel) this.level,
+                    ModDamageTypes.drillDamageSource(this.level.registryAccess()), 5.0F);
             }
         }
     }
@@ -209,7 +225,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
         this.drillYOffset = view.getFloatOr("DrillYOffset", 0.0F);
         this.overflowMethod = view.read("OverflowMethod", OverflowMethod.CODEC)
-                .orElse(OverflowMethod.VOID);
+            .orElse(OverflowMethod.VOID);
 
         this.overflowStacks.clear();
         for (ItemStack stack : view.listOrEmpty("OverflowStacks", ItemStack.CODEC)) {
@@ -223,7 +239,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         this.targetRotationSpeed = view.getFloatOr("TargetRotationSpeed", 0.0F);
 
         this.drillHeadAABB = view.read("DrillHeadAABB", ExtraCodecs.AABB_CODEC)
-                .orElseGet(() -> AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(this.worldPosition)));
+            .orElseGet(() -> AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(this.worldPosition)));
     }
 
     @Override
@@ -266,16 +282,16 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
-                .wherePosition(offset -> offset.getY() == 0
-                        && (offset.getX() != 0 || offset.getZ() != 0));
+            .wherePosition(offset -> offset.getY() == 0
+                && (offset.getX() != 0 || offset.getZ() != 0));
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.UP))
-                .at(new BlockPos(-1, 1, 0));
+            .at(new BlockPos(-1, 1, 0));
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(getFrontDirection()))
-                .at(new BlockPos(1, 1, 0));
+            .at(new BlockPos(1, 1, 0));
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(getBackDirection()))
-                .wherePosition(offset -> offset.getY() == 2);
+            .wherePosition(offset -> offset.getY() == 2);
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .at(new BlockPos(0, 2, 0));
+            .at(new BlockPos(0, 2, 0));
     }
 
     @Override
@@ -370,10 +386,10 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
             return;
 
         List<ItemStack> drops = new ArrayList<>(state.getDrops(new LootParams.Builder(serverWorld)
-                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
-                .withParameter(LootContextParams.BLOCK_STATE, state)
-                .withParameter(LootContextParams.TOOL, Items.DIAMOND_PICKAXE.getDefaultInstance())
-                .withOptionalParameter(LootContextParams.BLOCK_ENTITY, this)));
+            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+            .withParameter(LootContextParams.BLOCK_STATE, state)
+            .withParameter(LootContextParams.TOOL, Items.DIAMOND_PICKAXE.getDefaultInstance())
+            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, this)));
         SimpleContainer inventory = getOutputInventory();
         for (int index = 0; index < drops.size(); index++) {
             ItemStack drop = drops.get(index);
@@ -386,9 +402,9 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
         drops.removeIf(ItemStack::isEmpty);
 
         switch (this.overflowMethod) {
-            case VOID:
+            case VOID :
                 break;
-            case PAUSE:
+            case PAUSE :
                 if (!drops.isEmpty()) {
                     this.drilling = false;
                     this.retracting = false;
@@ -397,10 +413,11 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
                 }
 
                 break;
-            case SPILLAGE:
+            case SPILLAGE :
                 for (ItemStack drop : drops) {
                     if (!drop.isEmpty()) {
-                        Containers.dropItemStack(level, this.worldPosition.getX(), this.worldPosition.getY() + 3.5, this.worldPosition.getZ(), drop);
+                        Containers.dropItemStack(level, this.worldPosition.getX(), this.worldPosition.getY() + 3.5,
+                            this.worldPosition.getZ(), drop);
                     }
                 }
 
@@ -425,9 +442,12 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
     }
 
     public enum OverflowMethod implements IndustriaEnum<OverflowMethod> {
-        VOID, PAUSE, SPILLAGE;
+        VOID,
+        PAUSE,
+        SPILLAGE;
 
-        public static final Codec<OverflowMethod> CODEC = Codec.STRING.xmap(str -> OverflowMethod.valueOf(str.toUpperCase(Locale.ROOT)), OverflowMethod::getSerializedName);
+        public static final Codec<OverflowMethod> CODEC = Codec.STRING
+            .xmap(str -> OverflowMethod.valueOf(str.toUpperCase(Locale.ROOT)), OverflowMethod::getSerializedName);
 
         private final Component text = Component.translatable("industria.overflow_method." + getSerializedName());
 

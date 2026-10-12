@@ -21,22 +21,21 @@ import java.util.UUID;
 
 public class CableNetwork extends PipeNetwork<ResourceVariant<UnitResource>> {
     public static final MapCodec<CableNetwork> CODEC = PipeNetwork.createCodec(
-            Codec.LONG.fieldOf("storageAmount").forGetter(network -> network.storage.amount(0)),
-            (storage, storageAmount) -> PipeStorageUtil.restore(
-                    (CableNetworkEnergyStorage) storage, SimpleEnergyStorage.ENERGY, storageAmount),
-            CableNetwork::new);
+        Codec.LONG.fieldOf("storageAmount").forGetter(network -> network.storage.amount(0)),
+        (storage, storageAmount) -> PipeStorageUtil.restore(
+            (CableNetworkEnergyStorage) storage, SimpleEnergyStorage.ENERGY, storageAmount),
+        CableNetwork::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, CableNetwork> STREAM_CODEC =
-            PipeNetwork.createPacketCodec(
-                    ByteBufCodecs.LONG,
-                    network -> network.storage.amount(0),
-                    (storage, storageAmount) -> PipeStorageUtil.restore(
-                            (CableNetworkEnergyStorage) storage, SimpleEnergyStorage.ENERGY, storageAmount),
-                    CableNetwork::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, CableNetwork> STREAM_CODEC = PipeNetwork.createPacketCodec(
+        ByteBufCodecs.LONG,
+        network -> network.storage.amount(0),
+        (storage, storageAmount) -> PipeStorageUtil.restore(
+            (CableNetworkEnergyStorage) storage, SimpleEnergyStorage.ENERGY, storageAmount),
+        CableNetwork::new);
 
     public static final Codec<Set<CableNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final StreamCodec<RegistryFriendlyByteBuf, Set<CableNetwork>> SET_STREAM_CODEC =
-            ExtraStreamCodecs.setOf(STREAM_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<CableNetwork>> SET_STREAM_CODEC = ExtraStreamCodecs
+        .setOf(STREAM_CODEC);
 
     public CableNetwork(UUID id) {
         super(id, TransferType.ENERGY);

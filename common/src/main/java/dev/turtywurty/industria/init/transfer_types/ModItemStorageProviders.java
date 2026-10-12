@@ -15,31 +15,48 @@ public final class ModItemStorageProviders {
 
     public static void init() {
         TransferService transfers = TransferService.get();
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ALLOY_FURNACE, AlloyFurnaceBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.THERMAL_GENERATOR, ThermalGeneratorBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.BATTERY, BatteryBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.COMBUSTION_GENERATOR, CombustionGeneratorBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CRUSHER, CrusherBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ELECTRIC_FURNACE, ElectricFurnaceBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.MIXER, MixerBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CLARIFIER, ClarifierBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CRYSTALLIZER, CrystallizerBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ROTARY_KILN_CONTROLLER, RotaryKilnControllerBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ELECTROLYZER, ElectrolyzerBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.DRILL, DrillBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.SHAKING_TABLE, ShakingTableBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ARC_FURNACE, ArcFurnaceBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.AGITATOR, AgitatorBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ALLOY_FURNACE,
+            AlloyFurnaceBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.THERMAL_GENERATOR,
+            ThermalGeneratorBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.BATTERY,
+            BatteryBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.COMBUSTION_GENERATOR,
+            CombustionGeneratorBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CRUSHER,
+            CrusherBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ELECTRIC_FURNACE,
+            ElectricFurnaceBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.MIXER,
+            MixerBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CLARIFIER,
+            ClarifierBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CRYSTALLIZER,
+            CrystallizerBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ROTARY_KILN_CONTROLLER,
+            RotaryKilnControllerBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ELECTROLYZER,
+            ElectrolyzerBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.DRILL,
+            DrillBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.SHAKING_TABLE,
+            ShakingTableBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR,
+            CentrifugalConcentratorBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ARC_FURNACE,
+            ArcFurnaceBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.AGITATOR,
+            AgitatorBlockEntity::getInventoryProvider);
         transfers.registerBlockProvider(StorageKeys.ITEM, (level, pos, _, _, _) -> {
-                    if (level instanceof ServerLevel serverLevel)
-                        return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
+            if (level instanceof ServerLevel serverLevel)
+                return LevelConveyorNetworks.getOrCreate(serverLevel).getStorage(serverLevel, pos);
 
-                    return null;
-                }, ModBlocks.CONVEYOR, ModBlocks.SPLITTER_CONVEYOR, ModBlocks.MERGER_CONVEYOR, ModBlocks.ALTERNATOR_CONVEYOR, ModBlocks.HATCH_CONVEYOR,
-                ModBlocks.SIDE_INJECTOR_CONVEYOR, ModBlocks.LADDER_CONVEYOR, ModBlocks.FILTER_CONVEYOR,
-                ModBlocks.MAGNETIC_CONVEYOR, ModBlocks.DROP_CHUTE_CONVEYOR, ModBlocks.DETECTOR_CONVEYOR,
-                ModBlocks.COUNT_CONVEYOR, ModBlocks.DELAY_CONVEYOR, ModBlocks.CONTAINMENT_CONVEYOR);
+            return null;
+        }, ModBlocks.CONVEYOR, ModBlocks.SPLITTER_CONVEYOR, ModBlocks.MERGER_CONVEYOR, ModBlocks.ALTERNATOR_CONVEYOR,
+            ModBlocks.HATCH_CONVEYOR,
+            ModBlocks.SIDE_INJECTOR_CONVEYOR, ModBlocks.LADDER_CONVEYOR, ModBlocks.FILTER_CONVEYOR,
+            ModBlocks.MAGNETIC_CONVEYOR, ModBlocks.DROP_CHUTE_CONVEYOR, ModBlocks.DETECTOR_CONVEYOR,
+            ModBlocks.COUNT_CONVEYOR, ModBlocks.DELAY_CONVEYOR, ModBlocks.CONTAINMENT_CONVEYOR);
 
         transfers.registerBlockProvider(StorageKeys.ITEM, (level, _, _, blockEntity, side) -> {
             if (level instanceof ServerLevel && blockEntity instanceof FeederConveyorBlockEntity feeder)
@@ -48,9 +65,13 @@ public final class ModItemStorageProviders {
             return null;
         }, ModBlocks.FEEDER_CONVEYOR);
 
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CHARGING_HATCH, ChargingHatchBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.FIREBOX, FireboxBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntity::getInventoryProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_TABLE, CastingTableBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CHARGING_HATCH,
+            ChargingHatchBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.FIREBOX,
+            FireboxBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_BASIN,
+            CastingBasinBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.CASTING_TABLE,
+            CastingTableBlockEntity::getInventoryProvider);
     }
 }

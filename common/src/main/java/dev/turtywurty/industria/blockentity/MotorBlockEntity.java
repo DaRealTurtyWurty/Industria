@@ -33,7 +33,10 @@ import java.util.List;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class MotorBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("motor");
 
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
@@ -80,8 +83,9 @@ public class MotorBlockEntity extends IndustriaBlockEntity implements SyncableTi
             this.currentRotationSpeed = Mth.clamp(this.currentRotationSpeed - 0.01F, 0.0F, this.targetRotationSpeed);
         }
 
-        if (previousRotationSpeed != this.currentRotationSpeed)
+        if (previousRotationSpeed != this.currentRotationSpeed) {
             update();
+        }
     }
 
     @Override

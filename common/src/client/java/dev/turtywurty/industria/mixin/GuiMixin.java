@@ -13,10 +13,16 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Mixin(Hud.class)
 public abstract class GuiMixin {
     @ModifyConstant(method = "extractFood", constant = @Constant(intValue = 10))
-    private int industria$modifyFoodIconCount(int original, GuiGraphicsExtractor graphics, Player player, int yLineBase, int xRight) {
+    private int industria$modifyFoodIconCount(
+        int original,
+        GuiGraphicsExtractor graphics,
+        Player player,
+        int yLineBase,
+        int xRight
+    ) {
         int stomachDestructionLevel = AttachmentService.get()
-                .get(AttachmentTarget.entity(player), ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT)
-                .orElse(0);
+            .get(AttachmentTarget.entity(player), ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT)
+            .orElse(0);
         int maxFood = 20 - stomachDestructionLevel * 2;
         return (maxFood + 1) / 2;
     }

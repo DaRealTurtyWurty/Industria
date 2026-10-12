@@ -53,7 +53,7 @@ public class SyncingFluidStorage extends SimpleSingleSlotStorage<ResourceVariant
 
     public boolean canInsert(FluidStack fluidStack) {
         return (getResource().equals(fluidStack.variant()) || getResource().isBlank())
-                && fluidStack.amount() <= this.capacity - getAmount();
+            && fluidStack.amount() <= this.capacity - getAmount();
     }
 
     public boolean canExtract(FluidStack fluidStack) {

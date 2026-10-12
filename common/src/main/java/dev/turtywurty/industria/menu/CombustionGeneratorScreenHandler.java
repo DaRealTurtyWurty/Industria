@@ -10,12 +10,20 @@ import dev.turtywurty.industria.network.BlockPosPayload;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 
-public class CombustionGeneratorScreenHandler extends IndustriaScreenHandler<CombustionGeneratorBlockEntity, BlockPosPayload> {
+public class CombustionGeneratorScreenHandler
+    extends
+        IndustriaScreenHandler<CombustionGeneratorBlockEntity, BlockPosPayload> {
     public CombustionGeneratorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ModMenuTypes.COMBUSTION_GENERATOR.get(), syncId, playerInventory, payload, CombustionGeneratorBlockEntity.class);
+        super(ModMenuTypes.COMBUSTION_GENERATOR.get(), syncId, playerInventory, payload,
+            CombustionGeneratorBlockEntity.class);
     }
 
-    public CombustionGeneratorScreenHandler(int syncId, Inventory playerInventory, CombustionGeneratorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public CombustionGeneratorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        CombustionGeneratorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.COMBUSTION_GENERATOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
@@ -27,7 +35,7 @@ public class CombustionGeneratorScreenHandler extends IndustriaScreenHandler<Com
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
         addSlot(new PredicateSlot(this.wrappedContainerStorage.getInventory(0), 0, 81, 42,
-                itemStack -> this.blockEntity.isValid(itemStack, 0)));
+            itemStack -> this.blockEntity.isValid(itemStack, 0)));
     }
 
     @Override

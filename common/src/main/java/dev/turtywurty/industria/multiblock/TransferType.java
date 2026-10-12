@@ -43,28 +43,29 @@ import java.util.function.Predicate;
  * @param <A> the amount type exposed to existing pipe code
  */
 public class TransferType<S extends ResourceStorage<V>, V extends ResourceVariant<?>, A extends Number>
-        implements PortTransfer<S> {
+    implements
+        PortTransfer<S> {
     private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
-    public static final TransferType<ResourceStorage<ResourceVariant<Item>>, ResourceVariant<Item>, Long> ITEM =
-            standard("item", StorageKeys.ITEM);
+    public static final TransferType<ResourceStorage<ResourceVariant<Item>>, ResourceVariant<Item>, Long> ITEM = standard(
+        "item", StorageKeys.ITEM);
 
-    public static final TransferType<ResourceStorage<ResourceVariant<Fluid>>, ResourceVariant<Fluid>, Long> FLUID =
-            standard("fluid", StorageKeys.FLUID);
+    public static final TransferType<ResourceStorage<ResourceVariant<Fluid>>, ResourceVariant<Fluid>, Long> FLUID = standard(
+        "fluid", StorageKeys.FLUID);
 
-    public static final TransferType<ResourceStorage<ResourceVariant<UnitResource>>, ResourceVariant<UnitResource>, Long> ENERGY =
-            standard("energy", StorageKeys.ENERGY);
+    public static final TransferType<ResourceStorage<ResourceVariant<UnitResource>>, ResourceVariant<UnitResource>, Long> ENERGY = standard(
+        "energy", StorageKeys.ENERGY);
 
-    public static final TransferType<ResourceStorage<ResourceVariant<Slurry>>, ResourceVariant<Slurry>, Long> SLURRY =
-            standard("slurry", SlurryStorage.KEY);
+    public static final TransferType<ResourceStorage<ResourceVariant<Slurry>>, ResourceVariant<Slurry>, Long> SLURRY = standard(
+        "slurry", SlurryStorage.KEY);
 
-    public static final TransferType<ResourceStorage<ResourceVariant<Gas>>, ResourceVariant<Gas>, Long> GAS =
-            standard("gas", GasStorage.KEY);
+    public static final TransferType<ResourceStorage<ResourceVariant<Gas>>, ResourceVariant<Gas>, Long> GAS = standard(
+        "gas", GasStorage.KEY);
 
-    public static final Codec<TransferType<?, ?, ?>> CODEC =
-            Codec.STRING.xmap(TransferType::getByName, TransferType::getName);
-    public static final StreamCodec<RegistryFriendlyByteBuf, TransferType<?, ?, ?>> STREAM_CODEC =
-            StreamCodec.composite(ByteBufCodecs.STRING_UTF8, TransferType::getName, TransferType::getByName);
+    public static final Codec<TransferType<?, ?, ?>> CODEC = Codec.STRING.xmap(TransferType::getByName,
+        TransferType::getName);
+    public static final StreamCodec<RegistryFriendlyByteBuf, TransferType<?, ?, ?>> STREAM_CODEC = StreamCodec
+        .composite(ByteBufCodecs.STRING_UTF8, TransferType::getName, TransferType::getByName);
 
     private final String name;
     private final StorageKey<V> lookup;
@@ -79,16 +80,17 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
     private final Predicate<S> supportsExtract;
 
     public TransferType(
-            @NotNull String name,
-            @NotNull StorageKey<V> lookup,
-            @NotNull InsertExtractFunction<S, V, A> insertFunction,
-            @NotNull InsertExtractFunction<S, V, A> extractFunction,
-            @NotNull Function<S, V> valueGetter,
-            @NotNull A maxAmount,
-            @NotNull Function<Double, A> amountConverter,
-            @NotNull Predicate<V> isBlank,
-            @NotNull Predicate<S> supportsInsert,
-            @NotNull Predicate<S> supportsExtract) {
+        @NotNull String name,
+        @NotNull StorageKey<V> lookup,
+        @NotNull InsertExtractFunction<S, V, A> insertFunction,
+        @NotNull InsertExtractFunction<S, V, A> extractFunction,
+        @NotNull Function<S, V> valueGetter,
+        @NotNull A maxAmount,
+        @NotNull Function<Double, A> amountConverter,
+        @NotNull Predicate<V> isBlank,
+        @NotNull Predicate<S> supportsInsert,
+        @NotNull Predicate<S> supportsExtract
+    ) {
         this.name = Objects.requireNonNull(name, "name");
         this.lookup = Objects.requireNonNull(lookup, "lookup");
         this.insertFunction = Objects.requireNonNull(insertFunction, "insertFunction");
@@ -103,22 +105,21 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
         VALUES.add(this);
     }
 
-    private static <T> TransferType<
-            ResourceStorage<ResourceVariant<T>>, ResourceVariant<T>, Long> standard(
-            String name,
-            StorageKey<ResourceVariant<T>> key) {
+    private static <T> TransferType<ResourceStorage<ResourceVariant<T>>, ResourceVariant<T>, Long> standard(
+        String name,
+        StorageKey<ResourceVariant<T>> key
+    ) {
         return new TransferType<>(
-                name,
-                key,
-                ResourceStorage::insert,
-                ResourceStorage::extract,
-                storage -> firstVariant(storage, key),
-                Long.MAX_VALUE,
-                amount -> (long) Math.ceil(amount),
-                ResourceVariant::isBlank,
-                ResourceStorage::supportsInsertion,
-                ResourceStorage::supportsExtraction
-        );
+            name,
+            key,
+            ResourceStorage::insert,
+            ResourceStorage::extract,
+            storage -> firstVariant(storage, key),
+            Long.MAX_VALUE,
+            amount -> (long) Math.ceil(amount),
+            ResourceVariant::isBlank,
+            ResourceStorage::supportsInsertion,
+            ResourceStorage::supportsExtraction);
     }
 
     @SuppressWarnings("unchecked")
@@ -128,8 +129,9 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
 
     @SuppressWarnings("unchecked")
     private static <T> ResourceVariant<T> firstVariant(
-            ResourceStorage<ResourceVariant<T>> storage,
-            StorageKey<ResourceVariant<T>> key) {
+        ResourceStorage<ResourceVariant<T>> storage,
+        StorageKey<ResourceVariant<T>> key
+    ) {
         if (!storage.hasStableIndices())
             return emptyVariant(key);
         for (int index = 0; index < storage.size(); index++) {
@@ -145,9 +147,9 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
 
     public static TransferType<?, ?, ?> getByName(String name) {
         return VALUES.stream()
-                .filter(transferType -> transferType.name.equals(name))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No TransferType found for name: " + name));
+            .filter(transferType -> transferType.name.equals(name))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No TransferType found for name: " + name));
     }
 
     public StorageKey<V> getLookup() {
@@ -161,16 +163,16 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
     public void pushTo(Level level, BlockPos primaryPos, BlockPos secondaryPos, @Nullable Direction side) {
         BlockEntity primaryBlockEntity = level.getBlockEntity(primaryPos);
         BlockState primaryState = primaryBlockEntity != null
-                ? primaryBlockEntity.getBlockState()
-                : level.getBlockState(primaryPos);
+            ? primaryBlockEntity.getBlockState()
+            : level.getBlockState(primaryPos);
         S primaryStorage = lookup(level, primaryPos, primaryState, primaryBlockEntity, side);
         if (primaryStorage == null || !this.supportsExtract.test(primaryStorage))
             return;
 
         BlockEntity secondaryBlockEntity = level.getBlockEntity(secondaryPos);
         BlockState secondaryState = secondaryBlockEntity != null
-                ? secondaryBlockEntity.getBlockState()
-                : level.getBlockState(secondaryPos);
+            ? secondaryBlockEntity.getBlockState()
+            : level.getBlockState(secondaryPos);
         S secondaryStorage = lookup(level, secondaryPos, secondaryState, secondaryBlockEntity, side);
         if (secondaryStorage == null || !this.supportsInsert.test(secondaryStorage))
             return;
@@ -189,8 +191,9 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
             return;
 
         V value = this.valueGetter.apply(source);
-        if (!this.isBlank.test(value))
+        if (!this.isBlank.test(value)) {
             StorageTransfer.move(source, target, value, this.maxAmount.longValue());
+        }
     }
 
     public @Nullable S lookup(Level level, BlockPos pos, @Nullable Direction direction) {
@@ -199,13 +202,14 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
 
     @SuppressWarnings("unchecked")
     public @Nullable S lookup(
-            Level level,
-            BlockPos pos,
-            @Nullable BlockState state,
-            @Nullable BlockEntity blockEntity,
-            @Nullable Direction direction) {
+        Level level,
+        BlockPos pos,
+        @Nullable BlockState state,
+        @Nullable BlockEntity blockEntity,
+        @Nullable Direction direction
+    ) {
         return (S) TransferService.get().findBlock(
-                this.lookup, level, pos, state, blockEntity, direction);
+            this.lookup, level, pos, state, blockEntity, direction);
     }
 
     @SuppressWarnings("unchecked")
@@ -236,8 +240,9 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
         }
 
         double requested = fraction * available.doubleValue();
-        if (requested > 0)
+        if (requested > 0) {
             StorageTransfer.move(source, target, value, this.amountConverter.apply(requested).longValue());
+        }
     }
 
     public void transferAll(S source, S target) {
@@ -259,8 +264,7 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
     }
 
     @FunctionalInterface
-    public interface InsertExtractFunction<
-            S extends ResourceStorage<V>, V extends ResourceVariant<?>, A extends Number> {
+    public interface InsertExtractFunction<S extends ResourceStorage<V>, V extends ResourceVariant<?>, A extends Number> {
         A function(S storage, V value, A maxAmount, TransferContext transaction);
     }
 }

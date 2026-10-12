@@ -46,7 +46,10 @@ import java.util.Optional;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.*;
 
-public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
+public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("distillation_tower");
 
     private final WrappedContainerStorage<?> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -104,7 +107,8 @@ public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerB
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        return List.of(getInputFluidTank(), getPrimaryOutputFluidTank(), getSecondaryOutputFluidTank(), getEnergyStorage());
+        return List.of(getInputFluidTank(), getPrimaryOutputFluidTank(), getSecondaryOutputFluidTank(),
+            getEnergyStorage());
     }
 
     @Override
@@ -117,7 +121,8 @@ public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerB
             return;
 
         SyncingFluidStorage inputFluidTank = getInputFluidTank();
-        DistillationTowerRecipeInput recipeInput = new DistillationTowerRecipeInput(new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount()));
+        var recipeInput = new DistillationTowerRecipeInput(
+            new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount()));
         if (this.currentRecipeId == null) {
             Optional<RecipeHolder<DistillationTowerRecipe>> recipeEntry = getCurrentRecipe(serverLevel, recipeInput);
             if (recipeEntry.isPresent()) {
@@ -188,8 +193,12 @@ public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerB
         this.maxProgress = 0;
     }
 
-    private Optional<RecipeHolder<DistillationTowerRecipe>> getCurrentRecipe(ServerLevel serverLevel, DistillationTowerRecipeInput recipeInput) {
-        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.DISTILLATION_TOWER.get(), recipeInput, serverLevel);
+    private Optional<RecipeHolder<DistillationTowerRecipe>> getCurrentRecipe(
+        ServerLevel serverLevel,
+        DistillationTowerRecipeInput recipeInput
+    ) {
+        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.DISTILLATION_TOWER.get(), recipeInput,
+            serverLevel);
     }
 
     public SyncingFluidStorage getInputFluidTank() {
@@ -253,8 +262,10 @@ public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerB
         this.progress = view.getIntOr("Progress", 0);
         this.maxProgress = view.getIntOr("MaxProgress", 0);
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE)).orElse(null);
-        this.leftoverPrimaryOutput = view.read("PrimaryLeftoverOutput", FluidStack.CODEC.codec()).orElse(FluidStack.EMPTY);
-        this.leftoverSecondaryOutput = view.read("SecondaryLeftoverOutput", FluidStack.CODEC.codec()).orElse(FluidStack.EMPTY);
+        this.leftoverPrimaryOutput = view.read("PrimaryLeftoverOutput", FluidStack.CODEC.codec())
+            .orElse(FluidStack.EMPTY);
+        this.leftoverSecondaryOutput = view.read("SecondaryLeftoverOutput", FluidStack.CODEC.codec())
+            .orElse(FluidStack.EMPTY);
     }
 
     @Override
@@ -270,17 +281,18 @@ public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerB
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.FLUID, this::getInputFluidTank)
-                .at(new BlockPos(1, 6, 1));
+            .at(new BlockPos(1, 6, 1));
         ports.output(TransferType.FLUID, this::getPrimaryOutputFluidTank)
-                .at(new BlockPos(1, 1, 0));
+            .at(new BlockPos(1, 1, 0));
         ports.output(TransferType.FLUID, this::getSecondaryOutputFluidTank)
-                .at(new BlockPos(1, 1, 2));
+            .at(new BlockPos(1, 1, 2));
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .at(new BlockPos(1, 1, 1));
+            .at(new BlockPos(1, 1, 1));
     }
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new DistillationTowerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.properties);
+        return new DistillationTowerScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.properties);
     }
 }

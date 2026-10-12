@@ -18,14 +18,20 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
         super(ModMenuTypes.CRYSTALLIZER.get(), 4, syncId, playerInv, payload, CrystallizerBlockEntity.class);
     }
 
-    public CrystallizerScreenHandler(int syncId, Inventory playerInv, CrystallizerBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+    public CrystallizerScreenHandler(
+        int syncId,
+        Inventory playerInv,
+        CrystallizerBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
         super(ModMenuTypes.CRYSTALLIZER.get(), syncId, playerInv, blockEntity, wrappedContainerStorage, properties);
     }
 
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
         WrappedContainerStorage<?> wrappedStorage = this.wrappedContainerStorage;
-        addSlot(new PredicateSlot(wrappedStorage.getInventory(0), 0, 54, 12, $ -> !blockEntity.isRunning()));
+        addSlot(new PredicateSlot(wrappedStorage.getInventory(0), 0, 54, 12, _ -> !blockEntity.isRunning()));
         addSlot(new OutputSlot(wrappedStorage.getInventory(1), 0, 148, 27));
         addSlot(new OutputSlot(wrappedStorage.getInventory(2), 0, 148, 51));
     }
@@ -56,9 +62,8 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
     public float getProgressPercent() {
         float progress = getProgress();
         float maxProgress = getMaxProgress();
-        if (maxProgress == 0 || progress == 0) {
+        if (maxProgress == 0 || progress == 0)
             return 0.0f;
-        }
 
         return Mth.clamp(progress / maxProgress, 0.0f, 1.0f);
     }
@@ -78,9 +83,8 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
     public float getCatalystUsesPercent() {
         float uses = getCatalystUses();
         float maxUses = getMaxCatalystUses();
-        if (maxUses == 0 || uses == 0) {
+        if (maxUses == 0 || uses == 0)
             return 0.0f;
-        }
 
         return Mth.clamp(uses / maxUses, 0.0f, 1.0f);
     }

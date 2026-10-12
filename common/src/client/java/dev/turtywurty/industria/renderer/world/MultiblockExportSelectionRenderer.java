@@ -29,14 +29,13 @@ public class MultiblockExportSelectionRenderer implements IndustriaLevelRenderer
             return;
 
         int stage = MultiblockExportItem.getSelectionStage(stack);
-        AABB box = new AABB(
-                bounds.minX(),
-                bounds.minY(),
-                bounds.minZ(),
-                bounds.maxX() + 1.0D,
-                bounds.maxY() + 1.0D,
-                bounds.maxZ() + 1.0D
-        );
+        var box = new AABB(
+            bounds.minX(),
+            bounds.minY(),
+            bounds.minZ(),
+            bounds.maxX() + 1.0D,
+            bounds.maxY() + 1.0D,
+            bounds.maxZ() + 1.0D);
 
         int color = switch (stage) {
             case 1 -> 0x80FFD54A;
@@ -47,7 +46,9 @@ public class MultiblockExportSelectionRenderer implements IndustriaLevelRenderer
 
         Gizmos.cuboid(box, GizmoStyle.stroke(color));
         BlockPos controller = bounds.controller();
-        Gizmos.cuboid(new AABB(controller.getX(), controller.getY(), controller.getZ(), controller.getX() + 1.0D, controller.getY() + 1.0D, controller.getZ() + 1.0D),
-                GizmoStyle.stroke(0xFFFF5555));
+        Gizmos.cuboid(
+            new AABB(controller.getX(), controller.getY(), controller.getZ(), controller.getX() + 1.0D,
+                controller.getY() + 1.0D, controller.getZ() + 1.0D),
+            GizmoStyle.stroke(0xFFFF5555));
     }
 }

@@ -41,7 +41,11 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -83,7 +87,8 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
 
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
-        this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1, (itemStack, slot) -> isFuel(itemStack)), Direction.UP);
+        this.wrappedContainerStorage
+            .addInventory(new PredicateSimpleInventory(this, 1, (itemStack, slot) -> isFuel(itemStack)), Direction.UP);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
     }
 
@@ -112,7 +117,8 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, getWrappedContainerStorage(), this.propertyDelegate);
+        return new AlloyFurnaceScreenHandler(syncId, playerInventory, this, getWrappedContainerStorage(),
+            this.propertyDelegate);
     }
 
     @Override
@@ -134,17 +140,18 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
                 this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).addItem(this.bufferedStack);
                 this.bufferedStack = ItemStack.EMPTY;
                 update();
-            } else {
+            } else
                 return;
-            }
         }
 
         if (this.burnTime > 0) {
             this.burnTime--;
             if (this.burnTime <= 0) {
-                this.level.setBlockAndUpdate(this.worldPosition, getBlockState().setValue(BlockStateProperties.LIT, false));
+                this.level.setBlockAndUpdate(this.worldPosition,
+                    getBlockState().setValue(BlockStateProperties.LIT, false));
             } else {
-                this.level.setBlockAndUpdate(this.worldPosition, getBlockState().setValue(BlockStateProperties.LIT, true));
+                this.level.setBlockAndUpdate(this.worldPosition,
+                    getBlockState().setValue(BlockStateProperties.LIT, true));
             }
 
             update();
@@ -163,7 +170,8 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
         }
 
         Optional<RecipeHolder<AlloyingRecipe>> currentRecipe = getCurrentRecipe();
-        if (currentRecipe.isEmpty() || !currentRecipe.get().id().equals(this.currentRecipeId) || !canOutput(currentRecipe.get().value().output().create())) {
+        if (currentRecipe.isEmpty() || !currentRecipe.get().id().equals(this.currentRecipeId)
+            || !canOutput(currentRecipe.get().value().output().create())) {
             reset();
             return;
         }
@@ -225,7 +233,8 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
             return Optional.empty();
 
         Container inventory = getInventory();
-        var recipeInventory = new RecipeSimpleInventory(inventory.getItem(INPUT_SLOT_0), inventory.getItem(INPUT_SLOT_1));
+        var recipeInventory = new RecipeSimpleInventory(inventory.getItem(INPUT_SLOT_0),
+            inventory.getItem(INPUT_SLOT_1));
         return serverWorld.recipeAccess().getRecipeFor(ModRecipeTypes.ALLOYING.get(), recipeInventory, this.level);
     }
 
@@ -242,8 +251,9 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
 
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
 
-        if (!this.bufferedStack.isEmpty())
+        if (!this.bufferedStack.isEmpty()) {
             view.store("BufferedStack", ItemStack.CODEC, this.bufferedStack);
+        }
     }
 
     @Override

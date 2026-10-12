@@ -17,7 +17,12 @@ public class CastingRecipeBuilder {
     private final int coolingTime;
     private Optional<Identifier> moldId = Optional.empty();
 
-    public CastingRecipeBuilder(CastingRecipe.BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime) {
+    public CastingRecipeBuilder(
+        CastingRecipe.BlockType blockType,
+        FluidStack inputFluid,
+        OutputItemStack output,
+        int coolingTime
+    ) {
         this.blockType = blockType;
         this.input = inputFluid;
         this.output = output;
@@ -31,7 +36,7 @@ public class CastingRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new CastingRecipe(this.blockType, this.input, this.output, this.coolingTime, this.moldId),
-                null);
+            new CastingRecipe(this.blockType, this.input, this.output, this.coolingTime, this.moldId),
+            null);
     }
 }

@@ -14,10 +14,9 @@ import java.util.List;
 public class MagneticConveyorBlock extends AbstractPoweredConveyorBlock {
     public MagneticConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(
-                        new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.MAGNETIC_CONVEYOR.get())
-                                .shouldTick())
-        );
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.MAGNETIC_CONVEYOR.get())
+                    .shouldTick()));
     }
 
     @Override
@@ -26,8 +25,7 @@ public class MagneticConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 }

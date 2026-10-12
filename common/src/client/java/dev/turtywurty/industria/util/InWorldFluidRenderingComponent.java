@@ -29,14 +29,14 @@ import org.jetbrains.annotations.Nullable;
 public class InWorldFluidRenderingComponent {
     private static final Function<Identifier, RenderType> ENTITY_TRANSLUCENT_CULL = Util.memoize(texture -> {
         RenderSetup setup = RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT_CULL)
-                .setOitPipelines(RenderPipelines.OIT_ENTITY_CULL)
-                .withTexture("Sampler0", texture)
-                .useLightmap()
-                .useOverlay()
-                .affectsCrumbling()
-                .sortOnUpload()
-                .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
-                .createRenderSetup();
+            .setOitPipelines(RenderPipelines.OIT_ENTITY_CULL)
+            .withTexture("Sampler0", texture)
+            .useLightmap()
+            .useOverlay()
+            .affectsCrumbling()
+            .sortOnUpload()
+            .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
+            .createRenderSetup();
         return ClientRegistrations.createRenderType("industria_entity_translucent_cull", setup);
     });
 
@@ -46,19 +46,84 @@ public class InWorldFluidRenderingComponent {
         this.shouldDebugAmount = shouldDebugAmount;
     }
 
-    public void render(@Nullable SyncingFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2) {
-        render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, IndeterminateBoolean.INDETERMINATE);
+    public void render(
+        @Nullable SyncingFluidStorage fluidTank,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float maxHeightPixels,
+        float z2
+    ) {
+        render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2,
+            IndeterminateBoolean.INDETERMINATE);
     }
 
-    public void render(@Nullable SyncingFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, IndeterminateBoolean drawTopFace) {
-        render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, drawTopFace);
+    public void render(
+        @Nullable SyncingFluidStorage fluidTank,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float maxHeightPixels,
+        float z2,
+        IndeterminateBoolean drawTopFace
+    ) {
+        render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, 0xFFFFFFFF,
+            ColorMode.MULTIPLICATION, drawTopFace);
     }
 
-    public void render(@Nullable SyncingFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode) {
-        render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, color, colorMode, IndeterminateBoolean.INDETERMINATE);
+    public void render(
+        @Nullable SyncingFluidStorage fluidTank,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float maxHeightPixels,
+        float z2,
+        int color,
+        ColorMode colorMode
+    ) {
+        render(fluidTank, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, maxHeightPixels, z2, color,
+            colorMode, IndeterminateBoolean.INDETERMINATE);
     }
 
-    public void render(@Nullable SyncingFluidStorage fluidTank, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float maxHeightPixels, float z2, int color, ColorMode colorMode, IndeterminateBoolean drawTopFace) {
+    public void render(
+        @Nullable SyncingFluidStorage fluidTank,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float maxHeightPixels,
+        float z2,
+        int color,
+        ColorMode colorMode,
+        IndeterminateBoolean drawTopFace
+    ) {
         if (fluidTank == null || fluidTank.getResource().isBlank() || fluidTank.getAmount() <= 0)
             return;
 
@@ -99,49 +164,111 @@ public class InWorldFluidRenderingComponent {
         queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
             // Front (XY plane, z constant)
             drawTiledXYQuad(vertexConsumer, entry,
-                    x1, y1, z1 + 0.001F,
-                    x2, y2, z1 + 0.001F,
-                    stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
+                x1, y1, z1 + 0.001F,
+                x2, y2, z1 + 0.001F,
+                stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
 
             // Back (XY plane, z constant)
             drawReversedTiledXYQuad(vertexConsumer, entry,
-                    x1, y1, z2 - 0.001F,
-                    x2, y2, z2 - 0.001F,
-                    stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
+                x1, y1, z2 - 0.001F,
+                x2, y2, z2 - 0.001F,
+                stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
 
             // Left (YZ plane, x constant)
             drawReversedTiledYZQuad(vertexConsumer, entry,
-                    x1 + 0.001F, y1, z1,
-                    y2, z2,
-                    stillSprite, newFluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
+                x1 + 0.001F, y1, z1,
+                y2, z2,
+                stillSprite, newFluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
 
             // Right (YZ plane, x constant)
             drawTiledYZQuad(vertexConsumer, entry,
-                    x2 - 0.001F, y1, z1,
-                    y2, z2,
-                    stillSprite, newFluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
+                x2 - 0.001F, y1, z1,
+                y2, z2,
+                stillSprite, newFluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
 
             if (drawTopFace.evaluate(finalFillPercentage < 1.0F)) {
-                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor, newLight, overlay);
+                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, fluidColor,
+                    newLight, overlay);
             }
         });
 
         matrices.popPose();
     }
 
-    public void renderTopFaceOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2, UnaryOperator<RenderType> wrapRenderLayer) {
-        renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION, wrapRenderLayer);
+    public void renderTopFaceOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2,
+        UnaryOperator<RenderType> wrapRenderLayer
+    ) {
+        renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF,
+            ColorMode.MULTIPLICATION, wrapRenderLayer);
     }
 
-    public void renderTopFaceOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2) {
-        renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    public void renderTopFaceOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2
+    ) {
+        renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, 0xFFFFFFFF,
+            ColorMode.MULTIPLICATION);
     }
 
-    public void renderTopFaceOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode) {
-        renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, color, colorMode, renderLayer -> renderLayer);
+    public void renderTopFaceOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2,
+        int color,
+        ColorMode colorMode
+    ) {
+        renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y, z1, x2, z2, color,
+            colorMode, renderLayer -> renderLayer);
     }
 
-    public void renderTopFaceOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, final int light, int overlay, Level world, BlockPos pos, float x1, float y, float z1, float x2, float z2, int color, ColorMode colorMode, UnaryOperator<RenderType> wrapRenderLayer) {
+    public void renderTopFaceOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        final int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2,
+        int color,
+        ColorMode colorMode,
+        UnaryOperator<RenderType> wrapRenderLayer
+    ) {
         if (fluidVariant == null)
             return;
 
@@ -167,17 +294,25 @@ public class InWorldFluidRenderingComponent {
             int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
             int newLight = (light & 0xF00000) | (luminosity << 4);
 
-            drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, newFluidColor, newLight, overlay);
+            drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, stillSprite, newFluidColor,
+                newLight, overlay);
         });
 
         matrices.popPose();
     }
 
     public void renderTexturedTopFace(
-            TextureAtlasSprite sprite, int color,
-            SubmitNodeCollector queue, PoseStack matrices,
-            int light, int overlay,
-            float x1, float y, float z1, float x2, float z2
+        TextureAtlasSprite sprite,
+        int color,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2
     ) {
         if (sprite == null)
             return;
@@ -187,23 +322,39 @@ public class InWorldFluidRenderingComponent {
         matrices.pushPose();
         matrices.rotate(Axis.XP.rotationDegrees(180));
 
-        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) ->
-                drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, sprite, color, light, overlay));
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> drawTiledTopQuad(vertexConsumer,
+            entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, sprite, color, light, overlay));
 
         matrices.popPose();
     }
 
-    public void renderTexturedCuboid(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2) {
-        if(sprite == null || x2 <= x1 || y2 <= y1 || z2 <= z1)
+    public void renderTexturedCuboid(
+        TextureAtlasSprite sprite,
+        int color,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2
+    ) {
+        if (sprite == null || x2 <= x1 || y2 <= y1 || z2 <= z1)
             return;
 
         RenderType renderType = RenderTypes.entityTranslucent(sprite.atlasLocation());
         // North `(0,0,-1)`, South `(0,0,1)`, West `(-1,0,0)`, East `(1,0,0)`
         queue.submitCustomGeometry(matrices, renderType, (entry, vertexConsumer) -> {
-            drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z1, sprite, color, light, overlay, 0.0F, 0.0F, -1.0F);
-            drawReversedTiledXYQuad(vertexConsumer, entry, x1, y1, z2, x2, y2, z2, sprite, color, light, overlay, 0.0F, 0.0F, 1.0F);
-            drawReversedTiledYZQuad(vertexConsumer, entry, x1, y1, z1, y2, z2, sprite, color, light, overlay, -1.0F, 0.0F, 0.0F);
-            drawTiledYZQuad(vertexConsumer, entry, x2, y1, z1, y2, z2, sprite, color, light, overlay,1.0F , 0.0F , 0.0F);
+            drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z1, sprite, color, light, overlay, 0.0F, 0.0F,
+                -1.0F);
+            drawReversedTiledXYQuad(vertexConsumer, entry, x1, y1, z2, x2, y2, z2, sprite, color, light, overlay, 0.0F,
+                0.0F, 1.0F);
+            drawReversedTiledYZQuad(vertexConsumer, entry, x1, y1, z1, y2, z2, sprite, color, light, overlay, -1.0F,
+                0.0F, 0.0F);
+            drawTiledYZQuad(vertexConsumer, entry, x2, y1, z1, y2, z2, sprite, color, light, overlay, 1.0F, 0.0F, 0.0F);
             drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1, x2, z2, sprite, color, light, overlay);
         });
     }
@@ -211,52 +362,89 @@ public class InWorldFluidRenderingComponent {
     /**
      * Draws a horizontal octagonal surface directly in model space (up is negative Y).
      */
-    public void renderOctagonalTopFaceOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue,
-                                           PoseStack matrices, int light, int overlay, @Nullable Level world, BlockPos pos,
-                                           float y, float radius, float cornerCut) {
+    public void renderOctagonalTopFaceOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        @Nullable Level world,
+        BlockPos pos,
+        float y,
+        float radius,
+        float cornerCut
+    ) {
         FluidRenderUtils.GuiFluidRenderData data = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
         if (data == null || radius <= 0)
             return;
 
         int fluidLight = (light & 0xF00000)
-                | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(fluidVariant)) << 4);
-        renderOctagonalTopFaceOnly(data.stillSprite(), data.tintColor(), queue, matrices, fluidLight, overlay, y, radius, cornerCut);
+            | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(fluidVariant)) << 4);
+        renderOctagonalTopFaceOnly(data.stillSprite(), data.tintColor(), queue, matrices, fluidLight, overlay, y,
+            radius, cornerCut);
     }
 
     /**
      * Sprite-based overload shared by fluids and slurries. Uses model-space coordinates.
      */
-    public void renderOctagonalTopFaceOnly(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue,
-                                           PoseStack matrices, int light, int overlay, float y, float radius, float cornerCut) {
+    public void renderOctagonalTopFaceOnly(
+        TextureAtlasSprite sprite,
+        int color,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        float y,
+        float radius,
+        float cornerCut
+    ) {
         if (radius <= 0)
             return;
 
         float edge = radius - Mth.clamp(cornerCut, 0f, radius);
         float[][] perimeter = {{-edge, -radius}, {edge, -radius}, {radius, -edge}, {radius, edge},
-                {edge, radius}, {-edge, radius}, {-radius, edge}, {-radius, -edge}};
-        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()), (pose, vertices) -> {
-            // Clip each block-sized tile to the octagon, keeping every UV inside the atlas sprite.
-            for (float x = -radius; x < radius; x += 1f) {
-                for (float z = -radius; z < radius; z += 1f) {
-                    List<float[]> polygon = new ArrayList<>(Arrays.asList(perimeter));
-                    polygon = clipFluidTile(polygon, 0, x, true);
-                    polygon = clipFluidTile(polygon, 0, Math.min(x + 1f, radius), false);
-                    polygon = clipFluidTile(polygon, 1, z, true);
-                    polygon = clipFluidTile(polygon, 1, Math.min(z + 1f, radius), false);
-                    for (int i = 1; i + 1 < polygon.size(); i++) {
-                        float[][] triangle = {polygon.getFirst(), polygon.get(i), polygon.get(i + 1), polygon.get(i + 1)};
-                        for (float[] point : triangle) {
-                            vertices.addVertex(pose, point[0], y, point[1]).setColor(color)
-                                    .setUv(sprite.getU(Mth.clamp(point[0] - x, 0f, 1f)), sprite.getV(Mth.clamp(point[1] - z, 0f, 1f)))
+            {edge, radius}, {-edge, radius}, {-radius, edge}, {-radius, -edge}};
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()),
+            (pose, vertices) -> {
+                // Clip each block-sized tile to the octagon, keeping every UV inside the atlas sprite.
+                for (float x = -radius; x < radius; x += 1f) {
+                    for (float z = -radius; z < radius; z += 1f) {
+                        List<float[]> polygon = new ArrayList<>(Arrays.asList(perimeter));
+                        polygon = clipFluidTile(polygon, 0, x, true);
+                        polygon = clipFluidTile(polygon, 0, Math.min(x + 1f, radius), false);
+                        polygon = clipFluidTile(polygon, 1, z, true);
+                        polygon = clipFluidTile(polygon, 1, Math.min(z + 1f, radius), false);
+                        for (int i = 1; i + 1 < polygon.size(); i++) {
+                            float[][] triangle = {polygon.getFirst(), polygon.get(i), polygon.get(i + 1),
+                                polygon.get(i + 1)};
+                            for (float[] point : triangle) {
+                                vertices.addVertex(pose, point[0], y, point[1]).setColor(color)
+                                    .setUv(sprite.getU(Mth.clamp(point[0] - x, 0f, 1f)),
+                                        sprite.getV(Mth.clamp(point[1] - z, 0f, 1f)))
                                     .setOverlay(overlay).setLight(light).setNormal(pose, 0, -1, 0);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
     }
 
-    public void renderStream(ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level level, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, boolean includeTopFace) {
+    public void renderStream(
+        ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level level,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        boolean includeTopFace
+    ) {
         if (fluidVariant == null || fluidVariant.isBlank())
             return;
 
@@ -282,30 +470,31 @@ public class InWorldFluidRenderingComponent {
         queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
             // Front (XY plane, z constant)
             drawTiledXYQuad(vertexConsumer, entry,
-                    x1, y1, z1 + 0.001F,
-                    x2, y2, z1 + 0.001F,
-                    flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
+                x1, y1, z1 + 0.001F,
+                x2, y2, z1 + 0.001F,
+                flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F);
 
             // Back (XY plane, z constant)
             drawReversedTiledXYQuad(vertexConsumer, entry,
-                    x1, y1, z2 - 0.001F,
-                    x2, y2, z2 - 0.001F,
-                    flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
+                x1, y1, z2 - 0.001F,
+                x2, y2, z2 - 0.001F,
+                flowingSprite, fluidColor, newLight, overlay, 0.0F, 1.0F, 1.0F);
 
             // Left (YZ plane, x constant)
             drawReversedTiledYZQuad(vertexConsumer, entry,
-                    x1 + 0.001F, y1, z1,
-                    y2, z2,
-                    flowingSprite, fluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
+                x1 + 0.001F, y1, z1,
+                y2, z2,
+                flowingSprite, fluidColor, newLight, overlay, 1.0F, 1.0F, 0.0F);
 
             // Right (YZ plane, x constant)
             drawTiledYZQuad(vertexConsumer, entry,
-                    x2 - 0.001F, y1, z1,
-                    y2, z2,
-                    flowingSprite, fluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
+                x2 - 0.001F, y1, z1,
+                y2, z2,
+                flowingSprite, fluidColor, newLight, overlay, -1.0F, 1.0F, 0.0F);
 
             if (includeTopFace) {
-                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, renderData.stillSprite(), fluidColor, newLight, overlay);
+                drawTiledTopQuad(vertexConsumer, entry, x1, y2, z1 + 0.001F, x2, z2 - 0.001F, renderData.stillSprite(),
+                    fluidColor, newLight, overlay);
             }
         });
 
@@ -335,13 +524,19 @@ public class InWorldFluidRenderingComponent {
         return result;
     }
 
-    public static void drawTiledTopQuad(VertexConsumer vertexConsumer,
-                                        PoseStack.Pose entry,
-                                        float x1, float y, float z1,
-                                        float x2, float z2,
-                                        TextureAtlasSprite sprite,
-                                        int color,
-                                        int light, int overlay) {
+    public static void drawTiledTopQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2,
+        TextureAtlasSprite sprite,
+        int color,
+        int light,
+        int overlay
+    ) {
         float tileSize = 1.0f;
         int fullTilesX = (int) ((x2 - x1) / tileSize);
         int fullTilesZ = (int) ((z2 - z1) / tileSize);
@@ -355,8 +550,8 @@ public class InWorldFluidRenderingComponent {
                 float zStart = z1 + j * tileSize;
                 float zEnd = zStart + tileSize;
                 drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
-                        sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(),
-                        color, light, overlay);
+                    sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1(),
+                    color, light, overlay);
             }
         }
 
@@ -367,8 +562,8 @@ public class InWorldFluidRenderingComponent {
                 float zStart = z1 + j * tileSize;
                 float zEnd = zStart + tileSize;
                 drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
-                        sprite.getU0(), sprite.getV0(), sprite.getU(leftoverX), sprite.getV(tileSize),
-                        color, light, overlay);
+                    sprite.getU0(), sprite.getV0(), sprite.getU(leftoverX), sprite.getV(tileSize),
+                    color, light, overlay);
             }
         }
 
@@ -379,8 +574,8 @@ public class InWorldFluidRenderingComponent {
                 float zStart = z1 + fullTilesZ * tileSize;
                 float zEnd = zStart + leftoverZ;
                 drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
-                        sprite.getU0(), sprite.getV0(), sprite.getU(tileSize), sprite.getV(leftoverZ),
-                        color, light, overlay);
+                    sprite.getU0(), sprite.getV0(), sprite.getU(tileSize), sprite.getV(leftoverZ),
+                    color, light, overlay);
             }
 
             if (leftoverX > 0) {
@@ -389,47 +584,55 @@ public class InWorldFluidRenderingComponent {
                 float zStart = z1 + fullTilesZ * tileSize;
                 float zEnd = zStart + leftoverZ;
                 drawTopQuad(vertexConsumer, entry, xStart, y, zStart, xEnd, zEnd,
-                        sprite.getU0(), sprite.getV0(), sprite.getU(leftoverX), sprite.getV(leftoverZ),
-                        color, light, overlay);
+                    sprite.getU0(), sprite.getV0(), sprite.getU(leftoverX), sprite.getV(leftoverZ),
+                    color, light, overlay);
             }
         }
     }
 
-    private static void drawTopQuad(VertexConsumer vertexConsumer,
-                                    PoseStack.Pose entry,
-                                    float x1, float y, float z1,
-                                    float x2, float z2,
-                                    float minU, float minV,
-                                    float maxU, float maxV,
-                                    int color,
-                                    int light, int overlay) {
+    private static void drawTopQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x1,
+        float y,
+        float z1,
+        float x2,
+        float z2,
+        float minU,
+        float minV,
+        float maxU,
+        float maxV,
+        int color,
+        int light,
+        int overlay
+    ) {
         vertexConsumer.addVertex(entry, x1, y, z1)
-                .setColor(color)
-                .setUv(minU, minV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(0.0F, 1.0F, 0.0F);
+            .setColor(color)
+            .setUv(minU, minV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(0.0F, 1.0F, 0.0F);
 
         vertexConsumer.addVertex(entry, x1, y, z2)
-                .setColor(color)
-                .setUv(minU, maxV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(0.0F, 1.0F, 0.0F);
+            .setColor(color)
+            .setUv(minU, maxV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(0.0F, 1.0F, 0.0F);
 
         vertexConsumer.addVertex(entry, x2, y, z2)
-                .setColor(color)
-                .setUv(maxU, maxV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(0.0F, 1.0F, 0.0F);
+            .setColor(color)
+            .setUv(maxU, maxV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(0.0F, 1.0F, 0.0F);
 
         vertexConsumer.addVertex(entry, x2, y, z1)
-                .setColor(color)
-                .setUv(maxU, minV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(entry, 0.0F, 1.0F, 0.0F);
+            .setColor(color)
+            .setUv(maxU, minV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(entry, 0.0F, 1.0F, 0.0F);
     }
 
     /**
@@ -437,9 +640,21 @@ public class InWorldFluidRenderingComponent {
      * The sprite is stretched across the full bounds and cropped as the fill rises from bottomY to topY.
      * Decreasing Y bounds support model space, where Y points downwards.
      */
-    public void drawSingleXYQuadOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue,
-                                     PoseStack matrices, int light, int overlay, @Nullable Level world, BlockPos pos,
-                                     float left, float bottomY, float depth, float right, float topY, float fill) {
+    public void drawSingleXYQuadOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        @Nullable Level world,
+        BlockPos pos,
+        float left,
+        float bottomY,
+        float depth,
+        float right,
+        float topY,
+        float fill
+    ) {
         float progress = Mth.clamp(fill, 0f, 1f);
         if (!(progress > 0f) || left == right || bottomY == topY)
             return;
@@ -453,25 +668,61 @@ public class InWorldFluidRenderingComponent {
         float surfaceV = sprite.getV(1f - progress);
         float normalZ = -Math.signum((right - left) * (topY - bottomY));
         int fluidLight = (light & 0xF00000)
-                | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(fluidVariant)) << 4);
+            | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(fluidVariant)) << 4);
 
-        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()), (pose, vertices) -> {
-            vertices.addVertex(pose, left, bottomY, depth).setColor(data.tintColor())
-                    .setUv(sprite.getU0(), sprite.getV1()).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
-            vertices.addVertex(pose, left, surfaceY, depth).setColor(data.tintColor())
-                    .setUv(sprite.getU0(), surfaceV).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
-            vertices.addVertex(pose, right, surfaceY, depth).setColor(data.tintColor())
-                    .setUv(sprite.getU1(), surfaceV).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
-            vertices.addVertex(pose, right, bottomY, depth).setColor(data.tintColor())
-                    .setUv(sprite.getU1(), sprite.getV1()).setOverlay(overlay).setLight(fluidLight).setNormal(pose, 0, 0, normalZ);
-        });
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()),
+            (pose, vertices) -> {
+                vertices.addVertex(pose, left, bottomY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU0(), sprite.getV1()).setOverlay(overlay).setLight(fluidLight)
+                    .setNormal(pose, 0, 0, normalZ);
+                vertices.addVertex(pose, left, surfaceY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU0(), surfaceV).setOverlay(overlay).setLight(fluidLight)
+                    .setNormal(pose, 0, 0, normalZ);
+                vertices.addVertex(pose, right, surfaceY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU1(), surfaceV).setOverlay(overlay).setLight(fluidLight)
+                    .setNormal(pose, 0, 0, normalZ);
+                vertices.addVertex(pose, right, bottomY, depth).setColor(data.tintColor())
+                    .setUv(sprite.getU1(), sprite.getV1()).setOverlay(overlay).setLight(fluidLight)
+                    .setNormal(pose, 0, 0, normalZ);
+            });
     }
 
-    public void drawTiledXYQuadOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2) {
-        drawTiledXYQuadOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2, 0xFFFFFFFF, ColorMode.MULTIPLICATION);
+    public void drawTiledXYQuadOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2
+    ) {
+        drawTiledXYQuadOnly(fluidVariant, queue, matrices, light, overlay, world, pos, x1, y1, z1, x2, y2, z2,
+            0xFFFFFFFF, ColorMode.MULTIPLICATION);
     }
 
-    public void drawTiledXYQuadOnly(@Nullable ResourceVariant<Fluid> fluidVariant, SubmitNodeCollector queue, PoseStack matrices, final int light, int overlay, Level world, BlockPos pos, float x1, float y1, float z1, float x2, float y2, float z2, int color, ColorMode colorMode) {
+    public void drawTiledXYQuadOnly(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        final int light,
+        int overlay,
+        Level world,
+        BlockPos pos,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        int color,
+        ColorMode colorMode
+    ) {
         if (fluidVariant == null)
             return;
 
@@ -495,8 +746,8 @@ public class InWorldFluidRenderingComponent {
         int luminosity = Math.max(blockLight, FluidVariantAttributes.getLuminance(fluidVariant));
         int newLight = (light & 0xF00000) | (luminosity << 4);
 
-        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) ->
-                drawTiledXYQuad(vertexConsumer, entry, x1, y1, z1, x2, y2, z2, stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F));
+        queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> drawTiledXYQuad(vertexConsumer,
+            entry, x1, y1, z1, x2, y2, z2, stillSprite, newFluidColor, newLight, overlay, 0.0F, 1.0F, -1.0F));
 
         matrices.popPose();
     }
@@ -504,38 +755,73 @@ public class InWorldFluidRenderingComponent {
     /**
      * Sprite-based tiled face for slurries, with the same Y/Z transform as the fluid overload.
      */
-    public void drawTiledXYQuadOnly(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices,
-                                    int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2) {
+    public void drawTiledXYQuadOnly(
+        TextureAtlasSprite sprite,
+        int color,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2
+    ) {
         drawTiledXYQuadOnly(sprite, color, queue, matrices, light, overlay, x1, y1, z1, x2, y2, z2, false);
     }
 
     /**
      * Reverses winding and normal when the visible side is opposite the default face.
      */
-    public void drawTiledXYQuadOnly(TextureAtlasSprite sprite, int color, SubmitNodeCollector queue, PoseStack matrices,
-                                    int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2,
-                                    boolean reversed) {
+    public void drawTiledXYQuadOnly(
+        TextureAtlasSprite sprite,
+        int color,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        boolean reversed
+    ) {
         matrices.pushPose();
         matrices.rotate(Axis.XP.rotationDegrees(180));
-        queue.submitCustomGeometry(matrices, ENTITY_TRANSLUCENT_CULL.apply(sprite.atlasLocation()), (pose, vertices) -> {
-            if (reversed) {
-                drawReversedTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, 1f);
-            } else {
-                drawTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, -1f);
-            }
-        });
+        queue.submitCustomGeometry(matrices, ENTITY_TRANSLUCENT_CULL.apply(sprite.atlasLocation()),
+            (pose, vertices) -> {
+                if (reversed) {
+                    drawReversedTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f,
+                        0f, 1f);
+                } else {
+                    drawTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, -1f);
+                }
+            });
         matrices.popPose();
     }
 
     // For front and back (XY plane)
-    public static void drawTiledXYQuad(VertexConsumer vertexConsumer,
-                                       PoseStack.Pose entry,
-                                       float x1, float y1, float z1,
-                                       float x2, float y2, float z2,
-                                       TextureAtlasSprite sprite,
-                                       int color,
-                                       int light, int overlay,
-                                       float nx, float ny, float nz) {
+    public static void drawTiledXYQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        TextureAtlasSprite sprite,
+        int color,
+        int light,
+        int overlay,
+        float nx,
+        float ny,
+        float nz
+    ) {
         float tileSize = 1.0f;
         int fullTilesX = (int) ((x2 - x1) / tileSize);
         int fullTilesY = (int) ((y2 - y1) / tileSize);
@@ -553,7 +839,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU1();
                 float v1 = sprite.getV1();
-                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
         }
 
@@ -568,7 +855,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverX);
                 float v1 = sprite.getV(tileSize);
-                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
         }
 
@@ -583,7 +871,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(tileSize);
                 float v1 = sprite.getV(leftoverY);
-                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
 
             // Draw the corner leftover tile if both leftoverX and leftoverY > 0
@@ -596,20 +885,29 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverX);
                 float v1 = sprite.getV(leftoverY);
-                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
         }
     }
 
     // For left and right (YZ plane)
-    public static void drawTiledYZQuad(VertexConsumer vertexConsumer,
-                                       PoseStack.Pose entry,
-                                       float x, float y1, float z1,
-                                       float y2, float z2,
-                                       TextureAtlasSprite sprite,
-                                       int color,
-                                       int light, int overlay,
-                                       float nx, float ny, float nz) {
+    public static void drawTiledYZQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x,
+        float y1,
+        float z1,
+        float y2,
+        float z2,
+        TextureAtlasSprite sprite,
+        int color,
+        int light,
+        int overlay,
+        float nx,
+        float ny,
+        float nz
+    ) {
         float tileSize = 1.0f;
         int fullTilesZ = (int) ((z2 - z1) / tileSize);
         int fullTilesY = (int) ((y2 - y1) / tileSize);
@@ -627,7 +925,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU1();
                 float v1 = sprite.getV1();
-                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay,
+                    nx, ny, nz);
             }
         }
 
@@ -642,7 +941,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverZ);
                 float v1 = sprite.getV(tileSize);
-                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay,
+                    nx, ny, nz);
             }
         }
 
@@ -657,7 +957,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(tileSize);
                 float v1 = sprite.getV(leftoverY);
-                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay,
+                    nx, ny, nz);
             }
 
             // Draw the corner leftover tile if both leftoverZ and leftoverY > 0
@@ -670,76 +971,112 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverZ);
                 float v1 = sprite.getV(leftoverY);
-                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay,
+                    nx, ny, nz);
             }
         }
     }
 
-    private static void drawQuad(VertexConsumer vertexConsumer,
-                                 PoseStack.Pose entry,
-                                 float x1, float y1, float z1,
-                                 float x2, float y2, float z2,
-                                 float minU, float minV,
-                                 float maxU, float maxV,
-                                 int color,
-                                 int light, int overlay,
-                                 float normalX, float normalY, float normalZ) {
+    private static void drawQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        float minU,
+        float minV,
+        float maxU,
+        float maxV,
+        int color,
+        int light,
+        int overlay,
+        float normalX,
+        float normalY,
+        float normalZ
+    ) {
         vertexConsumer.addVertex(entry, x1, y1, z1)
-                .setColor(color)
-                .setUv(minU, minV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(normalX, normalY, normalZ);
+            .setColor(color)
+            .setUv(minU, minV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(normalX, normalY, normalZ);
 
         vertexConsumer.addVertex(entry, x1, y2, z1)
-                .setColor(color)
-                .setUv(minU, maxV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(normalX, normalY, normalZ);
+            .setColor(color)
+            .setUv(minU, maxV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(normalX, normalY, normalZ);
 
         vertexConsumer.addVertex(entry, x2, y2, z2)
-                .setColor(color)
-                .setUv(maxU, maxV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(normalX, normalY, normalZ);
+            .setColor(color)
+            .setUv(maxU, maxV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(normalX, normalY, normalZ);
 
         vertexConsumer.addVertex(entry, x2, y1, z2)
-                .setColor(color)
-                .setUv(maxU, minV)
-                .setLight(light)
-                .setOverlay(overlay)
-                .setNormal(normalX, normalY, normalZ);
+            .setColor(color)
+            .setUv(maxU, minV)
+            .setLight(light)
+            .setOverlay(overlay)
+            .setNormal(normalX, normalY, normalZ);
     }
 
-    private static void drawReversedQuad(VertexConsumer vertexConsumer,
-                                         PoseStack.Pose entry,
-                                         float x1, float y1, float z1,
-                                         float x2, float y2, float z2,
-                                         float minU, float minV,
-                                         float maxU, float maxV,
-                                         int color,
-                                         int light, int overlay,
-                                         float normalX, float normalY, float normalZ) {
+    private static void drawReversedQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        float minU,
+        float minV,
+        float maxU,
+        float maxV,
+        int color,
+        int light,
+        int overlay,
+        float normalX,
+        float normalY,
+        float normalZ
+    ) {
         // Vertex 4: (x2, y1, z2) with (maxU, minV)
-        vertexConsumer.addVertex(entry, x2, y1, z2).setColor(color).setUv(maxU, minV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x2, y1, z2).setColor(color).setUv(maxU, minV).setLight(light)
+            .setOverlay(overlay).setNormal(normalX, normalY, normalZ);
         // Vertex 3: (x2, y2, z2) with (maxU, maxV)
-        vertexConsumer.addVertex(entry, x2, y2, z2).setColor(color).setUv(maxU, maxV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x2, y2, z2).setColor(color).setUv(maxU, maxV).setLight(light)
+            .setOverlay(overlay).setNormal(normalX, normalY, normalZ);
         // Vertex 2: (x1, y2, z1) with (minU, maxV)
-        vertexConsumer.addVertex(entry, x1, y2, z1).setColor(color).setUv(minU, maxV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x1, y2, z1).setColor(color).setUv(minU, maxV).setLight(light)
+            .setOverlay(overlay).setNormal(normalX, normalY, normalZ);
         // Vertex 1: (x1, y1, z1) with (minU, minV)
-        vertexConsumer.addVertex(entry, x1, y1, z1).setColor(color).setUv(minU, minV).setLight(light).setOverlay(overlay).setNormal(normalX, normalY, normalZ);
+        vertexConsumer.addVertex(entry, x1, y1, z1).setColor(color).setUv(minU, minV).setLight(light)
+            .setOverlay(overlay).setNormal(normalX, normalY, normalZ);
     }
 
-    private static void drawReversedTiledXYQuad(VertexConsumer vertexConsumer,
-                                                PoseStack.Pose entry,
-                                                float x1, float y1, float z1,
-                                                float x2, float y2, float z2,
-                                                TextureAtlasSprite sprite,
-                                                int color,
-                                                int light, int overlay,
-                                                float nx, float ny, float nz) {
+    private static void drawReversedTiledXYQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x1,
+        float y1,
+        float z1,
+        float x2,
+        float y2,
+        float z2,
+        TextureAtlasSprite sprite,
+        int color,
+        int light,
+        int overlay,
+        float nx,
+        float ny,
+        float nz
+    ) {
         float tileSize = 1.0f;
         int fullTilesX = (int) ((x2 - x1) / tileSize);
         int fullTilesY = (int) ((y2 - y1) / tileSize);
@@ -757,7 +1094,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU1();
                 float v1 = sprite.getV1();
-                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color,
+                    light, overlay, nx, ny, nz);
             }
         }
 
@@ -772,7 +1110,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverX);
                 float v1 = sprite.getV(tileSize);
-                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color,
+                    light, overlay, nx, ny, nz);
             }
         }
 
@@ -787,7 +1126,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(tileSize);
                 float v1 = sprite.getV(leftoverY);
-                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color,
+                    light, overlay, nx, ny, nz);
             }
 
             // Draw the corner leftover tile if both leftoverX and leftoverY > 0
@@ -800,19 +1140,28 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverX);
                 float v1 = sprite.getV(leftoverY);
-                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, xStart, yStart, z1, xEnd, yEnd, z2, u0, v0, u1, v1, color,
+                    light, overlay, nx, ny, nz);
             }
         }
     }
 
-    private static void drawReversedTiledYZQuad(VertexConsumer vertexConsumer,
-                                                PoseStack.Pose entry,
-                                                float x, float y1, float z1,
-                                                float y2, float z2,
-                                                TextureAtlasSprite sprite,
-                                                int color,
-                                                int light, int overlay,
-                                                float nx, float ny, float nz) {
+    private static void drawReversedTiledYZQuad(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose entry,
+        float x,
+        float y1,
+        float z1,
+        float y2,
+        float z2,
+        TextureAtlasSprite sprite,
+        int color,
+        int light,
+        int overlay,
+        float nx,
+        float ny,
+        float nz
+    ) {
         float tileSize = 1.0f;
         int fullTilesZ = (int) ((z2 - z1) / tileSize);
         int fullTilesY = (int) ((y2 - y1) / tileSize);
@@ -830,7 +1179,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU1();
                 float v1 = sprite.getV1();
-                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
         }
 
@@ -845,7 +1195,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverZ);
                 float v1 = sprite.getV(tileSize);
-                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
         }
 
@@ -860,7 +1211,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(tileSize);
                 float v1 = sprite.getV(leftoverY);
-                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
 
             // Draw the corner leftover tile if both leftoverZ and leftoverY > 0
@@ -873,7 +1225,8 @@ public class InWorldFluidRenderingComponent {
                 float v0 = sprite.getV0();
                 float u1 = sprite.getU(leftoverZ);
                 float v1 = sprite.getV(leftoverY);
-                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light, overlay, nx, ny, nz);
+                drawReversedQuad(vertexConsumer, entry, x, yStart, zStart, x, yEnd, zEnd, u0, v0, u1, v1, color, light,
+                    overlay, nx, ny, nz);
             }
         }
     }

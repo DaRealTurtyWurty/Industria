@@ -28,7 +28,10 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
-public class MoldingTableBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
+public class MoldingTableBlockEntity extends IndustriaBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("molding_table");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -87,7 +90,7 @@ public class MoldingTableBlockEntity extends IndustriaBlockEntity implements Blo
         super.loadAdditional(input);
         ViewUtils.readChild(input, "Inventory", this.wrappedContainerStorage);
         this.visualState = input.read("MoldVisual", MoldTableVisualState.CODEC)
-                .filter(visual -> visual.matches(getInventory().getItem(0)) && visual.isValid()).orElse(null);
+            .filter(visual -> visual.matches(getInventory().getItem(0)) && visual.isValid()).orElse(null);
     }
 
     public SimpleContainer getInventory() {

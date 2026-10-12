@@ -8,7 +8,8 @@ import net.minecraft.resources.Identifier;
 
 public class ModModels {
     public static final Identifier SEISMIC_SCANNER_MODEL_ID = Industria.id("item/seismic_scanner_model");
-    public static final AdditionalModel<BlockStateModel> SEISMIC_SCANNER_MODEL_KEY = ClientRegistrations.registerAdditionalBlockStateModel(SEISMIC_SCANNER_MODEL_ID);
+    public static final AdditionalModel<BlockStateModel> SEISMIC_SCANNER_MODEL_KEY = ClientRegistrations
+        .registerAdditionalBlockStateModel(SEISMIC_SCANNER_MODEL_ID);
 
     public static void init() {
         ModPipeConnectionModels.init();

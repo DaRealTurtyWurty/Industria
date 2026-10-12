@@ -23,17 +23,22 @@ public class ChargingHatchMenu extends IndustriaScreenHandler<ChargingHatchBlock
 
     public ChargingHatchMenu(int syncId, Inventory playerInventory, ChargingHatchOpenPayload payload) {
         this(
-                syncId,
-                playerInventory,
-                findBlockEntity(playerInventory, payload),
-                createClientInventory(payload.slotCount()),
-                new SimpleContainerData(payload.slotCount() + 1)
-        );
+            syncId,
+            playerInventory,
+            findBlockEntity(playerInventory, payload),
+            createClientInventory(payload.slotCount()),
+            new SimpleContainerData(payload.slotCount() + 1));
     }
 
-    public ChargingHatchMenu(int syncId, Inventory playerInventory, ChargingHatchBlockEntity blockEntity,
-                             WrappedContainerStorage<?> wrappedContainerStorage, ContainerData menuData) {
-        super(ModMenuTypes.CHARGING_HATCH.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, menuData);
+    public ChargingHatchMenu(
+        int syncId,
+        Inventory playerInventory,
+        ChargingHatchBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData menuData
+    ) {
+        super(ModMenuTypes.CHARGING_HATCH.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            menuData);
     }
 
     @Override
@@ -53,9 +58,8 @@ public class ChargingHatchMenu extends IndustriaScreenHandler<ChargingHatchBlock
         this.scrollRow = row;
         for (int index = 0; index < getInventorySize(); index++) {
             Slot replacement = createHatchSlot(
-                    Objects.requireNonNull(this.wrappedContainerStorage.getInventory(0)),
-                    index
-            );
+                Objects.requireNonNull(this.wrappedContainerStorage.getInventory(0)),
+                index);
             replacement.index = index;
             this.slots.set(index, replacement);
         }
@@ -85,13 +89,13 @@ public class ChargingHatchMenu extends IndustriaScreenHandler<ChargingHatchBlock
             @Override
             public boolean mayPlace(ItemStack itemStack) {
                 return getContainerSlot() < ChargingHatchMenu.this.getProcessingSlotCount()
-                        && super.mayPlace(itemStack);
+                    && super.mayPlace(itemStack);
             }
 
             @Override
             public boolean isActive() {
                 return !ChargingHatchMenu.this.blockEntity.getLevel().isClientSide()
-                        || ChargingHatchMenu.this.isSlotVisible(getContainerSlot());
+                    || ChargingHatchMenu.this.isSlotVisible(getContainerSlot());
             }
         };
     }
@@ -104,7 +108,7 @@ public class ChargingHatchMenu extends IndustriaScreenHandler<ChargingHatchBlock
     @Override
     public boolean stillValid(Player player) {
         return stillValid(this.context, player, ModBlocks.CHARGING_HATCH.get())
-                && this.blockEntity.getInventory().getContainerSize() == getInventorySize();
+            && this.blockEntity.getInventory().getContainerSize() == getInventorySize();
     }
 
     public float getMeltingProgress(int slot) {

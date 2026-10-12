@@ -37,15 +37,35 @@ public class IndustriaBlockEntityRenderState extends BlockEntityRenderState {
         this.itemRenderStates.add(new ItemStackRenderState());
     }
 
-    public void updateItemRenderState(int index, IndustriaBlockEntityRenderer<?, ?> renderer, BlockEntity blockEntity, ItemStack stack, ItemDisplayContext displayContext, ItemOwner heldItemContext, int seed) {
-        renderer.getItemModelManager().updateForTopItem(this.itemRenderStates.get(index), stack, displayContext, blockEntity.getLevel(), heldItemContext, seed);
+    public void updateItemRenderState(
+        int index,
+        IndustriaBlockEntityRenderer<?, ?> renderer,
+        BlockEntity blockEntity,
+        ItemStack stack,
+        ItemDisplayContext displayContext,
+        ItemOwner heldItemContext,
+        int seed
+    ) {
+        renderer.getItemModelManager().updateForTopItem(this.itemRenderStates.get(index), stack, displayContext,
+            blockEntity.getLevel(), heldItemContext, seed);
     }
 
-    public void updateItemRenderState(int index, IndustriaBlockEntityRenderer<?, ?> renderer, BlockEntity blockEntity, ItemStack stack, ItemDisplayContext displayContext) {
+    public void updateItemRenderState(
+        int index,
+        IndustriaBlockEntityRenderer<?, ?> renderer,
+        BlockEntity blockEntity,
+        ItemStack stack,
+        ItemDisplayContext displayContext
+    ) {
         updateItemRenderState(index, renderer, blockEntity, stack, displayContext, null, 0);
     }
 
-    public void updateItemRenderState(int index, IndustriaBlockEntityRenderer<?, ?> renderer, BlockEntity blockEntity, ItemStack stack) {
+    public void updateItemRenderState(
+        int index,
+        IndustriaBlockEntityRenderer<?, ?> renderer,
+        BlockEntity blockEntity,
+        ItemStack stack
+    ) {
         updateItemRenderState(index, renderer, blockEntity, stack, ItemDisplayContext.NONE);
     }
 

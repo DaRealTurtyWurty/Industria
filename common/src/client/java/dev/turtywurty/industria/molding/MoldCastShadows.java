@@ -11,9 +11,9 @@ public final class MoldCastShadows {
     private static final float RAY_STEP = 0.5f / SHADOW_SIZE;
     private static final float DEPTH_BIAS = 0.0005f;
     private static final float[][] LIGHT_DIRECTIONS = {
-            {-0.6000f, -0.8000f},
-            {-0.6814f, -0.7319f},
-            {-0.5123f, -0.8588f}
+        {-0.6000f, -0.8000f},
+        {-0.6814f, -0.7319f},
+        {-0.5123f, -0.8588f}
     };
 
     private MoldCastShadows() {
@@ -46,7 +46,7 @@ public final class MoldCastShadows {
                 int visibleRays = 0;
                 for (float[] direction : LIGHT_DIRECTIONS) {
                     if (isVisible(projectedDepths, surface.positionX(x, y), surface.positionY(x, y),
-                            depth, direction[0], direction[1])) {
+                        depth, direction[0], direction[1])) {
                         visibleRays++;
                     }
                 }
@@ -73,8 +73,16 @@ public final class MoldCastShadows {
         return projectedDepths;
     }
 
-    private static void rasterize(float[] target, MoldCastSurface.Snapshot surface,
-                                  int ax, int ay, int bx, int by, int cx, int cy) {
+    private static void rasterize(
+        float[] target,
+        MoldCastSurface.Snapshot surface,
+        int ax,
+        int ay,
+        int bx,
+        int by,
+        int cx,
+        int cy
+    ) {
         float aX = surface.positionX(ax, ay);
         float aY = surface.positionY(ax, ay);
         float bX = surface.positionX(bx, by);
@@ -108,8 +116,14 @@ public final class MoldCastShadows {
         }
     }
 
-    private static boolean isVisible(float[] depths, float x, float y, float depth,
-                                     float directionX, float directionY) {
+    private static boolean isVisible(
+        float[] depths,
+        float x,
+        float y,
+        float depth,
+        float directionX,
+        float directionY
+    ) {
         for (float travel = RAY_STEP; travel * LIGHT_ELEVATION < depth; travel += RAY_STEP) {
             float sampleX = x + directionX * travel;
             float sampleY = y + directionY * travel;

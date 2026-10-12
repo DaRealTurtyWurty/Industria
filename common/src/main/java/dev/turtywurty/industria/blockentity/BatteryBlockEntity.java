@@ -47,9 +47,15 @@ import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class BatteryBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class BatteryBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        EnergySpreader,
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("battery");
-    public static final Component CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Component.translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
+    public static final Component CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Component
+        .translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");
 
     private final BatteryBlock.BatteryLevel batteryLevel;
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -65,7 +71,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
 
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1));
         var energyStorage = new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(),
-                this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer());
+            this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer());
         this.wrappedEnergyStorage.addStorage(energyStorage);
         this.inputEnergyStorage = RestrictedStorage.insertionOnly(energyStorage);
         this.outputEnergyStorage = RestrictedStorage.extractionOnly(energyStorage);
@@ -102,13 +108,14 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
             if (itemEnergyStorage != null) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                     if (this.chargeMode == ChargeMode.CHARGE && itemEnergyStorage.supportsExtraction()
-                            && energyStorage.getAmount() < energyStorage.getCapacity()) {
+                        && energyStorage.getAmount() < energyStorage.getCapacity()) {
                         long attemptToExtract = Math.min(Math.min(itemEnergyStorage.amount(0),
-                                energyStorage.getCapacity() - energyStorage.getAmount()), energyStorage.getMaxInput());
+                            energyStorage.getCapacity() - energyStorage.getAmount()), energyStorage.getMaxInput());
                         if (attemptToExtract <= 0)
                             return;
 
-                        long extracted = itemEnergyStorage.extract(SimpleEnergyStorage.ENERGY, attemptToExtract, transaction);
+                        long extracted = itemEnergyStorage.extract(SimpleEnergyStorage.ENERGY, attemptToExtract,
+                            transaction);
                         if (extracted <= 0)
                             return;
 
@@ -117,14 +124,15 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
 
                         update();
                     } else if (this.chargeMode == ChargeMode.DISCHARGE && itemEnergyStorage.supportsInsertion()
-                            && itemEnergyStorage.amount(0) < itemEnergyStorage.capacity(0, SimpleEnergyStorage.ENERGY)) {
+                        && itemEnergyStorage.amount(0) < itemEnergyStorage.capacity(0, SimpleEnergyStorage.ENERGY)) {
                         long attemptToInsert = Math.min(Math.min(energyStorage.getAmount(),
-                                        itemEnergyStorage.capacity(0, SimpleEnergyStorage.ENERGY) - itemEnergyStorage.amount(0)),
-                                energyStorage.getMaxOutput());
+                            itemEnergyStorage.capacity(0, SimpleEnergyStorage.ENERGY) - itemEnergyStorage.amount(0)),
+                            energyStorage.getMaxOutput());
                         if (attemptToInsert <= 0)
                             return;
 
-                        long inserted = itemEnergyStorage.insert(SimpleEnergyStorage.ENERGY, attemptToInsert, transaction);
+                        long inserted = itemEnergyStorage.insert(SimpleEnergyStorage.ENERGY, attemptToInsert,
+                            transaction);
                         if (inserted <= 0)
                             return;
 
@@ -226,8 +234,8 @@ public class BatteryBlockEntity extends IndustriaBlockEntity implements Syncable
 
         public static final Codec<ChargeMode> CODEC = Codec.STRING.xmap(ChargeMode::valueOf, ChargeMode::name);
         public static final StreamCodec<ByteBuf, ChargeMode> STREAM_CODEC = StreamCodec.of(
-                (buf, value) -> buf.writeByte(value.ordinal()),
-                buf -> values()[buf.readByte()]);
+            (buf, value) -> buf.writeByte(value.ordinal()),
+            buf -> values()[buf.readByte()]);
 
         public ChargeMode next() {
             return switch (this) {

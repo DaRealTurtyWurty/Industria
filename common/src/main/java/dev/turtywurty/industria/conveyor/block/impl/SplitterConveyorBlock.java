@@ -29,16 +29,21 @@ public class SplitterConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction right = facing.getClockWise();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(
-                        new ConveyorOutput(LEFT_OUTPUT_ID, pos.relative(left), pos),
-                        new ConveyorOutput(RIGHT_OUTPUT_ID, pos.relative(right), pos)
-                )
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(
+                new ConveyorOutput(LEFT_OUTPUT_ID, pos.relative(left), pos),
+                new ConveyorOutput(RIGHT_OUTPUT_ID, pos.relative(right), pos)));
     }
 
     @Override
-    public ConveyorOutput selectOutput(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public ConveyorOutput selectOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         ConveyorTopology topology = getTopology(level, pos, state);
         if (topology.outputs().isEmpty())
             return null;
@@ -46,9 +51,8 @@ public class SplitterConveyorBlock extends AbstractPoweredConveyorBlock {
         String selectedOutputId = item.getSelectedOutputId();
         if (selectedOutputId != null) {
             for (ConveyorOutput output : topology.outputs()) {
-                if (output.id().equals(selectedOutputId)) {
+                if (output.id().equals(selectedOutputId))
                     return output;
-                }
             }
         }
 

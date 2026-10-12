@@ -30,156 +30,157 @@ public class ModPayloadTypes {
     }
 
     private static void registerC2S() {
-        registerServerbound(UpdateMoldVisualPayload.ID, UpdateMoldVisualPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof MoldingTableMenu menu
-                            && menu.containerId == payload.containerId() && menu.stillValid(player)) {
-                        menu.getBlockEntity().setVisualState(payload.visual());
-                    }
-                }));
+        registerServerbound(UpdateMoldVisualPayload.ID, UpdateMoldVisualPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof MoldingTableMenu menu
+                    && menu.containerId == payload.containerId() && menu.stillValid(player)) {
+                    menu.getBlockEntity().setVisualState(payload.visual());
+                }
+            }));
 
-        registerServerbound(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    AbstractContainerMenu handler = player.containerMenu;
-                    if (handler instanceof BatteryScreenHandler batteryScreenHandler) {
-                        batteryScreenHandler.getBlockEntity().setChargeMode(payload.chargeMode());
-                    }
-                }));
+        registerServerbound(BatteryChargeModePayload.ID, BatteryChargeModePayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                AbstractContainerMenu handler = player.containerMenu;
+                if (handler instanceof BatteryScreenHandler batteryScreenHandler) {
+                    batteryScreenHandler.getBlockEntity().setChargeMode(payload.chargeMode());
+                }
+            }));
 
-        registerServerbound(ArcFurnaceSetModePayload.ID, ArcFurnaceSetModePayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    AbstractContainerMenu handler = player.containerMenu;
-                    if (handler instanceof ArcFurnaceScreenHandler arcFurnaceScreenHandler) {
-                        arcFurnaceScreenHandler.getBlockEntity().setMode(payload.mode());
-                    }
-                }));
+        registerServerbound(ArcFurnaceSetModePayload.ID, ArcFurnaceSetModePayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                AbstractContainerMenu handler = player.containerMenu;
+                if (handler instanceof ArcFurnaceScreenHandler arcFurnaceScreenHandler) {
+                    arcFurnaceScreenHandler.getBlockEntity().setMode(payload.mode());
+                }
+            }));
 
-        registerServerbound(ChangeDrillingPayload.ID, ChangeDrillingPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof DrillScreenHandler handler) {
-                        DrillBlockEntity blockEntity = handler.getBlockEntity();
-                        blockEntity.setDrilling(payload.drilling());
-                        blockEntity.update();
-                    }
-                }));
+        registerServerbound(ChangeDrillingPayload.ID, ChangeDrillingPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof DrillScreenHandler handler) {
+                    DrillBlockEntity blockEntity = handler.getBlockEntity();
+                    blockEntity.setDrilling(payload.drilling());
+                    blockEntity.update();
+                }
+            }));
 
-        registerServerbound(RetractDrillPayload.ID, RetractDrillPayload.CODEC, (_, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof DrillScreenHandler handler) {
-                        DrillBlockEntity blockEntity = handler.getBlockEntity();
-                        blockEntity.setDrilling(false);
-                        blockEntity.setRetracting(true);
-                        blockEntity.update();
-                    }
-                }));
+        registerServerbound(RetractDrillPayload.ID, RetractDrillPayload.CODEC,
+            (_, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof DrillScreenHandler handler) {
+                    DrillBlockEntity blockEntity = handler.getBlockEntity();
+                    blockEntity.setDrilling(false);
+                    blockEntity.setRetracting(true);
+                    blockEntity.update();
+                }
+            }));
 
-        registerServerbound(ChangeDrillOverflowModePayload.ID, ChangeDrillOverflowModePayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof DrillScreenHandler handler) {
-                        DrillBlockEntity blockEntity = handler.getBlockEntity();
-                        blockEntity.setOverflowMethod(payload.overflowMethod());
-                        blockEntity.update();
-                    }
-                }));
+        registerServerbound(ChangeDrillOverflowModePayload.ID, ChangeDrillOverflowModePayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof DrillScreenHandler handler) {
+                    DrillBlockEntity blockEntity = handler.getBlockEntity();
+                    blockEntity.setOverflowMethod(payload.overflowMethod());
+                    blockEntity.update();
+                }
+            }));
 
-        registerServerbound(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof MotorScreenHandler handler) {
-                        MotorBlockEntity blockEntity = handler.getBlockEntity();
-                        blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
-                        blockEntity.update();
-                    } else if (player.containerMenu instanceof DrillScreenHandler handler) {
-                        DrillBlockEntity blockEntity = handler.getBlockEntity();
-                        blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
-                        blockEntity.update();
-                    }
-                }));
+        registerServerbound(SetMotorTargetRPMPayload.ID, SetMotorTargetRPMPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof MotorScreenHandler handler) {
+                    MotorBlockEntity blockEntity = handler.getBlockEntity();
+                    blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
+                    blockEntity.update();
+                } else if (player.containerMenu instanceof DrillScreenHandler handler) {
+                    DrillBlockEntity blockEntity = handler.getBlockEntity();
+                    blockEntity.setTargetRotationSpeed(payload.targetRPM() / 60f);
+                    blockEntity.update();
+                }
+            }));
 
-        registerServerbound(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof FluidTankScreenHandler handler) {
-                        handler.getBlockEntity().setExtractMode(payload.extractMode());
-                    }
-                }));
+        registerServerbound(FluidTankChangeExtractModePayload.ID, FluidTankChangeExtractModePayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof FluidTankScreenHandler handler) {
+                    handler.getBlockEntity().setExtractMode(payload.extractMode());
+                }
+            }));
 
-        registerServerbound(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof OilPumpJackScreenHandler handler) {
-                        handler.getBlockEntity().setRunning(payload.isRunning());
-                    }
-                }));
+        registerServerbound(OilPumpJackSetRunningPayload.ID, OilPumpJackSetRunningPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof OilPumpJackScreenHandler handler) {
+                    handler.getBlockEntity().setRunning(payload.isRunning());
+                }
+            }));
 
-        registerServerbound(SetConveyorFilterStackPayload.ID, SetConveyorFilterStackPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setFilterStack(payload.stack());
-                    }
-                }));
+        registerServerbound(SetConveyorFilterStackPayload.ID, SetConveyorFilterStackPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setFilterStack(payload.stack());
+                }
+            }));
 
-        registerServerbound(SetConveyorBlacklistModePayload.ID, SetConveyorBlacklistModePayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setBlacklistMode(payload.blacklistMode());
-                    }
-                }));
+        registerServerbound(SetConveyorBlacklistModePayload.ID, SetConveyorBlacklistModePayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setBlacklistMode(payload.blacklistMode());
+                }
+            }));
 
-        registerServerbound(SetConveyorMatchDurabilityPayload.ID, SetConveyorMatchDurabilityPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setMatchDurability(payload.matchDurability());
-                    }
-                }));
+        registerServerbound(SetConveyorMatchDurabilityPayload.ID, SetConveyorMatchDurabilityPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setMatchDurability(payload.matchDurability());
+                }
+            }));
 
-        registerServerbound(SetConveyorMatchEnchantmentsPayload.ID, SetConveyorMatchEnchantmentsPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setMatchEnchantments(payload.matchEnchantments());
-                    }
-                }));
+        registerServerbound(SetConveyorMatchEnchantmentsPayload.ID, SetConveyorMatchEnchantmentsPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setMatchEnchantments(payload.matchEnchantments());
+                }
+            }));
 
-        registerServerbound(SetConveyorMatchComponentsPayload.ID, SetConveyorMatchComponentsPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setMatchComponents(payload.matchComponents());
-                    }
-                }));
+        registerServerbound(SetConveyorMatchComponentsPayload.ID, SetConveyorMatchComponentsPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setMatchComponents(payload.matchComponents());
+                }
+            }));
 
-        registerServerbound(SetConveyorFilterTagPayload.ID, SetConveyorFilterTagPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setFilterTag(payload.filterTag());
-                    }
-                }));
+        registerServerbound(SetConveyorFilterTagPayload.ID, SetConveyorFilterTagPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setFilterTag(payload.filterTag());
+                }
+            }));
 
-        registerServerbound(SetConveyorTagFilteringPayload.ID, SetConveyorTagFilteringPayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
-                    if (blockEntity != null) {
-                        blockEntity.setTagFiltering(payload.tagFiltering());
-                    }
-                }));
+        registerServerbound(SetConveyorTagFilteringPayload.ID, SetConveyorTagFilteringPayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                ConveyorFilterAccess blockEntity = getConveyorFilterAccess(player);
+                if (blockEntity != null) {
+                    blockEntity.setTagFiltering(payload.tagFiltering());
+                }
+            }));
 
-        registerServerbound(AgitatorSetPortModePayload.ID, AgitatorSetPortModePayload.CODEC, (payload, context) ->
-                context.sender().ifPresent(player -> {
-                    if (player.containerMenu instanceof AgitatorScreenHandler handler) {
-                        AgitatorBlockEntity blockEntity = handler.getBlockEntity();
-                        if (payload.output()) {
-                            blockEntity.setOutputMode(payload.index(), payload.portType());
-                        } else {
-                            blockEntity.setInputMode(payload.index(), payload.portType());
-                        }
+        registerServerbound(AgitatorSetPortModePayload.ID, AgitatorSetPortModePayload.CODEC,
+            (payload, context) -> context.sender().ifPresent(player -> {
+                if (player.containerMenu instanceof AgitatorScreenHandler handler) {
+                    AgitatorBlockEntity blockEntity = handler.getBlockEntity();
+                    if (payload.output()) {
+                        blockEntity.setOutputMode(payload.index(), payload.portType());
+                    } else {
+                        blockEntity.setInputMode(payload.index(), payload.portType());
                     }
-                }));
+                }
+            }));
 
         registerServerbound(CompleteMoldPayload.ID, CompleteMoldPayload.CODEC, (payload, context) -> {
             context.sender().ifPresent(player -> {
-                if (player.containerMenu.containerId == payload.containerId() && player.containerMenu instanceof MoldingTableMenu menu) {
+                if (player.containerMenu.containerId == payload.containerId()
+                    && player.containerMenu instanceof MoldingTableMenu menu) {
                     menu.completeMold(player, payload.moldId());
                 }
             });
@@ -201,12 +202,21 @@ public class ModPayloadTypes {
         registerClientbound(SmelteryControllerSnapshotPayload.ID, SmelteryControllerSnapshotPayload.CODEC);
     }
 
-    private static <T extends CustomPacketPayload> void registerServerbound(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec, PayloadHandler<T> handler) {
-        NETWORK.registerPlayServerbound(type, debugCodec(type, codec, "serverbound"), PayloadRegistrationOptions.DEFAULT, handler);
+    private static <T extends CustomPacketPayload> void registerServerbound(
+        CustomPacketPayload.Type<T> type,
+        StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
+        PayloadHandler<T> handler
+    ) {
+        NETWORK.registerPlayServerbound(type, debugCodec(type, codec, "serverbound"),
+            PayloadRegistrationOptions.DEFAULT, handler);
     }
 
-    private static <T extends CustomPacketPayload> void registerClientbound(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
-        NETWORK.registerPlayClientbound(type, debugCodec(type, codec, "clientbound"), PayloadRegistrationOptions.DEFAULT);
+    private static <T extends CustomPacketPayload> void registerClientbound(
+        CustomPacketPayload.Type<T> type,
+        StreamCodec<? super RegistryFriendlyByteBuf, T> codec
+    ) {
+        NETWORK.registerPlayClientbound(type, debugCodec(type, codec, "clientbound"),
+            PayloadRegistrationOptions.DEFAULT);
     }
 
     private static ConveyorFilterAccess getConveyorFilterAccess(ServerPlayer player) {
@@ -220,36 +230,34 @@ public class ModPayloadTypes {
     }
 
     private static <T extends CustomPacketPayload> StreamCodec<RegistryFriendlyByteBuf, T> debugCodec(
-            CustomPacketPayload.Type<T> id,
-            StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
-            String direction
+        CustomPacketPayload.Type<T> id,
+        StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
+        String direction
     ) {
         return StreamCodec.of(
-                (output, value) -> {
-                    try {
-                        codec.encode(output, value);
-                    } catch (Exception exception) {
-                        Industria.LOGGER.error("Failed to encode {} custom payload '{}'", direction, id.id(), exception);
-                        throw exception;
-                    }
-                },
-                input -> {
-                    int readerIndex = input.readerIndex();
-                    int readableBytes = input.readableBytes();
-                    try {
-                        return codec.decode(input);
-                    } catch (Exception exception) {
-                        Industria.LOGGER.error(
-                                "Failed to decode {} custom payload '{}' at readerIndex={} readableBytes={}",
-                                direction,
-                                id.id(),
-                                readerIndex,
-                                readableBytes,
-                                exception
-                        );
-                        throw exception;
-                    }
+            (output, value) -> {
+                try {
+                    codec.encode(output, value);
+                } catch (Exception exception) {
+                    Industria.LOGGER.error("Failed to encode {} custom payload '{}'", direction, id.id(), exception);
+                    throw exception;
                 }
-        );
+            },
+            input -> {
+                int readerIndex = input.readerIndex();
+                int readableBytes = input.readableBytes();
+                try {
+                    return codec.decode(input);
+                } catch (Exception exception) {
+                    Industria.LOGGER.error(
+                        "Failed to decode {} custom payload '{}' at readerIndex={} readableBytes={}",
+                        direction,
+                        id.id(),
+                        readerIndex,
+                        readableBytes,
+                        exception);
+                    throw exception;
+                }
+            });
     }
 }

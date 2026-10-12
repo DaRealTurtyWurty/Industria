@@ -89,9 +89,9 @@ public class DelayConveyorBlockEntity extends IndustriaBlockEntity implements Ti
         for (int i = 0; i < releaseCount; i++) {
             int finalI = i;
             UUID itemUUID = input.read("ItemUUID" + i, UUIDUtil.CODEC)
-                    .orElseThrow(() -> new IllegalStateException("Missing ItemUUID for index " + finalI));
+                .orElseThrow(() -> new IllegalStateException("Missing ItemUUID for index " + finalI));
             long releaseTick = input.getLong("ReleaseTick" + i)
-                    .orElseThrow(() -> new IllegalStateException("Missing ReleaseTick for index " + finalI));
+                .orElseThrow(() -> new IllegalStateException("Missing ReleaseTick for index " + finalI));
             releaseTicksByItem.put(itemUUID, releaseTick);
         }
     }

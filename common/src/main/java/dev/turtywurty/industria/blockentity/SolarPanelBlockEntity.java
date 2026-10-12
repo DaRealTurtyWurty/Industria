@@ -27,7 +27,10 @@ import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
-public class SolarPanelBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, ChainedGeneratorEnergyOutput {
+public class SolarPanelBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        ChainedGeneratorEnergyOutput {
     public static final Component TITLE = Industria.containerTitle("solar_panel");
     public static final Component ADVANCED_TITLE = Industria.containerTitle("advanced_solar_panel");
     public static final int BASIC_MAX_OUTPUT = 60;
@@ -43,7 +46,13 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
         this.energy.addStorage(new SyncingEnergyStorage(this, 100_000, 0, 500));
     }
 
-    public static int getEnergyOutput(long dayTime, boolean isRaining, boolean isThundering, int skylight, boolean isAdvanced) {
+    public static int getEnergyOutput(
+        long dayTime,
+        boolean isRaining,
+        boolean isThundering,
+        int skylight,
+        boolean isAdvanced
+    ) {
         dayTime = dayTime % 24000;
 
         if (dayTime <= 0 || dayTime >= 13000) // from 13000 to 24000 it's night
@@ -91,7 +100,8 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
         BlockState state = getBlockState();
         boolean powered = outputSignal > 0;
         if (state.getValue(SolarPanelBlock.POWERED) != powered) {
-            this.level.setBlock(this.worldPosition, state.setValue(SolarPanelBlock.POWERED, powered), Block.UPDATE_CLIENTS);
+            this.level.setBlock(this.worldPosition, state.setValue(SolarPanelBlock.POWERED, powered),
+                Block.UPDATE_CLIENTS);
         }
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) getEnergyStorage();
@@ -146,7 +156,7 @@ public class SolarPanelBlockEntity extends IndustriaBlockEntity implements Synca
 
     public ResourceStorage<ResourceVariant<UnitResource>> getEnergyProvider(Direction direction) {
         return isEnergyOutputDirection(direction)
-                ? this.energy.getStorage(direction)
-                : null;
+            ? this.energy.getStorage(direction)
+            : null;
     }
 }

@@ -15,7 +15,8 @@ import java.util.Comparator;
 import java.util.Map;
 
 public class ModTooltips {
-    private static final Component ENTITY_DATA_HINT = Component.literal("Hold Shift for entity data").withStyle(ChatFormatting.DARK_GRAY);
+    private static final Component ENTITY_DATA_HINT = Component.literal("Hold Shift for entity data")
+        .withStyle(ChatFormatting.DARK_GRAY);
     private static final Component ENTITY_DATA_HEADER = Component.literal("Entity Data").withStyle(ChatFormatting.GRAY);
 
     public static void init() {
@@ -42,9 +43,10 @@ public class ModTooltips {
 
             lines.add(ENTITY_DATA_HEADER);
             entityData.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
-                    .map(entry -> Component.literal(entry.getKey() + ": " + entry.getValue()).withStyle(ChatFormatting.DARK_GRAY))
-                    .forEach(lines::add);
+                .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
+                .map(entry -> Component.literal(entry.getKey() + ": " + entry.getValue())
+                    .withStyle(ChatFormatting.DARK_GRAY))
+                .forEach(lines::add);
         });
     }
 }

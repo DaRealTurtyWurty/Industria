@@ -39,7 +39,7 @@ public class ItemListTooltipComponent implements ClientTooltipComponent {
 
     @Override
     public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor context) {
-        if(this.stacks.isEmpty())
+        if (this.stacks.isEmpty())
             return;
 
         x = x + 2;

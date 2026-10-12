@@ -29,8 +29,9 @@ public class ResetPipeNetworksCommand {
         final int finalPipeCount = pipeCount;
 
         context.getSource().sendSuccess(
-                () -> Component.literal("Reset pipe networks: cleared " + finalNetworkCount + " network(s) across " + finalManagerCount + " manager(s), removing " + finalPipeCount + " mapped pipe(s)."),
-                false);
+            () -> Component.literal("Reset pipe networks: cleared " + finalNetworkCount + " network(s) across "
+                + finalManagerCount + " manager(s), removing " + finalPipeCount + " mapped pipe(s)."),
+            false);
 
         return networkCount;
     }

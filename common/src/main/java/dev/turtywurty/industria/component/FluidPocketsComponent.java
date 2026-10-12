@@ -12,11 +12,12 @@ import java.util.List;
 
 public record FluidPocketsComponent(List<WorldFluidPocketsState.FluidPocket> pockets) {
     public static final Codec<FluidPocketsComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.list(WorldFluidPocketsState.FluidPocket.CODEC).fieldOf("pockets").forGetter(FluidPocketsComponent::pockets)
-    ).apply(instance, FluidPocketsComponent::new));
+        Codec.list(WorldFluidPocketsState.FluidPocket.CODEC).fieldOf("pockets")
+            .forGetter(FluidPocketsComponent::pockets))
+        .apply(instance, FluidPocketsComponent::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPocketsComponent> STREAM_CODEC =
-            StreamCodec.composite(ByteBufCodecs.collection(ArrayList::new, WorldFluidPocketsState.FluidPocket.STREAM_CODEC),
-                    FluidPocketsComponent::pockets,
-                    FluidPocketsComponent::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPocketsComponent> STREAM_CODEC = StreamCodec
+        .composite(ByteBufCodecs.collection(ArrayList::new, WorldFluidPocketsState.FluidPocket.STREAM_CODEC),
+            FluidPocketsComponent::pockets,
+            FluidPocketsComponent::new);
 }

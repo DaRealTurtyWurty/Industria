@@ -19,13 +19,19 @@ public final class ModSlurryStorageProviders {
 
     public static void init() {
         TransferService transfers = TransferService.get();
-        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.MIXER, MixerBlockEntity::getSlurryProvider);
-        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.DIGESTER, DigesterBlockEntity::getSlurryProvider);
-        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.SHAKING_TABLE, ShakingTableBlockEntity::getSlurryProvider);
-        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntity::getSlurryProvider);
-        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.AGITATOR, AgitatorBlockEntity::getSlurryProvider);
+        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.MIXER,
+            MixerBlockEntity::getSlurryProvider);
+        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.DIGESTER,
+            DigesterBlockEntity::getSlurryProvider);
+        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.SHAKING_TABLE,
+            ShakingTableBlockEntity::getSlurryProvider);
+        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR,
+            CentrifugalConcentratorBlockEntity::getSlurryProvider);
+        transfers.registerBlockEntityProvider(SlurryStorage.KEY, ModBlockEntityTypes.AGITATOR,
+            AgitatorBlockEntity::getSlurryProvider);
         transfers.registerBlockProvider(SlurryStorage.KEY, (level, pos, state, blockEntity, side) -> {
-            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
+            IndustriaMultiblockControllerBlockEntity controller = resolveMultiblockController(
+                level instanceof ServerLevel serverLevel ? serverLevel : null, pos, blockEntity);
             return controller != null ? controller.getSlurryStorageForExternal(pos, side) : null;
         }, MultiblockLib.MULTIBLOCK_PART_HANDLE);
 
@@ -37,7 +43,11 @@ public final class ModSlurryStorageProviders {
         }, ModBlocks.SLURRY_PIPE);
     }
 
-    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(ServerLevel level, BlockPos pos, BlockEntity blockEntity) {
+    private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(
+        ServerLevel level,
+        BlockPos pos,
+        BlockEntity blockEntity
+    ) {
         if (blockEntity instanceof IndustriaMultiblockControllerBlockEntity controller)
             return controller;
 

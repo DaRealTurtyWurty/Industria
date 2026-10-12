@@ -8,12 +8,15 @@ import net.minecraft.client.gui.screens.TitleScreen;
 
 /** Opt-in smoke test that exits after resources, custom pipelines, and the title screen load. */
 public final class ClientStartupValidation {
-    private ClientStartupValidation() {}
+    private ClientStartupValidation() {
+    }
 
     public static void initialize() {
-        if (!Boolean.getBoolean("industria.test.client.startup")) return;
+        if (!Boolean.getBoolean("industria.test.client.startup"))
+            return;
         // Register both GUI pipelines before the resource reload so their shaders are validated too.
-        Industria.LOGGER.info("Validating custom pipelines {} and {}", MoldRenderPipelines.MOLD_LINE.getLocation(), MoldRenderPipelines.MOLD_CAST.getLocation());
+        Industria.LOGGER.info("Validating custom pipelines {} and {}", MoldRenderPipelines.MOLD_LINE.getLocation(),
+            MoldRenderPipelines.MOLD_CAST.getLocation());
         int[] readyTicks = {0};
         ClientEvents.onEndClientTick(client -> {
             if (client.options.onboardAccessibility) {
@@ -24,7 +27,8 @@ public final class ClientStartupValidation {
             }
             if (client.gui.overlay() == null && client.gui.screen() instanceof TitleScreen) {
                 if (++readyTicks[0] >= 20) {
-                    Industria.LOGGER.info("[ClientStartupValidation] PASS Minecraft 26.3 resources and title screen loaded");
+                    Industria.LOGGER
+                        .info("[ClientStartupValidation] PASS Minecraft 26.3 resources and title screen loaded");
                     client.stop();
                 }
             } else {

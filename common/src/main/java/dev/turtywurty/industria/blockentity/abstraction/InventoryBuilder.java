@@ -15,9 +15,8 @@ public class InventoryBuilder {
     private ItemStack[] stacks;
 
     public InventoryBuilder(int size) {
-        if (size <= 0) {
+        if (size <= 0)
             throw new IllegalArgumentException("Size must be greater than 0!");
-        }
 
         this.size = size;
         this.inventory = new IndustriaSimpleInventory(this.size);
@@ -29,18 +28,16 @@ public class InventoryBuilder {
     }
 
     public InventoryBuilder setStacks(ItemStack... stacks) {
-        if (stacks.length > this.size) {
+        if (stacks.length > this.size)
             throw new IllegalArgumentException("Stacks length is greater than the inventory size!");
-        }
 
         this.stacks = stacks;
         return this;
     }
 
     public InventoryBuilder setStack(int slot, ItemStack stack) {
-        if (slot >= this.size) {
+        if (slot >= this.size)
             throw new IllegalArgumentException("Slot is greater than the inventory size!");
-        }
 
         if (this.stacks == null) {
             this.stacks = new ItemStack[this.size];
@@ -66,7 +63,11 @@ public class InventoryBuilder {
         return addComponent(new StackPredicateComponent(predicate));
     }
 
-    private <T extends Component> void addComponentToInventory(IndustriaSimpleInventory inventory, Class<? extends Component> clazz, Component component) {
+    private <T extends Component> void addComponentToInventory(
+        IndustriaSimpleInventory inventory,
+        Class<? extends Component> clazz,
+        Component component
+    ) {
         // Safe because we know clazz and component match due to addComponent
         @SuppressWarnings("unchecked")
         Class<T> typedClazz = (Class<T>) clazz;

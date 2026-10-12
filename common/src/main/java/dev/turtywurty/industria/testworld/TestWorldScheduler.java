@@ -15,7 +15,7 @@ public final class TestWorldScheduler {
     public static void schedule(TestWorldContext context, long delay, Consumer<TestWorldContext> action) {
         long executionTick = context.overworld().getGameTime() + delay;
         ACTIONS.computeIfAbsent(context.overworld(), _ -> new PriorityQueue<>())
-                .add(new ScheduledAction(executionTick, nextSequence++, context, action));
+            .add(new ScheduledAction(executionTick, nextSequence++, context, action));
     }
 
     public static void tick(ServerLevel level) {
@@ -35,10 +35,10 @@ public final class TestWorldScheduler {
     }
 
     private record ScheduledAction(
-            long executionTick,
-            long sequence,
-            TestWorldContext context,
-            Consumer<TestWorldContext> action
+        long executionTick,
+        long sequence,
+        TestWorldContext context,
+        Consumer<TestWorldContext> action
     ) implements Comparable<ScheduledAction> {
         @Override
         public int compareTo(ScheduledAction other) {

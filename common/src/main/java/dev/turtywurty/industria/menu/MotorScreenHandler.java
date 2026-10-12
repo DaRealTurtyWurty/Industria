@@ -40,7 +40,8 @@ public class MotorScreenHandler extends AbstractContainerMenu {
         var energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long capacity = energyStorage.getCapacity();
-        if (energy == 0 || capacity == 0) return 0;
+        if (energy == 0 || capacity == 0)
+            return 0;
 
         return Mth.clamp((float) energy / capacity, 0, 1);
     }

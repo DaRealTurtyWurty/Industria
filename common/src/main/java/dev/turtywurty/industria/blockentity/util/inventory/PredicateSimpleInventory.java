@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 
 public class PredicateSimpleInventory extends SyncingSimpleInventory {
     private static final long BUCKET_AMOUNT = Units.FLUID_BUCKET.convert(
-            1, Units.FLUID_DROPLET, RoundingMode.UNNECESSARY);
+        1, Units.FLUID_DROPLET, RoundingMode.UNNECESSARY);
 
     private final BiPredicate<ItemStack, Integer> predicate;
 
@@ -32,21 +32,29 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
         return MutableItemContext.ofContainerSlot(new SimpleContainer(stack.copy()), 0);
     }
 
-    public PredicateSimpleInventory(UpdateableBlockEntityLike blockEntity, int size, BiPredicate<ItemStack, Integer> predicate) {
+    public PredicateSimpleInventory(
+        UpdateableBlockEntityLike blockEntity,
+        int size,
+        BiPredicate<ItemStack, Integer> predicate
+    ) {
         super(blockEntity, size);
         this.predicate = predicate;
     }
 
-    public PredicateSimpleInventory(UpdateableBlockEntityLike blockEntity, BiPredicate<ItemStack, Integer> predicate, ItemStack... stacks) {
+    public PredicateSimpleInventory(
+        UpdateableBlockEntityLike blockEntity,
+        BiPredicate<ItemStack, Integer> predicate,
+        ItemStack... stacks
+    ) {
         super(blockEntity, stacks);
         this.predicate = predicate;
     }
 
     public static BiPredicate<ItemStack, Integer> createEmptyFluidPredicate(
-            Supplier<ResourceVariant<Fluid>> fluidVariantSupplier) {
+        Supplier<ResourceVariant<Fluid>> fluidVariantSupplier
+    ) {
         return (stack, _) -> {
-            ResourceStorage<ResourceVariant<Fluid>> storage =
-                    mutableCopy(stack).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> storage = mutableCopy(stack).find(StorageKeys.FLUID);
             if (storage == null || !storage.supportsInsertion())
                 return false;
 
@@ -58,8 +66,7 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
 
     public static BiPredicate<ItemStack, Integer> createFluidPredicate(Supplier<FluidStack> fluidStackSupplier) {
         return (stack, _) -> {
-            ResourceStorage<ResourceVariant<Fluid>> storage =
-                    mutableCopy(stack).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> storage = mutableCopy(stack).find(StorageKeys.FLUID);
             if (storage == null || !storage.supportsExtraction())
                 return false;
 
@@ -70,10 +77,10 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
     }
 
     public static BiPredicate<ItemStack, Integer> createEmptySlurryPredicate(
-            Supplier<ResourceVariant<Slurry>> slurryVariantSupplier) {
+        Supplier<ResourceVariant<Slurry>> slurryVariantSupplier
+    ) {
         return (stack, _) -> {
-            ResourceStorage<ResourceVariant<Slurry>> storage =
-                    mutableCopy(stack).find(SlurryStorage.KEY);
+            ResourceStorage<ResourceVariant<Slurry>> storage = mutableCopy(stack).find(SlurryStorage.KEY);
             if (storage == null || !storage.supportsInsertion())
                 return false;
 
@@ -85,8 +92,7 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
 
     public static BiPredicate<ItemStack, Integer> createSlurryPredicate(Supplier<SlurryStack> slurryStackSupplier) {
         return (stack, _) -> {
-            ResourceStorage<ResourceVariant<Slurry>> storage =
-                    mutableCopy(stack).find(SlurryStorage.KEY);
+            ResourceStorage<ResourceVariant<Slurry>> storage = mutableCopy(stack).find(SlurryStorage.KEY);
             if (storage == null || !storage.supportsExtraction())
                 return false;
 
@@ -97,10 +103,10 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
     }
 
     public static BiPredicate<ItemStack, Integer> createEmptyGasPredicate(
-            Supplier<ResourceVariant<Gas>> gasVariantSupplier) {
+        Supplier<ResourceVariant<Gas>> gasVariantSupplier
+    ) {
         return (stack, _) -> {
-            ResourceStorage<ResourceVariant<Gas>> storage =
-                    mutableCopy(stack).find(GasStorage.KEY);
+            ResourceStorage<ResourceVariant<Gas>> storage = mutableCopy(stack).find(GasStorage.KEY);
             if (storage == null || !storage.supportsInsertion())
                 return false;
 
@@ -112,8 +118,7 @@ public class PredicateSimpleInventory extends SyncingSimpleInventory {
 
     public static BiPredicate<ItemStack, Integer> createGasPredicate(Supplier<GasStack> gasStackSupplier) {
         return (stack, _) -> {
-            ResourceStorage<ResourceVariant<Gas>> storage =
-                    mutableCopy(stack).find(GasStorage.KEY);
+            ResourceStorage<ResourceVariant<Gas>> storage = mutableCopy(stack).find(GasStorage.KEY);
             if (storage == null || !storage.supportsExtraction())
                 return false;
 

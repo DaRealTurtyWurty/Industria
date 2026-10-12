@@ -14,17 +14,13 @@ import java.util.Objects;
 
 public record GasStack(ResourceVariant<Gas> variant, long amount) {
     public static final GasStack EMPTY = new GasStack(GasVariant.blank(), 0);
-    public static final MapCodec<GasStack> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    GasVariant.CODEC.fieldOf("variant").forGetter(GasStack::variant),
-                    Codec.LONG.fieldOf("amount").forGetter(GasStack::amount)
-            ).apply(instance, GasStack::new)
-    );
+    public static final MapCodec<GasStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        GasVariant.CODEC.fieldOf("variant").forGetter(GasStack::variant),
+        Codec.LONG.fieldOf("amount").forGetter(GasStack::amount)).apply(instance, GasStack::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, GasStack> STREAM_CODEC = StreamCodec.composite(
-            GasVariant.STREAM_CODEC, GasStack::variant,
-            ByteBufCodecs.LONG, GasStack::amount,
-            GasStack::new
-    );
+        GasVariant.STREAM_CODEC, GasStack::variant,
+        ByteBufCodecs.LONG, GasStack::amount,
+        GasStack::new);
 
     public boolean isEmpty() {
         return this.amount <= 0 || this.variant.isBlank();
@@ -43,8 +39,10 @@ public record GasStack(ResourceVariant<Gas> variant, long amount) {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
 
         GasStack that = (GasStack) obj;
         return amount == that.amount && variant.equals(that.variant);

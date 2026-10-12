@@ -50,7 +50,12 @@ import java.util.List;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
-public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
+public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload>,
+        EnergySpreader,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("thermal_generator");
 
     private static final int CONSUME_RATE = 500;
@@ -96,14 +101,14 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
 
         extract(fluidStorage, fluidStorage.getResource(), CONSUME_RATE);
         insertEnergy(energyStorage, Mth.clamp(storedLava, 0,
-                energyStorage.getCapacity() - energyStorage.getAmount()));
+            energyStorage.getCapacity() - energyStorage.getAmount()));
         update();
     }
 
     private void extractLavaFromInventory() {
         SimpleContainer inventory = this.wrappedContainerStorage.getInventory(0);
-        ResourceStorage<ResourceVariant<Fluid>> storage =
-                MutableItemContext.ofContainerSlot(inventory, 0).find(StorageKeys.FLUID);
+        ResourceStorage<ResourceVariant<Fluid>> storage = MutableItemContext.ofContainerSlot(inventory, 0)
+            .find(StorageKeys.FLUID);
         if (storage == null || !storage.supportsExtraction())
             return;
 
@@ -126,12 +131,13 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements
 
     public boolean isValid(ItemStack itemStack, int slot) {
         ResourceStorage<ResourceVariant<Fluid>> storage = MutableItemContext.ofContainerSlot(
-                new SimpleContainer(itemStack.copy()), 0).find(StorageKeys.FLUID);
+            new SimpleContainer(itemStack.copy()), 0).find(StorageKeys.FLUID);
         if (storage == null || !storage.supportsExtraction())
             return false;
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-            return storage.extract(ResourceTypes.FLUID.of(Fluids.LAVA.builtInRegistryHolder()), FluidAmounts.BUCKET, transaction) > 0;
+            return storage.extract(ResourceTypes.FLUID.of(Fluids.LAVA.builtInRegistryHolder()), FluidAmounts.BUCKET,
+                transaction) > 0;
         }
     }
 

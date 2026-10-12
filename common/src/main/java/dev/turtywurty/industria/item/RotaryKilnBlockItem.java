@@ -39,7 +39,8 @@ public class RotaryKilnBlockItem extends BlockItem {
 
         if (toPlace.getBlock() != ModBlocks.ROTARY_KILN_CONTROLLER.get()) {
             BlockPos controllerPos = infrontPos.relative(facing, toPlace.getValue(RotaryKilnBlock.SEGMENT_INDEX) - 1);
-            if (context.getLevel().getBlockEntity(controllerPos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
+            if (context.getLevel()
+                .getBlockEntity(controllerPos) instanceof RotaryKilnControllerBlockEntity blockEntity) {
                 blockEntity.addKilnSegment(context.getClickedPos());
             }
         }

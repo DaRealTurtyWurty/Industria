@@ -48,17 +48,24 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
 
     public BasicConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .addStateProperty(SHAPE, ConveyorShape.STRAIGHT)
-                .addStateProperty(FACING, Direction.NORTH)
-                .addStateProperty(WATERLOGGED, false)
-                .addStateProperty(ENABLED, true)
-                .notPlaceFacingOpposite()
-                .hasComparatorOutput()
-        );
+            .addStateProperty(SHAPE, ConveyorShape.STRAIGHT)
+            .addStateProperty(FACING, Direction.NORTH)
+            .addStateProperty(WATERLOGGED, false)
+            .addStateProperty(ENABLED, true)
+            .notPlaceFacingOpposite()
+            .hasComparatorOutput());
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(
+        ItemStack itemStack,
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        InteractionHand hand,
+        BlockHitResult hitResult
+    ) {
         if (itemStack.isEmpty()) {
             if (player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
                 if (level.isClientSide())
@@ -111,8 +118,9 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
             if (!storageAt.addItem(new ConveyorItem(pos, itemStack.copyWithCount(1))))
                 return InteractionResult.PASS;
 
-            if (!player.isCreative())
+            if (!player.isCreative()) {
                 itemStack.shrink(1);
+            }
 
             networkManager.syncNetwork(serverLevel, networkAt);
             LevelConveyorNetworks.getOrCreate(serverLevel).setDirty();
@@ -131,10 +139,10 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         boolean waterlogged = fluid.getType() == Fluids.WATER;
 
         BlockState base = defaultBlockState()
-                .setValue(WATERLOGGED, waterlogged)
-                .setValue(FACING, context.getHorizontalDirection())
-                .setValue(SHAPE, ConveyorShape.STRAIGHT)
-                .setValue(ENABLED, true);
+            .setValue(WATERLOGGED, waterlogged)
+            .setValue(FACING, context.getHorizontalDirection())
+            .setValue(SHAPE, ConveyorShape.STRAIGHT)
+            .setValue(ENABLED, true);
 
         // Run the resolver once so corners/slopes can form immediately if possible.
         return resolveConveyorState(level, pos, base, Reason.PLACED, context);
@@ -155,7 +163,14 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Block block,
+        @Nullable Orientation orientation,
+        boolean movedByPiston
+    ) {
         super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
         if (level.isClientSide())
             return;
@@ -167,14 +182,14 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
 
     @Override
     protected BlockState updateShape(
-            BlockState state,
-            LevelReader level,
-            ScheduledTickAccess ticks,
-            BlockPos pos,
-            Direction directionToNeighbour,
-            BlockPos neighbourPos,
-            BlockState neighbourState,
-            RandomSource random
+        BlockState state,
+        LevelReader level,
+        ScheduledTickAccess ticks,
+        BlockPos pos,
+        Direction directionToNeighbour,
+        BlockPos neighbourPos,
+        BlockState neighbourState,
+        RandomSource random
     ) {
         if (state.getValue(WATERLOGGED)) {
             ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
@@ -203,9 +218,8 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
 
         ConveyorNetworkManager manager = getNetworkManager(level);
         if (manager != null) {
-            boolean needsNetworkUpdate =
-                    current.getValue(SHAPE) != resolved.getValue(SHAPE) ||
-                            current.getValue(FACING) != resolved.getValue(FACING);
+            boolean needsNetworkUpdate = current.getValue(SHAPE) != resolved.getValue(SHAPE) ||
+                current.getValue(FACING) != resolved.getValue(FACING);
 
             if (needsNetworkUpdate) {
                 manager.recreateNetworkAt(level, pos);
@@ -219,7 +233,12 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+    protected void affectNeighborsAfterRemoval(
+        BlockState state,
+        ServerLevel level,
+        BlockPos pos,
+        boolean movedByPiston
+    ) {
         BlockState newState = level.getBlockState(pos);
         if (!state.is(newState.getBlock())) {
             getNetworkManager(level).removeConveyor(level, pos);
@@ -247,8 +266,8 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
     @Override
     protected FluidState getFluidState(BlockState state) {
         return state.getValue(WATERLOGGED)
-                ? Fluids.WATER.getSource(false)
-                : super.getFluidState(state);
+            ? Fluids.WATER.getSource(false)
+            : super.getFluidState(state);
     }
 
     public ConveyorNetworkManager getNetworkManager(ServerLevel level) {
@@ -281,22 +300,28 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         return state.getValue(ENABLED);
     }
 
-    public BlockState resolveConveyorState(Level level, BlockPos pos, BlockState oldState, Reason reason, @Nullable BlockPlaceContext context) {
+    public BlockState resolveConveyorState(
+        Level level,
+        BlockPos pos,
+        BlockState oldState,
+        Reason reason,
+        @Nullable BlockPlaceContext context
+    ) {
         boolean waterlogged = level.getFluidState(pos).getType() == Fluids.WATER;
         boolean enabled = computeEnabled(level, pos, oldState);
 
         Direction preferredFacing = reason == Reason.PLACED && context != null
-                ? context.getHorizontalDirection()
-                : oldState.getValue(FACING);
+            ? context.getHorizontalDirection()
+            : oldState.getValue(FACING);
         ConveyorShape currentShape = oldState.getValue(SHAPE);
         ResolvedOrientation resolvedOrientation = reason == Reason.PLACED
-                ? new ResolvedOrientation(preferredFacing, computeBestShape(level, pos, preferredFacing, currentShape))
-                : computeBestOrientation(level, pos, preferredFacing, currentShape);
+            ? new ResolvedOrientation(preferredFacing, computeBestShape(level, pos, preferredFacing, currentShape))
+            : computeBestOrientation(level, pos, preferredFacing, currentShape);
 
         return oldState.setValue(FACING, resolvedOrientation.facing())
-                .setValue(WATERLOGGED, waterlogged)
-                .setValue(ENABLED, enabled)
-                .setValue(SHAPE, resolvedOrientation.shape());
+            .setValue(WATERLOGGED, waterlogged)
+            .setValue(ENABLED, enabled)
+            .setValue(SHAPE, resolvedOrientation.shape());
     }
 
     @Override
@@ -312,25 +337,20 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
 
         return switch (shape) {
             case STRAIGHT -> new ConveyorTopology(
-                    List.of(new ConveyorInput("in", pos.relative(back))),
-                    List.of(new ConveyorOutput("out", forward, pos))
-            );
+                List.of(new ConveyorInput("in", pos.relative(back))),
+                List.of(new ConveyorOutput("out", forward, pos)));
             case UP -> new ConveyorTopology(
-                    List.of(new ConveyorInput("in", pos.relative(back))),
-                    List.of(new ConveyorOutput("out", forward.above(), pos.above()))
-            );
+                List.of(new ConveyorInput("in", pos.relative(back))),
+                List.of(new ConveyorOutput("out", forward.above(), pos.above())));
             case DOWN -> new ConveyorTopology(
-                    List.of(new ConveyorInput("in", pos.relative(back).above())),
-                    List.of(new ConveyorOutput("out", forward, pos))
-            );
+                List.of(new ConveyorInput("in", pos.relative(back).above())),
+                List.of(new ConveyorOutput("out", forward, pos)));
             case TURN_LEFT -> new ConveyorTopology(
-                    List.of(new ConveyorInput("in", pos.relative(right))),
-                    List.of(new ConveyorOutput("out", forward, pos))
-            );
+                List.of(new ConveyorInput("in", pos.relative(right))),
+                List.of(new ConveyorOutput("out", forward, pos)));
             case TURN_RIGHT -> new ConveyorTopology(
-                    List.of(new ConveyorInput("in", pos.relative(left))),
-                    List.of(new ConveyorOutput("out", forward, pos))
-            );
+                List.of(new ConveyorInput("in", pos.relative(left))),
+                List.of(new ConveyorOutput("out", forward, pos)));
         };
     }
 
@@ -359,7 +379,12 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         return bestShape;
     }
 
-    public ResolvedOrientation computeBestOrientation(Level level, BlockPos pos, Direction currentFacing, ConveyorShape currentShape) {
+    public ResolvedOrientation computeBestOrientation(
+        Level level,
+        BlockPos pos,
+        Direction currentFacing,
+        ConveyorShape currentShape
+    ) {
         Direction bestFacing = currentFacing;
         ConveyorShape bestShape = currentShape;
         int bestScore = Integer.MIN_VALUE;
@@ -372,7 +397,8 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
                     continue;
 
                 int score = scoreShape(level, pos, facing, candidate, topology);
-                if (score > bestScore || score == bestScore && isPreferredOrientation(facing, candidate, bestFacing, bestShape, currentFacing, currentShape)) {
+                if (score > bestScore || score == bestScore
+                    && isPreferredOrientation(facing, candidate, bestFacing, bestShape, currentFacing, currentShape)) {
                     bestScore = score;
                     bestFacing = facing;
                     bestShape = candidate;
@@ -383,15 +409,25 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         return new ResolvedOrientation(bestFacing, bestShape);
     }
 
-    private static boolean isPreferredOrientation(Direction candidateFacing, ConveyorShape candidateShape,
-                                                  Direction currentBestFacing, ConveyorShape currentBestShape,
-                                                  Direction preferredFacing, ConveyorShape preferredShape) {
-        return getOrientationPriority(candidateFacing, candidateShape, preferredFacing, preferredShape)
-                > getOrientationPriority(currentBestFacing, currentBestShape, preferredFacing, preferredShape);
+    private static boolean isPreferredOrientation(
+        Direction candidateFacing,
+        ConveyorShape candidateShape,
+        Direction currentBestFacing,
+        ConveyorShape currentBestShape,
+        Direction preferredFacing,
+        ConveyorShape preferredShape
+    ) {
+        return getOrientationPriority(candidateFacing, candidateShape, preferredFacing,
+            preferredShape) > getOrientationPriority(currentBestFacing, currentBestShape, preferredFacing,
+                preferredShape);
     }
 
-    private static int getOrientationPriority(Direction candidateFacing, ConveyorShape candidateShape,
-                                              Direction preferredFacing, ConveyorShape preferredShape) {
+    private static int getOrientationPriority(
+        Direction candidateFacing,
+        ConveyorShape candidateShape,
+        Direction preferredFacing,
+        ConveyorShape preferredShape
+    ) {
         int priority = 0;
         if (candidateFacing == preferredFacing) {
             priority += 2;
@@ -404,7 +440,13 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         return priority;
     }
 
-    public boolean isPhysicallyValid(Level level, BlockPos pos, Direction facing, ConveyorShape shape, ConveyorTopology topology) {
+    public boolean isPhysicallyValid(
+        Level level,
+        BlockPos pos,
+        Direction facing,
+        ConveyorShape shape,
+        ConveyorTopology topology
+    ) {
         if (!level.isInValidBounds(pos))
             return false;
 
@@ -475,21 +517,28 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
             return false;
 
         return fromConveyor.getTopology(level, fromPos, fromState).outputs().stream()
-                .anyMatch(output -> output.deliveryPos().equals(toPos));
+            .anyMatch(output -> output.deliveryPos().equals(toPos));
     }
 
     @Override
-    public boolean canAcceptIncomingConnection(Level level, BlockPos pos, BlockState state, BlockPos sourcePos, BlockState sourceState,
-                                               ConveyorOutput sourceOutput, ConveyorConnectionType connectionType) {
-        boolean accepts = super.canAcceptIncomingConnection(level, pos, state, sourcePos, sourceState, sourceOutput, connectionType);
+    public boolean canAcceptIncomingConnection(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        BlockPos sourcePos,
+        BlockState sourceState,
+        ConveyorOutput sourceOutput,
+        ConveyorConnectionType connectionType
+    ) {
+        boolean accepts = super.canAcceptIncomingConnection(level, pos, state, sourcePos, sourceState, sourceOutput,
+            connectionType);
         if (accepts)
             return true;
 
         if (connectionType != ConveyorConnectionType.SIDE_INJECT
-                || state.getValue(SHAPE) != ConveyorShape.STRAIGHT
-                || !sourceOutput.deliveryPos().equals(pos)) {
+            || state.getValue(SHAPE) != ConveyorShape.STRAIGHT
+            || !sourceOutput.deliveryPos().equals(pos))
             return false;
-        }
 
         Direction facing = state.getValue(FACING);
         BlockPos leftPos = pos.relative(facing.getCounterClockWise());
@@ -527,11 +576,11 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
 
     private static void addTopologyPositions(Set<BlockPos> positions, ConveyorTopology topology) {
         topology.inputs().stream()
-                .map(ConveyorInput::expectedSourcePos)
-                .forEach(positions::add);
+            .map(ConveyorInput::expectedSourcePos)
+            .forEach(positions::add);
         topology.outputs().stream()
-                .map(ConveyorOutput::deliveryPos)
-                .forEach(positions::add);
+            .map(ConveyorOutput::deliveryPos)
+            .forEach(positions::add);
     }
 
     public enum ConveyorShape implements StringRepresentable {

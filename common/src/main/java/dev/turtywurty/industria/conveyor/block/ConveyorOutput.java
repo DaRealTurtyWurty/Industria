@@ -5,9 +5,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
 public record ConveyorOutput(
-        String id,
-        BlockPos deliveryPos,
-        BlockPos expectedInputPos
+    String id,
+    BlockPos deliveryPos,
+    BlockPos expectedInputPos
 ) {
     public Direction inventoryInsertSide() {
         Vec3i delta = expectedInputPos.subtract(deliveryPos);

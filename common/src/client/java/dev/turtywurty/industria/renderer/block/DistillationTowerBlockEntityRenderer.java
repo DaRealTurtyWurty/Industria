@@ -20,8 +20,11 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.BlockPos;
 
-public class DistillationTowerBlockEntityRenderer extends IndustriaBlockEntityRenderer<DistillationTowerBlockEntity, DistillationTowerRenderState> {
+public class DistillationTowerBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<DistillationTowerBlockEntity, DistillationTowerRenderState> {
     private final DistillationTowerModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
@@ -55,7 +58,13 @@ public class DistillationTowerBlockEntityRenderer extends IndustriaBlockEntityRe
     }
 
     @Override
-    public void extractRenderState(DistillationTowerBlockEntity blockEntity, DistillationTowerRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        DistillationTowerBlockEntity blockEntity,
+        DistillationTowerRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
@@ -65,27 +74,44 @@ public class DistillationTowerBlockEntityRenderer extends IndustriaBlockEntityRe
     }
 
     @Override
-    protected void onRender(DistillationTowerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        DistillationTowerRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ModelSubmitUtils.submitModel(queue, this.model, state,
-                matrices, this.model.renderType(DistillationTowerModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            matrices, this.model.renderType(DistillationTowerModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
 
         Level level = Minecraft.getInstance().level;
         if (level == null)
             return;
 
         renderFluidColumn(state.inputFluidTank, queue, matrices, light, overlay, level, state.blockPos,
-                -0.18F, -6.45F, -0.18F, 0.18F, -0.95F, 0.18F);
+            -0.18F, -6.45F, -0.18F, 0.18F, -0.95F, 0.18F);
         renderFluidColumn(state.primaryOutputFluidTank, queue, matrices, light, overlay, level, state.blockPos,
-                -1.45F, -5.70F, -0.55F, -0.80F, -5.05F, 0.55F);
+            -1.45F, -5.70F, -0.55F, -0.80F, -5.05F, 0.55F);
         renderFluidColumn(state.secondaryOutputFluidTank, queue, matrices, light, overlay, level, state.blockPos,
-                0.80F, -5.70F, -0.55F, 1.45F, -5.05F, 0.55F);
+            0.80F, -5.70F, -0.55F, 1.45F, -5.05F, 0.55F);
     }
 
-    private void renderFluidColumn(@Nullable SyncingFluidStorage storage,
-                                   SubmitNodeCollector queue, PoseStack matrices, int light, int overlay,
-                                   Level level, net.minecraft.core.BlockPos pos,
-                                   float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    private void renderFluidColumn(
+        @Nullable SyncingFluidStorage storage,
+        SubmitNodeCollector queue,
+        PoseStack matrices,
+        int light,
+        int overlay,
+        Level level,
+        BlockPos pos,
+        float minX,
+        float minY,
+        float minZ,
+        float maxX,
+        float maxY,
+        float maxZ
+    ) {
         if (storage == null || storage.getResource().isBlank() || storage.getAmount() <= 0)
             return;
 
@@ -94,6 +120,6 @@ public class DistillationTowerBlockEntityRenderer extends IndustriaBlockEntityRe
         float fluidHeight = minY + ((maxY - minY) * fluidProgress);
 
         this.fluidRenderer.renderTopFaceOnly(fluidVariant, queue, matrices, light, overlay, level, pos,
-                minX, fluidHeight, minZ, maxX, maxZ);
+            minX, fluidHeight, minZ, maxX, maxZ);
     }
 }

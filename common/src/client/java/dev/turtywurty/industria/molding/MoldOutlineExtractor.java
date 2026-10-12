@@ -55,7 +55,6 @@ public class MoldOutlineExtractor {
         return loops;
     }
 
-
     private static List<BoundaryEdge> findBoundaryEdges(NativeImage image) {
         List<BoundaryEdge> edges = new ArrayList<>();
         for (int x = 0; x < image.getWidth(); x++) {

@@ -30,7 +30,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class WindTurbineBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, ChainedGeneratorEnergyOutput {
+public class WindTurbineBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        ChainedGeneratorEnergyOutput {
     public static final Component TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
@@ -48,15 +51,17 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
     }
 
     public static int getEnergyOutput(Level world, BlockPos pos, float windSpeed, boolean canReceiveWind) {
-        if (!canReceiveWind || world == null || pos == null || !world.canSeeSkyFromBelowWater(pos) || pos.getY() < world.getSeaLevel())
+        if (!canReceiveWind || world == null || pos == null || !world.canSeeSkyFromBelowWater(pos)
+            || pos.getY() < world.getSeaLevel())
             return 0;
 
         Holder<Biome> biome = world.getBiome(pos);
         float biomeModifier = 1.0F;
-        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_MOUNTAIN))
+        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_MOUNTAIN)) {
             biomeModifier = 1.5F;
-        else if (biome.is(BiomeTags.IS_HILL))
+        } else if (biome.is(BiomeTags.IS_HILL)) {
             biomeModifier = 1.25F;
+        }
 
         float heightMultiplier = calculateHeightMultiplier(pos, world);
         // if the time of day is > 12000, reduce the output by 50%
@@ -93,9 +98,9 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
         if (this.windSpeed == -1F || this.level.getGameTime() % 24000 == 0) {
             float offset = this.level.getGameTime() / 24000F;
             this.windSpeed = (float) this.windNoise.get(
-                    this.worldPosition.getX() + offset,
-                    this.worldPosition.getY() + offset,
-                    this.worldPosition.getZ() + offset) + 1.0F;
+                this.worldPosition.getX() + offset,
+                this.worldPosition.getY() + offset,
+                this.worldPosition.getZ() + offset) + 1.0F;
         }
 
         if (this.level.getGameTime() % 100 == 0) {
@@ -103,7 +108,8 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
 
             // check 8 blocks in front. if any of them are not air, set canReceiveWind to false
             for (int i = 1; i <= 8; i++) {
-                BlockPos pos = this.worldPosition.above(3).offset(getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING).getUnitVec3i().multiply(i));
+                BlockPos pos = this.worldPosition.above(3).offset(
+                    getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING).getUnitVec3i().multiply(i));
                 if (!this.level.getBlockState(pos).isAir()) {
                     this.canReceiveWind = false;
                     break;
@@ -153,8 +159,8 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
 
     public ResourceStorage<ResourceVariant<UnitResource>> getEnergyProvider(Direction direction) {
         return isEnergyOutputDirection(direction)
-                ? this.energy.getStorage(direction)
-                : null;
+            ? this.energy.getStorage(direction)
+            : null;
     }
 
     public int getEnergyOutput() {

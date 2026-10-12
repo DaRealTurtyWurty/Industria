@@ -10,20 +10,20 @@ import net.minecraft.util.Unit;
 
 public class ModDynamicItemRenderers {
     public static void init() {
-        ClientRegistrations.registerSpecialModelRenderer(Industria.id("block_entity_item"), IndustriaBlockEntityItemRenderer.Unbaked.CODEC);
+        ClientRegistrations.registerSpecialModelRenderer(Industria.id("block_entity_item"),
+            IndustriaBlockEntityItemRenderer.Unbaked.CODEC);
 
-        ClientRegistrations.registerSpecialModelRenderer(Industria.id("drill_head"), DrillHeadItemRenderer.Unbaked.CODEC);
+        ClientRegistrations.registerSpecialModelRenderer(Industria.id("drill_head"),
+            DrillHeadItemRenderer.Unbaked.CODEC);
         ClientEvents.registerResourceReloadListener(Industria.id("drill_head_item_renderer"),
-                (_, _, preparationBarrier, applyExecutor) ->
-                        preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                            DrillHeadItemRenderer.INSTANCE.drillHeadModels.clear();
-                            DrillHeadItemRenderer.INSTANCE.drillHeadTextures.clear();
-                        }, applyExecutor));
+            (_, _, preparationBarrier, applyExecutor) -> preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
+                DrillHeadItemRenderer.INSTANCE.drillHeadModels.clear();
+                DrillHeadItemRenderer.INSTANCE.drillHeadTextures.clear();
+            }, applyExecutor));
 
         ClientRegistrations.registerSpecialModelRenderer(Industria.id("mold"), MoldItemRenderer.Unbaked.CODEC);
         ClientEvents.registerResourceReloadListener(Industria.id("mold_item_renderer"),
-                (_, _, preparationBarrier, applyExecutor) ->
-                        preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(
-                                MoldItemRenderer::clearTextures, applyExecutor));
+            (_, _, preparationBarrier, applyExecutor) -> preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(
+                MoldItemRenderer::clearTextures, applyExecutor));
     }
 }

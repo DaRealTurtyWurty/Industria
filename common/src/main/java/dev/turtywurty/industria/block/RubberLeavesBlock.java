@@ -34,21 +34,21 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
 
     public RubberLeavesBlock(Properties settings) {
         super(settings.mapColor(MapColor.PLANT)
-                .strength(0.2F)
-                .randomTicks()
-                .sound(SoundType.GRASS)
-                .noOcclusion()
-                .isValidSpawn(VanillaBlockPredicates::ocelotOrParrot)
-                .isSuffocating(VanillaBlockPredicates::never)
-                .isViewBlocking((state, world, pos, bounds) -> false)
-                .ignitedByLava()
-                .pushReaction(PushReaction.POPPED)
-                .isRedstoneConductor(VanillaBlockPredicates::never));
+            .strength(0.2F)
+            .randomTicks()
+            .sound(SoundType.GRASS)
+            .noOcclusion()
+            .isValidSpawn(VanillaBlockPredicates::ocelotOrParrot)
+            .isSuffocating(VanillaBlockPredicates::never)
+            .isViewBlocking((state, world, pos, bounds) -> false)
+            .ignitedByLava()
+            .pushReaction(PushReaction.POPPED)
+            .isRedstoneConductor(VanillaBlockPredicates::never));
 
         registerDefaultState(this.stateDefinition.any()
-                .setValue(DISTANCE, DECAY_DISTANCE)
-                .setValue(PERSISTENT, Boolean.FALSE)
-                .setValue(WATERLOGGED, Boolean.FALSE));
+            .setValue(DISTANCE, DECAY_DISTANCE)
+            .setValue(PERSISTENT, Boolean.FALSE)
+            .setValue(WATERLOGGED, Boolean.FALSE));
     }
 
     private static BlockState updateDistanceFromLogs(BlockState state, LevelAccessor world, BlockPos pos) {
@@ -70,17 +70,15 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     public static OptionalInt getOptionalDistanceFromLog(BlockState state) {
-        if (state.is(BlockTags.LOGS)) {
+        if (state.is(BlockTags.LOGS))
             return OptionalInt.of(0);
-        } else if (state.hasProperty(DISTANCE)) {
+        else if (state.hasProperty(DISTANCE))
             return OptionalInt.of(state.getValue(DISTANCE));
-        } else if (state.hasProperty(LeavesBlock.DISTANCE)) {
+        else if (state.hasProperty(LeavesBlock.DISTANCE))
             return OptionalInt.of(state.getValue(LeavesBlock.DISTANCE));
-        } else {
+        else
             return OptionalInt.empty();
-        }
     }
-
 
     @Override
     protected VoxelShape getBlockSupportShape(BlockState state, BlockGetter world, BlockPos pos) {
@@ -115,8 +113,16 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView,
-                                     BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader world,
+        ScheduledTickAccess tickView,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
         if (state.getValue(WATERLOGGED)) {
             tickView.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
         }
@@ -143,8 +149,8 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         FluidState fluidState = ctx.getLevel().getFluidState(ctx.getClickedPos());
         BlockState blockState = defaultBlockState()
-                .setValue(PERSISTENT, Boolean.TRUE)
-                .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+            .setValue(PERSISTENT, Boolean.TRUE)
+            .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
         return updateDistanceFromLogs(blockState, ctx.getLevel(), ctx.getClickedPos());
     }
 
@@ -161,7 +167,13 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
         }
     }
 
-    private void spawnLeafParticle(Level world, BlockPos pos, RandomSource random, BlockState state, BlockPos posBelow) {
+    private void spawnLeafParticle(
+        Level world,
+        BlockPos pos,
+        RandomSource random,
+        BlockState state,
+        BlockPos posBelow
+    ) {
         if (!(random.nextFloat() >= 0.01F)) {
             if (!isFaceFull(state.getCollisionShape(world, posBelow), Direction.UP)) {
                 this.spawnLeafParticle(world, pos, random);
@@ -170,7 +182,8 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     protected void spawnLeafParticle(Level world, BlockPos pos, RandomSource random) {
-        var tintedParticleEffect = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, world.getClientLeafTintColor(pos));
+        var tintedParticleEffect = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES,
+            world.getClientLeafTintColor(pos));
         ParticleUtils.spawnParticleBelow(world, pos, random, tintedParticleEffect);
     }
 }

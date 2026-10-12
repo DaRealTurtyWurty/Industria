@@ -14,8 +14,13 @@ public class DistillationTowerRecipeBuilder {
     private final int processTime;
     private final int energyCost;
 
-    public DistillationTowerRecipeBuilder(@NotNull FluidStack inputFluid, @NotNull FluidStack primaryOutputFluid,
-                                          @NotNull FluidStack secondaryOutputFluid, int processTime, int energyCost) {
+    public DistillationTowerRecipeBuilder(
+        @NotNull FluidStack inputFluid,
+        @NotNull FluidStack primaryOutputFluid,
+        @NotNull FluidStack secondaryOutputFluid,
+        int processTime,
+        int energyCost
+    ) {
         this.inputFluid = inputFluid;
         this.primaryOutputFluid = primaryOutputFluid;
         this.secondaryOutputFluid = secondaryOutputFluid;
@@ -25,7 +30,8 @@ public class DistillationTowerRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new DistillationTowerRecipe(this.inputFluid, this.primaryOutputFluid, this.secondaryOutputFluid, this.processTime, this.energyCost),
-                null);
+            new DistillationTowerRecipe(this.inputFluid, this.primaryOutputFluid, this.secondaryOutputFluid,
+                this.processTime, this.energyCost),
+            null);
     }
 }

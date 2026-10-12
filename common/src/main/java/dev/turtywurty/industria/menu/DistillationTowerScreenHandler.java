@@ -15,13 +15,22 @@ import net.minecraft.world.level.block.Block;
 import java.util.Collections;
 import java.util.List;
 
-public class DistillationTowerScreenHandler extends IndustriaScreenHandler<DistillationTowerBlockEntity, BlockPosPayload> {
+public class DistillationTowerScreenHandler
+    extends
+        IndustriaScreenHandler<DistillationTowerBlockEntity, BlockPosPayload> {
     public DistillationTowerScreenHandler(int syncId, Inventory playerInv, BlockPosPayload payload) {
         super(ModMenuTypes.DISTILLATION_TOWER.get(), 2, syncId, playerInv, payload, DistillationTowerBlockEntity.class);
     }
 
-    public DistillationTowerScreenHandler(int syncId, Inventory playerInv, DistillationTowerBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
-        super(ModMenuTypes.DISTILLATION_TOWER.get(), syncId, playerInv, blockEntity, wrappedContainerStorage, properties);
+    public DistillationTowerScreenHandler(
+        int syncId,
+        Inventory playerInv,
+        DistillationTowerBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
+        super(ModMenuTypes.DISTILLATION_TOWER.get(), syncId, playerInv, blockEntity, wrappedContainerStorage,
+            properties);
     }
 
     @Override

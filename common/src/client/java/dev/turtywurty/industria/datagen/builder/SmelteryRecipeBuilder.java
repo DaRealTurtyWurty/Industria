@@ -14,8 +14,13 @@ public class SmelteryRecipeBuilder {
     private final float maxSpeedMultiplier;
     private final int processTime;
 
-    public SmelteryRecipeBuilder(IndustriaIngredient input, FluidStack output, int preferredTemperature,
-                                 float maxSpeedMultiplier, int processTime) {
+    public SmelteryRecipeBuilder(
+        IndustriaIngredient input,
+        FluidStack output,
+        int preferredTemperature,
+        float maxSpeedMultiplier,
+        int processTime
+    ) {
         this.input = input;
         this.output = output;
         this.preferredTemperature = preferredTemperature;
@@ -25,8 +30,8 @@ public class SmelteryRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new SmelteryRecipe(this.input, this.output, this.preferredTemperature, this.maxSpeedMultiplier,
-                        this.processTime),
-                null);
+            new SmelteryRecipe(this.input, this.output, this.preferredTemperature, this.maxSpeedMultiplier,
+                this.processTime),
+            null);
     }
 }

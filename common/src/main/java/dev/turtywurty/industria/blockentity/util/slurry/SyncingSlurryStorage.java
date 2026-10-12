@@ -50,7 +50,7 @@ public class SyncingSlurryStorage extends SingleSlurryStorage implements Syncabl
 
     public boolean canInsert(SlurryStack stack) {
         return (getResource().equals(stack.variant()) || getResource().isBlank())
-                && stack.amount() <= this.capacity - getAmount();
+            && stack.amount() <= this.capacity - getAmount();
     }
 
     public boolean canExtract(SlurryStack stack) {

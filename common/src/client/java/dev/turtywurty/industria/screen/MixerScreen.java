@@ -28,25 +28,26 @@ public class MixerScreen extends AbstractContainerScreen<MixerScreenHandler> {
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 8, this.topPos + 10, 16, 89)
-                .color(0xFFD4AF37)
-                .build());
+            .bounds(this.leftPos + 8, this.topPos + 10, 16, 89)
+            .color(0xFFD4AF37)
+            .build());
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getInputFluidTank())
-                .bounds(this.leftPos + 34, this.topPos + 10, 20, 66)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 34, this.topPos + 10, 20, 66)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
 
         addRenderableOnly(new SlurryWidget.Builder(this.menu.getBlockEntity().getOutputSlurryTank())
-                .bounds(this.leftPos + 168, this.topPos + 10, 20, 66)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 168, this.topPos + 10, 20, 66)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
     }
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 113, this.topPos + 36, 200, 0, this.menu.getProgressScaled(), 17);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 113, this.topPos + 36, 200, 0,
+            this.menu.getProgressScaled(), 17);
     }
 }

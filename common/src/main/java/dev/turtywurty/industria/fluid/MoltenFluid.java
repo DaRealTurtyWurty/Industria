@@ -26,12 +26,15 @@ public abstract class MoltenFluid extends IndustriaFluid {
                 double x = pos.getX() + random.nextDouble();
                 double y = pos.getY() + 1;
                 double z = pos.getZ() + random.nextDouble();
-                world.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, state.createLegacyBlock()), x, y, z, 0.0, 0.0, 0.0);
-                world.playLocalSound(x, y, z, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, state.createLegacyBlock()), x, y, z, 0.0,
+                    0.0, 0.0);
+                world.playLocalSound(x, y, z, SoundEvents.LAVA_POP, SoundSource.BLOCKS,
+                    0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
 
             if (random.nextInt(100) == 0) {
-                world.playLocalSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.playLocalSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS,
+                    0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
         }
     }
@@ -44,9 +47,8 @@ public abstract class MoltenFluid extends IndustriaFluid {
 
                 for (int j = 0; j < fireChance; ++j) {
                     blockPos = blockPos.offset(random.nextInt(2) - 1, 1, random.nextInt(2) - 1);
-                    if (!world.isLoaded(blockPos)) {
+                    if (!world.isLoaded(blockPos))
                         return;
-                    }
 
                     BlockState blockState = world.getBlockState(blockPos);
                     if (blockState.isAir()) {
@@ -54,16 +56,14 @@ public abstract class MoltenFluid extends IndustriaFluid {
                             world.setBlockAndUpdate(blockPos, BaseFireBlock.getState(world, blockPos));
                             return;
                         }
-                    } else if (blockState.isSolid()) {
+                    } else if (blockState.isSolid())
                         return;
-                    }
                 }
             } else {
                 for (int k = 0; k < 2; ++k) {
                     BlockPos blockPos2 = pos.offset(random.nextInt(2) - 1, 0, random.nextInt(2) - 1);
-                    if (!world.isLoaded(blockPos2)) {
+                    if (!world.isLoaded(blockPos2))
                         return;
-                    }
 
                     if (world.isEmptyBlock(blockPos2.above()) && hasBurnableBlock(world, blockPos2)) {
                         world.setBlockAndUpdate(blockPos2.above(), BaseFireBlock.getState(world, blockPos2));
@@ -86,15 +86,26 @@ public abstract class MoltenFluid extends IndustriaFluid {
     }
 
     private boolean hasBurnableBlock(Level world, BlockPos pos) {
-        return (!world.isInsideBuildHeight(pos.getY()) || world.isLoaded(pos)) && world.getBlockState(pos).ignitedByLava();
+        return (!world.isInsideBuildHeight(pos.getY()) || world.isLoaded(pos))
+            && world.getBlockState(pos).ignitedByLava();
     }
 
-    public MoltenFluid(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+    public MoltenFluid(
+        Supplier<Fluid> stillSupplier,
+        Supplier<Fluid> flowingSupplier,
+        Supplier<Item> bucketSupplier,
+        Supplier<Block> blockSupplier
+    ) {
         super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
     }
 
     public static class Still extends MoltenFluid {
-        public Still(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+        public Still(
+            Supplier<Fluid> stillSupplier,
+            Supplier<Fluid> flowingSupplier,
+            Supplier<Item> bucketSupplier,
+            Supplier<Block> blockSupplier
+        ) {
             super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
         }
 
@@ -110,7 +121,12 @@ public abstract class MoltenFluid extends IndustriaFluid {
     }
 
     public static class Flowing extends MoltenFluid {
-        public Flowing(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+        public Flowing(
+            Supplier<Fluid> stillSupplier,
+            Supplier<Fluid> flowingSupplier,
+            Supplier<Item> bucketSupplier,
+            Supplier<Block> blockSupplier
+        ) {
             super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
         }
 

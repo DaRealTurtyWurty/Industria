@@ -25,19 +25,25 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public record ElectrolyzerRecipe(IndustriaIngredient input,
-                                 IndustriaIngredient anode, IndustriaIngredient cathode,
-                                 IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
-                                 FluidStack outputFluid, GasStack outputGas,
-                                 int processTime, int energyCost,
-                                 int temperature) implements Recipe<ElectrolyzerRecipeInput> {
+public record ElectrolyzerRecipe(
+    IndustriaIngredient input,
+    IndustriaIngredient anode,
+    IndustriaIngredient cathode,
+    IndustriaIngredient electrolyteItem,
+    FluidStack electrolyteFluid,
+    FluidStack outputFluid,
+    GasStack outputGas,
+    int processTime,
+    int energyCost,
+    int temperature
+) implements Recipe<ElectrolyzerRecipeInput> {
     @Override
     public boolean matches(ElectrolyzerRecipeInput input, Level world) {
         SyncingFluidStorage fluidStorage = input.electrolyteFluidStorage();
         return this.input.testForRecipe(input.getItem(0))
-                && this.anode.testForRecipeIgnoreComponents(input.getItem(1))
-                && this.cathode.testForRecipe(input.getItem(2))
-                && (this.electrolyteItem.testForRecipe(input.getItem(3))
+            && this.anode.testForRecipeIgnoreComponents(input.getItem(1))
+            && this.cathode.testForRecipe(input.getItem(2))
+            && (this.electrolyteItem.testForRecipe(input.getItem(3))
                 || this.electrolyteFluid.testForRecipe(fluidStorage));
     }
 
@@ -79,18 +85,17 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new ElectrolyzerRecipeDisplay(
-                this.input.toDisplay(),
-                this.anode.toDisplay(),
-                this.cathode.toDisplay(),
-                this.electrolyteItem.toDisplay(),
-                this.electrolyteFluid,
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.ELECTROLYZER.get().asItem()),
-                this.outputFluid,
-                this.outputGas,
-                this.processTime,
-                this.energyCost,
-                this.temperature
-        ));
+            this.input.toDisplay(),
+            this.anode.toDisplay(),
+            this.cathode.toDisplay(),
+            this.electrolyteItem.toDisplay(),
+            this.electrolyteFluid,
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.ELECTROLYZER.get().asItem()),
+            this.outputFluid,
+            this.outputGas,
+            this.processTime,
+            this.energyCost,
+            this.temperature));
     }
 
     @Override
@@ -111,43 +116,48 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
     }
 
     private static final MapCodec<ElectrolyzerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipe::input),
-            IndustriaIngredient.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipe::anode),
-            IndustriaIngredient.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipe::cathode),
-            IndustriaIngredient.CODEC.fieldOf("electrolyte_item").forGetter(ElectrolyzerRecipe::electrolyteItem),
-            FluidStack.CODEC.fieldOf("electrolyte_fluid").forGetter(ElectrolyzerRecipe::electrolyteFluid),
-            FluidStack.CODEC.fieldOf("output_fluid").forGetter(ElectrolyzerRecipe::outputFluid),
-            GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipe::outputGas),
-            Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipe::processTime),
-            Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipe::energyCost),
-            Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature)
-    ).apply(instance, ElectrolyzerRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipe::input),
+        IndustriaIngredient.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipe::anode),
+        IndustriaIngredient.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipe::cathode),
+        IndustriaIngredient.CODEC.fieldOf("electrolyte_item").forGetter(ElectrolyzerRecipe::electrolyteItem),
+        FluidStack.CODEC.fieldOf("electrolyte_fluid").forGetter(ElectrolyzerRecipe::electrolyteFluid),
+        FluidStack.CODEC.fieldOf("output_fluid").forGetter(ElectrolyzerRecipe::outputFluid),
+        GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipe::outputGas),
+        Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipe::processTime),
+        Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipe::energyCost),
+        Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipe::temperature))
+        .apply(instance, ElectrolyzerRecipe::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> STREAM_CODEC = ExtraStreamCodecs.tuple(
-            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::input,
-            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::anode,
-            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::cathode,
-            IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::electrolyteItem,
-            FluidStack.STREAM_CODEC, ElectrolyzerRecipe::electrolyteFluid,
-            FluidStack.STREAM_CODEC, ElectrolyzerRecipe::outputFluid,
-            GasStack.STREAM_CODEC, ElectrolyzerRecipe::outputGas,
-            ByteBufCodecs.INT, ElectrolyzerRecipe::processTime,
-            ByteBufCodecs.INT, ElectrolyzerRecipe::energyCost,
-            ByteBufCodecs.INT, ElectrolyzerRecipe::temperature,
-            ElectrolyzerRecipe::new
-    );
+        IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::input,
+        IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::anode,
+        IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::cathode,
+        IndustriaIngredient.STREAM_CODEC, ElectrolyzerRecipe::electrolyteItem,
+        FluidStack.STREAM_CODEC, ElectrolyzerRecipe::electrolyteFluid,
+        FluidStack.STREAM_CODEC, ElectrolyzerRecipe::outputFluid,
+        GasStack.STREAM_CODEC, ElectrolyzerRecipe::outputGas,
+        ByteBufCodecs.INT, ElectrolyzerRecipe::processTime,
+        ByteBufCodecs.INT, ElectrolyzerRecipe::energyCost,
+        ByteBufCodecs.INT, ElectrolyzerRecipe::temperature,
+        ElectrolyzerRecipe::new);
 
     public static final RecipeSerializer<ElectrolyzerRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
     public record ElectrolyzerRecipeDisplay(
-            SlotDisplay input,
-            SlotDisplay anode, SlotDisplay cathode,
-            SlotDisplay electrolyteItem, FluidStack electrolyteFluid,
-            SlotDisplay craftingStation,
-            FluidStack outputFluid, GasStack outputGas,
-            int processTime, int energyCost, int temperature
+        SlotDisplay input,
+        SlotDisplay anode,
+        SlotDisplay cathode,
+        SlotDisplay electrolyteItem,
+        FluidStack electrolyteFluid,
+        SlotDisplay craftingStation,
+        FluidStack outputFluid,
+        GasStack outputGas,
+        int processTime,
+        int energyCost,
+        int temperature
     ) implements RecipeDisplay {
-        private static final MapCodec<ElectrolyzerRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        private static final MapCodec<ElectrolyzerRecipeDisplay> CODEC = RecordCodecBuilder
+            .mapCodec(instance -> instance.group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(ElectrolyzerRecipeDisplay::input),
                 SlotDisplay.CODEC.fieldOf("anode").forGetter(ElectrolyzerRecipeDisplay::anode),
                 SlotDisplay.CODEC.fieldOf("cathode").forGetter(ElectrolyzerRecipeDisplay::cathode),
@@ -158,10 +168,11 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
                 GasStack.CODEC.fieldOf("output_gas").forGetter(ElectrolyzerRecipeDisplay::outputGas),
                 Codec.INT.fieldOf("process_time").orElse(200).forGetter(ElectrolyzerRecipeDisplay::processTime),
                 Codec.INT.fieldOf("energy_cost").orElse(1000).forGetter(ElectrolyzerRecipeDisplay::energyCost),
-                Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipeDisplay::temperature)
-        ).apply(instance, ElectrolyzerRecipeDisplay::new));
+                Codec.INT.fieldOf("temperature").orElse(300).forGetter(ElectrolyzerRecipeDisplay::temperature))
+                .apply(instance, ElectrolyzerRecipeDisplay::new));
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipeDisplay> STREAM_CODEC = ExtraStreamCodecs.tuple(
+        private static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipeDisplay> STREAM_CODEC = ExtraStreamCodecs
+            .tuple(
                 SlotDisplay.STREAM_CODEC, ElectrolyzerRecipeDisplay::input,
                 SlotDisplay.STREAM_CODEC, ElectrolyzerRecipeDisplay::anode,
                 SlotDisplay.STREAM_CODEC, ElectrolyzerRecipeDisplay::cathode,
@@ -173,10 +184,10 @@ public record ElectrolyzerRecipe(IndustriaIngredient input,
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::processTime,
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::energyCost,
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::temperature,
-                ElectrolyzerRecipeDisplay::new
-        );
+                ElectrolyzerRecipeDisplay::new);
 
-        private static final RecipeDisplay.Type<ElectrolyzerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        private static final RecipeDisplay.Type<ElectrolyzerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+            STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {

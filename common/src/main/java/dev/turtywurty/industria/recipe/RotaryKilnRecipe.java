@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output, int requiredTemperature)
-        implements Recipe<SingleItemStackRecipeInput> {
+    implements
+        Recipe<SingleItemStackRecipeInput> {
     @Override
     public boolean matches(SingleItemStackRecipeInput input, Level world) {
         return this.input.testForRecipe(input.stack());
@@ -69,11 +70,10 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new RotaryKilnRecipeDisplay(
-                input.toDisplay(),
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.ROTARY_KILN_CONTROLLER.get().asItem()),
-                output.toDisplay(),
-                requiredTemperature
-        ));
+            input.toDisplay(),
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.ROTARY_KILN_CONTROLLER.get().asItem()),
+            output.toDisplay(),
+            requiredTemperature));
     }
 
     @Override
@@ -94,38 +94,43 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
     }
 
     private static final MapCodec<RotaryKilnRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(RotaryKilnRecipe::input),
-            OutputItemStack.CODEC.fieldOf("output").forGetter(RotaryKilnRecipe::output),
-            Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipe::requiredTemperature)
-    ).apply(instance, RotaryKilnRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(RotaryKilnRecipe::input),
+        OutputItemStack.CODEC.fieldOf("output").forGetter(RotaryKilnRecipe::output),
+        Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipe::requiredTemperature))
+        .apply(instance, RotaryKilnRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, RotaryKilnRecipe> STREAM_CODEC = StreamCodec.composite(
-            IndustriaIngredient.STREAM_CODEC, RotaryKilnRecipe::input,
-            OutputItemStack.STREAM_CODEC, RotaryKilnRecipe::output,
-            ByteBufCodecs.INT, RotaryKilnRecipe::requiredTemperature,
-            RotaryKilnRecipe::new
-    );
+        IndustriaIngredient.STREAM_CODEC, RotaryKilnRecipe::input,
+        OutputItemStack.STREAM_CODEC, RotaryKilnRecipe::output,
+        ByteBufCodecs.INT, RotaryKilnRecipe::requiredTemperature,
+        RotaryKilnRecipe::new);
 
     public static final RecipeSerializer<RotaryKilnRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    public record RotaryKilnRecipeDisplay(SlotDisplay input, SlotDisplay craftingStation, SlotDisplay result,
-                                          int requiredTemperature) implements RecipeDisplay {
-        private static final MapCodec<RotaryKilnRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    public record RotaryKilnRecipeDisplay(
+        SlotDisplay input,
+        SlotDisplay craftingStation,
+        SlotDisplay result,
+        int requiredTemperature
+    ) implements RecipeDisplay {
+        private static final MapCodec<RotaryKilnRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
+            .group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(RotaryKilnRecipeDisplay::input),
                 SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(RotaryKilnRecipeDisplay::craftingStation),
                 SlotDisplay.CODEC.fieldOf("result").forGetter(RotaryKilnRecipeDisplay::result),
-                Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipeDisplay::requiredTemperature)
-        ).apply(instance, RotaryKilnRecipeDisplay::new));
+                Codec.INT.fieldOf("required_temperature").forGetter(RotaryKilnRecipeDisplay::requiredTemperature))
+            .apply(instance, RotaryKilnRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, RotaryKilnRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, RotaryKilnRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 SlotDisplay.STREAM_CODEC, RotaryKilnRecipeDisplay::input,
                 SlotDisplay.STREAM_CODEC, RotaryKilnRecipeDisplay::craftingStation,
                 SlotDisplay.STREAM_CODEC, RotaryKilnRecipeDisplay::result,
                 ByteBufCodecs.INT, RotaryKilnRecipeDisplay::requiredTemperature,
-                RotaryKilnRecipeDisplay::new
-        );
+                RotaryKilnRecipeDisplay::new);
 
-        private static final RecipeDisplay.Type<RotaryKilnRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        private static final RecipeDisplay.Type<RotaryKilnRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+            STREAM_CODEC);
 
         @Override
         public RecipeDisplay.Type<RotaryKilnRecipeDisplay> type() {

@@ -31,11 +31,22 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends Abstr
     private final Minecraft client = Minecraft.getInstance();
     private final Font textRenderer = client.font;
 
-    public IndustriaIngredientPreviewWidget(int x, int y, int slotIndex, @NotNull Function<T, IndustriaIngredient> ingredientGetter) {
+    public IndustriaIngredientPreviewWidget(
+        int x,
+        int y,
+        int slotIndex,
+        @NotNull Function<T, IndustriaIngredient> ingredientGetter
+    ) {
         this(x, y, slotIndex, 1000, ingredientGetter);
     }
 
-    public IndustriaIngredientPreviewWidget(int x, int y, int slotIndex, long cycleTimeMs, @NotNull Function<T, IndustriaIngredient> ingredientGetter) {
+    public IndustriaIngredientPreviewWidget(
+        int x,
+        int y,
+        int slotIndex,
+        long cycleTimeMs,
+        @NotNull Function<T, IndustriaIngredient> ingredientGetter
+    ) {
         super(x, y, 16, 16, Component.empty());
         this.slotIndex = slotIndex;
         this.cycleTimeMs = cycleTimeMs;
@@ -75,14 +86,16 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends Abstr
             itemListComponent.onRenderTick(context, mouseX, mouseY);
 
             List<ClientTooltipComponent> componentList = Screen.getTooltipFromItem(this.client, stack).stream()
-                    .map(Component::getVisualOrderText)
-                    .map(ClientTooltipComponent::create)
-                    .collect(Util.toMutableList());
+                .map(Component::getVisualOrderText)
+                .map(ClientTooltipComponent::create)
+                .collect(Util.toMutableList());
 
-            stack.getTooltipImage().ifPresent((data) -> componentList.add(componentList.isEmpty() ? 0 : 1, ClientTooltipComponent.create(data)));
+            stack.getTooltipImage().ifPresent(
+                (data) -> componentList.add(componentList.isEmpty() ? 0 : 1, ClientTooltipComponent.create(data)));
             componentList.addFirst(itemListComponent);
 
-            context.tooltip(this.textRenderer, componentList, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null, true);
+            context.tooltip(this.textRenderer, componentList, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null,
+                true);
         }
     }
 

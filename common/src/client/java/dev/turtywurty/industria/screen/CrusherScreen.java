@@ -31,15 +31,18 @@ public class CrusherScreen extends AbstractContainerScreen<CrusherScreenHandler>
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 67, this.topPos + 35, 176, 0, progress, 17);
 
         int energy = Mth.ceil(this.menu.getEnergyPercent() * 66);
-        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66, 0xFFD4AF37);
+        context.fill(this.leftPos + 144, this.topPos + 10 + 66 - energy, this.leftPos + 144 + 20, this.topPos + 10 + 66,
+            0xFFD4AF37);
     }
 
     @Override
     protected void extractTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         super.extractTooltip(context, mouseX, mouseY);
 
-        if(isHovering(144, 10, 20, 66, mouseX, mouseY)) {
-            context.setTooltipForNextFrame(this.font, Component.literal("Energy: " + this.menu.getEnergy() + " / " + this.menu.getMaxEnergy() + " FE"), mouseX, mouseY);
+        if (isHovering(144, 10, 20, 66, mouseX, mouseY)) {
+            context.setTooltipForNextFrame(this.font,
+                Component.literal("Energy: " + this.menu.getEnergy() + " / " + this.menu.getMaxEnergy() + " FE"),
+                mouseX, mouseY);
         }
     }
 }

@@ -20,14 +20,13 @@ public class RotaryKilnBlock extends IndustriaBlock {
 
     public RotaryKilnBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasComparatorOutput()
-                .hasHorizontalFacing()
-                .shapeFactory((state, world, pos, context) ->
-                        getVoxelShape(world, pos, state.getValue(BlockStateProperties.HORIZONTAL_FACING)))
-                .hasBlockEntityRenderer()
-                .addStateProperty(SEGMENT_INDEX, 1)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ROTARY_KILN)
-                ));
+            .hasComparatorOutput()
+            .hasHorizontalFacing()
+            .shapeFactory((state, world, pos, context) -> getVoxelShape(world, pos,
+                state.getValue(BlockStateProperties.HORIZONTAL_FACING)))
+            .hasBlockEntityRenderer()
+            .addStateProperty(SEGMENT_INDEX, 1)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ROTARY_KILN)));
     }
 
     public static VoxelShape getVoxelShape(BlockGetter world, BlockPos pos, Direction facing) {
@@ -46,10 +45,9 @@ public class RotaryKilnBlock extends IndustriaBlock {
         VoxelShape shape = primaryState.getShape(world, controllerPos, null);
 
         return shape.move(
-                -facing.getStepX() * segmentIndex,
-                -facing.getStepY() * segmentIndex,
-                -facing.getStepZ() * segmentIndex
-        );
+            -facing.getStepX() * segmentIndex,
+            -facing.getStepY() * segmentIndex,
+            -facing.getStepZ() * segmentIndex);
     }
 
     @Override
@@ -63,7 +61,9 @@ public class RotaryKilnBlock extends IndustriaBlock {
             if (controllerState.is(ModBlocks.ROTARY_KILN_CONTROLLER.get())) {
                 blockEntity = world.getBlockEntity(controllerPos);
             } else if (controllerState.is(this)) {
-                BlockPos actualControllerPos = controllerPos.relative(controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite(), controllerState.getValue(SEGMENT_INDEX));
+                BlockPos actualControllerPos = controllerPos.relative(
+                    controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite(),
+                    controllerState.getValue(SEGMENT_INDEX));
                 blockEntity = world.getBlockEntity(actualControllerPos);
             }
 

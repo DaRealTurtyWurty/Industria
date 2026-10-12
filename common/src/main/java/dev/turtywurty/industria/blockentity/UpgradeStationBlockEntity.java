@@ -48,7 +48,10 @@ import java.util.*;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
-public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<UpgradeStationOpenPayload>, BlockEntityContentsDropper {
+public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<UpgradeStationOpenPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("upgrade_station");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -97,7 +100,8 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
                 List<ResourceKey<Recipe<?>>> recipesForCenterStack = new ArrayList<>();
                 ItemStack centerStack = getItem(4);
 
-                if (!centerStack.isEmpty() && ItemStack.isSameItemSameComponents(centerStack, UpgradeStationBlockEntity.this.previousCenterStack))
+                if (!centerStack.isEmpty() && ItemStack.isSameItemSameComponents(centerStack,
+                    UpgradeStationBlockEntity.this.previousCenterStack))
                     return;
 
                 if (centerStack.isEmpty()) {
@@ -112,14 +116,16 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
 
                 RecipeManager recipeManager = serverWorld.recipeAccess();
                 recipeManager.getRecipes().stream()
-                        .filter(recipeEntry -> recipeEntry.value() instanceof UpgradeStationRecipe)
-                        .filter(recipeEntry -> ((UpgradeStationRecipe) recipeEntry.value()).doesCenterStackMatch(centerStack))
-                        .map(RecipeHolder::id)
-                        .forEach(recipesForCenterStack::add);
+                    .filter(recipeEntry -> recipeEntry.value() instanceof UpgradeStationRecipe)
+                    .filter(
+                        recipeEntry -> ((UpgradeStationRecipe) recipeEntry.value()).doesCenterStackMatch(centerStack))
+                    .map(RecipeHolder::id)
+                    .forEach(recipesForCenterStack::add);
 
                 UpgradeStationBlockEntity.this.availableRecipes.clear();
                 UpgradeStationBlockEntity.this.availableRecipes.addAll(recipesForCenterStack);
-                UpgradeStationBlockEntity.this.selectedRecipe = UpgradeStationBlockEntity.this.availableRecipes.isEmpty() ? null : UpgradeStationBlockEntity.this.availableRecipes.getFirst();
+                UpgradeStationBlockEntity.this.selectedRecipe = UpgradeStationBlockEntity.this.availableRecipes
+                    .isEmpty() ? null : UpgradeStationBlockEntity.this.availableRecipes.getFirst();
                 UpgradeStationBlockEntity.this.selectedRecipeIndex = 0;
 
                 UpgradeStationBlockEntity.this.previousCenterStack = centerStack;
@@ -170,9 +176,9 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
         for (ResourceKey<Recipe<?>> recipe : this.availableRecipes) {
             Optional<RecipeHolder<?>> opt = recipeLookup.byKey(recipe);
             opt.map(RecipeHolder::value)
-                    .filter(UpgradeStationRecipe.class::isInstance)
-                    .map(UpgradeStationRecipe.class::cast)
-                    .ifPresent(recipes::add);
+                .filter(UpgradeStationRecipe.class::isInstance)
+                .map(UpgradeStationRecipe.class::cast)
+                .ifPresent(recipes::add);
         }
 
         return recipes;
@@ -185,7 +191,8 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new UpgradeStationScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate, getRecipes());
+        return new UpgradeStationScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.propertyDelegate, getRecipes());
     }
 
     @Override
@@ -342,7 +349,8 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
     }
 
     public void setSelectedRecipeIndex(int index) {
-        if (this.level == null || this.level.isClientSide() || index < 0 || index >= this.availableRecipes.size() || this.selectedRecipeIndex == index)
+        if (this.level == null || this.level.isClientSide() || index < 0 || index >= this.availableRecipes.size()
+            || this.selectedRecipeIndex == index)
             return;
 
         this.selectedRecipeIndex = index;
@@ -357,7 +365,7 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(offset -> true);
+            .wherePosition(offset -> true);
     }
 
     @Override

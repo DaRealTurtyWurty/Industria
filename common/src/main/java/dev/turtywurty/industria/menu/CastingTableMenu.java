@@ -21,7 +21,12 @@ public class CastingTableMenu extends IndustriaScreenHandler<CastingTableBlockEn
         super(ModMenuTypes.CASTING_TABLE.get(), syncId, playerInventory, payload, CastingTableBlockEntity.class);
     }
 
-    public CastingTableMenu(int syncId, Inventory playerInventory, CastingTableBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public CastingTableMenu(
+        int syncId,
+        Inventory playerInventory,
+        CastingTableBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.CASTING_TABLE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
@@ -33,12 +38,13 @@ public class CastingTableMenu extends IndustriaScreenHandler<CastingTableBlockEn
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
         SimpleContainer inputInventory = this.wrappedContainerStorage.getInventory(0);
-        if(inputInventory != null) {
+        if (inputInventory != null) {
             for (int index = 0; index < 2; index++) {
                 addSlot(new Slot(inputInventory, index, 44 + (index * 18), 35) {
                     @Override
                     public boolean mayPlace(ItemStack itemStack) {
-                        return itemStack.getItem() instanceof MoldItem && itemStack.has(ModDataComponentTypes.MOLD.get());
+                        return itemStack.getItem() instanceof MoldItem
+                            && itemStack.has(ModDataComponentTypes.MOLD.get());
                     }
 
                     @Override
@@ -50,7 +56,7 @@ public class CastingTableMenu extends IndustriaScreenHandler<CastingTableBlockEn
         }
 
         SimpleContainer outputInventory = this.wrappedContainerStorage.getInventory(1);
-        if(outputInventory != null) {
+        if (outputInventory != null) {
             addSlot(new Slot(outputInventory, 0, 134, 35) {
                 @Override
                 public boolean mayPlace(ItemStack itemStack) {

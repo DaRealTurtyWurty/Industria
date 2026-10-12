@@ -8,7 +8,9 @@ import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
-public class UpgradeStationBlockEntityRenderer extends IndustriaBlockEntityRenderer<UpgradeStationBlockEntity, UpgradeStationRenderState> {
+public class UpgradeStationBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<UpgradeStationBlockEntity, UpgradeStationRenderState> {
     private final UpgradeStationModel model;
 
     public UpgradeStationBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -22,9 +24,15 @@ public class UpgradeStationBlockEntityRenderer extends IndustriaBlockEntityRende
     }
 
     @Override
-    public void onRender(UpgradeStationRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    public void onRender(
+        UpgradeStationRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ModelSubmitUtils.submitModel(queue, this.model, null,
-                matrices, this.model.renderType(UpgradeStationModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            matrices, this.model.renderType(UpgradeStationModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
     }
 }

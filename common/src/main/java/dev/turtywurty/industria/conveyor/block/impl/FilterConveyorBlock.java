@@ -21,9 +21,9 @@ public class FilterConveyorBlock extends AbstractPoweredConveyorBlock {
 
     public FilterConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.FILTER_CONVEYOR.get())
-                        .rightClickToOpenGui())
-        );
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.FILTER_CONVEYOR.get())
+                    .rightClickToOpenGui()));
     }
 
     @Override
@@ -33,16 +33,21 @@ public class FilterConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction right = facing.getClockWise();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(
-                        new ConveyorOutput(FORWARD_OUTPUT_ID, pos.relative(facing), pos),
-                        new ConveyorOutput(RIGHT_OUTPUT_ID, pos.relative(right), pos)
-                )
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(
+                new ConveyorOutput(FORWARD_OUTPUT_ID, pos.relative(facing), pos),
+                new ConveyorOutput(RIGHT_OUTPUT_ID, pos.relative(right), pos)));
     }
 
     @Override
-    public ConveyorOutput selectOutput(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public ConveyorOutput selectOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         ConveyorTopology topology = getTopology(level, pos, state);
         if (topology.outputs().isEmpty())
             return null;
@@ -56,15 +61,15 @@ public class FilterConveyorBlock extends AbstractPoweredConveyorBlock {
         }
 
         if (level.getBlockEntity(pos) instanceof FilterConveyorBlockEntity blockEntity) {
-            ConveyorOutput conveyorOutput = blockEntity.doesMatchFilter(item.getStack()) ?
-                    topology.outputs().stream()
-                            .filter(output -> output.id().equals(FORWARD_OUTPUT_ID))
-                            .findFirst()
-                            .orElse(null) :
-                    topology.outputs().stream()
-                            .filter(output -> output.id().equals(RIGHT_OUTPUT_ID))
-                            .findFirst()
-                            .orElse(null);
+            ConveyorOutput conveyorOutput = blockEntity.doesMatchFilter(item.getStack())
+                ? topology.outputs().stream()
+                    .filter(output -> output.id().equals(FORWARD_OUTPUT_ID))
+                    .findFirst()
+                    .orElse(null)
+                : topology.outputs().stream()
+                    .filter(output -> output.id().equals(RIGHT_OUTPUT_ID))
+                    .findFirst()
+                    .orElse(null);
             item.setSelectedOutputId(conveyorOutput != null ? conveyorOutput.id() : null);
             return conveyorOutput;
         }

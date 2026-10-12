@@ -24,23 +24,23 @@ import java.util.UUID;
 
 public class FluidPipeNetwork extends PipeNetwork<ResourceVariant<Fluid>> {
     public static final MapCodec<FluidPipeNetwork> CODEC = PipeNetwork.createCodec(
-            PipeStorageContent.codec(ResourceVariantCodecs.FLUID).fieldOf("storageContent")
-                    .forGetter(network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0))),
+        PipeStorageContent.codec(ResourceVariantCodecs.FLUID).fieldOf("storageContent")
+            .forGetter(network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0))),
+        (storage, storageContent) -> PipeStorageUtil.restore(
+            (FluidNetworkStorage) storage, storageContent.variant(), storageContent.amount()),
+        FluidPipeNetwork::new);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPipeNetwork> STREAM_CODEC = PipeNetwork
+        .createPacketCodec(
+            PipeStorageContent.streamCodec(ResourceVariantCodecs.FLUID_STREAM),
+            network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0)),
             (storage, storageContent) -> PipeStorageUtil.restore(
-                    (FluidNetworkStorage) storage, storageContent.variant(), storageContent.amount()),
+                (FluidNetworkStorage) storage, storageContent.variant(), storageContent.amount()),
             FluidPipeNetwork::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPipeNetwork> STREAM_CODEC =
-            PipeNetwork.createPacketCodec(
-                    PipeStorageContent.streamCodec(ResourceVariantCodecs.FLUID_STREAM),
-                    network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0)),
-                    (storage, storageContent) -> PipeStorageUtil.restore(
-                            (FluidNetworkStorage) storage, storageContent.variant(), storageContent.amount()),
-                    FluidPipeNetwork::new);
-
     public static final Codec<Set<FluidPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final StreamCodec<RegistryFriendlyByteBuf, Set<FluidPipeNetwork>> SET_STREAM_CODEC =
-            ExtraStreamCodecs.setOf(STREAM_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<FluidPipeNetwork>> SET_STREAM_CODEC = ExtraStreamCodecs
+        .setOf(STREAM_CODEC);
 
     public FluidPipeNetwork(UUID id) {
         super(id, TransferType.FLUID);

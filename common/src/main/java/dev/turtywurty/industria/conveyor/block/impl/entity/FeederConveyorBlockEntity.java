@@ -66,7 +66,8 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
     }
 
     private void tryInitialize() {
-        ConveyorNetworkManager manager = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level).getNetworkManager();
+        ConveyorNetworkManager manager = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level)
+            .getNetworkManager();
         ConveyorNetwork network = manager.getNetworkAt(this.worldPosition);
         if (network == null) {
             manager.traverseCreateNetwork((ServerLevel) this.level, this.worldPosition);
@@ -97,9 +98,9 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
 
         Direction pullDirection = getPullDirection();
         ResourceStorage<ResourceVariant<Item>> storageToPullFrom = TransferType.ITEM.lookup(
-                this.level,
-                this.worldPosition.relative(pullDirection),
-                pullDirection.getOpposite());
+            this.level,
+            this.worldPosition.relative(pullDirection),
+            pullDirection.getOpposite());
         if (storageToPullFrom != null && storageToPullFrom.supportsExtraction()) {
             try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                 ResourceVariant<Item> variantToPull = findItemVariant(storageToPullFrom);
@@ -137,7 +138,7 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
         if (storage == null)
             return false;
 
-        ConveyorItem conveyorItem = new ConveyorItem(this.worldPosition, extractedStack.copy());
+        var conveyorItem = new ConveyorItem(this.worldPosition, extractedStack.copy());
         if (!storage.addItem(conveyorItem))
             return false;
 
@@ -155,7 +156,8 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
     }
 
     private static @Nullable ResourceVariant<Item> findItemVariant(
-            ResourceStorage<ResourceVariant<Item>> storage) {
+        ResourceStorage<ResourceVariant<Item>> storage
+    ) {
         if (!storage.hasStableIndices())
             return null;
         for (int index = 0; index < storage.size(); index++) {
@@ -177,7 +179,8 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
     }
 
     private static final class FeederItemStorage extends TransactionParticipant<PendingInsert>
-            implements ResourceStorage<ResourceVariant<Item>> {
+        implements
+            ResourceStorage<ResourceVariant<Item>> {
         private final ServerLevel level;
         private final ConveyorStorage conveyorStorage;
 
@@ -223,21 +226,22 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
         public TransferSupport support(int index) {
             ResourceStorage<ResourceVariant<Item>> storage = requireItemStorage();
             TransferSupport extraction = storage.support(index).supportsExtraction()
-                    ? TransferSupport.EXTRACT_ONLY
-                    : TransferSupport.NONE;
+                ? TransferSupport.EXTRACT_ONLY
+                : TransferSupport.NONE;
             if (!supportsInsertion())
                 return extraction;
             return extraction == TransferSupport.EXTRACT_ONLY
-                    ? TransferSupport.BOTH
-                    : TransferSupport.INSERT_ONLY;
+                ? TransferSupport.BOTH
+                : TransferSupport.INSERT_ONLY;
         }
 
         @Override
         public long insert(
-                int index,
-                ResourceVariant<Item> resource,
-                long maxAmount,
-                TransferContext transaction) {
+            int index,
+            ResourceVariant<Item> resource,
+            long maxAmount,
+            TransferContext transaction
+        ) {
             StoragePreconditions.index(index, size());
             return insert(resource, maxAmount, transaction);
         }
@@ -262,8 +266,8 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
         public boolean supportsInsertion() {
             ConveyorStorage conveyorStorage = resolveConveyorStorage();
             return this.pendingInsert == null
-                    && conveyorStorage != null
-                    && conveyorStorage.canAcceptIncomingItem();
+                && conveyorStorage != null
+                && conveyorStorage.canAcceptIncomingItem();
         }
 
         @Override
@@ -274,21 +278,23 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
 
         @Override
         public long extract(
-                int index,
-                ResourceVariant<Item> resource,
-                long maxAmount,
-                TransferContext transaction) {
+            int index,
+            ResourceVariant<Item> resource,
+            long maxAmount,
+            TransferContext transaction
+        ) {
             ResourceStorage<ResourceVariant<Item>> storage = resolveItemStorage();
             return storage != null
-                    ? storage.extract(index, resource, maxAmount, transaction)
-                    : 0;
+                ? storage.extract(index, resource, maxAmount, transaction)
+                : 0;
         }
 
         @Override
         public long extract(
-                ResourceVariant<Item> resource,
-                long maxAmount,
-                TransferContext transaction) {
+            ResourceVariant<Item> resource,
+            long maxAmount,
+            TransferContext transaction
+        ) {
             ResourceStorage<ResourceVariant<Item>> storage = resolveItemStorage();
             return storage != null ? storage.extract(resource, maxAmount, transaction) : 0;
         }
@@ -328,7 +334,9 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
                 network = manager.getNetworkAt(this.conveyorStorage.getPos());
             }
 
-            return network != null ? network.getStorage().getStorageAt(this.level, this.conveyorStorage.getPos()) : null;
+            return network != null
+                ? network.getStorage().getStorageAt(this.level, this.conveyorStorage.getPos())
+                : null;
         }
 
         private @Nullable ResourceStorage<ResourceVariant<Item>> resolveItemStorage() {
@@ -344,9 +352,10 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
         }
 
         private static void commitInsert(
-                ServerLevel level,
-                BlockPos conveyorPos,
-                ResourceVariant<Item> variant) {
+            ServerLevel level,
+            BlockPos conveyorPos,
+            ResourceVariant<Item> variant
+        ) {
             LevelConveyorNetworks networks = LevelConveyorNetworks.getOrCreate(level);
             ConveyorNetworkManager manager = networks.getNetworkManager();
             ConveyorNetwork network = manager.getNetworkAt(conveyorPos);

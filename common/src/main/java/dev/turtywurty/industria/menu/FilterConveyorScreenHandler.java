@@ -23,7 +23,12 @@ public class FilterConveyorScreenHandler extends IndustriaScreenHandler<FilterCo
         super(ModMenuTypes.FILTER_CONVEYOR.get(), syncId, playerInventory, payload, FilterConveyorBlockEntity.class);
     }
 
-    public FilterConveyorScreenHandler(int syncId, Inventory playerInventory, FilterConveyorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public FilterConveyorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        FilterConveyorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.FILTER_CONVEYOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 

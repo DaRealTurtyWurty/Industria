@@ -21,8 +21,13 @@ public class FireboxMenu extends IndustriaScreenHandler<FireboxBlockEntity, Bloc
         super(ModMenuTypes.FIREBOX.get(), 2, syncId, playerInventory, payload, FireboxBlockEntity.class);
     }
 
-    public FireboxMenu(int syncId, Inventory playerInventory, FireboxBlockEntity blockEntity,
-                       WrappedContainerStorage<?> wrappedContainerStorage, ContainerData data) {
+    public FireboxMenu(
+        int syncId,
+        Inventory playerInventory,
+        FireboxBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData data
+    ) {
         super(ModMenuTypes.FIREBOX.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, data);
     }
 

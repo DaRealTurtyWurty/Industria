@@ -11,9 +11,9 @@ public record ArcFurnaceSetModePayload(ArcFurnaceBlockEntity.Mode mode) implemen
     public static final Type<ArcFurnaceSetModePayload> ID = new Type<>(Industria.id("arc_furnace_set_mode"));
 
     public static final StreamCodec<ByteBuf, ArcFurnaceSetModePayload> CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8.map(ArcFurnaceBlockEntity.Mode::valueOf, ArcFurnaceBlockEntity.Mode::name),
-            ArcFurnaceSetModePayload::mode,
-            ArcFurnaceSetModePayload::new);
+        ByteBufCodecs.STRING_UTF8.map(ArcFurnaceBlockEntity.Mode::valueOf, ArcFurnaceBlockEntity.Mode::name),
+        ArcFurnaceSetModePayload::mode,
+        ArcFurnaceSetModePayload::new);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

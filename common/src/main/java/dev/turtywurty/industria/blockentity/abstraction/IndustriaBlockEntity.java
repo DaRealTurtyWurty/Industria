@@ -18,19 +18,21 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
-public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> extends UpdatableBlockEntity implements SyncableTickableBlockEntity {
-    BlockEntityFields<T> fields;
+public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> extends UpdatableBlockEntity
+    implements
+        SyncableTickableBlockEntity {
+    private BlockEntityFields<T> fields;
 
-    int tickRate;
-    TickLogic<T, BlockEntityFields<T>> tickLogic;
+    private int tickRate;
+    private TickLogic<T, BlockEntityFields<T>> tickLogic;
 
-    WrappedContainerStorage<SimpleContainer> ContainerStorage;
-    WrappedFluidStorage<SyncingFluidStorage> fluidStorage;
-    WrappedEnergyStorage energyStorage;
+    private WrappedContainerStorage<SimpleContainer> ContainerStorage;
+    private WrappedFluidStorage<SyncingFluidStorage> fluidStorage;
+    private WrappedEnergyStorage energyStorage;
 
-    int ticks;
+    private int ticks;
 
-    IndustriaBlock blockRef;
+    private IndustriaBlock blockRef;
 
     public IndustriaBlockEntity(BlockPos pos, BlockState state, BlockEntityType<T> type) {
         super(type, pos, state);
@@ -38,14 +40,14 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
 
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
-        if (this.level == null) {
+        if (this.level == null)
             return;
-        }
 
         BlockState newState = level.getBlockState(pos);
         if (blockRef.dropContentsOnBreak) {
             if (!oldState.is(newState.getBlock())) {
-                if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component access maybe?
+                if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with
+                                                                                           // component access maybe?
                     blockEntityWithInventory.dropContents(level, pos);
                 }
             }
@@ -106,8 +108,10 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
         fields.addField("pos", this.worldPosition, IndustriaBlockEntity::getBlockPos, null);
         fields.addField("cachedState", getBlockState(), IndustriaBlockEntity::getBlockState, null);
         fields.addField("ticks", this.ticks, IndustriaBlockEntity::getTicks, null);
-        fields.addField("tickRate", this.tickRate, blockEntity -> blockEntity.tickRate, null);
-        fields.addField("isDirty", this.isDirty, blockEntity -> blockEntity.isDirty, (blockEntity, value) -> blockEntity.isDirty = value);
+        fields.addField("tickRate", this.tickRate, blockEntity -> ((IndustriaBlockEntity<?>) blockEntity).tickRate,
+            null);
+        fields.addField("isDirty", this.isDirty, blockEntity -> blockEntity.isDirty,
+            (blockEntity, value) -> blockEntity.isDirty = value);
     }
 
     public abstract void registerFields(BlockEntityFields<T> fields);
@@ -130,9 +134,8 @@ public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> ex
         }
 
         public BlockEntityProperties<T> tickRate(int tickRate) {
-            if (tickRate < 0) {
+            if (tickRate < 0)
                 throw new IllegalArgumentException("Tick rate must be greater than or equal to 0");
-            }
 
             this.tickRate = tickRate;
             return this;

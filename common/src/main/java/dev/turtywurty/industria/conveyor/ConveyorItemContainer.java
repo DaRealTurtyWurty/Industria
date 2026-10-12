@@ -67,8 +67,9 @@ public class ConveyorItemContainer implements Container, StackedContentsCompatib
             return removed.getStack();
         } else {
             ItemStack split = removed.getStack().split(count);
-            if (removed.getStack().isEmpty())
+            if (removed.getStack().isEmpty()) {
                 this.items.remove(slot);
+            }
 
             return split;
         }

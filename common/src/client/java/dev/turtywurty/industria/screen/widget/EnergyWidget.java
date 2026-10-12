@@ -20,7 +20,15 @@ public class EnergyWidget implements Renderable, LayoutElement {
     private int color;
     private final Orientation orientation;
 
-    public EnergyWidget(SimpleEnergyStorage energyStorage, int x, int y, int width, int height, int color, Orientation orientation) {
+    public EnergyWidget(
+        SimpleEnergyStorage energyStorage,
+        int x,
+        int y,
+        int width,
+        int height,
+        int color,
+        Orientation orientation
+    ) {
         this.energyStorage = energyStorage;
         this.x = x;
         this.y = y;
@@ -54,12 +62,16 @@ public class EnergyWidget implements Renderable, LayoutElement {
 
     protected void drawTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         boolean showFullAmount = Minecraft.getInstance().hasShiftDown();
-        String amount = showFullAmount ? Long.toString(this.energyStorage.getAmount()) : formatCompact(this.energyStorage.getAmount());
-        String capacity = showFullAmount ? Long.toString(this.energyStorage.getCapacity()) : formatCompact(this.energyStorage.getCapacity());
+        String amount = showFullAmount
+            ? Long.toString(this.energyStorage.getAmount())
+            : formatCompact(this.energyStorage.getAmount());
+        String capacity = showFullAmount
+            ? Long.toString(this.energyStorage.getCapacity())
+            : formatCompact(this.energyStorage.getCapacity());
 
         context.setTooltipForNextFrame(Minecraft.getInstance().font,
-                Component.literal(amount + " / " + capacity + " FE"),
-                mouseX, mouseY);
+            Component.literal(amount + " / " + capacity + " FE"),
+            mouseX, mouseY);
     }
 
     @Override

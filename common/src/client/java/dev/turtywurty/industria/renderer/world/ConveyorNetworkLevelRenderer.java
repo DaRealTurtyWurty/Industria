@@ -85,45 +85,45 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
     private static List<Vector3d> calculateItemAnchors(Model<?> model, BlockState state) {
         Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
-                ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
-                : Direction.SOUTH;
+            ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
+            : Direction.SOUTH;
         boolean mirrorTurnRight = state.hasProperty(BasicConveyorBlock.SHAPE)
-                && state.getValue(BasicConveyorBlock.SHAPE) == BasicConveyorBlock.ConveyorShape.TURN_RIGHT;
+            && state.getValue(BasicConveyorBlock.SHAPE) == BasicConveyorBlock.ConveyorShape.TURN_RIGHT;
 
         Map<String, ModelPart> parts = getModelParts(model);
         return parts.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith("anchor"))
-                .map(entry -> Map.entry(entry.getKey().substring("anchor".length()), entry.getValue()))
-                .map(entry -> {
-                    String name = entry.getKey();
-                    if (name.isEmpty()) {
-                        Industria.LOGGER.warn("Model part name for conveyor item anchor is empty. Expected format: 'anchorX' where X is an integer index.");
-                        return null;
-                    }
+            .filter(entry -> entry.getKey().startsWith("anchor"))
+            .map(entry -> Map.entry(entry.getKey().substring("anchor".length()), entry.getValue()))
+            .map(entry -> {
+                String name = entry.getKey();
+                if (name.isEmpty()) {
+                    Industria.LOGGER.warn(
+                        "Model part name for conveyor item anchor is empty. Expected format: 'anchorX' where X is an integer index.");
+                    return null;
+                }
 
-                    try {
-                        return Map.entry(Integer.parseInt(name), entry.getValue());
-                    } catch (NumberFormatException exception) {
-                        Industria.LOGGER.warn("Failed to parse index from model part name: {}", name);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(Map.Entry::getKey))
-                .map(entry -> {
-                    ModelPart part = entry.getValue();
-                    var anchor = new Vector3d(
-                            part.x / 16.0,
-                            part.y / 16.0,
-                            part.z / 16.0
-                    );
-                    if (mirrorTurnRight) {
-                        anchor.x = -anchor.x;
-                    }
+                try {
+                    return Map.entry(Integer.parseInt(name), entry.getValue());
+                } catch (NumberFormatException exception) {
+                    Industria.LOGGER.warn("Failed to parse index from model part name: {}", name);
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .sorted(Comparator.comparingInt(Map.Entry::getKey))
+            .map(entry -> {
+                ModelPart part = entry.getValue();
+                var anchor = new Vector3d(
+                    part.x / 16.0,
+                    part.y / 16.0,
+                    part.z / 16.0);
+                if (mirrorTurnRight) {
+                    anchor.x = -anchor.x;
+                }
 
-                    return rotateAnchorForFacing(anchor, facing);
-                })
-                .toList();
+                return rotateAnchorForFacing(anchor, facing);
+            })
+            .toList();
     }
 
     private static Vector3d rotateAnchorForFacing(Vector3d anchor, Direction facing) {
@@ -176,12 +176,13 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
                 int lightCoords = LightCoordsUtil.getLightCoords(level, conveyorPos);
 
-                ModConveyorSpecialRenderers.ConveyorSpecialRendererEntry rendererEntry = ModConveyorSpecialRenderers.getRenderer(state);
+                ModConveyorSpecialRenderers.ConveyorSpecialRendererEntry rendererEntry = ModConveyorSpecialRenderers
+                    .getRenderer(state);
                 ModConveyorSpecialRenderers.RenderContext renderContext = null;
                 if (rendererEntry != null) {
                     renderContext = new ModConveyorSpecialRenderers.RenderContext(
-                            context, partialTick, gameTime, manager, network, networkStorage, conveyorPos, lightCoords,
-                            conveyorStorage, state, new AtomicReference<>());
+                        context, partialTick, gameTime, manager, network, networkStorage, conveyorPos, lightCoords,
+                        conveyorStorage, state, new AtomicReference<>());
 
                     if (!rendererEntry.afterItemRendering()) {
                         rendererEntry.renderer().render(renderContext);
@@ -196,8 +197,9 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                     continue;
                 }
 
-                renderConveyorItems(conveyorStorage, conveyorPos, itemAnchorsByRoute, poseStack, nodeCollector, lightCoords,
-                        gameTime, partialTick, rendererEntry, renderContext, visibleItems);
+                renderConveyorItems(conveyorStorage, conveyorPos, itemAnchorsByRoute, poseStack, nodeCollector,
+                    lightCoords,
+                    gameTime, partialTick, rendererEntry, renderContext, visibleItems);
             }
         }
 
@@ -205,10 +207,19 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         ITEM_DIRECTION_SMOOTHING.keySet().removeIf(id -> !visibleItems.contains(id));
     }
 
-    private void renderConveyorItems(ConveyorStorage conveyorStorage, BlockPos conveyorPos, Map<String, List<Vector3d>> itemAnchorsByRoute,
-                                     PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords, long gameTime, float partialTick,
-                                     ModConveyorSpecialRenderers.ConveyorSpecialRendererEntry rendererEntry, ModConveyorSpecialRenderers.RenderContext renderContext,
-                                     Set<UUID> visibleItems) {
+    private void renderConveyorItems(
+        ConveyorStorage conveyorStorage,
+        BlockPos conveyorPos,
+        Map<String, List<Vector3d>> itemAnchorsByRoute,
+        PoseStack poseStack,
+        SubmitNodeCollector nodeCollector,
+        int lightCoords,
+        long gameTime,
+        float partialTick,
+        ModConveyorSpecialRenderers.ConveyorSpecialRendererEntry rendererEntry,
+        ModConveyorSpecialRenderers.RenderContext renderContext,
+        Set<UUID> visibleItems
+    ) {
         Vec3 conveyorCenter = Vec3.atCenterOf(conveyorPos);
         Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         Vec3 cameraPosition = camera.position();
@@ -220,10 +231,12 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         Map<ConveyorItem, Pair<List<Vector3d>, Float>> itemRenderData = new HashMap<>();
         for (ConveyorItem conveyorItem : conveyorStorage.getItems()) {
             List<Vector3d> itemAnchors = resolveItemAnchors(conveyorItem, itemAnchorsByRoute);
-            float smoothedProgress = getSmoothedProgress(conveyorItem, conveyorPos, gameTime, partialTick, visibleItems);
+            float smoothedProgress = getSmoothedProgress(conveyorItem, conveyorPos, gameTime, partialTick,
+                visibleItems);
 
             if (rendererEntry == null || !rendererEntry.overrideItemRendering()) {
-                renderConveyorItem(conveyorItem, conveyorPos, smoothedProgress, itemAnchors, poseStack, nodeCollector, lightCoords, gameTime, partialTick);
+                renderConveyorItem(conveyorItem, conveyorPos, smoothedProgress, itemAnchors, poseStack, nodeCollector,
+                    lightCoords, gameTime, partialTick);
             }
 
             if (rendererEntry != null && rendererEntry.afterItemRendering()) {
@@ -239,7 +252,6 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         poseStack.popPose();
     }
 
-
     private void renderConveyorNetwork(ConveyorNetwork network, ClientLevel level) {
         for (BlockPos conveyor : network.getConveyors()) {
             BlockState state = level.getBlockState(conveyor);
@@ -253,7 +265,10 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         }
     }
 
-    private static List<Vector3d> resolveItemAnchors(ConveyorItem conveyorItem, Map<String, List<Vector3d>> itemAnchorsByRoute) {
+    private static List<Vector3d> resolveItemAnchors(
+        ConveyorItem conveyorItem,
+        Map<String, List<Vector3d>> itemAnchorsByRoute
+    ) {
         if (itemAnchorsByRoute == null || itemAnchorsByRoute.isEmpty())
             return List.of();
 
@@ -278,7 +293,13 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         return itemAnchorsByRoute.values().iterator().next();
     }
 
-    private static float getSmoothedProgress(ConveyorItem conveyorItem, BlockPos conveyorPos, long gameTime, float partialTick, Set<UUID> visibleItems) {
+    private static float getSmoothedProgress(
+        ConveyorItem conveyorItem,
+        BlockPos conveyorPos,
+        long gameTime,
+        float partialTick,
+        Set<UUID> visibleItems
+    ) {
         UUID itemId = conveyorItem.getId();
         visibleItems.add(itemId);
 
@@ -298,11 +319,21 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
         float elapsedTicks = (float) (gameTime - state.lastSyncGameTime) + partialTick;
         float interpolation = Math.clamp(elapsedTicks, 0.0F, 1.0F);
-        return state.previousSyncedProgress + (state.currentSyncedProgress - state.previousSyncedProgress) * interpolation;
+        return state.previousSyncedProgress
+            + (state.currentSyncedProgress - state.previousSyncedProgress) * interpolation;
     }
 
-    private static void renderConveyorItem(ConveyorItem conveyorItem, BlockPos conveyorPos, float progressTicks, List<Vector3d> itemAnchors,
-                                           PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords, long gameTime, float partialTick) {
+    private static void renderConveyorItem(
+        ConveyorItem conveyorItem,
+        BlockPos conveyorPos,
+        float progressTicks,
+        List<Vector3d> itemAnchors,
+        PoseStack poseStack,
+        SubmitNodeCollector nodeCollector,
+        int lightCoords,
+        long gameTime,
+        float partialTick
+    ) {
         ItemStack stack = conveyorItem.getStack();
         float progress = progressTicks / (float) ConveyorStorage.MAX_PROGRESS;
         float clampedProgress = Math.clamp(progress, 0.0F, 1.0F);
@@ -315,16 +346,16 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         if (itemAnchors.size() > 1) {
             Vector3d rawTravelDirection = sampleTravelDirection(itemAnchors, clampedProgress);
             Vector3d smoothedDirection = getSmoothedTravelDirection(
-                    conveyorItem.getId(),
-                    conveyorPos,
-                    rawTravelDirection,
-                    gameTime,
-                    partialTick
-            );
+                conveyorItem.getId(),
+                conveyorPos,
+                rawTravelDirection,
+                gameTime,
+                partialTick);
 
             double lengthSquared = smoothedDirection.lengthSquared();
             if (lengthSquared > 1.0E-6D) {
-                double horizontalLength = Math.sqrt(smoothedDirection.x * smoothedDirection.x + smoothedDirection.z * smoothedDirection.z);
+                double horizontalLength = Math
+                    .sqrt(smoothedDirection.x * smoothedDirection.x + smoothedDirection.z * smoothedDirection.z);
                 float yaw = (float) Math.toDegrees(Math.atan2(smoothedDirection.x, smoothedDirection.z));
                 float pitch = (float) -Math.toDegrees(Math.atan2(smoothedDirection.y, horizontalLength));
                 poseStack.rotate(Axis.YP.rotationDegrees(yaw));
@@ -355,12 +386,19 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         return new Vector3d(to).sub(from);
     }
 
-    private static Vector3d getSmoothedTravelDirection(UUID itemId, BlockPos conveyorPos, Vector3d rawDirection, long gameTime, float partialTick) {
+    private static Vector3d getSmoothedTravelDirection(
+        UUID itemId,
+        BlockPos conveyorPos,
+        Vector3d rawDirection,
+        long gameTime,
+        float partialTick
+    ) {
         SmoothedDirectionState state = ITEM_DIRECTION_SMOOTHING.get(itemId);
         Vector3d normalizedRaw = normalizeOrNull(rawDirection);
         if (state == null) {
             Vector3d initialDirection = normalizedRaw != null ? normalizedRaw : new Vector3d(0.0D, 0.0D, 1.0D);
-            state = new SmoothedDirectionState(conveyorPos, new Vector3d(initialDirection), new Vector3d(initialDirection), gameTime);
+            state = new SmoothedDirectionState(conveyorPos, new Vector3d(initialDirection),
+                new Vector3d(initialDirection), gameTime);
             ITEM_DIRECTION_SMOOTHING.put(itemId, state);
             return new Vector3d(initialDirection);
         }
@@ -378,11 +416,10 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
         float elapsedTicks = (float) (gameTime - state.lastConveyorChangeGameTime) + partialTick;
         float blend = Math.clamp(elapsedTicks, 0.0F, 1.0F);
-        Vector3d blended = new Vector3d(
-                state.previousDirection.x + (state.currentDirection.x - state.previousDirection.x) * blend,
-                state.previousDirection.y + (state.currentDirection.y - state.previousDirection.y) * blend,
-                state.previousDirection.z + (state.currentDirection.z - state.previousDirection.z) * blend
-        );
+        var blended = new Vector3d(
+            state.previousDirection.x + (state.currentDirection.x - state.previousDirection.x) * blend,
+            state.previousDirection.y + (state.currentDirection.y - state.previousDirection.y) * blend,
+            state.previousDirection.z + (state.currentDirection.z - state.previousDirection.z) * blend);
         Vector3d normalizedBlended = normalizeOrNull(blended);
         return normalizedBlended != null ? normalizedBlended : new Vector3d(state.currentDirection);
     }
@@ -411,13 +448,17 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         Vector3d previousAnchor = itemAnchors.get(previousAnchorIndex);
         Vector3d nextAnchor = itemAnchors.get(nextAnchorIndex);
         return new Vector3d(
-                previousAnchor.x + (nextAnchor.x - previousAnchor.x) * anchorLerp,
-                previousAnchor.y + (nextAnchor.y - previousAnchor.y) * anchorLerp,
-                previousAnchor.z + (nextAnchor.z - previousAnchor.z) * anchorLerp
-        );
+            previousAnchor.x + (nextAnchor.x - previousAnchor.x) * anchorLerp,
+            previousAnchor.y + (nextAnchor.y - previousAnchor.y) * anchorLerp,
+            previousAnchor.z + (nextAnchor.z - previousAnchor.z) * anchorLerp);
     }
 
-    public static void renderItem(ItemStack stack, PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords) {
+    public static void renderItem(
+        ItemStack stack,
+        PoseStack poseStack,
+        SubmitNodeCollector nodeCollector,
+        int lightCoords
+    ) {
         Minecraft minecraft = Minecraft.getInstance();
         ItemModelResolver modelResolver = minecraft.getItemModelResolver();
 
@@ -432,7 +473,12 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         private int currentSyncedProgress;
         private long lastSyncGameTime;
 
-        private SmoothedProgressState(BlockPos conveyorPos, int previousSyncedProgress, int currentSyncedProgress, long lastSyncGameTime) {
+        private SmoothedProgressState(
+            BlockPos conveyorPos,
+            int previousSyncedProgress,
+            int currentSyncedProgress,
+            long lastSyncGameTime
+        ) {
             this.conveyorPos = conveyorPos;
             this.previousSyncedProgress = previousSyncedProgress;
             this.currentSyncedProgress = currentSyncedProgress;
@@ -446,7 +492,12 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         private Vector3d currentDirection;
         private long lastConveyorChangeGameTime;
 
-        private SmoothedDirectionState(BlockPos conveyorPos, Vector3d previousDirection, Vector3d currentDirection, long lastConveyorChangeGameTime) {
+        private SmoothedDirectionState(
+            BlockPos conveyorPos,
+            Vector3d previousDirection,
+            Vector3d currentDirection,
+            long lastConveyorChangeGameTime
+        ) {
             this.conveyorPos = conveyorPos;
             this.previousDirection = previousDirection;
             this.currentDirection = currentDirection;

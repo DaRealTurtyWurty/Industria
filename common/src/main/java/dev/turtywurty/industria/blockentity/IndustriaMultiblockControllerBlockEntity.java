@@ -29,13 +29,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class IndustriaMultiblockControllerBlockEntity extends MultiblockControllerBlockEntity implements SyncableTickableBlockEntity, UpdateableBlockEntityLike {
+public abstract class IndustriaMultiblockControllerBlockEntity extends MultiblockControllerBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        UpdateableBlockEntityLike {
     public static final Codec<ResourceKey<Recipe<?>>> RECIPE_CODEC = ResourceKey.codec(Registries.RECIPE);
 
     protected final IndustriaBlock blockRef;
     protected boolean isDirty;
 
-    protected IndustriaMultiblockControllerBlockEntity(IndustriaBlock blockRef, BlockEntityType<? extends IndustriaMultiblockControllerBlockEntity> type, BlockPos pos, BlockState state) {
+    protected IndustriaMultiblockControllerBlockEntity(
+        IndustriaBlock blockRef,
+        BlockEntityType<? extends IndustriaMultiblockControllerBlockEntity> type,
+        BlockPos pos,
+        BlockState state
+    ) {
         super(type, pos, state);
         this.blockRef = blockRef;
     }
@@ -66,7 +74,8 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
             return;
 
         BlockState newState = this.level.getBlockState(pos);
-        if (!oldState.is(newState.getBlock()) && this.blockRef.dropContentsOnBreak && this instanceof BlockEntityContentsDropper dropper) {
+        if (!oldState.is(newState.getBlock()) && this.blockRef.dropContentsOnBreak
+            && this instanceof BlockEntityContentsDropper dropper) {
             dropper.dropContents(this.level, pos);
         }
     }
@@ -137,9 +146,8 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
 
     @Override
     protected @Nullable Direction getPortLocalSide(@Nullable Direction worldSide) {
-        if (worldSide == null || worldSide.getAxis().isVertical()) {
+        if (worldSide == null || worldSide.getAxis().isVertical())
             return worldSide;
-        }
 
         return switch (getControllerFacing()) {
             case NORTH -> worldSide;
@@ -151,9 +159,8 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
     }
 
     protected @Nullable Direction getWorldSideForLocalSide(@Nullable Direction localSide) {
-        if (localSide == null || localSide.getAxis().isVertical()) {
+        if (localSide == null || localSide.getAxis().isVertical())
             return localSide;
-        }
 
         return switch (getControllerFacing()) {
             case NORTH -> localSide;
@@ -210,16 +217,24 @@ public abstract class IndustriaMultiblockControllerBlockEntity extends Multibloc
     }
 
     @Override
-    public ResourceStorage<ResourceVariant<UnitResource>> getEnergyStorageForExternal(BlockPos pos, @Nullable Direction side) {
+    public ResourceStorage<ResourceVariant<UnitResource>> getEnergyStorageForExternal(
+        BlockPos pos,
+        @Nullable Direction side
+    ) {
         return getExternalPortStorage(TransferType.ENERGY, pos, side);
     }
 
-    public @Nullable ResourceStorage<ResourceVariant<Slurry>> getSlurryStorageForExternal(BlockPos worldPos, @Nullable Direction side) {
+    public @Nullable ResourceStorage<ResourceVariant<Slurry>> getSlurryStorageForExternal(
+        BlockPos worldPos,
+        @Nullable Direction side
+    ) {
         return getExternalPortStorage(TransferType.SLURRY, worldPos, side);
     }
 
     public @Nullable ResourceStorage<ResourceVariant<Gas>> getGasStorageForExternal(
-            BlockPos worldPos, @Nullable Direction side) {
+        BlockPos worldPos,
+        @Nullable Direction side
+    ) {
         return getExternalPortStorage(TransferType.GAS, worldPos, side);
     }
 

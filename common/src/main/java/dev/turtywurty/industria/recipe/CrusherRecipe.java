@@ -25,8 +25,14 @@ import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 
-public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime)
-        implements Recipe<RecipeSimpleInventory> {
+public record CrusherRecipe(
+    IndustriaIngredient input,
+    OutputItemStack outputA,
+    OutputItemStack outputB,
+    int processTime
+)
+    implements
+        Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
         return this.input.testForRecipe(input.getItem(0));
@@ -77,11 +83,10 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new CrusherRecipeDisplay(
-                input().toDisplay(),
-                new SlotDisplay.Composite(List.of(this.outputA().toDisplay(), this.outputB().toDisplay())),
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.CRUSHER.get().asItem()),
-                processTime()
-        ));
+            input().toDisplay(),
+            new SlotDisplay.Composite(List.of(this.outputA().toDisplay(), this.outputB().toDisplay())),
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.CRUSHER.get().asItem()),
+            processTime()));
     }
 
     @Override
@@ -102,43 +107,46 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
     }
 
     private static final MapCodec<CrusherRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(CrusherRecipe::input),
-            OutputItemStack.CODEC.fieldOf("output_a").forGetter(CrusherRecipe::outputA),
-            OutputItemStack.CODEC.fieldOf("output_b").forGetter(CrusherRecipe::outputB),
-            Codec.INT.fieldOf("process_time").forGetter(CrusherRecipe::processTime)
-    ).apply(instance, CrusherRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(CrusherRecipe::input),
+        OutputItemStack.CODEC.fieldOf("output_a").forGetter(CrusherRecipe::outputA),
+        OutputItemStack.CODEC.fieldOf("output_b").forGetter(CrusherRecipe::outputB),
+        Codec.INT.fieldOf("process_time").forGetter(CrusherRecipe::processTime)).apply(instance, CrusherRecipe::new));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, CrusherRecipe> STREAM_CODEC =
-            StreamCodec.composite(
-                    IndustriaIngredient.STREAM_CODEC, CrusherRecipe::input,
-                    OutputItemStack.STREAM_CODEC, CrusherRecipe::outputA,
-                    OutputItemStack.STREAM_CODEC, CrusherRecipe::outputB,
-                    ByteBufCodecs.INT, CrusherRecipe::processTime,
-                    CrusherRecipe::new
-            );
+    private static final StreamCodec<RegistryFriendlyByteBuf, CrusherRecipe> STREAM_CODEC = StreamCodec.composite(
+        IndustriaIngredient.STREAM_CODEC, CrusherRecipe::input,
+        OutputItemStack.STREAM_CODEC, CrusherRecipe::outputA,
+        OutputItemStack.STREAM_CODEC, CrusherRecipe::outputB,
+        ByteBufCodecs.INT, CrusherRecipe::processTime,
+        CrusherRecipe::new);
 
     public static final RecipeSerializer<CrusherRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    public record CrusherRecipeDisplay(SlotDisplay input, SlotDisplay output, SlotDisplay craftingStation, int processTime)
-            implements RecipeDisplay {
+    public record CrusherRecipeDisplay(
+        SlotDisplay input,
+        SlotDisplay output,
+        SlotDisplay craftingStation,
+        int processTime
+    )
+        implements
+            RecipeDisplay {
         public static final MapCodec<CrusherRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
-                instance -> instance.group(
-                        SlotDisplay.CODEC.fieldOf("input").forGetter(CrusherRecipeDisplay::input),
-                        SlotDisplay.CODEC.fieldOf("output").forGetter(CrusherRecipeDisplay::output),
-                        SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(CrusherRecipeDisplay::craftingStation),
-                        Codec.INT.fieldOf("process_time").forGetter(CrusherRecipeDisplay::processTime)
-                ).apply(instance, CrusherRecipeDisplay::new)
-        );
+            instance -> instance.group(
+                SlotDisplay.CODEC.fieldOf("input").forGetter(CrusherRecipeDisplay::input),
+                SlotDisplay.CODEC.fieldOf("output").forGetter(CrusherRecipeDisplay::output),
+                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(CrusherRecipeDisplay::craftingStation),
+                Codec.INT.fieldOf("process_time").forGetter(CrusherRecipeDisplay::processTime))
+                .apply(instance, CrusherRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, CrusherRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, CrusherRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 SlotDisplay.STREAM_CODEC, CrusherRecipeDisplay::input,
                 SlotDisplay.STREAM_CODEC, CrusherRecipeDisplay::output,
                 SlotDisplay.STREAM_CODEC, CrusherRecipeDisplay::craftingStation,
                 ByteBufCodecs.INT, CrusherRecipeDisplay::processTime,
-                CrusherRecipeDisplay::new
-        );
+                CrusherRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<CrusherRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<CrusherRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+            STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {

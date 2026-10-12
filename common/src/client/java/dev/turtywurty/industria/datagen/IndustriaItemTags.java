@@ -9,15 +9,15 @@ import net.minecraft.world.item.Item;
 public final class IndustriaItemTags {
     public static void generate(TagGenerationContext<Item> tags) {
         tags.tag(ConventionTags.item("ingots"))
-                .add(ModItems.STEEL_INGOT.get().builtInRegistryHolder().key());
+            .add(ModItems.STEEL_INGOT.get().builtInRegistryHolder().key());
 
         tags.tag(TagList.Items.ELECTROLYSIS_RODS)
-                .add(ModItems.CARBON_ROD.get().builtInRegistryHolder().key());
+            .add(ModItems.CARBON_ROD.get().builtInRegistryHolder().key());
 
         tags.tag(TagList.Items.BLANK_MOLDS)
-                .add(ModItems.BLANK_SAND_CAST.get().builtInRegistryHolder().key())
-                .add(ModItems.BLANK_RED_SAND_CAST.get().builtInRegistryHolder().key())
-                .add(ModItems.BLANK_CLAY_CAST.get().builtInRegistryHolder().key());
+            .add(ModItems.BLANK_SAND_CAST.get().builtInRegistryHolder().key())
+            .add(ModItems.BLANK_RED_SAND_CAST.get().builtInRegistryHolder().key())
+            .add(ModItems.BLANK_CLAY_CAST.get().builtInRegistryHolder().key());
     }
 
     private IndustriaItemTags() {

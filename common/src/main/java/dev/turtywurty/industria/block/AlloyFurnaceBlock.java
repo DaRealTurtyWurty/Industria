@@ -6,12 +6,12 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class AlloyFurnaceBlock extends IndustriaBlock {
     public AlloyFurnaceBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasLitProperty()
-                .hasComparatorOutput()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ALLOY_FURNACE)
-                        .shouldTick()
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()));
+            .hasHorizontalFacing()
+            .hasLitProperty()
+            .hasComparatorOutput()
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ALLOY_FURNACE)
+                .shouldTick()
+                .rightClickToOpenGui()
+                .dropContentsOnBreak()));
     }
 }

@@ -38,8 +38,10 @@ public final class IndustriaTestWorldGenerator {
         energyGenContext.setBlock(0, 0, 0, ModBlocks.WIND_TURBINE);
         energyGenContext.setBlock(1, 0, 0, ModBlocks.WIND_TURBINE);
 
-        energyGenContext.setBlock(-3, 0, 1, ModBlocks.SOLAR_PANEL.get().defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
-        energyGenContext.setBlock(-3, 0, -1, ModBlocks.ADVANCED_SOLAR_PANEL.get().defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
+        energyGenContext.setBlock(-3, 0, 1, ModBlocks.SOLAR_PANEL.get().defaultBlockState()
+            .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
+        energyGenContext.setBlock(-3, 0, -1, ModBlocks.ADVANCED_SOLAR_PANEL.get().defaultBlockState()
+            .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
 
         TestWorldContext mixerContext = energyGenContext.at(-7, 0, -1);
         mixerContext.constructMultiblockPattern(0, 0, 0, MultiblockLib.DEFINITION_MANAGER.get(Industria.id("mixer")));
@@ -51,16 +53,17 @@ public final class IndustriaTestWorldGenerator {
         poolContext.fill(-1, -2, -1, 1, -1, 1, Blocks.WATER);
 
         var pumpState = ModBlocks.FLUID_PUMP.get().defaultBlockState()
-                .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH);
+            .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH);
         poolContext.setBlock(0, -2, 0, pumpState.setValue(BlockStateProperties.WATERLOGGED, true));
         poolContext.setBlock(0, -1, 0, pumpState
-                .setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER)
-                .setValue(BlockStateProperties.WATERLOGGED, true));
+            .setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER)
+            .setValue(BlockStateProperties.WATERLOGGED, true));
 
         for (int y = 0; y < 3; y++) {
             var oldPipe = poolContext.pos(2, y, 0);
-            if (context.overworld().getBlockState(oldPipe).is(ModBlocks.FLUID_PIPE.get()))
+            if (context.overworld().getBlockState(oldPipe).is(ModBlocks.FLUID_PIPE.get())) {
                 context.overworld().removeBlock(oldPipe, false);
+            }
         }
 
         TestWorldContext digesterContext = DigesterTestWorld.placeMachines(context, mixerContext, player);
@@ -72,37 +75,37 @@ public final class IndustriaTestWorldGenerator {
         SmelteryTestWorld.place(context.at(8, 0, -10));
     }
 
-    private static void connectMachines(TestWorldContext energyGenContext, TestWorldContext poolContext,
-                                        TestWorldContext mixerContext, TestWorldContext digesterContext) {
+    private static void connectMachines(
+        TestWorldContext energyGenContext,
+        TestWorldContext poolContext,
+        TestWorldContext mixerContext,
+        TestWorldContext digesterContext
+    ) {
         energyGenContext.runPipe(List.of(
-                energyGenContext.pos(-2, 0, 0),
-                energyGenContext.pos(-4, 0, 0),
-                energyGenContext.pos(-4, 0, 2),
-                energyGenContext.pos(-4, 3, 2),
-                energyGenContext.pos(-6, 3, 2),
-                energyGenContext.pos(-6, 3, 0)
-        ), ModBlocks.CABLE);
+            energyGenContext.pos(-2, 0, 0),
+            energyGenContext.pos(-4, 0, 0),
+            energyGenContext.pos(-4, 0, 2),
+            energyGenContext.pos(-4, 3, 2),
+            energyGenContext.pos(-6, 3, 2),
+            energyGenContext.pos(-6, 3, 0)), ModBlocks.CABLE);
 
         energyGenContext.runPipe(List.of(
-                energyGenContext.pos(-4, 3, 2),
-                poolContext.pos(0, 3, 2),
-                poolContext.pos(0, 1, 2),
-                poolContext.pos(0, 0, 2),
-                poolContext.pos(0, 0, 0)
-        ), ModBlocks.CABLE);
+            energyGenContext.pos(-4, 3, 2),
+            poolContext.pos(0, 3, 2),
+            poolContext.pos(0, 1, 2),
+            poolContext.pos(0, 0, 2),
+            poolContext.pos(0, 0, 0)), ModBlocks.CABLE);
 
         poolContext.placeBlockPath(
-                List.of(
-                        poolContext.pos(1, -2, 0),
-                        poolContext.pos(1, -1, 0)
-                ),
-                ModBlocks.FLUID_PIPE.get().defaultBlockState()
-                        .setValue(BlockStateProperties.WATERLOGGED, true));
-        poolContext.runPipe(List.of(
+            List.of(
                 poolContext.pos(1, -2, 0),
-                poolContext.pos(1, 3, 0),
-                mixerContext.pos(0, 3, 1)
-        ));
+                poolContext.pos(1, -1, 0)),
+            ModBlocks.FLUID_PIPE.get().defaultBlockState()
+                .setValue(BlockStateProperties.WATERLOGGED, true));
+        poolContext.runPipe(List.of(
+            poolContext.pos(1, -2, 0),
+            poolContext.pos(1, 3, 0),
+            mixerContext.pos(0, 3, 1)));
 
         DigesterTestWorld.connectMachines(digesterContext, mixerContext, energyGenContext);
     }
@@ -110,10 +113,10 @@ public final class IndustriaTestWorldGenerator {
     private static void addMixerItemFeed(TestWorldContext mixer) {
         // The controller is at (1, 0, 1); its item input is the top of (2, 2, 1).
         mixer.setBlock(2, 3, 1, Blocks.HOPPER.defaultBlockState()
-                .setValue(HopperBlock.FACING, Direction.DOWN));
+            .setValue(HopperBlock.FACING, Direction.DOWN));
         for (int x = 3; x <= 4; x++) {
             mixer.setBlock(x, 3, 1, Blocks.HOPPER.defaultBlockState()
-                    .setValue(HopperBlock.FACING, Direction.WEST));
+                .setValue(HopperBlock.FACING, Direction.WEST));
         }
 
         mixer.setBlock(4, 4, 1, Blocks.CHEST);

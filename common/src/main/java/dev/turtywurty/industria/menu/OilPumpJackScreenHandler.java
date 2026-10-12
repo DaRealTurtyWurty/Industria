@@ -14,7 +14,12 @@ public class OilPumpJackScreenHandler extends IndustriaScreenHandler<OilPumpJack
         super(ModMenuTypes.OIL_PUMP_JACK.get(), syncId, playerInv, payload, OilPumpJackBlockEntity.class);
     }
 
-    public OilPumpJackScreenHandler(int syncId, Inventory playerInv, OilPumpJackBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public OilPumpJackScreenHandler(
+        int syncId,
+        Inventory playerInv,
+        OilPumpJackBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.OIL_PUMP_JACK.get(), syncId, playerInv, blockEntity, wrappedContainerStorage);
     }
 

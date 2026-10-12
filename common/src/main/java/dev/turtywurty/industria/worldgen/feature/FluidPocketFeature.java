@@ -29,7 +29,9 @@ public class FluidPocketFeature implements Feature {
     }
 
     @Override
-    public MapCodec<FluidPocketFeature> codec() { return CODEC; }
+    public MapCodec<FluidPocketFeature> codec() {
+        return CODEC;
+    }
 
     @SuppressWarnings("deprecation")
     @Override
@@ -37,10 +39,10 @@ public class FluidPocketFeature implements Feature {
         FluidState fluidState = config.fluidState();
 
         BlockState originState = world.getBlockState(origin);
-        if(originState.isAir() || !config.replaceable().test(originState, origin, random))
+        if (originState.isAir() || !config.replaceable().test(originState, origin, random))
             return false;
 
-        if(random.nextInt(100) < 50)
+        if (random.nextInt(100) < 50)
             return false;
 
         ServerLevel serverWorld = world.getLevel();
@@ -63,7 +65,8 @@ public class FluidPocketFeature implements Feature {
                 for (int y = 0; y < currentDepth; y++) {
                     BlockPos pos = origin.offset(x, -y, z);
                     BlockState state = world.getBlockState(pos);
-                    if (pos.closerThan(origin, currentRadius) && !state.isAir() && config.replaceable().test(state, pos, random)) {
+                    if (pos.closerThan(origin, currentRadius) && !state.isAir()
+                        && config.replaceable().test(state, pos, random)) {
                         positions.add(pos);
                     }
                 }
@@ -72,7 +75,8 @@ public class FluidPocketFeature implements Feature {
 
         Map<BlockPos, Integer> positionsWithAmount = new HashMap<>();
         for (BlockPos pos : positions) {
-            positionsWithAmount.put(pos, random.nextIntBetweenInclusive((int) FluidAmounts.BOTTLE, (int) (FluidAmounts.BUCKET * 5)));
+            positionsWithAmount.put(pos,
+                random.nextIntBetweenInclusive((int) FluidAmounts.BOTTLE, (int) (FluidAmounts.BUCKET * 5)));
         }
 
         var pocket = new WorldFluidPocketsState.FluidPocket(fluidState, positionsWithAmount);

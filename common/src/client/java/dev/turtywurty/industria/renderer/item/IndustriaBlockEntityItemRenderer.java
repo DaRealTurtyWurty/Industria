@@ -20,9 +20,18 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
 
 public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
-        implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
+    implements
+        SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
-    public void submit(@Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int i) {
+    public void submit(
+        @Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay,
+        boolean glint,
+        int i
+    ) {
         if (data == null)
             return;
 
@@ -30,11 +39,13 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         if (stack.isEmpty() || this.modelPart == null)
             return;
 
-        RenderType renderLayer = glint ? RenderTypes.itemTranslucentGlint(this.texture) : RenderTypes.entityTranslucent(this.texture);
+        RenderType renderLayer = glint
+            ? RenderTypes.itemTranslucentGlint(this.texture)
+            : RenderTypes.entityTranslucent(this.texture);
         matrices.pushPose();
         setupTransformations(matrices);
         queue.submitModelPart(this.modelPart, matrices, renderLayer, light, overlay,
-                null, -1, i);
+            null, -1, i);
         matrices.popPose();
     }
 
@@ -57,18 +68,17 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
     }
 
     public record Unbaked(ModelLayerLocation modelLayer, Identifier texture)
-            implements SpecialModelRenderer.Unbaked<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
-        private static final Codec<ModelLayerLocation> ENTITY_MODEL_LAYER_CODEC =
-                RecordCodecBuilder.create(instance -> instance.group(
-                        Identifier.CODEC.fieldOf("id").forGetter(ModelLayerLocation::model),
-                        Codec.STRING.fieldOf("name").forGetter(ModelLayerLocation::layer)
-                ).apply(instance, ModelLayerLocation::new));
+        implements
+            SpecialModelRenderer.Unbaked<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
+        private static final Codec<ModelLayerLocation> ENTITY_MODEL_LAYER_CODEC = RecordCodecBuilder
+            .create(instance -> instance.group(
+                Identifier.CODEC.fieldOf("id").forGetter(ModelLayerLocation::model),
+                Codec.STRING.fieldOf("name").forGetter(ModelLayerLocation::layer))
+                .apply(instance, ModelLayerLocation::new));
 
-        public static final MapCodec<Unbaked> CODEC =
-                RecordCodecBuilder.mapCodec(instance -> instance.group(
-                        ENTITY_MODEL_LAYER_CODEC.fieldOf("model_layer").forGetter(Unbaked::modelLayer),
-                        Identifier.CODEC.fieldOf("texture").forGetter(Unbaked::texture)
-                ).apply(instance, Unbaked::new));
+        public static final MapCodec<Unbaked> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            ENTITY_MODEL_LAYER_CODEC.fieldOf("model_layer").forGetter(Unbaked::modelLayer),
+            Identifier.CODEC.fieldOf("texture").forGetter(Unbaked::texture)).apply(instance, Unbaked::new));
 
         @Override
         public MapCodec<Unbaked> type() {
@@ -76,7 +86,9 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         }
 
         @Override
-        public SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> bake(BakingContext context) {
+        public SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> bake(
+            BakingContext context
+        ) {
             EntityModelSet entityModels = context.entityModelSet();
             return new IndustriaBlockEntityItemRenderer(entityModels.bakeLayer(this.modelLayer), this.texture);
         }

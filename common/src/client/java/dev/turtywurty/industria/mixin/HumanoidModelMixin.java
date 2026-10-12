@@ -25,10 +25,10 @@ public class HumanoidModelMixin {
     @Final
     public ModelPart rightArm;
 
-    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;setupAttackAnimation(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V"))
+    @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;setupAttackAnimation(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V"))
     private void industria$setAngles(HumanoidRenderState bipedEntityRenderState, CallbackInfo callback) {
-        List<ArmPositionRegistry.DynamicArmPosition> positions = ArmPositionRegistry.getArmPosition(Minecraft.getInstance().player.getItemInHand(bipedEntityRenderState.useItemHand));
+        List<ArmPositionRegistry.DynamicArmPosition> positions = ArmPositionRegistry
+            .getArmPosition(Minecraft.getInstance().player.getItemInHand(bipedEntityRenderState.useItemHand));
         for (ArmPositionRegistry.DynamicArmPosition position : positions) {
             position.apply(bipedEntityRenderState, this.leftArm, this.rightArm);
         }

@@ -18,7 +18,13 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
         super(ModMenuTypes.CRUSHER.get(), 2, syncId, playerInv, payload, CrusherBlockEntity.class);
     }
 
-    public CrusherScreenHandler(int syncId, Inventory playerInv, CrusherBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
+    public CrusherScreenHandler(
+        int syncId,
+        Inventory playerInv,
+        CrusherBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData propertyDelegate
+    ) {
         super(ModMenuTypes.CRUSHER.get(), syncId, playerInv, blockEntity, wrappedContainerStorage, propertyDelegate);
     }
 
@@ -51,9 +57,8 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
     public float getProgressPercent() {
         float progress = getProgress();
         float maxProgress = getMaxProgress();
-        if (maxProgress == 0 || progress == 0) {
+        if (maxProgress == 0 || progress == 0)
             return 0.0f;
-        }
 
         return Mth.clamp(progress / maxProgress, 0.0f, 1.0f);
     }
@@ -69,9 +74,8 @@ public class CrusherScreenHandler extends IndustriaScreenHandler<CrusherBlockEnt
     public float getEnergyPercent() {
         long energy = getEnergy();
         long maxEnergy = getMaxEnergy();
-        if (maxEnergy == 0 || energy == 0) {
+        if (maxEnergy == 0 || energy == 0)
             return 0.0f;
-        }
 
         return Mth.clamp(energy / (float) maxEnergy, 0.0f, 1.0f);
     }

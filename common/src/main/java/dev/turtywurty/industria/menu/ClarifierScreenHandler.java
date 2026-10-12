@@ -18,7 +18,13 @@ public class ClarifierScreenHandler extends IndustriaScreenHandler<ClarifierBloc
         super(ModMenuTypes.CLARIFIER.get(), 2, syncId, playerInv, payload, ClarifierBlockEntity.class);
     }
 
-    public ClarifierScreenHandler(int syncId, Inventory playerInv, ClarifierBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+    public ClarifierScreenHandler(
+        int syncId,
+        Inventory playerInv,
+        ClarifierBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
         super(ModMenuTypes.CLARIFIER.get(), syncId, playerInv, blockEntity, wrappedContainerStorage, properties);
     }
 

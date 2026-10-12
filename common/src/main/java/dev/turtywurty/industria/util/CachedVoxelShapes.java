@@ -18,7 +18,7 @@ public class CachedVoxelShapes {
 
     public VoxelShape getShape(LevelReader world, BlockPos pos) {
         return this.cache.computeIfAbsent(world, w -> new HashMap<>())
-                .computeIfAbsent(pos, p -> this.factory.create(world, p));
+            .computeIfAbsent(pos, p -> this.factory.create(world, p));
     }
 
     public void clear() {

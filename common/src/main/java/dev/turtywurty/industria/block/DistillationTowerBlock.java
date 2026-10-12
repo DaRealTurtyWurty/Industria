@@ -10,14 +10,14 @@ public class DistillationTowerBlock extends IndustriaBlock {
 
     public DistillationTowerBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasComparatorOutput()
-                .hasBlockEntityRenderer()
-                .useRotatedShapes(VOXEL_SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.DISTILLATION_TOWER)
-                        .dropContentsOnBreak()
-                        .rightClickToOpenGui()
-                        .shouldTick()
-                ));
+            .hasHorizontalFacing()
+            .hasComparatorOutput()
+            .hasBlockEntityRenderer()
+            .useRotatedShapes(VOXEL_SHAPE)
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.DISTILLATION_TOWER)
+                    .dropContentsOnBreak()
+                    .rightClickToOpenGui()
+                    .shouldTick()));
     }
 }

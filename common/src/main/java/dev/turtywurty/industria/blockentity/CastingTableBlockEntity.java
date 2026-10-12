@@ -58,7 +58,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class CastingTableBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, TappingOutletBlockEntity.TappingOutletReceiver {
+public class CastingTableBlockEntity extends IndustriaBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload>,
+        SyncableTickableBlockEntity,
+        TappingOutletBlockEntity.TappingOutletReceiver {
     public static final Component TITLE = Industria.containerTitle("casting_table");
 
     private final WrappedContainerStorage<SyncingSimpleInventory> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -112,9 +117,9 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
 
     private long getFluidRequirement(ResourceVariant<Fluid> fluid) {
         if (!(this.level instanceof ServerLevel serverLevel)
-                || fluid.isBlank()
-                || !getOutputInventory().isEmpty()
-                || !canCast(fluid.value()))
+            || fluid.isBlank()
+            || !getOutputInventory().isEmpty()
+            || !canCast(fluid.value()))
             return 0;
 
         Optional<MoldPattern> mold = getAssembledMold();
@@ -122,9 +127,9 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
             return 0;
 
         var input = new CastingRecipeInput(CastingRecipe.BlockType.TABLE,
-                new FluidStack(fluid, Long.MAX_VALUE), mold.map(MoldPattern::id));
+            new FluidStack(fluid, Long.MAX_VALUE), mold.map(MoldPattern::id));
         return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel)
-                .map(holder -> holder.value().inputFluid().amount()).orElse(0L);
+            .map(holder -> holder.value().inputFluid().amount()).orElse(0L);
     }
 
     public float getCoolingFraction() {
@@ -140,7 +145,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
             return false;
 
         return getFluidStorage().getAmount() == 0
-                || getFluidStorage().getAmount() < getFluidRequirement(getFluidStorage().getResource());
+            || getFluidStorage().getAmount() < getFluidRequirement(getFluidStorage().getResource());
     }
 
     private Optional<RecipeHolder<CastingRecipe>> getMatchingRecipe() {
@@ -153,19 +158,18 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
 
         var fluidStack = new FluidStack(storage.resource(0), storage.amount(0));
         var input = new CastingRecipeInput(
-                CastingRecipe.BlockType.TABLE,
-                fluidStack,
-                getAssembledMold().map(MoldPattern::id)
-        );
+            CastingRecipe.BlockType.TABLE,
+            fluidStack,
+            getAssembledMold().map(MoldPattern::id));
 
         return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel);
     }
 
     private void resetCoolingProgress() {
         if (this.coolingProgress == 0
-                && this.currentRecipeId == null
-                && this.coolingDuration == 0
-                && this.castingItemStack.isEmpty())
+            && this.currentRecipeId == null
+            && this.coolingDuration == 0
+            && this.castingItemStack.isEmpty())
             return;
 
         this.coolingProgress = 0;
@@ -196,10 +200,11 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
         CastingRecipe recipe = recipeHolder.value();
         int count = recipe.output().count().maxInclusive();
         if (recipe.inputFluid().isEmpty()
-                || recipe.output().item() == Items.AIR
-                || count <= 0
-                || recipe.coolingTime() <= 0
-                || (count > new ItemStack(recipe.output().item()).getMaxStackSize() || count > getOutputInventory().getMaxStackSize())) {
+            || recipe.output().item() == Items.AIR
+            || count <= 0
+            || recipe.coolingTime() <= 0
+            || (count > new ItemStack(recipe.output().item()).getMaxStackSize()
+                || count > getOutputInventory().getMaxStackSize())) {
             resetCoolingProgress();
             return;
         }
@@ -237,10 +242,9 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
     @Override
     public List<SyncableStorage> getSyncableStorages() {
         return List.of(
-                getFluidStorage(),
-                getInputInventory(),
-                getOutputInventory()
-        );
+            getFluidStorage(),
+            getInputInventory(),
+            getOutputInventory());
     }
 
     @Override
@@ -266,16 +270,16 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
 
         if (!pattern.get().split())
             return firstData.piece() == MoldPiece.WHOLE && second.isEmpty()
-                    ? pattern
-                    : Optional.empty();
+                ? pattern
+                : Optional.empty();
 
         MoldComponent secondData = second.get(ModDataComponentTypes.MOLD.get());
         if (secondData == null
-                || first.getItem() != second.getItem()
-                || !firstData.moldId().equals(secondData.moldId())
-                || firstData.piece() == secondData.piece()
-                || firstData.piece() == MoldPiece.WHOLE
-                || secondData.piece() == MoldPiece.WHOLE)
+            || first.getItem() != second.getItem()
+            || !firstData.moldId().equals(secondData.moldId())
+            || firstData.piece() == secondData.piece()
+            || firstData.piece() == MoldPiece.WHOLE
+            || secondData.piece() == MoldPiece.WHOLE)
             return Optional.empty();
 
         return pattern;
@@ -283,30 +287,28 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity implements Blo
 
     private boolean completeCasting(CastingRecipe recipe) {
         if (!getInventory().isEmpty()
-                || recipe.inputFluid().isEmpty()
-                || !recipe.inputFluid().testForRecipe(getFluidStorage())
-                || !canCast(recipe.inputFluid().variant().value()))
+            || recipe.inputFluid().isEmpty()
+            || !recipe.inputFluid().testForRecipe(getFluidStorage())
+            || !canCast(recipe.inputFluid().variant().value()))
             return false;
 
         var outputStorage = ContainerStorage.of(getInventory(), null);
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long extracted = getFluidStorage().extractInternal(
-                    recipe.inputFluid().variant(),
-                    recipe.inputFluid().amount(),
-                    transaction
-            );
+                recipe.inputFluid().variant(),
+                recipe.inputFluid().amount(),
+                transaction);
             if (extracted != recipe.inputFluid().amount())
                 return false;
 
             ItemStack output = recipe.output().createStack(this.level.getRandom());
             if (!output.isEmpty()) {
                 long inserted = outputStorage.insert(
-                        0,
-                        ResourceVariant.ofItem(output),
-                        output.getCount(),
-                        transaction
-                );
+                    0,
+                    ResourceVariant.ofItem(output),
+                    output.getCount(),
+                    transaction);
                 if (inserted != output.getCount())
                     return false;
             }

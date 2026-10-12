@@ -17,7 +17,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer<WindTurbineBlockEntity, WindTurbineRenderState> {
+public class WindTurbineBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<WindTurbineBlockEntity, WindTurbineRenderState> {
     private static final Identifier ENERGY_BAR_TEXTURE = Industria.id("textures/block/energy_bar.png");
     private static final float ENERGY_BAR_MIN_X = -4.0F / 16.0F;
     private static final float ENERGY_BAR_MAX_X = 4.0F / 16.0F;
@@ -38,7 +40,13 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
     }
 
     @Override
-    public void extractRenderState(WindTurbineBlockEntity blockEntity, WindTurbineRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        WindTurbineBlockEntity blockEntity,
+        WindTurbineRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.propellerRotation = blockEntity.getPropellerRotation();
         state.energyOutput = blockEntity.getEnergyOutput();
@@ -47,30 +55,50 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
     }
 
     @Override
-    public void onRender(WindTurbineRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    public void onRender(
+        WindTurbineRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         float outputPercentage = getEnergyPerTickPercent(state);
-        state.propellerRotation += (outputPercentage * 0.25f) * (Minecraft.getInstance().level.getGameTime() + state.tickProgress);
+        state.propellerRotation += (outputPercentage * 0.25f)
+            * (Minecraft.getInstance().level.getGameTime() + state.tickProgress);
 
         ModelSubmitUtils.submitModel(queue, this.model,
-                new WindTurbineModel.WindTurbineModelRenderState(state.propellerRotation),
-                matrices, this.model.renderType(WindTurbineModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            new WindTurbineModel.WindTurbineModelRenderState(state.propellerRotation),
+            matrices, this.model.renderType(WindTurbineModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
 
         renderEnergyBuffer(state, matrices, queue, light, overlay);
     }
 
-    private static void renderEnergyBuffer(WindTurbineRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    private static void renderEnergyBuffer(
+        WindTurbineRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         if (state.energy <= 0L || state.energyCapacity <= 0L)
             return;
 
         float fillPercentage = Mth.clamp((float) state.energy / state.energyCapacity, 0.0F, 1.0F);
         float maxX = Mth.lerp(fillPercentage, ENERGY_BAR_MIN_X, ENERGY_BAR_MAX_X);
-        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(ENERGY_BAR_TEXTURE), (entry, vertexConsumer) -> {
-            vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, ENERGY_BAR_MIN_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-            vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, ENERGY_BAR_MAX_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-            vertexConsumer.addVertex(entry, maxX, ENERGY_BAR_MAX_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(fillPercentage, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-            vertexConsumer.addVertex(entry, maxX, ENERGY_BAR_MIN_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(fillPercentage, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-        });
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(ENERGY_BAR_TEXTURE),
+            (entry, vertexConsumer) -> {
+                vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, ENERGY_BAR_MIN_Y, ENERGY_BAR_Z)
+                    .setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.0F).setOverlay(overlay).setLight(light)
+                    .setNormal(0.0F, 0.0F, -1.0F);
+                vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, ENERGY_BAR_MAX_Y, ENERGY_BAR_Z)
+                    .setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.25F).setOverlay(overlay).setLight(light)
+                    .setNormal(0.0F, 0.0F, -1.0F);
+                vertexConsumer.addVertex(entry, maxX, ENERGY_BAR_MAX_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(fillPercentage, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+                vertexConsumer.addVertex(entry, maxX, ENERGY_BAR_MIN_Y, ENERGY_BAR_Z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(fillPercentage, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+            });
     }
 
     @Override

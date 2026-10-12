@@ -16,16 +16,25 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
-public class ContainmentConveyorScreenHandler extends IndustriaScreenHandler<ContainmentConveyorBlockEntity, BlockPosPayload> {
-    public static final Component CAPTURING_STATUS_TEXT = Component.translatable("container." + Industria.MOD_ID + ".containment_conveyor.status.capturing");
-    public static final Component IDLE_STATUS_TEXT = Component.translatable("container." + Industria.MOD_ID + ".containment_conveyor.status.idle");
+public class ContainmentConveyorScreenHandler
+    extends
+        IndustriaScreenHandler<ContainmentConveyorBlockEntity, BlockPosPayload> {
+    public static final Component CAPTURING_STATUS_TEXT = Component
+        .translatable("container." + Industria.MOD_ID + ".containment_conveyor.status.capturing");
+    public static final Component IDLE_STATUS_TEXT = Component
+        .translatable("container." + Industria.MOD_ID + ".containment_conveyor.status.idle");
 
     public ContainmentConveyorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ModMenuTypes.CONTAINMENT_CONVEYOR.get(), syncId, playerInventory, payload, ContainmentConveyorBlockEntity.class);
+        super(ModMenuTypes.CONTAINMENT_CONVEYOR.get(), syncId, playerInventory, payload,
+            ContainmentConveyorBlockEntity.class);
     }
 
-    public ContainmentConveyorScreenHandler(int syncId, Inventory playerInventory, ContainmentConveyorBlockEntity blockEntity,
-                                            WrappedContainerStorage<?> wrappedContainerStorage) {
+    public ContainmentConveyorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        ContainmentConveyorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.CONTAINMENT_CONVEYOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 

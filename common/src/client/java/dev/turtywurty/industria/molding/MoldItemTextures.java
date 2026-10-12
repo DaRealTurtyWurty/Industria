@@ -31,11 +31,12 @@ public class MoldItemTextures {
         MoldPattern pattern = MoldPatterns.find(data.moldId()).orElseThrow();
         Identifier materialTexture = getMaterialTexture(item);
         if (materialTexture == null)
-            throw new IllegalArgumentException("Item" + item.getDescriptionId() + " does not have a corresponding material texture");
+            throw new IllegalArgumentException(
+                "Item" + item.getDescriptionId() + " does not have a corresponding material texture");
 
         try (InputStream stream = Minecraft.getInstance().getResourceManager()
-                .getResourceOrThrow(materialTexture).open();
-             NativeImage material = NativeImage.read(stream)) {
+            .getResourceOrThrow(materialTexture).open();
+            NativeImage material = NativeImage.read(stream)) {
             return MoldGeometry.createItemTexture(material, pattern, data.piece());
         }
     }

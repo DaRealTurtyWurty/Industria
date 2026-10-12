@@ -17,7 +17,13 @@ public class DigesterScreenHandler extends IndustriaScreenHandler<DigesterBlockE
         super(ModMenuTypes.DIGESTER.get(), 2, syncId, playerInventory, payload, DigesterBlockEntity.class);
     }
 
-    public DigesterScreenHandler(int syncId, Inventory playerInventory, DigesterBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+    public DigesterScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        DigesterBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
         super(ModMenuTypes.DIGESTER.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, properties);
     }
 

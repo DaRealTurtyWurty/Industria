@@ -11,9 +11,12 @@ public class PredicateGasStorage extends SyncingGasStorage {
     private final Predicate<ResourceVariant<Gas>> canInsert;
     private final Predicate<ResourceVariant<Gas>> canExtract;
 
-    public PredicateGasStorage(BlockEntity blockEntity, long capacity,
-                               Predicate<ResourceVariant<Gas>> canInsert,
-                               Predicate<ResourceVariant<Gas>> canExtract) {
+    public PredicateGasStorage(
+        BlockEntity blockEntity,
+        long capacity,
+        Predicate<ResourceVariant<Gas>> canInsert,
+        Predicate<ResourceVariant<Gas>> canExtract
+    ) {
         super(blockEntity, capacity);
         this.canInsert = canInsert;
         this.canExtract = canExtract;

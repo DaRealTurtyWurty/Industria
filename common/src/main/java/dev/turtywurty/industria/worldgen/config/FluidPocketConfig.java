@@ -8,12 +8,10 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.material.FluidState;
 
 public record FluidPocketConfig(FluidState fluidState, IntProvider radius, IntProvider depth, RuleTest replaceable) {
-    public static final Codec<FluidPocketConfig> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                    FluidState.CODEC.fieldOf("fluid_state").forGetter(FluidPocketConfig::fluidState),
-                    IntProviders.POSITIVE_CODEC.fieldOf("radius").forGetter(FluidPocketConfig::radius),
-                    IntProviders.POSITIVE_CODEC.fieldOf("depth").forGetter(FluidPocketConfig::depth),
-                    RuleTest.CODEC.fieldOf("replaceable").forGetter(FluidPocketConfig::replaceable)
-            ).apply(instance, FluidPocketConfig::new)
-    );
+    public static final Codec<FluidPocketConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+        FluidState.CODEC.fieldOf("fluid_state").forGetter(FluidPocketConfig::fluidState),
+        IntProviders.POSITIVE_CODEC.fieldOf("radius").forGetter(FluidPocketConfig::radius),
+        IntProviders.POSITIVE_CODEC.fieldOf("depth").forGetter(FluidPocketConfig::depth),
+        RuleTest.CODEC.fieldOf("replaceable").forGetter(FluidPocketConfig::replaceable))
+        .apply(instance, FluidPocketConfig::new));
 }

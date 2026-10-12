@@ -12,7 +12,12 @@ public class BlockEntityFields<B extends IndustriaBlockEntity<B>> {
         return field;
     }
 
-    public <T> BlockEntityField<T, B> addField(String name, T defaultValue, BlockEntityField.FieldGetter<T, B> getter, BlockEntityField.FieldSetter<T, B> setter) {
+    public <T> BlockEntityField<T, B> addField(
+        String name,
+        T defaultValue,
+        BlockEntityField.FieldGetter<T, B> getter,
+        BlockEntityField.FieldSetter<T, B> setter
+    ) {
         BlockEntityField<T, B> field = new BlockEntityField<>(defaultValue, getter, setter);
         this.fields.put(name, field);
         return field;
@@ -24,21 +29,19 @@ public class BlockEntityFields<B extends IndustriaBlockEntity<B>> {
 
     public <T> BlockEntityField<T, B> getField(String name, Class<T> type) {
         try {
-            if (!containsField(name)) {
+            if (!containsField(name))
                 throw new IllegalArgumentException("Field with name '" + name + "' does not exist");
-            }
 
             BlockEntityField<?, B> field = this.fields.get(name);
-            if (field == null) {
+            if (field == null)
                 throw new IllegalArgumentException("Field with name '" + name + "' does not exist");
-            }
 
-            if (type.isInstance(field.defaultValue())) {
-                //noinspection unchecked
+            if (type.isInstance(field.defaultValue()))
+                // noinspection unchecked
                 return (BlockEntityField<T, B>) field;
-            } else {
-                throw new IllegalArgumentException("Field with name '" + name + "' is not of type " + type.getSimpleName());
-            }
+            else
+                throw new IllegalArgumentException(
+                    "Field with name '" + name + "' is not of type " + type.getSimpleName());
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("Field with name '" + name + "' is not of type " + type.getSimpleName());
         }

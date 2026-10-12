@@ -18,12 +18,21 @@ import java.util.function.Supplier;
 public class ModEntityTypes {
     private static final RegistryService REGISTRIES = RegistryService.get();
 
-    public static <T extends Entity> RegistrationHandle<EntityType<?>, EntityType<T>> register(String name, Supplier<EntityType.Builder<T>> type) {
+    public static <T extends Entity> RegistrationHandle<EntityType<?>, EntityType<T>> register(
+        String name,
+        Supplier<EntityType.Builder<T>> type
+    ) {
         Identifier id = Industria.id(name);
-        return REGISTRIES.registerEntityType(id, () -> type.get().build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
+        return REGISTRIES.registerEntityType(id,
+            () -> type.get().build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
     }
 
-    public static <T extends LivingEntity> RegistrationHandle<EntityType<?>, EntityType<T>> register(String name, EntityType.EntityFactory<T> factory, MobCategory category, Consumer<EntityTypeBuilder<T>> configuration) {
+    public static <T extends LivingEntity> RegistrationHandle<EntityType<?>, EntityType<T>> register(
+        String name,
+        EntityType.EntityFactory<T> factory,
+        MobCategory category,
+        Consumer<EntityTypeBuilder<T>> configuration
+    ) {
         return REGISTRIES.registerEntityType(Industria.id(name), factory, category, configuration);
     }
 

@@ -47,8 +47,16 @@ public class AutoCompleteEditBox<T> extends EditBox {
     private boolean suggestionsOpen;
     private @Nullable T selectedSuggestion;
 
-    public AutoCompleteEditBox(Font font, int x, int y, int width, int height, Component narration,
-                               AutoCompleteProvider<T> provider, int maxVisibleSuggestions) {
+    public AutoCompleteEditBox(
+        Font font,
+        int x,
+        int y,
+        int width,
+        int height,
+        Component narration,
+        AutoCompleteProvider<T> provider,
+        int maxVisibleSuggestions
+    ) {
         this(font, x, y, width, height, null, narration, provider, maxVisibleSuggestions);
     }
 
@@ -56,8 +64,17 @@ public class AutoCompleteEditBox<T> extends EditBox {
         return new Builder<>(font, provider);
     }
 
-    public AutoCompleteEditBox(Font font, int x, int y, int width, int height, @Nullable EditBox oldBox,
-                               Component narration, AutoCompleteProvider<T> provider, int maxVisibleSuggestions) {
+    public AutoCompleteEditBox(
+        Font font,
+        int x,
+        int y,
+        int width,
+        int height,
+        @Nullable EditBox oldBox,
+        Component narration,
+        AutoCompleteProvider<T> provider,
+        int maxVisibleSuggestions
+    ) {
         super(font, x, y, width, height, oldBox, narration);
         this.font = font;
         this.provider = provider;
@@ -125,7 +142,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
                 return true;
             }
 
-            if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER || event.key() == InputConstants.KEY_TAB) {
+            if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER
+                || event.key() == InputConstants.KEY_TAB) {
                 if (isValidSuggestionIndex(this.highlightedSuggestionIndex)) {
                     selectSuggestion(this.highlightedSuggestionIndex);
                     return true;
@@ -189,7 +207,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (isDropdownVisible() && isMouseOverDropdown(mouseX, mouseY) && shouldScrollSuggestions()) {
-            this.scrollOffset = Mth.clamp(this.scrollOffset - (int) Math.signum(verticalAmount), 0, getMaxScrollOffset());
+            this.scrollOffset = Mth.clamp(this.scrollOffset - (int) Math.signum(verticalAmount), 0,
+                getMaxScrollOffset());
             return true;
         }
 
@@ -221,7 +240,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
     public void updateWidgetNarration(NarrationElementOutput output) {
         super.updateWidgetNarration(output);
         if (isDropdownVisible() && isValidSuggestionIndex(this.highlightedSuggestionIndex)) {
-            output.add(NarratedElementType.HINT, Component.literal("Suggestion: " + toSuggestionString(this.suggestions.get(this.highlightedSuggestionIndex))));
+            output.add(NarratedElementType.HINT, Component
+                .literal("Suggestion: " + toSuggestionString(this.suggestions.get(this.highlightedSuggestionIndex))));
         }
     }
 
@@ -269,7 +289,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
         if (this.highlightedSuggestionIndex < 0) {
             this.highlightedSuggestionIndex = 0;
         } else {
-            this.highlightedSuggestionIndex = Mth.clamp(this.highlightedSuggestionIndex + amount, 0, this.suggestions.size() - 1);
+            this.highlightedSuggestionIndex = Mth.clamp(this.highlightedSuggestionIndex + amount, 0,
+                this.suggestions.size() - 1);
         }
 
         ensureHighlightVisible();
@@ -382,13 +403,13 @@ public class AutoCompleteEditBox<T> extends EditBox {
 
     private boolean isMouseOverDropdown(double mouseX, double mouseY) {
         return mouseX >= getDropdownX() && mouseX < getDropdownX() + getDropdownWidth()
-                && mouseY >= getDropdownY() && mouseY < getDropdownY() + getDropdownHeight();
+            && mouseY >= getDropdownY() && mouseY < getDropdownY() + getDropdownHeight();
     }
 
     private boolean isMouseOverScrollbar(double mouseX, double mouseY) {
         return shouldScrollSuggestions()
-                && mouseX >= getScrollbarX() && mouseX < getScrollbarX() + DROPDOWN_SCROLLBAR_WIDTH
-                && mouseY >= getDropdownContentY() && mouseY < getDropdownContentY() + getScrollbarHeight();
+            && mouseX >= getScrollbarX() && mouseX < getScrollbarX() + DROPDOWN_SCROLLBAR_WIDTH
+            && mouseY >= getDropdownContentY() && mouseY < getDropdownContentY() + getScrollbarHeight();
     }
 
     private int getSuggestionIndexAt(double mouseX, double mouseY) {
@@ -428,10 +449,11 @@ public class AutoCompleteEditBox<T> extends EditBox {
         int dropdownWidth = getDropdownWidth();
         int dropdownHeight = getDropdownHeight();
 
-        graphics.fill(dropdownX, dropdownY, dropdownX + dropdownWidth, dropdownY + dropdownHeight, DROPDOWN_BORDER_COLOR);
+        graphics.fill(dropdownX, dropdownY, dropdownX + dropdownWidth, dropdownY + dropdownHeight,
+            DROPDOWN_BORDER_COLOR);
         graphics.fill(dropdownX + DROPDOWN_BORDER_WIDTH, dropdownY + DROPDOWN_BORDER_WIDTH,
-                dropdownX + dropdownWidth - DROPDOWN_BORDER_WIDTH, dropdownY + dropdownHeight - DROPDOWN_BORDER_WIDTH,
-                DROPDOWN_BACKGROUND_COLOR);
+            dropdownX + dropdownWidth - DROPDOWN_BORDER_WIDTH, dropdownY + dropdownHeight - DROPDOWN_BORDER_WIDTH,
+            DROPDOWN_BACKGROUND_COLOR);
 
         int contentX = getDropdownContentX();
         int contentY = getDropdownContentY();
@@ -448,10 +470,12 @@ public class AutoCompleteEditBox<T> extends EditBox {
             boolean highlighted = suggestionIndex == this.highlightedSuggestionIndex;
             boolean hovered = suggestionIndex == getSuggestionIndexAt(mouseX, mouseY);
             if (highlighted || hovered) {
-                graphics.fill(contentX, entryY, contentX + contentWidth, entryY + getSuggestionRowHeight(), DROPDOWN_HIGHLIGHT_COLOR);
+                graphics.fill(contentX, entryY, contentX + contentWidth, entryY + getSuggestionRowHeight(),
+                    DROPDOWN_HIGHLIGHT_COLOR);
             }
 
-            String text = this.font.plainSubstrByWidth(toSuggestionString(this.suggestions.get(suggestionIndex)), contentWidth - DROPDOWN_PADDING * 2);
+            String text = this.font.plainSubstrByWidth(toSuggestionString(this.suggestions.get(suggestionIndex)),
+                contentWidth - DROPDOWN_PADDING * 2);
             graphics.text(this.font, text, contentX + DROPDOWN_PADDING, entryY + 2, DROPDOWN_TEXT_COLOR, false);
         }
         graphics.disableScissor();
@@ -460,11 +484,13 @@ public class AutoCompleteEditBox<T> extends EditBox {
             int scrollbarX = getScrollbarX();
             int scrollbarY = getDropdownContentY();
             int scrollbarHeight = getScrollbarHeight();
-            graphics.fill(scrollbarX, scrollbarY, scrollbarX + DROPDOWN_SCROLLBAR_WIDTH, scrollbarY + scrollbarHeight, DROPDOWN_SCROLLBAR_TRACK_COLOR);
+            graphics.fill(scrollbarX, scrollbarY, scrollbarX + DROPDOWN_SCROLLBAR_WIDTH, scrollbarY + scrollbarHeight,
+                DROPDOWN_SCROLLBAR_TRACK_COLOR);
 
             int handleY = getScrollbarHandleY();
             int handleHeight = getScrollbarHandleHeight();
-            graphics.fill(scrollbarX, handleY, scrollbarX + DROPDOWN_SCROLLBAR_WIDTH, handleY + handleHeight, DROPDOWN_SCROLLBAR_HANDLE_COLOR);
+            graphics.fill(scrollbarX, handleY, scrollbarX + DROPDOWN_SCROLLBAR_WIDTH, handleY + handleHeight,
+                DROPDOWN_SCROLLBAR_HANDLE_COLOR);
         }
     }
 
@@ -610,7 +636,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
 
         public AutoCompleteEditBox<T> build() {
             AutoCompleteEditBox<T> widget = new AutoCompleteEditBox<>(
-                    this.font, this.x, this.y, this.width, this.height, this.oldBox, this.narration, this.provider, this.maxVisibleSuggestions);
+                this.font, this.x, this.y, this.width, this.height, this.oldBox, this.narration, this.provider,
+                this.maxVisibleSuggestions);
             widget.setMaxLength(this.maxLength);
             widget.setBordered(this.bordered);
             widget.setEditable(this.editable);

@@ -50,7 +50,7 @@ public class SyncingGasStorage extends SingleGasStorage implements SyncableStora
 
     public boolean canInsert(GasStack stack) {
         return (getResource().equals(stack.variant()) || getResource().isBlank())
-                && stack.amount() <= this.capacity - getAmount();
+            && stack.amount() <= this.capacity - getAmount();
     }
 
     public boolean canExtract(GasStack stack) {

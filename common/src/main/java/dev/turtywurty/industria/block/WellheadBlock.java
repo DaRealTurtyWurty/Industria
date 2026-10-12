@@ -22,9 +22,9 @@ import java.util.List;
 public class WellheadBlock extends IndustriaBlock {
     public WellheadBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasBlockEntityRenderer()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.WELLHEAD)
-                        .shouldTick()));
+            .hasBlockEntityRenderer()
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.WELLHEAD)
+                .shouldTick()));
     }
 
     private static void loadDrillTubes(LevelReader world, BlockPos pos) {
@@ -53,13 +53,28 @@ public class WellheadBlock extends IndustriaBlock {
     }
 
     @Override
-    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(
+        Level world,
+        BlockPos pos,
+        BlockState state,
+        @Nullable LivingEntity placer,
+        ItemStack itemStack
+    ) {
         super.setPlacedBy(world, pos, state, placer, itemStack);
         loadDrillTubes(world, pos);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader world,
+        ScheduledTickAccess tickView,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
         if (direction == Direction.DOWN) {
             loadDrillTubes(world, pos);
         }

@@ -25,7 +25,12 @@ public class MoldingTableMenu extends IndustriaScreenHandler<MoldingTableBlockEn
         super(ModMenuTypes.MOLDING_TABLE.get(), syncId, playerInventory, payload, MoldingTableBlockEntity.class);
     }
 
-    public MoldingTableMenu(int syncId, Inventory playerInventory, MoldingTableBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public MoldingTableMenu(
+        int syncId,
+        Inventory playerInventory,
+        MoldingTableBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.MOLDING_TABLE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 

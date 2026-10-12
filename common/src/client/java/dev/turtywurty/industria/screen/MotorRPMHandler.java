@@ -13,7 +13,7 @@ public interface MotorRPMHandler {
             try {
                 int targetRPM = Integer.parseInt(value);
                 setTargetRPM(targetRPM);
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException _) {
                 setTargetRPM(0);
             }
         });
@@ -27,7 +27,7 @@ public interface MotorRPMHandler {
         int fieldRPM = 0;
         try {
             fieldRPM = Integer.parseInt(targetRPMField.getValue());
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             targetRPMField.setValue("0");
         }
 

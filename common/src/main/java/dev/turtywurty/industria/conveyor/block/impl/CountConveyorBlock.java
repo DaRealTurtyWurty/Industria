@@ -23,15 +23,22 @@ import java.util.List;
 public class CountConveyorBlock extends AbstractHorizontalConveyorBlock {
     public CountConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasComparatorOutput()
-                .comparatorOutput((_, level, pos, _) -> getSignalStrength(level, pos))
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.COUNT_CONVEYOR.get())
-                        .shouldTick())
-        );
+            .hasComparatorOutput()
+            .comparatorOutput((_, level, pos, _) -> getSignalStrength(level, pos))
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.COUNT_CONVEYOR.get())
+                    .shouldTick()));
     }
 
     @Override
-    public void onOutputUsed(Level level, BlockPos pos, BlockState state, ConveyorOutput output, ConveyorItem item, ConveyorRoutingState routingState) {
+    public void onOutputUsed(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorOutput output,
+        ConveyorItem item,
+        ConveyorRoutingState routingState
+    ) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CountConveyorBlockEntity blockEntity) {
             blockEntity.increaseCount();
         }
@@ -49,7 +56,7 @@ public class CountConveyorBlock extends AbstractHorizontalConveyorBlock {
 
     public static int getSignalStrength(BlockGetter level, BlockPos pos) {
         return level.getBlockEntity(pos) instanceof CountConveyorBlockEntity blockEntity
-                && blockEntity.isPowered() ? 15 : 0;
+            && blockEntity.isPowered() ? 15 : 0;
     }
 
     public static void updateRedstoneOutput(Level level, BlockPos pos, BlockState state) {
@@ -62,8 +69,8 @@ public class CountConveyorBlock extends AbstractHorizontalConveyorBlock {
     private static boolean canEmitTowards(BlockState state, Direction direction) {
         Direction facing = state.getValue(FACING);
         return direction == Direction.DOWN
-                || direction == facing.getClockWise()
-                || direction == facing.getCounterClockWise();
+            || direction == facing.getClockWise()
+            || direction == facing.getCounterClockWise();
     }
 
     @Override
@@ -80,15 +87,21 @@ public class CountConveyorBlock extends AbstractHorizontalConveyorBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CountConveyorBlockEntity blockEntity) {
             int threshold = blockEntity.getThreshold();
             boolean decrease = player.isShiftKeyDown();
 
             // Loops back around if the threshold goes below 1 or above CountConveyorBlockEntity.MAX_THRESHOLD
             threshold = decrease
-                    ? (threshold <= 1 ? CountConveyorBlockEntity.MAX_THRESHOLD : threshold - 1)
-                    : (threshold >= CountConveyorBlockEntity.MAX_THRESHOLD ? 1 : threshold + 1);
+                ? (threshold <= 1 ? CountConveyorBlockEntity.MAX_THRESHOLD : threshold - 1)
+                : (threshold >= CountConveyorBlockEntity.MAX_THRESHOLD ? 1 : threshold + 1);
             blockEntity.setThreshold(threshold);
             player.sendOverlayMessage(Component.literal("Count Threshold: " + blockEntity.getThreshold() + " items"));
 
@@ -104,8 +117,7 @@ public class CountConveyorBlock extends AbstractHorizontalConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 }

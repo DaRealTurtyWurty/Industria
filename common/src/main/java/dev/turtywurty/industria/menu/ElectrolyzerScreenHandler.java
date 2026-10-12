@@ -22,8 +22,15 @@ public class ElectrolyzerScreenHandler extends IndustriaScreenHandler<Electrolyz
         super(ModMenuTypes.ELECTROLYZER.get(), 4, syncId, playerInventory, payload, ElectrolyzerBlockEntity.class);
     }
 
-    public ElectrolyzerScreenHandler(int syncId, Inventory playerInventory, ElectrolyzerBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
-        super(ModMenuTypes.ELECTROLYZER.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, propertyDelegate);
+    public ElectrolyzerScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        ElectrolyzerBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData propertyDelegate
+    ) {
+        super(ModMenuTypes.ELECTROLYZER.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            propertyDelegate);
     }
 
     @Override
@@ -73,9 +80,8 @@ public class ElectrolyzerScreenHandler extends IndustriaScreenHandler<Electrolyz
     public float getProgressPercent() {
         float progress = getProgress();
         float maxProgress = getMaxProgress();
-        if (maxProgress == 0 || progress == 0) {
+        if (maxProgress == 0 || progress == 0)
             return 0.0f;
-        }
 
         return Mth.clamp(progress / maxProgress, 0.0f, 1.0f);
     }

@@ -46,19 +46,24 @@ import org.joml.Vector4f;
 /**
  * A block entity renderer for Industria block entities.
  * <p>
- * This class provides utility methods for rendering wireframes and checking if the player is looking at the block entity.
+ * This class provides utility methods for rendering wireframes and checking if the player is looking at the block
+ * entity.
  * It also provides a method for rendering the wireframe of the model parts.
  * <br>
- * This class also allows for the rendering process to be split up into multiple methods to allow for easier customization.
+ * This class also allows for the rendering process to be split up into multiple methods to allow for easier
+ * customization.
  * </p>
  *
  * @param <T> The block entity type
  * @see WireframeExtractor
  * @see IndustriaBlockEntityRenderer#onRender(IndustriaBlockEntityRenderState, PoseStack, SubmitNodeCollector, int, int)
- * @see IndustriaBlockEntityRenderer#postRender(IndustriaBlockEntityRenderState, PoseStack, SubmitNodeCollector, int, int)
+ * @see IndustriaBlockEntityRenderer#postRender(IndustriaBlockEntityRenderState, PoseStack, SubmitNodeCollector, int,
+ *      int)
  * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(PoseStack, IndustriaBlockEntityRenderState)
  */
-public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S extends IndustriaBlockEntityRenderState> implements BlockEntityRenderer<T, S> {
+public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S extends IndustriaBlockEntityRenderState>
+    implements
+        BlockEntityRenderer<T, S> {
     protected static final List<ModelPart> EMPTY_WIREFRAME = Collections.emptyList();
 
     protected final BlockEntityRendererProvider.Context context;
@@ -75,18 +80,18 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     /**
      * Called to render the block entity.
      *
-     * @param state    The block entity render state
+     * @param state The block entity render state
      * @param matrices The matrix stack
-     * @param queue    The vertex consumer provider
+     * @param queue The vertex consumer provider
      */
     protected abstract void onRender(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay);
 
     /**
      * Called after the block entity and wireframe have been rendered.
      *
-     * @param state    The block entity render state
+     * @param state The block entity render state
      * @param matrices The matrix stack
-     * @param queue    The vertex consumer provider
+     * @param queue The vertex consumer provider
      */
     protected void postRender(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
     }
@@ -127,7 +132,13 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     @Override
-    public void extractRenderState(T blockEntity, S state, float tickProgress, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        T blockEntity,
+        S state,
+        float tickProgress,
+        Vec3 cameraPos,
+        @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
+    ) {
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.blockState = blockEntity.getBlockState();
         state.movingBlockRenderState = null;
@@ -189,12 +200,17 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     /**
      * Renders the wireframe of the model parts.
      *
-     * @param modelParts     The model parts to render
-     * @param matrices       The matrix stack
-     * @param queue          The vertex consumer provider
+     * @param modelParts The model parts to render
+     * @param matrices The matrix stack
+     * @param queue The vertex consumer provider
      * @param isHighContrast If the wireframe should be high contrast
      */
-    public static void renderWireframe(List<ModelPart> modelParts, PoseStack matrices, SubmitNodeCollector queue, boolean isHighContrast) {
+    public static void renderWireframe(
+        List<ModelPart> modelParts,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        boolean isHighContrast
+    ) {
         var v0 = new Vector3f();
         var v1 = new Vector3f();
         var v2 = new Vector3f();
@@ -206,7 +222,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         RenderType renderType = isHighContrast ? RenderTypes.secondaryBlockOutline() : RenderTypes.lines();
         for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
             queue.submitCustomGeometry(matrices, renderType, (pose, vertexConsumer) -> {
-                PoseStack renderPoses = new PoseStack();
+                var renderPoses = new PoseStack();
                 renderPoses.mulPose(pose.pose());
                 for (ModelPart modelPart : modelParts) {
                     renderPoses.pushPose();
@@ -220,20 +236,32 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     /**
      * Visits a model part and renders its wireframe.
      *
-     * @param modelPart      The model part to visit
-     * @param matrices       The matrix stack
+     * @param modelPart The model part to visit
+     * @param matrices The matrix stack
      * @param vertexConsumer The vertex consumer
-     * @param color          The color of the wireframe
-     * @param v0             The first vertex
-     * @param v1             The second vertex
-     * @param v2             The third vertex
-     * @param v3             The fourth vertex
-     * @param pos            The position of the vertex
-     * @param normal         The normal of the vertex
+     * @param color The color of the wireframe
+     * @param v0 The first vertex
+     * @param v1 The second vertex
+     * @param v2 The third vertex
+     * @param v3 The fourth vertex
+     * @param pos The position of the vertex
+     * @param normal The normal of the vertex
      */
     @SuppressWarnings("DataFlowIssue")
-    private static void visitPart(ModelPart modelPart, PoseStack matrices, VertexConsumer vertexConsumer, int color, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, Vector4f pos, Vector3f normal) {
-        if (!modelPart.visible || (modelPart.isEmpty() && ((ModelPartAccessor) (Object) modelPart).industria$getChildren().isEmpty()))
+    private static void visitPart(
+        ModelPart modelPart,
+        PoseStack matrices,
+        VertexConsumer vertexConsumer,
+        int color,
+        Vector3f v0,
+        Vector3f v1,
+        Vector3f v2,
+        Vector3f v3,
+        Vector4f pos,
+        Vector3f normal
+    ) {
+        if (!modelPart.visible
+            || (modelPart.isEmpty() && ((ModelPartAccessor) (Object) modelPart).industria$getChildren().isEmpty()))
             return;
 
         matrices.pushPose();
@@ -263,15 +291,15 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
 
                 pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
                 vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
-                        .setColor(color)
-                        .setLineWidth(2.0f)
-                        .setNormal(normal.x, normal.y, normal.z).setLineWidth(1.0F);
+                    .setColor(color)
+                    .setLineWidth(2.0f)
+                    .setNormal(normal.x, normal.y, normal.z).setLineWidth(1.0F);
 
                 pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
                 vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
-                        .setColor(color)
-                        .setLineWidth(2.0f)
-                        .setNormal(normal.x, normal.y, normal.z).setLineWidth(1.0F);
+                    .setColor(color)
+                    .setLineWidth(2.0f)
+                    .setNormal(normal.x, normal.y, normal.z).setLineWidth(1.0F);
             }
         }
 
@@ -353,7 +381,10 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         return null;
     }
 
-    private static AABB createLibMultiblockRenderBounds(final BlockPos controllerPos, final List<MultiblockPartEntry> parts) {
+    private static AABB createLibMultiblockRenderBounds(
+        final BlockPos controllerPos,
+        final List<MultiblockPartEntry> parts
+    ) {
         if (parts.isEmpty())
             return null;
 
@@ -374,13 +405,12 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         }
 
         return new AABB(
-                controllerPos.getX() + minX,
-                controllerPos.getY() + minY,
-                controllerPos.getZ() + minZ,
-                controllerPos.getX() + maxX,
-                controllerPos.getY() + maxY,
-                controllerPos.getZ() + maxZ
-        ).inflate(2.0D);
+            controllerPos.getX() + minX,
+            controllerPos.getY() + minY,
+            controllerPos.getZ() + minZ,
+            controllerPos.getX() + maxX,
+            controllerPos.getY() + maxY,
+            controllerPos.getZ() + maxZ).inflate(2.0D);
     }
 
     private static double distanceToSqr(final AABB bounds, final Vec3 pos) {
@@ -449,35 +479,36 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     public static void drawFilledBox(
-            PoseStack.Pose entry,
-            VertexConsumer vertexConsumers,
-            double minX,
-            double minY,
-            double minZ,
-            double maxX,
-            double maxY,
-            double maxZ,
-            float red,
-            float green,
-            float blue,
-            float alpha
+        PoseStack.Pose entry,
+        VertexConsumer vertexConsumers,
+        double minX,
+        double minY,
+        double minZ,
+        double maxX,
+        double maxY,
+        double maxZ,
+        float red,
+        float green,
+        float blue,
+        float alpha
     ) {
-        drawFilledBox(entry, vertexConsumers, (float) minX, (float) minY, (float) minZ, (float) maxX, (float) maxY, (float) maxZ, red, green, blue, alpha);
+        drawFilledBox(entry, vertexConsumers, (float) minX, (float) minY, (float) minZ, (float) maxX, (float) maxY,
+            (float) maxZ, red, green, blue, alpha);
     }
 
     public static void drawFilledBox(
-            PoseStack.Pose entry,
-            VertexConsumer vertexConsumers,
-            float minX,
-            float minY,
-            float minZ,
-            float maxX,
-            float maxY,
-            float maxZ,
-            float red,
-            float green,
-            float blue,
-            float alpha
+        PoseStack.Pose entry,
+        VertexConsumer vertexConsumers,
+        float minX,
+        float minY,
+        float minZ,
+        float maxX,
+        float maxY,
+        float maxZ,
+        float red,
+        float green,
+        float blue,
+        float alpha
     ) {
         Matrix4f matrix4f = entry.pose();
         vertexConsumers.addVertex(matrix4f, minX, minY, minZ).setColor(red, green, blue, alpha);

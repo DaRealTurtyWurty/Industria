@@ -19,7 +19,8 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
     private static final int SCROLLBAR_HEIGHT = 54;
     private static final int SCROLLBAR_HANDLE_HEIGHT = 12;
     private static final Identifier SCROLLER = Identifier.withDefaultNamespace("container/stonecutter/scroller");
-    private static final Identifier SCROLLER_DISABLED = Identifier.withDefaultNamespace("container/stonecutter/scroller_disabled");
+    private static final Identifier SCROLLER_DISABLED = Identifier
+        .withDefaultNamespace("container/stonecutter/scroller_disabled");
     private static final Identifier SCROLLER_BACKGROUND = Identifier.withDefaultNamespace("widget/scroller_background");
 
     private boolean draggingScrollbar;
@@ -43,7 +44,7 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
 
         for (int position = 0; position < 9; position++) {
             int index = this.menu.getScrollRow() * 3 + position;
-            if(index < this.menu.getHatchSlotCount() && this.menu.isSlotVisible(index))
+            if (index < this.menu.getHatchSlotCount() && this.menu.isSlotVisible(index))
                 continue;
 
             int x = this.leftPos + 61 + (position % 3) * 18;
@@ -58,8 +59,9 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
                 continue;
 
             Slot slot = this.menu.slots.get(index);
-            if(index >= this.menu.getProcessingSlotCount()) {
-                context.fill(this.leftPos + slot.x, this.topPos + slot.y, this.leftPos + slot.x + 16, this.topPos + slot.y + 16, 0x88000000);
+            if (index >= this.menu.getProcessingSlotCount()) {
+                context.fill(this.leftPos + slot.x, this.topPos + slot.y, this.leftPos + slot.x + 16,
+                    this.topPos + slot.y + 16, 0x88000000);
             }
 
             if (!slot.hasItem())
@@ -78,12 +80,12 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
         double localY = y - this.topPos;
 
         if (((localX >= 61 && localX < 115
-                && localY >= 16 && localY < 70) ||
-                (localX >= SCROLLBAR_X && localX < SCROLLBAR_X + SCROLLBAR_WIDTH
-                        && localY >= SCROLLBAR_Y && localY < SCROLLBAR_Y + SCROLLBAR_HEIGHT))
-                && scrollY != 0
-                && this.menu.getMaxScrollRow() > 0
-                && this.menu.getCarried().isEmpty()) {
+            && localY >= 16 && localY < 70) ||
+            (localX >= SCROLLBAR_X && localX < SCROLLBAR_X + SCROLLBAR_WIDTH
+                && localY >= SCROLLBAR_Y && localY < SCROLLBAR_Y + SCROLLBAR_HEIGHT))
+            && scrollY != 0
+            && this.menu.getMaxScrollRow() > 0
+            && this.menu.getCarried().isEmpty()) {
             int direction = scrollY > 0 ? -1 : 1;
             this.menu.setScrollRow(this.menu.getScrollRow() + direction);
             return true;
@@ -98,10 +100,10 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
         int y = this.topPos + SCROLLBAR_Y;
 
         if (event.button() == 0
-                && event.x() >= x && event.x() < x + SCROLLBAR_WIDTH
-                && event.y() >= y && event.y() < y + SCROLLBAR_HEIGHT
-                && this.menu.getMaxScrollRow() > 0
-                && this.menu.getCarried().isEmpty()) {
+            && event.x() >= x && event.x() < x + SCROLLBAR_WIDTH
+            && event.y() >= y && event.y() < y + SCROLLBAR_HEIGHT
+            && this.menu.getMaxScrollRow() > 0
+            && this.menu.getCarried().isEmpty()) {
             this.draggingScrollbar = true;
             scrollToMouse(event.y());
             return true;
@@ -155,12 +157,13 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
 
         int travel = SCROLLBAR_HEIGHT - SCROLLBAR_HANDLE_HEIGHT;
         float fraction = maxScroll > 0
-                ? this.menu.getScrollRow() / (float) maxScroll
-                : 0;
+            ? this.menu.getScrollRow() / (float) maxScroll
+            : 0;
         int handleY = y + Math.round(fraction * travel);
 
         ScreenUtils.drawGuiTexture(graphics, SCROLLER_BACKGROUND, x, y, SCROLLBAR_WIDTH, SCROLLBAR_HEIGHT);
-        ScreenUtils.drawGuiTexture(graphics, maxScroll > 0 ? SCROLLER : SCROLLER_DISABLED, x, handleY, SCROLLBAR_WIDTH, SCROLLBAR_HANDLE_HEIGHT);
+        ScreenUtils.drawGuiTexture(graphics, maxScroll > 0 ? SCROLLER : SCROLLER_DISABLED, x, handleY, SCROLLBAR_WIDTH,
+            SCROLLBAR_HANDLE_HEIGHT);
     }
 
     private void scrollToMouse(double mouseY) {
@@ -168,8 +171,8 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
         int travel = SCROLLBAR_HEIGHT - SCROLLBAR_HANDLE_HEIGHT;
 
         double fraction = Math.clamp(
-                (mouseY - trackTop - SCROLLBAR_HANDLE_HEIGHT / 2.0) / travel,
-                0.0, 1.0);
+            (mouseY - trackTop - SCROLLBAR_HANDLE_HEIGHT / 2.0) / travel,
+            0.0, 1.0);
 
         this.menu.setScrollRow((int) Math.round(fraction * this.menu.getMaxScrollRow()));
     }

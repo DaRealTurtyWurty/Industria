@@ -22,7 +22,14 @@ public final class CompositePlayerTextureManager {
     private CompositePlayerTextureManager() {
     }
 
-    public Identifier getOrCreate(PlayerSkin skin, Object data, Function<Object, Identifier> otherIdFunction, int targetWidth, int targetHeight, boolean placeBelow) {
+    public Identifier getOrCreate(
+        PlayerSkin skin,
+        Object data,
+        Function<Object, Identifier> otherIdFunction,
+        int targetWidth,
+        int targetHeight,
+        boolean placeBelow
+    ) {
         Minecraft minecraft = Minecraft.getInstance();
         TextureManager textureManager = minecraft.getTextureManager();
         ResourceManager resourceManager = minecraft.getResourceManager();
@@ -37,15 +44,21 @@ public final class CompositePlayerTextureManager {
         var combined = new NativeImage(targetWidth, targetHeight, true);
 
         skinImage.copyRect(0, 0, 0, 0, 64, 64, false, false);
-        otherImage.copyRect(0, 0, placeBelow ? 0 : 64, placeBelow ? 64 : 0, otherImage.getWidth(), otherImage.getHeight(), false, false);
+        otherImage.copyRect(0, 0, placeBelow ? 0 : 64, placeBelow ? 64 : 0, otherImage.getWidth(),
+            otherImage.getHeight(), false, false);
 
-        Identifier customId = Identifier.fromNamespaceAndPath(otherId.getNamespace(), otherId.getPath() + "_composite_" + skinId.getPath());
+        Identifier customId = Identifier.fromNamespaceAndPath(otherId.getNamespace(),
+            otherId.getPath() + "_composite_" + skinId.getPath());
         textureManager.register(customId, new DynamicTexture(customId::toString, combined));
         cache.put(key, customId);
         return customId;
     }
 
-    public NativeImage loadTexturePixels(TextureManager textureManager, ResourceManager resourceManager, Identifier textureId) {
+    public NativeImage loadTexturePixels(
+        TextureManager textureManager,
+        ResourceManager resourceManager,
+        Identifier textureId
+    ) {
         AbstractTexture texture = textureManager.getTexture(textureId);
 
         if (texture instanceof DynamicTexture dynamic) {

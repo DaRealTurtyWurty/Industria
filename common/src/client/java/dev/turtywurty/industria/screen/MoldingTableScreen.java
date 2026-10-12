@@ -31,9 +31,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu> {
-    public static final Component MOLD_TEMPLATES_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.templates");
-    public static final Component RESET_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.reset");
-    public static final Component FAILED_LABEL = Component.translatable("gui." + Industria.MOD_ID + ".molding_table.failed");
+    public static final Component MOLD_TEMPLATES_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".molding_table.templates");
+    public static final Component RESET_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".molding_table.reset");
+    public static final Component FAILED_LABEL = Component
+        .translatable("gui." + Industria.MOD_ID + ".molding_table.failed");
 
     private static final Identifier TEXTURE = Industria.id("textures/gui/container/molding_table.png");
 
@@ -73,25 +76,25 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         }
 
         this.moldGrid = addRenderableWidget(new MoldGrid.Builder()
-                .setPosition(this.leftPos - 72, this.topPos + 14)
-                .setSize(68, 108)
-                .setPatterns(MoldPatterns.ALL)
-                .setOnSelected(this::selectPattern)
-                .build());
+            .setPosition(this.leftPos - 72, this.topPos + 14)
+            .setSize(68, 108)
+            .setPatterns(MoldPatterns.ALL)
+            .setOnSelected(this::selectPattern)
+            .build());
         this.moldGrid.selectPattern(this.selectedPattern);
 
         addRenderableWidget(new ImageButton(
-                this.leftPos + 13, this.topPos + 14, 20, 20,
-                RecipeBookComponent.RECIPE_BUTTON_SPRITES,
-                _ -> {
-                    this.moldsVisible = !this.moldsVisible;
-                    updateControls();
-                }, MOLD_TEMPLATES_LABEL));
+            this.leftPos + 13, this.topPos + 14, 20, 20,
+            RecipeBookComponent.RECIPE_BUTTON_SPRITES,
+            _ -> {
+                this.moldsVisible = !this.moldsVisible;
+                updateControls();
+            }, MOLD_TEMPLATES_LABEL));
 
         this.resetButton = addRenderableWidget(Button.builder(RESET_LABEL, _ -> resetCast())
-                .pos(this.leftPos + 4, this.topPos + 38)
-                .size(36, 16)
-                .build());
+            .pos(this.leftPos + 4, this.topPos + 38)
+            .size(36, 16)
+            .build());
         updateControls();
     }
 
@@ -112,12 +115,11 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
             return;
 
         graphics.guiRenderState.addPicturesInPictureState(new MoldCastPreviewState(
-                this.leftPos + CAST_X, this.topPos + CAST_Y,
-                CAST_SIZE,
-                sprite,
-                this.castSurface.snapshot(),
-                graphics.scissorStack.peek()
-        ));
+            this.leftPos + CAST_X, this.topPos + CAST_Y,
+            CAST_SIZE,
+            sprite,
+            this.castSurface.snapshot(),
+            graphics.scissorStack.peek()));
 
         if (this.failedCast) {
             graphics.text(this.font, FAILED_LABEL, this.leftPos + 8, this.topPos + 83, 0xFFAA2222, false);
@@ -220,7 +222,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         if (this.currentPolygonIndex < this.selectedPattern.polygons().size()) {
             if (this.moldTrace == null) {
                 this.moldTrace = new MoldTrace(this.selectedPattern.polygons().get(this.currentPolygonIndex),
-                        (float) MAX_DISTANCE / CAST_SIZE);
+                    (float) MAX_DISTANCE / CAST_SIZE);
             }
             this.moldTrace.begin(point);
             this.failedCast |= this.moldTrace.failed();
@@ -283,7 +285,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 if (isCastFinished()) {
                     syncVisual();
                     NetworkService.get().sendToServer(
-                            new CompleteMoldPayload(this.menu.containerId, this.selectedPattern.id()));
+                        new CompleteMoldPayload(this.menu.containerId, this.selectedPattern.id()));
                 }
             }
         }
@@ -328,12 +330,11 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
     }
 
     private void syncVisual() {
-        if (!this.visualDirty || this.menu.getSlot(0).getItem().isEmpty()) {
+        if (!this.visualDirty || this.menu.getSlot(0).getItem().isEmpty())
             return;
-        }
         var visual = new MoldTableVisualState(
-                BuiltInRegistries.ITEM.getKey(this.menu.getSlot(0).getItem().getItem()),
-                this.selectedPattern.id(), this.currentPolygonIndex, this.failedCast, this.visualStrokes);
+            BuiltInRegistries.ITEM.getKey(this.menu.getSlot(0).getItem().getItem()),
+            this.selectedPattern.id(), this.currentPolygonIndex, this.failedCast, this.visualStrokes);
         this.menu.getBlockEntity().setVisualState(visual);
         NetworkService.get().sendToServer(new UpdateMoldVisualPayload(this.menu.containerId, visual));
         this.visualDirty = false;
@@ -341,9 +342,8 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
     private boolean restoreVisual() {
         MoldTableVisualState visual = this.menu.getBlockEntity().getVisualState();
-        if (visual == null || !visual.matches(this.lastStack) || !visual.isValid()) {
+        if (visual == null || !visual.matches(this.lastStack) || !visual.isValid())
             return false;
-        }
         this.selectedPattern = MoldPatterns.find(visual.moldId()).orElseThrow();
         this.currentPolygonIndex = visual.completedPolygons();
         this.failedCast = visual.failed();
@@ -361,7 +361,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
             if (this.currentPolygonIndex < this.selectedPattern.polygons().size()) {
                 if (this.moldTrace == null) {
                     this.moldTrace = new MoldTrace(this.selectedPattern.polygons().get(this.currentPolygonIndex),
-                            (float) MAX_DISTANCE / CAST_SIZE);
+                        (float) MAX_DISTANCE / CAST_SIZE);
                 }
                 if (stroke.from().equals(stroke.to())) {
                     this.moldTrace.begin(stroke.from());
@@ -399,36 +399,42 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
     private static boolean isOnCast(double mouseX, double mouseY) {
         return mouseX >= CAST_X - MAX_DISTANCE && mouseX <= CAST_X + CAST_SIZE + MAX_DISTANCE
-                && mouseY >= CAST_Y - MAX_DISTANCE && mouseY <= CAST_Y + CAST_SIZE + MAX_DISTANCE;
+            && mouseY >= CAST_Y - MAX_DISTANCE && mouseY <= CAST_Y + CAST_SIZE + MAX_DISTANCE;
     }
 
     private static MoldPoint toCastPoint(double mouseX, double mouseY) {
         return new MoldPoint((float) ((mouseX - CAST_X) / CAST_SIZE), (float) ((mouseY - CAST_Y) / CAST_SIZE));
     }
 
-    private void drawGuideSection(GuiGraphicsExtractor graphics, MoldPoint from, MoldPoint to,
-                                  float start, float end, int color) {
+    private void drawGuideSection(
+        GuiGraphicsExtractor graphics,
+        MoldPoint from,
+        MoldPoint to,
+        float start,
+        float end,
+        int color
+    ) {
         if (end <= start)
             return;
 
         float dx = to.x() - from.x();
         float dy = to.y() - from.y();
         drawLine(graphics,
-                this.leftPos + CAST_X + (from.x() + dx * start) * CAST_SIZE,
-                this.topPos + CAST_Y + (from.y() + dy * start) * CAST_SIZE,
-                this.leftPos + CAST_X + (from.x() + dx * end) * CAST_SIZE,
-                this.topPos + CAST_Y + (from.y() + dy * end) * CAST_SIZE,
-                color);
+            this.leftPos + CAST_X + (from.x() + dx * start) * CAST_SIZE,
+            this.topPos + CAST_Y + (from.y() + dy * start) * CAST_SIZE,
+            this.leftPos + CAST_X + (from.x() + dx * end) * CAST_SIZE,
+            this.topPos + CAST_Y + (from.y() + dy * end) * CAST_SIZE,
+            color);
     }
 
     private static void drawLine(GuiGraphicsExtractor graphics, float x1, float y1, float x2, float y2, int color) {
         graphics.guiRenderState.addGuiElement(new MoldLineRenderState(
-                x1, y1, x2, y2,
-                5.0f,
-                color,
-                graphics.pose(),
-                graphics.scissorStack.peek(),
-                MoldRenderPipelines.MOLD_LINE));
+            x1, y1, x2, y2,
+            5.0f,
+            color,
+            graphics.pose(),
+            graphics.scissorStack.peek(),
+            MoldRenderPipelines.MOLD_LINE));
     }
 
     private static @Nullable TextureAtlasSprite getSprite(ItemStack stack) {
@@ -436,13 +442,12 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         var state = new ItemStackRenderState();
 
         minecraft.getItemModelResolver().updateForTopItem(
-                state,
-                stack,
-                ItemDisplayContext.GUI,
-                minecraft.level,
-                minecraft.player,
-                0
-        );
+            state,
+            stack,
+            ItemDisplayContext.GUI,
+            minecraft.level,
+            minecraft.player,
+            0);
 
         Material.Baked material = state.pickParticleMaterial(RandomSource.create(0));
         return material != null ? material.sprite() : null;

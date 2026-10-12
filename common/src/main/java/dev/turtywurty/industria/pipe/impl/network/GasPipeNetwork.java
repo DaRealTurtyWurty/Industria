@@ -23,23 +23,23 @@ import java.util.UUID;
 
 public class GasPipeNetwork extends PipeNetwork<ResourceVariant<Gas>> {
     public static final MapCodec<GasPipeNetwork> CODEC = PipeNetwork.createCodec(
-            PipeStorageContent.codec(GasVariant.CODEC).fieldOf("storageContent")
-                    .forGetter(network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0))),
+        PipeStorageContent.codec(GasVariant.CODEC).fieldOf("storageContent")
+            .forGetter(network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0))),
+        (storage, storageContent) -> PipeStorageUtil.restore(
+            (SingleGasStorage) storage, storageContent.variant(), storageContent.amount()),
+        GasPipeNetwork::new);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, GasPipeNetwork> STREAM_CODEC = PipeNetwork
+        .createPacketCodec(
+            PipeStorageContent.streamCodec(GasVariant.STREAM_CODEC),
+            network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0)),
             (storage, storageContent) -> PipeStorageUtil.restore(
-                    (SingleGasStorage) storage, storageContent.variant(), storageContent.amount()),
+                (SingleGasStorage) storage, storageContent.variant(), storageContent.amount()),
             GasPipeNetwork::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, GasPipeNetwork> STREAM_CODEC =
-            PipeNetwork.createPacketCodec(
-                    PipeStorageContent.streamCodec(GasVariant.STREAM_CODEC),
-                    network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0)),
-                    (storage, storageContent) -> PipeStorageUtil.restore(
-                            (SingleGasStorage) storage, storageContent.variant(), storageContent.amount()),
-                    GasPipeNetwork::new);
-
     public static final Codec<Set<GasPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final StreamCodec<RegistryFriendlyByteBuf, Set<GasPipeNetwork>> SET_STREAM_CODEC =
-            ExtraStreamCodecs.setOf(STREAM_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<GasPipeNetwork>> SET_STREAM_CODEC = ExtraStreamCodecs
+        .setOf(STREAM_CODEC);
 
     public GasPipeNetwork(UUID id) {
         super(id, TransferType.GAS);
@@ -51,7 +51,7 @@ public class GasPipeNetwork extends PipeNetwork<ResourceVariant<Gas>> {
             @Override
             protected long getCapacity(ResourceVariant<Gas> variant) {
                 return PipeStorageUtil.scaledCapacity(
-                        GasPipeNetwork.this.pipes.size(), GasApi.BUCKET.numerator());
+                    GasPipeNetwork.this.pipes.size(), GasApi.BUCKET.numerator());
             }
         };
     }

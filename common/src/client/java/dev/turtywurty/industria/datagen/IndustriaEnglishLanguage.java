@@ -167,8 +167,10 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.DELAY_CONVEYOR.get(), "Delay Conveyor");
         translationBuilder.add(ModBlocks.CONTAINMENT_CONVEYOR.get(), "Containment Conveyor");
         addText(translationBuilder, ContainmentConveyorBlockEntity.TITLE, "Containment Conveyor");
-        addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.capturing"), "Capturing");
-        addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.idle"), "Waiting for mob");
+        addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.capturing"),
+            "Capturing");
+        addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.idle"),
+            "Waiting for mob");
         addText(translationBuilder, ContainmentConveyorScreen.PROGRESS_TOOLTIP_TEXT, "Progress: %s%%");
         translationBuilder.add(ModBlocks.TREE_TAP.get(), "Tree Tap");
         translationBuilder.add(ModBlocks.AGITATOR.get(), "Agitator");
@@ -378,7 +380,8 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, SmelteryControllerScreen.EMPTY_LABEL, "Empty");
         addText(translationBuilder, SmelteryControllerScreen.AMOUNT_LABEL, "Amount: %s mB");
         addText(translationBuilder, SmelteryControllerScreen.CAPACITY_LABEL, "Capacity: %s mB");
-        addText(translationBuilder, SmelteryControllerScreen.UNKNOWN_MELTING_TEMPERATURE, "Unknown Melting Temperature");
+        addText(translationBuilder, SmelteryControllerScreen.UNKNOWN_MELTING_TEMPERATURE,
+            "Unknown Melting Temperature");
         addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_SOLID, "Solid");
         addText(translationBuilder, SmelteryControllerScreen.MOLTEN_STATE_MOLTEN, "Molten");
         addText(translationBuilder, SmelteryControllerScreen.KEEP_MOLTEN_ON_LABEL, "Keep Molten: On");
@@ -397,26 +400,31 @@ public final class IndustriaEnglishLanguage {
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {
         if (text.getContents() instanceof TranslatableContents translatableTextContent) {
             translationBuilder.add(translatableTextContent.getKey(), value);
-        } else {
+        } else
             throw new IllegalArgumentException("Text must be translatable! " + text);
-        }
     }
 
     private static void addTextEnum(LanguageGenerationContext translationBuilder, TextEnum textEnum, String value) {
         addText(translationBuilder, textEnum.getAsText(), value);
     }
 
-    private static void addDamageType(LanguageGenerationContext translationBuilder, ResourceKey<DamageType> key, String value) {
+    private static void addDamageType(
+        LanguageGenerationContext translationBuilder,
+        ResourceKey<DamageType> key,
+        String value
+    ) {
         translationBuilder.add("death.attack." + key.identifier().toLanguageKey(), value);
     }
 
-    private static void addSlurry(LanguageGenerationContext translationBuilder,
-                                  RegistrationHandle<Slurry, Slurry> slurry, String value) {
+    private static void addSlurry(
+        LanguageGenerationContext translationBuilder,
+        RegistrationHandle<Slurry, Slurry> slurry,
+        String value
+    ) {
         Component name = SlurryVariantAttributes.getName(SlurryVariant.of(slurry.holder()));
         if (name.getContents() instanceof TranslatableContents translatableTextContent) {
             translationBuilder.add(translatableTextContent.getKey(), value);
-        } else {
+        } else
             throw new IllegalArgumentException("Slurry name must be translatable! " + name);
-        }
     }
 }

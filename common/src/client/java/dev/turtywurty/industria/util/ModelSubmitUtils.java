@@ -9,12 +9,23 @@ import org.jspecify.annotations.Nullable;
 
 /** Submits a model and its separately queued block-breaking overlay. */
 public final class ModelSubmitUtils {
-    private ModelSubmitUtils() {}
+    private ModelSubmitUtils() {
+    }
 
-    public static <S> void submitModel(OrderedSubmitNodeCollector collector, Model<? super S> model, S state,
-        PoseStack poses, RenderType type, int light, int overlay, int outlineColor,
-        @Nullable CrumblingOverlay breaking) {
+    public static <S> void submitModel(
+        OrderedSubmitNodeCollector collector,
+        Model<? super S> model,
+        S state,
+        PoseStack poses,
+        RenderType type,
+        int light,
+        int overlay,
+        int outlineColor,
+        @Nullable CrumblingOverlay breaking
+    ) {
         collector.submitModel(model, state, poses, type, light, overlay, outlineColor);
-        if (breaking != null) collector.submitCrumblingOverlay(model, state, poses, type, light, overlay, -1, breaking);
+        if (breaking != null) {
+            collector.submitCrumblingOverlay(model, state, poses, type, light, overlay, -1, breaking);
+        }
     }
 }

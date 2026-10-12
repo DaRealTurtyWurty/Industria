@@ -40,8 +40,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public class IndustriaBlock extends Block implements EntityBlock {
-    private static final ThreadLocal<Deque<BlockProperties>> PENDING_PROPERTIES =
-            ThreadLocal.withInitial(ArrayDeque::new);
+    private static final ThreadLocal<Deque<BlockProperties>> PENDING_PROPERTIES = ThreadLocal
+        .withInitial(ArrayDeque::new);
 
     public final StateProperties stateProperties;
     public final boolean placeFacingOpposite;
@@ -127,18 +127,18 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
     @Override
     protected BlockState rotate(BlockState state, Rotation rotation) {
-        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            return state.setValue(BlockStateProperties.HORIZONTAL_FACING, rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
-        }
+        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING))
+            return state.setValue(BlockStateProperties.HORIZONTAL_FACING,
+                rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
 
         return super.rotate(state, rotation);
     }
 
     @Override
     protected BlockState mirror(BlockState state, Mirror mirror) {
-        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            return state.setValue(BlockStateProperties.HORIZONTAL_FACING, mirror.mirror(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
-        }
+        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING))
+            return state.setValue(BlockStateProperties.HORIZONTAL_FACING,
+                mirror.mirror(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
 
         return super.mirror(state, mirror);
     }
@@ -172,8 +172,14 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
-        return this.shouldTick ? (BlockEntityTicker<T>) this.blockEntityTicker.create(world, state, type) : EntityBlock.super.getTicker(world, state, type);
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+        Level world,
+        BlockState state,
+        BlockEntityType<T> type
+    ) {
+        return this.shouldTick
+            ? (BlockEntityTicker<T>) this.blockEntityTicker.create(world, state, type)
+            : EntityBlock.super.getTicker(world, state, type);
     }
 
     @Override
@@ -183,7 +189,9 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos, Direction direction) {
-        return this.hasComparatorOutput ? this.comparatorOutput.apply(state, world, pos, direction) : super.getAnalogOutputSignal(state, world, pos, direction);
+        return this.hasComparatorOutput
+            ? this.comparatorOutput.apply(state, world, pos, direction)
+            : super.getAnalogOutputSignal(state, world, pos, direction);
     }
 
     @Override
@@ -197,11 +205,19 @@ public class IndustriaBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (this.rightClickToOpenGui) {
             if (!level.isClientSide()) {
                 BlockEntity blockEntity = level.getBlockEntity(pos);
-                if (player instanceof ServerPlayer sPlayer && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with component access maybe?
+                if (player instanceof ServerPlayer sPlayer
+                    && blockEntity instanceof BlockEntityWithGui<?> blockEntityWithGui) { // TODO: Replace with
+                                                                                          // component access maybe?
                     blockEntityWithGui.openMenu(sPlayer);
                 }
             }
@@ -213,7 +229,13 @@ public class IndustriaBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void setPlacedBy(
+        Level world,
+        BlockPos pos,
+        BlockState state,
+        @Nullable LivingEntity placer,
+        ItemStack itemStack
+    ) {
         super.setPlacedBy(world, pos, state, placer, itemStack);
     }
 
@@ -223,12 +245,19 @@ public class IndustriaBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView,
-                                     BlockPos pos, Direction direction, BlockPos neighborPos,
-                                     BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader world,
+        ScheduledTickAccess tickView,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
         return !state.canSurvive(world, pos)
-                ? Blocks.AIR.defaultBlockState()
-                : super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+            ? Blocks.AIR.defaultBlockState()
+            : super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @FunctionalInterface
@@ -252,11 +281,13 @@ public class IndustriaBlock extends Block implements EntityBlock {
         private boolean placeFacingOpposite = true;
         private BlockBlockEntityProperties<?> blockEntityProperties;
         private boolean hasComparatorOutput = false;
-        private Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput =
-                (state, world, pos, direction) -> AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(pos));
+        private Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput = (
+            state,
+            world,
+            pos,
+            direction) -> AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(pos));
         private RenderShape renderType = RenderShape.MODEL;
-        private ShapeFactory shapeFactory =
-                (state, world, pos, context) -> Shapes.block();
+        private ShapeFactory shapeFactory = (state, world, pos, context) -> Shapes.block();
         private BiPredicate<LevelReader, BlockPos> canExistAt = (world, pos) -> true;
 
         public static void runShapeCalculation(Map<Direction, VoxelShape> shapeCache, VoxelShape shape) {
@@ -270,9 +301,8 @@ public class IndustriaBlock extends Block implements EntityBlock {
 
             final int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
             for (int i = 0; i < times; i++) {
-                buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
-                        buffer[1] = Shapes.or(buffer[1],
-                                Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+                buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1],
+                    Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
                 buffer[0] = buffer[1];
                 buffer[1] = Shapes.empty();
             }
@@ -358,13 +388,23 @@ public class IndustriaBlock extends Block implements EntityBlock {
             return this;
         }
 
-        public <T extends Enum<T> & StringRepresentable> BlockProperties addEnumStateProperty(String name, Class<T> clazz, T defaultValue) {
+        public <T extends Enum<T> & StringRepresentable> BlockProperties addEnumStateProperty(
+            String name,
+            Class<T> clazz,
+            T defaultValue
+        ) {
             this.stateProperties.addProperty(new StateProperty<>(EnumProperty.create(name, clazz), defaultValue));
             return this;
         }
 
-        public <T extends Enum<T> & StringRepresentable> BlockProperties addEnumStateProperty(String name, Class<T> clazz, T defaultValue, List<T> values) {
-            this.stateProperties.addProperty(new StateProperty<>(EnumProperty.create(name, clazz, values), defaultValue));
+        public <T extends Enum<T> & StringRepresentable> BlockProperties addEnumStateProperty(
+            String name,
+            Class<T> clazz,
+            T defaultValue,
+            List<T> values
+        ) {
+            this.stateProperties
+                .addProperty(new StateProperty<>(EnumProperty.create(name, clazz, values), defaultValue));
             return this;
         }
 
@@ -391,7 +431,9 @@ public class IndustriaBlock extends Block implements EntityBlock {
             return this;
         }
 
-        public BlockProperties comparatorOutput(Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput) {
+        public BlockProperties comparatorOutput(
+            Function4<BlockState, Level, BlockPos, Direction, Integer> comparatorOutput
+        ) {
             this.comparatorOutput = comparatorOutput;
             return this;
         }
@@ -432,14 +474,16 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 runShapeCalculation(this.cachedDirectionalShapes, shape);
             }
 
-            return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+            return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes
+                .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
         }
 
         public static class BlockBlockEntityProperties<T extends BlockEntity> {
             public final Supplier<BlockEntityType<T>> blockEntityTypeSupplier;
             public boolean shouldTick = false;
             public BlockEntityFactory<T> blockEntityFactory;
-            public BlockEntityTickerFactory<T> blockEntityTicker = (world, state, type) -> TickableBlockEntity.createTicker(world);
+            public BlockEntityTickerFactory<T> blockEntityTicker = (world, state, type) -> TickableBlockEntity
+                .createTicker(world);
             public boolean rightClickToOpenGui = false;
             public boolean dropContentsOnBreak = false;
 
@@ -468,7 +512,9 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 return this;
             }
 
-            public BlockBlockEntityProperties<T> blockEntityTickerFactory(BlockEntityTickerFactory<T> blockEntityTicker) {
+            public BlockBlockEntityProperties<T> blockEntityTickerFactory(
+                BlockEntityTickerFactory<T> blockEntityTicker
+            ) {
                 this.blockEntityTicker = blockEntityTicker;
                 return this;
             }

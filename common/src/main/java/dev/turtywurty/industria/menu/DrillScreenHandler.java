@@ -19,7 +19,12 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
         super(ModMenuTypes.DRILL.get(), syncId, playerInv, payload, DrillBlockEntity.class);
     }
 
-    public DrillScreenHandler(int syncId, Inventory playerInv, DrillBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public DrillScreenHandler(
+        int syncId,
+        Inventory playerInv,
+        DrillBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.DRILL.get(), syncId, playerInv, blockEntity, wrappedContainerStorage);
     }
 
@@ -68,7 +73,8 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
         var energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long capacity = energyStorage.getCapacity();
-        if (energy == 0 || capacity == 0) return 0;
+        if (energy == 0 || capacity == 0)
+            return 0;
 
         return Mth.clamp((float) energy / capacity, 0, 1);
     }

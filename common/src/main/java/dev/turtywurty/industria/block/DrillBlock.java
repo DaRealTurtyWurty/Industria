@@ -6,11 +6,10 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class DrillBlock extends IndustriaBlock {
     public DrillBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasComparatorOutput()
-                .hasBlockEntityRenderer()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.DRILL)
-                        .shouldTick()
-                ));
+            .hasHorizontalFacing()
+            .hasComparatorOutput()
+            .hasBlockEntityRenderer()
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.DRILL)
+                .shouldTick()));
     }
 }

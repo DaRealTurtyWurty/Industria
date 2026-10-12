@@ -16,18 +16,14 @@ import org.jetbrains.annotations.Nullable;
 public record FluidStack(ResourceVariant<Fluid> variant, long amount) {
     public static final FluidStack EMPTY = new FluidStack(ResourceTypes.FLUID.empty(), 0);
 
-    public static final MapCodec<FluidStack> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    ResourceVariantCodecs.FLUID.fieldOf("variant").forGetter(FluidStack::variant),
-                    Codec.LONG.fieldOf("amount").forGetter(FluidStack::amount)
-            ).apply(instance, FluidStack::new)
-    );
+    public static final MapCodec<FluidStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        ResourceVariantCodecs.FLUID.fieldOf("variant").forGetter(FluidStack::variant),
+        Codec.LONG.fieldOf("amount").forGetter(FluidStack::amount)).apply(instance, FluidStack::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FluidStack> STREAM_CODEC = StreamCodec.composite(
-            ResourceVariantCodecs.FLUID_STREAM, FluidStack::variant,
-            ByteBufCodecs.LONG, FluidStack::amount,
-            FluidStack::new
-    );
+        ResourceVariantCodecs.FLUID_STREAM, FluidStack::variant,
+        ByteBufCodecs.LONG, FluidStack::amount,
+        FluidStack::new);
 
     public boolean isEmpty() {
         return this.amount <= 0 || this.variant.isBlank();
@@ -53,6 +49,6 @@ public record FluidStack(ResourceVariant<Fluid> variant, long amount) {
             return false;
 
         return fluidStorage.hasStableIndices() && fluidStorage.size() == 1
-                && this.variant.equals(fluidStorage.resource(0)) && this.amount <= fluidStorage.amount(0);
+            && this.variant.equals(fluidStorage.resource(0)) && this.amount <= fluidStorage.amount(0);
     }
 }

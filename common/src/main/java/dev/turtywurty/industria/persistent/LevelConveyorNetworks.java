@@ -25,15 +25,14 @@ public class LevelConveyorNetworks extends SavedData {
     private static final NetworkService NETWORK = NetworkService.get();
 
     public static final Codec<LevelConveyorNetworks> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConveyorNetworkManager.CODEC.fieldOf("network_manager").forGetter(LevelConveyorNetworks::getNetworkManager)
-    ).apply(instance, LevelConveyorNetworks::new));
+        ConveyorNetworkManager.CODEC.fieldOf("network_manager").forGetter(LevelConveyorNetworks::getNetworkManager))
+        .apply(instance, LevelConveyorNetworks::new));
 
     private static final SavedDataType<LevelConveyorNetworks> TYPE = new SavedDataType<>(
-            Industria.id("conveyor_networks"),
-            LevelConveyorNetworks::new,
-            CODEC,
-            null
-    );
+        Industria.id("conveyor_networks"),
+        LevelConveyorNetworks::new,
+        CODEC,
+        null);
 
     public static LevelConveyorNetworks getOrCreate(ServerLevel serverWorld) {
         SavedDataStorage persistentStateManager = serverWorld.getDataStorage();

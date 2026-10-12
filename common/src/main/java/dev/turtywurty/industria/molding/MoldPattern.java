@@ -6,8 +6,12 @@ import net.minecraft.resources.Identifier;
 import java.util.List;
 import java.util.Map;
 
-public record MoldPattern(Identifier id, List<List<MoldPoint>> polygons, Map<Integer, MoldTextureCutout> cutoutTextures,
-                          boolean split) {
+public record MoldPattern(
+    Identifier id,
+    List<List<MoldPoint>> polygons,
+    Map<Integer, MoldTextureCutout> cutoutTextures,
+    boolean split
+) {
     public MoldPattern {
         polygons = polygons.stream().map(List::copyOf).toList();
         cutoutTextures = Map.copyOf(cutoutTextures);
@@ -23,7 +27,7 @@ public record MoldPattern(Identifier id, List<List<MoldPoint>> polygons, Map<Int
             MoldPoint a = polygon.get(i);
             MoldPoint b = polygon.get(j);
             if ((a.y() > y) != (b.y() > y)
-                    && x < a.x() + (y - a.y()) * (b.x() - a.x()) / (b.y() - a.y())) {
+                && x < a.x() + (y - a.y()) * (b.x() - a.x()) / (b.y() - a.y())) {
                 inside = !inside;
             }
         }

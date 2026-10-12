@@ -21,8 +21,12 @@ public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEnt
         super(ModMenuTypes.BATTERY.get(), syncId, playerInventory, payload, BatteryBlockEntity.class);
     }
 
-    public BatteryScreenHandler(int syncId, Inventory playerInventory, BatteryBlockEntity blockEntity,
-                                WrappedContainerStorage<?> wrappedContainerStorage) {
+    public BatteryScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        BatteryBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.BATTERY.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
@@ -45,7 +49,7 @@ public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEnt
     @Override
     public boolean stillValid(Player player) {
         return canUse(player, ModBlocks.BASIC_BATTERY.get(), ModBlocks.ADVANCED_BATTERY.get(),
-                ModBlocks.ELITE_BATTERY.get(), ModBlocks.ULTIMATE_BATTERY.get(), ModBlocks.CREATIVE_BATTERY.get());
+            ModBlocks.ELITE_BATTERY.get(), ModBlocks.ULTIMATE_BATTERY.get(), ModBlocks.CREATIVE_BATTERY.get());
     }
 
     private boolean canUse(Player player, Block... blocks) {

@@ -15,7 +15,8 @@ import net.minecraft.resources.Identifier;
 
 public class DistillationTowerModel extends Model<DistillationTowerRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/distillation_tower.png");
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("distillation_tower"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("distillation_tower"),
+        "main");
 
     public DistillationTowerModel(ModelPart root) {
         super(root, RenderTypes::entitySolid);
@@ -26,9 +27,9 @@ public class DistillationTowerModel extends Model<DistillationTowerRenderState> 
         PartDefinition root = meshDefinition.getRoot();
 
         root.addOrReplaceChild("bone", CubeListBuilder.create()
-                        .texOffs(0, 0)
-                        .addBox(-24.0F, -112.0F, -24.0F, 48.0F, 112.0F, 48.0F),
-                PartPose.offset(0.0F, 24.0F, 0.0F));
+            .texOffs(0, 0)
+            .addBox(-24.0F, -112.0F, -24.0F, 48.0F, 112.0F, 48.0F),
+            PartPose.offset(0.0F, 24.0F, 0.0F));
 
         return LayerDefinition.create(meshDefinition, 256, 256);
     }

@@ -10,14 +10,13 @@ public class ElectrolyzerBlock extends IndustriaBlock {
 
     public ElectrolyzerBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasBlockEntityRenderer()
-                .hasComparatorOutput()
-                .hasHorizontalFacing()
-                .useRotatedShapes(VOXEL_SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ELECTROLYZER)
-                        .shouldTick()
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()
-                ));
+            .hasBlockEntityRenderer()
+            .hasComparatorOutput()
+            .hasHorizontalFacing()
+            .useRotatedShapes(VOXEL_SHAPE)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ELECTROLYZER)
+                .shouldTick()
+                .rightClickToOpenGui()
+                .dropContentsOnBreak()));
     }
 }

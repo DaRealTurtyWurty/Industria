@@ -64,7 +64,10 @@ import java.util.*;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
-public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("arc_furnace");
 
     private static final int INPUT_PORT_X = 2;
@@ -124,9 +127,10 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 9), Direction.WEST);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 9), Direction.SOUTH);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000_000, 1_000_000, 0));
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 10, this::isCoolantFluid));
+        this.wrappedFluidStorage
+            .addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 10, this::isCoolantFluid));
         this.wrappedGasStorage.addStorage(new InputGasStorage(this, FluidAmounts.BUCKET * 5,
-                gas -> gas.holder().is(ModGases.OXYGEN.key())));
+            gas -> gas.holder().is(ModGases.OXYGEN.key())));
 
         this.blastingMatchGetter = RecipeManager.createCheck(RecipeType.BLASTING);
         this.alloyingMatchGetter = RecipeManager.createCheck(ModRecipeTypes.ALLOYING.get());
@@ -135,7 +139,8 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        return List.of(getInputInventory(), getOutputInventory(), getEnergyStorage(), getFluidStorage(), getGasStorage());
+        return List.of(getInputInventory(), getOutputInventory(), getEnergyStorage(), getFluidStorage(),
+            getGasStorage());
     }
 
     @Override
@@ -179,7 +184,11 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
     }
 
     @SuppressWarnings("DataFlowIssue") // We already check when this method is called if the server level is null
-    private void handleRecipeProcessing(List<ResourceKey<Recipe<?>>> matchingRecipeIds, int index, SimpleEnergyStorage energyStorage) {
+    private void handleRecipeProcessing(
+        List<ResourceKey<Recipe<?>>> matchingRecipeIds,
+        int index,
+        SimpleEnergyStorage energyStorage
+    ) {
         ResourceKey<Recipe<?>> recipeId = matchingRecipeIds.get(index);
         if (recipeId == null)
             return;
@@ -190,7 +199,8 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         Optional<? extends Recipe<?>> recipeOpt = (switch (mode) {
             case BLASTING -> this.blastingMatchGetter.getRecipeFor(singleRecipeInput, serverLevel);
             case ALLOYING ->
-                    this.alloyingMatchGetter.getRecipeFor(inputInventory, serverLevel).stream().filter(r -> r.id().equals(recipeId)).findFirst();
+                this.alloyingMatchGetter.getRecipeFor(inputInventory, serverLevel).stream()
+                    .filter(r -> r.id().equals(recipeId)).findFirst();
             case RECYCLING -> this.recyclingMatchGetter.getRecipeFor(singleRecipeInput, serverLevel);
         }).map(RecipeHolder::value);
 
@@ -296,14 +306,16 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         }
 
         for (int index = 0; index < this.bufferedOutputs.size(); index++) {
-            this.bufferedOutputs.set(index, index < newBufferedOutputs.size() ? newBufferedOutputs.get(index) : ItemStack.EMPTY);
+            this.bufferedOutputs.set(index,
+                index < newBufferedOutputs.size() ? newBufferedOutputs.get(index) : ItemStack.EMPTY);
         }
     }
 
     private void addBufferedOutput(ItemStack stack) {
         for (ItemStack bufferedStack : this.bufferedOutputs) {
             if (!bufferedStack.isEmpty() && ItemStack.isSameItemSameComponents(bufferedStack, stack)) {
-                int transferable = Math.min(stack.getCount(), bufferedStack.getMaxStackSize() - bufferedStack.getCount());
+                int transferable = Math.min(stack.getCount(),
+                    bufferedStack.getMaxStackSize() - bufferedStack.getCount());
                 if (transferable > 0) {
                     bufferedStack.grow(transferable);
                     stack.shrink(transferable);
@@ -348,12 +360,14 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         SyncingSimpleInventory inputInventory = getInputInventory();
         return switch (this.mode) {
             case BLASTING -> {
-                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>(Collections.nCopies(inputInventory.getContainerSize(), null));
+                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>(
+                    Collections.nCopies(inputInventory.getContainerSize(), null));
 
                 for (int slot = 0; slot < inputInventory.getContainerSize(); slot++) {
                     var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(slot));
-                    Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.blastingMatchGetter.getRecipeFor(singleRecipeInput, level)
-                            .map(RecipeHolder::id);
+                    Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.blastingMatchGetter
+                        .getRecipeFor(singleRecipeInput, level)
+                        .map(RecipeHolder::id);
                     if (recipeKeyOpt.isPresent()) {
                         recipeIds.set(slot, recipeKeyOpt.get());
                     }
@@ -362,16 +376,18 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                 yield recipeIds;
             }
             case ALLOYING -> this.alloyingMatchGetter.getRecipeFor(inputInventory, level)
-                    .stream()
-                    .map(RecipeHolder::id)
-                    .toList();
+                .stream()
+                .map(RecipeHolder::id)
+                .toList();
             case RECYCLING -> {
-                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>(Collections.nCopies(inputInventory.getContainerSize(), null));
+                List<ResourceKey<Recipe<?>>> recipeIds = new ArrayList<>(
+                    Collections.nCopies(inputInventory.getContainerSize(), null));
 
                 for (int slot = 0; slot < inputInventory.getContainerSize(); slot++) {
                     var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(slot));
-                    Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.recyclingMatchGetter.getRecipeFor(singleRecipeInput, level)
-                            .map(RecipeHolder::id);
+                    Optional<ResourceKey<Recipe<?>>> recipeKeyOpt = this.recyclingMatchGetter
+                        .getRecipeFor(singleRecipeInput, level)
+                        .map(RecipeHolder::id);
                     if (recipeKeyOpt.isPresent()) {
                         recipeIds.set(slot, recipeKeyOpt.get());
                     }
@@ -393,9 +409,9 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
 
         if (hasBufferedOutput()) {
             view.store("BufferedOutputs", ExtraCodecs.listOf(ItemStack.CODEC),
-                    this.bufferedOutputs.stream()
-                            .filter(stack -> !stack.isEmpty())
-                            .toList());
+                this.bufferedOutputs.stream()
+                    .filter(stack -> !stack.isEmpty())
+                    .toList());
         }
 
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
@@ -434,15 +450,15 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
-                .wherePosition(this::isItemInputPort);
+            .wherePosition(this::isItemInputPort);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.SOUTH))
-                .wherePosition(this::isItemOutputPort);
+            .wherePosition(this::isItemOutputPort);
         ports.input(TransferType.FLUID, this::getFluidStorage)
-                .wherePosition(this::isAuxInputPort);
+            .wherePosition(this::isAuxInputPort);
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(this::isAuxInputPort);
+            .wherePosition(this::isAuxInputPort);
         ports.input(TransferType.GAS, this::getGasStorage)
-                .wherePosition(this::isAuxInputPort);
+            .wherePosition(this::isAuxInputPort);
     }
 
     @Override
@@ -457,7 +473,8 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new ArcFurnaceScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate);
+        return new ArcFurnaceScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.propertyDelegate);
     }
 
     @Override
@@ -535,8 +552,10 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         double temperature = handler.getTemperature(fluidVariant);
         double viscosity = handler.getViscosity(fluidVariant, this.level);
 
-        double temperatureScore = Math.clamp((COOLANT_TEMPERATURE_THRESHOLD - temperature) / COOLANT_TEMPERATURE_THRESHOLD, 0.0D, 1.0D);
-        double viscosityScore = Math.clamp((COOLANT_VISCOSITY_THRESHOLD - viscosity) / COOLANT_VISCOSITY_THRESHOLD, 0.0D, 1.0D);
+        double temperatureScore = Math
+            .clamp((COOLANT_TEMPERATURE_THRESHOLD - temperature) / COOLANT_TEMPERATURE_THRESHOLD, 0.0D, 1.0D);
+        double viscosityScore = Math.clamp((COOLANT_VISCOSITY_THRESHOLD - viscosity) / COOLANT_VISCOSITY_THRESHOLD,
+            0.0D, 1.0D);
 
         return (temperatureScore * 0.75D) + (viscosityScore * 0.25D) > 0.5D;
     }

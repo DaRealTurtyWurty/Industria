@@ -26,8 +26,9 @@ public class WrappedFluidStorage<T extends ResourceStorage<ResourceVariant<Fluid
         List<FluidStack> fluids = new ArrayList<>();
         for (T tank : this.storages) {
             for (ResourceStorageView<ResourceVariant<Fluid>> storageView : tank) {
-                if (storageView.amount() > 0)
+                if (storageView.amount() > 0) {
                     fluids.add(new FluidStack(storageView.resource(), storageView.amount()));
+                }
             }
         }
 
@@ -57,7 +58,8 @@ public class WrappedFluidStorage<T extends ResourceStorage<ResourceVariant<Fluid
     }
 
     public record FluidStorageSerializer<T extends ResourceStorage<ResourceVariant<Fluid>>>(T storage)
-            implements ViewSerializable {
+        implements
+            ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);
@@ -70,7 +72,7 @@ public class WrappedFluidStorage<T extends ResourceStorage<ResourceVariant<Fluid
             requireSingleSlot(storage);
             long amount = view.getLongOr("Amount", 0L);
             ResourceVariant<Fluid> resource = view.read("Fluid", ResourceVariantCodecs.FLUID)
-                    .orElse(ResourceTypes.FLUID.empty());
+                .orElse(ResourceTypes.FLUID.empty());
             if (!new StorageSnapshot<>(List.of(new StorageSnapshot.Entry<>(resource, amount))).apply(storage))
                 throw new IllegalStateException("Stored fluid does not fit in " + storage.getClass().getName());
         }
@@ -78,7 +80,7 @@ public class WrappedFluidStorage<T extends ResourceStorage<ResourceVariant<Fluid
         private static void requireSingleSlot(ResourceStorage<?> storage) {
             if (!storage.hasStableIndices() || storage.size() != 1)
                 throw new UnsupportedOperationException(
-                        "Wrapped fluid persistence requires one stable slot: " + storage.getClass().getName());
+                    "Wrapped fluid persistence requires one stable slot: " + storage.getClass().getName());
         }
     }
 }

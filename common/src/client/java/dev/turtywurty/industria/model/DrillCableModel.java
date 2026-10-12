@@ -32,9 +32,9 @@ public class DrillCableModel extends Model<DrillCableModel.DrillCableModelRender
 
         PartDefinition modelPartData = modelData.getRoot();
         modelPartData.addOrReplaceChild("main", CubeListBuilder.create()
-                        .texOffs(0, 0)
-                        .addBox(-1.5F, -3.5F, -3.5F, 3.0F, 7.0F, 7.0F, new CubeDeformation(-0.05F)),
-                PartPose.offset(0.1223F, -22.642F, 7.8787F));
+            .texOffs(0, 0)
+            .addBox(-1.5F, -3.5F, -3.5F, 3.0F, 7.0F, 7.0F, new CubeDeformation(-0.05F)),
+            PartPose.offset(0.1223F, -22.642F, 7.8787F));
 
         return LayerDefinition.create(modelData, 32, 32);
     }

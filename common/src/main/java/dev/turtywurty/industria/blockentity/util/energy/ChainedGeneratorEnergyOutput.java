@@ -38,7 +38,7 @@ public interface ChainedGeneratorEnergyOutput extends EnergySpreader {
         while (world.isLoaded(cursor)) {
             BlockEntity blockEntity = world.getBlockEntity(cursor);
             if (!(blockEntity instanceof ChainedGeneratorEnergyOutput output)
-                    || !output.isEnergyOutputDirection(positive))
+                || !output.isEnergyOutputDirection(positive))
                 break;
 
             sources.add(output.getEnergyStorage());
@@ -68,19 +68,24 @@ public interface ChainedGeneratorEnergyOutput extends EnergySpreader {
     }
 
     private static ResourceStorage<ResourceVariant<UnitResource>> findTarget(
-            Level world, BlockPos pos, Direction travelDirection) {
+        Level world,
+        BlockPos pos,
+        Direction travelDirection
+    ) {
         if (!world.isLoaded(pos))
             return null;
 
         ResourceStorage<ResourceVariant<UnitResource>> target = TransferType.ENERGY.lookup(
-                world, pos, travelDirection.getOpposite());
+            world, pos, travelDirection.getOpposite());
         return target != null && target.supportsInsertion() ? target : null;
     }
 
-    private static void moveToTargets(SimpleEnergyStorage source,
-                                      ResourceStorage<ResourceVariant<UnitResource>> primaryTarget,
-                                      ResourceStorage<ResourceVariant<UnitResource>> secondaryTarget,
-                                      TransferContext transaction) {
+    private static void moveToTargets(
+        SimpleEnergyStorage source,
+        ResourceStorage<ResourceVariant<UnitResource>> primaryTarget,
+        ResourceStorage<ResourceVariant<UnitResource>> secondaryTarget,
+        TransferContext transaction
+    ) {
         long remaining = Math.min(source.getAmount(), source.getMaxOutput());
         if (remaining <= 0)
             return;

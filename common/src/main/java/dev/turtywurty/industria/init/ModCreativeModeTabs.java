@@ -20,24 +20,28 @@ public class ModCreativeModeTabs {
 
     public static final Component MAIN_TITLE = Component.translatable("itemGroup." + Industria.MOD_ID + ".main");
 
-    public static final RegistrationHandle<CreativeModeTab, CreativeModeTab> TAB = register("main", builder -> builder.title(MAIN_TITLE)
-            .icon(() -> ModBlocks.ALLOY_FURNACE.get().asItem().getDefaultInstance())
-            .displayItems((output) ->
-                    BuiltInRegistries.ITEM.registryKeySet().stream()
-                            .filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
-                            .filter(key -> Platform.isDevelopmentEnvironment() || !Objects.equals(key, ModItems.MULTIBLOCK_EXPORTER.key()))
-                            .map(BuiltInRegistries.ITEM::getValueOrThrow)
-                            .forEach(item -> {
-                                if (item instanceof MoldItem moldItem) {
-                                    for (MoldPattern pattern : MoldPatterns.ALL) {
-                                        moldItem.createStacks(pattern).forEach(output::accept);
-                                    }
-                                } else {
-                                    output.accept(item);
-                                }
-                            })));
+    public static final RegistrationHandle<CreativeModeTab, CreativeModeTab> TAB = register("main", builder -> builder
+        .title(MAIN_TITLE)
+        .icon(() -> ModBlocks.ALLOY_FURNACE.get().asItem().getDefaultInstance())
+        .displayItems((output) -> BuiltInRegistries.ITEM.registryKeySet().stream()
+            .filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))
+            .filter(
+                key -> Platform.isDevelopmentEnvironment() || !Objects.equals(key, ModItems.MULTIBLOCK_EXPORTER.key()))
+            .map(BuiltInRegistries.ITEM::getValueOrThrow)
+            .forEach(item -> {
+                if (item instanceof MoldItem moldItem) {
+                    for (MoldPattern pattern : MoldPatterns.ALL) {
+                        moldItem.createStacks(pattern).forEach(output::accept);
+                    }
+                } else {
+                    output.accept(item);
+                }
+            })));
 
-    public static RegistrationHandle<CreativeModeTab, CreativeModeTab> register(String name, Consumer<CreativeTabBuilder> group) {
+    public static RegistrationHandle<CreativeModeTab, CreativeModeTab> register(
+        String name,
+        Consumer<CreativeTabBuilder> group
+    ) {
         return REGISTRIES.registerCreativeTab(Industria.id(name), group);
     }
 

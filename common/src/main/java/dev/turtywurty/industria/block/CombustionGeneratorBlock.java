@@ -6,12 +6,13 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class CombustionGeneratorBlock extends IndustriaBlock {
     public CombustionGeneratorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasLitProperty()
-                .hasComparatorOutput()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.COMBUSTION_GENERATOR)
-                        .shouldTick()
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()));
+            .hasHorizontalFacing()
+            .hasLitProperty()
+            .hasComparatorOutput()
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.COMBUSTION_GENERATOR)
+                    .shouldTick()
+                    .rightClickToOpenGui()
+                    .dropContentsOnBreak()));
     }
 }

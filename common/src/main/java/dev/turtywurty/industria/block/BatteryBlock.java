@@ -8,12 +8,12 @@ public class BatteryBlock extends IndustriaBlock {
 
     public BatteryBlock(Properties settings, BatteryLevel level) {
         super(settings, new BlockProperties()
-                .hasAxisProperty()
-                .hasComparatorOutput()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.BATTERY)
-                        .dropContentsOnBreak()
-                        .rightClickToOpenGui()
-                        .shouldTick()));
+            .hasAxisProperty()
+            .hasComparatorOutput()
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.BATTERY)
+                .dropContentsOnBreak()
+                .rightClickToOpenGui()
+                .shouldTick()));
         this.level = level;
     }
 

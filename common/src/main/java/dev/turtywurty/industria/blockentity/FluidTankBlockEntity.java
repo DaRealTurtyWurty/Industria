@@ -36,8 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-public class FluidTankBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class FluidTankBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("fluid_tank");
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -47,10 +49,10 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
         super(ModBlocks.FLUID_TANK.get(), ModBlockEntityTypes.FLUID_TANK.get(), pos, state);
 
         this.wrappedFluidStorage.addStorage(new PredicateFluidStorage(
-                this,
-                FluidAmounts.BUCKET * 16,
-                variant -> !isExtractMode,
-                variant -> isExtractMode));
+            this,
+            FluidAmounts.BUCKET * 16,
+            variant -> !isExtractMode,
+            variant -> isExtractMode));
     }
 
     @Override
@@ -70,7 +72,8 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
 
             Map<ResourceStorage<ResourceVariant<Fluid>>, Long> storages = new HashMap<>();
             for (Direction direction : Direction.values()) {
-                ResourceStorage<ResourceVariant<Fluid>> fluidStorage = TransferService.get().findBlock(StorageKeys.FLUID, this.level, this.worldPosition.relative(direction), direction.getOpposite());
+                ResourceStorage<ResourceVariant<Fluid>> fluidStorage = TransferService.get().findBlock(
+                    StorageKeys.FLUID, this.level, this.worldPosition.relative(direction), direction.getOpposite());
                 if (fluidStorage == null || !fluidStorage.supportsInsertion())
                     continue;
 
@@ -85,7 +88,8 @@ public class FluidTankBlockEntity extends IndustriaBlockEntity implements Syncab
             }
 
             int size = storages.size();
-            long totalCanTransfer = Math.min(tank.getAmount(), storages.values().stream().mapToLong(Number::longValue).sum());
+            long totalCanTransfer = Math.min(tank.getAmount(),
+                storages.values().stream().mapToLong(Number::longValue).sum());
             for (Map.Entry<ResourceStorage<ResourceVariant<Fluid>>, Long> entry : storages.entrySet()) {
                 ResourceStorage<ResourceVariant<Fluid>> storage = entry.getKey();
                 long maxAmount = entry.getValue();

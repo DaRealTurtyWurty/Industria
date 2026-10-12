@@ -6,11 +6,11 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class CastingTableBlock extends IndustriaBlock {
     public CastingTableBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
-                        ModBlockEntityTypes.CASTING_TABLE)
-                        .dropContentsOnBreak()
-                        .rightClickToOpenGui()
-                        .shouldTick())
-                .hasHorizontalFacing());
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
+                ModBlockEntityTypes.CASTING_TABLE)
+                .dropContentsOnBreak()
+                .rightClickToOpenGui()
+                .shouldTick())
+            .hasHorizontalFacing());
     }
 }

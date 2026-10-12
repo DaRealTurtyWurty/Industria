@@ -15,21 +15,36 @@ public final class ModFluidStorageProviders {
 
     public static void init() {
         TransferService transfers = TransferService.get();
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.THERMAL_GENERATOR, ThermalGeneratorBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.INDUCTION_HEATER, InductionHeaterBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.FLUID_PUMP, FluidPumpBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.MIXER, MixerBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.DIGESTER, DigesterBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CLARIFIER, ClarifierBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CRYSTALLIZER, CrystallizerBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.ELECTROLYZER, ElectrolyzerBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.FLUID_TANK, FluidTankBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.WELLHEAD, WellheadBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.SHAKING_TABLE, ShakingTableBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR, CentrifugalConcentratorBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.ARC_FURNACE, ArcFurnaceBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.TREE_TAP, TreeTapBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.AGITATOR, AgitatorBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.THERMAL_GENERATOR,
+            ThermalGeneratorBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.INDUCTION_HEATER,
+            InductionHeaterBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.FLUID_PUMP,
+            FluidPumpBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.MIXER,
+            MixerBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.DIGESTER,
+            DigesterBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CLARIFIER,
+            ClarifierBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CRYSTALLIZER,
+            CrystallizerBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.ELECTROLYZER,
+            ElectrolyzerBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.FLUID_TANK,
+            FluidTankBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.WELLHEAD,
+            WellheadBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.SHAKING_TABLE,
+            ShakingTableBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR,
+            CentrifugalConcentratorBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.ARC_FURNACE,
+            ArcFurnaceBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.TREE_TAP,
+            TreeTapBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.AGITATOR,
+            AgitatorBlockEntity::getFluidProvider);
 
         transfers.registerBlockProvider(StorageKeys.FLUID, (world, pos, state, blockEntity, context) -> {
             if (world instanceof ServerLevel serverWorld)
@@ -38,8 +53,11 @@ public final class ModFluidStorageProviders {
             return null;
         }, ModBlocks.FLUID_PIPE);
 
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.TAPPING_OUTLET, TappingOutletBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CASTING_BASIN, CastingBasinBlockEntity::getFluidProvider);
-        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CASTING_TABLE, CastingTableBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.TAPPING_OUTLET,
+            TappingOutletBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CASTING_BASIN,
+            CastingBasinBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.CASTING_TABLE,
+            CastingTableBlockEntity::getFluidProvider);
     }
 }

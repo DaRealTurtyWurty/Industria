@@ -26,19 +26,18 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class WorldFluidPocketsState extends SavedData {
     public static final Codec<WorldFluidPocketsState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            FluidPocket.CODEC.listOf().fieldOf("FluidPockets").forGetter(state -> state.fluidPockets)
-    ).apply(instance, pockets -> {
-        var state = new WorldFluidPocketsState();
-        state.fluidPockets.addAll(pockets);
-        return state;
-    }));
+        FluidPocket.CODEC.listOf().fieldOf("FluidPockets").forGetter(state -> state.fluidPockets))
+        .apply(instance, pockets -> {
+            var state = new WorldFluidPocketsState();
+            state.fluidPockets.addAll(pockets);
+            return state;
+        }));
 
     private static final SavedDataType<WorldFluidPocketsState> TYPE = new SavedDataType<>(
-            Industria.id("fluid_pockets"),
-            WorldFluidPocketsState::new,
-            CODEC,
-            null
-    );
+        Industria.id("fluid_pockets"),
+        WorldFluidPocketsState::new,
+        CODEC,
+        null);
 
     private final List<FluidPocket> fluidPockets = new CopyOnWriteArrayList<>();
 
@@ -82,8 +81,9 @@ public class WorldFluidPocketsState extends SavedData {
 
         changed = changed || this.fluidPockets.removeIf(FluidPocket::isEmpty);
 
-        if (changed)
+        if (changed) {
             setDirty();
+        }
 
         return changed;
     }
@@ -91,7 +91,7 @@ public class WorldFluidPocketsState extends SavedData {
     public List<FluidPocket> existsBelow(BlockPos pos) {
         for (FluidPocket fluidPocket : this.fluidPockets) {
             if (fluidPocket.fluidPositions.keySet().stream()
-                    .anyMatch(pos1 -> pos1.getX() == pos.getX() && pos1.getY() <= pos.getY() && pos1.getZ() == pos.getZ()))
+                .anyMatch(pos1 -> pos1.getX() == pos.getX() && pos1.getY() <= pos.getY() && pos1.getZ() == pos.getZ()))
                 return List.of(fluidPocket);
         }
 
@@ -116,9 +116,8 @@ public class WorldFluidPocketsState extends SavedData {
 
     public FluidPocket getFluidPocket(BlockPos pos) {
         for (FluidPocket fluidPocket : this.fluidPockets) {
-            if (fluidPocket.isWithinDistance(pos, 0)) {
+            if (fluidPocket.isWithinDistance(pos, 0))
                 return fluidPocket;
-            }
         }
 
         return null;
@@ -137,8 +136,8 @@ public class WorldFluidPocketsState extends SavedData {
             updateMinMax();
 
             this.fluidAmount = fluidPositions.values().stream()
-                    .mapToLong(fluidAmount -> fluidAmount)
-                    .sum();
+                .mapToLong(fluidAmount -> fluidAmount)
+                .sum();
         }
 
         public FluidState fluidState() {
@@ -177,21 +176,21 @@ public class WorldFluidPocketsState extends SavedData {
             return this.fluidAmount;
         }
 
-        private static final Codec<Map<BlockPos, Integer>> FLUID_POSITIONS_CODEC =
-                Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT);
+        private static final Codec<Map<BlockPos, Integer>> FLUID_POSITIONS_CODEC = Codec
+            .unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, Codec.INT);
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_STREAM_CODEC =
-                ByteBufCodecs.map(HashMap::new, ExtraStreamCodecs.BLOCK_POS_STRING_CODEC, ByteBufCodecs.INT);
+        public static final StreamCodec<RegistryFriendlyByteBuf, Map<BlockPos, Integer>> FLUID_POSITIONS_STREAM_CODEC = ByteBufCodecs
+            .map(HashMap::new, ExtraStreamCodecs.BLOCK_POS_STRING_CODEC, ByteBufCodecs.INT);
 
         public static final Codec<FluidPocket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                FluidState.CODEC.fieldOf("FluidState").forGetter(FluidPocket::fluidState),
-                FLUID_POSITIONS_CODEC.fieldOf("FluidPositions").forGetter(FluidPocket::fluidPositions)
-        ).apply(instance, FluidPocket::new));
+            FluidState.CODEC.fieldOf("FluidState").forGetter(FluidPocket::fluidState),
+            FLUID_POSITIONS_CODEC.fieldOf("FluidPositions").forGetter(FluidPocket::fluidPositions))
+            .apply(instance, FluidPocket::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, FluidPocket> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.fromCodecWithRegistries(FluidState.CODEC), FluidPocket::fluidState,
-                FLUID_POSITIONS_STREAM_CODEC, FluidPocket::fluidPositions,
-                FluidPocket::new);
+            ByteBufCodecs.fromCodecWithRegistries(FluidState.CODEC), FluidPocket::fluidState,
+            FLUID_POSITIONS_STREAM_CODEC, FluidPocket::fluidPositions,
+            FluidPocket::new);
 
         public boolean isEmpty() {
             return this.fluidPositions.isEmpty() || this.fluidState.isEmpty() || this.fluidAmount <= 0;
@@ -200,8 +199,9 @@ public class WorldFluidPocketsState extends SavedData {
         public long extractFluid(long amount) {
             long originalAmount = this.fluidAmount;
 
-            if (amount > this.fluidAmount)
+            if (amount > this.fluidAmount) {
                 amount = this.fluidAmount;
+            }
 
             Map<BlockPos, Integer> nonEmptyPositions = new HashMap<>();
             for (Map.Entry<BlockPos, Integer> entry : this.fluidPositions.entrySet()) {
@@ -268,8 +268,8 @@ public class WorldFluidPocketsState extends SavedData {
 
         public boolean isWithinDistance(BlockPos pos, int distance) {
             return pos.getX() >= this.minX - distance && pos.getX() <= this.maxX + distance &&
-                    pos.getY() >= this.minY - distance && pos.getY() <= this.maxY + distance &&
-                    pos.getZ() >= this.minZ - distance && pos.getZ() <= this.maxZ + distance;
+                pos.getY() >= this.minY - distance && pos.getY() <= this.maxY + distance &&
+                pos.getZ() >= this.minZ - distance && pos.getZ() <= this.maxZ + distance;
         }
     }
 }

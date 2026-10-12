@@ -48,7 +48,12 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, WrappedContainerStorageHolder, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        WrappedContainerStorageHolder,
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("containment_conveyor");
 
     private final AABB bounds;
@@ -62,7 +67,7 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         super(ModBlocks.CONTAINMENT_CONVEYOR.get(), ModBlockEntityTypes.CONTAINMENT_CONVEYOR.get(), pos, state);
         this.bounds = new AABB(pos).inflate(0.5D);
         this.jarStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1,
-                (stack, _) -> stack.is(ModItems.EMPTY_MOB_JAR.get())), null);
+            (stack, _) -> stack.is(ModItems.EMPTY_MOB_JAR.get())), null);
     }
 
     @Override
@@ -126,7 +131,8 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
         if (storage == null || !storage.canAcceptIncomingItem())
             return;
 
-        List<LivingEntity> entities = this.level.getEntitiesOfClass(LivingEntity.class, this.bounds, entity -> !entity.isSpectator() && entity.isAlive() && !(entity instanceof Player));
+        List<LivingEntity> entities = this.level.getEntitiesOfClass(LivingEntity.class, this.bounds,
+            entity -> !entity.isSpectator() && entity.isAlive() && !(entity instanceof Player));
         for (LivingEntity entity : entities) {
             if (entity instanceof LivingEntity livingEntity && storage.canAcceptIncomingItem()) {
                 onEntityFound(livingEntity);
@@ -148,7 +154,8 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
     }
 
     private void onComplete() {
-        ConveyorNetwork network = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level).getNetwork(this.worldPosition);
+        ConveyorNetwork network = LevelConveyorNetworks.getOrCreate((ServerLevel) this.level)
+            .getNetwork(this.worldPosition);
         if (network != null) {
             ConveyorStorage storage = network.getStorage().getStorageAt(this.level, this.worldPosition);
             if (storage != null && storage.canAcceptIncomingItem()) {
@@ -215,11 +222,11 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity impleme
             return;
 
         Entity entity = EntityType.loadEntityRecursive(
-                this.containingEntityData.type(),
-                this.containingEntityData.copyTagWithoutId(),
-                this.level,
-                EntitySpawnReason.LOAD,
-                EntityProcessor.NOP);
+            this.containingEntityData.type(),
+            this.containingEntityData.copyTagWithoutId(),
+            this.level,
+            EntitySpawnReason.LOAD,
+            EntityProcessor.NOP);
         this.containingEntityData = null;
         if (entity instanceof LivingEntity livingEntity) {
             this.containingEntity = livingEntity;

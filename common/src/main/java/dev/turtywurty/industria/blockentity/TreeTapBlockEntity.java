@@ -45,7 +45,7 @@ public class TreeTapBlockEntity extends IndustriaBlockEntity implements Syncable
     public TreeTapBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.TREE_TAP.get(), ModBlockEntityTypes.TREE_TAP.get(), pos, state);
         this.fluidStorage.addStorage(new OutputFluidStorage(this, FluidAmounts.BLOCK,
-                variant -> variant.value().is(TagList.Fluids.LATEX)));
+            variant -> variant.value().is(TagList.Fluids.LATEX)));
     }
 
     @Override
@@ -64,7 +64,8 @@ public class TreeTapBlockEntity extends IndustriaBlockEntity implements Syncable
         if (!storage.getResource().isBlank()) {
             ResourceVariant<Fluid> variant = storage.getResource();
             BlockPos outputPos = this.worldPosition.relative(facing);
-            ResourceStorage<ResourceVariant<Fluid>> outputStorage = TransferService.get().findBlock(StorageKeys.FLUID, this.level, outputPos, facing.getOpposite());
+            ResourceStorage<ResourceVariant<Fluid>> outputStorage = TransferService.get().findBlock(StorageKeys.FLUID,
+                this.level, outputPos, facing.getOpposite());
             if (outputStorage != null) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                     long amountToExtract = Math.min(storage.getAmount(), FluidAmounts.INGOT);
@@ -98,7 +99,7 @@ public class TreeTapBlockEntity extends IndustriaBlockEntity implements Syncable
         if (stateAfterExtraction != null) {
             this.level.setBlock(source.pos(), stateAfterExtraction, Block.UPDATE_ALL);
             set(storage, ResourceTypes.FLUID.of(ModFluids.LATEX.still().get().builtInRegistryHolder()),
-                    storage.getAmount() + FluidAmounts.INGOT);
+                storage.getAmount() + FluidAmounts.INGOT);
             update();
         }
     }
@@ -144,21 +145,21 @@ public class TreeTapBlockEntity extends IndustriaBlockEntity implements Syncable
             return null;
 
         Comparator<LatexEntry> topDownComparator = Comparator
-                .comparingInt((LatexEntry entry) -> entry.pos().getY())
-                .thenComparingInt(entry -> -entry.pos().distManhattan(this.worldPosition))
-                .thenComparingInt(entry -> entry.pos().getX())
-                .thenComparingInt(entry -> entry.pos().getZ());
+            .comparingInt((LatexEntry entry) -> entry.pos().getY())
+            .thenComparingInt(entry -> -entry.pos().distManhattan(this.worldPosition))
+            .thenComparingInt(entry -> entry.pos().getX())
+            .thenComparingInt(entry -> entry.pos().getZ());
 
         return latexSources.stream()
-                .map(pos -> {
-                    BlockState state = this.level.getBlockState(pos);
-                    LatexBlock latexBlock = state.getBlock() instanceof LatexBlock block ? block : null;
-                    return new LatexEntry(pos, state, latexBlock);
-                })
-                .filter(entry -> entry.latexBlock != null)
-                .filter(entry -> entry.latexBlock().hasLatex(entry.state()))
-                .max(topDownComparator)
-                .orElse(null);
+            .map(pos -> {
+                BlockState state = this.level.getBlockState(pos);
+                LatexBlock latexBlock = state.getBlock() instanceof LatexBlock block ? block : null;
+                return new LatexEntry(pos, state, latexBlock);
+            })
+            .filter(entry -> entry.latexBlock != null)
+            .filter(entry -> entry.latexBlock().hasLatex(entry.state()))
+            .max(topDownComparator)
+            .orElse(null);
     }
 
     private Set<BlockPos> getCachedLatexSources(Direction facing) {
@@ -195,7 +196,8 @@ public class TreeTapBlockEntity extends IndustriaBlockEntity implements Syncable
         if (!(this.level.getBlockState(attachedPos).getBlock() instanceof LatexBlock))
             return;
 
-        this.cachedLatexSources.addAll(TreeTapBlock.findLatexSources(this.level, attachedPos, Collections.emptySet(), new HashSet<>()));
+        this.cachedLatexSources
+            .addAll(TreeTapBlock.findLatexSources(this.level, attachedPos, Collections.emptySet(), new HashSet<>()));
     }
 
     private record LatexEntry(BlockPos pos, BlockState state, LatexBlock latexBlock) {

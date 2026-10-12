@@ -22,8 +22,12 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public record AlloyingRecipe(IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStackTemplate output,
-                             int smeltTime) implements Recipe<RecipeSimpleInventory> {
+public record AlloyingRecipe(
+    IndustriaIngredient inputA,
+    IndustriaIngredient inputB,
+    ItemStackTemplate output,
+    int smeltTime
+) implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
         ItemStack matchedA = ItemStack.EMPTY;
@@ -117,13 +121,12 @@ public record AlloyingRecipe(IndustriaIngredient inputA, IndustriaIngredient inp
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new AlloyFurnaceRecipeDisplay(
-                this.inputA.toDisplay(),
-                this.inputB.toDisplay(),
-                SlotDisplay.AnyFuel.INSTANCE,
-                new SlotDisplay.ItemStackSlotDisplay(this.output),
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.ALLOY_FURNACE.get().asItem()),
-                this.smeltTime
-        ));
+            this.inputA.toDisplay(),
+            this.inputB.toDisplay(),
+            SlotDisplay.AnyFuel.INSTANCE,
+            new SlotDisplay.ItemStackSlotDisplay(this.output),
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.ALLOY_FURNACE.get().asItem()),
+            this.smeltTime));
     }
 
     public static class Type implements RecipeType<AlloyingRecipe> {
@@ -139,45 +142,50 @@ public record AlloyingRecipe(IndustriaIngredient inputA, IndustriaIngredient inp
     }
 
     private static final MapCodec<AlloyingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("inputA").forGetter(AlloyingRecipe::inputA),
-            IndustriaIngredient.CODEC.fieldOf("inputB").forGetter(AlloyingRecipe::inputB),
-            ItemStackTemplate.CODEC.fieldOf("output").forGetter(AlloyingRecipe::output),
-            Codec.INT.fieldOf("smelt_time").forGetter(AlloyingRecipe::smeltTime)
-    ).apply(instance, AlloyingRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("inputA").forGetter(AlloyingRecipe::inputA),
+        IndustriaIngredient.CODEC.fieldOf("inputB").forGetter(AlloyingRecipe::inputB),
+        ItemStackTemplate.CODEC.fieldOf("output").forGetter(AlloyingRecipe::output),
+        Codec.INT.fieldOf("smelt_time").forGetter(AlloyingRecipe::smeltTime)).apply(instance, AlloyingRecipe::new));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, AlloyingRecipe> STREAM_CODEC =
-            StreamCodec.composite(IndustriaIngredient.STREAM_CODEC, AlloyingRecipe::inputA,
-                    IndustriaIngredient.STREAM_CODEC, AlloyingRecipe::inputB,
-                    ItemStackTemplate.STREAM_CODEC, AlloyingRecipe::output,
-                    ByteBufCodecs.INT, AlloyingRecipe::smeltTime,
-                    AlloyingRecipe::new);
+    private static final StreamCodec<RegistryFriendlyByteBuf, AlloyingRecipe> STREAM_CODEC = StreamCodec.composite(
+        IndustriaIngredient.STREAM_CODEC, AlloyingRecipe::inputA,
+        IndustriaIngredient.STREAM_CODEC, AlloyingRecipe::inputB,
+        ItemStackTemplate.STREAM_CODEC, AlloyingRecipe::output,
+        ByteBufCodecs.INT, AlloyingRecipe::smeltTime,
+        AlloyingRecipe::new);
 
     public static final RecipeSerializer<AlloyingRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    public record AlloyFurnaceRecipeDisplay(SlotDisplay inputA, SlotDisplay inputB, SlotDisplay fuel,
-                                            SlotDisplay result, SlotDisplay craftingStation,
-                                            int processTime) implements RecipeDisplay {
+    public record AlloyFurnaceRecipeDisplay(
+        SlotDisplay inputA,
+        SlotDisplay inputB,
+        SlotDisplay fuel,
+        SlotDisplay result,
+        SlotDisplay craftingStation,
+        int processTime
+    ) implements RecipeDisplay {
         public static final MapCodec<AlloyFurnaceRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
-                instance -> instance.group(
-                        SlotDisplay.CODEC.fieldOf("inputA").forGetter(AlloyFurnaceRecipeDisplay::inputA),
-                        SlotDisplay.CODEC.fieldOf("inputB").forGetter(AlloyFurnaceRecipeDisplay::inputB),
-                        SlotDisplay.CODEC.fieldOf("fuel").forGetter(AlloyFurnaceRecipeDisplay::fuel),
-                        SlotDisplay.CODEC.fieldOf("result").forGetter(AlloyFurnaceRecipeDisplay::result),
-                        SlotDisplay.CODEC.fieldOf("craftingStation").forGetter(AlloyFurnaceRecipeDisplay::craftingStation),
-                        Codec.INT.fieldOf("processTime").forGetter(AlloyFurnaceRecipeDisplay::processTime)
-                ).apply(instance, AlloyFurnaceRecipeDisplay::new));
+            instance -> instance.group(
+                SlotDisplay.CODEC.fieldOf("inputA").forGetter(AlloyFurnaceRecipeDisplay::inputA),
+                SlotDisplay.CODEC.fieldOf("inputB").forGetter(AlloyFurnaceRecipeDisplay::inputB),
+                SlotDisplay.CODEC.fieldOf("fuel").forGetter(AlloyFurnaceRecipeDisplay::fuel),
+                SlotDisplay.CODEC.fieldOf("result").forGetter(AlloyFurnaceRecipeDisplay::result),
+                SlotDisplay.CODEC.fieldOf("craftingStation").forGetter(AlloyFurnaceRecipeDisplay::craftingStation),
+                Codec.INT.fieldOf("processTime").forGetter(AlloyFurnaceRecipeDisplay::processTime))
+                .apply(instance, AlloyFurnaceRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, AlloyFurnaceRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::inputA,
                 SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::inputB,
                 SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::fuel,
                 SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::result,
                 SlotDisplay.STREAM_CODEC, AlloyFurnaceRecipeDisplay::craftingStation,
                 ByteBufCodecs.INT, AlloyFurnaceRecipeDisplay::processTime,
-                AlloyFurnaceRecipeDisplay::new
-        );
+                AlloyFurnaceRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<AlloyFurnaceRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<AlloyFurnaceRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+            STREAM_CODEC);
 
         @Override
         public SlotDisplay craftingStation() {

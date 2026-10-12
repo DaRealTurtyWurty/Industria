@@ -34,7 +34,8 @@ public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGener
         long energy = this.menu.getEnergy();
         long maxEnergy = this.menu.getMaxEnergy();
         int energyBarHeight = Math.round((float) energy / maxEnergy * 60);
-        context.fill(this.leftPos + 8, this.topPos + 8 + 60 - energyBarHeight, this.leftPos + 16, this.topPos + 68, 0xFFD4AF37);
+        context.fill(this.leftPos + 8, this.topPos + 8 + 60 - energyBarHeight, this.leftPos + 16, this.topPos + 68,
+            0xFFD4AF37);
 
         Fluid fluid = this.menu.getFluid();
         long fluidAmount = this.menu.getFluidAmount();
@@ -50,7 +51,8 @@ public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGener
         if (renderData == null)
             return;
 
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, renderData.stillSprite(), this.leftPos + 146, this.topPos + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, renderData.tintColor());
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, renderData.stillSprite(), this.leftPos + 146,
+            this.topPos + 8 + 60 - fluidBarHeight, 16, fluidBarHeight, renderData.tintColor());
     }
 
     @Override
@@ -62,15 +64,19 @@ public class ThermalGeneratorScreen extends AbstractContainerScreen<ThermalGener
             long fluidAmount = this.menu.getFluidAmount();
             long fluidCapacity = this.menu.getFluidCapacity();
             if (fluid != null && fluidAmount > 0) {
-                context.setTooltipForNextFrame(this.font, Component.translatable(fluid.defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()), mouseX, mouseY);
-                context.setTooltipForNextFrame(this.font, Component.literal(fluidAmount + " / " + fluidCapacity + " mB"), mouseX, mouseY + 10);
+                context.setTooltipForNextFrame(this.font,
+                    Component.translatable(fluid.defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()),
+                    mouseX, mouseY);
+                context.setTooltipForNextFrame(this.font,
+                    Component.literal(fluidAmount + " / " + fluidCapacity + " mB"), mouseX, mouseY + 10);
             }
         }
 
         if (isHovering(8, 8, 8, 60, mouseX, mouseY)) {
             long energy = this.menu.getEnergy();
             long maxEnergy = this.menu.getMaxEnergy();
-            context.setTooltipForNextFrame(this.font, Component.literal(energy + " / " + maxEnergy + " FE"), mouseX, mouseY);
+            context.setTooltipForNextFrame(this.font, Component.literal(energy + " / " + maxEnergy + " FE"), mouseX,
+                mouseY);
         }
     }
 }

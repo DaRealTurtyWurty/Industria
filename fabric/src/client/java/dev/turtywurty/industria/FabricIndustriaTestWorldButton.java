@@ -18,15 +18,16 @@ public final class FabricIndustriaTestWorldButton {
 
             var widgets = Screens.getWidgets(screen);
             Button original = widgets.stream()
-                    .filter(Button.class::isInstance)
-                    .map(Button.class::cast)
-                    .filter(IndustriaTestWorldLauncher::isVanillaTestWorldButton)
-                    .findFirst()
-                    .orElse(null);
+                .filter(Button.class::isInstance)
+                .map(Button.class::cast)
+                .filter(IndustriaTestWorldLauncher::isVanillaTestWorldButton)
+                .findFirst()
+                .orElse(null);
             if (original == null) {
                 Button fallback = IndustriaTestWorldLauncher.createFallbackButton(screen, widgets);
-                if (fallback != null)
+                if (fallback != null) {
                     widgets.add(fallback);
+                }
                 return;
             }
 

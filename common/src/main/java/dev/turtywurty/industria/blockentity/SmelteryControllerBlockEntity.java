@@ -56,7 +56,10 @@ import java.util.*;
 import java.util.function.Supplier;
 
 @SuppressWarnings("DataFlowIssue")
-public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
+    implements
+        TickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("smeltery_controller");
 
     private static final float AMBIENT_TEMPERATURE = 20.0F;
@@ -101,8 +104,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
 
-        Optional<List<SmelteryChamberRenderData>> renderChambers = input.read("RenderChambers", SmelteryChamberRenderData.CODEC.listOf());
-        if(renderChambers.isPresent()) {
+        Optional<List<SmelteryChamberRenderData>> renderChambers = input.read("RenderChambers",
+            SmelteryChamberRenderData.CODEC.listOf());
+        if (renderChambers.isPresent()) {
             this.renderSnapshot = List.copyOf(renderChambers.get());
             return;
         }
@@ -117,9 +121,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         this.fireBoxPos = input.read("FireBoxPos", BlockPos.CODEC).orElse(null);
 
         this.retainedFluids.clear();
-        this.retainedFluids.addAll(input.read("RetainedFluids", RetainedChamberFluid.CODEC.listOf()).orElseGet(List::of));
+        this.retainedFluids
+            .addAll(input.read("RetainedFluids", RetainedChamberFluid.CODEC.listOf()).orElseGet(List::of));
 
-        this.temperature = Mth.clamp(input.getFloatOr("Temperature", AMBIENT_TEMPERATURE), AMBIENT_TEMPERATURE, MAX_TEMPERATURE);
+        this.temperature = Mth.clamp(input.getFloatOr("Temperature", AMBIENT_TEMPERATURE), AMBIENT_TEMPERATURE,
+            MAX_TEMPERATURE);
         this.keepMolten = input.getBooleanOr("KeepMolten", false);
     }
 
@@ -135,12 +141,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         float targetTemperature = getTargetTemperature();
         boolean heating = false;
         if (this.structureReady
-                && this.fireBoxPos != null
-                && this.level.isLoaded(this.fireBoxPos)
-                && this.level.getBlockEntity(this.fireBoxPos) instanceof FireboxBlockEntity firebox
-                && targetTemperature > AMBIENT_TEMPERATURE
-                && this.temperature <= targetTemperature
-        ) {
+            && this.fireBoxPos != null
+            && this.level.isLoaded(this.fireBoxPos)
+            && this.level.getBlockEntity(this.fireBoxPos) instanceof FireboxBlockEntity firebox
+            && targetTemperature > AMBIENT_TEMPERATURE
+            && this.temperature <= targetTemperature) {
             firebox.setFuelSpaceSize(this.fuelSpaceSize);
             heating = firebox.burnForTick();
         }
@@ -149,7 +154,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         applyChamberHeat();
         emitChimneyParticles(heating);
         processChambers();
-        if(this.level.getGameTime() % 5 == 0) {
+        if (this.level.getGameTime() % 5 == 0) {
             syncRenderSnapshot();
         }
     }
@@ -169,9 +174,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private void emitChimneyParticles(boolean heating) {
         if (!heating
-                || !this.structureReady
-                || !(this.level instanceof ServerLevel serverLevel)
-                || this.level.getGameTime() % 4 != 0)
+            || !this.structureReady
+            || !(this.level instanceof ServerLevel serverLevel)
+            || this.level.getGameTime() % 4 != 0)
             return;
 
         Set<BlockPos> emittedPositions = new HashSet<>();
@@ -185,23 +190,23 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
         for (BlockPos position : emittedPositions) {
             serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                    position.getX() + 0.5, position.getY() + 1.05, position.getZ() + 0.5,
-                    1, 0.08, 0.08, 0.08, 0.02);
+                position.getX() + 0.5, position.getY() + 1.05, position.getZ() + 0.5,
+                1, 0.08, 0.08, 0.08, 0.02);
         }
     }
 
     private void applyChamberHeat() {
-        if(!this.structureReady
-                || this.temperature < SAFE_ENTITY_TEMPERATURE
-                || !(this.level instanceof ServerLevel serverLevel)
-                || this.level.getGameTime() % 20 != 0)
+        if (!this.structureReady
+            || this.temperature < SAFE_ENTITY_TEMPERATURE
+            || !(this.level instanceof ServerLevel serverLevel)
+            || this.level.getGameTime() % 20 != 0)
             return;
 
         Set<Entity> affectedEntities = new HashSet<>();
         for (SmelteryChamber chamber : this.chambers) {
             List<Entity> entities = serverLevel.getEntities(null, chamber.getBoundingBox());
             for (Entity entity : entities) {
-                if(!entity.isAlive() || entity.fireImmune() || !affectedEntities.add(entity))
+                if (!entity.isAlive() || entity.fireImmune() || !affectedEntities.add(entity))
                     continue;
 
                 entity.igniteForSeconds(10.0F);
@@ -228,13 +233,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
             var fluidStack = new FluidStack(storage.getResource(), storage.getAmount());
             infos.add(new SmelteryControllerMenu.SmelteryChamberInfo(
-                    chamber.hatchPos,
-                    width, height, depth,
-                    fluidStack,
-                    storage.getCapacity(),
-                    getRequiredTemperatureForFluid(fluidStack.variant()),
-                    getSolidBlockForFluid(fluidStack.variant())
-            ));
+                chamber.hatchPos,
+                width, height, depth,
+                fluidStack,
+                storage.getCapacity(),
+                getRequiredTemperatureForFluid(fluidStack.variant()),
+                getSolidBlockForFluid(fluidStack.variant())));
         }
 
         return List.copyOf(infos);
@@ -254,7 +258,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 continue;
 
             SyncingFluidStorage fluidStorage = chamber.getFluidStorage();
-            if (fluidStorage.getCapacity() <= 0 || fluidStorage.getAmount() <= 0 || fluidStorage.getResource().isBlank())
+            if (fluidStorage.getCapacity() <= 0 || fluidStorage.getAmount() <= 0
+                || fluidStorage.getResource().isBlank())
                 continue;
 
             float requiredTemperature = getRequiredTemperatureForFluid(fluidStorage.getResource());
@@ -262,12 +267,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 continue;
 
             renderDataList.add(new SmelteryChamberRenderData(
-                    chamber.getBoundingBox(),
-                    fluidStorage.getFluidStack(),
-                    fluidStorage.getCapacity(),
-                    getSolidBlockForFluid(fluidStorage.getResource()),
-                    this.temperature >= requiredTemperature
-            ));
+                chamber.getBoundingBox(),
+                fluidStorage.getFluidStack(),
+                fluidStorage.getCapacity(),
+                getSolidBlockForFluid(fluidStorage.getResource()),
+                this.temperature >= requiredTemperature));
         }
 
         return List.copyOf(renderDataList);
@@ -275,7 +279,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private void syncRenderSnapshot() {
         List<SmelteryChamberRenderData> renderSnapshot = createRenderSnapshot();
-        if(!renderSnapshot.equals(this.renderSnapshot)) {
+        if (!renderSnapshot.equals(this.renderSnapshot)) {
             this.renderSnapshot = renderSnapshot;
             forceUpdate();
         }
@@ -291,20 +295,21 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private boolean isValidMeltingRecipe(SmelteryRecipe recipe) {
         return recipe.processTime() > 0
-                && !recipe.output().isEmpty()
-                && recipe.input().stackData().count() > 0
-                && recipe.requiredTemperature() >= AMBIENT_TEMPERATURE
-                && recipe.preferredTemperature() > recipe.requiredTemperature()
-                && recipe.preferredTemperature() <= MAX_TEMPERATURE
-                && Float.isFinite(recipe.maxSpeedMultiplier())
-                && recipe.maxSpeedMultiplier() >= 1.0F;
+            && !recipe.output().isEmpty()
+            && recipe.input().stackData().count() > 0
+            && recipe.requiredTemperature() >= AMBIENT_TEMPERATURE
+            && recipe.preferredTemperature() > recipe.requiredTemperature()
+            && recipe.preferredTemperature() <= MAX_TEMPERATURE
+            && Float.isFinite(recipe.maxSpeedMultiplier())
+            && recipe.maxSpeedMultiplier() >= 1.0F;
     }
 
     public Optional<RecipeHolder<SmelteryRecipe>> getMatchingRecipe(ItemStack stack) {
         if (!(this.level instanceof ServerLevel serverLevel))
             return Optional.empty();
 
-        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.SMELTERY.get(), SingleItemStackRecipeInput.of(stack), this.level);
+        return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.SMELTERY.get(),
+            SingleItemStackRecipeInput.of(stack), this.level);
     }
 
     public float getRequiredTemperatureForFluid(ResourceVariant<Fluid> fluid) {
@@ -321,9 +326,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
         Optional<MetalDefinition> optMetalDefinition = MetalRegistry.findBy(fluid.value());
         return optMetalDefinition.map(MetalDefinition::storageBlock)
-                .map(Supplier::get)
-                .map(Block::defaultBlockState)
-                .orElseGet(Blocks.AIR::defaultBlockState);
+            .map(Supplier::get)
+            .map(Block::defaultBlockState)
+            .orElseGet(Blocks.AIR::defaultBlockState);
     }
 
     public boolean canTapOutput(BlockPos outletPos) {
@@ -361,14 +366,16 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 if (!fluidStack.isEmpty()) {
                     float requiredTemperature = getRequiredTemperatureForFluid(fluidStack.variant());
                     if (requiredTemperature > 0) {
-                        target = Math.clamp(requiredTemperature + 5.0f, target, MAX_TEMPERATURE); // Add a small buffer to ensure the fluid stays molten
+                        target = Math.clamp(requiredTemperature + 5.0f, target, MAX_TEMPERATURE); // Add a small buffer
+                                                                                                  // to ensure the fluid
+                                                                                                  // stays molten
                     }
                 }
             }
 
             if (chamber.hatchPos == null
-                    || !this.level.isLoaded(chamber.hatchPos)
-                    || !(this.level.getBlockEntity(chamber.hatchPos) instanceof ChargingHatchBlockEntity hatch))
+                || !this.level.isLoaded(chamber.hatchPos)
+                || !(this.level.getBlockEntity(chamber.hatchPos) instanceof ChargingHatchBlockEntity hatch))
                 continue;
 
             int processingSlots = Math.min(hatch.getProcessingSlotCount(), hatch.getInventory().getContainerSize());
@@ -383,8 +390,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                 SmelteryRecipe recipe = matchingRecipe.get().value();
                 if (!isValidMeltingRecipe(recipe)
-                        || !recipe.input().testForRecipe(stack)
-                        || !chamber.getFluidStorage().canInsert(recipe.output()))
+                    || !recipe.input().testForRecipe(stack)
+                    || !chamber.getFluidStorage().canInsert(recipe.output()))
                     continue;
 
                 target = Math.max(target, recipe.preferredTemperature());
@@ -439,7 +446,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
         hatch.prepareMeltingSlot(slot, recipe.processTime());
         if (this.temperature < recipe.requiredTemperature()
-                || !chamber.getFluidStorage().canInsert(recipe.output()))
+            || !chamber.getFluidStorage().canInsert(recipe.output()))
             return;
 
         if (hatch.getMeltingProgress(slot) < recipe.processTime()) {
@@ -453,7 +460,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         }
     }
 
-    private boolean completeMelting(ChargingHatchBlockEntity hatch, SmelteryChamber chamber, int slot, SmelteryRecipe recipe) {
+    private boolean completeMelting(
+        ChargingHatchBlockEntity hatch,
+        SmelteryChamber chamber,
+        int slot,
+        SmelteryRecipe recipe
+    ) {
         ItemStack stack = hatch.getInventory().getItem(slot);
         if (!recipe.input().testForRecipe(stack))
             return false;
@@ -465,7 +477,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             if (extracted != requiredCount)
                 return false;
 
-            long inserted = chamber.getFluidStorage().insert(recipe.output().variant(), recipe.output().amount(), transaction);
+            long inserted = chamber.getFluidStorage().insert(recipe.output().variant(), recipe.output().amount(),
+                transaction);
             if (inserted != recipe.output().amount())
                 return false;
 
@@ -502,7 +515,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
             AABB boundingBox = calculateBounds(positions);
 
-            Direction fuelSpaceDirection = this.level.getBlockState(this.fireBoxPos).getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
+            Direction fuelSpaceDirection = this.level.getBlockState(this.fireBoxPos)
+                .getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
             BlockPos fuelSpaceStartPos = this.fireBoxPos.relative(fuelSpaceDirection);
             SearchResult fuelSpaceResult = floodFillFuelSpace(fuelSpaceStartPos, boundingBox);
             if (fuelSpaceResult.type() == SearchResultType.NOT_FOUND) {
@@ -510,17 +524,15 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 return;
             }
 
-            if (fuelSpaceResult.type() != SearchResultType.VALID) {
+            if (fuelSpaceResult.type() != SearchResultType.VALID)
                 return;
-            }
 
             List<ChamberCandidate> chamberCandidates = discoverChambers(
-                    boundingBox,
-                    hatchPositions,
-                    chimneyPositions,
-                    outletPositions,
-                    fuelSpaceResult
-            );
+                boundingBox,
+                hatchPositions,
+                chimneyPositions,
+                outletPositions,
+                fuelSpaceResult);
 
             if (chamberCandidates == null)
                 return;
@@ -528,7 +540,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             boolean controllerInWall = false;
             for (ChamberCandidate candidate : chamberCandidates) {
                 AABB aabb = candidate.boundingBox();
-                if (isControllerInWall((int) aabb.minX - 1, (int) aabb.maxX, (int) aabb.minY - 1, (int) aabb.maxY, (int) aabb.minZ - 1, (int) aabb.maxZ)) {
+                if (isControllerInWall((int) aabb.minX - 1, (int) aabb.maxX, (int) aabb.minY - 1, (int) aabb.maxY,
+                    (int) aabb.minZ - 1, (int) aabb.maxZ)) {
                     controllerInWall = true;
                     break;
                 }
@@ -565,28 +578,32 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             }
         }
 
-        return new SmelteryComponents(controllerPositions, fireboxPositions, chimneyPositions, hatchPositions, outletPositions);
+        return new SmelteryComponents(controllerPositions, fireboxPositions, chimneyPositions, hatchPositions,
+            outletPositions);
     }
 
     private AABB calculateBounds(Set<BlockPos> positions) {
         return new AABB(positions.stream().mapToDouble(BlockPos::getX).min().orElse(0),
-                positions.stream().mapToDouble(BlockPos::getY).min().orElse(0),
-                positions.stream().mapToDouble(BlockPos::getZ).min().orElse(0),
-                positions.stream().mapToDouble(BlockPos::getX).max().orElse(0) + 1,
-                positions.stream().mapToDouble(BlockPos::getY).max().orElse(0) + 1,
-                positions.stream().mapToDouble(BlockPos::getZ).max().orElse(0) + 1);
+            positions.stream().mapToDouble(BlockPos::getY).min().orElse(0),
+            positions.stream().mapToDouble(BlockPos::getZ).min().orElse(0),
+            positions.stream().mapToDouble(BlockPos::getX).max().orElse(0) + 1,
+            positions.stream().mapToDouble(BlockPos::getY).max().orElse(0) + 1,
+            positions.stream().mapToDouble(BlockPos::getZ).max().orElse(0) + 1);
     }
 
     private BlockPos findChimney(
-            Set<BlockPos> chimneyPositions,
-            int firstX, int lastX, int lastY,
-            int firstZ, int lastZ
+        Set<BlockPos> chimneyPositions,
+        int firstX,
+        int lastX,
+        int lastY,
+        int firstZ,
+        int lastZ
     ) {
         BlockPos chamberChimneyPos = null;
         for (BlockPos chimneyPos : chimneyPositions) {
             if (chimneyPos.getY() == lastY + 1
-                    && chimneyPos.getX() > firstX && chimneyPos.getX() < lastX
-                    && chimneyPos.getZ() > firstZ && chimneyPos.getZ() < lastZ) {
+                && chimneyPos.getX() > firstX && chimneyPos.getX() < lastX
+                && chimneyPos.getZ() > firstZ && chimneyPos.getZ() < lastZ) {
                 chamberChimneyPos = chimneyPos;
                 break;
             }
@@ -596,15 +613,21 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private List<BlockPos> findOutlets(
-            Set<BlockPos> outletPositions,
-            int firstX, int lastX, int firstY, int lastY,
-            int firstZ, int lastZ
+        Set<BlockPos> outletPositions,
+        int firstX,
+        int lastX,
+        int firstY,
+        int lastY,
+        int firstZ,
+        int lastZ
     ) {
         List<BlockPos> chamberOutlets = new ArrayList<>();
         for (BlockPos outletPos : outletPositions) {
             if ((outletPos.getY() > firstY && outletPos.getY() < lastY)
-                    && (((outletPos.getX() == firstX - 1 || outletPos.getX() == lastX + 1) && outletPos.getZ() > firstZ && outletPos.getZ() < lastZ)
-                    || ((outletPos.getZ() == firstZ - 1 || outletPos.getZ() == lastZ + 1) && outletPos.getX() > firstX && outletPos.getX() < lastX))) {
+                && (((outletPos.getX() == firstX - 1 || outletPos.getX() == lastX + 1) && outletPos.getZ() > firstZ
+                    && outletPos.getZ() < lastZ)
+                    || ((outletPos.getZ() == firstZ - 1 || outletPos.getZ() == lastZ + 1) && outletPos.getX() > firstX
+                        && outletPos.getX() < lastX))) {
                 chamberOutlets.add(outletPos);
             }
         }
@@ -618,13 +641,18 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         int z = this.worldPosition.getZ();
 
         return y > firstY && y < lastY
-                && ((x == firstX || x == lastX) && z > firstZ && z < lastZ
+            && ((x == firstX || x == lastX) && z > firstZ && z < lastZ
                 || (z == firstZ || z == lastZ) && x > firstX && x < lastX);
     }
 
     private SearchResultType validateChamberShell(
-            BlockPos hatchPos,
-            int firstX, int lastX, int firstY, int lastY, int firstZ, int lastZ
+        BlockPos hatchPos,
+        int firstX,
+        int lastX,
+        int firstY,
+        int lastY,
+        int firstZ,
+        int lastZ
     ) {
         boolean shellValid = true;
         for (int x = firstX; x <= lastX; x++) {
@@ -634,17 +662,16 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                         continue;
 
                     var pos = new BlockPos(x, y, z);
-                    if (!this.level.isLoaded(pos)) {
+                    if (!this.level.isLoaded(pos))
                         return SearchResultType.UNLOADED_CHUNK;
-                    }
 
                     BlockState state = this.level.getBlockState(pos);
                     if (state.is(ModBlocks.FIREBRICK.get())
-                            || (pos.equals(hatchPos) && state.is(ModBlocks.CHARGING_HATCH.get()))
-                            || (pos.equals(this.worldPosition)
+                        || (pos.equals(hatchPos) && state.is(ModBlocks.CHARGING_HATCH.get()))
+                        || (pos.equals(this.worldPosition)
                             && state.is(ModBlocks.SMELTERY_CONTROLLER.get())
                             && isControllerInWall(firstX, lastX, firstY, lastY, firstZ, lastZ))
-                            || (state.is(ModBlocks.SMELTERY_GLASS.get()) && y > firstY && y < lastY))
+                        || (state.is(ModBlocks.SMELTERY_GLASS.get()) && y > firstY && y < lastY))
                         continue;
                     shellValid = false;
                 }
@@ -655,19 +682,21 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private SearchResultType validateChamberFoundation(
-            BlockPos hatchPos,
-            int firstX, int lastX, int firstY,
-            int firstZ, int lastZ,
-            SearchResult fuelSpaceResult
+        BlockPos hatchPos,
+        int firstX,
+        int lastX,
+        int firstY,
+        int firstZ,
+        int lastZ,
+        SearchResult fuelSpaceResult
     ) {
         boolean foundationValid = true;
         for (int x = firstX; x <= lastX; x++) {
             for (int z = firstZ; z <= lastZ; z++) {
                 var airPos = new BlockPos(x, firstY - 1, z);
                 var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
-                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos)) {
+                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos))
                     return SearchResultType.UNLOADED_CHUNK;
-                }
 
                 BlockState firebrickBottomState = this.level.getBlockState(firebrickBottomPos);
                 if (firebrickBottomState.is(ModBlocks.SMELTERY_GLASS.get())) {
@@ -690,16 +719,15 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 var airPos = new BlockPos(x, firstY - 1, z);
                 var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
 
-                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos)) {
+                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos))
                     return SearchResultType.UNLOADED_CHUNK;
-                }
 
                 BlockState airState = this.level.getBlockState(airPos);
                 BlockState firebrickBottomState = this.level.getBlockState(firebrickBottomPos);
 
                 if (!airState.isAir()
-                        || !firebrickBottomState.is(ModBlocks.FIREBRICK.get())
-                        || !fuelSpaceResult.positions().contains(airPos)) {
+                    || !firebrickBottomState.is(ModBlocks.FIREBRICK.get())
+                    || !fuelSpaceResult.positions().contains(airPos)) {
                     foundationValid = false;
                     break;
                 }
@@ -713,11 +741,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private List<ChamberCandidate> discoverChambers(
-            AABB boundingBox,
-            Set<BlockPos> hatchPositions,
-            Set<BlockPos> chimneyPositions,
-            Set<BlockPos> outletPositions,
-            SearchResult fuelSpaceResult
+        AABB boundingBox,
+        Set<BlockPos> hatchPositions,
+        Set<BlockPos> chimneyPositions,
+        Set<BlockPos> outletPositions,
+        SearchResult fuelSpaceResult
     ) {
         List<ChamberCandidate> chamberCandidates = new ArrayList<>();
         for (BlockPos hatchPos : hatchPositions) {
@@ -725,13 +753,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             Direction insideDirection = hatchState.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
             BlockPos insidePos = hatchPos.relative(insideDirection);
             SearchResult chamberPositions = floodFillChamber(insidePos, boundingBox);
-            if (chamberPositions.type() == SearchResultType.UNLOADED_CHUNK || chamberPositions.type() == SearchResultType.TOO_LARGE) {
+            if (chamberPositions.type() == SearchResultType.UNLOADED_CHUNK
+                || chamberPositions.type() == SearchResultType.TOO_LARGE)
                 return null;
-            }
 
-            if (chamberPositions.type() != SearchResultType.VALID) {
+            if (chamberPositions.type() != SearchResultType.VALID)
                 continue;
-            }
 
             var chamberBoundingBox = calculateBounds(chamberPositions.positions());
 
@@ -741,10 +768,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
             long expectedCapacity = width * height * depth;
             long actualCapacity = chamberPositions.positions().size();
-            if (expectedCapacity != actualCapacity) {
+            if (expectedCapacity != actualCapacity)
                 // The chamber is not a solid rectangular prism, so we skip it
                 continue;
-            }
 
             int firstX = (int) chamberBoundingBox.minX - 1;
             int lastX = (int) chamberBoundingBox.maxX;
@@ -757,31 +783,29 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             if (shellResult == SearchResultType.UNLOADED_CHUNK)
                 return null;
 
-            if (shellResult != SearchResultType.VALID) {
+            if (shellResult != SearchResultType.VALID)
                 continue;
-            }
 
             BlockPos chamberChimneyPos = findChimney(chimneyPositions, firstX, lastX, lastY, firstZ, lastZ);
-            if (chamberChimneyPos == null) {
+            if (chamberChimneyPos == null)
                 continue;
-            }
 
-            List<BlockPos> chamberOutletPositions = findOutlets(outletPositions, firstX, lastX, firstY, lastY, firstZ, lastZ);
-            if (chamberOutletPositions.isEmpty()) {
+            List<BlockPos> chamberOutletPositions = findOutlets(outletPositions, firstX, lastX, firstY, lastY, firstZ,
+                lastZ);
+            if (chamberOutletPositions.isEmpty())
                 continue;
-            }
 
-            SearchResultType foundationResult = validateChamberFoundation(hatchPos, firstX, lastX, firstY, firstZ, lastZ, fuelSpaceResult);
+            SearchResultType foundationResult = validateChamberFoundation(hatchPos, firstX, lastX, firstY, firstZ,
+                lastZ, fuelSpaceResult);
             if (foundationResult == SearchResultType.UNLOADED_CHUNK)
                 return null;
 
-            if (foundationResult != SearchResultType.VALID) {
+            if (foundationResult != SearchResultType.VALID)
                 continue;
-            }
 
             var chamber = new ChamberCandidate(chamberBoundingBox,
-                    chamberChimneyPos, hatchPos, chamberOutletPositions,
-                    FluidAmounts.BLOCK * expectedCapacity);
+                chamberChimneyPos, hatchPos, chamberOutletPositions,
+                FluidAmounts.BLOCK * expectedCapacity);
 
             if (chamberCandidates.stream().noneMatch(c -> c.boundingBox().equals(chamber.boundingBox()))) {
                 chamberCandidates.add(chamber);
@@ -805,11 +829,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             for (int index = 0; index < sources.size(); index++) {
                 ChamberFluidSource source = sources.get(index);
                 if (source.previousBounds().equals(retainedFluid.previousBounds())
-                        && (source.fluidStack().isEmpty()
+                    && (source.fluidStack().isEmpty()
                         || source.fluidStack().variant().equals(retainedFluid.fluidStack().variant()))) {
                     long combinedAmount = source.fluidStack().amount() + retainedFluid.fluidStack().amount();
                     sources.set(index, new ChamberFluidSource(source.previousBounds(),
-                            new FluidStack(retainedFluid.fluidStack().variant(), combinedAmount)));
+                        new FluidStack(retainedFluid.fluidStack().variant(), combinedAmount)));
                     matched = true;
                     break;
                 }
@@ -824,8 +848,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private List<ChamberReconciliationGroup> groupChamberOverlaps(
-            List<ChamberFluidSource> sources,
-            List<ChamberCandidate> candidates
+        List<ChamberFluidSource> sources,
+        List<ChamberCandidate> candidates
     ) {
         List<ChamberReconciliationGroup> groups = new ArrayList<>();
         Set<ChamberFluidSource> remainingSources = new HashSet<>(sources);
@@ -846,7 +870,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                 for (ChamberFluidSource source : new ArrayList<>(remainingSources)) {
                     if (groupCandidates.stream().anyMatch(
-                            candidate -> source.previousBounds().intersects(candidate.boundingBox()))) {
+                        candidate -> source.previousBounds().intersects(candidate.boundingBox()))) {
                         groupSources.add(source);
                         remainingSources.remove(source);
                         changed = true;
@@ -854,8 +878,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 }
 
                 for (ChamberCandidate candidate : new ArrayList<>(remainingCandidates)) {
-                    if (groupSources.stream().anyMatch(source ->
-                            source.previousBounds().intersects(candidate.boundingBox()))) {
+                    if (groupSources.stream()
+                        .anyMatch(source -> source.previousBounds().intersects(candidate.boundingBox()))) {
                         groupCandidates.add(candidate);
                         remainingCandidates.remove(candidate);
                         changed = true;
@@ -864,11 +888,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             } while (changed);
 
             groupSources.sort(Comparator.comparingDouble((ChamberFluidSource s) -> s.previousBounds().minX)
-                    .thenComparingDouble(s -> s.previousBounds().minY)
-                    .thenComparingDouble(s -> s.previousBounds().minZ));
+                .thenComparingDouble(s -> s.previousBounds().minY)
+                .thenComparingDouble(s -> s.previousBounds().minZ));
             groupCandidates.sort(Comparator.comparingDouble((ChamberCandidate c) -> c.boundingBox().minX)
-                    .thenComparingDouble(c -> c.boundingBox().minY)
-                    .thenComparingDouble(c -> c.boundingBox().minZ));
+                .thenComparingDouble(c -> c.boundingBox().minY)
+                .thenComparingDouble(c -> c.boundingBox().minZ));
 
             groups.add(new ChamberReconciliationGroup(groupSources, groupCandidates));
         }
@@ -881,9 +905,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private boolean reconcileGroup(
-            ChamberReconciliationGroup group,
-            List<SmelteryChamber> newChambers,
-            List<RetainedChamberFluid> newRetainedFluids
+        ChamberReconciliationGroup group,
+        List<SmelteryChamber> newChambers,
+        List<RetainedChamberFluid> newRetainedFluids
     ) {
         if (group.candidates().isEmpty()) {
             for (ChamberFluidSource source : group.sources()) {
@@ -896,8 +920,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         }
 
         FluidStack survivingFluid = group.sources().isEmpty()
-                ? FluidStack.EMPTY
-                : group.sources().getFirst().fluidStack();
+            ? FluidStack.EMPTY
+            : group.sources().getFirst().fluidStack();
         long remaining = survivingFluid.amount();
 
         for (ChamberCandidate candidate : group.candidates()) {
@@ -905,22 +929,21 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
             var storage = new SyncingFluidStorage(this, candidate.fluidCapacity());
             if (amountToKeep > 0) {
                 var snapshot = new StorageSnapshot<>(List.of(
-                        new StorageSnapshot.Entry<>(survivingFluid.variant(), amountToKeep)));
-                if (!snapshot.apply(storage)) {
+                    new StorageSnapshot.Entry<>(survivingFluid.variant(), amountToKeep)));
+                if (!snapshot.apply(storage))
                     return false;
-                }
             }
 
             remaining -= amountToKeep;
 
             var newChamber = new SmelteryChamber(candidate.boundingBox(), candidate.chimneyPos(),
-                    candidate.hatchPos(), candidate.outletPositions(), storage);
+                candidate.hatchPos(), candidate.outletPositions(), storage);
             newChambers.add(newChamber);
         }
 
         if (remaining > 0) {
             newRetainedFluids.add(new RetainedChamberFluid(group.candidates().getFirst().boundingBox(),
-                    new FluidStack(survivingFluid.variant(), remaining)));
+                new FluidStack(survivingFluid.variant(), remaining)));
         }
 
         return true;
@@ -938,9 +961,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 return;
         }
 
-        if (newChambers.size() != chamberCandidates.size()) {
+        if (newChambers.size() != chamberCandidates.size())
             return;
-        }
 
         commitChambers(newChambers, newRetainedFluids, fuelSpaceSize);
     }
@@ -1009,9 +1031,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                     var pos = new BlockPos(x, y, z);
                     BlockState state = this.level.getBlockState(pos);
-                    if (state.is(ModBlocks.SMELTERY_GLASS.get())) {
+                    if (state.is(ModBlocks.SMELTERY_GLASS.get()))
                         return true;
-                    }
                 }
             }
         }
@@ -1020,19 +1041,17 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private void commitChambers(
-            List<SmelteryChamber> newChambers,
-            List<RetainedChamberFluid> newRetainedFluids,
-            int fuelSpaceSize
+        List<SmelteryChamber> newChambers,
+        List<RetainedChamberFluid> newRetainedFluids,
+        int fuelSpaceSize
     ) {
         for (SmelteryChamber oldChamber : this.chambers) {
-            if (newChambers.stream().noneMatch(candidate ->
-                    Objects.equals(candidate.hatchPos, oldChamber.hatchPos))) {
+            if (newChambers.stream().noneMatch(candidate -> Objects.equals(candidate.hatchPos, oldChamber.hatchPos))) {
                 clearHatchLink(oldChamber.hatchPos);
             }
 
             for (BlockPos outletPos : oldChamber.outletPositions) {
-                if (newChambers.stream().noneMatch(candidate ->
-                        candidate.outletPositions.contains(outletPos))) {
+                if (newChambers.stream().noneMatch(candidate -> candidate.outletPositions.contains(outletPos))) {
                     clearOutletLink(outletPos);
                 }
             }
@@ -1052,10 +1071,10 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                 AABB boundingBox = chamber.getBoundingBox();
                 int slotCount = Math.multiplyExact(
-                        Math.multiplyExact(
-                                (int) boundingBox.getXsize(),
-                                (int) boundingBox.getYsize()),
-                        (int) boundingBox.getZsize());
+                    Math.multiplyExact(
+                        (int) boundingBox.getXsize(),
+                        (int) boundingBox.getYsize()),
+                    (int) boundingBox.getZsize());
                 hatch.setProcessingSlotCount(slotCount);
             }
 
@@ -1101,22 +1120,20 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         BlockState middleState = this.level.getBlockState(pos);
         BlockState belowState = this.level.getBlockState(belowPos);
         return aboveState.is(ModBlocks.FIREBRICK.get())
-                && middleState.isAir()
-                && belowState.is(ModBlocks.FIREBRICK.get());
+            && middleState.isAir()
+            && belowState.is(ModBlocks.FIREBRICK.get());
     }
 
     private SearchResult floodFillFuelSpace(BlockPos startPos, AABB boundingBox) {
-        if (!this.level.isLoaded(startPos) || !this.level.isLoaded(startPos.above()) || !this.level.isLoaded(startPos.below())) {
+        if (!this.level.isLoaded(startPos) || !this.level.isLoaded(startPos.above())
+            || !this.level.isLoaded(startPos.below()))
             return SearchResult.unloadedChunk();
-        }
 
-        if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5)) {
+        if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5))
             return SearchResult.notFound();
-        }
 
-        if (!isSandwiched(startPos)) {
+        if (!isSandwiched(startPos))
             return SearchResult.notFound();
-        }
 
         Deque<BlockPos> toVisit = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
@@ -1130,44 +1147,37 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 if (visited.contains(neighborPos))
                     continue;
 
-                if (!this.level.isLoaded(neighborPos)) {
+                if (!this.level.isLoaded(neighborPos))
                     return SearchResult.unloadedChunk();
-                }
 
                 BlockState neighborState = this.level.getBlockState(neighborPos);
                 if (neighborState.is(ModBlocks.FIREBRICK.get()))
                     continue;
 
                 if (neighborState.is(ModBlocks.FIREBOX.get())) {
-                    if (!neighborPos.equals(this.fireBoxPos) || !currentPos.equals(startPos)) {
+                    if (!neighborPos.equals(this.fireBoxPos) || !currentPos.equals(startPos))
                         return SearchResult.notFound();
-                    }
 
                     continue;
                 }
 
-                if (!neighborState.isAir()) {
+                if (!neighborState.isAir())
                     return SearchResult.notFound();
-                }
 
-                if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5)) {
+                if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5))
                     return SearchResult.notFound();
-                }
 
-                if (!this.level.isLoaded(neighborPos.above()) || !this.level.isLoaded(neighborPos.below())) {
+                if (!this.level.isLoaded(neighborPos.above()) || !this.level.isLoaded(neighborPos.below()))
                     return SearchResult.unloadedChunk();
-                }
 
-                if (!isSandwiched(neighborPos)) {
+                if (!isSandwiched(neighborPos))
                     return SearchResult.notFound();
-                }
 
                 visited.add(neighborPos);
                 toVisit.add(neighborPos);
 
-                if (visited.size() > 10_000) {
+                if (visited.size() > 10_000)
                     return SearchResult.tooLarge();
-                }
             }
         }
 
@@ -1175,18 +1185,15 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private SearchResult floodFillChamber(BlockPos startPos, AABB boundingBox) {
-        if (!this.level.isLoaded(startPos)) {
+        if (!this.level.isLoaded(startPos))
             return SearchResult.unloadedChunk();
-        }
 
-        if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5)) {
+        if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5))
             return SearchResult.notFound();
-        }
 
         BlockState startState = this.level.getBlockState(startPos);
-        if (!startState.isAir()) {
+        if (!startState.isAir())
             return SearchResult.notFound();
-        }
 
         Deque<BlockPos> toVisit = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
@@ -1200,24 +1207,21 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 if (visited.contains(neighborPos))
                     continue;
 
-                if (!this.level.isLoaded(neighborPos)) {
+                if (!this.level.isLoaded(neighborPos))
                     return SearchResult.unloadedChunk();
-                }
 
                 BlockState neighborState = this.level.getBlockState(neighborPos);
                 if (!neighborState.isAir())
                     continue;
 
-                if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5)) {
+                if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5))
                     return SearchResult.notFound();
-                }
 
                 visited.add(neighborPos);
                 toVisit.add(neighborPos);
 
-                if (visited.size() > 10_000) {
+                if (visited.size() > 10_000)
                     return SearchResult.tooLarge();
-                }
             }
         }
 
@@ -1225,9 +1229,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private SearchResult collectSmelteryBlocks() {
-        if (this.level == null) {
+        if (this.level == null)
             return SearchResult.notFound();
-        }
 
         Deque<BlockPos> toVisit = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
@@ -1241,9 +1244,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 if (visited.contains(neighborPos))
                     continue;
 
-                if (!this.level.isLoaded(neighborPos)) {
+                if (!this.level.isLoaded(neighborPos))
                     return SearchResult.unloadedChunk();
-                }
 
                 BlockState neighborState = this.level.getBlockState(neighborPos);
                 if (!isValidSmelteryBlock(neighborState))
@@ -1252,9 +1254,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
                 visited.add(neighborPos);
                 toVisit.add(neighborPos);
 
-                if (visited.size() > 10_000) {
+                if (visited.size() > 10_000)
                     return SearchResult.tooLarge();
-                }
             }
         }
 
@@ -1263,12 +1264,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
     private boolean isValidSmelteryBlock(BlockState state) {
         return state.is(ModBlocks.FIREBRICK.get())
-                || state.is(ModBlocks.SMELTERY_CONTROLLER.get())
-                || state.is(ModBlocks.FIREBOX.get())
-                || state.is(ModBlocks.CHARGING_HATCH.get())
-                || state.is(ModBlocks.CHIMNEY.get())
-                || state.is(ModBlocks.TAPPING_OUTLET.get())
-                || state.is(ModBlocks.SMELTERY_GLASS.get());
+            || state.is(ModBlocks.SMELTERY_CONTROLLER.get())
+            || state.is(ModBlocks.FIREBOX.get())
+            || state.is(ModBlocks.CHARGING_HATCH.get())
+            || state.is(ModBlocks.CHIMNEY.get())
+            || state.is(ModBlocks.TAPPING_OUTLET.get())
+            || state.is(ModBlocks.SMELTERY_GLASS.get());
     }
 
     @Override
@@ -1298,31 +1299,38 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
 
                 var storage = new SyncingFluidStorage(owner, data.capacity());
                 var snapshot = new StorageSnapshot<>(List.of(
-                        new StorageSnapshot.Entry<>(data.fluid().variant(), data.fluid().amount())));
+                    new StorageSnapshot.Entry<>(data.fluid().variant(), data.fluid().amount())));
                 if (!snapshot.apply(storage))
                     return DataResult.error(() -> "Stored fluid does not fit in the smeltery chamber");
 
-                return DataResult.success(new SmelteryChamber(data.boundingBox(), chimneyPos, hatchPos, outletPositions, storage));
+                return DataResult
+                    .success(new SmelteryChamber(data.boundingBox(), chimneyPos, hatchPos, outletPositions, storage));
             }, chamber -> DataResult.success(new SavedChamber(
-                    chamber.boundingBox,
-                    Optional.ofNullable(chamber.chimneyPos),
-                    Optional.ofNullable(chamber.hatchPos),
-                    chamber.outletPositions,
-                    chamber.fluidStorage.getCapacity(),
-                    new FluidStack(chamber.fluidStorage.getResource(), chamber.fluidStorage.getAmount()))));
+                chamber.boundingBox,
+                Optional.ofNullable(chamber.chimneyPos),
+                Optional.ofNullable(chamber.hatchPos),
+                chamber.outletPositions,
+                chamber.fluidStorage.getCapacity(),
+                new FluidStack(chamber.fluidStorage.getResource(), chamber.fluidStorage.getAmount()))));
         }
 
-        private record SavedChamber(AABB boundingBox, Optional<BlockPos> chimneyPos, Optional<BlockPos> hatchPos,
-                                    List<BlockPos> outletPositions, long capacity,
-                                    FluidStack fluid) {
+        private record SavedChamber(
+            AABB boundingBox,
+            Optional<BlockPos> chimneyPos,
+            Optional<BlockPos> hatchPos,
+            List<BlockPos> outletPositions,
+            long capacity,
+            FluidStack fluid
+        ) {
             private static final Codec<SavedChamber> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    ExtraCodecs.AABB_CODEC.fieldOf("bounding_box").forGetter(SavedChamber::boundingBox),
-                    BlockPos.CODEC.optionalFieldOf("chimney_pos").forGetter(SavedChamber::chimneyPos),
-                    BlockPos.CODEC.optionalFieldOf("hatch_pos").forGetter(SavedChamber::hatchPos),
-                    ExtraCodecs.listOf(BlockPos.CODEC).optionalFieldOf("outlet_positions", List.of()).forGetter(SavedChamber::outletPositions),
-                    Codec.LONG.fieldOf("capacity").forGetter(SavedChamber::capacity),
-                    FluidStack.CODEC.codec().fieldOf("fluid").forGetter(SavedChamber::fluid)
-            ).apply(instance, SavedChamber::new));
+                ExtraCodecs.AABB_CODEC.fieldOf("bounding_box").forGetter(SavedChamber::boundingBox),
+                BlockPos.CODEC.optionalFieldOf("chimney_pos").forGetter(SavedChamber::chimneyPos),
+                BlockPos.CODEC.optionalFieldOf("hatch_pos").forGetter(SavedChamber::hatchPos),
+                ExtraCodecs.listOf(BlockPos.CODEC).optionalFieldOf("outlet_positions", List.of())
+                    .forGetter(SavedChamber::outletPositions),
+                Codec.LONG.fieldOf("capacity").forGetter(SavedChamber::capacity),
+                FluidStack.CODEC.codec().fieldOf("fluid").forGetter(SavedChamber::fluid))
+                .apply(instance, SavedChamber::new));
         }
 
         private final AABB boundingBox;
@@ -1332,7 +1340,13 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
         private final List<BlockPos> outletPositions;
         private boolean hasGlass;
 
-        public SmelteryChamber(AABB boundingBox, BlockPos chimneyPos, BlockPos hatchPos, List<BlockPos> outletPositions, SyncingFluidStorage fluidStorage) {
+        public SmelteryChamber(
+            AABB boundingBox,
+            BlockPos chimneyPos,
+            BlockPos hatchPos,
+            List<BlockPos> outletPositions,
+            SyncingFluidStorage fluidStorage
+        ) {
             this.boundingBox = boundingBox;
             this.chimneyPos = chimneyPos;
             this.hatchPos = hatchPos;
@@ -1379,42 +1393,42 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity implemen
     }
 
     private record ChamberCandidate(
-            AABB boundingBox,
-            BlockPos chimneyPos,
-            BlockPos hatchPos,
-            List<BlockPos> outletPositions,
-            long fluidCapacity
+        AABB boundingBox,
+        BlockPos chimneyPos,
+        BlockPos hatchPos,
+        List<BlockPos> outletPositions,
+        long fluidCapacity
     ) {
     }
 
     private record RetainedChamberFluid(
-            AABB previousBounds,
-            FluidStack fluidStack
+        AABB previousBounds,
+        FluidStack fluidStack
     ) {
         public static final Codec<RetainedChamberFluid> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ExtraCodecs.AABB_CODEC.fieldOf("previous_bounds").forGetter(RetainedChamberFluid::previousBounds),
-                FluidStack.CODEC.codec().fieldOf("fluid_stack").forGetter(RetainedChamberFluid::fluidStack)
-        ).apply(instance, RetainedChamberFluid::new));
+            ExtraCodecs.AABB_CODEC.fieldOf("previous_bounds").forGetter(RetainedChamberFluid::previousBounds),
+            FluidStack.CODEC.codec().fieldOf("fluid_stack").forGetter(RetainedChamberFluid::fluidStack))
+            .apply(instance, RetainedChamberFluid::new));
     }
 
     private record ChamberFluidSource(
-            AABB previousBounds,
-            FluidStack fluidStack
+        AABB previousBounds,
+        FluidStack fluidStack
     ) {
     }
 
     private record ChamberReconciliationGroup(
-            List<ChamberFluidSource> sources,
-            List<ChamberCandidate> candidates
+        List<ChamberFluidSource> sources,
+        List<ChamberCandidate> candidates
     ) {
     }
 
     private record SmelteryComponents(
-            Set<BlockPos> controllerPositions,
-            Set<BlockPos> fireboxPositions,
-            Set<BlockPos> chimneyPositions,
-            Set<BlockPos> hatchPositions,
-            Set<BlockPos> outletPositions
+        Set<BlockPos> controllerPositions,
+        Set<BlockPos> fireboxPositions,
+        Set<BlockPos> chimneyPositions,
+        Set<BlockPos> hatchPositions,
+        Set<BlockPos> outletPositions
     ) {
     }
 }

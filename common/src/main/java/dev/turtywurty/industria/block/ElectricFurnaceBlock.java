@@ -6,12 +6,13 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 public class ElectricFurnaceBlock extends IndustriaBlock {
     public ElectricFurnaceBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasLitProperty()
-                .hasComparatorOutput()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ELECTRIC_FURNACE)
-                        .shouldTick()
-                        .dropContentsOnBreak()
-                        .rightClickToOpenGui()));
+            .hasHorizontalFacing()
+            .hasLitProperty()
+            .hasComparatorOutput()
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ELECTRIC_FURNACE)
+                    .shouldTick()
+                    .dropContentsOnBreak()
+                    .rightClickToOpenGui()));
     }
 }

@@ -15,18 +15,14 @@ import java.util.Objects;
 public record SlurryStack(ResourceVariant<Slurry> variant, long amount) {
     public static final SlurryStack EMPTY = new SlurryStack(SlurryVariant.blank(), 0);
 
-    public static final MapCodec<SlurryStack> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    SlurryVariant.CODEC.fieldOf("variant").forGetter(SlurryStack::variant),
-                    Codec.LONG.fieldOf("amount").forGetter(SlurryStack::amount)
-            ).apply(instance, SlurryStack::new)
-    );
+    public static final MapCodec<SlurryStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        SlurryVariant.CODEC.fieldOf("variant").forGetter(SlurryStack::variant),
+        Codec.LONG.fieldOf("amount").forGetter(SlurryStack::amount)).apply(instance, SlurryStack::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SlurryStack> STREAM_CODEC = StreamCodec.composite(
-            SlurryVariant.STREAM_CODEC, SlurryStack::variant,
-            ByteBufCodecs.LONG, SlurryStack::amount,
-            SlurryStack::new
-    );
+        SlurryVariant.STREAM_CODEC, SlurryStack::variant,
+        ByteBufCodecs.LONG, SlurryStack::amount,
+        SlurryStack::new);
 
     public boolean isEmpty() {
         return this.amount <= 0 || this.variant.isBlank();
@@ -45,8 +41,10 @@ public record SlurryStack(ResourceVariant<Slurry> variant, long amount) {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
 
         SlurryStack that = (SlurryStack) obj;
         return amount == that.amount && variant.equals(that.variant);

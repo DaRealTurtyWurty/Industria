@@ -8,15 +8,14 @@ import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.resources.Identifier;
 
 public record ConnectionModelReference(
-        AdditionalModel<BlockStateModel> modelKey,
-        Identifier modelId,
-        ModelState modelState
+    AdditionalModel<BlockStateModel> modelKey,
+    Identifier modelId,
+    ModelState modelState
 ) {
     public ConnectionModelReference(Identifier modelKey, Identifier modelId, ModelState modelState) {
         this(ClientRegistrations.registerAdditionalBlockStateModel(
-                modelKey,
-                AdditionalBlockStateModelDefinition.blockStateModel(modelId, modelState)
-        ), modelId, modelState);
+            modelKey,
+            AdditionalBlockStateModelDefinition.blockStateModel(modelId, modelState)), modelId, modelState);
     }
 
     public AdditionalBlockStateModelDefinition createUnbakedModel() {

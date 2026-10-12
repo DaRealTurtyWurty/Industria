@@ -39,7 +39,8 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         EntityModelSet modelSet = Minecraft.getInstance().getEntityModels();
-        this.platformModel = new LadderConveyorPlatformModel(modelSet.bakeLayer(LadderConveyorPlatformModel.LAYER_LOCATION));
+        this.platformModel = new LadderConveyorPlatformModel(
+            modelSet.bakeLayer(LadderConveyorPlatformModel.LAYER_LOCATION));
     }
 
     @Override
@@ -58,10 +59,11 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
         boolean upward = context.conveyorState().getValue(LadderConveyorBlock.UPWARD);
         StackBounds stackBounds = getStackBounds(level, conveyorPos, facing, upward);
         int stackStorageSize = getStackStorageSize(context, level, stackBounds, conveyorPos, facing, upward);
-        int platformCount = Math.clamp((long) stackStorageSize * PLATFORMS_PER_STORAGE_SLOT, MIN_PLATFORM_COUNT, MAX_PLATFORM_COUNT);
+        int platformCount = Math.clamp((long) stackStorageSize * PLATFORMS_PER_STORAGE_SLOT, MIN_PLATFORM_COUNT,
+            MAX_PLATFORM_COUNT);
         int conveyorSpeed = context.conveyorState().getBlock() instanceof LadderConveyorBlock ladderConveyor
-                ? ladderConveyor.getSpeed(level, conveyorPos, context.conveyorState())
-                : 0;
+            ? ladderConveyor.getSpeed(level, conveyorPos, context.conveyorState())
+            : 0;
         float progressPerTick = conveyorSpeed / (float) ConveyorStorage.MAX_PROGRESS;
         float loopPerimeter = stackBounds.loopPerimeter(FRONT_Z - BACK_Z);
         float phaseAdvancePerTick = loopPerimeter > 0.0F ? progressPerTick / loopPerimeter : 0.0F;
@@ -91,8 +93,9 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
             poseStack.translate(0.0F, MODEL_PIVOT_Y, MODEL_PIVOT_Z);
             poseStack.rotate(Axis.XP.rotationDegrees(platformPose.yawDegrees));
             poseStack.translate(0.0F, -MODEL_PIVOT_Y, -MODEL_PIVOT_Z);
-            ModelSubmitUtils.submitModel(nodeCollector, this.platformModel, null, poseStack, RENDER_TYPE, context.lightCoords(),
-                    OverlayTexture.NO_OVERLAY, 0, null);
+            ModelSubmitUtils.submitModel(nodeCollector, this.platformModel, null, poseStack, RENDER_TYPE,
+                context.lightCoords(),
+                OverlayTexture.NO_OVERLAY, 0, null);
             poseStack.popPose();
         }
         poseStack.popPose();
@@ -101,7 +104,7 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
     private static StackBounds getStackBounds(ClientLevel level, BlockPos centerPos, Direction facing, boolean upward) {
         int bottomY = centerPos.getY();
         int topY = centerPos.getY();
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        var cursor = new BlockPos.MutableBlockPos();
 
         while (true) {
             int nextY = bottomY - 1;
@@ -124,15 +127,21 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
 
     private static boolean isMatchingLadder(BlockState state, Direction facing, boolean upward) {
         return state.getBlock() instanceof LadderConveyorBlock
-                && state.getValue(LadderConveyorBlock.FACING) == facing
-                && state.getValue(LadderConveyorBlock.UPWARD) == upward;
+            && state.getValue(LadderConveyorBlock.FACING) == facing
+            && state.getValue(LadderConveyorBlock.UPWARD) == upward;
     }
 
-    private static int getStackStorageSize(ModConveyorSpecialRenderers.RenderContext context, ClientLevel level, StackBounds stackBounds,
-                                           BlockPos centerPos, Direction facing, boolean upward) {
+    private static int getStackStorageSize(
+        ModConveyorSpecialRenderers.RenderContext context,
+        ClientLevel level,
+        StackBounds stackBounds,
+        BlockPos centerPos,
+        Direction facing,
+        boolean upward
+    ) {
         int total = 0;
         for (int y = stackBounds.bottomY(); y <= stackBounds.topY(); y++) {
-            BlockPos pos = new BlockPos(centerPos.getX(), y, centerPos.getZ());
+            var pos = new BlockPos(centerPos.getX(), y, centerPos.getZ());
             BlockState state = level.getBlockState(pos);
             if (!isMatchingLadder(state, facing, upward))
                 continue;
@@ -147,8 +156,8 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
             return total;
 
         return context.conveyorStorage().getItemContainer() != null
-                ? context.conveyorStorage().getItemContainer().getContainerSize()
-                : 1;
+            ? context.conveyorStorage().getItemContainer().getContainerSize()
+            : 1;
     }
 
     private static PlatformPose samplePlatformPose(float phase, StackBounds stackBounds, int currentY) {
@@ -199,8 +208,15 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
         return start + (end - start) * delta;
     }
 
-    private static PlatformPose toLocalPose(int currentY, float worldY, float z, float yaw, boolean visible,
-                                            boolean includeLowerBoundary, boolean includeUpperBoundary) {
+    private static PlatformPose toLocalPose(
+        int currentY,
+        float worldY,
+        float z,
+        float yaw,
+        boolean visible,
+        boolean includeLowerBoundary,
+        boolean includeUpperBoundary
+    ) {
         float lower = currentY + MIN_Y;
         float upper = currentY + MAX_Y;
         boolean belowLower = includeLowerBoundary ? worldY < lower - BOUNDS_EPSILON : worldY <= lower + BOUNDS_EPSILON;

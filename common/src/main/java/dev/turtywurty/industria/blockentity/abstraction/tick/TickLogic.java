@@ -10,7 +10,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 public record TickLogic<T extends IndustriaBlockEntity<T>, F extends BlockEntityFields<T>>(
-        List<TickOperation<T, F>> operations) {
+    List<TickOperation<T, F>> operations
+) {
     public void run(T blockEntity, F fields) {
         for (TickOperation<T, F> operation : this.operations) {
             operation.run(blockEntity, fields);
@@ -24,7 +25,11 @@ public record TickLogic<T extends IndustriaBlockEntity<T>, F extends BlockEntity
             return addOperation(new TickOperation.Default<>(operation));
         }
 
-        public TickLogicBuilder<T, F> condition(BiPredicate<T, F> condition, TickOperation<T, F> operation, TickOperation<T, F> elseOperation) {
+        public TickLogicBuilder<T, F> condition(
+            BiPredicate<T, F> condition,
+            TickOperation<T, F> operation,
+            TickOperation<T, F> elseOperation
+        ) {
             return addOperation(new TickOperation.Conditional<>(condition, operation, elseOperation));
         }
 
@@ -32,8 +37,13 @@ public record TickLogic<T extends IndustriaBlockEntity<T>, F extends BlockEntity
             return addOperation(new TickOperation.Conditional<>(condition, operation));
         }
 
-        public TickLogicBuilder<T, F> condition(BiPredicate<T, F> condition, BiConsumer<T, F> operation, BiConsumer<T, F> elseOperation) {
-            return addOperation(new TickOperation.Conditional<>(condition, new TickOperation.Default<>(operation), new TickOperation.Default<>(elseOperation)));
+        public TickLogicBuilder<T, F> condition(
+            BiPredicate<T, F> condition,
+            BiConsumer<T, F> operation,
+            BiConsumer<T, F> elseOperation
+        ) {
+            return addOperation(new TickOperation.Conditional<>(condition, new TickOperation.Default<>(operation),
+                new TickOperation.Default<>(elseOperation)));
         }
 
         public TickLogicBuilder<T, F> condition(BiPredicate<T, F> condition, BiConsumer<T, F> operation) {

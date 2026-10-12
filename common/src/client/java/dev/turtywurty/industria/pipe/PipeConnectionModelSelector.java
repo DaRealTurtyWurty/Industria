@@ -8,6 +8,11 @@ import org.jetbrains.annotations.Nullable;
 
 @FunctionalInterface
 public interface PipeConnectionModelSelector {
-    @Nullable ConnectionModelSet select(BlockAndTintGetter level, BlockPos targetPos, BlockState targetState,
-                                        Direction targetFace);
+    @Nullable
+    ConnectionModelSet select(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        BlockState targetState,
+        Direction targetFace
+    );
 }

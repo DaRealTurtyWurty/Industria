@@ -14,10 +14,10 @@ import java.util.UUID;
 
 public class CableNetworkManager extends PipeNetworkManager<ResourceVariant<UnitResource>, CableNetwork> {
     public static final MapCodec<CableNetworkManager> CODEC = PipeNetworkManager.createCodec(
-            CableNetwork.CODEC.codec(), CableNetworkManager::new);
+        CableNetwork.CODEC.codec(), CableNetworkManager::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, CableNetworkManager> STREAM_CODEC =
-            PipeNetworkManager.createPacketCodec(CableNetwork.STREAM_CODEC, CableNetworkManager::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, CableNetworkManager> STREAM_CODEC = PipeNetworkManager
+        .createPacketCodec(CableNetwork.STREAM_CODEC, CableNetworkManager::new);
 
     public CableNetworkManager() {
         super(ModPipeNetworkManagerTypes.ENERGY.get(), TransferType.ENERGY);

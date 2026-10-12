@@ -22,23 +22,31 @@ import java.util.List;
 public class DelayConveyorBlock extends AbstractHorizontalConveyorBlock {
     public DelayConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.DELAY_CONVEYOR.get())
-                        .shouldTick())
-        );
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.DELAY_CONVEYOR.get())
+                    .shouldTick()));
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof DelayConveyorBlockEntity blockEntity) {
             int threshold = blockEntity.getThreshold();
             boolean decrease = player.isShiftKeyDown();
 
-            // Loops back around if the threshold goes below 1 or above DelayConveyorBlockEntity.MAX_THRESHOLD. Increase/Decrease by 10.
+            // Loops back around if the threshold goes below 1 or above DelayConveyorBlockEntity.MAX_THRESHOLD.
+            // Increase/Decrease by 10.
             threshold = decrease
-                    ? (threshold <= 10 ? DelayConveyorBlockEntity.MAX_THRESHOLD : threshold - 10)
-                    : (threshold >= DelayConveyorBlockEntity.MAX_THRESHOLD ? 10 : threshold + 10);
+                ? (threshold <= 10 ? DelayConveyorBlockEntity.MAX_THRESHOLD : threshold - 10)
+                : (threshold >= DelayConveyorBlockEntity.MAX_THRESHOLD ? 10 : threshold + 10);
             blockEntity.setThreshold(threshold);
-            player.sendOverlayMessage(Component.literal("Delay: " + blockEntity.getThreshold() + " ticks (" + (blockEntity.getThreshold() / 20f) + " seconds)"));
+            player.sendOverlayMessage(Component.literal("Delay: " + blockEntity.getThreshold() + " ticks ("
+                + (blockEntity.getThreshold() / 20f) + " seconds)"));
 
             return InteractionResult.SUCCESS;
         }
@@ -52,7 +60,14 @@ public class DelayConveyorBlock extends AbstractHorizontalConveyorBlock {
     }
 
     @Override
-    public ConveyorOutput selectOutput(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public ConveyorOutput selectOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         if (level.getBlockEntity(pos) instanceof DelayConveyorBlockEntity blockEntity) {
             long gameTime = level.getGameTime();
             if (blockEntity.isItemDelayed(item.getId(), gameTime))
@@ -68,8 +83,7 @@ public class DelayConveyorBlock extends AbstractHorizontalConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 }

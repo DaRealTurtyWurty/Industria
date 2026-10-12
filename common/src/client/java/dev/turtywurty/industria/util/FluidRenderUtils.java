@@ -18,7 +18,11 @@ public final class FluidRenderUtils {
     private FluidRenderUtils() {
     }
 
-    public static @Nullable GuiFluidRenderData getRenderData(Fluid fluid, @Nullable Level level, @Nullable BlockPos pos) {
+    public static @Nullable GuiFluidRenderData getRenderData(
+        Fluid fluid,
+        @Nullable Level level,
+        @Nullable BlockPos pos
+    ) {
         if (fluid == null || fluid == Fluids.EMPTY)
             return null;
 
@@ -29,14 +33,23 @@ public final class FluidRenderUtils {
         return new GuiFluidRenderData(model.stillMaterial().sprite(), model.flowingMaterial().sprite(), tintColor);
     }
 
-    public static @Nullable GuiFluidRenderData getRenderData(@Nullable ResourceVariant<Fluid> fluidVariant, @Nullable Level level, @Nullable BlockPos pos) {
+    public static @Nullable GuiFluidRenderData getRenderData(
+        @Nullable ResourceVariant<Fluid> fluidVariant,
+        @Nullable Level level,
+        @Nullable BlockPos pos
+    ) {
         if (fluidVariant == null || fluidVariant.isBlank())
             return null;
 
         return getRenderData(fluidVariant.value(), level, pos);
     }
 
-    private static int getTintColor(@Nullable BlockTintSource tintSource, BlockState blockState, @Nullable Level level, @Nullable BlockPos pos) {
+    private static int getTintColor(
+        @Nullable BlockTintSource tintSource,
+        BlockState blockState,
+        @Nullable Level level,
+        @Nullable BlockPos pos
+    ) {
         if (tintSource == null)
             return 0xFFFFFFFF;
 

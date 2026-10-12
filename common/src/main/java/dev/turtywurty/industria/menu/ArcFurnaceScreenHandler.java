@@ -20,8 +20,15 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
         super(ModMenuTypes.ARC_FURNACE.get(), 19, syncId, playerInventory, payload, ArcFurnaceBlockEntity.class);
     }
 
-    public ArcFurnaceScreenHandler(int syncId, Inventory playerInventory, ArcFurnaceBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
-        super(ModMenuTypes.ARC_FURNACE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, properties);
+    public ArcFurnaceScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        ArcFurnaceBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
+        super(ModMenuTypes.ARC_FURNACE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            properties);
     }
 
     @Override
@@ -38,7 +45,6 @@ public class ArcFurnaceScreenHandler extends IndustriaScreenHandler<ArcFurnaceBl
     protected void addBlockEntitySlots(Inventory playerInventory) {
         SyncingSimpleInventory inputInventory = this.blockEntity.getInputInventory();
         SyncingSimpleInventory outputInventory = this.blockEntity.getOutputInventory();
-
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {

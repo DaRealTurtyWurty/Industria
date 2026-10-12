@@ -8,7 +8,8 @@ public class ClientWrappedContainerStorage extends WrappedContainerStorage<Simpl
     public static ClientWrappedContainerStorage copyOf(WrappedContainerStorage<?> inventory) {
         var wrappedContainerStorage = new ClientWrappedContainerStorage();
         for (Pair<Direction, ? extends SimpleContainer> entry : inventory.getSidedInventories()) {
-            wrappedContainerStorage.addInventory(new SimpleContainer(entry.getSecond().getContainerSize()), entry.getFirst());
+            wrappedContainerStorage.addInventory(new SimpleContainer(entry.getSecond().getContainerSize()),
+                entry.getFirst());
         }
 
         return wrappedContainerStorage;

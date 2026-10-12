@@ -12,23 +12,24 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.BooleanSupplier;
 
 public record PredicateContainerStorage(
-        ContainerStorage delegate,
-        BooleanSupplier canInsert,
-        BooleanSupplier canExtract
+    ContainerStorage delegate,
+    BooleanSupplier canInsert,
+    BooleanSupplier canExtract
 ) implements ResourceStorage<ResourceVariant<Item>> {
-    private static final ConcurrentMap<ContainerStorage, ConcurrentMap<PredicateKey, PredicateContainerStorage>> CACHE =
-            new MapMaker().weakKeys().makeMap();
+    private static final ConcurrentMap<ContainerStorage, ConcurrentMap<PredicateKey, PredicateContainerStorage>> CACHE = new MapMaker()
+        .weakKeys().makeMap();
 
     public static PredicateContainerStorage of(
-            ContainerStorage containerStorage,
-            BooleanSupplier canInsert,
-            BooleanSupplier canExtract) {
-        ConcurrentMap<PredicateKey, PredicateContainerStorage> inventoryCache =
-                CACHE.computeIfAbsent(containerStorage, _ -> new MapMaker().makeMap());
+        ContainerStorage containerStorage,
+        BooleanSupplier canInsert,
+        BooleanSupplier canExtract
+    ) {
+        ConcurrentMap<PredicateKey, PredicateContainerStorage> inventoryCache = CACHE.computeIfAbsent(containerStorage,
+            _ -> new MapMaker().makeMap());
 
         var key = new PredicateKey(canInsert, canExtract);
         return inventoryCache.computeIfAbsent(key,
-                _ -> new PredicateContainerStorage(containerStorage, canInsert, canExtract));
+            _ -> new PredicateContainerStorage(containerStorage, canInsert, canExtract));
     }
 
     @Override
@@ -64,31 +65,33 @@ public record PredicateContainerStorage(
     @Override
     public TransferSupport support(int index) {
         TransferSupport restriction = this.canInsert.getAsBoolean()
-                ? this.canExtract.getAsBoolean() ? TransferSupport.BOTH : TransferSupport.INSERT_ONLY
-                : this.canExtract.getAsBoolean() ? TransferSupport.EXTRACT_ONLY : TransferSupport.NONE;
+            ? this.canExtract.getAsBoolean() ? TransferSupport.BOTH : TransferSupport.INSERT_ONLY
+            : this.canExtract.getAsBoolean() ? TransferSupport.EXTRACT_ONLY : TransferSupport.NONE;
         return this.delegate.support(index).and(restriction);
     }
 
     @Override
     public long insert(
-            int index,
-            ResourceVariant<Item> resource,
-            long maxAmount,
-            TransferContext transaction) {
+        int index,
+        ResourceVariant<Item> resource,
+        long maxAmount,
+        TransferContext transaction
+    ) {
         return this.canInsert.getAsBoolean()
-                ? this.delegate.insert(index, resource, maxAmount, transaction)
-                : 0;
+            ? this.delegate.insert(index, resource, maxAmount, transaction)
+            : 0;
     }
 
     @Override
     public long extract(
-            int index,
-            ResourceVariant<Item> resource,
-            long maxAmount,
-            TransferContext transaction) {
+        int index,
+        ResourceVariant<Item> resource,
+        long maxAmount,
+        TransferContext transaction
+    ) {
         return this.canExtract.getAsBoolean()
-                ? this.delegate.extract(index, resource, maxAmount, transaction)
-                : 0;
+            ? this.delegate.extract(index, resource, maxAmount, transaction)
+            : 0;
     }
 
     @Override

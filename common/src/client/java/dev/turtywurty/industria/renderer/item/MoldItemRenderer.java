@@ -32,25 +32,43 @@ public class MoldItemRenderer implements SpecialModelRenderer<MoldItemRenderer.R
     private static int nextTextureId;
 
     @Override
-    public void submit(MoldItemRenderer.@Nullable RenderData renderData, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int light, int overlay, boolean glint, int outlineColor) {
+    public void submit(
+        MoldItemRenderer.@Nullable RenderData renderData,
+        PoseStack poseStack,
+        SubmitNodeCollector submitNodeCollector,
+        int light,
+        int overlay,
+        boolean glint,
+        int outlineColor
+    ) {
         if (renderData == null)
             return;
 
-        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(getTexture(renderData)), (pose, vertexConsumer) -> {
-            vertex(vertexConsumer, pose, 0, 0, 0, 1, light, overlay);
-            vertex(vertexConsumer, pose, 1, 0, 1, 1, light, overlay);
-            vertex(vertexConsumer, pose, 1, 1, 1, 0, light, overlay);
-            vertex(vertexConsumer, pose, 0, 1, 0, 0, light, overlay);
-        });
+        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(getTexture(renderData)),
+            (pose, vertexConsumer) -> {
+                vertex(vertexConsumer, pose, 0, 0, 0, 1, light, overlay);
+                vertex(vertexConsumer, pose, 1, 0, 1, 1, light, overlay);
+                vertex(vertexConsumer, pose, 1, 1, 1, 0, light, overlay);
+                vertex(vertexConsumer, pose, 0, 1, 0, 0, light, overlay);
+            });
     }
 
-    private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float u, float v, int light, int overlay) {
+    private static void vertex(
+        VertexConsumer buffer,
+        PoseStack.Pose pose,
+        float x,
+        float y,
+        float u,
+        float v,
+        int light,
+        int overlay
+    ) {
         buffer.addVertex(pose.pose(), x, y, 0.5f)
-                .setColor(-1)
-                .setUv(u, v)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(pose, 0, 0, 1);
+            .setColor(-1)
+            .setUv(u, v)
+            .setOverlay(overlay)
+            .setLight(light)
+            .setNormal(pose, 0, 0, 1);
     }
 
     @Override

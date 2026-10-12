@@ -29,16 +29,21 @@ public class TreeTapModel extends Model<TreeTapBlockEntityRenderer.TreeTapRender
         var meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
 
-        partDefinition.addOrReplaceChild("harness", CubeListBuilder.create().texOffs(36, 9).addBox(12.0F, -2.0F, -16.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+        partDefinition.addOrReplaceChild("harness",
+            CubeListBuilder.create().texOffs(36, 9)
+                .addBox(12.0F, -2.0F, -16.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(12, 38).addBox(12.0F, -4.0F, -16.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(12, 38).addBox(6.0F, -4.0F, -16.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(36, 9).addBox(6.0F, 0.0F, -16.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(36, 9).addBox(0.0F, -2.0F, -16.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 18).addBox(0.0F, -2.0F, 2.0F, 20.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 0).addBox(18.0F, -2.0F, -14.0F, 2.0F, 2.0F, 16.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 0).addBox(0.0F, -2.0F, -14.0F, 2.0F, 2.0F, 16.0F, new CubeDeformation(0.0F)), PartPose.offset(-10.0F, 12.0F, 22.0F));
+                .texOffs(0, 0).addBox(0.0F, -2.0F, -14.0F, 2.0F, 2.0F, 16.0F, new CubeDeformation(0.0F)),
+            PartPose.offset(-10.0F, 12.0F, 22.0F));
 
-        partDefinition.addOrReplaceChild("bowl", CubeListBuilder.create().texOffs(0, 31).addBox(-5.0F, -1.0F, 1.999F, 12.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+        partDefinition.addOrReplaceChild("bowl",
+            CubeListBuilder.create().texOffs(0, 31)
+                .addBox(-5.0F, -1.0F, 1.999F, 12.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 33).addBox(-4.0F, 0.0F, 1.999F, 10.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
                 .texOffs(26, 31).addBox(-4.0F, 2.0F, -6.0F, 1.0F, 2.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 22).addBox(-3.0F, 4.0F, -6.0F, 8.0F, 1.0F, 8.0F, new CubeDeformation(0.0F))
@@ -55,13 +60,18 @@ public class TreeTapModel extends Model<TreeTapBlockEntityRenderer.TreeTapRender
                 .texOffs(22, 36).addBox(-4.0F, -1.0F, -8.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
                 .texOffs(26, 31).addBox(-5.0F, 0.0F, -6.0F, 1.0F, 2.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(22, 36).addBox(-5.0F, -1.0F, -7.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(36, 0).addBox(-6.0F, -1.0F, -6.0F, 1.0F, 1.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.0F, 19.0F, 6.0F));
+                .texOffs(36, 0).addBox(-6.0F, -1.0F, -6.0F, 1.0F, 1.0F, 8.0F, new CubeDeformation(0.0F)),
+            PartPose.offset(-1.0F, 19.0F, 6.0F));
 
-        PartDefinition spout = partDefinition.addOrReplaceChild("spout", CubeListBuilder.create(), PartPose.offset(1.0F, 12.0F, 6.0F));
+        PartDefinition spout = partDefinition.addOrReplaceChild("spout", CubeListBuilder.create(),
+            PartPose.offset(1.0F, 12.0F, 6.0F));
 
-        spout.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 38).addBox(1.999F, -2.0F, -6.0F, 0.0F, 2.0F, 6.0F, new CubeDeformation(0.0F))
+        spout.addOrReplaceChild("cube_r1",
+            CubeListBuilder.create().texOffs(0, 38)
+                .addBox(1.999F, -2.0F, -6.0F, 0.0F, 2.0F, 6.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 38).addBox(-1.999F, -2.0F, -6.0F, 0.0F, 2.0F, 6.0F, new CubeDeformation(0.0F))
-                .texOffs(32, 22).addBox(-2.0F, 0.0F, -6.0F, 4.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.0F, -2.0F, 2.0F, 0.7854F, 0.0F, 0.0F));
+                .texOffs(32, 22).addBox(-2.0F, 0.0F, -6.0F, 4.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)),
+            PartPose.offsetAndRotation(-1.0F, -2.0F, 2.0F, 0.7854F, 0.0F, 0.0F));
 
         return LayerDefinition.create(meshDefinition, 64, 64);
     }

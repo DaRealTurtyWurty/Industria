@@ -16,7 +16,16 @@ public class CrystallizerRecipeBuilder {
     private final int catalystUses;
     private final int processTime;
 
-    public CrystallizerRecipeBuilder(FluidStack waterFluid, FluidStack crystalFluid, IndustriaIngredient catalyst, OutputItemStack output, OutputItemStack byproduct, boolean requiresCatalyst, int catalystUses, int processTime) {
+    public CrystallizerRecipeBuilder(
+        FluidStack waterFluid,
+        FluidStack crystalFluid,
+        IndustriaIngredient catalyst,
+        OutputItemStack output,
+        OutputItemStack byproduct,
+        boolean requiresCatalyst,
+        int catalystUses,
+        int processTime
+    ) {
         this.waterFluid = waterFluid;
         this.crystalFluid = crystalFluid;
         this.catalyst = catalyst;
@@ -29,7 +38,8 @@ public class CrystallizerRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new CrystallizerRecipe(this.waterFluid, this.crystalFluid, this.catalyst, this.output, this.byproduct, this.requiresCatalyst, this.catalystUses, this.processTime),
-                null);
+            new CrystallizerRecipe(this.waterFluid, this.crystalFluid, this.catalyst, this.output, this.byproduct,
+                this.requiresCatalyst, this.catalystUses, this.processTime),
+            null);
     }
 }

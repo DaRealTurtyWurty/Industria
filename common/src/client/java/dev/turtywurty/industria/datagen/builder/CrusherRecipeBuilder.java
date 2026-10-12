@@ -27,7 +27,13 @@ public class CrusherRecipeBuilder implements RecipeBuilder {
     private final RecipeCategory category;
     private final Map<String, Criterion<?>> criteria = new HashMap<>();
 
-    public CrusherRecipeBuilder(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime, RecipeCategory category) {
+    public CrusherRecipeBuilder(
+        IndustriaIngredient input,
+        OutputItemStack outputA,
+        OutputItemStack outputB,
+        int processTime,
+        RecipeCategory category
+    ) {
         this.input = input;
         this.outputA = outputA;
         this.outputB = outputB;
@@ -55,12 +61,13 @@ public class CrusherRecipeBuilder implements RecipeBuilder {
     @Override
     public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeId) {
         Advancement.Builder builder = exporter.advancement()
-                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(exporter.lookup(Registries.RECIPE).getOrThrow(recipeId)))
-                .rewards(AdvancementRewards.Builder.recipe(recipeId))
-                .requirements(AdvancementRequirements.Strategy.OR);
+            .addCriterion("has_the_recipe",
+                RecipeUnlockedTrigger.unlocked(exporter.lookup(Registries.RECIPE).getOrThrow(recipeId)))
+            .rewards(AdvancementRewards.Builder.recipe(recipeId))
+            .requirements(AdvancementRequirements.Strategy.OR);
         this.criteria.forEach(builder::addCriterion);
         exporter.accept(recipeId,
-                new CrusherRecipe(this.input, this.outputA, this.outputB, this.processTime),
-                builder.build(recipeId.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+            new CrusherRecipe(this.input, this.outputA, this.outputB, this.processTime),
+            builder.build(recipeId.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 }

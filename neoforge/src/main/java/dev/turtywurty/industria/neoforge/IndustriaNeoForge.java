@@ -21,14 +21,13 @@ public final class IndustriaNeoForge {
         Industria.onInitialize();
         NeoForgeFluidTypes.register(modBus);
 
-        modBus.addListener(FMLCommonSetupEvent.class, event ->
-                event.enqueueWork(Industria::onRegistriesApplied));
+        modBus.addListener(FMLCommonSetupEvent.class, event -> event.enqueueWork(Industria::onRegistriesApplied));
         modBus.addListener(GatherDataRegistryEntriesEvent.class,
-                event -> NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
-        modBus.addListener(GatherDataEvent.Client.class, event ->
-                NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
-        modBus.addListener(GatherDataEvent.Server.class, event ->
-                NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
+            event -> NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
+        modBus.addListener(GatherDataEvent.Client.class,
+            event -> NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
+        modBus.addListener(GatherDataEvent.Server.class,
+            event -> NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
 
         LOGGER.info("Industria NeoForge loaded.");
     }

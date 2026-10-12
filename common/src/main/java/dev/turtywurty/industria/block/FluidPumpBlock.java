@@ -34,22 +34,24 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
 
     public FluidPumpBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .addStateProperty(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
-                .addStateProperty(BlockStateProperties.WATERLOGGED, false)
-                .shapeFactory((state, _, _, _) -> SHAPES
-                        .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
-                        .get(state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)))
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.FLUID_PUMP)
-                        .blockEntityFactory((pos, state) ->
-                                state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                                        ? ModBlockEntityTypes.FLUID_PUMP.get().create(pos, state)
-                                        : null)
-                        .shouldTick()
-                        .blockEntityTickerFactory((world, state, type) ->
-                                state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                                        ? TickableBlockEntity.createTicker(world)
-                                        : null)));
+            .hasHorizontalFacing()
+            .addStateProperty(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
+            .addStateProperty(BlockStateProperties.WATERLOGGED, false)
+            .shapeFactory((state, _, _, _) -> SHAPES
+                .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
+                .get(state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)))
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.FLUID_PUMP)
+                .blockEntityFactory(
+                    (pos, state) -> state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                        ? ModBlockEntityTypes.FLUID_PUMP.get().create(pos, state)
+                        : null)
+                .shouldTick()
+                .blockEntityTickerFactory((
+                    world,
+                    state,
+                    type) -> state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                        ? TickableBlockEntity.createTicker(world)
+                        : null)));
     }
 
     private static Map<Direction, Map<DoubleBlockHalf, VoxelShape>> createShapes() {
@@ -61,9 +63,9 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
             VoxelShape fullShape = BlockProperties.calculateShape(direction, northShape);
             Map<DoubleBlockHalf, VoxelShape> halves = new EnumMap<>(DoubleBlockHalf.class);
             halves.put(DoubleBlockHalf.LOWER,
-                    Shapes.join(fullShape, Shapes.block(), BooleanOp.AND).optimize());
+                Shapes.join(fullShape, Shapes.block(), BooleanOp.AND).optimize());
             halves.put(DoubleBlockHalf.UPPER,
-                    Shapes.join(fullShape.move(0, -1, 0), Shapes.block(), BooleanOp.AND).optimize());
+                Shapes.join(fullShape.move(0, -1, 0), Shapes.block(), BooleanOp.AND).optimize());
             shapes.put(direction, halves);
         }
 
@@ -90,35 +92,46 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockPos upperPos = context.getClickedPos().above();
         if (context.getLevel().isOutsideBuildHeight(upperPos)
-                || !context.getLevel().getBlockState(upperPos).canBeReplaced()) {
+            || !context.getLevel().getBlockState(upperPos).canBeReplaced())
             return null;
-        }
 
         BlockState state = super.getStateForPlacement(context);
         return state == null
-                ? null
-                : state.setValue(BlockStateProperties.WATERLOGGED,
-                        context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
+            ? null
+            : state.setValue(BlockStateProperties.WATERLOGGED,
+                context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state,
-                            @Nullable LivingEntity placer, ItemStack stack) {
+    public void setPlacedBy(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        @Nullable LivingEntity placer,
+        ItemStack stack
+    ) {
         super.setPlacedBy(level, pos, state, placer, stack);
         if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
             BlockPos upperPos = pos.above();
             boolean upperWaterlogged = level.getFluidState(upperPos).getType() == Fluids.WATER;
             level.setBlock(upperPos,
-                    state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER)
-                            .setValue(BlockStateProperties.WATERLOGGED, upperWaterlogged),
-                    Block.UPDATE_ALL);
+                state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER)
+                    .setValue(BlockStateProperties.WATERLOGGED, upperWaterlogged),
+                Block.UPDATE_ALL);
         }
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks,
-                                     BlockPos pos, Direction direction, BlockPos neighborPos,
-                                     BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader level,
+        ScheduledTickAccess ticks,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
         if (state.getValue(BlockStateProperties.WATERLOGGED)) {
             ticks.getFluidTicks().schedule(ticks.createTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level)));
         }
@@ -129,15 +142,15 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
     @Override
     protected FluidState getFluidState(BlockState state) {
         return state.getValue(BlockStateProperties.WATERLOGGED)
-                ? Fluids.WATER.getSource(false)
-                : super.getFluidState(state);
+            ? Fluids.WATER.getSource(false)
+            : super.getFluidState(state);
     }
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                ? RenderShape.MODEL
-                : RenderShape.INVISIBLE;
+            ? RenderShape.MODEL
+            : RenderShape.INVISIBLE;
     }
 
     @Override
@@ -145,8 +158,8 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
         super.affectNeighborsAfterRemoval(state, level, pos, moved);
 
         BlockPos otherPos = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                ? pos.above()
-                : pos.below();
+            ? pos.above()
+            : pos.below();
         if (level.getBlockState(otherPos).is(this)) {
             level.destroyBlock(otherPos, false);
         }
@@ -154,7 +167,7 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
 
     public static BlockPos getControllerPos(BlockPos pos, BlockState state) {
         return state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER
-                ? pos.below()
-                : pos;
+            ? pos.below()
+            : pos;
     }
 }

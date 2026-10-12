@@ -36,23 +36,28 @@ public class FluidWidget implements Renderable, LayoutElement {
     private int x, y;
 
     public FluidWidget(
-            SyncingFluidStorage fluidTank,
-            int x, int y,
-            int width, int height,
-            Supplier<BlockPos> posSupplier,
-            Orientation orientation
+        SyncingFluidStorage fluidTank,
+        int x,
+        int y,
+        int width,
+        int height,
+        Supplier<BlockPos> posSupplier,
+        Orientation orientation
     ) {
-        this(() -> null, fluidTank::getFluidStack, fluidTank::getCapacity, x, y, width, height, posSupplier, orientation);
+        this(() -> null, fluidTank::getFluidStack, fluidTank::getCapacity, x, y, width, height, posSupplier,
+            orientation);
     }
 
     public FluidWidget(
-            Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier,
-            Supplier<FluidStack> fluidSupplier,
-            LongSupplier capacitySupplier,
-            int x, int y,
-            int width, int height,
-            Supplier<BlockPos> posSupplier,
-            Orientation orientation
+        Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier,
+        Supplier<FluidStack> fluidSupplier,
+        LongSupplier capacitySupplier,
+        int x,
+        int y,
+        int width,
+        int height,
+        Supplier<BlockPos> posSupplier,
+        Orientation orientation
     ) {
         this.renderDataOverrideSupplier = renderDataOverrideSupplier;
         this.fluidSupplier = fluidSupplier;
@@ -93,7 +98,8 @@ public class FluidWidget implements Renderable, LayoutElement {
             fillWidth = (int) (width * percentage);
         }
 
-        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, renderData.stillSprite(), fillX, fillY, fillWidth, fillHeight, renderData.tintColor());
+        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, renderData.stillSprite(), fillX, fillY,
+            fillWidth, fillHeight, renderData.tintColor());
 
         if (isPointWithinBounds(fillX, fillY, fillWidth, fillHeight, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
@@ -109,8 +115,9 @@ public class FluidWidget implements Renderable, LayoutElement {
         Font textRenderer = Minecraft.getInstance().font;
         if (fluid != null && fluidAmount > 0) {
             List<Component> texts = List.of(
-                    Component.translatable(fluid.defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()),
-                    Component.literal(Math.round(fluidAmount * 1000.0 / FluidAmounts.BUCKET) + " / " + Math.round(fluidCapacity * 1000.0 / FluidAmounts.BUCKET) + " mB"));
+                Component.translatable(fluid.defaultFluidState().createLegacyBlock().getBlock().getDescriptionId()),
+                Component.literal(Math.round(fluidAmount * 1000.0 / FluidAmounts.BUCKET) + " / "
+                    + Math.round(fluidCapacity * 1000.0 / FluidAmounts.BUCKET) + " mB"));
             context.setComponentTooltipForNextFrame(textRenderer, texts, mouseX, mouseY);
         }
     }
@@ -161,10 +168,12 @@ public class FluidWidget implements Renderable, LayoutElement {
         return capacitySupplier;
     }
 
-    public void setRenderDataOverrideSupplier(@Nullable Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier) {
+    public void setRenderDataOverrideSupplier(
+        @Nullable Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier
+    ) {
         this.renderDataOverrideSupplier = renderDataOverrideSupplier == null
-                ? () -> null
-                : renderDataOverrideSupplier;
+            ? () -> null
+            : renderDataOverrideSupplier;
     }
 
     @Override
@@ -194,10 +203,12 @@ public class FluidWidget implements Renderable, LayoutElement {
             this.capacitySupplier = fluidTank::getCapacity;
         }
 
-        public Builder renderDataOverrideSupplier(Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier) {
+        public Builder renderDataOverrideSupplier(
+            Supplier<FluidRenderUtils.GuiFluidRenderData> renderDataOverrideSupplier
+        ) {
             this.renderDataOverrideSupplier = renderDataOverrideSupplier == null
-                    ? () -> null
-                    : renderDataOverrideSupplier;
+                ? () -> null
+                : renderDataOverrideSupplier;
             return this;
         }
 
@@ -252,7 +263,8 @@ public class FluidWidget implements Renderable, LayoutElement {
         }
 
         public FluidWidget build() {
-            return new FluidWidget(renderDataOverrideSupplier, fluidSupplier, capacitySupplier, x, y, width, height, posSupplier, orientation);
+            return new FluidWidget(renderDataOverrideSupplier, fluidSupplier, capacitySupplier, x, y, width, height,
+                posSupplier, orientation);
         }
     }
 }

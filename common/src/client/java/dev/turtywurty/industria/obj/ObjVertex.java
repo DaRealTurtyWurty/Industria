@@ -22,7 +22,8 @@ public record ObjVertex(int posIndex, int uvIndex, int normalIndex) {
             return -1; // No index provided
 
         int index = Integer.parseInt(part);
-        if(index > 0) return index;
+        if (index > 0)
+            return index;
 
         return count + index + 1; // Handle negative indices
     }

@@ -11,14 +11,13 @@ public class MixerBlock extends IndustriaBlock {
 
     public MixerBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasComparatorOutput()
-                .hasBlockEntityRenderer()
-                .useRotatedShapes(VOXEL_SHAPE)
-                .blockEntityProperties(
-                        new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.MIXER)
-                                .shouldTick()
-                ));
+            .hasHorizontalFacing()
+            .hasComparatorOutput()
+            .hasBlockEntityRenderer()
+            .useRotatedShapes(VOXEL_SHAPE)
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.MIXER)
+                    .shouldTick()));
     }
 
     private static VoxelShape createShape() {

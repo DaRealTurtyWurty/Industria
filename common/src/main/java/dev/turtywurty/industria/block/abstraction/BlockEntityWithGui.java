@@ -11,17 +11,19 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.OptionalInt;
 
-public interface BlockEntityWithGui<T extends CustomPacketPayload> extends ExtendedMenuProvider<T>, SelfOpeningMenuProvider {
+public interface BlockEntityWithGui<T extends CustomPacketPayload>
+    extends
+        ExtendedMenuProvider<T>,
+        SelfOpeningMenuProvider {
     @Override
     default OptionalInt openMenu(ServerPlayer player) {
         T openingData = getMenuOpeningData(player);
-        if (openingData instanceof BlockPosPayload payload) {
+        if (openingData instanceof BlockPosPayload payload)
             return MenuService.get().openExtendedMenu(player, this, payload, BlockPosPayload.CODEC);
-        } else if (openingData instanceof UpgradeStationOpenPayload payload) {
+        else if (openingData instanceof UpgradeStationOpenPayload payload)
             return MenuService.get().openExtendedMenu(player, this, payload, UpgradeStationOpenPayload.CODEC);
-        } else if(openingData instanceof ChargingHatchOpenPayload payload) {
+        else if (openingData instanceof ChargingHatchOpenPayload payload)
             return MenuService.get().openExtendedMenu(player, this, payload, ChargingHatchOpenPayload.CODEC);
-        }
 
         throw new IllegalStateException("Unsupported menu opening payload: " + openingData.type().id());
     }

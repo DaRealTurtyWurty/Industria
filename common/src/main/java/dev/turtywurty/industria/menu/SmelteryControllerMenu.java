@@ -49,8 +49,9 @@ public class SmelteryControllerMenu extends AbstractContainerMenu {
         super.broadcastChanges();
 
         if (!(this.player instanceof ServerPlayer serverPlayer)
-                || !this.player.level().isLoaded(this.controllerPos)
-                || !(this.player.level().getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
+            || !this.player.level().isLoaded(this.controllerPos)
+            || !(this.player.level()
+                .getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
             return;
 
         float temperature = controller.getTemperature();
@@ -58,25 +59,29 @@ public class SmelteryControllerMenu extends AbstractContainerMenu {
         boolean keepMolten = controller.isKeepingMolten();
         List<SmelteryChamberInfo> chambers = controller.getChamberInfos();
         if (snapshotSent
-                && Float.compare(this.temperature, temperature) == 0
-                && this.structureReady == structureReady
-                && this.keepMolten == keepMolten
-                && this.chambers.equals(chambers))
+            && Float.compare(this.temperature, temperature) == 0
+            && this.structureReady == structureReady
+            && this.keepMolten == keepMolten
+            && this.chambers.equals(chambers))
             return;
 
         applySnapshot(temperature, structureReady, keepMolten, chambers);
         NetworkService.get().sendToPlayer(serverPlayer, new SmelteryControllerSnapshotPayload(
-                this.containerId,
-                this.controllerPos,
-                temperature,
-                structureReady,
-                keepMolten,
-                chambers
-        ));
+            this.containerId,
+            this.controllerPos,
+            temperature,
+            structureReady,
+            keepMolten,
+            chambers));
         this.snapshotSent = true;
     }
 
-    public void applySnapshot(float temperature, boolean structureReady, boolean keepMolten, List<SmelteryChamberInfo> chambers) {
+    public void applySnapshot(
+        float temperature,
+        boolean structureReady,
+        boolean keepMolten,
+        List<SmelteryChamberInfo> chambers
+    ) {
         this.temperature = temperature;
         this.structureReady = structureReady;
         this.keepMolten = keepMolten;
@@ -86,10 +91,10 @@ public class SmelteryControllerMenu extends AbstractContainerMenu {
     @Override
     public boolean clickMenuButton(Player player, int id) {
         if (id != 0
-                || player.level().isClientSide()
-                || !stillValid(player)
-                || !player.level().isLoaded(this.controllerPos)
-                || !(player.level().getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
+            || player.level().isClientSide()
+            || !stillValid(player)
+            || !player.level().isLoaded(this.controllerPos)
+            || !(player.level().getBlockEntity(this.controllerPos) instanceof SmelteryControllerBlockEntity controller))
             return false;
 
         controller.setKeepMolten(!controller.isKeepingMolten());
@@ -127,9 +132,18 @@ public class SmelteryControllerMenu extends AbstractContainerMenu {
         return this.keepMolten;
     }
 
-    public record SmelteryChamberInfo(BlockPos hatchPos, int width, int height, int depth, FluidStack fluid,
-                                      long capacity, float requiredTemperature, BlockState solidBlock) {
-        public static final StreamCodec<RegistryFriendlyByteBuf, SmelteryChamberInfo> STREAM_CODEC = StreamCodec.composite(
+    public record SmelteryChamberInfo(
+        BlockPos hatchPos,
+        int width,
+        int height,
+        int depth,
+        FluidStack fluid,
+        long capacity,
+        float requiredTemperature,
+        BlockState solidBlock
+    ) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, SmelteryChamberInfo> STREAM_CODEC = StreamCodec
+            .composite(
                 BlockPos.STREAM_CODEC, SmelteryChamberInfo::hatchPos,
                 ByteBufCodecs.VAR_INT, SmelteryChamberInfo::width,
                 ByteBufCodecs.VAR_INT, SmelteryChamberInfo::height,
@@ -138,7 +152,6 @@ public class SmelteryControllerMenu extends AbstractContainerMenu {
                 ByteBufCodecs.VAR_LONG, SmelteryChamberInfo::capacity,
                 ByteBufCodecs.FLOAT, SmelteryChamberInfo::requiredTemperature,
                 ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY), SmelteryChamberInfo::solidBlock,
-                SmelteryChamberInfo::new
-        );
+                SmelteryChamberInfo::new);
     }
 }

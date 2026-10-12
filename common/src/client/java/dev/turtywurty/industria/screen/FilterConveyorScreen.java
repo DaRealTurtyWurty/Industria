@@ -25,14 +25,22 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyorScreenHandler> implements AutoCompleteProvider<TagKey<Item>> {
-    public static final Component BLACKLIST_MODE_LABEL = Component.translatable("container." + Industria.MOD_ID + ".filter_conveyor.blacklist_mode");
-    public static final Component MATCH_DURABILITY_LABEL = Component.translatable("container." + Industria.MOD_ID + ".filter_conveyor.match_durability");
-    public static final Component MATCH_ENCHANTMENTS_LABEL = Component.translatable("container." + Industria.MOD_ID + ".filter_conveyor.match_enchantments");
-    public static final Component MATCH_COMPONENTS_LABEL = Component.translatable("container." + Industria.MOD_ID + ".filter_conveyor.match_components");
+public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyorScreenHandler>
+    implements
+        AutoCompleteProvider<TagKey<Item>> {
+    public static final Component BLACKLIST_MODE_LABEL = Component
+        .translatable("container." + Industria.MOD_ID + ".filter_conveyor.blacklist_mode");
+    public static final Component MATCH_DURABILITY_LABEL = Component
+        .translatable("container." + Industria.MOD_ID + ".filter_conveyor.match_durability");
+    public static final Component MATCH_ENCHANTMENTS_LABEL = Component
+        .translatable("container." + Industria.MOD_ID + ".filter_conveyor.match_enchantments");
+    public static final Component MATCH_COMPONENTS_LABEL = Component
+        .translatable("container." + Industria.MOD_ID + ".filter_conveyor.match_components");
 
-    private static final Identifier TEXTURE_STACK_MODE = Industria.id("textures/gui/container/filter_conveyor_stack_mode.png");
-    private static final Identifier TEXTURE_TAG_MODE = Industria.id("textures/gui/container/filter_conveyor_tag_mode.png");
+    private static final Identifier TEXTURE_STACK_MODE = Industria
+        .id("textures/gui/container/filter_conveyor_stack_mode.png");
+    private static final Identifier TEXTURE_TAG_MODE = Industria
+        .id("textures/gui/container/filter_conveyor_tag_mode.png");
 
     private AutoCompleteEditBox<TagKey<Item>> tagFilterEditBox;
 
@@ -46,14 +54,14 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
         this.tagFilterEditBox = null;
 
         addRenderableWidget(new ToggleButton.Builder(this.leftPos + 8, this.topPos + 16)
-                .toggledByDefault(this.menu.isTagFiltering())
-                .textures(ToggleButton.DEFAULT_COLOURED_TEXTURES)
-                .onPress((_, pressed) -> {
-                    this.menu.setTagFiltering(pressed);
+            .toggledByDefault(this.menu.isTagFiltering())
+            .textures(ToggleButton.DEFAULT_COLOURED_TEXTURES)
+            .onPress((_, pressed) -> {
+                this.menu.setTagFiltering(pressed);
 
-                    rebuildWidgets();
-                })
-                .build());
+                rebuildWidgets();
+            })
+            .build());
 
         if (this.menu.isTagFiltering()) {
             initTagKeyFilteringWidgets();
@@ -64,32 +72,32 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
 
     private void initTagKeyFilteringWidgets() {
         addRenderableWidget(Checkbox.builder(BLACKLIST_MODE_LABEL, this.font)
-                .onValueChange((_, selected) -> this.menu.setBlacklistMode(selected))
-                .selected(this.menu.isBlacklistMode())
-                .pos(this.leftPos + 62, this.topPos + 16)
-                .maxWidth(88)
-                .build());
+            .onValueChange((_, selected) -> this.menu.setBlacklistMode(selected))
+            .selected(this.menu.isBlacklistMode())
+            .pos(this.leftPos + 62, this.topPos + 16)
+            .maxWidth(88)
+            .build());
 
         this.tagFilterEditBox = addRenderableWidget(AutoCompleteEditBox.builder(this.font, this)
-                .bounds(this.leftPos + 8, this.topPos + 36, 128, 20)
-                .maxVisibleSuggestions(10)
-                .value(this.menu.getFilterTag() == null ? "" : this.menu.getFilterTag().location().toString())
-                .responder(string -> {
-                    string = string.trim().replaceFirst("^#", "");
-                    if (string.isBlank())
-                        return;
+            .bounds(this.leftPos + 8, this.topPos + 36, 128, 20)
+            .maxVisibleSuggestions(10)
+            .value(this.menu.getFilterTag() == null ? "" : this.menu.getFilterTag().location().toString())
+            .responder(string -> {
+                string = string.trim().replaceFirst("^#", "");
+                if (string.isBlank())
+                    return;
 
-                    Identifier identifier = Identifier.tryParse(string);
-                    if (identifier == null)
-                        return;
+                Identifier identifier = Identifier.tryParse(string);
+                if (identifier == null)
+                    return;
 
-                    TagKey<Item> tagKey = TagKey.create(Registries.ITEM, identifier);
-                    BuiltInRegistries.ITEM.listTagIds()
-                            .filter(existingTagKey -> existingTagKey.equals(tagKey))
-                            .findFirst()
-                            .ifPresent(this.menu::setFilterTag);
-                })
-                .build());
+                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, identifier);
+                BuiltInRegistries.ITEM.listTagIds()
+                    .filter(existingTagKey -> existingTagKey.equals(tagKey))
+                    .findFirst()
+                    .ifPresent(this.menu::setFilterTag);
+            })
+            .build());
     }
 
     @Override
@@ -109,8 +117,8 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
 
         if (this.tagFilterEditBox != null)
             return this.tagFilterEditBox.keyPressed(event)
-                    || this.tagFilterEditBox.canConsumeInput()
-                    || super.keyPressed(event);
+                || this.tagFilterEditBox.canConsumeInput()
+                || super.keyPressed(event);
 
         return super.keyPressed(event);
     }
@@ -118,7 +126,7 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (this.tagFilterEditBox != null
-                && this.tagFilterEditBox.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))
+            && this.tagFilterEditBox.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))
             return true;
 
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -143,32 +151,32 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
 
     private void initStackFilteringWidgets() {
         addRenderableWidget(Checkbox.builder(BLACKLIST_MODE_LABEL, this.font)
-                .onValueChange((_, selected) -> this.menu.setBlacklistMode(selected))
-                .selected(this.menu.isBlacklistMode())
-                .pos(this.leftPos + 62, this.topPos + 18)
-                .maxWidth(88)
-                .build());
+            .onValueChange((_, selected) -> this.menu.setBlacklistMode(selected))
+            .selected(this.menu.isBlacklistMode())
+            .pos(this.leftPos + 62, this.topPos + 18)
+            .maxWidth(88)
+            .build());
 
         addRenderableWidget(Checkbox.builder(MATCH_DURABILITY_LABEL, this.font)
-                .onValueChange((_, selected) -> this.menu.setMatchDurability(selected))
-                .selected(this.menu.isMatchDurability())
-                .pos(this.leftPos + 62, this.topPos + 37)
-                .maxWidth(88)
-                .build());
+            .onValueChange((_, selected) -> this.menu.setMatchDurability(selected))
+            .selected(this.menu.isMatchDurability())
+            .pos(this.leftPos + 62, this.topPos + 37)
+            .maxWidth(88)
+            .build());
 
         addRenderableWidget(Checkbox.builder(MATCH_ENCHANTMENTS_LABEL, this.font)
-                .onValueChange((_, selected) -> this.menu.setMatchEnchantments(selected))
-                .selected(this.menu.isMatchEnchantments())
-                .pos(this.leftPos + 62, this.topPos + 56)
-                .maxWidth(88)
-                .build());
+            .onValueChange((_, selected) -> this.menu.setMatchEnchantments(selected))
+            .selected(this.menu.isMatchEnchantments())
+            .pos(this.leftPos + 62, this.topPos + 56)
+            .maxWidth(88)
+            .build());
 
         addRenderableWidget(Checkbox.builder(MATCH_COMPONENTS_LABEL, this.font)
-                .onValueChange((_, selected) -> this.menu.setMatchComponents(selected))
-                .selected(this.menu.isMatchComponents())
-                .pos(this.leftPos + 62, this.topPos + 75)
-                .maxWidth(88)
-                .build());
+            .onValueChange((_, selected) -> this.menu.setMatchComponents(selected))
+            .selected(this.menu.isMatchComponents())
+            .pos(this.leftPos + 62, this.topPos + 75)
+            .maxWidth(88)
+            .build());
     }
 
     @Override
@@ -205,10 +213,10 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tickDelta) {
         ScreenUtils.drawTexture(graphics,
-                this.menu.isTagFiltering() ? TEXTURE_TAG_MODE : TEXTURE_STACK_MODE,
-                this.leftPos, this.topPos,
-                0, 0,
-                this.imageWidth, this.imageHeight);
+            this.menu.isTagFiltering() ? TEXTURE_TAG_MODE : TEXTURE_STACK_MODE,
+            this.leftPos, this.topPos,
+            0, 0,
+            this.imageWidth, this.imageHeight);
     }
 
     @Override
@@ -235,19 +243,26 @@ public class FilterConveyorScreen extends AbstractContainerScreen<FilterConveyor
         if (this.menu.isTagFiltering())
             return;
 
-        if (isMouseOverPosition(mouseX, mouseY, this.leftPos + 8, this.topPos + 47, 16, 16) && !this.menu.getFilterStack().isEmpty()) {
+        if (isMouseOverPosition(mouseX, mouseY, this.leftPos + 8, this.topPos + 47, 16, 16)
+            && !this.menu.getFilterStack().isEmpty()) {
             ItemStack item = this.menu.getFilterStack();
             graphics.setTooltipForNextFrame(
-                    this.font,
-                    getTooltipFromContainerItem(item),
-                    item.getTooltipImage(),
-                    mouseX, mouseY,
-                    item.get(DataComponents.TOOLTIP_STYLE)
-            );
+                this.font,
+                getTooltipFromContainerItem(item),
+                item.getTooltipImage(),
+                mouseX, mouseY,
+                item.get(DataComponents.TOOLTIP_STYLE));
         }
     }
 
-    private static boolean isMouseOverPosition(double mouseX, double mouseY, double x, double y, double width, double height) {
+    private static boolean isMouseOverPosition(
+        double mouseX,
+        double mouseY,
+        double x,
+        double y,
+        double width,
+        double height
+    ) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 }

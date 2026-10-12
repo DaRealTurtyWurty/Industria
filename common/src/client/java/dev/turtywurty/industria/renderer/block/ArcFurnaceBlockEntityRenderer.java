@@ -8,7 +8,9 @@ import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
-public class ArcFurnaceBlockEntityRenderer extends IndustriaBlockEntityRenderer<ArcFurnaceBlockEntity, IndustriaBlockEntityRenderState> {
+public class ArcFurnaceBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<ArcFurnaceBlockEntity, IndustriaBlockEntityRenderState> {
     private final ArcFurnaceModel model;
 
     public ArcFurnaceBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -17,9 +19,15 @@ public class ArcFurnaceBlockEntityRenderer extends IndustriaBlockEntityRenderer<
     }
 
     @Override
-    protected void onRender(IndustriaBlockEntityRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        IndustriaBlockEntityRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ModelSubmitUtils.submitModel(queue, this.model, state,
-                matrices, this.model.renderType(ArcFurnaceModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            matrices, this.model.renderType(ArcFurnaceModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
     }
 }

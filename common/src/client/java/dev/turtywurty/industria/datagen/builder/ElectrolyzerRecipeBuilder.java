@@ -14,10 +14,18 @@ public class ElectrolyzerRecipeBuilder {
     private final GasStack outputGas;
     private final int processTime, energyCost, temperature;
 
-    public ElectrolyzerRecipeBuilder(IndustriaIngredient input, IndustriaIngredient anode, IndustriaIngredient cathode,
-                                      IndustriaIngredient electrolyteItem, FluidStack electrolyteFluid,
-                                      FluidStack outputFluid, GasStack outputGas,
-                                      int processTime, int energyCost, int temperature) {
+    public ElectrolyzerRecipeBuilder(
+        IndustriaIngredient input,
+        IndustriaIngredient anode,
+        IndustriaIngredient cathode,
+        IndustriaIngredient electrolyteItem,
+        FluidStack electrolyteFluid,
+        FluidStack outputFluid,
+        GasStack outputGas,
+        int processTime,
+        int energyCost,
+        int temperature
+    ) {
         this.input = input;
         this.anode = anode;
         this.cathode = cathode;
@@ -32,9 +40,9 @@ public class ElectrolyzerRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new ElectrolyzerRecipe(this.input, this.anode, this.cathode, this.electrolyteItem,
-                        this.electrolyteFluid, this.outputFluid, this.outputGas,
-                        this.processTime, this.energyCost, this.temperature),
-                null);
+            new ElectrolyzerRecipe(this.input, this.anode, this.cathode, this.electrolyteItem,
+                this.electrolyteFluid, this.outputFluid, this.outputGas,
+                this.processTime, this.energyCost, this.temperature),
+            null);
     }
 }

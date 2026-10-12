@@ -42,7 +42,8 @@ public class MagneticConveyorBlockEntity extends IndustriaBlockEntity implements
         if (storage == null || !storage.canAcceptIncomingItem())
             return;
 
-        List<ItemEntity> itemEntities = this.level.getEntitiesOfClass(ItemEntity.class, this.magneticBounds, Entity::isAlive);
+        List<ItemEntity> itemEntities = this.level.getEntitiesOfClass(ItemEntity.class, this.magneticBounds,
+            Entity::isAlive);
         for (ItemEntity itemEntity : itemEntities) {
             pullItemEntity(itemEntity, storage);
         }

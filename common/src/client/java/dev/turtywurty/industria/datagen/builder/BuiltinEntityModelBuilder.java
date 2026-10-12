@@ -19,87 +19,87 @@ import java.util.function.Consumer;
 
 public class BuiltinEntityModelBuilder {
     private static final DefaultDisplaySettingsBuilder DEFAULT_ITEM = new DefaultDisplaySettingsBuilder()
-            .thirdPersonBothHands(new DisplaySettings.Builder()
-                    .translation(0, 3, 1)
-                    .scale(0.55f))
-            .firstPersonRightHand(new DisplaySettings.Builder()
-                    .rotation(0, -90, 25)
-                    .translation(1.13f, 3.2f, 1.13f)
-                    .scale(0.68f))
-            .firstPersonLeftHand(new DisplaySettings.Builder()
-                    .rotation(0, 90, -25)
-                    .translation(1.13f, 3.2f, 1.13f)
-                    .scale(0.68f))
-            .ground(new DisplaySettings.Builder()
-                    .translation(0, 2, 0)
-                    .scale(0.5f))
-            .head(new DisplaySettings.Builder()
-                    .rotation(0, 180, 0)
-                    .translation(0, 13, 7))
-            .fixed(new DisplaySettings.Builder()
-                    .rotation(0, 180, 0));
+        .thirdPersonBothHands(new DisplaySettings.Builder()
+            .translation(0, 3, 1)
+            .scale(0.55f))
+        .firstPersonRightHand(new DisplaySettings.Builder()
+            .rotation(0, -90, 25)
+            .translation(1.13f, 3.2f, 1.13f)
+            .scale(0.68f))
+        .firstPersonLeftHand(new DisplaySettings.Builder()
+            .rotation(0, 90, -25)
+            .translation(1.13f, 3.2f, 1.13f)
+            .scale(0.68f))
+        .ground(new DisplaySettings.Builder()
+            .translation(0, 2, 0)
+            .scale(0.5f))
+        .head(new DisplaySettings.Builder()
+            .rotation(0, 180, 0)
+            .translation(0, 13, 7))
+        .fixed(new DisplaySettings.Builder()
+            .rotation(0, 180, 0));
 
     private static final DefaultDisplaySettingsBuilder DEFAULT_BLOCK = new DefaultDisplaySettingsBuilder()
-            .thirdPersonBothHands(new DisplaySettings.Builder()
-                    .rotation(75, 45, 0)
-                    .translation(0, 2.5f, 0)
-                    .scale(0.375f))
-            .firstPersonRightHand(new DisplaySettings.Builder()
-                    .rotation(0, 45, 0)
-                    .translation(0, 0, 0)
-                    .scale(0.4f))
-            .firstPersonLeftHand(new DisplaySettings.Builder()
-                    .rotation(0, 225, 0)
-                    .translation(0, 0, 0)
-                    .scale(0.4f))
-            .ground(new DisplaySettings.Builder()
-                    .rotation(0, 0, 0)
-                    .translation(0, 3, 0)
-                    .scale(0.25f))
-            .fixed(new DisplaySettings.Builder()
-                    .rotation(0, 0, 0)
-                    .translation(0, 0, 0)
-                    .scale(0.5f))
-            .gui(new DisplaySettings.Builder()
-                    .rotation(30, 225, 0)
-                    .translation(0, 0, 0)
-                    .scale(0.625f));
+        .thirdPersonBothHands(new DisplaySettings.Builder()
+            .rotation(75, 45, 0)
+            .translation(0, 2.5f, 0)
+            .scale(0.375f))
+        .firstPersonRightHand(new DisplaySettings.Builder()
+            .rotation(0, 45, 0)
+            .translation(0, 0, 0)
+            .scale(0.4f))
+        .firstPersonLeftHand(new DisplaySettings.Builder()
+            .rotation(0, 225, 0)
+            .translation(0, 0, 0)
+            .scale(0.4f))
+        .ground(new DisplaySettings.Builder()
+            .rotation(0, 0, 0)
+            .translation(0, 3, 0)
+            .scale(0.25f))
+        .fixed(new DisplaySettings.Builder()
+            .rotation(0, 0, 0)
+            .translation(0, 0, 0)
+            .scale(0.5f))
+        .gui(new DisplaySettings.Builder()
+            .rotation(30, 225, 0)
+            .translation(0, 0, 0)
+            .scale(0.625f));
 
     private static final DefaultDisplaySettingsBuilder DEFAULT_WEAPON = new DefaultDisplaySettingsBuilder()
-            .thirdPersonRightHand(new DisplaySettings.Builder()
-                    .rotation(0, -90, 55)
-                    .translation(0, 4, 0.5f)
-                    .scale(0.85f))
-            .thirdPersonLeftHand(new DisplaySettings.Builder()
-                    .rotation(0, 90, -55)
-                    .translation(0, 4, 0.5f)
-                    .scale(0.85f))
-            .firstPersonRightHand(new DisplaySettings.Builder()
-                    .rotation(0, -90, 25)
-                    .translation(1.13f, 3.2f, 1.13f)
-                    .scale(0.68f))
-            .firstPersonLeftHand(new DisplaySettings.Builder()
-                    .rotation(0, 90, -25)
-                    .translation(1.13f, 3.2f, 1.13f)
-                    .scale(0.68f));
+        .thirdPersonRightHand(new DisplaySettings.Builder()
+            .rotation(0, -90, 55)
+            .translation(0, 4, 0.5f)
+            .scale(0.85f))
+        .thirdPersonLeftHand(new DisplaySettings.Builder()
+            .rotation(0, 90, -55)
+            .translation(0, 4, 0.5f)
+            .scale(0.85f))
+        .firstPersonRightHand(new DisplaySettings.Builder()
+            .rotation(0, -90, 25)
+            .translation(1.13f, 3.2f, 1.13f)
+            .scale(0.68f))
+        .firstPersonLeftHand(new DisplaySettings.Builder()
+            .rotation(0, 90, -25)
+            .translation(1.13f, 3.2f, 1.13f)
+            .scale(0.68f));
 
     private static final DefaultDisplaySettingsBuilder DEFAULT_ROD = new DefaultDisplaySettingsBuilder()
-            .thirdPersonRightHand(new DisplaySettings.Builder()
-                    .rotation(0, 90, 55)
-                    .translation(0, 4, 2.5f)
-                    .scale(0.85f))
-            .thirdPersonLeftHand(new DisplaySettings.Builder()
-                    .rotation(0, -90, -55)
-                    .translation(0, 4, 2.5f)
-                    .scale(0.85f))
-            .firstPersonRightHand(new DisplaySettings.Builder()
-                    .rotation(0, 90, 25)
-                    .translation(0, 1.6f, 0.8f)
-                    .scale(0.68f))
-            .firstPersonLeftHand(new DisplaySettings.Builder()
-                    .rotation(0, -90, -25)
-                    .translation(0, 1.6f, 0.8f)
-                    .scale(0.68f));
+        .thirdPersonRightHand(new DisplaySettings.Builder()
+            .rotation(0, 90, 55)
+            .translation(0, 4, 2.5f)
+            .scale(0.85f))
+        .thirdPersonLeftHand(new DisplaySettings.Builder()
+            .rotation(0, -90, -55)
+            .translation(0, 4, 2.5f)
+            .scale(0.85f))
+        .firstPersonRightHand(new DisplaySettings.Builder()
+            .rotation(0, 90, 25)
+            .translation(0, 1.6f, 0.8f)
+            .scale(0.68f))
+        .firstPersonLeftHand(new DisplaySettings.Builder()
+            .rotation(0, -90, -25)
+            .translation(0, 1.6f, 0.8f)
+            .scale(0.68f));
 
     private final Item item;
     private final Identifier id;
@@ -107,7 +107,12 @@ public class BuiltinEntityModelBuilder {
     private final @Nullable Identifier particleTextureId;
     private final List<DisplaySettings> displaySettings = new ArrayList<>();
 
-    private BuiltinEntityModelBuilder(Item item, Identifier id, ItemModelGenerators writer, @Nullable Identifier particleTextureId) {
+    private BuiltinEntityModelBuilder(
+        Item item,
+        Identifier id,
+        ItemModelGenerators writer,
+        @Nullable Identifier particleTextureId
+    ) {
         this.item = item;
         this.id = id;
         this.writer = writer;
@@ -131,7 +136,8 @@ public class BuiltinEntityModelBuilder {
             for (DisplaySettings displaySetting : this.displaySettings) {
                 var displayObject = new JsonObject();
 
-                if(displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0 || displaySetting.rotation.z != 0) {
+                if (displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0
+                    || displaySetting.rotation.z != 0) {
                     var rotation = new JsonArray();
                     rotation.add(new JsonPrimitive(displaySetting.rotation.x));
                     rotation.add(new JsonPrimitive(displaySetting.rotation.y));
@@ -139,7 +145,8 @@ public class BuiltinEntityModelBuilder {
                     displayObject.add("rotation", rotation);
                 }
 
-                if(displaySetting.translation.x != 0 || displaySetting.translation.y != 0 || displaySetting.translation.z != 0) {
+                if (displaySetting.translation.x != 0 || displaySetting.translation.y != 0
+                    || displaySetting.translation.z != 0) {
                     var translation = new JsonArray();
                     translation.add(new JsonPrimitive(displaySetting.translation.x));
                     translation.add(new JsonPrimitive(displaySetting.translation.y));
@@ -147,7 +154,7 @@ public class BuiltinEntityModelBuilder {
                     displayObject.add("translation", translation);
                 }
 
-                if(displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
+                if (displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
                     var scale = new JsonArray();
                     scale.add(new JsonPrimitive(displaySetting.scale.x));
                     scale.add(new JsonPrimitive(displaySetting.scale.y));
@@ -162,9 +169,10 @@ public class BuiltinEntityModelBuilder {
             return object;
         });
 
-//        if(item instanceof BlockItem) {
-//            this.writer.output.accept(this.item, ItemModels.special(ModelIds.getItemModelId(this.item), DynamicItemRendererInit.getItemRenderer(this.item)));
-//        }
+        // if(item instanceof BlockItem) {
+        // this.writer.output.accept(this.item, ItemModels.special(ModelIds.getItemModelId(this.item),
+        // DynamicItemRendererInit.getItemRenderer(this.item)));
+        // }
     }
 
     private static Identifier defaultParticleTexture(Item item) {
@@ -176,16 +184,33 @@ public class BuiltinEntityModelBuilder {
         write(writer, item, particleTextureId, null);
     }
 
-    public static void write(ItemModelGenerators writer, ItemLike item, Identifier particleTextureId, DefaultDisplaySettingsBuilder defaultBuilder) {
+    public static void write(
+        ItemModelGenerators writer,
+        ItemLike item,
+        Identifier particleTextureId,
+        DefaultDisplaySettingsBuilder defaultBuilder
+    ) {
         write(writer, item.asItem(), getItemModelLocation(item.asItem()), particleTextureId, defaultBuilder);
     }
 
-    public static void write(ItemModelGenerators writer, Item item, Identifier id, DefaultDisplaySettingsBuilder defaultBuilder) {
+    public static void write(
+        ItemModelGenerators writer,
+        Item item,
+        Identifier id,
+        DefaultDisplaySettingsBuilder defaultBuilder
+    ) {
         write(writer, item, id, defaultParticleTexture(item), defaultBuilder);
     }
 
-    public static void write(ItemModelGenerators writer, Item item, Identifier id, Identifier particleTextureId, DefaultDisplaySettingsBuilder defaultBuilder) {
-        new BuiltinEntityModelBuilder.Builder(writer, item, id, particleTextureId).defaultDisplaySettings(defaultBuilder).build().write();
+    public static void write(
+        ItemModelGenerators writer,
+        Item item,
+        Identifier id,
+        Identifier particleTextureId,
+        DefaultDisplaySettingsBuilder defaultBuilder
+    ) {
+        new BuiltinEntityModelBuilder.Builder(writer, item, id, particleTextureId)
+            .defaultDisplaySettings(defaultBuilder).build().write();
     }
 
     public static void write(ItemModelGenerators writer, Item item, DefaultDisplaySettingsBuilder defaultBuilder) {
@@ -328,11 +353,11 @@ public class BuiltinEntityModelBuilder {
 
         public DefaultDisplaySettingsBuilder copyModifyAll(Consumer<DisplaySettings> modifier) {
             return copyModifyThirdPersonBothHands(modifier)
-                    .copyModifyFirstPersonBothHands(modifier)
-                    .copyModifyGround(modifier)
-                    .copyModifyGui(modifier)
-                    .copyModifyHead(modifier)
-                    .copyModifyFixed(modifier);
+                .copyModifyFirstPersonBothHands(modifier)
+                .copyModifyGround(modifier)
+                .copyModifyGui(modifier)
+                .copyModifyHead(modifier)
+                .copyModifyFixed(modifier);
         }
 
         public Map<String, DisplaySettings> build() {
@@ -369,7 +394,8 @@ public class BuiltinEntityModelBuilder {
         public BuiltinEntityModelBuilder build() {
             var builder = new BuiltinEntityModelBuilder(this.item, this.id, this.writer, this.particleTextureId);
             if (this.defaultDisplaySettingsBuilder != null) {
-                for (Map.Entry<String, DisplaySettings> displaySettingsEntry : this.defaultDisplaySettingsBuilder.build().entrySet()) {
+                for (Map.Entry<String, DisplaySettings> displaySettingsEntry : this.defaultDisplaySettingsBuilder
+                    .build().entrySet()) {
                     builder.displaySettings.add(displaySettingsEntry.getValue());
                 }
             }
@@ -423,7 +449,8 @@ public class BuiltinEntityModelBuilder {
         }
 
         public DisplaySettings copy() {
-            return new DisplaySettings(this.name, new Vector3f(this.rotation), new Vector3f(this.translation), new Vector3f(this.scale));
+            return new DisplaySettings(this.name, new Vector3f(this.rotation), new Vector3f(this.translation),
+                new Vector3f(this.scale));
         }
 
         public static class Builder {

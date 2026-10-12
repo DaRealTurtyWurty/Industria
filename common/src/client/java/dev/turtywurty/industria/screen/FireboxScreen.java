@@ -28,7 +28,7 @@ public class FireboxScreen extends AbstractContainerScreen<FireboxMenu> {
         super.extractBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        if(this.menu.isBurning()) {
+        if (this.menu.isBurning()) {
             int width = Mth.ceil(this.menu.getBurnProgress() * 52);
             context.fill(this.leftPos + 62, this.topPos + 59, this.leftPos + 62 + width, this.topPos + 65, 0xFFFF9800);
         }

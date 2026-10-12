@@ -20,15 +20,23 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 
 public class RubberTreeTrunkPlacer extends TrunkPlacer {
-    public static final MapCodec<RubberTreeTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(instance ->
-            trunkPlacerParts(instance).and(
-                    instance.group(IntProviders.POSITIVE_CODEC.fieldOf("branch_start_height").forGetter(placer -> placer.branchStartHeight),
-                            IntProviders.NON_NEGATIVE_CODEC.fieldOf("branch_length").forGetter(placer -> placer.branchLength)))
-                    .apply(instance, RubberTreeTrunkPlacer::new));
+    public static final MapCodec<RubberTreeTrunkPlacer> CODEC = RecordCodecBuilder
+        .mapCodec(instance -> trunkPlacerParts(instance).and(
+            instance.group(
+                IntProviders.POSITIVE_CODEC.fieldOf("branch_start_height")
+                    .forGetter(placer -> placer.branchStartHeight),
+                IntProviders.NON_NEGATIVE_CODEC.fieldOf("branch_length").forGetter(placer -> placer.branchLength)))
+            .apply(instance, RubberTreeTrunkPlacer::new));
     public final IntProvider branchStartHeight;
     public final IntProvider branchLength;
 
-    public RubberTreeTrunkPlacer(int baseHeight, int firstRandomHeight, int secondRandomHeight, IntProvider branchStartHeight, IntProvider branchLength) {
+    public RubberTreeTrunkPlacer(
+        int baseHeight,
+        int firstRandomHeight,
+        int secondRandomHeight,
+        IntProvider branchStartHeight,
+        IntProvider branchLength
+    ) {
         super(baseHeight, firstRandomHeight, secondRandomHeight);
         this.branchStartHeight = branchStartHeight;
         this.branchLength = branchLength;
@@ -40,7 +48,14 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(WorldGenLevel level, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, int treeHeight, BlockPos startPos, TreeFeature config) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(
+        WorldGenLevel level,
+        BiConsumer<BlockPos, BlockState> replacer,
+        RandomSource random,
+        int treeHeight,
+        BlockPos startPos,
+        TreeFeature config
+    ) {
         List<FoliagePlacer.FoliageAttachment> nodes = new ArrayList<>();
         placeBelowTrunkBlock(level, replacer, random, startPos.below(), config);
         nodes.add(new FoliagePlacer.FoliageAttachment(startPos.above(treeHeight), 0, false));
@@ -51,8 +66,8 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
         for (int yPos = 0; yPos < treeHeight; ++yPos) {
             placeLog(level, replacer, random, startPos.above(yPos), config);
 
-            if(yPos >= height - 1) {
-                if(random.nextFloat() < branchingPossibility) {
+            if (yPos >= height - 1) {
+                if (random.nextFloat() < branchingPossibility) {
                     branchingPossibility *= branchingPossibility;
 
                     Direction direction;
@@ -72,7 +87,7 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
                         BlockPos offsetPos = pos.offset(offsetX, hPos, offsetZ);
                         placeLog(level, replacer, random, offsetPos, config);
 
-                        if(hPos == 0 || random.nextFloat() < 0.8F) {
+                        if (hPos == 0 || random.nextFloat() < 0.8F) {
                             offsetX += branchDirection.getStepX();
                             offsetZ += branchDirection.getStepZ();
                         }
@@ -89,8 +104,14 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    protected boolean placeLog(WorldGenLevel world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, BlockPos pos, TreeFeature config) {
+    protected boolean placeLog(
+        WorldGenLevel world,
+        BiConsumer<BlockPos, BlockState> replacer,
+        RandomSource random,
+        BlockPos pos,
+        TreeFeature config
+    ) {
         return placeLog(world, replacer, random, pos, config,
-                state -> state.setValue(LatexBlock.LATEX_LEVEL, random.nextIntBetweenInclusive(6, 9)));
+            state -> state.setValue(LatexBlock.LATEX_LEVEL, random.nextIntBetweenInclusive(6, 9)));
     }
 }

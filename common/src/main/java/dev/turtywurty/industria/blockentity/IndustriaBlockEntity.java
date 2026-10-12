@@ -36,7 +36,8 @@ public abstract class IndustriaBlockEntity extends UpdatableBlockEntity {
     }
 
     protected void dropContentsOnBreak() {
-        if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component access maybe?
+        if (this instanceof BlockEntityContentsDropper blockEntityWithInventory) { // TODO: Replace with component
+                                                                                   // access maybe?
             blockEntityWithInventory.dropContents(level, worldPosition);
         }
     }

@@ -22,175 +22,161 @@ import java.util.Map;
 
 public final class ModPipeConnectionModels {
     private static final ConnectionModelSet CABLE = ConnectionModelSet.horizontalAndVertical(
-            Industria.id("default/cable"),
-            Industria.id("block/cable_connection"),
-            Industria.id("block/cable_connection_up"),
-            Industria.id("block/cable_connection_down")
-    );
+        Industria.id("default/cable"),
+        Industria.id("block/cable_connection"),
+        Industria.id("block/cable_connection_up"),
+        Industria.id("block/cable_connection_down"));
     private static final ConnectionModelSet FLUID_PIPE = ConnectionModelSet.horizontalAndVertical(
-            Industria.id("default/fluid_pipe"),
-            Industria.id("block/fluid_pipe_connection"),
-            Industria.id("block/fluid_pipe_connection_up"),
-            Industria.id("block/fluid_pipe_connection_down")
-    );
+        Industria.id("default/fluid_pipe"),
+        Industria.id("block/fluid_pipe_connection"),
+        Industria.id("block/fluid_pipe_connection_up"),
+        Industria.id("block/fluid_pipe_connection_down"));
     private static final ConnectionModelSet SLURRY_PIPE = ConnectionModelSet.horizontalAndVertical(
-            Industria.id("default/slurry_pipe"),
-            Industria.id("block/slurry_pipe_connection"),
-            Industria.id("block/slurry_pipe_connection_up"),
-            Industria.id("block/slurry_pipe_connection_down")
-    );
+        Industria.id("default/slurry_pipe"),
+        Industria.id("block/slurry_pipe_connection"),
+        Industria.id("block/slurry_pipe_connection_up"),
+        Industria.id("block/slurry_pipe_connection_down"));
     private static final ConnectionModelSet GAS_PIPE = ConnectionModelSet.horizontalAndVertical(
-            Industria.id("default/gas_pipe"),
-            Industria.id("block/gas_pipe_connection"),
-            Industria.id("block/gas_pipe_connection_up"),
-            Industria.id("block/gas_pipe_connection_down")
-    );
+        Industria.id("default/gas_pipe"),
+        Industria.id("block/gas_pipe_connection"),
+        Industria.id("block/gas_pipe_connection_up"),
+        Industria.id("block/gas_pipe_connection_down"));
     private static final Map<Direction, ConnectionModelSet> MIXER_FLUID_PIPE = createMixerFluidPipeModels();
     private static final ConnectionModelSet MIXER_SLURRY_PIPE = ConnectionModelSet.rotatedFromNorth(
-            Industria.id("mixer_slurry_pipe"),
-            Industria.id("block/mixer_slurry_pipe_connection")
-    );
+        Industria.id("mixer_slurry_pipe"),
+        Industria.id("block/mixer_slurry_pipe_connection"));
     private static final ConnectionModelSet SOLAR_PANEL_CABLE = ConnectionModelSet.horizontal(
-            Industria.id("solar_panel_cable"),
-            Industria.id("block/solar_panel_cable_connection")
-    );
+        Industria.id("solar_panel_cable"),
+        Industria.id("block/solar_panel_cable_connection"));
     private static final ConnectionModelSet DIGESTER_FLUID_PIPE = ConnectionModelSet.horizontal(
-            Industria.id("digester_fluid_pipe"),
-            Industria.id("block/digester_fluid_pipe_connection")
-    );
+        Industria.id("digester_fluid_pipe"),
+        Industria.id("block/digester_fluid_pipe_connection"));
     private static final ConnectionModelSet DIGESTER_CABLE = ConnectionModelSet.horizontal(
-            Industria.id("digester_cable"),
-            Industria.id("block/digester_cable_connection")
-    );
+        Industria.id("digester_cable"),
+        Industria.id("block/digester_cable_connection"));
     private static final ConnectionModelSet CLARIFIER_FLUID_INPUT = ConnectionModelSet.horizontal(
-            Industria.id("clarifier_fluid_input"),
-            Industria.id("block/clarifier_fluid_pipe_input_connection")
-    );
+        Industria.id("clarifier_fluid_input"),
+        Industria.id("block/clarifier_fluid_pipe_input_connection"));
     private static final ConnectionModelSet CLARIFIER_FLUID_OUTPUT = ConnectionModelSet.horizontal(
-            Industria.id("clarifier_fluid_output"),
-            Industria.id("block/clarifier_fluid_pipe_output_connection")
-    );
+        Industria.id("clarifier_fluid_output"),
+        Industria.id("block/clarifier_fluid_pipe_output_connection"));
     private static final ConnectionModelSet CLARIFIER_CABLE = ConnectionModelSet.horizontal(
-            Industria.id("clarifier_cable"),
-            Industria.id("block/clarifier_cable_connection")
-    );
+        Industria.id("clarifier_cable"),
+        Industria.id("block/clarifier_cable_connection"));
 
     public static void init() {
     }
 
     public static void register() {
         PipeConnectionModelApi.register(
-                Industria.id("clarifier_cable"), ModBlocks.CABLE.get(), MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> {
-                    BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below();
-                    return level.getBlockEntity(controllerPos) instanceof ClarifierBlockEntity clarifier
-                            && clarifier.getEnergyStorageForExternal(targetPos, targetFace) != null;
-                },
-                CLARIFIER_CABLE, 100
-        );
+            Industria.id("clarifier_cable"), ModBlocks.CABLE.get(), MultiblockLib.MULTIBLOCK_PART,
+            (level, targetPos, _, targetFace) -> {
+                BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below();
+                return level.getBlockEntity(controllerPos) instanceof ClarifierBlockEntity clarifier
+                    && clarifier.getEnergyStorageForExternal(targetPos, targetFace) != null;
+            },
+            CLARIFIER_CABLE, 100);
         PipeConnectionModelApi.registerDynamic(
-                Industria.id("clarifier_fluid_pipe"),
-                ModBlocks.FLUID_PIPE.get(),
-                MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> findClarifierFluidModel(level, targetPos, targetFace),
-                List.of(CLARIFIER_FLUID_INPUT, CLARIFIER_FLUID_OUTPUT),
-                100
-        );
+            Industria.id("clarifier_fluid_pipe"),
+            ModBlocks.FLUID_PIPE.get(),
+            MultiblockLib.MULTIBLOCK_PART,
+            (level, targetPos, _, targetFace) -> findClarifierFluidModel(level, targetPos, targetFace),
+            List.of(CLARIFIER_FLUID_INPUT, CLARIFIER_FLUID_OUTPUT),
+            100);
         PipeConnectionModelRegistry.registerDefault(
-                ModBlocks.CABLE.get(),
-                CABLE
-        );
+            ModBlocks.CABLE.get(),
+            CABLE);
 
         PipeConnectionModelRegistry.registerDefault(
-                ModBlocks.FLUID_PIPE.get(),
-                FLUID_PIPE
-        );
+            ModBlocks.FLUID_PIPE.get(),
+            FLUID_PIPE);
 
         PipeConnectionModelRegistry.registerDefault(
-                ModBlocks.SLURRY_PIPE.get(),
-                SLURRY_PIPE
-        );
+            ModBlocks.SLURRY_PIPE.get(),
+            SLURRY_PIPE);
 
         PipeConnectionModelRegistry.registerDefault(
-                ModBlocks.GAS_PIPE.get(),
-                GAS_PIPE
-        );
+            ModBlocks.GAS_PIPE.get(),
+            GAS_PIPE);
 
         PipeConnectionModelApi.registerDynamic(
-                Industria.id("mixer_fluid_pipe"),
-                ModBlocks.FLUID_PIPE.get(),
-                MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> {
-                    Direction facing = findMixerPortFacing(level, targetPos, targetFace, true);
-                    return facing == null ? null : MIXER_FLUID_PIPE.get(facing);
-                },
-                List.copyOf(MIXER_FLUID_PIPE.values()),
-                100
-        );
+            Industria.id("mixer_fluid_pipe"),
+            ModBlocks.FLUID_PIPE.get(),
+            MultiblockLib.MULTIBLOCK_PART,
+            (level, targetPos, _, targetFace) -> {
+                Direction facing = findMixerPortFacing(level, targetPos, targetFace, true);
+                return facing == null ? null : MIXER_FLUID_PIPE.get(facing);
+            },
+            List.copyOf(MIXER_FLUID_PIPE.values()),
+            100);
 
         PipeConnectionModelApi.register(
-                Industria.id("mixer_slurry_pipe"),
-                ModBlocks.SLURRY_PIPE.get(),
-                MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> isMixerPort(level, targetPos, targetFace, false),
-                MIXER_SLURRY_PIPE,
-                100
-        );
+            Industria.id("mixer_slurry_pipe"),
+            ModBlocks.SLURRY_PIPE.get(),
+            MultiblockLib.MULTIBLOCK_PART,
+            (level, targetPos, _, targetFace) -> isMixerPort(level, targetPos, targetFace, false),
+            MIXER_SLURRY_PIPE,
+            100);
 
         PipeConnectionModelApi.register(
-                Industria.id("solar_panel_cable"),
-                ModBlocks.CABLE.get(),
-                ModBlocks.SOLAR_PANEL.get(),
-                (state, targetFace) -> {
-                    Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
-                    return targetFace == facing.getClockWise() || targetFace == facing.getCounterClockWise();
-                },
-                SOLAR_PANEL_CABLE,
-                0
-        );
+            Industria.id("solar_panel_cable"),
+            ModBlocks.CABLE.get(),
+            ModBlocks.SOLAR_PANEL.get(),
+            (state, targetFace) -> {
+                Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+                return targetFace == facing.getClockWise() || targetFace == facing.getCounterClockWise();
+            },
+            SOLAR_PANEL_CABLE,
+            0);
 
         PipeConnectionModelApi.register(
-                Industria.id("digester_fluid_pipe"),
-                ModBlocks.FLUID_PIPE.get(),
-                MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> isDigesterPort(level, targetPos, targetFace, true),
-                DIGESTER_FLUID_PIPE,
-                100
-        );
+            Industria.id("digester_fluid_pipe"),
+            ModBlocks.FLUID_PIPE.get(),
+            MultiblockLib.MULTIBLOCK_PART,
+            (level, targetPos, _, targetFace) -> isDigesterPort(level, targetPos, targetFace, true),
+            DIGESTER_FLUID_PIPE,
+            100);
 
         PipeConnectionModelApi.register(
-                Industria.id("digester_cable"),
-                ModBlocks.CABLE.get(),
-                MultiblockLib.MULTIBLOCK_PART,
-                (level, targetPos, _, targetFace) -> isDigesterPort(level, targetPos, targetFace, false),
-                DIGESTER_CABLE,
-                100
-        );
+            Industria.id("digester_cable"),
+            ModBlocks.CABLE.get(),
+            MultiblockLib.MULTIBLOCK_PART,
+            (level, targetPos, _, targetFace) -> isDigesterPort(level, targetPos, targetFace, false),
+            DIGESTER_CABLE,
+            100);
 
         PipeConnectionModelApi.register(
-                Industria.id("advanced_solar_panel_cable"),
-                ModBlocks.CABLE.get(),
-                ModBlocks.ADVANCED_SOLAR_PANEL.get(),
-                (state, targetFace) -> {
-                    Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
-                    return targetFace == facing.getClockWise() || targetFace == facing.getCounterClockWise();
-                },
-                SOLAR_PANEL_CABLE,
-                0
-        );
+            Industria.id("advanced_solar_panel_cable"),
+            ModBlocks.CABLE.get(),
+            ModBlocks.ADVANCED_SOLAR_PANEL.get(),
+            (state, targetFace) -> {
+                Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+                return targetFace == facing.getClockWise() || targetFace == facing.getCounterClockWise();
+            },
+            SOLAR_PANEL_CABLE,
+            0);
     }
 
-    private static boolean isDigesterPort(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
+    private static boolean isDigesterPort(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        Direction targetFace,
+        boolean fluid
+    ) {
         BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below(fluid ? 0 : 1);
         if (!(level.getBlockEntity(controllerPos) instanceof DigesterBlockEntity digester))
             return false;
 
-        return fluid ? digester.getFluidStorageForExternal(targetPos, targetFace) != null :
-                digester.getEnergyStorageForExternal(targetPos, targetFace) != null;
+        return fluid
+            ? digester.getFluidStorageForExternal(targetPos, targetFace) != null
+            : digester.getEnergyStorageForExternal(targetPos, targetFace) != null;
     }
 
-    private static @Nullable ConnectionModelSet findClarifierFluidModel(BlockAndTintGetter level, BlockPos targetPos,
-                                                                       Direction targetFace) {
+    private static @Nullable ConnectionModelSet findClarifierFluidModel(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        Direction targetFace
+    ) {
         for (int height : new int[]{0, 2}) {
             BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below(height);
             if (!(level.getBlockEntity(controllerPos) instanceof ClarifierBlockEntity clarifier))
@@ -217,20 +203,29 @@ public final class ModPipeConnectionModels {
                 default -> throw new IllegalStateException("Unexpected mixer facing: " + facing);
             };
             models.put(facing, ConnectionModelSet.forDirection(
-                    Industria.id("mixer_fluid_pipe/" + facing.getName()),
-                    Direction.DOWN,
-                    Industria.id("block/mixer_fluid_pipe_connection"),
-                    state
-            ));
+                Industria.id("mixer_fluid_pipe/" + facing.getName()),
+                Direction.DOWN,
+                Industria.id("block/mixer_fluid_pipe_connection"),
+                state));
         }
         return Map.copyOf(models);
     }
 
-    private static boolean isMixerPort(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
+    private static boolean isMixerPort(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        Direction targetFace,
+        boolean fluid
+    ) {
         return findMixerPortFacing(level, targetPos, targetFace, fluid) != null;
     }
 
-    private static @Nullable Direction findMixerPortFacing(BlockAndTintGetter level, BlockPos targetPos, Direction targetFace, boolean fluid) {
+    private static @Nullable Direction findMixerPortFacing(
+        BlockAndTintGetter level,
+        BlockPos targetPos,
+        Direction targetFace,
+        boolean fluid
+    ) {
         for (int blocksBelow = 0; blocksBelow <= 2; blocksBelow++) {
             for (int offsetX = -1; offsetX <= 1; offsetX++) {
                 for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
@@ -238,9 +233,9 @@ public final class ModPipeConnectionModels {
                     if (!(level.getBlockEntity(controllerPos) instanceof MixerBlockEntity mixer))
                         continue;
 
-                    boolean matchesPort = fluid ?
-                            mixer.getFluidStorageForExternal(targetPos, targetFace) != null :
-                            mixer.getSlurryStorageForExternal(targetPos, targetFace) != null;
+                    boolean matchesPort = fluid
+                        ? mixer.getFluidStorageForExternal(targetPos, targetFace) != null
+                        : mixer.getSlurryStorageForExternal(targetPos, targetFace) != null;
                     if (matchesPort)
                         return mixer.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
                 }

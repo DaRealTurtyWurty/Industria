@@ -15,8 +15,14 @@ public class MoldCastPreviewState implements PictureInPictureRenderState {
     private final MoldCastSurface.Snapshot surface;
     private final @Nullable ScreenRectangle scissorArea;
 
-    public MoldCastPreviewState(int x, int y, int size, TextureAtlasSprite sprite,
-                                MoldCastSurface.Snapshot surface, @Nullable ScreenRectangle scissorArea) {
+    public MoldCastPreviewState(
+        int x,
+        int y,
+        int size,
+        TextureAtlasSprite sprite,
+        MoldCastSurface.Snapshot surface,
+        @Nullable ScreenRectangle scissorArea
+    ) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -71,12 +77,12 @@ public class MoldCastPreviewState implements PictureInPictureRenderState {
     @Override
     public boolean equals(Object other) {
         return other instanceof MoldCastPreviewState state
-                && x == state.x
-                && y == state.y
-                && size == state.size
-                && sprite == state.sprite
-                && surface == state.surface
-                && Objects.equals(scissorArea, state.scissorArea);
+            && x == state.x
+            && y == state.y
+            && size == state.size
+            && sprite == state.sprite
+            && surface == state.surface
+            && Objects.equals(scissorArea, state.scissorArea);
     }
 
     @Override

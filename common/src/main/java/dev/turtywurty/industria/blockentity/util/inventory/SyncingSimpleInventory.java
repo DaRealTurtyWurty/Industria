@@ -21,7 +21,8 @@ public class SyncingSimpleInventory extends RecipeSimpleInventory implements Syn
 
     @Override
     public void sync() {
-        if (this.isDirty && this.blockEntity instanceof BlockEntity be && be.hasLevel() && !be.getLevel().isClientSide()) {
+        if (this.isDirty && this.blockEntity instanceof BlockEntity be && be.hasLevel()
+            && !be.getLevel().isClientSide()) {
             this.isDirty = false;
 
             this.blockEntity.update();

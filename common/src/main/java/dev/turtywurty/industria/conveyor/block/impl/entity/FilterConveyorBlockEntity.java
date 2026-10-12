@@ -31,7 +31,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder, ConveyorFilterAccess {
+public class FilterConveyorBlockEntity extends IndustriaBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        WrappedContainerStorageHolder,
+        ConveyorFilterAccess {
     public static final Component TITLE = Industria.containerTitle("filter_conveyor");
 
     // This is purely to make the screen handler happy :)
@@ -100,20 +104,15 @@ public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements B
         if (stack == null || stack.isEmpty())
             return false;
 
-        if (this.isTagFiltering) {
-            //noinspection SimplifiableConditionalExpression - This is more readable in my opinion
-            return this.blacklistMode ?
-                    !stack.is(this.filterTag) :
-                    stack.is(this.filterTag);
-        }
+        if (this.isTagFiltering)
+            // noinspection SimplifiableConditionalExpression - This is more readable in my opinion
+            return this.blacklistMode ? !stack.is(this.filterTag) : stack.is(this.filterTag);
 
         if (this.filterStack.isEmpty())
             return false;
 
-        //noinspection SimplifiableConditionalExpression - This is more readable in my opinion
-        return this.blacklistMode ?
-                !internalStackMatches(stack) :
-                internalStackMatches(stack);
+        // noinspection SimplifiableConditionalExpression - This is more readable in my opinion
+        return this.blacklistMode ? !internalStackMatches(stack) : internalStackMatches(stack);
     }
 
     private boolean internalStackMatches(ItemStack stack) {
@@ -126,7 +125,9 @@ public class FilterConveyorBlockEntity extends IndustriaBlockEntity implements B
         if (this.matchDurability && stack.getDamageValue() != this.filterStack.getDamageValue())
             return false;
 
-        DataComponentType<ItemEnchantments> componentType = stack.is(Items.ENCHANTED_BOOK) ? DataComponents.STORED_ENCHANTMENTS : DataComponents.ENCHANTMENTS;
+        DataComponentType<ItemEnchantments> componentType = stack.is(Items.ENCHANTED_BOOK)
+            ? DataComponents.STORED_ENCHANTMENTS
+            : DataComponents.ENCHANTMENTS;
         return !this.matchEnchantments || Objects.equals(componentType, this.filterStack.get(componentType));
     }
 

@@ -57,7 +57,8 @@ public class WrappedGasStorage<T extends ResourceStorage<ResourceVariant<Gas>>> 
     }
 
     public record GasStorageSerializer<T extends ResourceStorage<ResourceVariant<Gas>>>(T storage)
-            implements ViewSerializable {
+        implements
+            ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);
@@ -77,7 +78,7 @@ public class WrappedGasStorage<T extends ResourceStorage<ResourceVariant<Gas>>> 
         private static void requireSingleSlot(ResourceStorage<?> storage) {
             if (!storage.hasStableIndices() || storage.size() != 1)
                 throw new UnsupportedOperationException(
-                        "Wrapped gas persistence requires one stable slot: " + storage.getClass().getName());
+                    "Wrapped gas persistence requires one stable slot: " + storage.getClass().getName());
         }
     }
 }

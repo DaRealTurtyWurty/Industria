@@ -10,8 +10,9 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.function.Supplier;
 
 public record PipeNetworkManagerType<V extends ResourceVariant<?>, N extends PipeNetwork<V>>(
-        TransferType<ResourceStorage<V>, V, Long> transferType,
-        Supplier<PipeNetworkManager<V, N>> factory,
-        MapCodec<? extends PipeNetworkManager<V, N>> codec,
-        StreamCodec<RegistryFriendlyByteBuf, ? extends PipeNetworkManager<V, N>> packetCodec) {
+    TransferType<ResourceStorage<V>, V, Long> transferType,
+    Supplier<PipeNetworkManager<V, N>> factory,
+    MapCodec<? extends PipeNetworkManager<V, N>> codec,
+    StreamCodec<RegistryFriendlyByteBuf, ? extends PipeNetworkManager<V, N>> packetCodec
+) {
 }

@@ -7,18 +7,18 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Objects;
 
 /**
- * Represents a type of port in a multiblock structure, defining its transfer type and whether it is an input or output port.
+ * Represents a type of port in a multiblock structure, defining its transfer type and whether it is an input or output
+ * port.
  *
  * @param transferType the transfer type associated with this port
- * @param isInput      indicates if this port is an input port
- * @param isOutput     indicates if this port is an output port
+ * @param isInput indicates if this port is an input port
+ * @param isOutput indicates if this port is an output port
  */
 public record PortType(TransferType<?, ?, ?> transferType, boolean isInput, boolean isOutput) {
     public static final MapCodec<PortType> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            TransferType.CODEC.fieldOf("transfer_type").forGetter(PortType::transferType),
-            Codec.BOOL.optionalFieldOf("is_input", false).forGetter(PortType::isInput),
-            Codec.BOOL.optionalFieldOf("is_output", false).forGetter(PortType::isOutput)
-    ).apply(instance, PortType::new));
+        TransferType.CODEC.fieldOf("transfer_type").forGetter(PortType::transferType),
+        Codec.BOOL.optionalFieldOf("is_input", false).forGetter(PortType::isInput),
+        Codec.BOOL.optionalFieldOf("is_output", false).forGetter(PortType::isOutput)).apply(instance, PortType::new));
 
     public PortType {
         Objects.requireNonNull(transferType, "Transfer type cannot be null");
@@ -110,7 +110,7 @@ public record PortType(TransferType<?, ?, ?> transferType, boolean isInput, bool
         /**
          * Sets both input and output flags for this port type.
          *
-         * @param isInput  true if this port is an input, false otherwise
+         * @param isInput true if this port is an input, false otherwise
          * @param isOutput true if this port is an output, false otherwise
          * @return this Builder instance for chaining
          */

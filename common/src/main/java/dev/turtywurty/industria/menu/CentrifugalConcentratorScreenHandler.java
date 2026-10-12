@@ -14,13 +14,23 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 
-public class CentrifugalConcentratorScreenHandler extends IndustriaScreenHandler<CentrifugalConcentratorBlockEntity, BlockPosPayload> {
+public class CentrifugalConcentratorScreenHandler
+    extends
+        IndustriaScreenHandler<CentrifugalConcentratorBlockEntity, BlockPosPayload> {
     public CentrifugalConcentratorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ModMenuTypes.CENTRIFUGAL_CONCENTRATOR.get(), 3, syncId, playerInventory, payload, CentrifugalConcentratorBlockEntity.class);
+        super(ModMenuTypes.CENTRIFUGAL_CONCENTRATOR.get(), 3, syncId, playerInventory, payload,
+            CentrifugalConcentratorBlockEntity.class);
     }
 
-    public CentrifugalConcentratorScreenHandler(int syncId, Inventory playerInventory, CentrifugalConcentratorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
-        super(ModMenuTypes.CENTRIFUGAL_CONCENTRATOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, properties);
+    public CentrifugalConcentratorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        CentrifugalConcentratorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
+        super(ModMenuTypes.CENTRIFUGAL_CONCENTRATOR.get(), syncId, playerInventory, blockEntity,
+            wrappedContainerStorage, properties);
     }
 
     @Override

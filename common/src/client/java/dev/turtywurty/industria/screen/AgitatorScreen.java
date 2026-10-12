@@ -41,10 +41,10 @@ public class AgitatorScreen extends AbstractContainerScreen<AgitatorScreenHandle
         super.init();
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 8, this.topPos + 94, 160, 10)
-                .orientation(Orientation.HORIZONTAL)
-                .color(0xFFD4AF37)
-                .build());
+            .bounds(this.leftPos + 8, this.topPos + 94, 160, 10)
+            .orientation(Orientation.HORIZONTAL)
+            .color(0xFFD4AF37)
+            .build());
 
         for (int index = 0; index < 3; index++) {
             final int portIndex = index;
@@ -54,48 +54,52 @@ public class AgitatorScreen extends AbstractContainerScreen<AgitatorScreenHandle
             int buttonY = baseY + 12;
 
             this.inputButtons[index] = addRenderableWidget(new SelectEnumButton<>(
-                    this.menu.getInputMode(index),
-                    mode -> this.menu.setInputMode(portIndex, mode),
-                    2,
-                    buttonX, buttonY, 20, 20,
-                    Map.of()));
+                this.menu.getInputMode(index),
+                mode -> this.menu.setInputMode(portIndex, mode),
+                2,
+                buttonX, buttonY, 20, 20,
+                Map.of()));
 
-            this.inputFluidWidgets[index] = new FluidWidget.Builder(this.menu.getBlockEntity().getInputFluidStorage(index))
-                    .bounds(baseX + 13, buttonY + 21, 14, 47)
-                    .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                    .orientation(Orientation.VERTICAL)
-                    .build();
+            this.inputFluidWidgets[index] = new FluidWidget.Builder(
+                this.menu.getBlockEntity().getInputFluidStorage(index))
+                .bounds(baseX + 13, buttonY + 21, 14, 47)
+                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+                .orientation(Orientation.VERTICAL)
+                .build();
             this.inputGasWidgets[index] = new GasWidget.Builder(this.menu.getBlockEntity().getInputGasStorage(index))
-                    .bounds(baseX + 13, buttonY + 21, 14, 47)
-                    .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                    .orientation(Orientation.VERTICAL)
-                    .build();
-            this.inputSlurryWidgets[index] = new SlurryWidget.Builder(this.menu.getBlockEntity().getInputSlurryStorage(index))
-                    .bounds(baseX + 13, buttonY + 21, 14, 47)
-                    .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                    .orientation(Orientation.VERTICAL)
-                    .build();
+                .bounds(baseX + 13, buttonY + 21, 14, 47)
+                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+                .orientation(Orientation.VERTICAL)
+                .build();
+            this.inputSlurryWidgets[index] = new SlurryWidget.Builder(
+                this.menu.getBlockEntity().getInputSlurryStorage(index))
+                .bounds(baseX + 13, buttonY + 21, 14, 47)
+                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+                .orientation(Orientation.VERTICAL)
+                .build();
         }
 
         for (int index = 0; index < 2; index++) {
             int baseX = this.leftPos + 133 + (index * 22);
             int baseY = this.topPos + 41;
 
-            this.outputFluidWidgets[index] = new FluidWidget.Builder(this.menu.getBlockEntity().getOutputFluidStorage(index))
-                    .bounds(baseX, baseY, 14, 47)
-                    .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                    .orientation(Orientation.VERTICAL)
-                    .build();
+            this.outputFluidWidgets[index] = new FluidWidget.Builder(
+                this.menu.getBlockEntity().getOutputFluidStorage(index))
+                .bounds(baseX, baseY, 14, 47)
+                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+                .orientation(Orientation.VERTICAL)
+                .build();
             this.outputGasWidgets[index] = new GasWidget.Builder(this.menu.getBlockEntity().getOutputGasStorage(index))
-                    .bounds(baseX, baseY, 14, 47)
-                    .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                    .orientation(Orientation.VERTICAL)
-                    .build();
-            this.outputSlurryWidgets[index] = new SlurryWidget.Builder(this.menu.getBlockEntity().getOutputSlurryStorage(index))
-                    .bounds(baseX, baseY, 14, 47)
-                    .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                    .orientation(Orientation.VERTICAL)
-                    .build();
+                .bounds(baseX, baseY, 14, 47)
+                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+                .orientation(Orientation.VERTICAL)
+                .build();
+            this.outputSlurryWidgets[index] = new SlurryWidget.Builder(
+                this.menu.getBlockEntity().getOutputSlurryStorage(index))
+                .bounds(baseX, baseY, 14, 47)
+                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+                .orientation(Orientation.VERTICAL)
+                .build();
         }
     }
 
@@ -114,11 +118,16 @@ public class AgitatorScreen extends AbstractContainerScreen<AgitatorScreenHandle
         super.extractBackground(context, mouseX, mouseY, delta);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        drawConditionalItemSlotFrame(context, 0, this.menu.getInputMode(0) == AgitatorPortType.ITEM, 176, 17, 18, 18, -1, -1);
-        drawConditionalItemSlotFrame(context, 1, this.menu.getInputMode(1) == AgitatorPortType.ITEM, 176, 17, 18, 18, -1, -1);
-        drawConditionalItemSlotFrame(context, 2, this.menu.getInputMode(2) == AgitatorPortType.ITEM, 176, 17, 18, 18, -1, -1);
-        drawConditionalItemSlotFrame(context, 3, this.menu.getOutputMode(0) == AgitatorPortType.ITEM, 176, 17, 18, 18, -1, -1);
-        drawConditionalItemSlotFrame(context, 4, this.menu.getOutputMode(1) == AgitatorPortType.ITEM, 176, 17, 18, 18, -1, -1);
+        drawConditionalItemSlotFrame(context, 0, this.menu.getInputMode(0) == AgitatorPortType.ITEM, 176, 17, 18, 18,
+            -1, -1);
+        drawConditionalItemSlotFrame(context, 1, this.menu.getInputMode(1) == AgitatorPortType.ITEM, 176, 17, 18, 18,
+            -1, -1);
+        drawConditionalItemSlotFrame(context, 2, this.menu.getInputMode(2) == AgitatorPortType.ITEM, 176, 17, 18, 18,
+            -1, -1);
+        drawConditionalItemSlotFrame(context, 3, this.menu.getOutputMode(0) == AgitatorPortType.ITEM, 176, 17, 18, 18,
+            -1, -1);
+        drawConditionalItemSlotFrame(context, 4, this.menu.getOutputMode(1) == AgitatorPortType.ITEM, 176, 17, 18, 18,
+            -1, -1);
 
         renderInputWidget(context, mouseX, mouseY, 0, this.menu.getInputMode(0));
         renderInputWidget(context, mouseX, mouseY, 1, this.menu.getInputMode(1));
@@ -139,54 +148,84 @@ public class AgitatorScreen extends AbstractContainerScreen<AgitatorScreenHandle
         }
 
         if (this.menu.getMaxProgress() > 0 && this.menu.getProgress() > 0) {
-            ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 104, this.topPos + 37, 176, 0, (this.menu.getProgress() * 24) / this.menu.getMaxProgress(), 17, 256, 256);
+            ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 104, this.topPos + 37, 176, 0,
+                (this.menu.getProgress() * 24) / this.menu.getMaxProgress(), 17, 256, 256);
         }
     }
 
-    private void renderInputWidget(GuiGraphicsExtractor context, int mouseX, int mouseY, int index, AgitatorPortType mode) {
+    private void renderInputWidget(
+        GuiGraphicsExtractor context,
+        int mouseX,
+        int mouseY,
+        int index,
+        AgitatorPortType mode
+    ) {
         switch (mode) {
             case ITEM -> {
             }
             case FLUID -> {
-                drawWidgetFrame(context, this.inputFluidWidgets[index].getX(), this.inputFluidWidgets[index].getY(), 176, 35, 14, 47);
+                drawWidgetFrame(context, this.inputFluidWidgets[index].getX(), this.inputFluidWidgets[index].getY(),
+                    176, 35, 14, 47);
                 this.inputFluidWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
             case GAS -> {
-                drawWidgetFrame(context, this.inputGasWidgets[index].getX(), this.inputGasWidgets[index].getY(), 176, 35, 14, 47);
+                drawWidgetFrame(context, this.inputGasWidgets[index].getX(), this.inputGasWidgets[index].getY(), 176,
+                    35, 14, 47);
                 this.inputGasWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
             case SLURRY -> {
-                drawWidgetFrame(context, this.inputSlurryWidgets[index].getX(), this.inputSlurryWidgets[index].getY(), 176, 35, 14, 47);
+                drawWidgetFrame(context, this.inputSlurryWidgets[index].getX(), this.inputSlurryWidgets[index].getY(),
+                    176, 35, 14, 47);
                 this.inputSlurryWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
         }
     }
 
-    private void renderOutputWidget(GuiGraphicsExtractor context, int mouseX, int mouseY, int index, AgitatorPortType mode) {
+    private void renderOutputWidget(
+        GuiGraphicsExtractor context,
+        int mouseX,
+        int mouseY,
+        int index,
+        AgitatorPortType mode
+    ) {
         switch (mode) {
             case ITEM -> {
             }
             case FLUID -> {
-                drawWidgetFrame(context, this.outputFluidWidgets[index].getX(), this.outputFluidWidgets[index].getY(), 176, 35, 14, 47);
+                drawWidgetFrame(context, this.outputFluidWidgets[index].getX(), this.outputFluidWidgets[index].getY(),
+                    176, 35, 14, 47);
                 this.outputFluidWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
             case GAS -> {
-                drawWidgetFrame(context, this.outputGasWidgets[index].getX(), this.outputGasWidgets[index].getY(), 176, 35, 14, 47);
+                drawWidgetFrame(context, this.outputGasWidgets[index].getX(), this.outputGasWidgets[index].getY(), 176,
+                    35, 14, 47);
                 this.outputGasWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
             case SLURRY -> {
-                drawWidgetFrame(context, this.outputSlurryWidgets[index].getX(), this.outputSlurryWidgets[index].getY(), 176, 35, 14, 47);
+                drawWidgetFrame(context, this.outputSlurryWidgets[index].getX(), this.outputSlurryWidgets[index].getY(),
+                    176, 35, 14, 47);
                 this.outputSlurryWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
         }
     }
 
-    private void drawConditionalItemSlotFrame(GuiGraphicsExtractor context, int slotIndex, boolean active, int u, int v, int width, int height, int offsetX, int offsetY) {
+    private void drawConditionalItemSlotFrame(
+        GuiGraphicsExtractor context,
+        int slotIndex,
+        boolean active,
+        int u,
+        int v,
+        int width,
+        int height,
+        int offsetX,
+        int offsetY
+    ) {
         if (!active)
             return;
 
         Slot slot = this.menu.slots.get(slotIndex);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + slot.x + offsetX, this.topPos + slot.y + offsetY, u, v, width, height);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + slot.x + offsetX, this.topPos + slot.y + offsetY, u, v,
+            width, height);
     }
 
     private void drawWidgetFrame(GuiGraphicsExtractor context, int x, int y, int u, int v, int width, int height) {

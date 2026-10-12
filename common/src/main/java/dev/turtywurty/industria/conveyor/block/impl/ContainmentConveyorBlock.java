@@ -14,12 +14,12 @@ import java.util.List;
 public class ContainmentConveyorBlock extends AbstractPoweredConveyorBlock {
     public ContainmentConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(
-                        new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.CONTAINMENT_CONVEYOR.get())
-                                .shouldTick()
-                                .rightClickToOpenGui()
-                                .dropContentsOnBreak())
-                .hasComparatorOutput());
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.CONTAINMENT_CONVEYOR.get())
+                    .shouldTick()
+                    .rightClickToOpenGui()
+                    .dropContentsOnBreak())
+            .hasComparatorOutput());
     }
 
     @Override
@@ -28,8 +28,7 @@ public class ContainmentConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 }

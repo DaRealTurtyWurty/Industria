@@ -19,9 +19,15 @@ public class AlloyFurnaceScreenHandler extends IndustriaScreenHandler<AlloyFurna
         super(ModMenuTypes.ALLOY_FURNACE.get(), 4, syncId, playerInventory, payload, AlloyFurnaceBlockEntity.class);
     }
 
-    public AlloyFurnaceScreenHandler(int syncId, Inventory playerInventory, AlloyFurnaceBlockEntity blockEntity,
-                                     WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
-        super(ModMenuTypes.ALLOY_FURNACE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, propertyDelegate);
+    public AlloyFurnaceScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        AlloyFurnaceBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData propertyDelegate
+    ) {
+        super(ModMenuTypes.ALLOY_FURNACE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            propertyDelegate);
     }
 
     @Override

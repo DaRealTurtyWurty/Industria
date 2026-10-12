@@ -27,7 +27,13 @@ public class AlloyFurnaceRecipeBuilder implements RecipeBuilder {
     private final RecipeCategory category;
     private final Map<String, Criterion<?>> criteria = new HashMap<>();
 
-    public AlloyFurnaceRecipeBuilder(IndustriaIngredient inputA, IndustriaIngredient inputB, ItemStackTemplate output, int smeltTime, RecipeCategory category) {
+    public AlloyFurnaceRecipeBuilder(
+        IndustriaIngredient inputA,
+        IndustriaIngredient inputB,
+        ItemStackTemplate output,
+        int smeltTime,
+        RecipeCategory category
+    ) {
         this.inputA = inputA;
         this.inputB = inputB;
         this.output = output;
@@ -54,12 +60,13 @@ public class AlloyFurnaceRecipeBuilder implements RecipeBuilder {
     @Override
     public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeId) {
         Advancement.Builder builder = exporter.advancement()
-                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(exporter.lookup(Registries.RECIPE).getOrThrow(recipeId)))
-                .rewards(AdvancementRewards.Builder.recipe(recipeId))
-                .requirements(AdvancementRequirements.Strategy.OR);
+            .addCriterion("has_the_recipe",
+                RecipeUnlockedTrigger.unlocked(exporter.lookup(Registries.RECIPE).getOrThrow(recipeId)))
+            .rewards(AdvancementRewards.Builder.recipe(recipeId))
+            .requirements(AdvancementRequirements.Strategy.OR);
         this.criteria.forEach(builder::addCriterion);
         exporter.accept(recipeId,
-                new AlloyingRecipe(this.inputA, this.inputB, this.output, this.smeltTime),
-                builder.build(recipeId.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+            new AlloyingRecipe(this.inputA, this.inputB, this.output, this.smeltTime),
+            builder.build(recipeId.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 }

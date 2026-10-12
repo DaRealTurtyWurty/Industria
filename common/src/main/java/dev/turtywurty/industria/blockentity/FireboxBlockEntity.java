@@ -35,7 +35,11 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
-public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload>, TickableBlockEntity {
+public class FireboxBlockEntity extends IndustriaBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload>,
+        TickableBlockEntity {
     public static final Component TITLE = Industria.containerTitle("firebox");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -52,10 +56,11 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
         public int get(int index) {
             return switch (index) {
                 case 0 -> {
-                    if(maxBurnTime <= 0)
+                    if (maxBurnTime <= 0)
                         yield 0;
 
-                    yield (int) (Mth.clamp((remainingFuelUnits / ((float) maxBurnTime * FUEL_UNITS_PER_BURN_TICK)), 0, 1) * 1000);
+                    yield (int) (Mth.clamp((remainingFuelUnits / ((float) maxBurnTime * FUEL_UNITS_PER_BURN_TICK)), 0,
+                        1) * 1000);
                 }
                 case 1 -> isBurning() ? 1 : 0;
                 default -> 0;
@@ -75,20 +80,20 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
     public FireboxBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.FIREBOX.get(), ModBlockEntityTypes.FIREBOX.get(), pos, state);
         this.wrappedContainerStorage.addInventory(
-                new PredicateSimpleInventory(this, 3,
-                        (itemStack, _) -> isFuel(itemStack)));
+            new PredicateSimpleInventory(this, 3,
+                (itemStack, _) -> isFuel(itemStack)));
     }
 
     @Override
     public void tick() {
-        if(this.level == null || this.level.isClientSide())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         updateLitState();
     }
 
     private void updateLitState() {
-        if(this.level == null || this.level.isClientSide())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         BlockState currentState = getBlockState();
@@ -96,7 +101,8 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
         boolean shouldBeLit = isBurning();
 
         if (isCurrentlyLit != shouldBeLit) {
-            this.level.setBlockAndUpdate(this.worldPosition, currentState.setValue(BlockStateProperties.LIT, shouldBeLit));
+            this.level.setBlockAndUpdate(this.worldPosition,
+                currentState.setValue(BlockStateProperties.LIT, shouldBeLit));
         }
     }
 
@@ -154,7 +160,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
     }
 
     public boolean isBurning() {
-        if(this.level == null)
+        if (this.level == null)
             return false;
 
         long gameTime = this.level.getGameTime();
@@ -162,7 +168,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
     }
 
     public boolean burnForTick() {
-        if(this.level == null || this.level.isClientSide())
+        if (this.level == null || this.level.isClientSide())
             return false;
 
         long gameTime = this.level.getGameTime();
@@ -186,7 +192,8 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
     }
 
     public int getBurnTime() {
-        return (int) ((Math.max(0L, this.remainingFuelUnits) + FUEL_UNITS_PER_BURN_TICK - 1) / FUEL_UNITS_PER_BURN_TICK);
+        return (int) ((Math.max(0L, this.remainingFuelUnits) + FUEL_UNITS_PER_BURN_TICK - 1)
+            / FUEL_UNITS_PER_BURN_TICK);
     }
 
     public int getMaxBurnTime() {
@@ -194,12 +201,12 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
     }
 
     public void setFuelSpaceSize(int size) {
-        if(size < 1)
+        if (size < 1)
             throw new IllegalArgumentException("Fuel space size must be at least 1");
 
         int previousFuelUnitsPerTick = this.fuelUnitsPerTick;
         this.fuelUnitsPerTick = size;
-        if(previousFuelUnitsPerTick != this.fuelUnitsPerTick) {
+        if (previousFuelUnitsPerTick != this.fuelUnitsPerTick) {
             setChanged();
         }
     }
@@ -240,7 +247,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
     }
 
     private void storeFuelRemainder(ItemStack remainder) {
-        if(remainder == null || remainder.isEmpty())
+        if (remainder == null || remainder.isEmpty())
             return;
 
         SimpleContainer inventory = getInventory();
@@ -250,7 +257,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
                 continue;
 
             int spaceLeft = inventory.getMaxStackSize(stack) - stack.getCount();
-            if(spaceLeft <= 0)
+            if (spaceLeft <= 0)
                 continue;
 
             int toAdd = Math.min(spaceLeft, remainder.getCount());
@@ -258,7 +265,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
             remainder.shrink(toAdd);
             inventory.setChanged();
 
-            if(remainder.isEmpty())
+            if (remainder.isEmpty())
                 return;
         }
 
@@ -270,12 +277,13 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
             int toAdd = Math.min(inventory.getMaxStackSize(remainder), remainder.getCount());
             ItemStack newStack = remainder.split(toAdd);
             inventory.setItem(slot, newStack);
-            if(remainder.isEmpty())
+            if (remainder.isEmpty())
                 return;
         }
 
-        if(this.level != null) {
-            Containers.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), remainder);
+        if (this.level != null) {
+            Containers.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(),
+                this.worldPosition.getZ(), remainder);
         }
     }
 }

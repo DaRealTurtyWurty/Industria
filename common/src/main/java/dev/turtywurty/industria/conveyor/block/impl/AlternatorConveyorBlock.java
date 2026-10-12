@@ -30,17 +30,24 @@ public class AlternatorConveyorBlock extends AbstractHorizontalConveyorBlock {
 
     public AlternatorConveyorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .addStateProperty(POWERED, false));
+            .addStateProperty(POWERED, false));
     }
 
     @Override
     protected BlockState applyPlacementState(BlockState state, BlockPlaceContext context, Direction facing) {
         return super.applyPlacementState(state, context, facing)
-                .setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
+            .setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Block block,
+        @Nullable Orientation orientation,
+        boolean movedByPiston
+    ) {
         super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
 
         if (level.isClientSide())
@@ -78,7 +85,7 @@ public class AlternatorConveyorBlock extends AbstractHorizontalConveyorBlock {
     @Override
     protected BlockState resolveState(ServerLevel level, BlockPos pos, BlockState current) {
         return super.resolveState(level, pos, current)
-                .setValue(POWERED, level.hasNeighborSignal(pos));
+            .setValue(POWERED, level.hasNeighborSignal(pos));
     }
 
     @Override
@@ -94,16 +101,21 @@ public class AlternatorConveyorBlock extends AbstractHorizontalConveyorBlock {
         Direction right = facing.getClockWise();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(
-                        new ConveyorOutput(LEFT_OUTPUT_ID, pos.relative(left), pos),
-                        new ConveyorOutput(RIGHT_OUTPUT_ID, pos.relative(right), pos)
-                )
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(
+                new ConveyorOutput(LEFT_OUTPUT_ID, pos.relative(left), pos),
+                new ConveyorOutput(RIGHT_OUTPUT_ID, pos.relative(right), pos)));
     }
 
     @Override
-    public ConveyorOutput selectOutput(Level level, BlockPos pos, BlockState state, ConveyorItem item, ConveyorNetwork network, ConveyorRoutingState routingState) {
+    public ConveyorOutput selectOutput(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorItem item,
+        ConveyorNetwork network,
+        ConveyorRoutingState routingState
+    ) {
         ConveyorTopology topology = getTopology(level, pos, state);
         if (topology.outputs().isEmpty())
             return null;

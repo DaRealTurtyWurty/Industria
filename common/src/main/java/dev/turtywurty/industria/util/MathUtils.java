@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class MathUtils {
     public static @Nullable Direction getRelativeDirection(@Nullable Direction direction, @Nullable Direction facing) {
-        if(direction == null || facing == null || direction.getAxis().isVertical())
+        if (direction == null || facing == null || direction.getAxis().isVertical())
             return direction;
 
         Direction relative = direction;
@@ -47,8 +47,7 @@ public class MathUtils {
 
         // Build and return new Box by translating back to world coords
         return new AABB(
-                cx + rx1, cy + y1, cz + rz1,
-                cx + rx2, cy + y2, cz + rz2
-        );
+            cx + rx1, cy + y1, cz + rz1,
+            cx + rx2, cy + y2, cz + rz2);
     }
 }

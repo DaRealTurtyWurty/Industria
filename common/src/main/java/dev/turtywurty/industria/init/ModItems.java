@@ -17,15 +17,17 @@ public class ModItems {
     private static final RegistryService REGISTRIES = RegistryService.get();
 
     public static final RegistrationHandle<Item, SeismicScannerItem> SEISMIC_SCANNER = register("seismic_scanner",
-            SeismicScannerItem::new, settings -> settings.stacksTo(1));
+        SeismicScannerItem::new, settings -> settings.stacksTo(1));
 
     public static final RegistrationHandle<Item, SimpleDrillHeadItem> SIMPLE_DRILL_HEAD = register("simple_drill_head",
-            SimpleDrillHeadItem::new, settings -> settings.stacksTo(1));
+        SimpleDrillHeadItem::new, settings -> settings.stacksTo(1));
 
-    public static final RegistrationHandle<Item, BlockBuilderDrillHeadItem> BLOCK_BUILDER_DRILL_HEAD = register("block_builder_drill_head",
-            BlockBuilderDrillHeadItem::new, settings -> settings.stacksTo(1));
+    public static final RegistrationHandle<Item, BlockBuilderDrillHeadItem> BLOCK_BUILDER_DRILL_HEAD = register(
+        "block_builder_drill_head",
+        BlockBuilderDrillHeadItem::new, settings -> settings.stacksTo(1));
 
-    public static final RegistrationHandle<Item, RotaryKilnBlockItem> ROTARY_KILN = register("rotary_kiln", RotaryKilnBlockItem::new);
+    public static final RegistrationHandle<Item, RotaryKilnBlockItem> ROTARY_KILN = register("rotary_kiln",
+        RotaryKilnBlockItem::new);
 
     // Aluminium
     public static final RegistrationHandle<Item, Item> BAUXITE = register("bauxite");
@@ -130,47 +132,63 @@ public class ModItems {
     public static final RegistrationHandle<Item, Item> RED_MUD = register("red_mud");
     public static final RegistrationHandle<Item, Item> CRYOLITE = register("cryolite");
     public static final RegistrationHandle<Item, Item> CARBON_ROD = registerWithSettings("carbon_rod",
-            settings -> settings.durability(50));
+        settings -> settings.durability(50));
     public static final RegistrationHandle<Item, WrenchItem> WRENCH = register("wrench",
-            settings -> new WrenchItem(settings.stacksTo(1)));
-    public static final RegistrationHandle<Item, MultiblockExportItem> MULTIBLOCK_EXPORTER = register("multiblock_exporter",
-            settings -> new MultiblockExportItem(settings.stacksTo(1)));
+        settings -> new WrenchItem(settings.stacksTo(1)));
+    public static final RegistrationHandle<Item, MultiblockExportItem> MULTIBLOCK_EXPORTER = register(
+        "multiblock_exporter",
+        settings -> new MultiblockExportItem(settings.stacksTo(1)));
     public static final RegistrationHandle<Item, Item> EMPTY_MOB_JAR = register("mob_jar", Item::new);
     public static final RegistrationHandle<Item, MobJarItem> FILLED_MOB_JAR = register("filled_mob_jar",
-            settings -> new MobJarItem(settings.craftRemainder(ModItems.EMPTY_MOB_JAR.get())));
+        settings -> new MobJarItem(settings.craftRemainder(ModItems.EMPTY_MOB_JAR.get())));
     public static final RegistrationHandle<Item, Item> BOTTLE_FORMIC_ACID = registerWithSettings("bottle_formic_acid",
-            settings -> settings.craftRemainder(Items.GLASS_BOTTLE)
-                    .stacksTo(16)
-                    .food(FoodList.FORMIC_ACID_FOOD, FoodList.FORMIC_ACID_CONSUMABLE));
+        settings -> settings.craftRemainder(Items.GLASS_BOTTLE)
+            .stacksTo(16)
+            .food(FoodList.FORMIC_ACID_FOOD, FoodList.FORMIC_ACID_CONSUMABLE));
 
     // Casting/Smeltery
     public static final RegistrationHandle<Item, Item> BLANK_SAND_CAST = register("blank_sand_cast");
     public static final RegistrationHandle<Item, Item> BLANK_RED_SAND_CAST = register("blank_red_sand_cast");
     public static final RegistrationHandle<Item, Item> BLANK_CLAY_CAST = register("blank_clay_cast");
     public static final RegistrationHandle<Item, Item> BLANK_GOLD_CAST = register("blank_gold_cast");
-    public static final RegistrationHandle<Item, MoldItem> SAND_MOLD = register("sand_mold", properties -> new MoldItem(properties, 1));
-    public static final RegistrationHandle<Item, MoldItem> RED_SAND_MOLD = register("red_sand_mold", properties -> new MoldItem(properties, 1));
-    public static final RegistrationHandle<Item, MoldItem> CLAY_MOLD = register("clay_mold", properties -> new MoldItem(properties, 1));
-    public static final RegistrationHandle<Item, MoldItem> CERAMIC_MOLD = register("ceramic_mold", properties -> new MoldItem(properties, 4));
-    public static final RegistrationHandle<Item, MoldItem> GOLD_MOLD = register("gold_mold", properties -> new MoldItem(properties, 256));
+    public static final RegistrationHandle<Item, MoldItem> SAND_MOLD = register("sand_mold",
+        properties -> new MoldItem(properties, 1));
+    public static final RegistrationHandle<Item, MoldItem> RED_SAND_MOLD = register("red_sand_mold",
+        properties -> new MoldItem(properties, 1));
+    public static final RegistrationHandle<Item, MoldItem> CLAY_MOLD = register("clay_mold",
+        properties -> new MoldItem(properties, 1));
+    public static final RegistrationHandle<Item, MoldItem> CERAMIC_MOLD = register("ceramic_mold",
+        properties -> new MoldItem(properties, 4));
+    public static final RegistrationHandle<Item, MoldItem> GOLD_MOLD = register("gold_mold",
+        properties -> new MoldItem(properties, 256));
 
     public static RegistrationHandle<Item, Item> register(String name) {
         return registerItem(name, () -> new Item(new Item.Properties()
-                .setId(ResourceKey.create(Registries.ITEM, Industria.id(name)))));
+            .setId(ResourceKey.create(Registries.ITEM, Industria.id(name)))));
     }
 
-    public static RegistrationHandle<Item, Item> registerWithSettings(String name, Function<Item.Properties, Item.Properties> settingsApplier) {
+    public static RegistrationHandle<Item, Item> registerWithSettings(
+        String name,
+        Function<Item.Properties, Item.Properties> settingsApplier
+    ) {
         return registerItem(name, () -> new Item(settingsApplier.apply(new Item.Properties()
-                .setId(ResourceKey.create(Registries.ITEM, Industria.id(name))))));
+            .setId(ResourceKey.create(Registries.ITEM, Industria.id(name))))));
     }
 
-    public static <T extends Item> RegistrationHandle<Item, T> register(String name, Function<Item.Properties, T> constructor, Function<Item.Properties, Item.Properties> settingsApplier) {
+    public static <T extends Item> RegistrationHandle<Item, T> register(
+        String name,
+        Function<Item.Properties, T> constructor,
+        Function<Item.Properties, Item.Properties> settingsApplier
+    ) {
         return registerItem(name, () -> constructor.apply(
-                settingsApplier.apply(new Item.Properties().setId(
-                        ResourceKey.create(Registries.ITEM, Industria.id(name))))));
+            settingsApplier.apply(new Item.Properties().setId(
+                ResourceKey.create(Registries.ITEM, Industria.id(name))))));
     }
 
-    public static <T extends Item> RegistrationHandle<Item, T> register(String name, Function<Item.Properties, T> constructor) {
+    public static <T extends Item> RegistrationHandle<Item, T> register(
+        String name,
+        Function<Item.Properties, T> constructor
+    ) {
         return register(name, constructor, settings -> settings);
     }
 

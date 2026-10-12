@@ -29,15 +29,13 @@ public class WorldPipeNetworks extends SavedData {
     private static final NetworkService NETWORK = NetworkService.get();
 
     public static final Codec<WorldPipeNetworks> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Data.CODEC.fieldOf("data").forGetter(WorldPipeNetworks::getData)
-    ).apply(instance, WorldPipeNetworks::new));
+        Data.CODEC.fieldOf("data").forGetter(WorldPipeNetworks::getData)).apply(instance, WorldPipeNetworks::new));
 
     private static final SavedDataType<WorldPipeNetworks> TYPE = new SavedDataType<>(
-            Industria.id("pipe_networks"),
-            WorldPipeNetworks::new,
-            CODEC,
-            null
-    );
+        Industria.id("pipe_networks"),
+        WorldPipeNetworks::new,
+        CODEC,
+        null);
 
     public static WorldPipeNetworks getOrCreate(ServerLevel serverWorld) {
         SavedDataStorage persistentStateManager = serverWorld.getDataStorage();
@@ -59,10 +57,10 @@ public class WorldPipeNetworks extends SavedData {
         WorldPipeNetworks worldPipeNetworks = getOrCreate(serverWorld);
         for (PipeNetworkManager<?, ?> manager : worldPipeNetworks.getPipeNetworkManagers()) {
             NETWORK.sendToPlayer(player, new SyncPipeNetworkManagerPayload(
-                    manager.getTransferType(), serverWorld.dimension(), manager.getPipeToNetworkId()));
+                manager.getTransferType(), serverWorld.dimension(), manager.getPipeToNetworkId()));
             for (PipeNetwork<?> network : manager.getNetworks()) {
                 NETWORK.sendToPlayer(player, new AddPipeNetworkPayload(
-                        serverWorld.dimension(), manager.getTransferType(), network));
+                    serverWorld.dimension(), manager.getTransferType(), network));
             }
         }
     }
@@ -77,11 +75,11 @@ public class WorldPipeNetworks extends SavedData {
 
     @SuppressWarnings("unchecked")
     public <V extends ResourceVariant<?>, N extends PipeNetwork<V>> PipeNetworkManager<V, N> getNetworkManager(
-            TransferType<ResourceStorage<V>, V, Long> transferType) {
+        TransferType<ResourceStorage<V>, V, Long> transferType
+    ) {
         for (PipeNetworkManager<?, ?> pipeNetworkManager : getPipeNetworkManagers()) {
-            if (transferType.equals(pipeNetworkManager.getTransferType())) {
+            if (transferType.equals(pipeNetworkManager.getTransferType()))
                 return (PipeNetworkManager<V, N>) pipeNetworkManager;
-            }
         }
 
         PipeNetworkManager<V, N> manager = ModPipeNetworkManagerTypes.<V, N>getType(transferType).factory().get();
@@ -90,21 +88,23 @@ public class WorldPipeNetworks extends SavedData {
     }
 
     public <V extends ResourceVariant<?>, N extends PipeNetwork<V>> @Nullable N getNetwork(
-            TransferType<ResourceStorage<V>, V, Long> transferType, BlockPos pos) {
+        TransferType<ResourceStorage<V>, V, Long> transferType,
+        BlockPos pos
+    ) {
         PipeNetworkManager<V, N> pipeNetworkManager = getNetworkManager(transferType);
-        if (pipeNetworkManager != null) {
+        if (pipeNetworkManager != null)
             return pipeNetworkManager.getNetwork(pos);
-        }
 
         return null;
     }
 
     public <V extends ResourceVariant<?>, N extends PipeNetwork<V>> @Nullable ResourceStorage<V> getStorage(
-            TransferType<ResourceStorage<V>, V, Long> transferType, BlockPos pos) {
+        TransferType<ResourceStorage<V>, V, Long> transferType,
+        BlockPos pos
+    ) {
         N network = getNetwork(transferType, pos);
-        if (network != null) {
+        if (network != null)
             return network.getStorage(pos);
-        }
 
         return null;
     }
@@ -115,10 +115,10 @@ public class WorldPipeNetworks extends SavedData {
         }
 
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                PipeNetworkManager.LIST_CODEC.fieldOf("pipeNetworkManagers").forGetter(Data::pipeNetworkManagers)
-        ).apply(instance, Data::new));
+            PipeNetworkManager.LIST_CODEC.fieldOf("pipeNetworkManagers").forGetter(Data::pipeNetworkManagers))
+            .apply(instance, Data::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, Data> STREAM_CODEC =
-                StreamCodec.composite(PipeNetworkManager.LIST_STREAM_CODEC, Data::pipeNetworkManagers, Data::new);
+        public static final StreamCodec<RegistryFriendlyByteBuf, Data> STREAM_CODEC = StreamCodec
+            .composite(PipeNetworkManager.LIST_STREAM_CODEC, Data::pipeNetworkManagers, Data::new);
     }
 }

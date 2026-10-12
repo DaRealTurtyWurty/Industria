@@ -15,17 +15,21 @@ import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
-public record ModifyPipeNetworkPayload(Operation operation, ResourceKey<Level> world, TransferType<?, ?, ?> transferType,
-                                       UUID networkId, BlockPos pos) implements CustomPacketPayload {
+public record ModifyPipeNetworkPayload(
+    Operation operation,
+    ResourceKey<Level> world,
+    TransferType<?, ?, ?> transferType,
+    UUID networkId,
+    BlockPos pos
+) implements CustomPacketPayload {
     public static final Type<ModifyPipeNetworkPayload> ID = new Type<>(Industria.id("modify_pipe_network"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, ModifyPipeNetworkPayload> CODEC =
-            StreamCodec.composite(
-                    Operation.STREAM_CODEC, ModifyPipeNetworkPayload::operation,
-                    ResourceKey.streamCodec(Registries.DIMENSION), ModifyPipeNetworkPayload::world,
-                    TransferType.STREAM_CODEC, ModifyPipeNetworkPayload::transferType,
-                    UUIDUtil.STREAM_CODEC, ModifyPipeNetworkPayload::networkId,
-                    BlockPos.STREAM_CODEC, ModifyPipeNetworkPayload::pos,
-                    ModifyPipeNetworkPayload::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, ModifyPipeNetworkPayload> CODEC = StreamCodec.composite(
+        Operation.STREAM_CODEC, ModifyPipeNetworkPayload::operation,
+        ResourceKey.streamCodec(Registries.DIMENSION), ModifyPipeNetworkPayload::world,
+        TransferType.STREAM_CODEC, ModifyPipeNetworkPayload::transferType,
+        UUIDUtil.STREAM_CODEC, ModifyPipeNetworkPayload::networkId,
+        BlockPos.STREAM_CODEC, ModifyPipeNetworkPayload::pos,
+        ModifyPipeNetworkPayload::new);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
@@ -38,7 +42,7 @@ public record ModifyPipeNetworkPayload(Operation operation, ResourceKey<Level> w
         ADD_CONNECTED_BLOCK,
         REMOVE_CONNECTED_BLOCK;
 
-        public static final StreamCodec<ByteBuf, Operation> STREAM_CODEC =
-                ByteBufCodecs.STRING_UTF8.map(Operation::valueOf, Operation::name);
+        public static final StreamCodec<ByteBuf, Operation> STREAM_CODEC = ByteBufCodecs.STRING_UTF8
+            .map(Operation::valueOf, Operation::name);
     }
 }

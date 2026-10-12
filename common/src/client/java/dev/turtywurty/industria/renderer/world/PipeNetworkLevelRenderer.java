@@ -29,17 +29,16 @@ import org.joml.Matrix4f;
 
 public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
     public static int getColor(TransferType<?, ?, ?> type) {
-        if (type == TransferType.ITEM) {
+        if (type == TransferType.ITEM)
             return 0x8800BF4D;
-        } else if (type == TransferType.ENERGY) {
+        else if (type == TransferType.ENERGY)
             return 0x88FFFF33;
-        } else if (type == TransferType.FLUID) {
+        else if (type == TransferType.FLUID)
             return 0x8887CEFA;
-        } else if (type == TransferType.SLURRY) {
+        else if (type == TransferType.SLURRY)
             return 0x888B4513;
-        } else if (type == TransferType.GAS) {
+        else if (type == TransferType.GAS)
             return 0x883A9F02;
-        }
 
         throw new IllegalStateException("Unexpected value: " + type);
     }
@@ -101,8 +100,9 @@ public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
                     Font textRenderer = client.font;
                     float xOffset = (float) (-textRenderer.width(text)) / 2.0F;
 
-                    consumers.submitText(matrices, xOffset, 0, text.getVisualOrderText(), false, Font.DisplayMode.NORMAL,
-                            LightCoordsUtil.FULL_BRIGHT, CommonColors.WHITE, 0, 0);
+                    consumers.submitText(matrices, xOffset, 0, text.getVisualOrderText(), false,
+                        Font.DisplayMode.NORMAL,
+                        LightCoordsUtil.FULL_BRIGHT, CommonColors.WHITE, 0, 0);
                     matrices.popPose();
                 }
             }

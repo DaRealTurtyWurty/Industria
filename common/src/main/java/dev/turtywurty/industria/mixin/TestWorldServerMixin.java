@@ -19,39 +19,45 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MinecraftServer.class)
 public abstract class TestWorldServerMixin {
-    @Shadow @Final
+    @Shadow
+    @Final
     protected LevelStorageSource.LevelStorageAccess storageSource;
 
     @Unique
     private boolean industria$isDisposableTestWorld() {
         var server = (MinecraftServer) (Object) this;
         return (!server.isDedicatedServer() || Boolean.getBoolean("industria.test.disposableWorld"))
-                && IndustriaTestWorld.WORLD_ID.equals(this.storageSource.getLevelId())
-                && IndustriaTestWorld.WORLD_ID.equals(server.getWorldData().getLevelName());
+            && IndustriaTestWorld.WORLD_ID.equals(this.storageSource.getLevelId())
+            && IndustriaTestWorld.WORLD_ID.equals(server.getWorldData().getLevelName());
     }
 
     @Inject(method = {"saveEverything", "saveAllChunks"}, at = @At("HEAD"), cancellable = true)
-    private void industria$skipTestWorldSave(boolean silent, boolean flush, boolean force, CallbackInfoReturnable<Boolean> cir) {
-        if (industria$isDisposableTestWorld())
+    private void industria$skipTestWorldSave(
+        boolean silent,
+        boolean flush,
+        boolean force,
+        CallbackInfoReturnable<Boolean> cir
+    ) {
+        if (industria$isDisposableTestWorld()) {
             cir.setReturnValue(false);
+        }
     }
 
     @Inject(method = "createLevels", at = @At("RETURN"))
     private void industria$disableTestWorldSaving(CallbackInfo ci) {
         if (industria$isDisposableTestWorld()) {
-            for (ServerLevel level : ((MinecraftServer) (Object) this).getAllLevels())
+            for (ServerLevel level : ((MinecraftServer) (Object) this).getAllLevels()) {
                 level.noSave = true;
+            }
         }
     }
 
-    @Redirect(method = "stopServer", at = @At(value = "FIELD",
-            target = "Lnet/minecraft/server/level/ServerLevel;noSave:Z", opcode = Opcodes.PUTFIELD))
+    @Redirect(method = "stopServer", at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;noSave:Z", opcode = Opcodes.PUTFIELD))
     private void industria$keepTestWorldUnsaved(ServerLevel level, boolean noSave) {
         level.noSave = noSave || industria$isDisposableTestWorld();
     }
 
-    @Inject(method = "stopServer", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;close()V"))
+    @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;close()V"))
     private void industria$deleteTestWorld(CallbackInfo ci) {
         if (!industria$isDisposableTestWorld())
             return;
@@ -59,7 +65,8 @@ public abstract class TestWorldServerMixin {
         try {
             this.storageSource.deleteLevel();
         } catch (IOException exception) {
-            LogUtils.getLogger().error("Failed to delete Industria test world; it will be retried on next launch", exception);
+            LogUtils.getLogger().error("Failed to delete Industria test world; it will be retried on next launch",
+                exception);
         }
     }
 }

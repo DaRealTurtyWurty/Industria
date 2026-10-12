@@ -10,13 +10,11 @@ public final class ModReloadListeners {
 
     public static void init() {
         ClientEvents.registerResourceReloadListener(
-                Industria.id("client_conveyor_networks"),
-                ConveyorNetworkLevelRenderer.ReloadListener.INSTANCE
-        );
+            Industria.id("client_conveyor_networks"),
+            ConveyorNetworkLevelRenderer.ReloadListener.INSTANCE);
 
         ClientEvents.registerResourceReloadListener(
-                Industria.id("conveyor_special_renderer"),
-                ModConveyorSpecialRenderers.ReloadListener.INSTANCE
-        );
+            Industria.id("conveyor_special_renderer"),
+            ModConveyorSpecialRenderers.ReloadListener.INSTANCE);
     }
 }

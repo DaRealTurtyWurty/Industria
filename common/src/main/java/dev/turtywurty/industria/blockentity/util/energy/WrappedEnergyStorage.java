@@ -36,7 +36,8 @@ public class WrappedEnergyStorage extends WrappedStorage<ResourceStorage<Resourc
     }
 
     public record EnergyStorageSerializer(ResourceStorage<ResourceVariant<UnitResource>> storage)
-            implements ViewSerializable {
+        implements
+            ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);
@@ -48,14 +49,14 @@ public class WrappedEnergyStorage extends WrappedStorage<ResourceStorage<Resourc
             requireSingleSlot(storage);
             long amount = view.getLongOr("Amount", 0L);
             if (!new StorageSnapshot<>(List.of(
-                    new StorageSnapshot.Entry<>(SimpleEnergyStorage.ENERGY, amount))).apply(storage))
+                new StorageSnapshot.Entry<>(SimpleEnergyStorage.ENERGY, amount))).apply(storage))
                 throw new IllegalStateException("Stored energy does not fit in " + storage.getClass().getName());
         }
 
         private static void requireSingleSlot(ResourceStorage<?> storage) {
             if (!storage.hasStableIndices() || storage.size() != 1)
                 throw new UnsupportedOperationException(
-                        "Wrapped energy persistence requires one stable slot: " + storage.getClass().getName());
+                    "Wrapped energy persistence requires one stable slot: " + storage.getClass().getName());
         }
     }
 }

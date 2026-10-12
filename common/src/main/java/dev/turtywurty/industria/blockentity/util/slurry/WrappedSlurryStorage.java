@@ -57,7 +57,8 @@ public class WrappedSlurryStorage<T extends ResourceStorage<ResourceVariant<Slur
     }
 
     public record SlurryStorageSerializer<T extends ResourceStorage<ResourceVariant<Slurry>>>(T storage)
-            implements ViewSerializable {
+        implements
+            ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);
@@ -70,7 +71,7 @@ public class WrappedSlurryStorage<T extends ResourceStorage<ResourceVariant<Slur
             requireSingleSlot(storage);
             long amount = view.getLongOr("Amount", 0L);
             ResourceVariant<Slurry> resource = view.read("Slurry", SlurryVariant.CODEC)
-                    .orElse(SlurryVariant.blank());
+                .orElse(SlurryVariant.blank());
             if (!new StorageSnapshot<>(List.of(new StorageSnapshot.Entry<>(resource, amount))).apply(storage))
                 throw new IllegalStateException("Stored slurry does not fit in " + storage.getClass().getName());
         }
@@ -78,7 +79,7 @@ public class WrappedSlurryStorage<T extends ResourceStorage<ResourceVariant<Slur
         private static void requireSingleSlot(ResourceStorage<?> storage) {
             if (!storage.hasStableIndices() || storage.size() != 1)
                 throw new UnsupportedOperationException(
-                        "Wrapped slurry persistence requires one stable slot: " + storage.getClass().getName());
+                    "Wrapped slurry persistence requires one stable slot: " + storage.getClass().getName());
         }
     }
 }

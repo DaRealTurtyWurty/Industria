@@ -26,7 +26,8 @@ public class ClientConveyorNetworks {
             ResourceKey<Level> levelKey = payload.level();
             ConveyorNetwork network = payload.network();
 
-            ConveyorNetworkManager manager = CONVEYOR_NETWORKS.computeIfAbsent(levelKey, _ -> new ConveyorNetworkManager());
+            ConveyorNetworkManager manager = CONVEYOR_NETWORKS.computeIfAbsent(levelKey,
+                _ -> new ConveyorNetworkManager());
 
             Set<ConveyorNetwork> networks = manager.getNetworks();
             networks.removeIf(existingNetwork -> existingNetwork.getId().equals(network.getId()));
@@ -70,8 +71,8 @@ public class ClientConveyorNetworks {
 
             Set<ConveyorNetwork> networks = manager.getNetworks();
             Optional<ConveyorNetwork> optionalNetwork = networks.stream()
-                    .filter(network -> network.getId().equals(networkId))
-                    .findFirst();
+                .filter(network -> network.getId().equals(networkId))
+                .findFirst();
             optionalNetwork.ifPresent(network -> {
                 switch (operation) {
                     case ADD_CONVEYOR -> {
@@ -82,10 +83,11 @@ public class ClientConveyorNetworks {
                         network.removeConveyor(pos);
                         manager.removeConveyor(pos);
                     }
-//                    case ADD_CONNECTED_BLOCK -> network.getConnectedBlocks().add(pos);
-//                    case REMOVE_CONNECTED_BLOCK -> network.getConnectedBlocks().remove(pos);
+                    // case ADD_CONNECTED_BLOCK -> network.getConnectedBlocks().add(pos);
+                    // case REMOVE_CONNECTED_BLOCK -> network.getConnectedBlocks().remove(pos);
                     default ->
-                            throw new UnsupportedOperationException("Operation " + operation + " is not supported for ConveyorNetwork yet");
+                        throw new UnsupportedOperationException(
+                            "Operation " + operation + " is not supported for ConveyorNetwork yet");
                 }
             });
         });

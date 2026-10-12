@@ -11,11 +11,12 @@ public class CentrifugalConcentratorBlock extends IndustriaBlock {
 
     public CentrifugalConcentratorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasComparatorOutput()
-                .hasBlockEntityRenderer()
-                .useRotatedShapes(VOXEL_SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR)
-                        .shouldTickAllowClient(true)));
+            .hasHorizontalFacing()
+            .hasComparatorOutput()
+            .hasBlockEntityRenderer()
+            .useRotatedShapes(VOXEL_SHAPE)
+            .blockEntityProperties(
+                new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.CENTRIFUGAL_CONCENTRATOR)
+                    .shouldTickAllowClient(true)));
     }
 }

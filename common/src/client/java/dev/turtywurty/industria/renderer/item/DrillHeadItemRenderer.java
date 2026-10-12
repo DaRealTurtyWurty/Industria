@@ -28,7 +28,15 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
     public final Map<DrillHeadable, Identifier> drillHeadTextures = new HashMap<>();
 
     @Override
-    public void submit(DrillRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay, boolean glint, int outlineColor) {
+    public void submit(
+        DrillRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay,
+        boolean glint,
+        int outlineColor
+    ) {
         if (state == null)
             return;
 
@@ -36,8 +44,10 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
             EntityModelSet loadedEntityModels = Minecraft.getInstance().getEntityModels();
             DrillHeadRegistry.DrillHeadClientData clientData = DrillHeadRegistry.getClientData(drillHeadable);
             if (clientData != null && clientData.renderDynamicItem()) {
-                Model<?> model = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> clientData.modelResolver().apply(Either.right(loadedEntityModels)));
-                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
+                Model<?> model = this.drillHeadModels.computeIfAbsent(drillHeadable,
+                    _ -> clientData.modelResolver().apply(Either.right(loadedEntityModels)));
+                Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable,
+                    _ -> clientData.textureLocation());
                 matrices.pushPose();
                 matrices.translate(0.5f, 0.75f, 0.5f);
                 matrices.rotate(Axis.XP.rotationDegrees(180));
@@ -52,7 +62,8 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
     @Override
     public void getExtents(Consumer<Vector3fc> vertices) {
         var matrices = new PoseStack();
-        this.drillHeadModels.values().forEach(model -> model.allParts().forEach(modelPart -> modelPart.getExtentsForGui(matrices, vertices)));
+        this.drillHeadModels.values()
+            .forEach(model -> model.allParts().forEach(modelPart -> modelPart.getExtentsForGui(matrices, vertices)));
     }
 
     @Override

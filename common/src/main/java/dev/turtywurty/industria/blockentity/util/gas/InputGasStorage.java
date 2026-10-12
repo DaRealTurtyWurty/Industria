@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 
 public class InputGasStorage extends PredicateGasStorage {
     public InputGasStorage(BlockEntity blockEntity, long capacity, Predicate<ResourceVariant<Gas>> canInsert) {
-        super(blockEntity, capacity, canInsert, $ -> false);
+        super(blockEntity, capacity, canInsert, _ -> false);
     }
 
     public InputGasStorage(BlockEntity blockEntity, long capacity) {

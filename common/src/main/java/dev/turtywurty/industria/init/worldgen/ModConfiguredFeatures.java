@@ -49,40 +49,42 @@ public class ModConfiguredFeatures {
 
         HolderGetter<PlacedFeature> registryLookup = context.lookup(Registries.PLACED_FEATURE);
 
-        context.register(CRUDE_OIL_POCKET, new FluidPocketFeature(new FluidPocketConfig(ModFluids.CRUDE_OIL.still().get().defaultFluidState(),
-                        UniformInt.of(4, 6),
-                        UniformInt.of(2, 4),
-                        stoneOreReplaceables)));
+        context.register(CRUDE_OIL_POCKET,
+            new FluidPocketFeature(new FluidPocketConfig(ModFluids.CRUDE_OIL.still().get().defaultFluidState(),
+                UniformInt.of(4, 6),
+                UniformInt.of(2, 4),
+                stoneOreReplaceables)));
 
         List<BlockReplacement> bauxiteTargets = List.of(
-                BlockReplacement.replace(stoneOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()),
-                BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()));
+            BlockReplacement.replace(stoneOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()),
+            BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()));
 
         List<BlockReplacement> tinTargets = List.of(
-                BlockReplacement.replace(stoneOreReplaceables, ModBlocks.CASSITERITE_ORE.get().defaultBlockState()),
-                BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.DEEPSLATE_CASSITERITE_ORE.get().defaultBlockState()));
+            BlockReplacement.replace(stoneOreReplaceables, ModBlocks.CASSITERITE_ORE.get().defaultBlockState()),
+            BlockReplacement.replace(deepslateOreReplaceables,
+                ModBlocks.DEEPSLATE_CASSITERITE_ORE.get().defaultBlockState()));
 
         List<BlockReplacement> zincTargets = List.of(
-                BlockReplacement.replace(stoneOreReplaceables, ModBlocks.SPHALERITE_ORE.get().defaultBlockState()),
-                BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.DEEPSLATE_SPHALERITE_ORE.get().defaultBlockState()));
+            BlockReplacement.replace(stoneOreReplaceables, ModBlocks.SPHALERITE_ORE.get().defaultBlockState()),
+            BlockReplacement.replace(deepslateOreReplaceables,
+                ModBlocks.DEEPSLATE_SPHALERITE_ORE.get().defaultBlockState()));
 
         context.register(BAUXITE_ORE, new OreFeature(bauxiteTargets, 8, 0.25f));
         context.register(CASSITERITE_ORE, new OreFeature(tinTargets, 14));
         context.register(ZINC_ORE, new ScatteredOreFeature(zincTargets, 10, 0.0f));
 
         context.register(RUBBER_TREE, new TreeFeature.Builder(
-                        BlockStateProvider.of(ModWoodSets.RUBBER.log().get()),
-                        new RubberTreeTrunkPlacer(15, 2, 1, UniformInt.of(10, 13), UniformInt.of(3, 5)),
-                        BlockStateProvider.of(ModWoodSets.RUBBER.leaves().get()),
-                        new BlobFoliagePlacer(UniformInt.of(2, 4), ConstantInt.of(2), 4),
-                        new TwoLayersFeatureSize(1, 0, 1), Holder.direct(BlockStateProvider.of(Blocks.DIRT)))
-                        .ignoreVines()
-                        .build());
+            BlockStateProvider.of(ModWoodSets.RUBBER.log().get()),
+            new RubberTreeTrunkPlacer(15, 2, 1, UniformInt.of(10, 13), UniformInt.of(3, 5)),
+            BlockStateProvider.of(ModWoodSets.RUBBER.leaves().get()),
+            new BlobFoliagePlacer(UniformInt.of(2, 4), ConstantInt.of(2), 4),
+            new TwoLayersFeatureSize(1, 0, 1), Holder.direct(BlockStateProvider.of(Blocks.DIRT)))
+            .ignoreVines()
+            .build());
     }
 
     private static ResourceKey<Feature> registerKey(String name) {
         return ResourceKey.create(Registries.FEATURE, Industria.id(name));
     }
-
 
 }

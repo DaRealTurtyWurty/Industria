@@ -17,15 +17,22 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
+import net.minecraft.world.item.ItemStack;
 
 public class AgitatorScreenHandler extends IndustriaScreenHandler<AgitatorBlockEntity, BlockPosPayload> {
     public AgitatorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ModMenuTypes.AGITATOR.get(), 2, syncId, playerInventory, payload, AgitatorBlockEntity.class);
     }
 
-    public AgitatorScreenHandler(int syncId, Inventory playerInventory, AgitatorBlockEntity blockEntity,
-                                 WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
-        super(ModMenuTypes.AGITATOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, propertyDelegate);
+    public AgitatorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        AgitatorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData propertyDelegate
+    ) {
+        super(ModMenuTypes.AGITATOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            propertyDelegate);
     }
 
     @Override
@@ -84,14 +91,21 @@ public class AgitatorScreenHandler extends IndustriaScreenHandler<AgitatorBlockE
         private final AgitatorBlockEntity blockEntity;
         private final int portIndex;
 
-        public InputModeSlot(SimpleContainer container, int slot, int x, int y, AgitatorBlockEntity blockEntity, int portIndex) {
+        public InputModeSlot(
+            SimpleContainer container,
+            int slot,
+            int x,
+            int y,
+            AgitatorBlockEntity blockEntity,
+            int portIndex
+        ) {
             super(container, slot, x, y);
             this.blockEntity = blockEntity;
             this.portIndex = portIndex;
         }
 
         @Override
-        public boolean mayPlace(net.minecraft.world.item.ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return isActive();
         }
 
@@ -105,7 +119,14 @@ public class AgitatorScreenHandler extends IndustriaScreenHandler<AgitatorBlockE
         private final AgitatorBlockEntity blockEntity;
         private final int portIndex;
 
-        public OutputModeSlot(SimpleContainer inventory, int index, int x, int y, AgitatorBlockEntity blockEntity, int portIndex) {
+        public OutputModeSlot(
+            SimpleContainer inventory,
+            int index,
+            int x,
+            int y,
+            AgitatorBlockEntity blockEntity,
+            int portIndex
+        ) {
             super(inventory, index, x, y);
             this.blockEntity = blockEntity;
             this.portIndex = portIndex;

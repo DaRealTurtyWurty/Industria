@@ -10,12 +10,12 @@ public class ArcFurnaceBlock extends IndustriaBlock {
 
     public ArcFurnaceBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasLitProperty()
-                .hasComparatorOutput()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ARC_FURNACE)
-                        .shouldTick()
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()));
+            .hasHorizontalFacing()
+            .hasLitProperty()
+            .hasComparatorOutput()
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.ARC_FURNACE)
+                .shouldTick()
+                .rightClickToOpenGui()
+                .dropContentsOnBreak()));
     }
 }

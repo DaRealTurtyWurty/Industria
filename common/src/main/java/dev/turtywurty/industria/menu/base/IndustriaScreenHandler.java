@@ -17,32 +17,68 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedContainerStorageHolder, P extends HasPositionPayload> extends AbstractContainerMenu {
+public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedContainerStorageHolder, P extends HasPositionPayload>
+    extends
+        AbstractContainerMenu {
     protected final T blockEntity;
     protected final WrappedContainerStorage<?> wrappedContainerStorage;
     protected final ContainerLevelAccess context;
     protected final ContainerData propertyDelegate;
 
-    public IndustriaScreenHandler(MenuType<?> type, int syncId, Inventory playerInventory, P payload, Class<T> blockEntityClass) {
+    public IndustriaScreenHandler(
+        MenuType<?> type,
+        int syncId,
+        Inventory playerInventory,
+        P payload,
+        Class<T> blockEntityClass
+    ) {
         this(type, 0, syncId, playerInventory, payload, new CachedBlockEntityFetcher<>(blockEntityClass));
     }
 
-    public IndustriaScreenHandler(MenuType<?> type, int propertiesSize, int syncId, Inventory playerInventory, P payload, Class<T> blockEntityClass) {
+    public IndustriaScreenHandler(
+        MenuType<?> type,
+        int propertiesSize,
+        int syncId,
+        Inventory playerInventory,
+        P payload,
+        Class<T> blockEntityClass
+    ) {
         this(type, propertiesSize, syncId, playerInventory, payload, new CachedBlockEntityFetcher<>(blockEntityClass));
     }
 
-    public IndustriaScreenHandler(MenuType<?> type, int propertiesSize, int syncId, Inventory playerInventory, P payload, CachedBlockEntityFetcher<T> cachedFetcher) {
+    public IndustriaScreenHandler(
+        MenuType<?> type,
+        int propertiesSize,
+        int syncId,
+        Inventory playerInventory,
+        P payload,
+        CachedBlockEntityFetcher<T> cachedFetcher
+    ) {
         this(type, syncId, playerInventory,
-                cachedFetcher.apply(playerInventory, payload.pos()),
-                ClientWrappedContainerStorage.copyOf(cachedFetcher.apply(playerInventory, payload.pos()).getWrappedContainerStorage()),
-                propertiesSize == 0 ? null : new SimpleContainerData(propertiesSize));
+            cachedFetcher.apply(playerInventory, payload.pos()),
+            ClientWrappedContainerStorage
+                .copyOf(cachedFetcher.apply(playerInventory, payload.pos()).getWrappedContainerStorage()),
+            propertiesSize == 0 ? null : new SimpleContainerData(propertiesSize));
     }
 
-    public IndustriaScreenHandler(MenuType<?> type, int syncId, Inventory playerInventory, T blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public IndustriaScreenHandler(
+        MenuType<?> type,
+        int syncId,
+        Inventory playerInventory,
+        T blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         this(type, syncId, playerInventory, blockEntity, wrappedContainerStorage, null);
     }
 
-    public IndustriaScreenHandler(MenuType<?> type, int syncId, Inventory playerInventory, T blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
+    public IndustriaScreenHandler(
+        MenuType<?> type,
+        int syncId,
+        Inventory playerInventory,
+        T blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
         super(type, syncId);
         if (properties != null && properties.getCount() >= 0) {
             this.propertyDelegate = properties;
@@ -67,23 +103,20 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedCont
     public ItemStack quickMoveStack(Player player, int slotIndex) {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasItem()) {
+        if (!slot.hasItem())
             return stack;
-        }
 
         ItemStack stackInSlot = slot.getItem();
         stack = stackInSlot.copy();
 
         if (slotIndex < getInventorySize()) {
             if (!moveItemStackTo(stackInSlot, this.slots.size() - 9, this.slots.size(), true)) {
-                if (!moveItemStackTo(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false)) {
+                if (!moveItemStackTo(stackInSlot, this.slots.size() - 36, this.slots.size() - 9, false))
                     return ItemStack.EMPTY;
-                }
             }
         } else {
-            if (!moveItemStackTo(stackInSlot, 0, getInventorySize(), false)) {
+            if (!moveItemStackTo(stackInSlot, 0, getInventorySize(), false))
                 return ItemStack.EMPTY;
-            }
         }
 
         if (stackInSlot.isEmpty()) {
@@ -134,7 +167,9 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedCont
 
     protected abstract void addBlockEntitySlots(Inventory playerInventory);
 
-    public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedContainerStorageHolder> implements BiFunction<Inventory, BlockPos, T> {
+    public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedContainerStorageHolder>
+        implements
+            BiFunction<Inventory, BlockPos, T> {
         private final Class<T> blockEntityClass;
         private final Map<BlockPos, T> cache = new HashMap<>();
 
@@ -144,18 +179,17 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedCont
 
         @Override
         public T apply(Inventory playerInventory, BlockPos pos) {
-            if (cache.containsKey(pos)) {
+            if (cache.containsKey(pos))
                 return cache.get(pos);
-            }
 
             BlockEntity blockEntity = playerInventory.player.level().getBlockEntity(pos);
             if (blockEntityClass.isInstance(blockEntity)) {
                 T castedBlockEntity = blockEntityClass.cast(blockEntity);
                 cache.put(pos, castedBlockEntity);
                 return castedBlockEntity;
-            } else {
-                throw new IllegalArgumentException("Block entity at " + pos + " is not of type " + blockEntityClass.getSimpleName());
-            }
+            } else
+                throw new IllegalArgumentException(
+                    "Block entity at " + pos + " is not of type " + blockEntityClass.getSimpleName());
         }
     }
 }

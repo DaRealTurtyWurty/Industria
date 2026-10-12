@@ -32,7 +32,8 @@ public class StateProperties {
 
     public <T extends Comparable<T>> void addProperty(StateProperty<T> property) {
         if (this.properties.containsKey(property.delegate().getName()))
-            throw new IllegalArgumentException("Property with name: " + property.delegate().getName() + " already exists!");
+            throw new IllegalArgumentException(
+                "Property with name: " + property.delegate().getName() + " already exists!");
 
         this.properties.put(property.delegate().getName(), property);
     }
@@ -46,7 +47,8 @@ public class StateProperties {
         try {
             return (StateProperty<T>) stateProperty;
         } catch (ClassCastException exception) {
-            throw new IllegalArgumentException("Property with name: " + name + " is not of the correct type!", exception);
+            throw new IllegalArgumentException("Property with name: " + name + " is not of the correct type!",
+                exception);
         }
     }
 

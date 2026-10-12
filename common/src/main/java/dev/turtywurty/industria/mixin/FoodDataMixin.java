@@ -47,10 +47,7 @@ public abstract class FoodDataMixin implements IHasPlayer {
         return attachmentService.get(attachmentTarget, ModAttachmentTypes.STOMACH_DESTRUCTION_ATTACHMENT).orElse(0);
     }
 
-    @ModifyArg(
-            method = "add",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"),
-            index = 2)
+    @ModifyArg(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"), index = 2)
     private int industria$modifyMaximumFoodLevel(int original) {
         return original - industria$getStomachDestructionLevel() * 2;
     }

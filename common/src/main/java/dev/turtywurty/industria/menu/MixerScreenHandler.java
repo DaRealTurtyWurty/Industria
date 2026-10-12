@@ -20,8 +20,15 @@ public class MixerScreenHandler extends IndustriaScreenHandler<MixerBlockEntity,
         super(ModMenuTypes.MIXER.get(), 2, syncId, playerInventory, payload, MixerBlockEntity.class);
     }
 
-    public MixerScreenHandler(int syncId, Inventory playerInventory, MixerBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData propertyDelegate) {
-        super(ModMenuTypes.MIXER.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, propertyDelegate);
+    public MixerScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        MixerBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData propertyDelegate
+    ) {
+        super(ModMenuTypes.MIXER.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            propertyDelegate);
     }
 
     @Override

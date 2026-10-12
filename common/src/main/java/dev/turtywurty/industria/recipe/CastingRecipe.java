@@ -28,17 +28,17 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record CastingRecipe(
-        BlockType blockType,
-        FluidStack inputFluid,
-        OutputItemStack output,
-        int coolingTime,
-        Optional<Identifier> moldId
+    BlockType blockType,
+    FluidStack inputFluid,
+    OutputItemStack output,
+    int coolingTime,
+    Optional<Identifier> moldId
 ) implements Recipe<CastingRecipeInput> {
     @Override
     public boolean matches(CastingRecipeInput input, Level world) {
         return input.blockType() == this.blockType
-                && input.fluidStack().testForRecipe(this.inputFluid)
-                && this.moldId.equals(input.moldId());
+            && input.fluidStack().testForRecipe(this.inputFluid)
+            && this.moldId.equals(input.moldId());
     }
 
     @Override
@@ -99,21 +99,19 @@ public record CastingRecipe(
     }
 
     private static final MapCodec<CastingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            BlockType.CODEC.fieldOf("block_type").forGetter(CastingRecipe::blockType),
-            FluidStack.CODEC.fieldOf("input_fluid").forGetter(CastingRecipe::inputFluid),
-            OutputItemStack.CODEC.fieldOf("output").forGetter(CastingRecipe::output),
-            Codec.intRange(1, Integer.MAX_VALUE).fieldOf("cooling_time").forGetter(CastingRecipe::coolingTime),
-            Identifier.CODEC.optionalFieldOf("mold").forGetter(CastingRecipe::moldId)
-    ).apply(instance, CastingRecipe::new));
+        BlockType.CODEC.fieldOf("block_type").forGetter(CastingRecipe::blockType),
+        FluidStack.CODEC.fieldOf("input_fluid").forGetter(CastingRecipe::inputFluid),
+        OutputItemStack.CODEC.fieldOf("output").forGetter(CastingRecipe::output),
+        Codec.intRange(1, Integer.MAX_VALUE).fieldOf("cooling_time").forGetter(CastingRecipe::coolingTime),
+        Identifier.CODEC.optionalFieldOf("mold").forGetter(CastingRecipe::moldId)).apply(instance, CastingRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, CastingRecipe> STREAM_CODEC = StreamCodec.composite(
-            BlockType.STREAM_CODEC, CastingRecipe::blockType,
-            FluidStack.STREAM_CODEC, CastingRecipe::inputFluid,
-            OutputItemStack.STREAM_CODEC, CastingRecipe::output,
-            ByteBufCodecs.INT, CastingRecipe::coolingTime,
-            ByteBufCodecs.optional(Identifier.STREAM_CODEC), CastingRecipe::moldId,
-            CastingRecipe::new
-    );
+        BlockType.STREAM_CODEC, CastingRecipe::blockType,
+        FluidStack.STREAM_CODEC, CastingRecipe::inputFluid,
+        OutputItemStack.STREAM_CODEC, CastingRecipe::output,
+        ByteBufCodecs.INT, CastingRecipe::coolingTime,
+        ByteBufCodecs.optional(Identifier.STREAM_CODEC), CastingRecipe::moldId,
+        CastingRecipe::new);
 
     public static final RecipeSerializer<CastingRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 

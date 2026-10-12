@@ -15,7 +15,11 @@ import net.minecraft.world.entity.player.Inventory;
 public class CentrifugalConcentratorScreen extends AbstractContainerScreen<CentrifugalConcentratorScreenHandler> {
     public static final Identifier TEXTURE = Industria.id("textures/gui/container/centrifugal_concentrator.png");
 
-    public CentrifugalConcentratorScreen(CentrifugalConcentratorScreenHandler handler, Inventory inventory, Component title) {
+    public CentrifugalConcentratorScreen(
+        CentrifugalConcentratorScreenHandler handler,
+        Inventory inventory,
+        Component title
+    ) {
         super(handler, inventory, title, 176, 174);
         this.inventoryLabelY = this.imageHeight - 94;
     }
@@ -26,24 +30,25 @@ public class CentrifugalConcentratorScreen extends AbstractContainerScreen<Centr
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 8, this.topPos + 10, 12, 66)
-                .color(0xFFD4AF37)
-                .build());
+            .bounds(this.leftPos + 8, this.topPos + 10, 12, 66)
+            .color(0xFFD4AF37)
+            .build());
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getInputFluidTank())
-                .bounds(this.leftPos + 24, this.topPos + 10, 20, 46)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 24, this.topPos + 10, 20, 46)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
 
         addRenderableOnly(new SlurryWidget.Builder(this.menu.getBlockEntity().getOutputSlurryTank())
-                .bounds(this.leftPos + 132, this.topPos + 10, 20, 46)
-                .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
-                .build());
+            .bounds(this.leftPos + 132, this.topPos + 10, 20, 46)
+            .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
+            .build());
     }
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 76, this.topPos + 36, 176, 0, this.menu.getProgressScaled(), 17);
+        ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 76, this.topPos + 36, 176, 0,
+            this.menu.getProgressScaled(), 17);
     }
 }

@@ -13,14 +13,20 @@ import net.minecraft.world.phys.BlockHitResult;
 public class CastingBasinBlock extends IndustriaBlock {
     public CastingBasinBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
-                        ModBlockEntityTypes.CASTING_BASIN)
-                        .shouldTick()
-                        .dropContentsOnBreak()));
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
+                ModBlockEntityTypes.CASTING_BASIN)
+                .shouldTick()
+                .dropContentsOnBreak()));
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CastingBasinBlockEntity blockEntity) {
             blockEntity.collectOutput(player);
         }

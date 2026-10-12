@@ -11,9 +11,12 @@ public class PredicateFluidStorage extends SyncingFluidStorage {
     private final Predicate<ResourceVariant<Fluid>> canInsert;
     private final Predicate<ResourceVariant<Fluid>> canExtract;
 
-    public PredicateFluidStorage(BlockEntity blockEntity, long capacity,
-                                 Predicate<ResourceVariant<Fluid>> canInsert,
-                                 Predicate<ResourceVariant<Fluid>> canExtract) {
+    public PredicateFluidStorage(
+        BlockEntity blockEntity,
+        long capacity,
+        Predicate<ResourceVariant<Fluid>> canInsert,
+        Predicate<ResourceVariant<Fluid>> canExtract
+    ) {
         super(blockEntity, capacity);
         this.canInsert = canInsert;
         this.canExtract = canExtract;

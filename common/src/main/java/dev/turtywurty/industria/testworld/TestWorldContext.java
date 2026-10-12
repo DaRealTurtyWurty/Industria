@@ -141,8 +141,9 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
             overworld.setBlockAndUpdate(pathPos, state);
             if (state.getBlock() instanceof PipeBlock<?, ?> pipeBlock) {
                 var networkManager = pipeBlock.getNetworkManager(overworld);
-                if (!networkManager.containsPipe(pathPos))
+                if (!networkManager.containsPipe(pathPos)) {
                     networkManager.placePipe(overworld, pathPos);
+                }
             }
         }
     }
@@ -167,13 +168,12 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
             return List.of(immutableStart);
 
         long nextSequence = 0;
-        PathNode startNode = new PathNode(
-                new PathState(immutableStart, null),
-                0,
-                0,
-                manhattanDistance(immutableStart, immutableEnd),
-                nextSequence++
-        );
+        var startNode = new PathNode(
+            new PathState(immutableStart, null),
+            0,
+            0,
+            manhattanDistance(immutableStart, immutableEnd),
+            nextSequence++);
 
         PriorityQueue<PathNode> open = new PriorityQueue<>();
         open.add(startNode);
@@ -192,7 +192,7 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
 
             if (++visitedNodes > MAX_PATHFINDING_NODES)
                 throw new IllegalStateException("Could not find a path from " + immutableStart + " to "
-                        + immutableEnd + " after visiting " + MAX_PATHFINDING_NODES + " nodes");
+                    + immutableEnd + " after visiting " + MAX_PATHFINDING_NODES + " nodes");
 
             if (current.state().pos().equals(immutableEnd))
                 return reconstructPath(current.state(), previous);
@@ -205,11 +205,12 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
                 int steps = current.steps() + 1;
                 int turns = current.turns();
                 if (current.state().arrivalDirection() != null
-                        && current.state().arrivalDirection() != direction)
+                    && current.state().arrivalDirection() != direction) {
                     turns++;
+                }
 
-                PathState neighbourState = new PathState(neighbour, direction);
-                PathCost neighbourCost = new PathCost(steps, turns);
+                var neighbourState = new PathState(neighbour, direction);
+                var neighbourCost = new PathCost(steps, turns);
                 PathCost knownCost = bestCosts.get(neighbourState);
                 if (knownCost != null && knownCost.compareTo(neighbourCost) <= 0)
                     continue;
@@ -217,12 +218,11 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
                 bestCosts.put(neighbourState, neighbourCost);
                 previous.put(neighbourState, current.state());
                 open.add(new PathNode(
-                        neighbourState,
-                        steps,
-                        turns,
-                        manhattanDistance(neighbour, immutableEnd),
-                        nextSequence++
-                ));
+                    neighbourState,
+                    steps,
+                    turns,
+                    manhattanDistance(neighbour, immutableEnd),
+                    nextSequence++));
             }
         }
 
@@ -242,8 +242,8 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
 
     private static long manhattanDistance(BlockPos first, BlockPos second) {
         return Math.abs((long) first.getX() - second.getX())
-                + Math.abs((long) first.getY() - second.getY())
-                + Math.abs((long) first.getZ() - second.getZ());
+            + Math.abs((long) first.getY() - second.getY())
+            + Math.abs((long) first.getZ() - second.getZ());
     }
 
     private record PathState(BlockPos pos, Direction arrivalDirection) {
@@ -258,11 +258,11 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
     }
 
     private record PathNode(
-            PathState state,
-            int steps,
-            int turns,
-            long remainingDistance,
-            long sequence
+        PathState state,
+        int steps,
+        int turns,
+        long remainingDistance,
+        long sequence
     ) implements Comparable<PathNode> {
         @Override
         public int compareTo(PathNode other) {
@@ -283,91 +283,117 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
     }
 
     public void fill(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ,
-            Block block
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ,
+        Block block
     ) {
         fill(minX, minY, minZ, maxX, maxY, maxZ, block.defaultBlockState());
     }
 
     public void fill(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ,
-            BlockState state
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ,
+        BlockState state
     ) {
         BlockPos.betweenClosedStream(
-                pos(minX, minY, minZ),
-                pos(maxX, maxY, maxZ)
-        ).forEach(pos -> overworld.setBlockAndUpdate(pos, state));
+            pos(minX, minY, minZ),
+            pos(maxX, maxY, maxZ)).forEach(pos -> overworld.setBlockAndUpdate(pos, state));
     }
 
     public void fillAir(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ
     ) {
         fill(minX, minY, minZ, maxX, maxY, maxZ, Blocks.AIR);
     }
 
     public void fillReplace(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ,
-            BlockState state,
-            BlockState replace
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ,
+        BlockState state,
+        BlockState replace
     ) {
         fillReplaceWhere(
-                minX, minY, minZ,
-                maxX, maxY, maxZ,
-                state,
-                blockState -> blockState.equals(replace)
-        );
+            minX, minY, minZ,
+            maxX, maxY, maxZ,
+            state,
+            blockState -> blockState.equals(replace));
     }
 
     public void fillReplace(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ,
-            BlockState state,
-            Block replace
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ,
+        BlockState state,
+        Block replace
     ) {
         fillReplaceWhere(
-                minX, minY, minZ,
-                maxX, maxY, maxZ,
-                state,
-                blockState -> blockState.is(replace)
-        );
+            minX, minY, minZ,
+            maxX, maxY, maxZ,
+            state,
+            blockState -> blockState.is(replace));
     }
 
     public void fillReplaceAir(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ,
-            BlockState state
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ,
+        BlockState state
     ) {
         fillReplace(minX, minY, minZ, maxX, maxY, maxZ, state, Blocks.AIR.defaultBlockState());
     }
 
     public void fillReplaceWhere(
-            int minX, int minY, int minZ,
-            int maxX, int maxY, int maxZ,
-            BlockState state,
-            Predicate<BlockState> predicate
+        int minX,
+        int minY,
+        int minZ,
+        int maxX,
+        int maxY,
+        int maxZ,
+        BlockState state,
+        Predicate<BlockState> predicate
     ) {
         BlockPos.betweenClosedStream(
-                pos(minX, minY, minZ),
-                pos(maxX, maxY, maxZ)
-        ).forEach(pos -> {
-            if (predicate.test(overworld.getBlockState(pos))) {
-                overworld.setBlockAndUpdate(pos, state);
-            }
-        });
+            pos(minX, minY, minZ),
+            pos(maxX, maxY, maxZ)).forEach(pos -> {
+                if (predicate.test(overworld.getBlockState(pos))) {
+                    overworld.setBlockAndUpdate(pos, state);
+                }
+            });
     }
 
     public <T extends BlockEntity> T requireBlockEntity(int x, int y, int z, Class<T> type) {
         BlockPos pos = pos(x, y, z);
         BlockEntity blockEntity = overworld.getBlockEntity(pos);
         if (blockEntity == null)
-            throw new IllegalStateException("Expected " + type.getSimpleName() + " at " + pos + ", but found no block entity");
+            throw new IllegalStateException(
+                "Expected " + type.getSimpleName() + " at " + pos + ", but found no block entity");
 
         if (!type.isInstance(blockEntity))
-            throw new IllegalStateException("Expected " + type.getSimpleName() + " at " + pos + ", but found " + blockEntity.getClass().getSimpleName());
+            throw new IllegalStateException("Expected " + type.getSimpleName() + " at " + pos + ", but found "
+                + blockEntity.getClass().getSimpleName());
 
         return type.cast(blockEntity);
     }
@@ -391,28 +417,28 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
         MultiblockPattern pattern = definition.pattern();
         BlockPos anchor = pos(x, y, z);
         pattern.positions().stream()
-                .sorted(Comparator.comparingLong((BlockPos blockPos) -> blockPos.getY())
-                        .thenComparingLong(BlockPos::getX)
-                        .thenComparingLong(BlockPos::getZ))
-                .forEach(localPos -> {
-                    BlockMatcherList matcher = pattern.matcherAt(localPos);
-                    if (matcher == null)
-                        throw new IllegalStateException("Multiblock '" + definition.id()
-                                + "' has no matcher at pattern position " + localPos);
+            .sorted(Comparator.comparingLong((BlockPos blockPos) -> blockPos.getY())
+                .thenComparingLong(BlockPos::getX)
+                .thenComparingLong(BlockPos::getZ))
+            .forEach(localPos -> {
+                BlockMatcherList matcher = pattern.matcherAt(localPos);
+                if (matcher == null)
+                    throw new IllegalStateException("Multiblock '" + definition.id()
+                        + "' has no matcher at pattern position " + localPos);
 
-                    BlockPos worldPos = anchor.offset(localPos);
-                    BlockState exampleState = matcher.exampleState().orElse(null);
-                    if (exampleState != null) {
-                        overworld.setBlockAndUpdate(worldPos, exampleState);
-                        return;
-                    }
+                BlockPos worldPos = anchor.offset(localPos);
+                BlockState exampleState = matcher.exampleState().orElse(null);
+                if (exampleState != null) {
+                    overworld.setBlockAndUpdate(worldPos, exampleState);
+                    return;
+                }
 
-                    BlockState existingState = overworld.getBlockState(worldPos);
-                    if (!matcher.matches(existingState))
-                        throw new IllegalStateException("Cannot construct multiblock '" + definition.id()
-                                + "' at " + worldPos + ": matcher " + matcher.describe()
-                                + " has no example state and does not match the existing state " + existingState);
-                });
+                BlockState existingState = overworld.getBlockState(worldPos);
+                if (!matcher.matches(existingState))
+                    throw new IllegalStateException("Cannot construct multiblock '" + definition.id()
+                        + "' at " + worldPos + ": matcher " + matcher.describe()
+                        + " has no example state and does not match the existing state " + existingState);
+            });
     }
 
     public ServerPlayer createFakePlayer(int x, int y, int z, GameProfile profile) {
@@ -422,7 +448,14 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
         return player;
     }
 
-    public InteractionResult useItemOnBlock(int x, int y, int z, ServerPlayer player, ItemStack stack, InteractionHand hand) {
+    public InteractionResult useItemOnBlock(
+        int x,
+        int y,
+        int z,
+        ServerPlayer player,
+        ItemStack stack,
+        InteractionHand hand
+    ) {
         BlockPos pos = pos(x, y, z);
         player.setItemInHand(hand, stack);
 
@@ -435,7 +468,14 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
         return useItemOnBlock(x, y, z, player, item.getDefaultInstance(), hand);
     }
 
-    public InteractionResult useItemOnBlock(int x, int y, int z, ServerPlayer player, Supplier<? extends Item> itemSupplier, InteractionHand hand) {
+    public InteractionResult useItemOnBlock(
+        int x,
+        int y,
+        int z,
+        ServerPlayer player,
+        Supplier<? extends Item> itemSupplier,
+        InteractionHand hand
+    ) {
         return useItemOnBlock(x, y, z, player, itemSupplier.get(), hand);
     }
 }

@@ -23,7 +23,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class SmelteryControllerBlockEntityRenderer implements BlockEntityRenderer<SmelteryControllerBlockEntity, SmelteryControllerBlockEntityRenderer.SmelteryRenderState> {
+public class SmelteryControllerBlockEntityRenderer
+    implements
+        BlockEntityRenderer<SmelteryControllerBlockEntity, SmelteryControllerBlockEntityRenderer.SmelteryRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderingComponent = new InWorldFluidRenderingComponent();
 
     public SmelteryControllerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -35,26 +37,39 @@ public class SmelteryControllerBlockEntityRenderer implements BlockEntityRendere
     }
 
     @Override
-    public void extractRenderState(SmelteryControllerBlockEntity blockEntity, SmelteryControllerBlockEntityRenderer.SmelteryRenderState state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
+    public void extractRenderState(
+        SmelteryControllerBlockEntity blockEntity,
+        SmelteryControllerBlockEntityRenderer.SmelteryRenderState state,
+        float partialTicks,
+        Vec3 cameraPosition,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress
+    ) {
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, partialTicks, cameraPosition, breakProgress);
         state.chambers = blockEntity.getRenderSnapshot();
     }
 
     @Override
-    public void submit(SmelteryControllerBlockEntityRenderer.SmelteryRenderState smelteryRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
+    public void submit(
+        SmelteryControllerBlockEntityRenderer.SmelteryRenderState smelteryRenderState,
+        PoseStack poseStack,
+        SubmitNodeCollector submitNodeCollector,
+        CameraRenderState cameraRenderState
+    ) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null)
             return;
 
         double maxDistancedSquared = (double) getViewDistance() * (double) getViewDistance();
         for (SmelteryChamberRenderData chamber : smelteryRenderState.chambers) {
-            if (chamber.capacity() <= 0 || chamber.fluid().isEmpty() || (!chamber.molten() && chamber.solidBlockState().isAir()))
+            if (chamber.capacity() <= 0 || chamber.fluid().isEmpty()
+                || (!chamber.molten() && chamber.solidBlockState().isAir()))
                 continue;
 
             AABB bounds = chamber.bounds();
-            //noinspection ConstantValue - IntelliJ is just blatantly wrong here, cameraRenderState.cullFrustum is not final
+            // noinspection ConstantValue - IntelliJ is just blatantly wrong here, cameraRenderState.cullFrustum is not
+            // final
             if (bounds.distanceToSqr(cameraRenderState.pos) >= maxDistancedSquared
-                    || (cameraRenderState.cullFrustum != null && !cameraRenderState.cullFrustum.isVisible(bounds)))
+                || (cameraRenderState.cullFrustum != null && !cameraRenderState.cullFrustum.isVisible(bounds)))
                 continue;
 
             double fill = Math.clamp((double) chamber.fluid().amount() / chamber.capacity(), 0.0, 1.0);
@@ -63,18 +78,16 @@ public class SmelteryControllerBlockEntityRenderer implements BlockEntityRendere
             FluidRenderUtils.GuiFluidRenderData renderData;
             if (chamber.molten()) {
                 renderData = FluidRenderUtils.getRenderData(
-                        chamber.fluid().variant(),
-                        level,
-                        BlockPos.containing(bounds.getCenter())
-                );
+                    chamber.fluid().variant(),
+                    level,
+                    BlockPos.containing(bounds.getCenter()));
             } else {
                 renderData = new FluidRenderUtils.GuiFluidRenderData(
-                        Minecraft.getInstance().getModelManager()
-                                .getBlockStateModelSet()
-                                .getParticleMaterial(chamber.solidBlockState())
-                                .sprite(),
-                        0xFFFFFFFF
-                );
+                    Minecraft.getInstance().getModelManager()
+                        .getBlockStateModelSet()
+                        .getParticleMaterial(chamber.solidBlockState())
+                        .sprite(),
+                    0xFFFFFFFF);
             }
             if (renderData == null || renderData.stillSprite() == null)
                 continue;
@@ -83,18 +96,20 @@ public class SmelteryControllerBlockEntityRenderer implements BlockEntityRendere
             float y1 = (float) (bounds.minY - smelteryRenderState.blockPos.getY());
             float z1 = (float) (bounds.minZ - smelteryRenderState.blockPos.getZ() + 0.001f);
             float x2 = (float) (bounds.maxX - smelteryRenderState.blockPos.getX() - 0.001f);
-            float y2 = (float) (bounds.minY - smelteryRenderState.blockPos.getY() + Math.min(filledHeight, bounds.getYsize() - 0.001f));
+            float y2 = (float) (bounds.minY - smelteryRenderState.blockPos.getY()
+                + Math.min(filledHeight, bounds.getYsize() - 0.001f));
             float z2 = (float) (bounds.maxZ - smelteryRenderState.blockPos.getZ() - 0.001f);
 
             int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(bounds.getCenter()));
             if (chamber.molten()) {
-                light = (light & 0xF00000) | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(chamber.fluid().variant())) << 4);
+                light = (light & 0xF00000) | (Math.max((light >> 4) & 15,
+                    FluidVariantAttributes.getLuminance(chamber.fluid().variant())) << 4);
             }
             this.fluidRenderingComponent.renderTexturedCuboid(renderData.stillSprite(), renderData.tintColor(),
-                    submitNodeCollector, poseStack,
-                    light, OverlayTexture.NO_OVERLAY,
-                    x1, y1, z1,
-                    x2, y2, z2);
+                submitNodeCollector, poseStack,
+                light, OverlayTexture.NO_OVERLAY,
+                x1, y1, z1,
+                x2, y2, z2);
         }
     }
 

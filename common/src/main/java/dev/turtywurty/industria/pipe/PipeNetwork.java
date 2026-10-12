@@ -27,51 +27,51 @@ import java.util.function.Function;
 
 public abstract class PipeNetwork<V extends ResourceVariant<?>> {
     public static final Codec<PipeNetwork<?>> CODEC = ModPipeNetworkTypes.CODEC.dispatch(
-            PipeNetwork::getType, PipeNetworkType::codec);
+        PipeNetwork::getType, PipeNetworkType::codec);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetwork<?>> STREAM_CODEC =
-            ModPipeNetworkTypes.STREAM_CODEC.dispatch(PipeNetwork::getType, PipeNetworkType::packetCodec);
+    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetwork<?>> STREAM_CODEC = ModPipeNetworkTypes.STREAM_CODEC
+        .dispatch(PipeNetwork::getType, PipeNetworkType::packetCodec);
 
     protected static <V extends ResourceVariant<?>, ST, N extends PipeNetwork<V>> MapCodec<N> createCodec(
-            RecordCodecBuilder<N, ST> storageApp,
-            BiConsumer<ResourceStorage<V>, ST> storageModifier,
-            Function<UUID, N> factory) {
-        return RecordCodecBuilder.mapCodec(instance ->
-                instance.group(
-                        UUIDUtil.CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
-                        ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(PipeNetwork::getPipes),
-                        ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(PipeNetwork::getConnectedBlocks),
-                        TransferType.CODEC.fieldOf("transferType").forGetter(PipeNetwork::getTransferType),
-                        storageApp
-                ).apply(instance, (id, pipes, connectedBlocks, transferType, storage) -> {
-                    var network = factory.apply(id);
-                    network.pipes.addAll(pipes);
-                    network.connectedBlocks.addAll(connectedBlocks);
-                    storageModifier.accept(network.storage, storage);
+        RecordCodecBuilder<N, ST> storageApp,
+        BiConsumer<ResourceStorage<V>, ST> storageModifier,
+        Function<UUID, N> factory
+    ) {
+        return RecordCodecBuilder.mapCodec(instance -> instance.group(
+            UUIDUtil.CODEC.fieldOf("id").forGetter(PipeNetwork::getId),
+            ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("pipes").forGetter(PipeNetwork::getPipes),
+            ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(PipeNetwork::getConnectedBlocks),
+            TransferType.CODEC.fieldOf("transferType").forGetter(PipeNetwork::getTransferType),
+            storageApp).apply(instance, (id, pipes, connectedBlocks, transferType, storage) -> {
+                var network = factory.apply(id);
+                network.pipes.addAll(pipes);
+                network.connectedBlocks.addAll(connectedBlocks);
+                storageModifier.accept(network.storage, storage);
 
-                    return network;
-                }));
+                return network;
+            }));
     }
 
     protected static <V extends ResourceVariant<?>, ST, N extends PipeNetwork<V>> StreamCodec<RegistryFriendlyByteBuf, N> createPacketCodec(
-            StreamCodec<? super RegistryFriendlyByteBuf, ST> storageTypeCodec,
-            Function<N, ST> storageTypeRetriever,
-            BiConsumer<ResourceStorage<V>, ST> storageModifier,
-            Function<UUID, N> factory) {
+        StreamCodec<? super RegistryFriendlyByteBuf, ST> storageTypeCodec,
+        Function<N, ST> storageTypeRetriever,
+        BiConsumer<ResourceStorage<V>, ST> storageModifier,
+        Function<UUID, N> factory
+    ) {
         return StreamCodec.composite(
-                UUIDUtil.STREAM_CODEC, PipeNetwork::getId,
-                ExtraStreamCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getPipes,
-                ExtraStreamCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getConnectedBlocks,
-                TransferType.STREAM_CODEC, PipeNetwork::getTransferType,
-                storageTypeCodec, storageTypeRetriever,
-                (id, pipes, connectedBlocks, transferType, storage) -> {
-                    var network = factory.apply(id);
-                    network.pipes.addAll(pipes);
-                    network.connectedBlocks.addAll(connectedBlocks);
-                    storageModifier.accept(network.storage, storage);
+            UUIDUtil.STREAM_CODEC, PipeNetwork::getId,
+            ExtraStreamCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getPipes,
+            ExtraStreamCodecs.BLOCK_POS_SET_STREAM_CODEC, PipeNetwork::getConnectedBlocks,
+            TransferType.STREAM_CODEC, PipeNetwork::getTransferType,
+            storageTypeCodec, storageTypeRetriever,
+            (id, pipes, connectedBlocks, transferType, storage) -> {
+                var network = factory.apply(id);
+                network.pipes.addAll(pipes);
+                network.connectedBlocks.addAll(connectedBlocks);
+                storageModifier.accept(network.storage, storage);
 
-                    return network;
-                });
+                return network;
+            });
     }
 
     protected UUID id;

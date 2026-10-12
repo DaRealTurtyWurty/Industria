@@ -39,26 +39,39 @@ public class DrillHeadRegistry {
     }
 
     public record DrillHeadClientData(
+        Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
+        boolean renderDynamicItem,
+        RenderFunction onRender,
+        Identifier textureLocation
+    ) {
+        public static DrillHeadClientData create(
             Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
             boolean renderDynamicItem,
             RenderFunction onRender,
-            Identifier textureLocation) {
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
-                                                 boolean renderDynamicItem,
-                                                 RenderFunction onRender,
-                                                 Identifier textureLocation) {
+            Identifier textureLocation
+        ) {
             return new DrillHeadClientData(modelResolver, renderDynamicItem, onRender, textureLocation);
         }
 
-        public static DrillHeadClientData create(Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
-                                                 RenderFunction onRender,
-                                                 Identifier textureLocation) {
+        public static DrillHeadClientData create(
+            Function<Either<BlockEntityRendererProvider.Context, EntityModelSet>, Model<?>> modelResolver,
+            RenderFunction onRender,
+            Identifier textureLocation
+        ) {
             return create(modelResolver, true, onRender, textureLocation);
         }
 
         @FunctionalInterface
         public interface RenderFunction {
-            void render(DrillRenderState state, PoseStack matrices, SubmitNodeCollector queue, Model<?> model, RenderType renderLayer, int light, int overlay);
+            void render(
+                DrillRenderState state,
+                PoseStack matrices,
+                SubmitNodeCollector queue,
+                Model<?> model,
+                RenderType renderLayer,
+                int light,
+                int overlay
+            );
         }
     }
 }

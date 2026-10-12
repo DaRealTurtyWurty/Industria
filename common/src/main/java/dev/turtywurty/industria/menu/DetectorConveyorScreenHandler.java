@@ -16,14 +16,22 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
-public class DetectorConveyorScreenHandler extends IndustriaScreenHandler<DetectorConveyorBlockEntity, BlockPosPayload> {
+public class DetectorConveyorScreenHandler
+    extends
+        IndustriaScreenHandler<DetectorConveyorBlockEntity, BlockPosPayload> {
     private static final NetworkService NETWORK = NetworkService.get();
 
     public DetectorConveyorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ModMenuTypes.DETECTOR_CONVEYOR.get(), syncId, playerInventory, payload, DetectorConveyorBlockEntity.class);
+        super(ModMenuTypes.DETECTOR_CONVEYOR.get(), syncId, playerInventory, payload,
+            DetectorConveyorBlockEntity.class);
     }
 
-    public DetectorConveyorScreenHandler(int syncId, Inventory playerInventory, DetectorConveyorBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public DetectorConveyorScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        DetectorConveyorBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.DETECTOR_CONVEYOR.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 

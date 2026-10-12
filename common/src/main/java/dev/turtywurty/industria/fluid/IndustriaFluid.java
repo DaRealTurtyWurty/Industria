@@ -23,7 +23,12 @@ public abstract class IndustriaFluid extends FlowingFluid {
     private final Supplier<Item> bucketSupplier;
     private final Supplier<Block> blockSupplier;
 
-    public IndustriaFluid(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+    public IndustriaFluid(
+        Supplier<Fluid> stillSupplier,
+        Supplier<Fluid> flowingSupplier,
+        Supplier<Item> bucketSupplier,
+        Supplier<Block> blockSupplier
+    ) {
         this.stillSupplier = stillSupplier;
         this.flowingSupplier = flowingSupplier;
         this.bucketSupplier = bucketSupplier;
@@ -72,7 +77,13 @@ public abstract class IndustriaFluid extends FlowingFluid {
     }
 
     @Override
-    protected boolean canBeReplacedWith(FluidState state, BlockGetter world, BlockPos pos, Fluid fluid, Direction direction) {
+    protected boolean canBeReplacedWith(
+        FluidState state,
+        BlockGetter world,
+        BlockPos pos,
+        Fluid fluid,
+        Direction direction
+    ) {
         return false;
     }
 
@@ -98,7 +109,12 @@ public abstract class IndustriaFluid extends FlowingFluid {
     }
 
     public static class Flowing extends IndustriaFluid {
-        public Flowing(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+        public Flowing(
+            Supplier<Fluid> stillSupplier,
+            Supplier<Fluid> flowingSupplier,
+            Supplier<Item> bucketSupplier,
+            Supplier<Block> blockSupplier
+        ) {
             super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
         }
 
@@ -114,7 +130,12 @@ public abstract class IndustriaFluid extends FlowingFluid {
     }
 
     public static class Still extends IndustriaFluid {
-        public Still(Supplier<Fluid> stillSupplier, Supplier<Fluid> flowingSupplier, Supplier<Item> bucketSupplier, Supplier<Block> blockSupplier) {
+        public Still(
+            Supplier<Fluid> stillSupplier,
+            Supplier<Fluid> flowingSupplier,
+            Supplier<Item> bucketSupplier,
+            Supplier<Block> blockSupplier
+        ) {
             super(stillSupplier, flowingSupplier, bucketSupplier, blockSupplier);
         }
 

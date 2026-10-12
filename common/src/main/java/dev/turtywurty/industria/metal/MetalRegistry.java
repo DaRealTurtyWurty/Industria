@@ -34,24 +34,24 @@ public final class MetalRegistry {
         Objects.requireNonNull(item, "item cannot be null");
 
         return METALS.values().stream()
-                .filter(definition -> definition.getItem(form).map(i -> i == item).orElse(false))
-                .findFirst();
+            .filter(definition -> definition.getItem(form).map(i -> i == item).orElse(false))
+            .findFirst();
     }
 
     public static Optional<MetalDefinition> findBy(Block storageBlock) {
         Objects.requireNonNull(storageBlock, "storageBlock cannot be null");
 
         return METALS.values().stream()
-                .filter(definition -> definition.storageBlock() != null && definition.storageBlock().get() == storageBlock)
-                .findFirst();
+            .filter(definition -> definition.storageBlock() != null && definition.storageBlock().get() == storageBlock)
+            .findFirst();
     }
 
     public static Optional<MetalDefinition> findBy(Fluid fluid) {
         Objects.requireNonNull(fluid, "fluid cannot be null");
 
         return METALS.values().stream()
-                .filter(definition -> definition.moltenFluid().still().get() == fluid
-                        || definition.moltenFluid().flowing().get() == fluid)
-                .findFirst();
+            .filter(definition -> definition.moltenFluid().still().get() == fluid
+                || definition.moltenFluid().flowing().get() == fluid)
+            .findFirst();
     }
 }

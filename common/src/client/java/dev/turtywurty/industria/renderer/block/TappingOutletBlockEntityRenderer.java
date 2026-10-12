@@ -16,31 +16,39 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class TappingOutletBlockEntityRenderer extends IndustriaBlockEntityRenderer<TappingOutletBlockEntity, TappingOutletBlockEntityRenderer.TappingOutletRenderState> {
+public class TappingOutletBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<TappingOutletBlockEntity, TappingOutletBlockEntityRenderer.TappingOutletRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public TappingOutletBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
-        //this.fluidRenderer.setShouldDebugAmount(true);
+        // this.fluidRenderer.setShouldDebugAmount(true);
     }
 
     @Override
-    protected void onRender(TappingOutletRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        TappingOutletRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || state.fluidVariant.isBlank())
             return;
 
         this.fluidRenderer.renderStream(state.fluidVariant,
-                queue, matrices, light, overlay, level, state.blockPos,
-                -2f / 16f, state.streamBottom, 0f,
-                2f / 16f, -16f / 16f, 2f / 16f,
-                false);
+            queue, matrices, light, overlay, level, state.blockPos,
+            -2f / 16f, state.streamBottom, 0f,
+            2f / 16f, -16f / 16f, 2f / 16f,
+            false);
 
         this.fluidRenderer.renderStream(state.fluidVariant,
-                queue, matrices, light, overlay, level, state.blockPos,
-                -2f / 16f, -16f / 16f, -8f / 16f,
-                2f / 16f, -14f / 16f, 2f / 16f,
-                true);
+            queue, matrices, light, overlay, level, state.blockPos,
+            -2f / 16f, -16f / 16f, -8f / 16f,
+            2f / 16f, -14f / 16f, 2f / 16f,
+            true);
     }
 
     @Override
@@ -49,12 +57,19 @@ public class TappingOutletBlockEntityRenderer extends IndustriaBlockEntityRender
     }
 
     @Override
-    public void extractRenderState(TappingOutletBlockEntity blockEntity, TappingOutletRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        TappingOutletBlockEntity blockEntity,
+        TappingOutletRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.fluidVariant = blockEntity.getPouringFluid();
         state.streamBottom = -38f / 16f;
         if (blockEntity.getLevel() != null
-                && blockEntity.getLevel().getBlockEntity(blockEntity.getBlockPos().below()) instanceof CastingTableBlockEntity table) {
+            && blockEntity.getLevel()
+                .getBlockEntity(blockEntity.getBlockPos().below()) instanceof CastingTableBlockEntity table) {
             state.streamBottom = CastingTableBlockEntityRenderer.receivingHeight(table) - 2.5f;
         }
     }

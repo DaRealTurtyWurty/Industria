@@ -24,7 +24,6 @@ public class ModClientEvents {
             }
         });
 
-
         ClientEvents.onLevelLeave(level -> {
             RotaryKilnBlockEntityRenderer.BLOCK_POS_RENDERER_DATA_MAP.clear();
             FeederConveyorSpecialRenderer.INSTANCE.onDimensionUnload(level.dimension());

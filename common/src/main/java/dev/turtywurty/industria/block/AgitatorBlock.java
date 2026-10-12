@@ -10,14 +10,13 @@ public class AgitatorBlock extends IndustriaBlock {
 
     public AgitatorBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasComparatorOutput()
-                .hasBlockEntityRenderer()
-                .useRotatedShapes(VOXEL_SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.AGITATOR)
-                        .dropContentsOnBreak()
-                        .rightClickToOpenGui()
-                        .shouldTick()
-                ));
+            .hasHorizontalFacing()
+            .hasComparatorOutput()
+            .hasBlockEntityRenderer()
+            .useRotatedShapes(VOXEL_SHAPE)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.AGITATOR)
+                .dropContentsOnBreak()
+                .rightClickToOpenGui()
+                .shouldTick()));
     }
 }

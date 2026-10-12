@@ -13,15 +13,17 @@ public final class TransferUtils {
     }
 
     public static <V extends ResourceVariant<?>> Optional<V> findFirstVariant(
-            ResourceStorage<V> storage, @Nullable V checkFirst) {
+        ResourceStorage<V> storage,
+        @Nullable V checkFirst
+    ) {
         if (storage.hasStableIndices() && storage.size() == 1)
             return Optional.of(storage.resource(0));
 
         if (checkFirst != null && !checkFirst.isBlank()) {
             try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                 return storage.extract(checkFirst, FluidAmounts.BUCKET, transaction) > 0
-                        ? Optional.of(checkFirst)
-                        : Optional.empty();
+                    ? Optional.of(checkFirst)
+                    : Optional.empty();
             }
         }
 

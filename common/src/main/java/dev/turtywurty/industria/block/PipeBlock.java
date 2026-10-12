@@ -42,7 +42,9 @@ import org.jetbrains.annotations.Nullable;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
-public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetwork<V>> extends Block implements SimpleWaterloggedBlock {
+public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetwork<V>> extends Block
+    implements
+        SimpleWaterloggedBlock {
     protected static final ShapeProfile CABLE_SHAPE = new ShapeProfile(6.5, 9.5, 6.5, 9.5, 6, 10, 3);
     protected static final ShapeProfile FLUID_PIPE_SHAPE = new ShapeProfile(6, 10, 6, 10, 5, 11, 1);
     protected static final ShapeProfile GAS_PIPE_SHAPE = new ShapeProfile(6, 10, 6, 10, 4, 12, 1.5);
@@ -60,21 +62,26 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
     protected final VoxelShape[] pipeShapes = new VoxelShape[Direction.values().length];
     protected final VoxelShape[] blockConnectorShapes = new VoxelShape[Direction.values().length];
 
-    protected final VoxelShape[] shapeCache = new VoxelShape[ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length];
+    protected final VoxelShape[] shapeCache = new VoxelShape[ConnectorType.VALUES.length * ConnectorType.VALUES.length
+        * ConnectorType.VALUES.length * ConnectorType.VALUES.length * ConnectorType.VALUES.length
+        * ConnectorType.VALUES.length];
 
     private final TransferType<ResourceStorage<V>, V, Long> transferType;
 
-    public PipeBlock(Properties settings, ShapeProfile shapeProfile,
-                     TransferType<ResourceStorage<V>, V, Long> transferType) {
+    public PipeBlock(
+        Properties settings,
+        ShapeProfile shapeProfile,
+        TransferType<ResourceStorage<V>, V, Long> transferType
+    ) {
         super(settings);
         registerDefaultState(defaultBlockState()
-                .setValue(NORTH, ConnectorType.NONE)
-                .setValue(SOUTH, ConnectorType.NONE)
-                .setValue(WEST, ConnectorType.NONE)
-                .setValue(EAST, ConnectorType.NONE)
-                .setValue(UP, ConnectorType.NONE)
-                .setValue(DOWN, ConnectorType.NONE)
-                .setValue(WATERLOGGED, false));
+            .setValue(NORTH, ConnectorType.NONE)
+            .setValue(SOUTH, ConnectorType.NONE)
+            .setValue(WEST, ConnectorType.NONE)
+            .setValue(EAST, ConnectorType.NONE)
+            .setValue(UP, ConnectorType.NONE)
+            .setValue(DOWN, ConnectorType.NONE)
+            .setValue(WATERLOGGED, false));
 
         this.transferType = transferType;
 
@@ -119,19 +126,32 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
         return value / 16.0;
     }
 
-    protected static VoxelShape combineShape(VoxelShape shape, ConnectorType connectorType, VoxelShape cableShape, VoxelShape blockShape) {
-        if (connectorType == ConnectorType.PIPE) {
+    protected static VoxelShape combineShape(
+        VoxelShape shape,
+        ConnectorType connectorType,
+        VoxelShape cableShape,
+        VoxelShape blockShape
+    ) {
+        if (connectorType == ConnectorType.PIPE)
             return Shapes.joinUnoptimized(shape, cableShape, BooleanOp.OR);
-        } else if (connectorType == ConnectorType.BLOCK) {
-            return Shapes.joinUnoptimized(shape, Shapes.joinUnoptimized(blockShape, cableShape, BooleanOp.OR), BooleanOp.OR);
-        } else {
+        else if (connectorType == ConnectorType.BLOCK)
+            return Shapes.joinUnoptimized(shape, Shapes.joinUnoptimized(blockShape, cableShape, BooleanOp.OR),
+                BooleanOp.OR);
+        else
             return shape;
-        }
     }
 
-    protected static int calculateShapeIndex(ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
+    protected static int calculateShapeIndex(
+        ConnectorType north,
+        ConnectorType south,
+        ConnectorType west,
+        ConnectorType east,
+        ConnectorType up,
+        ConnectorType down
+    ) {
         int size = ConnectorType.VALUES.length;
-        return ((((south.ordinal() * size + north.ordinal()) * size + west.ordinal()) * size + east.ordinal()) * size + up.ordinal()) * size + down.ordinal();
+        return ((((south.ordinal() * size + north.ordinal()) * size + west.ordinal()) * size + east.ordinal()) * size
+            + up.ordinal()) * size + down.ordinal();
     }
 
     public PipeNetworkManager<V, N> getNetworkManager(ServerLevel world) {
@@ -159,34 +179,54 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
         }
     }
 
-    private VoxelShape createShape(ShapeProfile profile, ConnectorType north, ConnectorType south, ConnectorType west, ConnectorType east, ConnectorType up, ConnectorType down) {
+    private VoxelShape createShape(
+        ShapeProfile profile,
+        ConnectorType north,
+        ConnectorType south,
+        ConnectorType west,
+        ConnectorType east,
+        ConnectorType up,
+        ConnectorType down
+    ) {
         VoxelShape shape = Shapes.box(
-                pixels(profile.centerMin()), pixels(profile.centerMin()), pixels(profile.centerMin()),
-                pixels(profile.centerMax()), pixels(profile.centerMax()), pixels(profile.centerMax()));
-        shape = combineShape(shape, north, pipeShapes[Direction.NORTH.ordinal()], blockConnectorShapes[Direction.NORTH.ordinal()]);
-        shape = combineShape(shape, south, pipeShapes[Direction.SOUTH.ordinal()], blockConnectorShapes[Direction.SOUTH.ordinal()]);
-        shape = combineShape(shape, west, pipeShapes[Direction.WEST.ordinal()], blockConnectorShapes[Direction.WEST.ordinal()]);
-        shape = combineShape(shape, east, pipeShapes[Direction.EAST.ordinal()], blockConnectorShapes[Direction.EAST.ordinal()]);
-        shape = combineShape(shape, up, pipeShapes[Direction.UP.ordinal()], blockConnectorShapes[Direction.UP.ordinal()]);
-        shape = combineShape(shape, down, pipeShapes[Direction.DOWN.ordinal()], blockConnectorShapes[Direction.DOWN.ordinal()]);
+            pixels(profile.centerMin()), pixels(profile.centerMin()), pixels(profile.centerMin()),
+            pixels(profile.centerMax()), pixels(profile.centerMax()), pixels(profile.centerMax()));
+        shape = combineShape(shape, north, pipeShapes[Direction.NORTH.ordinal()],
+            blockConnectorShapes[Direction.NORTH.ordinal()]);
+        shape = combineShape(shape, south, pipeShapes[Direction.SOUTH.ordinal()],
+            blockConnectorShapes[Direction.SOUTH.ordinal()]);
+        shape = combineShape(shape, west, pipeShapes[Direction.WEST.ordinal()],
+            blockConnectorShapes[Direction.WEST.ordinal()]);
+        shape = combineShape(shape, east, pipeShapes[Direction.EAST.ordinal()],
+            blockConnectorShapes[Direction.EAST.ordinal()]);
+        shape = combineShape(shape, up, pipeShapes[Direction.UP.ordinal()],
+            blockConnectorShapes[Direction.UP.ordinal()]);
+        shape = combineShape(shape, down, pipeShapes[Direction.DOWN.ordinal()],
+            blockConnectorShapes[Direction.DOWN.ordinal()]);
         return shape;
     }
 
-    public record ShapeProfile(double centerMin, double centerMax, double armMin, double armMax,
-                               double connectorMin, double connectorMax, double connectorDepth) {
+    public record ShapeProfile(
+        double centerMin,
+        double centerMax,
+        double armMin,
+        double armMax,
+        double connectorMin,
+        double connectorMax,
+        double connectorDepth
+    ) {
     }
 
     protected ConnectorType getConnectorType(Level world, BlockPos connectorPos, Direction facing) {
         BlockPos pos = connectorPos.relative(facing);
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
-        if (block == this) {
+        if (block == this)
             return ConnectorType.PIPE;
-        } else if (isConnectable(world, connectorPos, facing)) {
+        else if (isConnectable(world, connectorPos, facing))
             return ConnectorType.BLOCK;
-        } else {
+        else
             return ConnectorType.NONE;
-        }
     }
 
     public boolean isConnectable(Level world, BlockPos connectorPos, Direction facing) {
@@ -211,7 +251,16 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader world,
+        ScheduledTickAccess tickView,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
         if (state.getValue(WATERLOGGED)) {
             tickView.getFluidTicks().schedule(tickView.createTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world)));
         }
@@ -220,7 +269,14 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, @Nullable Orientation wireOrientation, boolean notify) {
+    protected void neighborChanged(
+        BlockState state,
+        Level world,
+        BlockPos pos,
+        Block sourceBlock,
+        @Nullable Orientation wireOrientation,
+        boolean notify
+    ) {
         super.neighborChanged(state, world, pos, sourceBlock, wireOrientation, notify);
         BlockState blockState = calculateState(world, pos, state);
         if (blockState != state) {
@@ -247,7 +303,8 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
             getNetworkManager(serverWorld).placePipe(serverWorld, pos);
         }
 
-        BlockState state = defaultBlockState().setValue(WATERLOGGED, world.getFluidState(pos).getType() == Fluids.WATER);
+        BlockState state = defaultBlockState().setValue(WATERLOGGED,
+            world.getFluidState(pos).getType() == Fluids.WATER);
         return calculateState(world, pos, state);
     }
 
@@ -273,7 +330,13 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
     public abstract String getUnit();
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level world,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         if (player.getMainHandItem().getItem() instanceof BlockItem)
             return InteractionResult.PASS;
 
@@ -305,9 +368,10 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
                 capacityStr = scientific.format(capacity);
             }
 
-            player.sendOverlayMessage(Component.literal("Pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
+            player.sendOverlayMessage(
+                Component.literal("Pipe at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ": ")
                     .append(Component.literal(amountStr + " " + getUnit() + " / " + capacityStr + " " + getUnit())
-                            .withStyle(ChatFormatting.GREEN)));
+                        .withStyle(ChatFormatting.GREEN)));
             return InteractionResult.SUCCESS_SERVER;
         }
 
@@ -323,12 +387,12 @@ public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetw
         ConnectorType down = getConnectorType(world, pos, Direction.DOWN);
 
         return state
-                .setValue(NORTH, north)
-                .setValue(SOUTH, south)
-                .setValue(WEST, west)
-                .setValue(EAST, east)
-                .setValue(UP, up)
-                .setValue(DOWN, down);
+            .setValue(NORTH, north)
+            .setValue(SOUTH, south)
+            .setValue(WEST, west)
+            .setValue(EAST, east)
+            .setValue(UP, up)
+            .setValue(DOWN, down);
     }
 
     public static EnumProperty<ConnectorType> propertyFor(Direction direction) {

@@ -13,7 +13,10 @@ public final class StorageOperations {
     }
 
     public static <V extends ResourceVariant<?>> boolean set(
-            MutableResourceStorage<V> storage, V resource, long amount) {
+        MutableResourceStorage<V> storage,
+        V resource,
+        long amount
+    ) {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             if (!storage.set(0, resource, amount, transaction))
                 return false;
@@ -24,7 +27,10 @@ public final class StorageOperations {
     }
 
     public static <V extends ResourceVariant<?>> long insert(
-            MutableResourceStorage<V> storage, V resource, long amount) {
+        MutableResourceStorage<V> storage,
+        V resource,
+        long amount
+    ) {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long inserted = storage.insertInternal(resource, amount, transaction);
             transaction.commit();
@@ -33,7 +39,10 @@ public final class StorageOperations {
     }
 
     public static <V extends ResourceVariant<?>> long extract(
-            MutableResourceStorage<V> storage, V resource, long amount) {
+        MutableResourceStorage<V> storage,
+        V resource,
+        long amount
+    ) {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long extracted = storage.extractInternal(resource, amount, transaction);
             transaction.commit();

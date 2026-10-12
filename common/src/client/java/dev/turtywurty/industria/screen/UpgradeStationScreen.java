@@ -36,28 +36,28 @@ public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStation
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 168, this.topPos + 10, 20, 66)
-                .color(0xFFD4AF37)
-                .build());
+            .bounds(this.leftPos + 168, this.topPos + 10, 20, 66)
+            .color(0xFFD4AF37)
+            .build());
 
         this.recipeSelector = addRenderableWidget(new SelectRecipeWidget.Builder<UpgradeStationRecipe>()
-                .position(this.leftPos + 65, this.topPos + 15)
-                .scrollBarPosition(this.leftPos + 132, this.topPos + 15)
-                .recipes(this.menu.getAvailableRecipes())
-                .canCraft(this.menu.canCraft())
-                .selectedRecipeIndex(this.menu.getSelectedRecipeIndex())
-                .onRecipeSelected((widget, index) -> {
-                    if (this.minecraft.gameMode == null)
-                        return;
+            .position(this.leftPos + 65, this.topPos + 15)
+            .scrollBarPosition(this.leftPos + 132, this.topPos + 15)
+            .recipes(this.menu.getAvailableRecipes())
+            .canCraft(this.menu.canCraft())
+            .selectedRecipeIndex(this.menu.getSelectedRecipeIndex())
+            .onRecipeSelected((widget, index) -> {
+                if (this.minecraft.gameMode == null)
+                    return;
 
-                    this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, index);
-                    widget.setSelectedRecipeIndex(index);
-                })
-                .outputFunction(recipe -> recipe.output().create())
-                .columnCount(4)
-                .rowCount(3)
-                .lockable()
-                .build());
+                this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, index);
+                widget.setSelectedRecipeIndex(index);
+            })
+            .outputFunction(recipe -> recipe.output().create())
+            .columnCount(4)
+            .rowCount(3)
+            .lockable()
+            .build());
 
         this.recipeSelector.addRecipeListener(recipe -> {
             for (IndustriaIngredientPreviewWidget<UpgradeStationRecipe> widget : this.ingredientWidgets) {
@@ -75,9 +75,9 @@ public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStation
 
             final int finalIndex = index;
             this.ingredientWidgets.add(
-                    addRenderableOnly(new IndustriaIngredientPreviewWidget<>(xPos, yPos,
-                            finalIndex,
-                            theRecipe -> theRecipe.getIngredient(finalIndex))));
+                addRenderableOnly(new IndustriaIngredientPreviewWidget<>(xPos, yPos,
+                    finalIndex,
+                    theRecipe -> theRecipe.getIngredient(finalIndex))));
         }
 
         int selectedRecipeIndex = this.recipeSelector.getSelectedRecipeIndex();
@@ -92,7 +92,7 @@ public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStation
 
     @Override
     protected void containerTick() {
-        if(this.isDirty) {
+        if (this.isDirty) {
             if (this.recipeSelector != null) {
                 this.recipeSelector.setCanCraft(this.menu.canCraft());
                 if (!this.recipeSelector.canCraft()) {
@@ -120,9 +120,9 @@ public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStation
     }
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
-            return getChildAt(mouseX, mouseY).filter(element -> element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)).isPresent();
-        }
+        if (!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))
+            return getChildAt(mouseX, mouseY)
+                .filter(element -> element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)).isPresent();
 
         return true;
     }

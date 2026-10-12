@@ -7,13 +7,12 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record SetConveyorBlacklistModePayload(boolean blacklistMode) implements CustomPacketPayload {
-    public static final Type<SetConveyorBlacklistModePayload> ID =
-            new Type<>(Industria.id("set_conveyor_blacklist_mode"));
+    public static final Type<SetConveyorBlacklistModePayload> ID = new Type<>(
+        Industria.id("set_conveyor_blacklist_mode"));
 
-    public static final StreamCodec<ByteBuf, SetConveyorBlacklistModePayload> CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.BOOL, SetConveyorBlacklistModePayload::blacklistMode,
-                    SetConveyorBlacklistModePayload::new);
+    public static final StreamCodec<ByteBuf, SetConveyorBlacklistModePayload> CODEC = StreamCodec.composite(
+        ByteBufCodecs.BOOL, SetConveyorBlacklistModePayload::blacklistMode,
+        SetConveyorBlacklistModePayload::new);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

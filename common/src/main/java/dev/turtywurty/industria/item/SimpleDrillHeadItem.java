@@ -46,13 +46,15 @@ public class SimpleDrillHeadItem extends Item implements DrillHeadable {
             isThis = true;
         }
 
-        if (world.getBlockState(down).getDestroySpeed(world, pos) == -1F || blockEntity.getDrillYOffset() < world.getMinY() - pos.getY()) {
+        if (world.getBlockState(down).getDestroySpeed(world, pos) == -1F
+            || blockEntity.getDrillYOffset() < world.getMinY() - pos.getY()) {
             blockEntity.setDrilling(false);
             blockEntity.setRetracting(true);
             drillYOffset += 0.01F;
         }
 
-        if (!blockEntity.isRetracting() && (drillYOffset - Math.floor(drillYOffset) > 0.75F) && !isThis && !state.isAir()) {
+        if (!blockEntity.isRetracting() && (drillYOffset - Math.floor(drillYOffset) > 0.75F) && !isThis
+            && !state.isAir()) {
             blockEntity.handleBlockBreak(down, state);
             drillYOffset += 0.01F;
         }

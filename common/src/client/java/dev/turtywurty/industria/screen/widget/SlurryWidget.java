@@ -33,7 +33,15 @@ public class SlurryWidget implements Renderable, LayoutElement {
     private final int width, height;
     private int x, y;
 
-    public SlurryWidget(SingleSlurryStorage slurryTank, int x, int y, int width, int height, Supplier<BlockPos> posSupplier, Orientation orientation) {
+    public SlurryWidget(
+        SingleSlurryStorage slurryTank,
+        int x,
+        int y,
+        int width,
+        int height,
+        Supplier<BlockPos> posSupplier,
+        Orientation orientation
+    ) {
         this.slurryTank = slurryTank;
         this.x = x;
         this.y = y;
@@ -48,8 +56,9 @@ public class SlurryWidget implements Renderable, LayoutElement {
         Slurry slurry = this.slurryTank.getResource().value();
         long amount = this.slurryTank.getAmount();
 
-        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY))
+        if (isPointWithinBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             drawTooltip(context, mouseX, mouseY);
+        }
 
         SlurryRenderHandler slurryRenderHandler = SlurryRenderHandlerRegistry.get(slurry);
         if (slurryRenderHandler == null || amount <= 0)
@@ -75,7 +84,8 @@ public class SlurryWidget implements Renderable, LayoutElement {
             fillWidth = (int) (width * percentage);
         }
 
-        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth, fillHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
+        ScreenUtils.renderTiledSprite(context, RenderPipelines.GUI_TEXTURED, stillTexture, fillX, fillY, fillWidth,
+            fillHeight, ARGB.colorFromFloat(1.0F, red, green, blue));
 
     }
 
@@ -91,7 +101,7 @@ public class SlurryWidget implements Renderable, LayoutElement {
             lines.add(Component.translatable("slurry." + slurry.id().getNamespace() + "." + slurry.id().getPath()));
         }
         lines.add(Component.literal(((long) ((double) amount / FluidAmounts.BUCKET * 1000))
-                + " / " + ((long) ((double) capacity / FluidAmounts.BUCKET * 1000)) + " mB"));
+            + " / " + ((long) ((double) capacity / FluidAmounts.BUCKET * 1000)) + " mB"));
         context.setComponentTooltipForNextFrame(textRenderer, lines, mouseX, mouseY);
     }
 

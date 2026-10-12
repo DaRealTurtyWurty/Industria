@@ -21,29 +21,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ClientPipeNetworks {
     private static final NetworkService NETWORK = NetworkService.get();
-    private static final Map<ResourceKey<Level>, List<PipeNetworkManager<?, ?>>> PIPE_NETWORKS =
-            new ConcurrentHashMap<>();
+    private static final Map<ResourceKey<Level>, List<PipeNetworkManager<?, ?>>> PIPE_NETWORKS = new ConcurrentHashMap<>();
 
     private ClientPipeNetworks() {
     }
 
     public static void init() {
         NETWORK.registerClientHandler(PayloadPhase.PLAY, SyncPipeNetworkManagerPayload.ID,
-                (payload, _) -> syncManager(payload));
+            (payload, _) -> syncManager(payload));
         NETWORK.registerClientHandler(PayloadPhase.PLAY, AddPipeNetworkPayload.ID,
-                (payload, _) -> addNetwork(payload));
+            (payload, _) -> addNetwork(payload));
         NETWORK.registerClientHandler(PayloadPhase.PLAY, RemovePipeNetworkPayload.ID,
-                (payload, _) -> removeNetwork(payload));
+            (payload, _) -> removeNetwork(payload));
         NETWORK.registerClientHandler(PayloadPhase.PLAY, ModifyPipeNetworkPayload.ID,
-                (payload, _) -> modifyNetwork(payload));
+            (payload, _) -> modifyNetwork(payload));
         NETWORK.onClientDisconnect(PIPE_NETWORKS::clear);
     }
 
     private static void syncManager(SyncPipeNetworkManagerPayload payload) {
         ResourceKey<Level> worldKey = payload.dimension();
         TransferType<?, ?, ?> transferType = payload.transferType();
-        List<PipeNetworkManager<?, ?>> managers =
-                PIPE_NETWORKS.computeIfAbsent(worldKey, ignored -> new ArrayList<>());
+        List<PipeNetworkManager<?, ?>> managers = PIPE_NETWORKS.computeIfAbsent(worldKey, _ -> new ArrayList<>());
         managers.removeIf(manager -> transferType.equals(manager.getTransferType()));
 
         PipeNetworkManagerType<?, ?> type = ModPipeNetworkManagerTypes.getTypeUnchecked(transferType);
@@ -72,8 +70,8 @@ public final class ClientPipeNetworks {
             return;
 
         Optional<? extends PipeNetwork<?>> network = manager.getNetworks().stream()
-                .filter(candidate -> candidate.getId().equals(payload.networkId()))
-                .findFirst();
+            .filter(candidate -> candidate.getId().equals(payload.networkId()))
+            .findFirst();
         network.ifPresent(value -> {
             BlockPos pos = payload.pos();
             switch (payload.operation()) {
@@ -86,16 +84,17 @@ public final class ClientPipeNetworks {
     }
 
     private static PipeNetworkManager<?, ?> findManager(
-            ResourceKey<Level> worldKey,
-            TransferType<?, ?, ?> transferType) {
+        ResourceKey<Level> worldKey,
+        TransferType<?, ?, ?> transferType
+    ) {
         List<PipeNetworkManager<?, ?>> managers = PIPE_NETWORKS.get(worldKey);
         if (managers == null)
             return null;
 
         return managers.stream()
-                .filter(manager -> transferType.equals(manager.getTransferType()))
-                .findFirst()
-                .orElse(null);
+            .filter(manager -> transferType.equals(manager.getTransferType()))
+            .findFirst()
+            .orElse(null);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

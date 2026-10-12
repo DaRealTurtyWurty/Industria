@@ -43,7 +43,11 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-public class CastingBasinBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper, SyncableTickableBlockEntity, TappingOutletBlockEntity.TappingOutletReceiver {
+public class CastingBasinBlockEntity extends IndustriaBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        SyncableTickableBlockEntity,
+        TappingOutletBlockEntity.TappingOutletReceiver {
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SyncingSimpleInventory> wrappedContainerStorage = new WrappedContainerStorage<>();
 
@@ -112,15 +116,15 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
     }
 
     public void collectOutput(Player player) {
-        if(this.level == null || this.level.isClientSide())
+        if (this.level == null || this.level.isClientSide())
             return;
 
         ItemStack outputStack = getInventory().getItem(0);
-        if(outputStack.isEmpty())
+        if (outputStack.isEmpty())
             return;
 
         ItemStack removed = getInventory().removeItem(0, outputStack.getCount());
-        if(!removed.isEmpty()) {
+        if (!removed.isEmpty()) {
             player.getInventory().placeItemBackInInventory(removed, Prediction.SERVER_ONLY);
             setChanged();
         }
@@ -139,9 +143,9 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
 
     private void resetCoolingProgress() {
         if (this.coolingProgress == 0
-                && this.currentRecipeId == null
-                && this.coolingDuration == 0
-                && this.castingBlockState.isAir())
+            && this.currentRecipeId == null
+            && this.coolingDuration == 0
+            && this.castingBlockState.isAir())
             return;
 
         this.coolingProgress = 0;
@@ -171,18 +175,19 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
         CastingRecipe recipe = recipeHolder.value();
         int count = recipe.output().count().maxInclusive();
         if (recipe.inputFluid().isEmpty()
-                || recipe.output().item() == Items.AIR
-                || count <= 0
-                || recipe.coolingTime() <= 0
-                || (count > new ItemStack(recipe.output().item()).getMaxStackSize() || count > getInventory().getMaxStackSize())) {
+            || recipe.output().item() == Items.AIR
+            || count <= 0
+            || recipe.coolingTime() <= 0
+            || (count > new ItemStack(recipe.output().item()).getMaxStackSize()
+                || count > getInventory().getMaxStackSize())) {
             resetCoolingProgress();
             return;
         }
 
         BlockState outputState = recipe.output().item() instanceof BlockItem blockItem
-                ? blockItem.getBlock().defaultBlockState()
-                : Blocks.AIR.defaultBlockState();
-        if(this.coolingDuration != recipe.coolingTime() || !Objects.equals(this.castingBlockState, outputState)) {
+            ? blockItem.getBlock().defaultBlockState()
+            : Blocks.AIR.defaultBlockState();
+        if (this.coolingDuration != recipe.coolingTime() || !Objects.equals(this.castingBlockState, outputState)) {
             this.coolingDuration = recipe.coolingTime();
             this.castingBlockState = outputState;
             update();
@@ -204,7 +209,7 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
             update();
         }
 
-        if(this.coolingProgress >= recipe.coolingTime()) {
+        if (this.coolingProgress >= recipe.coolingTime()) {
             if (completeCasting(recipe)) {
                 resetCoolingProgress();
             }
@@ -214,36 +219,33 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
     @Override
     public List<SyncableStorage> getSyncableStorages() {
         return List.of(
-                getFluidStorage(),
-                Objects.requireNonNull(this.wrappedContainerStorage.getInventory(0))
-        );
+            getFluidStorage(),
+            Objects.requireNonNull(this.wrappedContainerStorage.getInventory(0)));
     }
 
     private boolean completeCasting(CastingRecipe recipe) {
-        if(!getInventory().isEmpty()
-                || recipe.inputFluid().isEmpty()
-                || !recipe.inputFluid().testForRecipe(getFluidStorage()))
+        if (!getInventory().isEmpty()
+            || recipe.inputFluid().isEmpty()
+            || !recipe.inputFluid().testForRecipe(getFluidStorage()))
             return false;
 
         var outputStorage = ContainerStorage.of(getInventory(), null);
 
-        try(TransferTransaction transaction = TransferTransaction.openRoot()) {
+        try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long extracted = getFluidStorage().extract(
-                    recipe.inputFluid().variant(),
-                    recipe.inputFluid().amount(),
-                    transaction
-            );
-            if(extracted != recipe.inputFluid().amount())
+                recipe.inputFluid().variant(),
+                recipe.inputFluid().amount(),
+                transaction);
+            if (extracted != recipe.inputFluid().amount())
                 return false;
 
             ItemStack output = recipe.output().createStack(this.level.getRandom());
             if (!output.isEmpty()) {
                 long inserted = outputStorage.insert(
-                        0,
-                        ResourceVariant.ofItem(output),
-                        output.getCount(),
-                        transaction
-                );
+                    0,
+                    ResourceVariant.ofItem(output),
+                    output.getCount(),
+                    transaction);
                 if (inserted != output.getCount())
                     return false;
             }
@@ -271,7 +273,8 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
         ViewUtils.readChild(input, "Inventory", this.wrappedContainerStorage);
         this.coolingProgress = Math.max(0, input.getIntOr("CoolingProgress", 0));
         this.coolingDuration = Math.max(0, input.getIntOr("CoolingDuration", 0));
-        this.castingBlockState = input.read("CastingBlockState", BlockState.CODEC).orElse(Blocks.AIR.defaultBlockState());
+        this.castingBlockState = input.read("CastingBlockState", BlockState.CODEC)
+            .orElse(Blocks.AIR.defaultBlockState());
         this.currentRecipeId = input.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE)).orElse(null);
     }
 }

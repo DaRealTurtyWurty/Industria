@@ -14,10 +14,10 @@ import java.util.UUID;
 
 public class FluidPipeNetworkManager extends PipeNetworkManager<ResourceVariant<Fluid>, FluidPipeNetwork> {
     public static final MapCodec<FluidPipeNetworkManager> CODEC = PipeNetworkManager.createCodec(
-            FluidPipeNetwork.CODEC.codec(), FluidPipeNetworkManager::new);
+        FluidPipeNetwork.CODEC.codec(), FluidPipeNetworkManager::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPipeNetworkManager> STREAM_CODEC =
-            PipeNetworkManager.createPacketCodec(FluidPipeNetwork.STREAM_CODEC, FluidPipeNetworkManager::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, FluidPipeNetworkManager> STREAM_CODEC = PipeNetworkManager
+        .createPacketCodec(FluidPipeNetwork.STREAM_CODEC, FluidPipeNetworkManager::new);
 
     public FluidPipeNetworkManager() {
         super(ModPipeNetworkManagerTypes.FLUID.get(), TransferType.FLUID);

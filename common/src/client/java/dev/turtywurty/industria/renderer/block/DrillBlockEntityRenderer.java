@@ -50,7 +50,13 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
     }
 
     @Override
-    public void extractRenderState(DrillBlockEntity blockEntity, DrillRenderState state, float tickProgress, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        DrillBlockEntity blockEntity,
+        DrillRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.motorInventory = blockEntity.getMotorInventory();
         state.drillHeadItemStack = blockEntity.getDrillHeadInventory().getItem(0);
@@ -66,7 +72,13 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
     }
 
     @Override
-    public void onRender(DrillRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    public void onRender(
+        DrillRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         Level world = Minecraft.getInstance().level;
 
         { // Render motor
@@ -78,17 +90,17 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
                 state.clientMotorRotation += (state.isDrilling ? 0.03f : state.isRetracting ? -0.03f : 0);
 
                 ModelSubmitUtils.submitModel(queue, this.motorModel,
-                        new DrillMotorModel.DrillMotorModelRenderState(state.clientMotorRotation),
-                        matrices, this.motorModel.renderType(DrillMotorModel.TEXTURE_LOCATION),
-                        light, overlay, 0, state.breakProgress);
+                    new DrillMotorModel.DrillMotorModelRenderState(state.clientMotorRotation),
+                    matrices, this.motorModel.renderType(DrillMotorModel.TEXTURE_LOCATION),
+                    light, overlay, 0, state.breakProgress);
             }
         }
 
         { // Render frame
             ModelSubmitUtils.submitModel(queue, this.model,
-                    new DrillFrameModel.DrillFrameModelRenderState(state.clientMotorRotation),
-                    matrices, this.model.renderType(DrillFrameModel.TEXTURE_LOCATION),
-                    light, overlay, 0, state.breakProgress);
+                new DrillFrameModel.DrillFrameModelRenderState(state.clientMotorRotation),
+                matrices, this.model.renderType(DrillFrameModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
         }
 
         int worldBottom = world == null ? 0 : world.getMinY();
@@ -100,12 +112,13 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         { // Render cable wheel
             state.cableScaleFactor = 0.5f - (progress / 2f);
             ModelSubmitUtils.submitModel(queue, this.cableModel,
-                    new DrillCableModel.DrillCableModelRenderState(state.clientMotorRotation, state.cableScaleFactor),
-                    matrices, this.cableModel.renderType(DrillCableModel.TEXTURE_LOCATION),
-                    light, overlay, 0, state.breakProgress);
+                new DrillCableModel.DrillCableModelRenderState(state.clientMotorRotation, state.cableScaleFactor),
+                matrices, this.cableModel.renderType(DrillCableModel.TEXTURE_LOCATION),
+                light, overlay, 0, state.breakProgress);
         }
 
-        if (state.drillHeadItemStack.isEmpty() || !(state.drillHeadItemStack.getItem() instanceof DrillHeadable drillHeadable))
+        if (state.drillHeadItemStack.isEmpty()
+            || !(state.drillHeadItemStack.getItem() instanceof DrillHeadable drillHeadable))
             return;
 
         DrillHeadRegistry.DrillHeadClientData drillHeadData = DrillHeadRegistry.getClientData(drillHeadable);
@@ -117,9 +130,9 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
             matrices.pushPose();
 
             queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
-                float angleOffset = (float) (state.isRetracting ?
-                        -state.clientMotorRotation < 0 ? -Math.PI / 4 : -Math.PI / 4 - Math.PI / 2 :
-                        -state.clientMotorRotation < 0 ? -3 * Math.PI / 4 + Math.PI / 2 : -3 * Math.PI / 4);
+                float angleOffset = (float) (state.isRetracting
+                    ? -state.clientMotorRotation < 0 ? -Math.PI / 4 : -Math.PI / 4 - Math.PI / 2
+                    : -state.clientMotorRotation < 0 ? -3 * Math.PI / 4 + Math.PI / 2 : -3 * Math.PI / 4);
 
                 float angle = (float) (-state.clientMotorRotation % (Math.PI / 2f)) + angleOffset;
 
@@ -133,35 +146,44 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
                 float cableY = wheelY + (float) (Math.sin(angle) * r);
 
                 vertexConsumer.addVertex(entry, 0f, cableY, cableZ)
-                        .setColor(70, 70, 70, 255)
-                        .setNormal(1, 0, 0);
+                    .setColor(70, 70, 70, 255)
+                    .setNormal(1, 0, 0);
 
                 vertexConsumer.addVertex(entry, 0, -1.54f, 0)
-                        .setColor(70, 70, 70, 255)
-                        .setNormal(1, 0, 0);
+                    .setColor(70, 70, 70, 255)
+                    .setNormal(1, 0, 0);
 
                 vertexConsumer.addVertex(entry, 0, -1.54f, 0)
-                        .setColor(70, 70, 70, 255)
-                        .setNormal(0, 1, 0);
+                    .setColor(70, 70, 70, 255)
+                    .setNormal(0, 1, 0);
 
                 matrices.translate(0, -state.drillYOffset, 0);
                 vertexConsumer.addVertex(matrices.last(), 0, 0.5f, 0)
-                        .setColor(70, 70, 70, 255)
-                        .setNormal(0, 1, 0);
+                    .setColor(70, 70, 70, 255)
+                    .setNormal(0, 1, 0);
             });
         }
 
         { // Render drill head
-            Model<?> drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable, ignored -> drillHeadData.modelResolver().apply(Either.left(this.context)));
-            Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> drillHeadData.textureLocation());
+            Model<?> drillHeadModel = this.drillHeadModels.computeIfAbsent(drillHeadable,
+                _ -> drillHeadData.modelResolver().apply(Either.left(this.context)));
+            Identifier drillHeadTexture = this.drillHeadTextures.computeIfAbsent(drillHeadable,
+                _ -> drillHeadData.textureLocation());
 
-            drillHeadData.onRender().render(state, matrices, queue, drillHeadModel, drillHeadModel.renderType(drillHeadTexture), light, overlay);
+            drillHeadData.onRender().render(state, matrices, queue, drillHeadModel,
+                drillHeadModel.renderType(drillHeadTexture), light, overlay);
             matrices.popPose();
         }
     }
 
     @Override
-    protected void postRender(DrillRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void postRender(
+        DrillRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         if (shouldRenderHitboxes() && state.drillHeadAABB != null) {
             double minX = state.drillHeadAABB.minX - state.blockPos.getX();
             double minY = state.drillHeadAABB.minY - state.blockPos.getY();
@@ -184,7 +206,8 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
 
     @Override
     public boolean shouldRender(DrillBlockEntity blockEntity, Vec3 pos) {
-        return blockEntity.getBlockPos().closerToCenterThan(pos, blockEntity.getLevel() == null ? 64 : blockEntity.getLevel().getHeight());
+        return blockEntity.getBlockPos().closerToCenterThan(pos,
+            blockEntity.getLevel() == null ? 64 : blockEntity.getLevel().getHeight());
     }
 
     @Override

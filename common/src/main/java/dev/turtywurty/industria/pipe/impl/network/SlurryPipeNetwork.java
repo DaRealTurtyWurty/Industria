@@ -23,23 +23,23 @@ import java.util.UUID;
 
 public class SlurryPipeNetwork extends PipeNetwork<ResourceVariant<Slurry>> {
     public static final MapCodec<SlurryPipeNetwork> CODEC = PipeNetwork.createCodec(
-            PipeStorageContent.codec(SlurryVariant.CODEC).fieldOf("storageContent")
-                    .forGetter(network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0))),
+        PipeStorageContent.codec(SlurryVariant.CODEC).fieldOf("storageContent")
+            .forGetter(network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0))),
+        (storage, storageContent) -> PipeStorageUtil.restore(
+            (SingleSlurryStorage) storage, storageContent.variant(), storageContent.amount()),
+        SlurryPipeNetwork::new);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, SlurryPipeNetwork> STREAM_CODEC = PipeNetwork
+        .createPacketCodec(
+            PipeStorageContent.streamCodec(SlurryVariant.STREAM_CODEC),
+            network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0)),
             (storage, storageContent) -> PipeStorageUtil.restore(
-                    (SingleSlurryStorage) storage, storageContent.variant(), storageContent.amount()),
+                (SingleSlurryStorage) storage, storageContent.variant(), storageContent.amount()),
             SlurryPipeNetwork::new);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SlurryPipeNetwork> STREAM_CODEC =
-            PipeNetwork.createPacketCodec(
-                    PipeStorageContent.streamCodec(SlurryVariant.STREAM_CODEC),
-                    network -> new PipeStorageContent<>(network.storage.resource(0), network.storage.amount(0)),
-                    (storage, storageContent) -> PipeStorageUtil.restore(
-                            (SingleSlurryStorage) storage, storageContent.variant(), storageContent.amount()),
-                    SlurryPipeNetwork::new);
-
     public static final Codec<Set<SlurryPipeNetwork>> SET_CODEC = ExtraCodecs.setOf(CODEC);
-    public static final StreamCodec<RegistryFriendlyByteBuf, Set<SlurryPipeNetwork>> SET_STREAM_CODEC =
-            ExtraStreamCodecs.setOf(STREAM_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Set<SlurryPipeNetwork>> SET_STREAM_CODEC = ExtraStreamCodecs
+        .setOf(STREAM_CODEC);
 
     public SlurryPipeNetwork(UUID id) {
         super(id, TransferType.SLURRY);
@@ -51,7 +51,7 @@ public class SlurryPipeNetwork extends PipeNetwork<ResourceVariant<Slurry>> {
             @Override
             protected long getCapacity(ResourceVariant<Slurry> variant) {
                 return PipeStorageUtil.scaledCapacity(
-                        SlurryPipeNetwork.this.pipes.size(), SlurryApi.BUCKET.numerator());
+                    SlurryPipeNetwork.this.pipes.size(), SlurryApi.BUCKET.numerator());
             }
         };
     }

@@ -15,18 +15,21 @@ import net.minecraft.world.phys.Vec3;
 
 /** Resolves the reloadable fuel component that replaced the level fuel registry. */
 public final class FuelUtils {
-    private FuelUtils() {}
+    private FuelUtils() {
+    }
 
     public static boolean isFuel(ItemStack stack) {
         return !stack.isEmpty() && stack.has(DataComponents.COOKING_FUEL);
     }
 
     public static int burnDuration(Level level, ItemStack stack) {
-        if (!(level instanceof ServerLevel serverLevel) || !isFuel(stack)) return 0;
+        if (!(level instanceof ServerLevel serverLevel) || !isFuel(stack))
+            return 0;
         LootParams params = new LootParams.Builder(serverLevel)
             .withParameter(LootContextParams.ORIGIN, Vec3.ZERO)
             .create(LootContextParamSets.COMMAND);
         LootContext context = new LootContext.Builder(params).create(Optional.empty());
-        return Math.max(0, ResolvableInt.getFromItem(stack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0));
+        return Math.max(0,
+            ResolvableInt.getFromItem(stack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0));
     }
 }

@@ -16,7 +16,11 @@ public class ResizableSyncingInventory extends SyncingSimpleInventory {
     private SyncingSimpleInventory backing;
     private BiPredicate<Integer, ItemStack> insertionPredicate = (slot, stack) -> true;
 
-    public ResizableSyncingInventory(UpdateableBlockEntityLike owner, int initialSize, BiFunction<UpdateableBlockEntityLike, Integer, SyncingSimpleInventory> backingFactory) {
+    public ResizableSyncingInventory(
+        UpdateableBlockEntityLike owner,
+        int initialSize,
+        BiFunction<UpdateableBlockEntityLike, Integer, SyncingSimpleInventory> backingFactory
+    ) {
         super(owner, 0);
         this.backingFactory = backingFactory;
         this.backing = this.backingFactory.apply(owner, initialSize);
@@ -46,8 +50,8 @@ public class ResizableSyncingInventory extends SyncingSimpleInventory {
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         return slot >= 0 && slot < getContainerSize()
-                && insertionPredicate.test(slot, stack)
-                && backing.canPlaceItem(slot, stack);
+            && insertionPredicate.test(slot, stack)
+            && backing.canPlaceItem(slot, stack);
     }
 
     @Override
@@ -59,7 +63,7 @@ public class ResizableSyncingInventory extends SyncingSimpleInventory {
             if (canPlaceItem(slot, itemStack)) {
                 ItemStack existingStack = getItem(slot);
                 if (existingStack.isEmpty()
-                        || (existingStack.getCount() < getMaxStackSize(existingStack)
+                    || (existingStack.getCount() < getMaxStackSize(existingStack)
                         && ItemStack.isSameItemSameComponents(existingStack, itemStack)))
                     return true;
             }
@@ -81,7 +85,7 @@ public class ResizableSyncingInventory extends SyncingSimpleInventory {
 
             ItemStack existingStack = getItem(slot);
             if (existingStack.isEmpty()
-                    || !ItemStack.isSameItemSameComponents(existingStack, remaining))
+                || !ItemStack.isSameItemSameComponents(existingStack, remaining))
                 continue;
 
             int space = getMaxStackSize(remaining) - existingStack.getCount();

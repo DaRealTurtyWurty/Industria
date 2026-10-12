@@ -29,14 +29,23 @@ public class UpgradeStationScreenHandler extends AbstractContainerMenu {
 
     public UpgradeStationScreenHandler(int syncId, Inventory inventory, UpgradeStationOpenPayload payload) {
         this(syncId,
-                inventory,
-                (UpgradeStationBlockEntity) inventory.player.level().getBlockEntity(payload.pos()),
-                ClientWrappedContainerStorage.copyOf(((UpgradeStationBlockEntity) inventory.player.level().getBlockEntity(payload.pos())).getWrappedContainerStorage()),
-                new SimpleContainerData(1),
-                payload.recipes());
+            inventory,
+            (UpgradeStationBlockEntity) inventory.player.level().getBlockEntity(payload.pos()),
+            ClientWrappedContainerStorage
+                .copyOf(((UpgradeStationBlockEntity) inventory.player.level().getBlockEntity(payload.pos()))
+                    .getWrappedContainerStorage()),
+            new SimpleContainerData(1),
+            payload.recipes());
     }
 
-    public UpgradeStationScreenHandler(int syncId, Inventory inventory, UpgradeStationBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties, List<UpgradeStationRecipe> recipes) {
+    public UpgradeStationScreenHandler(
+        int syncId,
+        Inventory inventory,
+        UpgradeStationBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties,
+        List<UpgradeStationRecipe> recipes
+    ) {
         super(ModMenuTypes.UPGRADE_STATION.get(), syncId);
 
         this.blockEntity = blockEntity;

@@ -4,7 +4,9 @@ import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 
-public record CrystallizerRecipeInput(FluidStack waterFluid, FluidStack crystalFluid, ItemStack catalyst) implements RecipeInput {
+public record CrystallizerRecipeInput(FluidStack waterFluid, FluidStack crystalFluid, ItemStack catalyst)
+    implements
+        RecipeInput {
     @Override
     public ItemStack getItem(int slot) {
         return slot == 0 ? catalyst : null;

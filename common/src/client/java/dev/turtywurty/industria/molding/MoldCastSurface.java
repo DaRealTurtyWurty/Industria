@@ -49,7 +49,9 @@ public final class MoldCastSurface {
             for (int x = minX; x <= maxX; x++) {
                 float px = x / (float) RESOLUTION;
                 float py = y / (float) RESOLUTION;
-                float t = lengthSquared == 0 ? 0 : Math.clamp(
+                float t = lengthSquared == 0
+                    ? 0
+                    : Math.clamp(
                         ((px - from.x()) * dx + (py - from.y()) * dy) / lengthSquared, 0, 1);
                 float towardX = from.x() + t * dx - px;
                 float towardY = from.y() + t * dy - py;
@@ -72,8 +74,8 @@ public final class MoldCastSurface {
                 if (influence > influences[index]) {
                     float floorRadius = radius * FLOOR_RADIUS;
                     float profile = distance <= floorRadius
-                            ? distance / floorRadius
-                            : (radius - distance) / (radius - floorRadius);
+                        ? distance / floorRadius
+                        : (radius - distance) / (radius - floorRadius);
                     float displacement = radius * MATERIAL_DISPLACEMENT * profile;
                     float directionScale = distance == 0 ? 0 : displacement / distance;
                     offsetsX[index] = -towardX * directionScale;
@@ -109,7 +111,7 @@ public final class MoldCastSurface {
         clearGrooves();
     }
 
-    static boolean contains(List<MoldPoint> polygon, float x, float y) {
+    public static boolean contains(List<MoldPoint> polygon, float x, float y) {
         return MoldPattern.containsPolygon(polygon, x, y);
     }
 

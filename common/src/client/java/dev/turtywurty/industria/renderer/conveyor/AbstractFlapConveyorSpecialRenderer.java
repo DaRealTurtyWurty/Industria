@@ -31,7 +31,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector3d;
 
-public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyorSpecialRenderers.ConveyorSpecialRenderer {
+public abstract class AbstractFlapConveyorSpecialRenderer
+    implements
+        ModConveyorSpecialRenderers.ConveyorSpecialRenderer {
     private static final RenderType RENDER_TYPE = RenderTypes.entitySolid(ConveyorFlapsModel.TEXTURE_LOCATION);
     private static final float FLAP_MODEL_Y_OFFSET = -0.875f;
     private static final float[] FLAP_X_OFFSETS = {-4.5f, -1.5f, 1.5f, 4.5f};
@@ -89,7 +91,7 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
         simulation.writeAnglesToModel(state, partialTick);
 
         ModelSubmitUtils.submitModel(nodeCollector, this.flapsModel, state, poseStack, RENDER_TYPE, lightCoords,
-                OverlayTexture.NO_OVERLAY, 0, null);
+            OverlayTexture.NO_OVERLAY, 0, null);
 
         poseStack.popPose();
     }
@@ -100,8 +102,9 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
 
     public void onConveyorRemoved(ResourceKey<Level> dimension, BlockPos pos) {
         Long2ObjectMap<FlapSimulation> simsByPos = this.simsByDim.get(dimension);
-        if (simsByPos != null)
+        if (simsByPos != null) {
             simsByPos.remove(pos.asLong());
+        }
     }
 
     public void onTick(ClientLevel level) {
@@ -121,7 +124,8 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
     }
 
     private FlapSimulation getFlapSim(ResourceKey<Level> dimension, BlockPos pos) {
-        Long2ObjectMap<FlapSimulation> simsByPos = this.simsByDim.computeIfAbsent(dimension, _ -> new Long2ObjectOpenHashMap<>());
+        Long2ObjectMap<FlapSimulation> simsByPos = this.simsByDim.computeIfAbsent(dimension,
+            _ -> new Long2ObjectOpenHashMap<>());
         return simsByPos.computeIfAbsent(pos.asLong(), _ -> new FlapSimulation());
     }
 
@@ -161,14 +165,15 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
                 System.arraycopy(this.currentBend, 0, this.previousBend, 0, this.currentBend.length);
                 for (int flapIndex = 0; flapIndex < this.currentBend.length; flapIndex++) {
                     float acceleration = -FLAP_SPRING_STRENGTH * this.currentBend[flapIndex]
-                            - FLAP_DAMPING * this.velocities[flapIndex];
+                        - FLAP_DAMPING * this.velocities[flapIndex];
                     this.velocities[flapIndex] += acceleration * FIXED_DT;
                     this.currentBend[flapIndex] += this.velocities[flapIndex] * FIXED_DT;
 
-                    this.currentBend[flapIndex] = Mth.clamp(this.currentBend[flapIndex], -FLAP_MAX_BACKSWING, FLAP_MAX_BEND);
+                    this.currentBend[flapIndex] = Mth.clamp(this.currentBend[flapIndex], -FLAP_MAX_BACKSWING,
+                        FLAP_MAX_BEND);
 
                     if (Math.abs(this.currentBend[flapIndex]) <= FLAP_SETTLE_ANGLE_EPSILON
-                            && Math.abs(this.velocities[flapIndex]) <= FLAP_SETTLE_VELOCITY_EPSILON) {
+                        && Math.abs(this.velocities[flapIndex]) <= FLAP_SETTLE_VELOCITY_EPSILON) {
                         this.currentBend[flapIndex] = 0f;
                         this.velocities[flapIndex] = 0f;
                     }
@@ -201,9 +206,9 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
 
         private static void applyAngles(ConveyorFlapsModel.RenderState state, int flapIndex, float bend) {
             state.applyForIndex(flapIndex,
-                    -bend * 0.25f,
-                    -bend * 0.30f,
-                    -bend * 0.45f);
+                -bend * 0.25f,
+                -bend * 0.30f,
+                -bend * 0.45f);
         }
     }
 }

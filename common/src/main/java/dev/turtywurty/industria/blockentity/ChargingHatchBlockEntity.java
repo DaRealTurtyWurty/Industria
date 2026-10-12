@@ -35,7 +35,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class ChargingHatchBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<ChargingHatchOpenPayload> {
+public class ChargingHatchBlockEntity extends IndustriaBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        BlockEntityWithGui<ChargingHatchOpenPayload> {
     public static final Component TITLE = Industria.containerTitle("charging_hatch");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -48,13 +51,13 @@ public class ChargingHatchBlockEntity extends IndustriaBlockEntity implements Bl
 
     public ChargingHatchBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.CHARGING_HATCH.get(), ModBlockEntityTypes.CHARGING_HATCH.get(), pos, state);
-        this.inventory = new ResizableSyncingInventory(this, 9, (owner, size) ->
-                new SyncingSimpleInventory(owner, size) {
-                    @Override
-                    public int getMaxStackSize() {
-                        return 1;
-                    }
-                });
+        this.inventory = new ResizableSyncingInventory(this, 9,
+            (owner, size) -> new SyncingSimpleInventory(owner, size) {
+                @Override
+                public int getMaxStackSize() {
+                    return 1;
+                }
+            });
 
         this.inventory.setInsertionPredicate((slot, _) -> slot < this.processingSlotCount);
         this.wrappedContainerStorage.addInventory(this.inventory);
@@ -126,8 +129,8 @@ public class ChargingHatchBlockEntity extends IndustriaBlockEntity implements Bl
         }
 
         if (this.meltingInputs[slot].isEmpty()
-                || !ItemStack.isSameItemSameComponents(stack, this.meltingInputs[slot])
-                || this.meltingDuration[slot] != duration) {
+            || !ItemStack.isSameItemSameComponents(stack, this.meltingInputs[slot])
+            || this.meltingDuration[slot] != duration) {
             this.meltingInputs[slot] = stack.copyWithCount(1);
             this.meltingDuration[slot] = duration;
             this.meltingProgress[slot] = 0;
@@ -191,25 +194,25 @@ public class ChargingHatchBlockEntity extends IndustriaBlockEntity implements Bl
         List<Double> progress = input.read("MeltingProgress", Codec.DOUBLE.listOf()).orElse(List.of());
         int[] durations = input.getIntArray("MeltingDuration").orElse(new int[0]);
         List<ItemStack> inputs = input.read("MeltingInputs", ItemStack.OPTIONAL_CODEC.listOf())
-                .orElse(List.of());
+            .orElse(List.of());
 
         for (int i = 0; i < this.meltingProgress.length; i++) {
             this.meltingDuration[i] = i < durations.length
-                    ? Math.max(0, durations[i])
-                    : 0;
+                ? Math.max(0, durations[i])
+                : 0;
 
             double savedProgress = i < progress.size() ? progress.get(i) : 0.0;
 
             this.meltingProgress[i] = Double.isFinite(savedProgress)
-                    ? Math.clamp(savedProgress, 0.0, this.meltingDuration[i])
-                    : 0.0;
+                ? Math.clamp(savedProgress, 0.0, this.meltingDuration[i])
+                : 0.0;
 
             this.meltingInputs[i] = i < inputs.size()
-                    ? inputs.get(i).copyWithCount(1)
-                    : ItemStack.EMPTY;
+                ? inputs.get(i).copyWithCount(1)
+                : ItemStack.EMPTY;
 
             if (this.meltingInputs[i].isEmpty()
-                    || !ItemStack.isSameItemSameComponents(this.meltingInputs[i], getInventory().getItem(i))) {
+                || !ItemStack.isSameItemSameComponents(this.meltingInputs[i], getInventory().getItem(i))) {
                 this.meltingInputs[i] = ItemStack.EMPTY;
                 this.meltingProgress[i] = 0;
                 this.meltingDuration[i] = 0;
@@ -258,7 +261,7 @@ public class ChargingHatchBlockEntity extends IndustriaBlockEntity implements Bl
         return new ContainerData() {
             @Override
             public int get(int index) {
-                if(index == 0)
+                if (index == 0)
                     return getProcessingSlotCount();
 
                 int slot = index - 1;

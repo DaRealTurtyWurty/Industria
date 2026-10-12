@@ -24,8 +24,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<MoldingTableBlockEntity,
-        MoldingTableBlockEntityRenderer.MoldingTableRenderState> {
+public class MoldingTableBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<MoldingTableBlockEntity, MoldingTableBlockEntityRenderer.MoldingTableRenderState> {
     private static final float CAST_SIZE = 14f / 16f;
     private static final float CAST_TOP = 15f / 16f + CAST_SIZE * MoldWorldMesh.THICKNESS + 0.001f;
     private final Map<MoldingTableBlockEntity, CachedMesh> meshes = new WeakHashMap<>();
@@ -40,9 +41,13 @@ public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    public void extractRenderState(MoldingTableBlockEntity blockEntity, MoldingTableRenderState state,
-                                   float tickProgress, Vec3 cameraPos,
-                                   ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        MoldingTableBlockEntity blockEntity,
+        MoldingTableRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.mesh = null;
         state.sprite = null;
@@ -65,7 +70,7 @@ public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
 
         CachedMesh cached = this.meshes.get(blockEntity);
         if (cached == null || cached.sprite != sprite || !Objects.equals(cached.visual, visual)
-                || !ItemStack.isSameItemSameComponents(cached.stack, stack)) {
+            || !ItemStack.isSameItemSameComponents(cached.stack, stack)) {
             cached = new CachedMesh(stack.copy(), sprite, visual, buildMesh(sprite, visual));
             this.meshes.put(blockEntity, cached);
         }
@@ -100,8 +105,13 @@ public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
     }
 
     @Override
-    protected void onRender(MoldingTableRenderState state, PoseStack matrices, SubmitNodeCollector queue,
-                            int light, int overlay) {
+    protected void onRender(
+        MoldingTableRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         MoldWorldMesh mesh = state.mesh;
         TextureAtlasSprite sprite = state.sprite;
         if (mesh == null || sprite == null)
@@ -115,12 +125,12 @@ public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             for (MoldWorldMesh.Vertex vertex : mesh.vertices()) {
                 int shade = Math.round(vertex.shade() * 255);
                 buffer.addVertex(pose, vertex.x(), vertex.y(), vertex.z())
-                        .setColor(shade, shade, shade, 255)
-                        .setUv(Mth.lerp(vertex.u(), sprite.getU0(), sprite.getU1()),
-                                Mth.lerp(vertex.v(), sprite.getV0(), sprite.getV1()))
-                        .setOverlay(overlay)
-                        .setLight(light)
-                        .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
+                    .setColor(shade, shade, shade, 255)
+                    .setUv(Mth.lerp(vertex.u(), sprite.getU0(), sprite.getU1()),
+                        Mth.lerp(vertex.v(), sprite.getV0(), sprite.getV1()))
+                    .setOverlay(overlay)
+                    .setLight(light)
+                    .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
             }
         });
         matrices.popPose();
@@ -135,7 +145,11 @@ public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
         }
     }
 
-    private record CachedMesh(ItemStack stack, TextureAtlasSprite sprite,
-                              @Nullable MoldTableVisualState visual, MoldWorldMesh mesh) {
+    private record CachedMesh(
+        ItemStack stack,
+        TextureAtlasSprite sprite,
+        @Nullable MoldTableVisualState visual,
+        MoldWorldMesh mesh
+    ) {
     }
 }

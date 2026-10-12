@@ -34,58 +34,64 @@ import java.util.function.Supplier;
 public class ModPipeNetworkManagerTypes {
     private static final RegistryService REGISTRIES = RegistryService.get();
 
-    public static final ResourceKey<Registry<PipeNetworkManagerType<?, ?>>> PIPE_NETWORK_MANAGERS_TYPE_KEY =
-            ResourceKey.createRegistryKey(Industria.id("pipe_network_manager_type"));
+    public static final ResourceKey<Registry<PipeNetworkManagerType<?, ?>>> PIPE_NETWORK_MANAGERS_TYPE_KEY = ResourceKey
+        .createRegistryKey(Industria.id("pipe_network_manager_type"));
 
-    public static final CustomRegistry<PipeNetworkManagerType<?, ?>> PIPE_NETWORK_MANAGER_TYPES =
-            REGISTRIES.customRegistry(PIPE_NETWORK_MANAGERS_TYPE_KEY, new CustomRegistryOptions(true, false));
+    public static final CustomRegistry<PipeNetworkManagerType<?, ?>> PIPE_NETWORK_MANAGER_TYPES = REGISTRIES
+        .customRegistry(PIPE_NETWORK_MANAGERS_TYPE_KEY, new CustomRegistryOptions(true, false));
 
-    public static final Codec<PipeNetworkManagerType<?, ?>> CODEC =
-            Codec.lazyInitialized(() -> ModPipeNetworkManagerTypes.PIPE_NETWORK_MANAGER_TYPES.get().byNameCodec());
-    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetworkManagerType<?, ?>> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
+    public static final Codec<PipeNetworkManagerType<?, ?>> CODEC = Codec
+        .lazyInitialized(() -> ModPipeNetworkManagerTypes.PIPE_NETWORK_MANAGER_TYPES.get().byNameCodec());
+    public static final StreamCodec<RegistryFriendlyByteBuf, PipeNetworkManagerType<?, ?>> STREAM_CODEC = ByteBufCodecs
+        .fromCodecWithRegistries(CODEC);
 
-    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<UnitResource>, CableNetwork>> ENERGY =
-            register("energy", () -> new PipeNetworkManagerType<>(
-                    TransferType.ENERGY,
-                    CableNetworkManager::new,
-                    CableNetworkManager.CODEC,
-                    CableNetworkManager.STREAM_CODEC));
+    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<UnitResource>, CableNetwork>> ENERGY = register(
+        "energy", () -> new PipeNetworkManagerType<>(
+            TransferType.ENERGY,
+            CableNetworkManager::new,
+            CableNetworkManager.CODEC,
+            CableNetworkManager.STREAM_CODEC));
 
-    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<Fluid>, FluidPipeNetwork>> FLUID =
-            register("fluid", () -> new PipeNetworkManagerType<>(
-                    TransferType.FLUID,
-                    FluidPipeNetworkManager::new,
-                    FluidPipeNetworkManager.CODEC,
-                    FluidPipeNetworkManager.STREAM_CODEC));
+    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<Fluid>, FluidPipeNetwork>> FLUID = register(
+        "fluid", () -> new PipeNetworkManagerType<>(
+            TransferType.FLUID,
+            FluidPipeNetworkManager::new,
+            FluidPipeNetworkManager.CODEC,
+            FluidPipeNetworkManager.STREAM_CODEC));
 
-    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<Slurry>, SlurryPipeNetwork>> SLURRY =
-            register("slurry", () -> new PipeNetworkManagerType<>(
-                    TransferType.SLURRY,
-                    SlurryPipeNetworkManager::new,
-                    SlurryPipeNetworkManager.CODEC,
-                    SlurryPipeNetworkManager.STREAM_CODEC));
+    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<Slurry>, SlurryPipeNetwork>> SLURRY = register(
+        "slurry", () -> new PipeNetworkManagerType<>(
+            TransferType.SLURRY,
+            SlurryPipeNetworkManager::new,
+            SlurryPipeNetworkManager.CODEC,
+            SlurryPipeNetworkManager.STREAM_CODEC));
 
-    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<Gas>, GasPipeNetwork>> GAS =
-            register("gas", () -> new PipeNetworkManagerType<>(
-                    TransferType.GAS,
-                    GasPipeNetworkManager::new,
-                    GasPipeNetworkManager.CODEC,
-                    GasPipeNetworkManager.STREAM_CODEC));
+    public static final RegistrationHandle<PipeNetworkManagerType<?, ?>, PipeNetworkManagerType<ResourceVariant<Gas>, GasPipeNetwork>> GAS = register(
+        "gas", () -> new PipeNetworkManagerType<>(
+            TransferType.GAS,
+            GasPipeNetworkManager::new,
+            GasPipeNetworkManager.CODEC,
+            GasPipeNetworkManager.STREAM_CODEC));
 
     @SuppressWarnings("unchecked")
     public static <V extends ResourceVariant<?>, N extends PipeNetwork<V>> PipeNetworkManagerType<V, N> getType(
-            TransferType<ResourceStorage<V>, V, Long> transferType) {
+        TransferType<ResourceStorage<V>, V, Long> transferType
+    ) {
         return (PipeNetworkManagerType<V, N>) getTypeUnchecked(transferType);
     }
 
     public static PipeNetworkManagerType<?, ?> getTypeUnchecked(TransferType<?, ?, ?> transferType) {
         return PIPE_NETWORK_MANAGER_TYPES.get().stream()
-                .filter(type -> type.transferType() == transferType)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No PipeNetworkManagerType found for transfer type: " + transferType));
+            .filter(type -> type.transferType() == transferType)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(
+                "No PipeNetworkManagerType found for transfer type: " + transferType));
     }
 
-    public static <V extends ResourceVariant<?>, N extends PipeNetwork<V>, T extends PipeNetworkManagerType<V, N>> RegistrationHandle<PipeNetworkManagerType<?, ?>, T> register(String name, Supplier<T> type) {
+    public static <V extends ResourceVariant<?>, N extends PipeNetwork<V>, T extends PipeNetworkManagerType<V, N>> RegistrationHandle<PipeNetworkManagerType<?, ?>, T> register(
+        String name,
+        Supplier<T> type
+    ) {
         return REGISTRIES.register(PIPE_NETWORK_MANAGERS_TYPE_KEY, Industria.id(name), type);
     }
 

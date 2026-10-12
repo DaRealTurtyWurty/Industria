@@ -21,7 +21,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityRenderer<SolarPanelBlockEntity, AdvancedSolarPanelBlockEntityRenderer.RenderState> {
+public class AdvancedSolarPanelBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<SolarPanelBlockEntity, AdvancedSolarPanelBlockEntityRenderer.RenderState> {
     private static final float MAXIMUM_TILT = 60.0F * Mth.DEG_TO_RAD;
     private static final float HALF_PI = (float) Math.PI / 2.0F;
     private static final Identifier ENERGY_BAR_TEXTURE = Industria.id("textures/block/energy_bar.png");
@@ -49,8 +51,13 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
     }
 
     @Override
-    public void extractRenderState(SolarPanelBlockEntity blockEntity, RenderState state, float tickProgress,
-                                   Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        SolarPanelBlockEntity blockEntity,
+        RenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.advanced = blockEntity.isAdvanced();
         state.onStair = state.blockState.getValue(SolarPanelBlock.ON_STAIR);
@@ -64,7 +71,7 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
 
         state.powered = state.blockState.getValue(SolarPanelBlock.POWERED);
         float sunAngle = Minecraft.getInstance().gameRenderer.mainCamera().attributeProbe()
-                .getValue(EnvironmentAttributes.SUN_ANGLE, tickProgress);
+            .getValue(EnvironmentAttributes.SUN_ANGLE, tickProgress);
         state.pitch = getTrackingPitch(sunAngle);
     }
 
@@ -73,24 +80,30 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
         if (state.advanced) {
             AdvancedSolarPanelModel selectedModel = state.onStair ? this.stairModel : this.model;
             Identifier texture = state.powered
-                    ? AdvancedSolarPanelModel.TEXTURE_LOCATION
-                    : AdvancedSolarPanelModel.POWERLESS_TEXTURE_LOCATION;
+                ? AdvancedSolarPanelModel.TEXTURE_LOCATION
+                : AdvancedSolarPanelModel.POWERLESS_TEXTURE_LOCATION;
 
             matrices.pushPose();
             if (state.onStair) {
                 matrices.rotate(Axis.YP.rotationDegrees(180.0F));
             }
 
-            ModelSubmitUtils.submitModel(queue, selectedModel, new AdvancedSolarPanelModel.RenderState(state.yaw, state.pitch),
-                    matrices, selectedModel.renderType(texture), light, overlay, 0, state.breakProgress);
+            ModelSubmitUtils.submitModel(queue, selectedModel,
+                new AdvancedSolarPanelModel.RenderState(state.yaw, state.pitch),
+                matrices, selectedModel.renderType(texture), light, overlay, 0, state.breakProgress);
             matrices.popPose();
         }
 
         renderEnergyBuffer(state, matrices, queue, light, overlay);
     }
 
-    private static void renderEnergyBuffer(RenderState state, PoseStack matrices, SubmitNodeCollector queue,
-                                           int light, int overlay) {
+    private static void renderEnergyBuffer(
+        RenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         if (state.energy <= 0L || state.energyCapacity <= 0L)
             return;
 
@@ -101,15 +114,21 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
         float z = state.onStair ? ENERGY_BAR_STAIR_Z : ENERGY_BAR_NORMAL_Z;
 
         matrices.pushPose();
-        if (state.onStair)
+        if (state.onStair) {
             matrices.rotate(Axis.YP.rotationDegrees(180.0F));
+        }
 
-        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(ENERGY_BAR_TEXTURE), (entry, vertexConsumer) -> {
-            vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, minY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-            vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, maxY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-            vertexConsumer.addVertex(entry, maxX, maxY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(fillPercentage, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-            vertexConsumer.addVertex(entry, maxX, minY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(fillPercentage, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
-        });
+        queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(ENERGY_BAR_TEXTURE),
+            (entry, vertexConsumer) -> {
+                vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, minY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(0.0F, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+                vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, maxY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(0.0F, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+                vertexConsumer.addVertex(entry, maxX, maxY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(fillPercentage, 0.25F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+                vertexConsumer.addVertex(entry, maxX, minY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                    .setUv(fillPercentage, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
+            });
         matrices.popPose();
     }
 
@@ -123,7 +142,7 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
         return (90.0F - blockRotation) * Mth.DEG_TO_RAD;
     }
 
-    static float getTrackingPitch(float sunAngleDegrees) {
+    private static float getTrackingPitch(float sunAngleDegrees) {
         float sunAngle = Mth.wrapDegrees(sunAngleDegrees);
         if (sunAngle >= -90.0F && sunAngle <= 90.0F)
             return -sunAngle / 90.0F * MAXIMUM_TILT;

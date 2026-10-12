@@ -27,7 +27,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> outputs, int processTime)
-        implements Recipe<SingleRecipeInput> {
+    implements
+        Recipe<SingleRecipeInput> {
     @Override
     public boolean matches(SingleRecipeInput input, Level world) {
         return this.input.testForRecipe(input.getItem(0));
@@ -41,7 +42,8 @@ public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> o
     public ItemStack assemble(SingleRecipeInput input) {
         ItemStack stack = input.getItem(0);
         stack.shrink(this.input.stackData().count());
-        return this.outputs.getFirst().createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
+        return this.outputs.getFirst()
+            .createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
     }
 
     @Override
@@ -77,11 +79,10 @@ public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> o
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new RecyclingRecipeDisplay(
-                input().toDisplay(),
-                new SlotDisplay.Composite(this.outputs().stream().map(OutputItemStack::toDisplay).toList()),
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.ARC_FURNACE.get().asItem()), // TODO: Something else(?)
-                processTime()
-        ));
+            input().toDisplay(),
+            new SlotDisplay.Composite(this.outputs().stream().map(OutputItemStack::toDisplay).toList()),
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.ARC_FURNACE.get().asItem()), // TODO: Something else(?)
+            processTime()));
     }
 
     @Override
@@ -102,39 +103,42 @@ public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> o
     }
 
     private static final MapCodec<RecyclingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(RecyclingRecipe::input),
-            ExtraCodecs.listOf(OutputItemStack.CODEC).fieldOf("outputs").forGetter(RecyclingRecipe::outputs),
-            Codec.INT.fieldOf("process_time").forGetter(RecyclingRecipe::processTime)
-    ).apply(instance, RecyclingRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(RecyclingRecipe::input),
+        ExtraCodecs.listOf(OutputItemStack.CODEC).fieldOf("outputs").forGetter(RecyclingRecipe::outputs),
+        Codec.INT.fieldOf("process_time").forGetter(RecyclingRecipe::processTime))
+        .apply(instance, RecyclingRecipe::new));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, RecyclingRecipe> STREAM_CODEC =
-            StreamCodec.composite(
-                    IndustriaIngredient.STREAM_CODEC, RecyclingRecipe::input,
-                    ExtraStreamCodecs.listOf(OutputItemStack.STREAM_CODEC), RecyclingRecipe::outputs,
-                    ByteBufCodecs.INT, RecyclingRecipe::processTime,
-                    RecyclingRecipe::new
-            );
+    private static final StreamCodec<RegistryFriendlyByteBuf, RecyclingRecipe> STREAM_CODEC = StreamCodec.composite(
+        IndustriaIngredient.STREAM_CODEC, RecyclingRecipe::input,
+        ExtraStreamCodecs.listOf(OutputItemStack.STREAM_CODEC), RecyclingRecipe::outputs,
+        ByteBufCodecs.INT, RecyclingRecipe::processTime,
+        RecyclingRecipe::new);
 
     public static final RecipeSerializer<RecyclingRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    public record RecyclingRecipeDisplay(SlotDisplay input, SlotDisplay output, SlotDisplay craftingStation, int processTime)
-            implements RecipeDisplay {
+    public record RecyclingRecipeDisplay(
+        SlotDisplay input,
+        SlotDisplay output,
+        SlotDisplay craftingStation,
+        int processTime
+    )
+        implements
+            RecipeDisplay {
         public static final MapCodec<RecyclingRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
-                instance -> instance.group(
-                        SlotDisplay.CODEC.fieldOf("input").forGetter(RecyclingRecipeDisplay::input),
-                        SlotDisplay.CODEC.fieldOf("output").forGetter(RecyclingRecipeDisplay::output),
-                        SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(RecyclingRecipeDisplay::craftingStation),
-                        Codec.INT.fieldOf("process_time").forGetter(RecyclingRecipeDisplay::processTime)
-                ).apply(instance, RecyclingRecipeDisplay::new)
-        );
+            instance -> instance.group(
+                SlotDisplay.CODEC.fieldOf("input").forGetter(RecyclingRecipeDisplay::input),
+                SlotDisplay.CODEC.fieldOf("output").forGetter(RecyclingRecipeDisplay::output),
+                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(RecyclingRecipeDisplay::craftingStation),
+                Codec.INT.fieldOf("process_time").forGetter(RecyclingRecipeDisplay::processTime))
+                .apply(instance, RecyclingRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, RecyclingRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, RecyclingRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 SlotDisplay.STREAM_CODEC, RecyclingRecipeDisplay::input,
                 SlotDisplay.STREAM_CODEC, RecyclingRecipeDisplay::output,
                 SlotDisplay.STREAM_CODEC, RecyclingRecipeDisplay::craftingStation,
                 ByteBufCodecs.INT, RecyclingRecipeDisplay::processTime,
-                RecyclingRecipeDisplay::new
-        );
+                RecyclingRecipeDisplay::new);
 
         public static final Type<RecyclingRecipeDisplay> SERIALIZER = new Type<>(CODEC, STREAM_CODEC);
 

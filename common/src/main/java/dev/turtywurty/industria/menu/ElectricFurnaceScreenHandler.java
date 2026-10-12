@@ -22,14 +22,20 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
         super(ModMenuTypes.ELECTRIC_FURNACE.get(), syncId, playerInventory, payload, ElectricFurnaceBlockEntity.class);
     }
 
-    public ElectricFurnaceScreenHandler(int syncId, Inventory playerInventory, ElectricFurnaceBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage) {
+    public ElectricFurnaceScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        ElectricFurnaceBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage
+    ) {
         super(ModMenuTypes.ELECTRIC_FURNACE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage);
     }
 
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
         addSlot(new Slot(wrappedContainerStorage.getInventory(0), 0, 49, 33));
-        addSlot(new ExperienceOutputSlot(playerInventory.player, blockEntity, wrappedContainerStorage.getInventory(1), 0, 108, 33));
+        addSlot(new ExperienceOutputSlot(playerInventory.player, blockEntity, wrappedContainerStorage.getInventory(1),
+            0, 108, 33));
     }
 
     @Override
@@ -70,7 +76,14 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
         private final ElectricFurnaceBlockEntity blockEntity;
         private int amount;
 
-        public ExperienceOutputSlot(Player player, ElectricFurnaceBlockEntity blockEntity, SimpleContainer inventory, int index, int x, int y) {
+        public ExperienceOutputSlot(
+            Player player,
+            ElectricFurnaceBlockEntity blockEntity,
+            SimpleContainer inventory,
+            int index,
+            int x,
+            int y
+        ) {
             super(inventory, index, x, y);
             this.player = player;
             this.blockEntity = blockEntity;

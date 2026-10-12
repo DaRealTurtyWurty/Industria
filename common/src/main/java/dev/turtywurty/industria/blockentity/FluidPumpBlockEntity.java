@@ -39,7 +39,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
 public class FluidPumpBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
     private static final Direction[] HORIZONTAL_DIRECTIONS = {
-            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
+        Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
     };
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -58,7 +58,8 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        return List.of(this.wrappedFluidStorage.getStorage(0), (SyncableStorage) this.wrappedEnergyStorage.getStorage(0));
+        return List.of(this.wrappedFluidStorage.getStorage(0),
+            (SyncableStorage) this.wrappedEnergyStorage.getStorage(0));
     }
 
     @Override
@@ -70,7 +71,8 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
         if (!isEmpty(fluidStorage)) {
             Direction outputDirection = getFluidOutputDirection();
             BlockPos outputPos = this.worldPosition.relative(outputDirection);
-            ResourceStorage<ResourceVariant<Fluid>> storage = TransferService.get().findBlock(StorageKeys.FLUID, this.level, outputPos, outputDirection.getOpposite());
+            ResourceStorage<ResourceVariant<Fluid>> storage = TransferService.get().findBlock(StorageKeys.FLUID,
+                this.level, outputPos, outputDirection.getOpposite());
             if (storage != null) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                     long inserted = storage.insert(fluidStorage.getResource(), fluidStorage.getAmount(), transaction);
@@ -89,7 +91,7 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
         SimpleEnergyStorage energyStorage = (SimpleEnergyStorage) this.wrappedEnergyStorage.getStorage(Direction.UP);
         if (energyStorage.getAmount() < 10
-                || fluidStorage.getCapacity() - fluidStorage.getAmount() < FluidAmounts.BUCKET)
+            || fluidStorage.getCapacity() - fluidStorage.getAmount() < FluidAmounts.BUCKET)
             return;
 
         Fluid surroundingFluid = getSurroundingFluid(fluidStorage);
@@ -127,9 +129,8 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
             if (requiredFluid == null) {
                 requiredFluid = fluidState.getType();
-            } else if (!requiredFluid.isSame(fluidState.getType())) {
+            } else if (!requiredFluid.isSame(fluidState.getType()))
                 return null;
-            }
         }
 
         return requiredFluid;
@@ -168,14 +169,14 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     public @Nullable SyncingFluidStorage getFluidProvider(Direction side) {
         return side == getFluidOutputDirection()
-                ? this.wrappedFluidStorage.getStorage(Direction.EAST)
-                : null;
+            ? this.wrappedFluidStorage.getStorage(Direction.EAST)
+            : null;
     }
 
     public @Nullable ResourceStorage<ResourceVariant<UnitResource>> getEnergyProvider(Direction side) {
         return side == Direction.UP
-                ? this.wrappedEnergyStorage.getStorage(Direction.UP)
-                : null;
+            ? this.wrappedEnergyStorage.getStorage(Direction.UP)
+            : null;
     }
 
     public SyncingEnergyStorage getEnergyStorage() {
@@ -188,8 +189,8 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
 
     private Direction getFluidOutputDirection() {
         return MathUtils.getRelativeDirection(
-                Direction.EAST,
-                getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
+            Direction.EAST,
+            getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING));
     }
 
     private record DrainTarget(BlockPos pos, int index) {

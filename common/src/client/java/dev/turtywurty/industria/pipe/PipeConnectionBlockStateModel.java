@@ -25,12 +25,11 @@ public final class PipeConnectionBlockStateModel implements BlockStateModelAugme
             Direction targetFace = pipeToTarget.getOpposite();
 
             ConnectionModelSet modelSet = PipeConnectionModelRegistry.findModel(
-                    context.level(),
-                    targetPos,
-                    state,
-                    targetState,
-                    targetFace
-            );
+                context.level(),
+                targetPos,
+                state,
+                targetState,
+                targetFace);
 
             if (modelSet == null)
                 continue;
@@ -44,7 +43,7 @@ public final class PipeConnectionBlockStateModel implements BlockStateModelAugme
                 continue;
 
             long seed = context.baseSeed()
-                    ^ ((long) pipeToTarget.ordinal()
+                ^ ((long) pipeToTarget.ordinal()
                     * DIRECTION_SEED_MULTIPLIER);
 
             models.accept(connectionModel, seed);
@@ -57,14 +56,13 @@ public final class PipeConnectionBlockStateModel implements BlockStateModelAugme
             return null;
 
         return new GeometryKey(
-                wrappedKey,
-                findModelId(context, Direction.NORTH),
-                findModelId(context, Direction.SOUTH),
-                findModelId(context, Direction.WEST),
-                findModelId(context, Direction.EAST),
-                findModelId(context, Direction.UP),
-                findModelId(context, Direction.DOWN)
-        );
+            wrappedKey,
+            findModelId(context, Direction.NORTH),
+            findModelId(context, Direction.SOUTH),
+            findModelId(context, Direction.WEST),
+            findModelId(context, Direction.EAST),
+            findModelId(context, Direction.UP),
+            findModelId(context, Direction.DOWN));
     }
 
     private static @Nullable Identifier findModelId(Context context, Direction pipeToTarget) {
@@ -77,12 +75,11 @@ public final class PipeConnectionBlockStateModel implements BlockStateModelAugme
         BlockState targetState = context.level().getBlockState(targetPos);
 
         ConnectionModelSet modelSet = PipeConnectionModelRegistry.findModel(
-                context.level(),
-                targetPos,
-                state,
-                targetState,
-                pipeToTarget.getOpposite()
-        );
+            context.level(),
+            targetPos,
+            state,
+            targetState,
+            pipeToTarget.getOpposite());
 
         return modelSet == null ? null : modelSet.id();
     }
@@ -92,13 +89,13 @@ public final class PipeConnectionBlockStateModel implements BlockStateModelAugme
     }
 
     private record GeometryKey(
-            Object wrapped,
-            @Nullable Identifier north,
-            @Nullable Identifier south,
-            @Nullable Identifier west,
-            @Nullable Identifier east,
-            @Nullable Identifier up,
-            @Nullable Identifier down
+        Object wrapped,
+        @Nullable Identifier north,
+        @Nullable Identifier south,
+        @Nullable Identifier west,
+        @Nullable Identifier east,
+        @Nullable Identifier up,
+        @Nullable Identifier down
     ) {
     }
 }

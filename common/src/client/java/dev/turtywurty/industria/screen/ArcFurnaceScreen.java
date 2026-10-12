@@ -38,27 +38,27 @@ public class ArcFurnaceScreen extends AbstractContainerScreen<ArcFurnaceScreenHa
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
-                .bounds(this.leftPos + 8, this.topPos + 18, 12, 52)
-                .build());
+            .bounds(this.leftPos + 8, this.topPos + 18, 12, 52)
+            .build());
 
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getFluidStorage())
-                .bounds(this.leftPos + 26, this.topPos + 94, 138, 10)
-                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                .orientation(Orientation.HORIZONTAL)
-                .build());
+            .bounds(this.leftPos + 26, this.topPos + 94, 138, 10)
+            .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+            .orientation(Orientation.HORIZONTAL)
+            .build());
 
         addRenderableOnly(new GasWidget.Builder(this.menu.getBlockEntity().getGasStorage())
-                .bounds(this.leftPos + 26, this.topPos + 80, 138, 10)
-                .posSupplier(this.menu.getBlockEntity()::getBlockPos)
-                .orientation(Orientation.HORIZONTAL)
-                .build());
+            .bounds(this.leftPos + 26, this.topPos + 80, 138, 10)
+            .posSupplier(this.menu.getBlockEntity()::getBlockPos)
+            .orientation(Orientation.HORIZONTAL)
+            .build());
 
         this.modeButton = addRenderableWidget(new SelectEnumButton<>(
-                this.menu.getMode(),
-                mode -> NetworkService.get().sendToServer(new ArcFurnaceSetModePayload(mode)),
-                ArcFurnaceBlockEntity.Mode.values().length,
-                this.leftPos + 78, this.topPos + 82, 20, 20,
-                Map.of()));
+            this.menu.getMode(),
+            mode -> NetworkService.get().sendToServer(new ArcFurnaceSetModePayload(mode)),
+            ArcFurnaceBlockEntity.Mode.values().length,
+            this.leftPos + 78, this.topPos + 82, 20, 20,
+            Map.of()));
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ArcFurnaceScreen extends AbstractContainerScreen<ArcFurnaceScreenHa
         int green = (int) (progress * 255.0F);
 
         return 0xFF000000
-                | (red << 16)
-                | (green << 8);
+            | (red << 16)
+            | (green << 8);
     }
 }

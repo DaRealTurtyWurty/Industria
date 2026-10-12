@@ -35,7 +35,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 // TODO
-public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
+public class InductionHeaterBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("induction_heater");
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SyncingFluidStorage> waterStorage = new WrappedFluidStorage<>();
@@ -43,7 +46,8 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
     public InductionHeaterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.INDUCTION_HEATER.get(), ModBlockEntityTypes.INDUCTION_HEATER.get(), pos, state);
 
-        this.waterStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER));
+        this.waterStorage.addStorage(
+            new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER));
         this.energyStorage.addStorage(new SyncingEnergyStorage(this, 50_000, 1_000, 0));
     }
 
@@ -101,7 +105,6 @@ public class InductionHeaterBlockEntity extends IndustriaBlockEntity implements 
     public SyncingEnergyStorage getEnergyStorage() {
         return (SyncingEnergyStorage) getEnergyProvider(null);
     }
-
 
     public InputFluidStorage getWaterStorage() {
         return (InputFluidStorage) this.waterStorage.getStorage(null);

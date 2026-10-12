@@ -17,7 +17,17 @@ public class MoldLineRenderState implements GuiElementRenderState {
     private final @Nullable ScreenRectangle scissorArea;
     private final RenderPipeline renderPipeline;
 
-    public MoldLineRenderState(float x1, float y1, float x2, float y2, float halfWidth, int color, Matrix3x2fc pose, @Nullable ScreenRectangle scissorArea, RenderPipeline renderPipeline) {
+    public MoldLineRenderState(
+        float x1,
+        float y1,
+        float x2,
+        float y2,
+        float halfWidth,
+        int color,
+        Matrix3x2fc pose,
+        @Nullable ScreenRectangle scissorArea,
+        RenderPipeline renderPipeline
+    ) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -45,17 +55,17 @@ public class MoldLineRenderState implements GuiElementRenderState {
         float extent = length / (2.0f * halfWidth) + 1.0f;
 
         vertexConsumer.addVertexWith2DPose(this.pose, x1 - offsetX - extensionX, y1 - offsetY - extensionY)
-                .setColor(this.color)
-                .setUv(-extent, -1);
+            .setColor(this.color)
+            .setUv(-extent, -1);
         vertexConsumer.addVertexWith2DPose(this.pose, x1 + offsetX - extensionX, y1 + offsetY - extensionY)
-                .setColor(this.color)
-                .setUv(-extent, 1);
+            .setColor(this.color)
+            .setUv(-extent, 1);
         vertexConsumer.addVertexWith2DPose(this.pose, x2 + offsetX + extensionX, y2 + offsetY + extensionY)
-                .setColor(this.color)
-                .setUv(extent, 1);
+            .setColor(this.color)
+            .setUv(extent, 1);
         vertexConsumer.addVertexWith2DPose(this.pose, x2 - offsetX + extensionX, y2 - offsetY + extensionY)
-                .setColor(this.color)
-                .setUv(extent, -1);
+            .setColor(this.color)
+            .setUv(extent, -1);
     }
 
     @Override
@@ -83,7 +93,7 @@ public class MoldLineRenderState implements GuiElementRenderState {
         var rectangle = new ScreenRectangle(minX, minY, maxX - minX, maxY - minY);
         rectangle = rectangle.transformMaxBounds(this.pose);
         return this.scissorArea == null
-                ? rectangle
-                : rectangle.intersection(this.scissorArea);
+            ? rectangle
+            : rectangle.intersection(this.scissorArea);
     }
 }

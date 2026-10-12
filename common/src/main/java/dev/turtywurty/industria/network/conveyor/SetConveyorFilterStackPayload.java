@@ -8,10 +8,10 @@ import net.minecraft.world.item.ItemStack;
 
 public record SetConveyorFilterStackPayload(ItemStack stack) implements CustomPacketPayload {
     public static final Type<SetConveyorFilterStackPayload> ID = new Type<>(Industria.id("set_conveyor_filter_stack"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, SetConveyorFilterStackPayload> CODEC =
-            StreamCodec.composite(
-                    ItemStack.OPTIONAL_STREAM_CODEC, SetConveyorFilterStackPayload::stack,
-                    SetConveyorFilterStackPayload::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetConveyorFilterStackPayload> CODEC = StreamCodec
+        .composite(
+            ItemStack.OPTIONAL_STREAM_CODEC, SetConveyorFilterStackPayload::stack,
+            SetConveyorFilterStackPayload::new);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

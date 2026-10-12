@@ -13,24 +13,29 @@ import java.util.function.BiConsumer;
 
 public class ToggleButton extends Button {
     public static final WidgetSprites DEFAULT_TEXTURES = new WidgetSprites(
-            Industria.id("textures/gui/widget/toggle_switch_on.png"),
-            Industria.id("textures/gui/widget/toggle_switch_off.png"),
-            Industria.id("textures/gui/widget/selected_toggle_switch_on.png"),
-            Industria.id("textures/gui/widget/selected_toggle_switch_off.png")
-    );
+        Industria.id("textures/gui/widget/toggle_switch_on.png"),
+        Industria.id("textures/gui/widget/toggle_switch_off.png"),
+        Industria.id("textures/gui/widget/selected_toggle_switch_on.png"),
+        Industria.id("textures/gui/widget/selected_toggle_switch_off.png"));
     public static final WidgetSprites DEFAULT_COLOURED_TEXTURES = new WidgetSprites(
-            Industria.id("textures/gui/widget/toggle_switch_green_on.png"),
-            Industria.id("textures/gui/widget/toggle_switch_red_off.png"),
-            Industria.id("textures/gui/widget/selected_toggle_switch_green_on.png"),
-            Industria.id("textures/gui/widget/selected_toggle_switch_red_off.png")
-    );
+        Industria.id("textures/gui/widget/toggle_switch_green_on.png"),
+        Industria.id("textures/gui/widget/toggle_switch_red_off.png"),
+        Industria.id("textures/gui/widget/selected_toggle_switch_green_on.png"),
+        Industria.id("textures/gui/widget/selected_toggle_switch_red_off.png"));
 
     private final WidgetSprites textures;
     private final BiConsumer<ToggleButton, Boolean> onPressed;
     private boolean toggled;
 
-    protected ToggleButton(int x, int y, BiConsumer<ToggleButton, Boolean> onPressed, CreateNarration narrationSupplier, boolean defaultToggle, WidgetSprites textures) {
-        super(x, y, 32, 16, Component.empty(), $ -> {
+    protected ToggleButton(
+        int x,
+        int y,
+        BiConsumer<ToggleButton, Boolean> onPressed,
+        CreateNarration narrationSupplier,
+        boolean defaultToggle,
+        WidgetSprites textures
+    ) {
+        super(x, y, 32, 16, Component.empty(), _ -> {
         }, narrationSupplier);
         this.toggled = defaultToggle;
         this.textures = textures;
@@ -50,16 +55,15 @@ public class ToggleButton extends Button {
     @Override
     protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         ScreenUtils.drawTexture(
-                context,
-                this.textures.get(this.toggled, isHovered()),
-                getX(),
-                getY(),
-                0, 0,
-                getWidth(),
-                getHeight(),
-                32, 16,
-                ARGB.white(this.alpha)
-        );
+            context,
+            this.textures.get(this.toggled, isHovered()),
+            getX(),
+            getY(),
+            0, 0,
+            getWidth(),
+            getHeight(),
+            32, 16,
+            ARGB.white(this.alpha));
     }
 
     public void setToggled(boolean isToggled) {
@@ -108,7 +112,8 @@ public class ToggleButton extends Button {
         }
 
         public ToggleButton build() {
-            return new ToggleButton(this.x, this.y, this.onPressed, this.narrationSupplier, this.defaultToggled, this.textures);
+            return new ToggleButton(this.x, this.y, this.onPressed, this.narrationSupplier, this.defaultToggled,
+                this.textures);
         }
     }
 }

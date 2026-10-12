@@ -51,7 +51,11 @@ import org.jetbrains.annotations.Nullable;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
-public class CrusherBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class CrusherBlockEntity extends IndustriaBlockEntity
+    implements
+        SyncableTickableBlockEntity,
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crusher");
     public static final int INPUT_SLOT = 0, OUTPUT_SLOT = 1;
     private static final AABB PICKUP_AREA = new AABB(0, 0, 0, 1, 0.7, 1);
@@ -174,11 +178,13 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
                 consumeEnergy();
                 this.wrappedContainerStorage.getInventory(INPUT_SLOT).removeItem(0, recipe.input().stackData().count());
 
-                if (!outputA.isEmpty())
+                if (!outputA.isEmpty()) {
                     this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).addItem(outputA);
+                }
 
-                if (!outputB.isEmpty())
+                if (!outputB.isEmpty()) {
                     this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).addItem(outputB);
+                }
 
                 reset();
             }
@@ -193,12 +199,12 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
 
     private void listenForItemEntities() {
         List<ItemEntity> entities = this.level.getEntitiesOfClass(ItemEntity.class,
-                PICKUP_AREA.move(this.worldPosition),
-                entity -> {
-                    ItemStack stack = entity.getItem().copy();
-                    stack.setCount(1);
-                    return canInput(stack);
-                });
+            PICKUP_AREA.move(this.worldPosition),
+            entity -> {
+                ItemStack stack = entity.getItem().copy();
+                stack.setCount(1);
+                return canInput(stack);
+            });
         if (entities.isEmpty())
             return;
 
@@ -273,7 +279,8 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new CrusherScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate);
+        return new CrusherScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.propertyDelegate);
     }
 
     private boolean hasItemsInBuffer() {
@@ -308,12 +315,12 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
         this.maxProgress = view.getIntOr("MaxProgress", 0);
 
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
-                .orElse(null);
+            .orElse(null);
 
         for (int i = 0; i < view.listOrEmpty("Buffer", ItemStack.CODEC).stream().toList().size(); i++) {
 
             this.buffer[i] = view.read(ItemStack.MAP_CODEC)
-                    .orElse(ItemStack.EMPTY);
+                .orElse(ItemStack.EMPTY);
         }
 
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);

@@ -19,8 +19,15 @@ public class ShakingTableScreenHandler extends IndustriaScreenHandler<ShakingTab
         super(ModMenuTypes.SHAKING_TABLE.get(), 2, syncId, playerInventory, payload, ShakingTableBlockEntity.class);
     }
 
-    public ShakingTableScreenHandler(int syncId, Inventory playerInventory, ShakingTableBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData properties) {
-        super(ModMenuTypes.SHAKING_TABLE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, properties);
+    public ShakingTableScreenHandler(
+        int syncId,
+        Inventory playerInventory,
+        ShakingTableBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData properties
+    ) {
+        super(ModMenuTypes.SHAKING_TABLE.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            properties);
     }
 
     @Override

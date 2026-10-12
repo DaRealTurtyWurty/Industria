@@ -21,7 +21,7 @@ public class DigesterRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new DigesterRecipe(this.inputSlurry, this.outputFluid, this.processTime),
-                null);
+            new DigesterRecipe(this.inputSlurry, this.outputFluid, this.processTime),
+            null);
     }
 }

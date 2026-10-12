@@ -20,7 +20,7 @@ public class RotaryKilnRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new RotaryKilnRecipe(this.input, this.output, this.requiredTemperature),
-                null);
+            new RotaryKilnRecipe(this.input, this.output, this.requiredTemperature),
+            null);
     }
 }

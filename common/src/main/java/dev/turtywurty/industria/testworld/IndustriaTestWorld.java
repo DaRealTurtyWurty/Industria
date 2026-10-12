@@ -35,11 +35,10 @@ public final class IndustriaTestWorld {
 
     private static void configureWorld(TestWorldContext context) {
         context.overworld().setRespawnData(LevelData.RespawnData.of(
-                Level.OVERWORLD,
-                context.origin(),
-                0.0F,
-                0.0F
-        ));
+            Level.OVERWORLD,
+            context.origin(),
+            0.0F,
+            0.0F));
 
         context.overworld().getGameRules().set(GameRules.RESPAWN_RADIUS, 0, context.server());
         context.overworld().getGameRules().set(GameRules.SPAWN_MOBS, false, context.server());
@@ -47,7 +46,8 @@ public final class IndustriaTestWorld {
         context.overworld().getGameRules().set(GameRules.ADVANCE_WEATHER, false, context.server());
 
         ServerClockManager clockManager = context.server().clockManager();
-        clockManager.setTotalTicks(context.overworld().dimensionTypeRegistration().value().defaultClock().orElseThrow(), 6000L);
+        clockManager.setTotalTicks(context.overworld().dimensionTypeRegistration().value().defaultClock().orElseThrow(),
+            6000L);
     }
 
     private static boolean isTestWorld(MinecraftServer server) {

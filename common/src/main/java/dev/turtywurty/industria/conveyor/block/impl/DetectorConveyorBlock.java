@@ -23,12 +23,12 @@ import java.util.List;
 public class DetectorConveyorBlock extends AbstractHorizontalConveyorBlock {
     public DetectorConveyorBlock(BlockBehaviour.Properties settings) {
         super(settings, new IndustriaBlock.BlockProperties()
-                .hasComparatorOutput()
-                .comparatorOutput((state, level, pos, direction) -> getSignalStrength(state, level, pos))
-                .blockEntityProperties(new IndustriaBlock.BlockProperties.BlockBlockEntityProperties<>(() -> ModBlockEntityTypes.DETECTOR_CONVEYOR.get())
-                        .shouldTick()
-                        .rightClickToOpenGui())
-        );
+            .hasComparatorOutput()
+            .comparatorOutput((state, level, pos, direction) -> getSignalStrength(state, level, pos))
+            .blockEntityProperties(new IndustriaBlock.BlockProperties.BlockBlockEntityProperties<>(
+                () -> ModBlockEntityTypes.DETECTOR_CONVEYOR.get())
+                .shouldTick()
+                .rightClickToOpenGui()));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DetectorConveyorBlock extends AbstractHorizontalConveyorBlock {
 
     public static int getSignalStrength(BlockState state, BlockGetter level, BlockPos pos) {
         if (!(level instanceof ServerLevel serverLevel)
-                || !(state.getBlock() instanceof DetectorConveyorBlock detectorConveyor))
+            || !(state.getBlock() instanceof DetectorConveyorBlock detectorConveyor))
             return 0;
 
         ConveyorNetwork networkAt = detectorConveyor.getNetworkManager(serverLevel).getNetworkAt(pos);
@@ -76,8 +76,8 @@ public class DetectorConveyorBlock extends AbstractHorizontalConveyorBlock {
     private static boolean canEmitTowards(BlockState state, Direction direction) {
         Direction facing = state.getValue(FACING);
         return direction == Direction.DOWN
-                || direction == facing.getClockWise()
-                || direction == facing.getCounterClockWise();
+            || direction == facing.getClockWise()
+            || direction == facing.getCounterClockWise();
     }
 
     @Override
@@ -99,8 +99,7 @@ public class DetectorConveyorBlock extends AbstractHorizontalConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 }

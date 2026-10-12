@@ -43,7 +43,8 @@ public class SeismicScannerItem extends Item {
             WorldFluidPocketsState state = WorldFluidPocketsState.getServerState((ServerLevel) world);
             List<WorldFluidPocketsState.FluidPocket> existsBelow = state.existsBelow(user.blockPosition());
             if (existsBelow.isEmpty()) {
-                user.sendSystemMessage(Component.literal("There are no fluid fluidPockets here!")); // TODO: Translatable
+                user.sendSystemMessage(Component.literal("There are no fluid fluidPockets here!")); // TODO:
+                                                                                                    // Translatable
                 return InteractionResult.FAIL;
             }
 
@@ -61,13 +62,14 @@ public class SeismicScannerItem extends Item {
             return;
 
         boolean selected = player.getItemBySlot(EquipmentSlot.MAINHAND).is(this) ||
-                player.getItemBySlot(EquipmentSlot.OFFHAND).is(this);
+            player.getItemBySlot(EquipmentSlot.OFFHAND).is(this);
         if (selected) {
             WorldFluidPocketsState state = WorldFluidPocketsState.getServerState(world);
             List<Component> fluidBelow = new ArrayList<>();
             for (WorldFluidPocketsState.FluidPocket fluidPocket : state.existsBelow(player.blockPosition())) {
                 Optional<ResourceKey<Fluid>> regKey = fluidPocket.fluidState().typeHolder().unwrapKey();
-                regKey.ifPresent(key -> fluidBelow.add(Component.translatable(key.identifier().toLanguageKey()).append(": " + fluidPocket.minY())));
+                regKey.ifPresent(key -> fluidBelow
+                    .add(Component.translatable(key.identifier().toLanguageKey()).append(": " + fluidPocket.minY())));
             }
 
             if (fluidBelow.isEmpty())

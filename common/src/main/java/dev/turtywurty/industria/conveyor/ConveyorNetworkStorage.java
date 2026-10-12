@@ -19,29 +19,28 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class ConveyorNetworkStorage {
-    private static final Codec<Map<BlockPos, ConveyorStorage>> STORAGE_MAP_CODEC =
-            Codec.unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, ConveyorStorage.CODEC.codec());
-    private static final StreamCodec<RegistryFriendlyByteBuf, Map<BlockPos, ConveyorStorage>> STORAGE_MAP_STREAM_CODEC = ByteBufCodecs.map(
+    private static final Codec<Map<BlockPos, ConveyorStorage>> STORAGE_MAP_CODEC = Codec
+        .unboundedMap(ExtraCodecs.BLOCK_POS_STRING_CODEC, ConveyorStorage.CODEC.codec());
+    private static final StreamCodec<RegistryFriendlyByteBuf, Map<BlockPos, ConveyorStorage>> STORAGE_MAP_STREAM_CODEC = ByteBufCodecs
+        .map(
             HashMap::new,
             BlockPos.STREAM_CODEC,
-            ConveyorStorage.STREAM_CODEC
-    );
+            ConveyorStorage.STREAM_CODEC);
 
     public static final MapCodec<ConveyorNetworkStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            STORAGE_MAP_CODEC.fieldOf("storages").forGetter(network -> network.storages)
-    ).apply(instance, networks -> {
-        var storage = new ConveyorNetworkStorage();
-        storage.storages.putAll(networks);
-        return storage;
-    }));
-    public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorNetworkStorage> STREAM_CODEC = StreamCodec.composite(
+        STORAGE_MAP_CODEC.fieldOf("storages").forGetter(network -> network.storages)).apply(instance, networks -> {
+            var storage = new ConveyorNetworkStorage();
+            storage.storages.putAll(networks);
+            return storage;
+        }));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorNetworkStorage> STREAM_CODEC = StreamCodec
+        .composite(
             STORAGE_MAP_STREAM_CODEC, ConveyorNetworkStorage::getStorages,
             (storages) -> {
                 var storage = new ConveyorNetworkStorage();
                 storage.storages.putAll(storages);
                 return storage;
-            }
-    );
+            });
 
     private final Map<BlockPos, ConveyorStorage> storages = new ConcurrentHashMap<>();
 

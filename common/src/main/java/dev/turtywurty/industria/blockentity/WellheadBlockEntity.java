@@ -31,10 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class WellheadBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
-    private static final Codec<Map<BlockPos, Integer>> DRILL_TUBES_CODEC =
-            Codec.unboundedMap(BlockPos.CODEC, Codec.INT);
+    private static final Codec<Map<BlockPos, Integer>> DRILL_TUBES_CODEC = Codec.unboundedMap(BlockPos.CODEC,
+        Codec.INT);
     private final Map<BlockPos, Integer> drillTubes = new HashMap<>();
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -43,9 +42,9 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.UPGRADE_STATION.get(), ModBlockEntityTypes.WELLHEAD.get(), pos, state);
 
-        OutputFluidStorage storage = new OutputFluidStorage(this, FluidAmounts.BUCKET);
-        Direction.Plane.HORIZONTAL.stream().forEach(direction ->
-                this.wrappedFluidStorage.addStorage(storage, direction));
+        var storage = new OutputFluidStorage(this, FluidAmounts.BUCKET);
+        Direction.Plane.HORIZONTAL.stream()
+            .forEach(direction -> this.wrappedFluidStorage.addStorage(storage, direction));
         this.wrappedFluidStorage.addStorage(storage, Direction.UP);
     }
 
@@ -96,12 +95,12 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         distributeFluid();
 
         if (!(this.level.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity)
-                || !oilPumpJackBlockEntity.isRunning())
+            || !oilPumpJackBlockEntity.isRunning())
             return;
 
         BlockPos bottomOfTubes = this.drillTubes.keySet().stream()
-                .min(Comparator.comparingInt(Vec3i::getY))
-                .orElse(null);
+            .min(Comparator.comparingInt(Vec3i::getY))
+            .orElse(null);
         if (bottomOfTubes == null)
             return;
 
@@ -143,7 +142,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
 
         Map<ResourceStorage<ResourceVariant<Fluid>>, Long> storages = new HashMap<>();
         for (Direction direction : Direction.values()) {
-            ResourceStorage<ResourceVariant<Fluid>> fluidStorage = TransferService.get().findBlock(StorageKeys.FLUID, this.level, this.worldPosition.relative(direction), direction.getOpposite());
+            ResourceStorage<ResourceVariant<Fluid>> fluidStorage = TransferService.get().findBlock(StorageKeys.FLUID,
+                this.level, this.worldPosition.relative(direction), direction.getOpposite());
             if (fluidStorage == null || !fluidStorage.supportsInsertion())
                 continue;
 
@@ -158,7 +158,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
         }
 
         int size = storages.size();
-        long totalCanTransfer = Math.min(tank.getAmount(), storages.values().stream().mapToLong(Number::longValue).sum());
+        long totalCanTransfer = Math.min(tank.getAmount(),
+            storages.values().stream().mapToLong(Number::longValue).sum());
         for (Map.Entry<ResourceStorage<ResourceVariant<Fluid>>, Long> entry : storages.entrySet()) {
             ResourceStorage<ResourceVariant<Fluid>> storage = entry.getKey();
             long maxAmount = entry.getValue();
@@ -199,7 +200,8 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     public void setRemoved() {
         super.setRemoved();
         if (this.oilPumpJackPos != null && this.level != null) {
-            if (this.level.getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity) {
+            if (this.level
+                .getBlockEntity(this.oilPumpJackPos) instanceof OilPumpJackBlockEntity oilPumpJackBlockEntity) {
                 oilPumpJackBlockEntity.removeWellhead();
             }
         }

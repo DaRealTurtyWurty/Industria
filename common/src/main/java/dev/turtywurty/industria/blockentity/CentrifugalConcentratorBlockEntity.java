@@ -69,7 +69,10 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
-public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
+public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityWithGui<BlockPosPayload>,
+        BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("centrifugal_concentrator");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -116,14 +119,17 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
         this.wrappedContainerStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.UP);
         this.wrappedContainerStorage.addExtractOnlyInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createFluidPredicate(() -> {
-                    SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                    return new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount());
-                })), Direction.NORTH);
+            PredicateSimpleInventory.createFluidPredicate(() -> {
+                SyncingFluidStorage inputFluidTank = getInputFluidTank();
+                return new FluidStack(inputFluidTank.getResource(), inputFluidTank.getAmount());
+            })), Direction.NORTH);
         this.wrappedContainerStorage.addInventory(new PredicateSimpleInventory(this, 1,
-                PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().getResource())), Direction.SOUTH);
+            PredicateSimpleInventory.createEmptySlurryPredicate(() -> getOutputSlurryTank().getResource())),
+            Direction.SOUTH);
 
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER), Direction.UP);
+        this.wrappedFluidStorage.addStorage(
+            new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER),
+            Direction.UP);
         this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 10_000_000, 1_000_000, 0));
         this.wrappedSlurryStorage.addStorage(new OutputSlurryStorage(this, FluidAmounts.BUCKET * 10), Direction.DOWN);
     }
@@ -143,8 +149,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
         SyncableStorage outputSlurryTank = getOutputSlurryTank();
         SyncableStorage energyStorage = getEnergyStorage();
         return List.of(ContainerStorage, outputContainerStorage, bucketInputInventory, bucketOutputInventory,
-                inputFluidTank, outputSlurryTank,
-                energyStorage);
+            inputFluidTank, outputSlurryTank,
+            energyStorage);
     }
 
     @Override
@@ -155,11 +161,12 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
         SyncingSimpleInventory bucketInputInventory = getBucketInputInventory();
         if (!bucketInputInventory.isEmpty()) {
             ItemStack bucket = bucketInputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Fluid>> storage =
-                    MutableItemContext.ofContainerSlot(bucketInputInventory, 0).find(StorageKeys.FLUID);
+            ResourceStorage<ResourceVariant<Fluid>> storage = MutableItemContext
+                .ofContainerSlot(bucketInputInventory, 0).find(StorageKeys.FLUID);
             if (storage != null && storage.supportsExtraction()) {
                 SyncingFluidStorage inputFluidTank = getInputFluidTank();
-                Optional<ResourceVariant<Fluid>> optVariant = TransferUtils.findFirstVariant(storage, inputFluidTank.getResource());
+                Optional<ResourceVariant<Fluid>> optVariant = TransferUtils.findFirstVariant(storage,
+                    inputFluidTank.getResource());
                 optVariant.filter(variant -> !variant.isBlank()).ifPresent(variant -> {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                         long extracted = storage.extract(variant, FluidAmounts.BUCKET, transaction);
@@ -176,13 +183,14 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
         SyncingSimpleInventory bucketOutputInventory = getBucketOutputInventory();
         if (!bucketOutputInventory.isEmpty()) {
             ItemStack bucket = bucketOutputInventory.getItem(0);
-            ResourceStorage<ResourceVariant<Slurry>> storage =
-                    MutableItemContext.ofContainerSlot(bucketOutputInventory, 0).find(SlurryStorage.KEY);
+            ResourceStorage<ResourceVariant<Slurry>> storage = MutableItemContext
+                .ofContainerSlot(bucketOutputInventory, 0).find(SlurryStorage.KEY);
             if (storage != null && storage.supportsInsertion()) {
                 SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
                 if (outputSlurryTank.getAmount() > 0) {
                     try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                        long inserted = storage.insert(outputSlurryTank.getResource(), FluidAmounts.BUCKET, transaction);
+                        long inserted = storage.insert(outputSlurryTank.getResource(), FluidAmounts.BUCKET,
+                            transaction);
                         if (inserted > 0) {
                             outputSlurryTank.extractInternal(outputSlurryTank.getResource(), inserted, transaction);
                         }
@@ -206,8 +214,10 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
 
         if (!this.outputSlurryStack.isEmpty()) {
             SyncingSlurryStorage outputSlurryTank = getOutputSlurryTank();
-            if (Objects.equals(outputSlurryTank.getResource(), this.outputSlurryStack.variant()) && outputSlurryTank.getCapacity() - outputSlurryTank.getAmount() >= 0) {
-                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(), this.outputSlurryStack.amount());
+            if (Objects.equals(outputSlurryTank.getResource(), this.outputSlurryStack.variant())
+                && outputSlurryTank.getCapacity() - outputSlurryTank.getAmount() >= 0) {
+                long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(),
+                    this.outputSlurryStack.amount());
                 insert(outputSlurryTank, this.outputSlurryStack.variant(), inserted);
                 this.outputSlurryStack = this.outputSlurryStack.withAmount(this.outputSlurryStack.amount() - inserted);
                 update();
@@ -272,7 +282,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
 
                 SlurryStack outputSlurry = recipe.outputSlurry();
                 if (outputSlurryTank.canInsert(outputSlurry)) {
-                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(), outputSlurry.amount());
+                    long inserted = Math.min(outputSlurryTank.getCapacity() - outputSlurryTank.getAmount(),
+                        outputSlurry.amount());
                     insert(outputSlurryTank, outputSlurry.variant(), inserted);
                     outputSlurry = outputSlurry.withAmount(outputSlurry.amount() - inserted);
                 }
@@ -299,11 +310,14 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
         this.bowlRotation += (this.recipeRPM / 60f / 20f);
     }
 
-    private Optional<RecipeHolder<CentrifugalConcentratorRecipe>> getCurrentRecipe(CentrifugalConcentratorRecipeInput recipeInput) {
+    private Optional<RecipeHolder<CentrifugalConcentratorRecipe>> getCurrentRecipe(
+        CentrifugalConcentratorRecipeInput recipeInput
+    ) {
         if (this.level == null || !(this.level instanceof ServerLevel serverWorld))
             return Optional.empty();
 
-        return serverWorld.recipeAccess().getRecipeFor(ModRecipeTypes.CENTRIFUGAL_CONCENTRATOR.get(), recipeInput, this.level);
+        return serverWorld.recipeAccess().getRecipeFor(ModRecipeTypes.CENTRIFUGAL_CONCENTRATOR.get(), recipeInput,
+            this.level);
     }
 
     private CentrifugalConcentratorRecipeInput createRecipeInput() {
@@ -378,7 +392,8 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
-        return new CentrifugalConcentratorScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage, this.propertyDelegate);
+        return new CentrifugalConcentratorScreenHandler(syncId, playerInventory, this, this.wrappedContainerStorage,
+            this.propertyDelegate);
     }
 
     public SyncingSimpleInventory getInputInventory() {
@@ -428,15 +443,15 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.both(TransferType.ITEM, this.wrappedContainerStorage::getCombinedStorage)
-                .wherePosition(offset -> offset.getY() == 0 || offset.getY() == 2);
+            .wherePosition(offset -> offset.getY() == 0 || offset.getY() == 2);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.DOWN))
-                .wherePosition(offset -> offset.getY() == 0);
+            .wherePosition(offset -> offset.getY() == 0);
         ports.input(TransferType.FLUID, this::getInputFluidTank)
-                .wherePosition(offset -> offset.getY() == 2);
+            .wherePosition(offset -> offset.getY() == 2);
         ports.output(TransferType.SLURRY, this::getOutputSlurryTank)
-                .wherePosition(offset -> offset.getY() == 0);
+            .wherePosition(offset -> offset.getY() == 0);
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .wherePosition(offset -> offset.getY() == 0);
+            .wherePosition(offset -> offset.getY() == 0);
     }
 
     public int getProgress() {

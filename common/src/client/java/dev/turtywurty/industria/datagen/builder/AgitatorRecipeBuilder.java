@@ -13,9 +13,12 @@ public class AgitatorRecipeBuilder {
     private final int processTime;
     private final int energyCost;
 
-    public AgitatorRecipeBuilder(List<AgitatorRecipe.AgitatorInput> inputs,
-                                 List<AgitatorRecipe.AgitatorOutput> outputs,
-                                 int processTime, int energyCost) {
+    public AgitatorRecipeBuilder(
+        List<AgitatorRecipe.AgitatorInput> inputs,
+        List<AgitatorRecipe.AgitatorOutput> outputs,
+        int processTime,
+        int energyCost
+    ) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.processTime = processTime;
@@ -23,6 +26,7 @@ public class AgitatorRecipeBuilder {
     }
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
-        exporter.accept(recipeKey, new AgitatorRecipe(this.inputs, this.outputs, this.processTime, this.energyCost), null);
+        exporter.accept(recipeKey, new AgitatorRecipe(this.inputs, this.outputs, this.processTime, this.energyCost),
+            null);
     }
 }

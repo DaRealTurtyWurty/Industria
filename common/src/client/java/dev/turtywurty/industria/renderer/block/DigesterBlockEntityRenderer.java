@@ -20,7 +20,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<DigesterBlockEntity, DigesterBlockEntityRenderer.DigesterRenderState> {
+public class DigesterBlockEntityRenderer
+    extends
+        IndustriaBlockEntityRenderer<DigesterBlockEntity, DigesterBlockEntityRenderer.DigesterRenderState> {
     private static final float WINDOW_LEFT = -10f / 16f;
     private static final float WINDOW_RIGHT = 10f / 16f;
     private static final float TANK_BOTTOM = 1.0f;
@@ -39,17 +41,29 @@ public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<Di
     }
 
     @Override
-    protected void onRender(DigesterRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    protected void onRender(
+        DigesterRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ModelSubmitUtils.submitModel(queue, this.model, state,
-                matrices, this.model.renderType(DigesterModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            matrices, this.model.renderType(DigesterModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
         renderSlurry(state, matrices, queue, light, overlay);
         ModelSubmitUtils.submitModel(queue, this.glassModel, state,
-                matrices, this.glassModel.renderType(DigesterModel.TEXTURE_LOCATION),
-                light, overlay, 0, state.breakProgress);
+            matrices, this.glassModel.renderType(DigesterModel.TEXTURE_LOCATION),
+            light, overlay, 0, state.breakProgress);
     }
 
-    private void renderSlurry(DigesterRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
+    private void renderSlurry(
+        DigesterRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || state.amount <= 0 || state.capacity <= 0)
             return;
@@ -65,10 +79,10 @@ public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<Di
         float fill = Math.clamp((float) state.amount / state.capacity, 0f, 1f);
         float surfaceY = TANK_BOTTOM + (TANK_TOP - TANK_BOTTOM) * fill;
         this.fluidRenderer.drawTiledXYQuadOnly(sprite, color, queue, matrices, light, overlay,
-                WINDOW_LEFT, -TANK_BOTTOM, -FLUID_FRONT, WINDOW_RIGHT, -surfaceY, -FLUID_FRONT, true);
+            WINDOW_LEFT, -TANK_BOTTOM, -FLUID_FRONT, WINDOW_RIGHT, -surfaceY, -FLUID_FRONT, true);
 
         this.fluidRenderer.renderOctagonalTopFaceOnly(sprite, color, queue, matrices, light, overlay,
-                surfaceY, FLUID_RADIUS, FLUID_CORNER_CUT);
+            surfaceY, FLUID_RADIUS, FLUID_CORNER_CUT);
     }
 
     @Override
@@ -77,8 +91,13 @@ public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<Di
     }
 
     @Override
-    public void extractRenderState(DigesterBlockEntity blockEntity, DigesterRenderState state, float tickProgress,
-                                   Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    public void extractRenderState(
+        DigesterBlockEntity blockEntity,
+        DigesterRenderState state,
+        float tickProgress,
+        Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         InputSlurryStorage tank = blockEntity.getInputSlurryStorage();
         state.slurry = tank.getResource();
@@ -87,8 +106,8 @@ public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<Di
         int duration = blockEntity.getMaxProgress();
         float progress = blockEntity.getProgress() + (blockEntity.isRunning() ? tickProgress : 0f);
         state.bladeRotation = duration > 0
-                ? Math.clamp(progress / duration, 0f, 1f) * (float) (Math.PI * 8)
-                : 0f;
+            ? Math.clamp(progress / duration, 0f, 1f) * (float) (Math.PI * 8)
+            : 0f;
     }
 
     public static class DigesterRenderState extends IndustriaBlockEntityRenderState {

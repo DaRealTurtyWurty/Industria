@@ -23,16 +23,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ConveyorStorage {
     public static final ConveyorStorage EMPTY = new ConveyorStorage();
     public static final MapCodec<ConveyorStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            BlockPos.CODEC.fieldOf("pos").forGetter(ConveyorStorage::getPos),
-            Codec.INT.fieldOf("itemCount").forGetter(storage -> storage.getItemContainer().getContainerSize()),
-            ExtraCodecs.listOf(ConveyorItem.CODEC).fieldOf("items").forGetter(ConveyorStorage::getItems)
-    ).apply(instance, ConveyorStorage::new));
+        BlockPos.CODEC.fieldOf("pos").forGetter(ConveyorStorage::getPos),
+        Codec.INT.fieldOf("itemCount").forGetter(storage -> storage.getItemContainer().getContainerSize()),
+        ExtraCodecs.listOf(ConveyorItem.CODEC).fieldOf("items").forGetter(ConveyorStorage::getItems))
+        .apply(instance, ConveyorStorage::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorStorage> STREAM_CODEC = StreamCodec.composite(
-            BlockPos.STREAM_CODEC, ConveyorStorage::getPos,
-            ByteBufCodecs.INT, storage -> storage.getItemContainer().getContainerSize(),
-            ExtraStreamCodecs.listOf(ConveyorItem.STREAM_CODEC), ConveyorStorage::getItems,
-            ConveyorStorage::new
-    );
+        BlockPos.STREAM_CODEC, ConveyorStorage::getPos,
+        ByteBufCodecs.INT, storage -> storage.getItemContainer().getContainerSize(),
+        ExtraStreamCodecs.listOf(ConveyorItem.STREAM_CODEC), ConveyorStorage::getItems,
+        ConveyorStorage::new);
     public static final int MAX_PROGRESS = 100;
 
     private final BlockPos pos;
@@ -44,9 +43,10 @@ public class ConveyorStorage {
         this.pos = pos;
         BlockState state = level.getBlockState(pos);
         this.itemContainer = new ConveyorItemContainer(
-                state.getBlock() instanceof ConveyorLike conveyorBlock
-                        ? conveyorBlock.getItemLimit(level, pos, state) : 0,
-                this.items);
+            state.getBlock() instanceof ConveyorLike conveyorBlock
+                ? conveyorBlock.getItemLimit(level, pos, state)
+                : 0,
+            this.items);
         this.itemStorage = ContainerStorage.of(this.itemContainer, null);
     }
 
@@ -183,12 +183,11 @@ public class ConveyorStorage {
 
     public ConveyorStorage copy() {
         return new ConveyorStorage(
-                this.pos,
-                this.itemContainer.getContainerSize(),
-                this.items.stream()
-                        .map(ConveyorItem::copy)
-                        .toList()
-        );
+            this.pos,
+            this.itemContainer.getContainerSize(),
+            this.items.stream()
+                .map(ConveyorItem::copy)
+                .toList());
     }
 
     private void sanitizeItems() {

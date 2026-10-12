@@ -52,7 +52,10 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
-public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
+public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements
+        BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("clarifier");
     public static final BlockPos ENERGY_PORT = new BlockPos(-2, 1, 0);
     public static final BlockPos FLUID_INPUT_PORT = new BlockPos(-2, 2, 0);
@@ -63,7 +66,6 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
-
 
     private ResourceKey<Recipe<?>> currentRecipeId;
     private int progress;
@@ -143,7 +145,8 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
         if (!this.outputFluidStack.isEmpty()) {
             SyncingFluidStorage outputFluidTank = getOutputFluidTank();
             if (outputFluidTank.canInsert(this.outputFluidStack)) {
-                long inserted = Math.min(outputFluidTank.getCapacity() - outputFluidTank.getAmount(), this.outputFluidStack.amount());
+                long inserted = Math.min(outputFluidTank.getCapacity() - outputFluidTank.getAmount(),
+                    this.outputFluidStack.amount());
                 set(outputFluidTank, outputFluidStack.variant(), outputFluidTank.getAmount() + inserted);
                 this.outputFluidStack = this.outputFluidStack.withAmount(this.outputFluidStack.amount() - inserted);
                 update();
@@ -259,7 +262,7 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
 
     public boolean isRunning() {
         return isFormed() && this.currentRecipeId != null && this.progress < this.maxProgress
-                && this.outputItemStack.isEmpty() && this.outputFluidStack.isEmpty() && hasEnergy();
+            && this.outputItemStack.isEmpty() && this.outputFluidStack.isEmpty() && hasEnergy();
     }
 
     @Override
@@ -298,16 +301,16 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
         this.maxProgress = view.getIntOr("MaxProgress", 0);
 
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
-                .orElse(null);
+            .orElse(null);
 
         this.outputItemStack = view.read("OutputStack", ItemStack.CODEC)
-                .orElse(ItemStack.EMPTY);
+            .orElse(ItemStack.EMPTY);
 
         this.outputFluidStack = view.read("OutputFluid", FluidStack.CODEC.codec())
-                .orElse(FluidStack.EMPTY);
+            .orElse(FluidStack.EMPTY);
 
         this.nextOutputItemStack = view.read("NextOutputStack", ItemStack.OPTIONAL_CODEC)
-                .orElse(ItemStack.EMPTY);
+            .orElse(ItemStack.EMPTY);
     }
 
     @Override
@@ -323,13 +326,13 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ENERGY, this::getEnergyStorage)
-                .where((offset, side) -> offset.equals(ENERGY_PORT) && side == Direction.WEST);
+            .where((offset, side) -> offset.equals(ENERGY_PORT) && side == Direction.WEST);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.SOUTH))
-                .where((offset, side) -> offset.equals(ITEM_OUTPUT_PORT) && side == Direction.NORTH);
+            .where((offset, side) -> offset.equals(ITEM_OUTPUT_PORT) && side == Direction.NORTH);
         ports.input(TransferType.FLUID, this::getInputFluidTank)
-                .where((offset, side) -> offset.equals(FLUID_INPUT_PORT) && side == Direction.WEST);
+            .where((offset, side) -> offset.equals(FLUID_INPUT_PORT) && side == Direction.WEST);
         ports.output(TransferType.FLUID, this::getOutputFluidTank)
-                .where((offset, side) -> offset.equals(FLUID_OUTPUT_PORT) && side == Direction.NORTH);
+            .where((offset, side) -> offset.equals(FLUID_OUTPUT_PORT) && side == Direction.NORTH);
     }
 
     @Override

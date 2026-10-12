@@ -26,12 +26,17 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputItemStack output, SlurryStack outputSlurry,
-                                            int processTime, int rpm) implements Recipe<CentrifugalConcentratorRecipeInput> {
+public record CentrifugalConcentratorRecipe(
+    IndustriaIngredient input,
+    OutputItemStack output,
+    SlurryStack outputSlurry,
+    int processTime,
+    int rpm
+) implements Recipe<CentrifugalConcentratorRecipeInput> {
     @Override
     public boolean matches(CentrifugalConcentratorRecipeInput input, Level world) {
         return this.input.testForRecipe(input.recipeInventory().getItem(0))
-                && input.waterAmount() >= FluidAmounts.BUCKET * 2;
+            && input.waterAmount() >= FluidAmounts.BUCKET * 2;
     }
 
     @Override
@@ -57,13 +62,12 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new CentrifugalConcentratorRecipeDisplay(
-                this.input.toDisplay(),
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.CENTRIFUGAL_CONCENTRATOR.get().asItem()),
-                this.output.toDisplay(),
-                this.outputSlurry,
-                this.processTime,
-                this.rpm
-        ));
+            this.input.toDisplay(),
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.CENTRIFUGAL_CONCENTRATOR.get().asItem()),
+            this.output.toDisplay(),
+            this.outputSlurry,
+            this.processTime,
+            this.rpm));
     }
 
     @Override
@@ -98,49 +102,59 @@ public record CentrifugalConcentratorRecipe(IndustriaIngredient input, OutputIte
         }
     }
 
-    private static final MapCodec<CentrifugalConcentratorRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    private static final MapCodec<CentrifugalConcentratorRecipe> CODEC = RecordCodecBuilder
+        .mapCodec(instance -> instance.group(
             IndustriaIngredient.CODEC.fieldOf("input").forGetter(CentrifugalConcentratorRecipe::input),
             OutputItemStack.CODEC.fieldOf("output").forGetter(CentrifugalConcentratorRecipe::output),
             SlurryStack.CODEC.fieldOf("output_slurry").forGetter(CentrifugalConcentratorRecipe::outputSlurry),
             Codec.INT.fieldOf("process_time").forGetter(CentrifugalConcentratorRecipe::processTime),
-            Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipe::rpm)
-    ).apply(instance, CentrifugalConcentratorRecipe::new));
+            Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipe::rpm))
+            .apply(instance, CentrifugalConcentratorRecipe::new));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipe> STREAM_CODEC = StreamCodec.composite(
+    private static final StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipe> STREAM_CODEC = StreamCodec
+        .composite(
             IndustriaIngredient.STREAM_CODEC, CentrifugalConcentratorRecipe::input,
             OutputItemStack.STREAM_CODEC, CentrifugalConcentratorRecipe::output,
             SlurryStack.STREAM_CODEC, CentrifugalConcentratorRecipe::outputSlurry,
             ByteBufCodecs.INT, CentrifugalConcentratorRecipe::processTime,
             ByteBufCodecs.INT, CentrifugalConcentratorRecipe::rpm,
-            CentrifugalConcentratorRecipe::new
-    );
+            CentrifugalConcentratorRecipe::new);
 
-    public static final RecipeSerializer<CentrifugalConcentratorRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
+    public static final RecipeSerializer<CentrifugalConcentratorRecipe> SERIALIZER = new RecipeSerializer<>(CODEC,
+        STREAM_CODEC);
 
-    public record CentrifugalConcentratorRecipeDisplay(SlotDisplay input, SlotDisplay craftingStation,
-                                                       SlotDisplay output, SlurryStack outputSlurry,
-                                                       int processTime, int rpm) implements RecipeDisplay {
-        public static final MapCodec<CentrifugalConcentratorRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    public record CentrifugalConcentratorRecipeDisplay(
+        SlotDisplay input,
+        SlotDisplay craftingStation,
+        SlotDisplay output,
+        SlurryStack outputSlurry,
+        int processTime,
+        int rpm
+    ) implements RecipeDisplay {
+        public static final MapCodec<CentrifugalConcentratorRecipeDisplay> CODEC = RecordCodecBuilder
+            .mapCodec(instance -> instance.group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(CentrifugalConcentratorRecipeDisplay::input),
-                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(CentrifugalConcentratorRecipeDisplay::craftingStation),
+                SlotDisplay.CODEC.fieldOf("crafting_station")
+                    .forGetter(CentrifugalConcentratorRecipeDisplay::craftingStation),
                 SlotDisplay.CODEC.fieldOf("output").forGetter(CentrifugalConcentratorRecipeDisplay::output),
-                SlurryStack.CODEC.fieldOf("output_slurry").forGetter(CentrifugalConcentratorRecipeDisplay::outputSlurry),
+                SlurryStack.CODEC.fieldOf("output_slurry")
+                    .forGetter(CentrifugalConcentratorRecipeDisplay::outputSlurry),
                 Codec.INT.fieldOf("process_time").forGetter(CentrifugalConcentratorRecipeDisplay::processTime),
-                Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipeDisplay::rpm)
-        ).apply(instance, CentrifugalConcentratorRecipeDisplay::new));
+                Codec.INT.fieldOf("rpm").forGetter(CentrifugalConcentratorRecipeDisplay::rpm))
+                .apply(instance, CentrifugalConcentratorRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, CentrifugalConcentratorRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 SlotDisplay.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::input,
                 SlotDisplay.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::craftingStation,
                 SlotDisplay.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::output,
                 SlurryStack.STREAM_CODEC, CentrifugalConcentratorRecipeDisplay::outputSlurry,
                 ByteBufCodecs.INT, CentrifugalConcentratorRecipeDisplay::processTime,
                 ByteBufCodecs.INT, CentrifugalConcentratorRecipeDisplay::rpm,
-                CentrifugalConcentratorRecipeDisplay::new
-        );
+                CentrifugalConcentratorRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<CentrifugalConcentratorRecipeDisplay> SERIALIZER =
-                new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<CentrifugalConcentratorRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(
+            CODEC, STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {

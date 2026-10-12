@@ -14,10 +14,10 @@ import net.minecraft.resources.Identifier;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ConveyorFlapsModel extends Model<ConveyorFlapsModel.RenderState> {
-    public static final ModelLayerLocation LAYER_LOCATION =
-            new ModelLayerLocation(Industria.id("feeder_conveyor_flaps"), "main");
-    public static final Identifier TEXTURE_LOCATION =
-            Identifier.withDefaultNamespace("textures/block/black_concrete.png");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
+        Industria.id("feeder_conveyor_flaps"), "main");
+    public static final Identifier TEXTURE_LOCATION = Identifier
+        .withDefaultNamespace("textures/block/black_concrete.png");
 
     private final ModelPart flaps;
     private final Flap flap1, flap2, flap3, flap4;
@@ -53,11 +53,11 @@ public class ConveyorFlapsModel extends Model<ConveyorFlapsModel.RenderState> {
     }
 
     public static LayerDefinition createMainLayer() {
-        MeshDefinition mesh = new MeshDefinition();
+        var mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
 
         PartDefinition flaps = root.addOrReplaceChild("flaps", CubeListBuilder.create(),
-                PartPose.offset(0.0F, 15.0F, 0.0F));
+            PartPose.offset(0.0F, 15.0F, 0.0F));
 
         addFlap(flaps, "flap1", -4.5F);
         addFlap(flaps, "flap2", -1.5F);
@@ -69,18 +69,18 @@ public class ConveyorFlapsModel extends Model<ConveyorFlapsModel.RenderState> {
 
     private static void addFlap(PartDefinition parent, String name, float x) {
         PartDefinition flap = parent.addOrReplaceChild(name, CubeListBuilder.create(),
-                PartPose.offset(x, 0.0F, -0.5F));
+            PartPose.offset(x, 0.0F, -0.5F));
 
         // Build the flap as a chain so lower segments inherit the bend from the segments above them.
         PartDefinition segTop = flap.addOrReplaceChild("segTop", CubeListBuilder.create()
-                        .texOffs(0, 0).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
-                PartPose.offset(0.0F, 0.0F, 0.0F));
+            .texOffs(0, 0).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
+            PartPose.offset(0.0F, 0.0F, 0.0F));
         PartDefinition segMid = segTop.addOrReplaceChild("segMid", CubeListBuilder.create()
-                        .texOffs(0, 3).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
-                PartPose.offset(0.0F, -2.0F, 0.0F));
+            .texOffs(0, 3).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
+            PartPose.offset(0.0F, -2.0F, 0.0F));
         segMid.addOrReplaceChild("segBot", CubeListBuilder.create()
-                        .texOffs(0, 6).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
-                PartPose.offset(0.0F, -2.0F, 0.0F));
+            .texOffs(0, 6).addBox(-1.0F, -2.0F, -0.5F, 2.0F, 2.0F, 1.0F),
+            PartPose.offset(0.0F, -2.0F, 0.0F));
     }
 
     public Flap flap1() {

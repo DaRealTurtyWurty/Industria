@@ -43,27 +43,39 @@ public class SideInjectorConveyorBlock extends AbstractPoweredConveyorBlock {
         Direction back = facing.getOpposite();
 
         return new ConveyorTopology(
-                List.of(new ConveyorInput("in", pos.relative(back))),
-                List.of(new ConveyorOutput("out", pos.relative(facing), pos))
-        );
+            List.of(new ConveyorInput("in", pos.relative(back))),
+            List.of(new ConveyorOutput("out", pos.relative(facing), pos)));
     }
 
     @Override
-    public ConveyorConnectionType getConnectionType(Level level, BlockPos pos, BlockState state, ConveyorOutput output) {
+    public ConveyorConnectionType getConnectionType(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorOutput output
+    ) {
         return ConveyorConnectionType.SIDE_INJECT;
     }
 
     @Override
-    public boolean canConnectToConveyor(Level level, BlockPos pos, BlockState state, ConveyorOutput output, BlockPos targetPos, BlockState targetState) {
-        return targetPos.equals(output.deliveryPos()) && super.canConnectToConveyor(level, pos, state, output, targetPos, targetState);
+    public boolean canConnectToConveyor(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        ConveyorOutput output,
+        BlockPos targetPos,
+        BlockState targetState
+    ) {
+        return targetPos.equals(output.deliveryPos())
+            && super.canConnectToConveyor(level, pos, state, output, targetPos, targetState);
     }
 
     private static Direction[] getPlacementOrder(Direction preferredFacing) {
         return new Direction[]{
-                preferredFacing,
-                preferredFacing.getClockWise(),
-                preferredFacing.getCounterClockWise(),
-                preferredFacing.getOpposite()
+            preferredFacing,
+            preferredFacing.getClockWise(),
+            preferredFacing.getCounterClockWise(),
+            preferredFacing.getOpposite()
         };
     }
 

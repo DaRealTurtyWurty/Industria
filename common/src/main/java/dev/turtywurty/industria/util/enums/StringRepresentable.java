@@ -13,9 +13,8 @@ public interface StringRepresentable {
 
     static <T extends Enum<?> & StringRepresentable> T getEnumByName(T[] values, String serializedName) {
         for (T value : values) {
-            if (Objects.equals(value.getSerializedName(), serializedName)) {
+            if (Objects.equals(value.getSerializedName(), serializedName))
                 return value;
-            }
         }
 
         return null;
@@ -23,6 +22,7 @@ public interface StringRepresentable {
 
     static <T extends Enum<?> & StringRepresentable> Codec<T> fromEnum(Class<T> enumClass) {
         T[] values = enumClass.getEnumConstants();
-        return Codec.STRING.xmap(serializedName -> getEnumByName(values, serializedName), StringRepresentable::getSerializedName);
+        return Codec.STRING.xmap(serializedName -> getEnumByName(values, serializedName),
+            StringRepresentable::getSerializedName);
     }
 }

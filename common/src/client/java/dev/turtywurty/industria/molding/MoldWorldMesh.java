@@ -22,7 +22,7 @@ public final class MoldWorldMesh {
         for (int y = 0; y < textureHeight; y++) {
             for (int x = 0; x < textureWidth; x++) {
                 addRegion(x * SIZE / textureWidth, y * SIZE / textureHeight,
-                        (x + 1) * SIZE / textureWidth, (y + 1) * SIZE / textureHeight);
+                    (x + 1) * SIZE / textureWidth, (y + 1) * SIZE / textureHeight);
             }
         }
         addWalls();
@@ -34,7 +34,7 @@ public final class MoldWorldMesh {
 
     private boolean removed(int x, int y) {
         return x < 0 || y < 0 || x >= SIZE || y >= SIZE || surface.removed(x, y)
-                || !opaque[(y * textureHeight / SIZE) * textureWidth + x * textureWidth / SIZE];
+            || !opaque[(y * textureHeight / SIZE) * textureWidth + x * textureWidth / SIZE];
     }
 
     private void addRegion(int x0, int y0, int x1, int y1) {
@@ -57,7 +57,7 @@ public final class MoldWorldMesh {
         for (int y = y0; flat && y <= y1; y++) {
             for (int x = x0; x <= x1; x++) {
                 if (surface.depth(x, y) != 0 || surface.positionX(x, y) != x / (float) SIZE
-                        || surface.positionY(x, y) != y / (float) SIZE) {
+                    || surface.positionY(x, y) != y / (float) SIZE) {
                     flat = false;
                     break;
                 }
@@ -112,8 +112,8 @@ public final class MoldWorldMesh {
         float v = (cellY + 0.5f) / SIZE;
 
         addQuad(point(ax, ay, -surface.depth(ax, ay), u, v),
-                point(bx, by, -surface.depth(bx, by), u, v),
-                point(bx, by, -THICKNESS, u, v), point(ax, ay, -THICKNESS, u, v));
+            point(bx, by, -surface.depth(bx, by), u, v),
+            point(bx, by, -THICKNESS, u, v), point(ax, ay, -THICKNESS, u, v));
     }
 
     private Point top(int x, int y) {
@@ -126,7 +126,7 @@ public final class MoldWorldMesh {
 
     private Point point(int x, int y, float z, float u, float v) {
         return new Point(surface.positionX(x, y) - 0.5f, surface.positionY(x, y) - 0.5f, z,
-                u, v, surface.illumination(x, y));
+            u, v, surface.illumination(x, y));
     }
 
     private void addTriangle(Point a, Point b, Point c) {
@@ -146,7 +146,7 @@ public final class MoldWorldMesh {
         float length = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
         if (length == 0)
             return;
-        
+
         nx /= length;
         ny /= length;
         nz /= length;

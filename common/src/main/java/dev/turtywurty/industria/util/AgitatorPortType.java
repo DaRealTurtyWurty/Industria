@@ -16,15 +16,13 @@ public enum AgitatorPortType implements IndustriaEnum<AgitatorPortType> {
     SLURRY;
 
     public static final Codec<AgitatorPortType> CODEC = Codec.STRING.xmap(
-            AgitatorPortType::fromName,
-            AgitatorPortType::getSerializedName
-    );
+        AgitatorPortType::fromName,
+        AgitatorPortType::getSerializedName);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorPortType> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT,
-            AgitatorPortType::ordinal,
-            AgitatorPortType::fromOrdinal
-    );
+        ByteBufCodecs.INT,
+        AgitatorPortType::ordinal,
+        AgitatorPortType::fromOrdinal);
     private final String serializedName = name().toLowerCase(Locale.ROOT);
     private final Component text = Component.literal(switch (this) {
         case ITEM -> "Item";

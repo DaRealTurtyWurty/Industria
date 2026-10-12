@@ -25,12 +25,12 @@ public class TreeTapBlock extends IndustriaBlock {
 
     public TreeTapBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing()
-                .hasBlockEntityRenderer()
-                .canExistAt(TreeTapBlock::canExist)
-                .useRotatedShapes(SHAPE)
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.TREE_TAP)
-                        .shouldTick()));
+            .hasHorizontalFacing()
+            .hasBlockEntityRenderer()
+            .canExistAt(TreeTapBlock::canExist)
+            .useRotatedShapes(SHAPE)
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.TREE_TAP)
+                .shouldTick()));
     }
 
     @Override
@@ -46,7 +46,12 @@ public class TreeTapBlock extends IndustriaBlock {
         return state.setValue(BlockStateProperties.HORIZONTAL_FACING, facing.getOpposite());
     }
 
-    public static Set<BlockPos> findLatexSources(LevelReader level, BlockPos pos, Set<BlockPos> previouslyVisited, Set<BlockPos> visited) {
+    public static Set<BlockPos> findLatexSources(
+        LevelReader level,
+        BlockPos pos,
+        Set<BlockPos> previouslyVisited,
+        Set<BlockPos> visited
+    ) {
         visited.add(pos);
 
         for (int[] offset : CONNECTED_OFFSETS) {
@@ -68,12 +73,16 @@ public class TreeTapBlock extends IndustriaBlock {
         return isLatexSourceTapped(level, sources, null);
     }
 
-    public static boolean isLatexSourceTapped(LevelReader level, Set<BlockPos> sources, @Nullable BlockPos ignoredTapPos) {
+    public static boolean isLatexSourceTapped(
+        LevelReader level,
+        Set<BlockPos> sources,
+        @Nullable BlockPos ignoredTapPos
+    ) {
         for (BlockPos source : sources) {
             for (Direction direction : Direction.values()) {
                 BlockPos neighbourPos = source.relative(direction);
                 if (level.getBlockState(neighbourPos).getBlock() instanceof TreeTapBlock
-                        && !Objects.equals(neighbourPos, ignoredTapPos))
+                    && !Objects.equals(neighbourPos, ignoredTapPos))
                     return true;
             }
         }
@@ -124,7 +133,14 @@ public class TreeTapBlock extends IndustriaBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, @Nullable Orientation wireOrientation, boolean notify) {
+    protected void neighborChanged(
+        BlockState state,
+        Level world,
+        BlockPos pos,
+        Block sourceBlock,
+        @Nullable Orientation wireOrientation,
+        boolean notify
+    ) {
         super.neighborChanged(state, world, pos, sourceBlock, wireOrientation, notify);
         if (!world.isClientSide() && world.getBlockEntity(pos) instanceof TreeTapBlockEntity treeTapBlockEntity) {
             treeTapBlockEntity.markLatexNetworkDirty();

@@ -23,7 +23,8 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, int processTime)
-        implements Recipe<DigesterRecipeInput> {
+    implements
+        Recipe<DigesterRecipeInput> {
     @Override
     public boolean matches(DigesterRecipeInput input, Level world) {
         return input.slurryStack().matches(this.inputSlurry);
@@ -57,11 +58,10 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
     @Override
     public List<RecipeDisplay> display() {
         return List.of(new DigesterRecipeDisplay(
-                this.inputSlurry,
-                new SlotDisplay.ItemSlotDisplay(ModBlocks.DIGESTER.get().asItem()),
-                this.outputFluid,
-                this.processTime
-        ));
+            this.inputSlurry,
+            new SlotDisplay.ItemSlotDisplay(ModBlocks.DIGESTER.get().asItem()),
+            this.outputFluid,
+            this.processTime));
     }
 
     @Override
@@ -92,40 +92,44 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
     }
 
     private static final MapCodec<DigesterRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipe::inputSlurry),
-            FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipe::outputFluid),
-            Codec.INT.fieldOf("process_time").forGetter(DigesterRecipe::processTime)
-    ).apply(instance, DigesterRecipe::new));
+        SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipe::inputSlurry),
+        FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipe::outputFluid),
+        Codec.INT.fieldOf("process_time").forGetter(DigesterRecipe::processTime)).apply(instance, DigesterRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipe> STREAM_CODEC = StreamCodec.composite(
-            SlurryStack.STREAM_CODEC, DigesterRecipe::inputSlurry,
-            FluidStack.STREAM_CODEC, DigesterRecipe::outputFluid,
-            ByteBufCodecs.INT, DigesterRecipe::processTime,
-            DigesterRecipe::new
-    );
+        SlurryStack.STREAM_CODEC, DigesterRecipe::inputSlurry,
+        FluidStack.STREAM_CODEC, DigesterRecipe::outputFluid,
+        ByteBufCodecs.INT, DigesterRecipe::processTime,
+        DigesterRecipe::new);
 
     public static final RecipeSerializer<DigesterRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    public record DigesterRecipeDisplay(SlurryStack inputSlurry, SlotDisplay craftingStation, FluidStack outputFluid, int processTime)
-            implements RecipeDisplay {
+    public record DigesterRecipeDisplay(
+        SlurryStack inputSlurry,
+        SlotDisplay craftingStation,
+        FluidStack outputFluid,
+        int processTime
+    )
+        implements
+            RecipeDisplay {
         public static final MapCodec<DigesterRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
-                instance -> instance.group(
-                        SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipeDisplay::inputSlurry),
-                        SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(DigesterRecipeDisplay::craftingStation),
-                        FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipeDisplay::outputFluid),
-                        Codec.INT.fieldOf("process_time").forGetter(DigesterRecipeDisplay::processTime)
-                ).apply(instance, DigesterRecipeDisplay::new)
-        );
+            instance -> instance.group(
+                SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipeDisplay::inputSlurry),
+                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(DigesterRecipeDisplay::craftingStation),
+                FluidStack.CODEC.fieldOf("output_fluid").forGetter(DigesterRecipeDisplay::outputFluid),
+                Codec.INT.fieldOf("process_time").forGetter(DigesterRecipeDisplay::processTime))
+                .apply(instance, DigesterRecipeDisplay::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipeDisplay> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, DigesterRecipeDisplay> STREAM_CODEC = StreamCodec
+            .composite(
                 SlurryStack.STREAM_CODEC, DigesterRecipeDisplay::inputSlurry,
                 SlotDisplay.STREAM_CODEC, DigesterRecipeDisplay::craftingStation,
                 FluidStack.STREAM_CODEC, DigesterRecipeDisplay::outputFluid,
                 ByteBufCodecs.INT, DigesterRecipeDisplay::processTime,
-                DigesterRecipeDisplay::new
-        );
+                DigesterRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<DigesterRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC, STREAM_CODEC);
+        public static final RecipeDisplay.Type<DigesterRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+            STREAM_CODEC);
 
         @Override
         public SlotDisplay result() {
