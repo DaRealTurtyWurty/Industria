@@ -31,7 +31,7 @@ public class ModScreens {
         ClientMenus.register(ModMenuTypes.AGITATOR, AgitatorScreen::new);
         ClientMenus.register(ModMenuTypes.DISTILLATION_TOWER, DistillationTowerScreen::new);
         ClientMenus.register(ModMenuTypes.CHARGING_HATCH, ChargingHatchScreen::new);
-        ClientMenus.register(ModMenuTypes.FIREBOX, FireboxScreen::new);
+        ClientMenus.register(ModMenuTypes.FUELBOX, FuelboxScreen::new);
         ClientMenus.register(ModMenuTypes.SMELTERY_CONTROLLER, SmelteryControllerScreen::new);
         ClientMenus.register(ModMenuTypes.MOLDING_TABLE, MoldingTableScreen::new);
         ClientMenus.register(ModMenuTypes.CASTING_TABLE, CastingTableScreen::new);

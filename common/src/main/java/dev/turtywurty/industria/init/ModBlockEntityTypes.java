@@ -173,9 +173,9 @@ public class ModBlockEntityTypes {
         "charging_hatch",
         ChargingHatchBlockEntity::new, builder -> builder.validBlock(ModBlocks.CHARGING_HATCH));
 
-    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<FireboxBlockEntity>> FIREBOX = register(
-        "firebox",
-        FireboxBlockEntity::new, builder -> builder.validBlock(ModBlocks.FIREBOX));
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<FuelboxBlockEntity>> FUELBOX = register(
+        "fuelbox",
+        FuelboxBlockEntity::new, builder -> builder.validBlock(ModBlocks.FUELBOX));
 
     public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<TappingOutletBlockEntity>> TAPPING_OUTLET = register(
         "tapping_outlet",

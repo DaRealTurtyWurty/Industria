@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_c:sands": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:sands"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_clay_ball": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:clay_ball"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_nether_brick": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:nether_brick"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "industria:unfired_firebrick"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_clay_ball",
+      "has_nether_brick",
+      "has_c:sands"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:unfired_firebrick"
+    ]
+  }
+}

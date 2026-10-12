@@ -8,7 +8,7 @@ import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInvent
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
-import dev.turtywurty.industria.menu.FireboxMenu;
+import dev.turtywurty.industria.menu.FuelboxMenu;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.util.FuelUtils;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -35,12 +35,12 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
-public class FireboxBlockEntity extends IndustriaBlockEntity
+public class FuelboxBlockEntity extends IndustriaBlockEntity
     implements
         BlockEntityContentsDropper,
         BlockEntityWithGui<BlockPosPayload>,
         TickableBlockEntity {
-    public static final Component TITLE = Industria.containerTitle("firebox");
+    public static final Component TITLE = Industria.containerTitle("fuelbox");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
@@ -77,8 +77,8 @@ public class FireboxBlockEntity extends IndustriaBlockEntity
         }
     };
 
-    public FireboxBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.FIREBOX.get(), ModBlockEntityTypes.FIREBOX.get(), pos, state);
+    public FuelboxBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlocks.FUELBOX.get(), ModBlockEntityTypes.FUELBOX.get(), pos, state);
         this.wrappedContainerStorage.addInventory(
             new PredicateSimpleInventory(this, 3,
                 (itemStack, _) -> isFuel(itemStack)));
@@ -128,7 +128,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity
 
     @Override
     public Block getBlock() {
-        return ModBlocks.FIREBOX.get();
+        return ModBlocks.FUELBOX.get();
     }
 
     @Override
@@ -156,7 +156,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int syncId, Inventory inventory, Player player) {
-        return new FireboxMenu(syncId, inventory, this, this.wrappedContainerStorage, this.menuData);
+        return new FuelboxMenu(syncId, inventory, this, this.wrappedContainerStorage, this.menuData);
     }
 
     public boolean isBurning() {

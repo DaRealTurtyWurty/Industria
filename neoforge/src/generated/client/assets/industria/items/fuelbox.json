@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "industria:block/firebox"
+    "model": "industria:block/fuelbox"
   }
 }

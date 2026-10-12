@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": "minecraft:clay",
+    "P": "minecraft:paper"
+  },
+  "pattern": [
+    "C C",
+    " P ",
+    "C C"
+  ],
+  "result": {
+    "count": 4,
+    "id": "industria:blank_clay_cast"
+  }
+}

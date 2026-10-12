@@ -29,7 +29,7 @@ public final class SmelteryTestWorld {
         context.fillAir(1, 1, 1, 3, 1, 3);
         context.fillAir(1, 3, 1, 3, 4, 3);
 
-        context.setBlock(0, 1, 2, ModBlocks.FIREBOX.get().defaultBlockState()
+        context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
         context.setBlock(2, 3, 0, ModBlocks.CHARGING_HATCH.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
@@ -47,7 +47,7 @@ public final class SmelteryTestWorld {
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
 
         LOGGER.info(
-            "Smeltery test fixture: controller={}, hatch={}, firebox={}, chimney={}, outlet={}, basin={}, table outlet={}, casting table={}, spare parts={}",
+            "Smeltery test fixture: controller={}, hatch={}, fuelbox={}, chimney={}, outlet={}, basin={}, table outlet={}, casting table={}, spare parts={}",
             context.pos(1, 3, 0), context.pos(2, 3, 0), context.pos(0, 1, 2),
             context.pos(2, 6, 2), context.pos(5, 3, 2), context.pos(5, 2, 2),
             context.pos(5, 3, 3), context.pos(5, 2, 3), context.pos(2, 0, -3));

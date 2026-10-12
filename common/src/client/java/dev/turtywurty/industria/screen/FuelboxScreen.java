@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
-import dev.turtywurty.industria.menu.FireboxMenu;
+import dev.turtywurty.industria.menu.FuelboxMenu;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -10,10 +10,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 
-public class FireboxScreen extends AbstractContainerScreen<FireboxMenu> {
-    private static final Identifier TEXTURE = Industria.id("textures/gui/container/firebox.png");
+public class FuelboxScreen extends AbstractContainerScreen<FuelboxMenu> {
+    private static final Identifier TEXTURE = Industria.id("textures/gui/container/fuelbox.png");
 
-    public FireboxScreen(FireboxMenu handler, Inventory inventory, Component title) {
+    public FuelboxScreen(FuelboxMenu handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": "#c:player_workstations/crafting_tables",
+    "I": "#c:ingots/iron",
+    "P": "minecraft:oak_planks"
+  },
+  "pattern": [
+    "PPP",
+    "ICI",
+    "P P"
+  ],
+  "result": {
+    "id": "industria:molding_table"
+  }
+}

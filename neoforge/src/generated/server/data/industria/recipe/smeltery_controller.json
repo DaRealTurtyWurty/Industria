@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "F": "industria:firebrick",
+    "I": "#c:ingots/iron",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "FIF",
+    "IRI",
+    "FIF"
+  ],
+  "result": {
+    "id": "industria:smeltery_controller"
+  }
+}

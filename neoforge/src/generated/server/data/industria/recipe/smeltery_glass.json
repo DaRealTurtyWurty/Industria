@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "F": "industria:firebrick",
+    "G": "#c:glass_blocks",
+    "Q": "#c:gems/quartz"
+  },
+  "pattern": [
+    "FGF",
+    "GQG",
+    "FGF"
+  ],
+  "result": {
+    "count": 4,
+    "id": "industria:smeltery_glass"
+  }
+}

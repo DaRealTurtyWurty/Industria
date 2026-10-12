@@ -71,7 +71,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
     private final List<SmelteryChamber> chambers = new ArrayList<>();
     private final List<RetainedChamberFluid> retainedFluids = new ArrayList<>();
-    private BlockPos fireBoxPos = null;
+    private BlockPos fuelBoxPos = null;
     private boolean structureReady;
     private float temperature = AMBIENT_TEMPERATURE;
     private boolean keepMolten = false;
@@ -94,7 +94,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.store("Chambers", this.chambersCodec, this.chambers);
-        output.storeNullable("FireBoxPos", BlockPos.CODEC, this.fireBoxPos);
+        output.storeNullable("FuelBoxPos", BlockPos.CODEC, this.fuelBoxPos);
         output.store("RetainedFluids", RetainedChamberFluid.CODEC.listOf(), this.retainedFluids);
         output.putFloat("Temperature", this.temperature);
         output.putBoolean("KeepMolten", this.keepMolten);
@@ -118,7 +118,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         this.chambers.clear();
         this.chambers.addAll(input.read("Chambers", this.chambersCodec).orElseGet(List::of));
 
-        this.fireBoxPos = input.read("FireBoxPos", BlockPos.CODEC).orElse(null);
+        this.fuelBoxPos = input.read("FuelBoxPos", BlockPos.CODEC).orElse(null);
 
         this.retainedFluids.clear();
         this.retainedFluids
@@ -141,13 +141,13 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         float targetTemperature = getTargetTemperature();
         boolean heating = false;
         if (this.structureReady
-            && this.fireBoxPos != null
-            && this.level.isLoaded(this.fireBoxPos)
-            && this.level.getBlockEntity(this.fireBoxPos) instanceof FireboxBlockEntity firebox
+            && this.fuelBoxPos != null
+            && this.level.isLoaded(this.fuelBoxPos)
+            && this.level.getBlockEntity(this.fuelBoxPos) instanceof FuelboxBlockEntity fuelbox
             && targetTemperature > AMBIENT_TEMPERATURE
             && this.temperature <= targetTemperature) {
-            firebox.setFuelSpaceSize(this.fuelSpaceSize);
-            heating = firebox.burnForTick();
+            fuelbox.setFuelSpaceSize(this.fuelSpaceSize);
+            heating = fuelbox.burnForTick();
         }
 
         updateTemperature(heating, targetTemperature);
@@ -496,28 +496,28 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
             SmelteryComponents components = collectComponents(positions);
             if (components.controllerPositions().size() != 1) {
-                this.fireBoxPos = null;
+                this.fuelBoxPos = null;
                 deactivateChambers();
                 return;
             }
 
-            Set<BlockPos> fireboxPositions = components.fireboxPositions();
+            Set<BlockPos> fuelboxPositions = components.fuelboxPositions();
             Set<BlockPos> chimneyPositions = components.chimneyPositions();
             Set<BlockPos> hatchPositions = components.hatchPositions();
             Set<BlockPos> outletPositions = components.outletPositions();
-            if (fireboxPositions.size() == 1) {
-                this.fireBoxPos = fireboxPositions.iterator().next();
+            if (fuelboxPositions.size() == 1) {
+                this.fuelBoxPos = fuelboxPositions.iterator().next();
             } else {
-                this.fireBoxPos = null;
+                this.fuelBoxPos = null;
                 deactivateChambers();
                 return;
             }
 
             AABB boundingBox = calculateBounds(positions);
 
-            Direction fuelSpaceDirection = this.level.getBlockState(this.fireBoxPos)
+            Direction fuelSpaceDirection = this.level.getBlockState(this.fuelBoxPos)
                 .getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
-            BlockPos fuelSpaceStartPos = this.fireBoxPos.relative(fuelSpaceDirection);
+            BlockPos fuelSpaceStartPos = this.fuelBoxPos.relative(fuelSpaceDirection);
             SearchResult fuelSpaceResult = floodFillFuelSpace(fuelSpaceStartPos, boundingBox);
             if (fuelSpaceResult.type() == SearchResultType.NOT_FOUND) {
                 deactivateChambers();
@@ -558,7 +558,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
     private SmelteryComponents collectComponents(Set<BlockPos> positions) {
         Set<BlockPos> controllerPositions = new HashSet<>();
-        Set<BlockPos> fireboxPositions = new HashSet<>();
+        Set<BlockPos> fuelboxPositions = new HashSet<>();
         Set<BlockPos> chimneyPositions = new HashSet<>();
         Set<BlockPos> hatchPositions = new HashSet<>();
         Set<BlockPos> outletPositions = new HashSet<>();
@@ -567,8 +567,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             BlockState state = this.level.getBlockState(pos);
             if (state.is(ModBlocks.SMELTERY_CONTROLLER.get())) {
                 controllerPositions.add(pos);
-            } else if (state.is(ModBlocks.FIREBOX.get())) {
-                fireboxPositions.add(pos);
+            } else if (state.is(ModBlocks.FUELBOX.get())) {
+                fuelboxPositions.add(pos);
             } else if (state.is(ModBlocks.CHIMNEY.get())) {
                 chimneyPositions.add(pos);
             } else if (state.is(ModBlocks.CHARGING_HATCH.get())) {
@@ -578,7 +578,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             }
         }
 
-        return new SmelteryComponents(controllerPositions, fireboxPositions, chimneyPositions, hatchPositions,
+        return new SmelteryComponents(controllerPositions, fuelboxPositions, chimneyPositions, hatchPositions,
             outletPositions);
     }
 
@@ -1154,8 +1154,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                 if (neighborState.is(ModBlocks.FIREBRICK.get()))
                     continue;
 
-                if (neighborState.is(ModBlocks.FIREBOX.get())) {
-                    if (!neighborPos.equals(this.fireBoxPos) || !currentPos.equals(startPos))
+                if (neighborState.is(ModBlocks.FUELBOX.get())) {
+                    if (!neighborPos.equals(this.fuelBoxPos) || !currentPos.equals(startPos))
                         return SearchResult.notFound();
 
                     continue;
@@ -1265,7 +1265,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
     private boolean isValidSmelteryBlock(BlockState state) {
         return state.is(ModBlocks.FIREBRICK.get())
             || state.is(ModBlocks.SMELTERY_CONTROLLER.get())
-            || state.is(ModBlocks.FIREBOX.get())
+            || state.is(ModBlocks.FUELBOX.get())
             || state.is(ModBlocks.CHARGING_HATCH.get())
             || state.is(ModBlocks.CHIMNEY.get())
             || state.is(ModBlocks.TAPPING_OUTLET.get())
@@ -1425,7 +1425,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
     private record SmelteryComponents(
         Set<BlockPos> controllerPositions,
-        Set<BlockPos> fireboxPositions,
+        Set<BlockPos> fuelboxPositions,
         Set<BlockPos> chimneyPositions,
         Set<BlockPos> hatchPositions,
         Set<BlockPos> outletPositions

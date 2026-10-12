@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "F": "industria:firebrick"
+  },
+  "pattern": [
+    "F F",
+    "F F"
+  ],
+  "result": {
+    "id": "industria:chimney"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_c:ingots/iron": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ingots/iron"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:player_workstations/furnaces": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:player_workstations/furnaces"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_firebrick": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:firebrick"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_iron_trapdoor": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:iron_trapdoor"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "industria:fuelbox"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_firebrick",
+      "has_c:ingots/iron",
+      "has_c:player_workstations/furnaces",
+      "has_iron_trapdoor"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:fuelbox"
+    ]
+  }
+}

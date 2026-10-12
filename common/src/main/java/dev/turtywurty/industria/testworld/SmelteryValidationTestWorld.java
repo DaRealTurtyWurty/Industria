@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import dev.turtywurty.industria.blockentity.CastingBasinBlockEntity;
 import dev.turtywurty.industria.blockentity.ChargingHatchBlockEntity;
-import dev.turtywurty.industria.blockentity.FireboxBlockEntity;
+import dev.turtywurty.industria.blockentity.FuelboxBlockEntity;
 import dev.turtywurty.industria.blockentity.SmelteryControllerBlockEntity;
 import dev.turtywurty.industria.blockentity.TappingOutletBlockEntity;
 import dev.turtywurty.industria.blockentity.util.StorageOperations;
@@ -13,7 +13,7 @@ import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModFluids;
 import dev.turtywurty.industria.init.ModItems;
 import dev.turtywurty.industria.menu.ChargingHatchMenu;
-import dev.turtywurty.industria.menu.FireboxMenu;
+import dev.turtywurty.industria.menu.FuelboxMenu;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.network.ChargingHatchOpenPayload;
 import dev.turtywurty.industria.recipe.SmelteryRecipe;
@@ -244,10 +244,10 @@ public final class SmelteryValidationTestWorld {
                 s.expect(0, s.expected(1, 51, 4 * BLOCK));
                 var hatch = s.context.requireBlockEntity(26, 3, 0, ChargingHatchBlockEntity.class);
                 check(hatch.getChamber() == null, "Unloaded structure still resolves an operational hatch");
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 2));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 2));
             })
             .step(40, "unloaded structure does not start new fuel", s -> {
-                check(s.firebox().getBurnTime() == 0 && s.fuelCount(Items.COAL) == 2,
+                check(s.fuelbox().getBurnTime() == 0 && s.fuelCount(Items.COAL) == 2,
                     "Unloaded structure consumed fuel");
                 s.expect(0, s.expected(1, 51, 4 * BLOCK));
             });
@@ -258,12 +258,12 @@ public final class SmelteryValidationTestWorld {
         invalidStructure(suite, "second connected controller", s -> s.context.setBlock(4, 2, -1,
             ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)));
-        invalidStructure(suite, "second firebox", s -> s.context.setBlock(4, 1, 2,
-            ModBlocks.FIREBOX.get().defaultBlockState()
+        invalidStructure(suite, "second fuelbox", s -> s.context.setBlock(4, 1, 2,
+            ModBlocks.FUELBOX.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)));
-        invalidStructure(suite, "missing firebox", s -> s.context.removeBlock(0, 1, 2));
-        invalidStructure(suite, "firebox faces into structure", s -> s.context.setBlock(0, 1, 2,
-            ModBlocks.FIREBOX.get().defaultBlockState()
+        invalidStructure(suite, "missing fuelbox", s -> s.context.removeBlock(0, 1, 2));
+        invalidStructure(suite, "fuelbox faces into structure", s -> s.context.setBlock(0, 1, 2,
+            ModBlocks.FUELBOX.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)));
         invalidStructure(suite, "missing hatch", s -> s.context.setBlock(2, 3, 0, ModBlocks.FIREBRICK));
         invalidStructure(suite, "hatch faces into chamber", s -> s.context.setBlock(2, 3, 0,
@@ -355,17 +355,17 @@ public final class SmelteryValidationTestWorld {
             });
 
         suite.scenario("deactivation clears empty chamber hatch link", 4)
-            .step(60, "remove firebox from empty chamber", s -> {
+            .step(60, "remove fuelbox from empty chamber", s -> {
                 s.expectHatchLink(true);
                 s.context.removeBlock(0, 1, 2);
             })
             .step(40, "empty chamber hatch unlinked", s -> {
                 s.expect(0);
                 s.expectHatchLink(false);
-                s.context.setBlock(0, 1, 2, ModBlocks.FIREBOX.get().defaultBlockState()
+                s.context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
                     .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
             })
-            .step(40, "firebox repair restores link", s -> {
+            .step(40, "fuelbox repair restores link", s -> {
                 s.expect(0, s.expected(1, 3, 0));
                 s.expectHatchLink(true);
             });
@@ -684,28 +684,28 @@ public final class SmelteryValidationTestWorld {
                     "Physical shrink overflow did not survive reload");
             });
 
-        suite.scenario("firebox consumes one coal and counts down once per tick", 4)
+        suite.scenario("fuelbox consumes one coal and counts down once per tick", 4)
             .step(60, "insert coal with pending work", s -> s.startWorkingWithFuel(Items.COAL, 3))
             .step(1, "first fuel lights immediately", s -> {
-                var firebox = s.firebox();
+                var fuelbox = s.fuelbox();
                 int duration = FuelUtils.burnDuration(s.context.overworld(), new ItemStack(Items.COAL));
                 check(s.fuelCount(Items.COAL) == 2, "Starting fire did not consume exactly one coal");
-                check(firebox.getMaxBurnTime() == duration, "Maximum duration differs from fuel value");
-                check(firebox.getBurnTime() >= duration - 1 && firebox.getBurnTime() <= duration,
+                check(fuelbox.getMaxBurnTime() == duration, "Maximum duration differs from fuel value");
+                check(fuelbox.getBurnTime() >= duration - 1 && fuelbox.getBurnTime() <= duration,
                     "Burn duration started incorrectly");
-                check(firebox.getBlockState().getValue(BlockStateProperties.LIT),
-                    "Starting coal did not light firebox");
-                check(!firebox.tryStartFuel() && s.fuelCount(Items.COAL) == 2, "Burning firebox consumed extra coal");
-                s.lastBurnTime = firebox.getBurnTime();
+                check(fuelbox.getBlockState().getValue(BlockStateProperties.LIT),
+                    "Starting coal did not light fuelbox");
+                check(!fuelbox.tryStartFuel() && s.fuelCount(Items.COAL) == 2, "Burning fuelbox consumed extra coal");
+                s.lastBurnTime = fuelbox.getBurnTime();
                 s.lastGameTime = s.context.overworld().getGameTime();
             })
             .step(40, "one decrement per actual server tick", s -> {
                 long elapsed = s.context.overworld().getGameTime() - s.lastGameTime;
-                check(s.firebox().getBurnTime() == s.lastBurnTime - elapsed, "Fuel countdown is not once per tick");
+                check(s.fuelbox().getBurnTime() == s.lastBurnTime - elapsed, "Fuel countdown is not once per tick");
                 check(s.fuelCount(Items.COAL) == 2, "Ongoing burn consumed another item");
             });
 
-        suite.scenario("valid firebox starts next fuel after expiry", 4)
+        suite.scenario("valid fuelbox starts next fuel after expiry", 4)
             .step(60, "start first fuel", s -> s.startWorkingWithFuel(Items.COAL, 3))
             .step(1, "shorten remaining burn for expiry test", s -> {
                 check(s.fuelCount(Items.COAL) == 2, "First fuel was not consumed");
@@ -713,8 +713,8 @@ public final class SmelteryValidationTestWorld {
             })
             .step(5, "next item starts exactly once", s -> {
                 check(s.fuelCount(Items.COAL) == 1, "Expiry consumed wrong number of fuel items");
-                check(s.firebox().isBurning(), "Valid structure did not restart fire after expiry");
-                check(s.firebox().getBlockState().getValue(BlockStateProperties.LIT), "Restarted firebox is unlit");
+                check(s.fuelbox().isBurning(), "Valid structure did not restart fire after expiry");
+                check(s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT), "Restarted fuelbox is unlit");
             });
 
         suite.scenario("invalid structure pauses existing fuel until repair", 4)
@@ -726,62 +726,62 @@ public final class SmelteryValidationTestWorld {
             })
             .step(40, "invalid chamber retains fuel already burning", s -> {
                 s.expectHatchLink(false);
-                check(!s.firebox().isBurning() && s.remainingUnits() > 0 && s.remainingUnits() < 720,
+                check(!s.fuelbox().isBurning() && s.remainingUnits() > 0 && s.remainingUnits() < 720,
                     "Invalidation did not pause the existing fire");
                 s.lastFuelUnits = s.remainingUnits();
                 check(s.fuelCount(Items.COAL) == 1, "Invalidation consumed a new coal");
             })
             .step(60, "paused invalid fire stays off", s -> {
-                check(!s.firebox().isBurning() && s.fuelCount(Items.COAL) == 1, "Invalid structure restarted fuel");
+                check(!s.fuelbox().isBurning() && s.fuelCount(Items.COAL) == 1, "Invalid structure restarted fuel");
                 check(s.remainingUnits() == s.lastFuelUnits, "Invalid structure drained saved fuel energy");
-                check(!s.firebox().getBlockState().getValue(BlockStateProperties.LIT), "Idle firebox stays lit");
+                check(!s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT), "Idle fuelbox stays lit");
                 s.context.setBlock(2, 6, 2, ModBlocks.CHIMNEY);
             })
             .step(40, "repair permits new fuel", s -> {
                 s.expectHatchLink(true);
-                check(s.firebox().isBurning() && s.fuelCount(Items.COAL) == 1
+                check(s.fuelbox().isBurning() && s.fuelCount(Items.COAL) == 1
                     && s.remainingUnits() < s.lastFuelUnits, "Repair failed to reuse saved fuel");
             });
 
-        suite.scenario("standalone firebox does not start itself", 4)
+        suite.scenario("standalone fuelbox does not start itself", 4)
             .step(60, "remove controller before inserting coal", s -> {
                 s.context.removeBlock(0, 3, 1);
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
             })
-            .step(40, "uncontrolled firebox retains all fuel", s -> {
-                check(s.fuelCount(Items.COAL) == 3 && !s.firebox().isBurning(), "Standalone firebox consumed fuel");
-                check(!s.firebox().getBlockState().getValue(BlockStateProperties.LIT), "Standalone firebox lit itself");
+            .step(40, "uncontrolled fuelbox retains all fuel", s -> {
+                check(s.fuelCount(Items.COAL) == 3 && !s.fuelbox().isBurning(), "Standalone fuelbox consumed fuel");
+                check(!s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT), "Standalone fuelbox lit itself");
             });
 
-        suite.scenario("firebox fuel remainder merges before filling its emptied slot", 4)
+        suite.scenario("fuelbox fuel remainder merges before filling its emptied slot", 4)
             .step(60, "consume lava fuel alongside existing buckets", s -> {
-                var inventory = s.firebox().getInventory();
+                var inventory = s.fuelbox().getInventory();
                 inventory.setItem(0, new ItemStack(Items.LAVA_BUCKET));
                 inventory.setItem(1, new ItemStack(Items.BUCKET, 5));
                 inventory.setItem(2, new ItemStack(Items.COAL, 64));
-                check(s.firebox().tryStartFuel(), "Lava fuel did not start");
+                check(s.fuelbox().tryStartFuel(), "Lava fuel did not start");
                 check(inventory.getItem(0).isEmpty() && inventory.getItem(1).getCount() == 6,
                     "Fuel remainder used an empty slot instead of merging existing buckets");
                 check(s.fuelCount(Items.BUCKET) == 6 && s.fuelCount(Items.COAL) == 64,
                     "Remainder placement changed unrelated fuel or bucket totals");
             });
 
-        suite.scenario("firebox full bucket stack uses an empty slot", 4)
+        suite.scenario("fuelbox full bucket stack uses an empty slot", 4)
             .step(60, "consume lava beside a full remainder stack", s -> {
-                var inventory = s.firebox().getInventory();
+                var inventory = s.fuelbox().getInventory();
                 int bucketLimit = new ItemStack(Items.BUCKET).getMaxStackSize();
                 inventory.setItem(0, new ItemStack(Items.LAVA_BUCKET));
                 inventory.setItem(1, new ItemStack(Items.BUCKET, bucketLimit));
                 inventory.setItem(2, new ItemStack(Items.COAL, 64));
-                check(s.firebox().tryStartFuel(), "Lava fuel did not start");
+                check(s.fuelbox().tryStartFuel(), "Lava fuel did not start");
                 check(inventory.getItem(0).is(Items.BUCKET) && inventory.getItem(0).getCount() == 1
                     && inventory.getItem(1).getCount() == bucketLimit,
                     "Full remainder stack overflowed or empty slot lost its bucket");
             });
 
-        suite.scenario("firebox remainder partly merges and drops only excess", 4)
+        suite.scenario("fuelbox remainder partly merges and drops only excess", 4)
             .step(60, "route a multi-item remainder into a full inventory", s -> {
-                var inventory = s.firebox().getInventory();
+                var inventory = s.fuelbox().getInventory();
                 int bucketLimit = new ItemStack(Items.BUCKET).getMaxStackSize();
                 inventory.setItem(0, new ItemStack(Items.BUCKET, bucketLimit - 1));
                 inventory.setItem(1, new ItemStack(Items.COAL, 64));
@@ -796,9 +796,9 @@ public final class SmelteryValidationTestWorld {
                 check(dropped == 2, "Full inventory did not drop exactly the leftover remainder");
             });
 
-        suite.scenario("firebox remainder fills multiple slots without exceeding limits", 4)
+        suite.scenario("fuelbox remainder fills multiple slots without exceeding limits", 4)
             .step(60, "place more remainder items than one slot can hold", s -> {
-                var inventory = s.firebox().getInventory();
+                var inventory = s.fuelbox().getInventory();
                 int bucketLimit = new ItemStack(Items.BUCKET).getMaxStackSize();
                 inventory.setItem(0, new ItemStack(Items.COAL, 64));
                 s.storeFuelRemainderForTest(new ItemStack(Items.BUCKET, bucketLimit + 2));
@@ -812,9 +812,9 @@ public final class SmelteryValidationTestWorld {
             .step(1, "bucket remainder and duration preserved", s -> {
                 check(s.fuelCount(Items.LAVA_BUCKET) == 0 && s.fuelCount(Items.BUCKET) == 1,
                     "Lava fuel lost or duplicated its bucket remainder");
-                check(s.firebox().getMaxBurnTime() == FuelUtils.burnDuration(s.context.overworld(),
+                check(s.fuelbox().getMaxBurnTime() == FuelUtils.burnDuration(s.context.overworld(),
                     new ItemStack(Items.LAVA_BUCKET)), "Wrong lava duration");
-                check(s.firebox().getBlockState().getValue(BlockStateProperties.LIT), "Lava did not light immediately");
+                check(s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT), "Lava did not light immediately");
                 var storage = TransferService.get().findBlock(StorageKeys.ITEM,
                     s.context.overworld(), s.context.pos(0, 1, 2), Direction.WEST);
                 var bucket = ResourceTypes.ITEM.of(Items.BUCKET.builtInRegistryHolder());
@@ -825,30 +825,30 @@ public final class SmelteryValidationTestWorld {
                 check(s.fuelCount(Items.BUCKET) == 0, "Extracted remainder remains in inventory");
             });
 
-        suite.scenario("firebox searches later slots and skips nonfuel remainders", 4)
+        suite.scenario("fuelbox searches later slots and skips nonfuel remainders", 4)
             .step(60, "put fuel behind invalid items", s -> {
                 s.addPendingInput();
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.BUCKET));
-                s.firebox().getInventory().setItem(1, new ItemStack(Items.IRON_INGOT));
-                s.firebox().getInventory().setItem(2, new ItemStack(Items.COAL, 2));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.BUCKET));
+                s.fuelbox().getInventory().setItem(1, new ItemStack(Items.IRON_INGOT));
+                s.fuelbox().getInventory().setItem(2, new ItemStack(Items.COAL, 2));
             })
             .step(1, "third slot starts fuel without consuming other items", s -> {
-                check(s.firebox().isBurning() && s.fuelCount(Items.COAL) == 1, "Later fuel slot was skipped");
+                check(s.fuelbox().isBurning() && s.fuelCount(Items.COAL) == 1, "Later fuel slot was skipped");
                 check(s.fuelCount(Items.BUCKET) == 1 && s.fuelCount(Items.IRON_INGOT) == 1,
                     "Nonfuel items were consumed");
             });
 
-        suite.scenario("firebox storage rejects nonfuel on every side", 4)
+        suite.scenario("fuelbox storage rejects nonfuel on every side", 4)
             .step(60, "registered predicate rejects iron and accepts coal", s -> {
                 var iron = ResourceTypes.ITEM.of(Items.IRON_INGOT.builtInRegistryHolder());
                 var coal = ResourceTypes.ITEM.of(Items.COAL.builtInRegistryHolder());
                 for (Direction direction : Direction.values()) {
                     var storage = TransferService.get().findBlock(StorageKeys.ITEM,
                         s.context.overworld(), s.context.pos(0, 1, 2), direction);
-                    check(storage != null, "Missing firebox storage on " + direction);
+                    check(storage != null, "Missing fuelbox storage on " + direction);
                     try (var transaction = TransferTransaction.openRoot()) {
-                        check(storage.insert(iron, 1, transaction) == 0, "Firebox accepted nonfuel on " + direction);
-                        check(storage.insert(coal, 1, transaction) == 1, "Firebox refused fuel on " + direction);
+                        check(storage.insert(iron, 1, transaction) == 0, "Fuelbox accepted nonfuel on " + direction);
+                        check(storage.insert(coal, 1, transaction) == 1, "Fuelbox refused fuel on " + direction);
                         transaction.commit();
                     }
                 }
@@ -856,24 +856,24 @@ public final class SmelteryValidationTestWorld {
                     "Registered fuel storage changed wrong items");
             });
 
-        suite.scenario("firebox save load preserves burning fuel and inventory", 4)
+        suite.scenario("fuelbox save load preserves burning fuel and inventory", 4)
             .step(60, "start coal", s -> s.startWorkingWithFuel(Items.COAL, 3))
             .step(1, "round trip saved burn state", s -> {
-                var firebox = s.firebox();
-                int before = firebox.getBurnTime();
-                int maxBefore = firebox.getMaxBurnTime();
-                var data = firebox.saveWithoutMetadata(s.context.overworld().registryAccess());
-                firebox.getInventory().clearContent();
-                firebox.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
+                var fuelbox = s.fuelbox();
+                int before = fuelbox.getBurnTime();
+                int maxBefore = fuelbox.getMaxBurnTime();
+                var data = fuelbox.saveWithoutMetadata(s.context.overworld().registryAccess());
+                fuelbox.getInventory().clearContent();
+                fuelbox.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                     s.context.overworld().registryAccess(), data));
-                check(firebox.getBurnTime() == before && firebox.getMaxBurnTime() == maxBefore,
+                check(fuelbox.getBurnTime() == before && fuelbox.getMaxBurnTime() == maxBefore,
                     "Reload lost burn counters");
                 check(s.fuelCount(Items.COAL) == 2, "Reload changed remaining fuel inventory");
                 s.lastBurnTime = before;
                 s.lastGameTime = s.context.overworld().getGameTime();
             })
             .step(40, "saved fire keeps counting down without duplicate consumption", s -> {
-                check(s.firebox().getBurnTime() == s.lastBurnTime
+                check(s.fuelbox().getBurnTime() == s.lastBurnTime
                     - (s.context.overworld().getGameTime() - s.lastGameTime), "Reload changed countdown rate");
                 check(s.fuelCount(Items.COAL) == 2, "Reload consumed duplicate fuel");
             });
@@ -884,13 +884,13 @@ public final class SmelteryValidationTestWorld {
                 .step(60, "start fuel at derived foundation rate", s -> {
                     check(s.controller().getFuelSpaceSize() == airCount, "Incorrect fuel air count");
                     s.addPendingInput();
-                    s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
+                    s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
                 })
                 .step(1, "capture exact energy and temperature", s -> {
                     check(s.fuelCount(Items.COAL) == 2, "Expected one starting coal");
                     s.captureEnergyAndTemperature();
-                    var data = s.firebox().saveWithoutMetadata(s.context.overworld().registryAccess());
-                    s.firebox().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
+                    var data = s.fuelbox().saveWithoutMetadata(s.context.overworld().registryAccess());
+                    s.fuelbox().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                         s.context.overworld().registryAccess(), data));
                     check(s.remainingUnits() == s.lastFuelUnits, "Reload changed exact energy");
                 })
@@ -908,7 +908,7 @@ public final class SmelteryValidationTestWorld {
             .step(60, "start shared fuel", s -> {
                 check(s.controller().getFuelSpaceSize() == 21, "Common fuel space counted per chamber");
                 s.addPendingInput();
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
             })
             .step(1, "capture shared energy", Scenario::captureEnergyAndTemperature)
             .step(40, "shared heat consumes 21 units per tick",
@@ -916,9 +916,9 @@ public final class SmelteryValidationTestWorld {
                     s.remainingUnits() == s.lastFuelUnits - 21 * (s.context.overworld().getGameTime() - s.lastGameTime),
                     "Shared chambers multiplied fuel cost"));
 
-        suite.scenario("foundation growth updates existing firebox consumption", 4)
+        suite.scenario("foundation growth updates existing fuelbox consumption", 4)
             .step(60, "start coal", s -> s.startWorkingWithFuel(Items.COAL, 3))
-            .step(1, "extend foundation and chamber without replacing firebox", s -> {
+            .step(1, "extend foundation and chamber without replacing fuelbox", s -> {
                 s.context.fill(5, 0, 0, 8, 5, 4, ModBlocks.FIREBRICK.get());
                 s.context.fillAir(4, 1, 1, 7, 1, 3);
                 s.context.fillAir(4, 3, 1, 7, 4, 3);
@@ -939,7 +939,7 @@ public final class SmelteryValidationTestWorld {
             .step(40, "capture temperature after invalidation", s -> {
                 check(s.controller().getChamberForHatch(s.context.pos(2, 3, 0)) == null,
                     "Invalid structure still exposes an active chamber");
-                check(!s.firebox().isBurning() && s.firebox().hasFuelEnergy(), "Invalid structure did not pause fuel");
+                check(!s.fuelbox().isBurning() && s.fuelbox().hasFuelEnergy(), "Invalid structure did not pause fuel");
                 s.captureEnergyAndTemperature();
             })
             .step(40, "cool at expected rate", s -> {
@@ -963,7 +963,7 @@ public final class SmelteryValidationTestWorld {
                 s.load(data);
                 check(s.controller().getTemperature() == 4000.0F, "Upper temperature bound failed");
                 s.addPendingInput();
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
             })
             .step(30, "excess stored heat cools without burning fuel", s -> {
                 check(s.controller().getTemperature() < 4000.0F && s.controller().getTemperature() > 3900.0F,
@@ -977,14 +977,14 @@ public final class SmelteryValidationTestWorld {
                 s.addPendingInput();
                 long unitsPerStick = 9L * FuelUtils.burnDuration(s.context.overworld(), new ItemStack(Items.STICK));
                 check(unitsPerStick > 0, "Stick is not fuel");
-                var data = s.firebox().saveWithoutMetadata(s.context.overworld().registryAccess());
+                var data = s.fuelbox().saveWithoutMetadata(s.context.overworld().registryAccess());
                 data.putLong("RemainingFuelUnits", -2 * unitsPerStick - 1);
-                s.firebox().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
+                s.fuelbox().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                     s.context.overworld().registryAccess(), data));
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.STICK, 4));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.STICK, 4));
             })
             .step(1, "consume enough items to repay debt", s -> {
-                check(s.fuelCount(Items.STICK) == 1 && s.firebox().isBurning(),
+                check(s.fuelCount(Items.STICK) == 1 && s.fuelbox().isBurning(),
                     "Refuel stopped before repaying fuel debt");
                 s.captureEnergyAndTemperature();
             })
@@ -1165,7 +1165,7 @@ public final class SmelteryValidationTestWorld {
             .step(60, "prepare chamber just below preferred temperature", s -> {
                 s.setTemperature(s.aluminiumRecipe().preferredTemperature() - 0.25F);
                 s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
             })
             .step(1, "heating clamps without overshoot",
                 s -> check(s.controller().getTemperature() == s.aluminiumRecipe().preferredTemperature(),
@@ -1173,7 +1173,7 @@ public final class SmelteryValidationTestWorld {
             .step(10, "maintain target while melting", s -> {
                 check(
                     s.controller().getTemperature() == s.aluminiumRecipe().preferredTemperature()
-                        && s.firebox().isBurning(),
+                        && s.fuelbox().isBurning(),
                     "Loaded recipe did not maintain preferred temperature");
                 s.lastFuelUnits = s.remainingUnits();
                 s.hatch().getInventory().clearContent();
@@ -1181,7 +1181,7 @@ public final class SmelteryValidationTestWorld {
             .step(10, "no work cools without fuel", s -> {
                 check(s.controller().getTemperature() < s.aluminiumRecipe().preferredTemperature(),
                     "Idle smeltery did not cool");
-                check(s.remainingUnits() == s.lastFuelUnits && !s.firebox().isBurning(),
+                check(s.remainingUnits() == s.lastFuelUnits && !s.fuelbox().isBurning(),
                     "Empty hatch kept consuming fuel");
             });
 
@@ -1291,32 +1291,32 @@ public final class SmelteryValidationTestWorld {
                 check(s.meltingStorage().getAmount() == before, "Failed output committed partial fluid");
             });
 
-        suite.scenario("firebox menu maps fuel slots and transfers without losing items", 4)
+        suite.scenario("fuelbox menu maps fuel slots and transfers without losing items", 4)
             .step(60, "exercise server fuel menu", s -> {
                 var player = s.context.createFakePlayer(0, 1, 1,
-                    new GameProfile(UUID.randomUUID(), "FireboxMenuTest"));
-                var created = s.firebox().createMenu(1, player.getInventory(), player);
-                check(created instanceof FireboxMenu, "Firebox did not create fuel menu");
-                var menu = (FireboxMenu) created;
+                    new GameProfile(UUID.randomUUID(), "FuelboxMenuTest"));
+                var created = s.fuelbox().createMenu(1, player.getInventory(), player);
+                check(created instanceof FuelboxMenu, "Fuelbox did not create fuel menu");
+                var menu = (FuelboxMenu) created;
                 check(menu.slots.size() == 39, "Expected three fuel and 36 player slots");
                 for (int index = 0; index < 3; index++) {
                     var slot = menu.getSlot(index);
-                    check(slot.container == s.firebox().getInventory(), "Fuel slot uses wrong inventory");
+                    check(slot.container == s.fuelbox().getInventory(), "Fuel slot uses wrong inventory");
                     check(slot.x == 62 + index * 18 && slot.y == 35, "Fuel slot does not align with texture");
                     check(slot.mayPlace(new ItemStack(Items.COAL)), "Fuel slot rejects coal");
                     check(!slot.mayPlace(new ItemStack(Items.IRON_INGOT))
                         && !slot.mayPlace(new ItemStack(Items.BUCKET)), "Fuel slot accepts nonfuel");
-                    s.firebox().getInventory().setItem(index, new ItemStack(Items.COAL, index + 1));
+                    s.fuelbox().getInventory().setItem(index, new ItemStack(Items.COAL, index + 1));
                     check(slot.getItem().getCount() == index + 1, "Fuel slot maps to wrong index");
                 }
-                s.firebox().getInventory().clearContent();
+                s.fuelbox().getInventory().clearContent();
                 player.getInventory().clearContent();
                 player.getInventory().setItem(0, new ItemStack(Items.IRON_INGOT, 10));
                 check(menu.quickMoveStack(player, 30).isEmpty(), "Shift click inserted nonfuel");
                 check(player.getInventory().getItem(0).getCount() == 10 && s.fuelCount(Items.IRON_INGOT) == 0,
                     "Rejected transfer changed inventory");
                 player.getInventory().setItem(0, new ItemStack(Items.COAL, 10));
-                check(menu.quickMoveStack(player, 30).getCount() == 10, "Player-to-firebox shift click failed");
+                check(menu.quickMoveStack(player, 30).getCount() == 10, "Player-to-fuelbox shift click failed");
                 check(s.fuelCount(Items.COAL) == 10 && player.getInventory().getItem(0).isEmpty(),
                     "Fuel insertion duplicated or lost coal");
                 check(menu.quickMoveStack(player, 0).getCount() == 10, "Fuel extraction shift click failed");
@@ -1329,27 +1329,27 @@ public final class SmelteryValidationTestWorld {
                 }
                 check(s.fuelCount(Items.COAL) == 0 && playerCoal == 10,
                     "Fuel extraction duplicated or lost coal");
-                s.firebox().getInventory().setItem(2, new ItemStack(Items.BUCKET));
+                s.fuelbox().getInventory().setItem(2, new ItemStack(Items.BUCKET));
                 check(menu.quickMoveStack(player, 2).getCount() == 1 && s.fuelCount(Items.BUCKET) == 0,
                     "Menu traps fuel remainder bucket");
-                check(menu.stillValid(player), "Nearby player cannot use firebox menu");
+                check(menu.stillValid(player), "Nearby player cannot use fuelbox menu");
                 player.setPos(s.context.origin().getX() + 100, s.context.origin().getY() + 1,
                     s.context.origin().getZ());
-                check(!menu.stillValid(player), "Distant player can use firebox menu");
+                check(!menu.stillValid(player), "Distant player can use fuelbox menu");
                 player.setPos(s.context.origin().getX() + 0.5, s.context.origin().getY() + 1,
                     s.context.origin().getZ() + 1.5);
                 s.context.removeBlock(0, 1, 2);
-                check(!menu.stillValid(player), "Removed firebox remains usable");
+                check(!menu.stillValid(player), "Removed fuelbox remains usable");
                 menu.removed(player);
             });
 
-        suite.scenario("firebox payload menu copies inventory and reads synchronized burn data", 4)
+        suite.scenario("fuelbox payload menu copies inventory and reads synchronized burn data", 4)
             .step(60, "exercise payload menu data", s -> {
                 var player = s.context.createFakePlayer(0, 1, 1,
-                    new GameProfile(UUID.randomUUID(), "FireboxPayloadTest"));
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 7));
-                var menu = new FireboxMenu(1, player.getInventory(), new BlockPosPayload(s.context.pos(0, 1, 2)));
-                check(menu.slots.size() == 39 && menu.getSlot(0).container != s.firebox().getInventory(),
+                    new GameProfile(UUID.randomUUID(), "FuelboxPayloadTest"));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 7));
+                var menu = new FuelboxMenu(1, player.getInventory(), new BlockPosPayload(s.context.pos(0, 1, 2)));
+                check(menu.slots.size() == 39 && menu.getSlot(0).container != s.fuelbox().getInventory(),
                     "Payload menu has incorrect inventory");
                 check(menu.getSlot(0).getItem().isEmpty(), "Payload inventory is not initially empty");
                 check(menu.getSlot(0).mayPlace(new ItemStack(Items.COAL))
@@ -1366,36 +1366,36 @@ public final class SmelteryValidationTestWorld {
                 menu.removed(player);
             });
 
-        suite.scenario("firebox server menu exposes live normalized burn fraction", 4)
+        suite.scenario("fuelbox server menu exposes live normalized burn fraction", 4)
             .step(60, "create menu and start fuel", s -> {
                 var player = s.context.createFakePlayer(0, 1, 1,
-                    new GameProfile(UUID.randomUUID(), "FireboxBurnTest"));
-                s.fireboxMenu = (FireboxMenu) s.firebox().createMenu(1, player.getInventory(), player);
-                check(!s.fireboxMenu.isBurning() && s.fireboxMenu.getBurnProgress() == 0.0F,
+                    new GameProfile(UUID.randomUUID(), "FuelboxBurnTest"));
+                s.fuelboxMenu = (FuelboxMenu) s.fuelbox().createMenu(1, player.getInventory(), player);
+                check(!s.fuelboxMenu.isBurning() && s.fuelboxMenu.getBurnProgress() == 0.0F,
                     "Unfueled menu burn values are incorrect");
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL));
                 s.addPendingInput();
-                check(s.firebox().burnForTick(), "Could not burn coal");
-                check(s.fireboxMenu.isBurning() && s.fireboxMenu.getBurnProgress() > 0.99F,
+                check(s.fuelbox().burnForTick(), "Could not burn coal");
+                check(s.fuelboxMenu.isBurning() && s.fuelboxMenu.getBurnProgress() > 0.99F,
                     "Started fuel is not visible through menu data");
             })
             .step(40, "remaining fraction updates and expiry clears flag", s -> {
-                float exact = s.remainingUnits() / (s.firebox().getMaxBurnTime() * 9.0F);
-                check(s.fireboxMenu.isBurning() && Math.abs(s.fireboxMenu.getBurnProgress() - exact) < 0.0011F,
+                float exact = s.remainingUnits() / (s.fuelbox().getMaxBurnTime() * 9.0F);
+                check(s.fuelboxMenu.isBurning() && Math.abs(s.fuelboxMenu.getBurnProgress() - exact) < 0.0011F,
                     "Menu fraction differs from remaining fuel");
-                check(s.fireboxMenu.getBurnProgress() < 1.0F, "Menu fraction did not decrease");
+                check(s.fuelboxMenu.getBurnProgress() < 1.0F, "Menu fraction did not decrease");
                 s.setRemainingBurn(0);
-                check(!s.fireboxMenu.isBurning() && s.fireboxMenu.getBurnProgress() == 0.0F,
+                check(!s.fuelboxMenu.isBurning() && s.fuelboxMenu.getBurnProgress() == 0.0F,
                     "Expired fuel remains active through menu data");
             });
 
         suite.scenario("empty smeltery never starts fuel", 4)
             .step(60, "insert coal without work",
-                s -> s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3)))
+                s -> s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3)))
             .step(80, "idle inventory and temperature unchanged", s -> {
                 check(s.fuelCount(Items.COAL) == 3 && s.remainingUnits() == 0, "Idle smeltery consumed fuel");
-                check(!s.firebox().isBurning() && !s.firebox().getBlockState().getValue(BlockStateProperties.LIT),
-                    "Idle firebox shows burning");
+                check(!s.fuelbox().isBurning() && !s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT),
+                    "Idle fuelbox shows burning");
                 check(s.controller().getTemperature() == 20.0F, "Idle smeltery heated without work");
                 s.hatch().getInventory().setItem(0, new ItemStack(Items.STICK));
             })
@@ -1406,7 +1406,7 @@ public final class SmelteryValidationTestWorld {
         suite.scenario("removing and returning cold input pauses and resumes stored energy", 4)
             .step(60, "start heating cold input", s -> s.startWorkingWithFuel(Items.COAL, 3))
             .step(20, "remove unfinished input", s -> {
-                check(s.firebox().isBurning() && s.controller().getTemperature() > 20.0F,
+                check(s.fuelbox().isBurning() && s.controller().getTemperature() > 20.0F,
                     "Cold work did not request heating");
                 s.lastFuelUnits = s.remainingUnits();
                 s.lastTemperature = s.controller().getTemperature();
@@ -1414,30 +1414,30 @@ public final class SmelteryValidationTestWorld {
             })
             .step(40, "idle keeps remaining energy and cools", s -> {
                 check(s.remainingUnits() == s.lastFuelUnits && s.fuelCount(Items.COAL) == 2,
-                    "Idle firebox drained or refilled energy");
-                check(!s.firebox().isBurning() && !s.firebox().getBlockState().getValue(BlockStateProperties.LIT),
-                    "Idle firebox stayed active");
+                    "Idle fuelbox drained or refilled energy");
+                check(!s.fuelbox().isBurning() && !s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT),
+                    "Idle fuelbox stayed active");
                 check(s.controller().getTemperature() < s.lastTemperature, "Idle chamber failed to cool");
-                var data = s.firebox().saveWithoutMetadata(s.context.overworld().registryAccess());
-                s.firebox().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
+                var data = s.fuelbox().saveWithoutMetadata(s.context.overworld().registryAccess());
+                s.fuelbox().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                     s.context.overworld().registryAccess(), data));
             })
             .step(40, "reload preserves idle energy", s -> {
-                check(s.remainingUnits() == s.lastFuelUnits && !s.firebox().isBurning(),
+                check(s.remainingUnits() == s.lastFuelUnits && !s.fuelbox().isBurning(),
                     "Reload resumed or lost paused energy");
                 s.addPendingInput();
             })
             .step(1, "resuming reuses stored energy", s -> {
                 check(s.remainingUnits() == s.lastFuelUnits - 9 && s.fuelCount(Items.COAL) == 2,
                     "Resuming consumed new coal or incorrect energy");
-                check(s.firebox().isBurning(), "Returning input did not resume burning");
+                check(s.fuelbox().isBurning(), "Returning input did not resume burning");
             });
 
         suite.scenario("last completed batch pauses fuel until another item arrives", 4)
             .step(60, "warm chamber", Scenario::warmForMelting)
             .step(200, "insert one batch and fuel", s -> {
                 s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
-                s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 2));
+                s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 2));
             })
             .step(200, "capture energy at completion", s -> {
                 s.expectMolten(FluidAmounts.INGOT);
@@ -1447,7 +1447,7 @@ public final class SmelteryValidationTestWorld {
             .step(200, "completed chamber preserves remaining fuel", s -> {
                 check(s.remainingUnits() == s.lastFuelUnits && s.fuelCount(Items.COAL) == 2,
                     "Finished chamber continued consuming fuel");
-                check(!s.firebox().isBurning(), "Finished chamber remained active");
+                check(!s.fuelbox().isBurning(), "Finished chamber remained active");
                 s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
             })
             .step(200, "next batch uses remaining fuel", s -> {
@@ -1464,23 +1464,23 @@ public final class SmelteryValidationTestWorld {
                     s.seed(new Fluid[]{incompatible ? Fluids.WATER : ModFluids.MOLTEN_ALUMINIUM.still().get()},
                         incompatible ? FluidAmounts.BUCKET : s.meltingStorage().getCapacity());
                     s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
-                    s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
+                    s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
                 })
                 .step(80, "blocked work does not burn or consume input", s -> {
-                    check(s.remainingUnits() == 0 && s.fuelCount(Items.COAL) == 3 && !s.firebox().isBurning(),
+                    check(s.remainingUnits() == 0 && s.fuelCount(Items.COAL) == 3 && !s.fuelbox().isBurning(),
                         "Blocked output burned fuel");
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 1, "Blocked output consumed input");
                 });
         }
 
-        suite.scenario("duplicate burn requests and firebox ticks do not double consume", 4)
+        suite.scenario("duplicate burn requests and fuelbox ticks do not double consume", 4)
             .step(60, "start pending work", s -> s.startWorkingWithFuel(Items.COAL, 3))
             .step(1, "request already paid tick twice", s -> {
                 long before = s.remainingUnits();
-                check(s.firebox().burnForTick() && s.firebox().burnForTick(), "Paid tick was not recognized");
-                s.firebox().tick();
+                check(s.fuelbox().burnForTick() && s.fuelbox().burnForTick(), "Paid tick was not recognized");
+                s.fuelbox().tick();
                 check(s.remainingUnits() == before && s.fuelCount(Items.COAL) == 2,
-                    "Duplicate request or firebox tick consumed energy twice");
+                    "Duplicate request or fuelbox tick consumed energy twice");
             });
 
         suite.scenario("outlet registered extraction commits and rolls back", 4)
@@ -2021,7 +2021,7 @@ public final class SmelteryValidationTestWorld {
         private long lastFuelUnits;
         private float lastTemperature;
         private long lastFluidAmount;
-        private FireboxMenu fireboxMenu;
+        private FuelboxMenu fuelboxMenu;
         private int structureWidth;
         private ResourceStorage<ResourceVariant<Fluid>> outletStorage;
 
@@ -2105,7 +2105,7 @@ public final class SmelteryValidationTestWorld {
                 context.setBlock(center, 3, -1, ModBlocks.TAPPING_OUTLET);
                 first = last + 2;
             }
-            context.setBlock(0, 1, 2, ModBlocks.FIREBOX.get().defaultBlockState()
+            context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
             if (!(context.overworld().getBlockEntity(context.pos(0, 3, 1)) instanceof SmelteryControllerBlockEntity)) {
                 context.setBlock(0, 3, 1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
@@ -2144,23 +2144,23 @@ public final class SmelteryValidationTestWorld {
             return context.requireBlockEntity(2, 3, 0, ChargingHatchBlockEntity.class);
         }
 
-        private FireboxBlockEntity firebox() {
-            return context.requireBlockEntity(0, 1, 2, FireboxBlockEntity.class);
+        private FuelboxBlockEntity fuelbox() {
+            return context.requireBlockEntity(0, 1, 2, FuelboxBlockEntity.class);
         }
 
         private void storeFuelRemainderForTest(ItemStack remainder) {
             try {
-                var method = FireboxBlockEntity.class.getDeclaredMethod("storeFuelRemainder", ItemStack.class);
+                var method = FuelboxBlockEntity.class.getDeclaredMethod("storeFuelRemainder", ItemStack.class);
                 method.setAccessible(true);
-                method.invoke(firebox(), remainder);
+                method.invoke(fuelbox(), remainder);
             } catch (ReflectiveOperationException failure) {
-                throw new IllegalStateException("Cannot exercise firebox remainder placement", failure);
+                throw new IllegalStateException("Cannot exercise fuelbox remainder placement", failure);
             }
         }
 
         private int fuelCount(Item item) {
             int count = 0;
-            var inventory = firebox().getInventory();
+            var inventory = fuelbox().getInventory();
             for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
                 var stack = inventory.getItem(slot);
                 if (stack.is(item)) {
@@ -2183,20 +2183,20 @@ public final class SmelteryValidationTestWorld {
 
         private void startWorkingWithFuel(Item fuel, int count) {
             addPendingInput();
-            firebox().getInventory().setItem(0, new ItemStack(fuel, count));
+            fuelbox().getInventory().setItem(0, new ItemStack(fuel, count));
         }
 
         private void setRemainingBurn(int ticks) {
-            var firebox = firebox();
-            var data = firebox.saveWithoutMetadata(context.overworld().registryAccess());
+            var fuelbox = fuelbox();
+            var data = fuelbox.saveWithoutMetadata(context.overworld().registryAccess());
             data.putLong("RemainingFuelUnits", ticks * 9L);
-            firebox.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
+            fuelbox.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                 context.overworld().registryAccess(), data));
-            firebox.setChanged();
+            fuelbox.setChanged();
         }
 
         private long remainingUnits() {
-            return firebox().saveWithoutMetadata(context.overworld().registryAccess())
+            return fuelbox().saveWithoutMetadata(context.overworld().registryAccess())
                 .getLongOr("RemainingFuelUnits", 0L);
         }
 

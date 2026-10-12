@@ -92,8 +92,8 @@ public class ModMenuTypes {
     public static final ExtendedMenuRegistration<ChargingHatchMenu, ChargingHatchOpenPayload> CHARGING_HATCH = register(
         "charging_hatch", ChargingHatchMenu::new, ChargingHatchOpenPayload.CODEC);
 
-    public static final ExtendedMenuRegistration<FireboxMenu, BlockPosPayload> FIREBOX = register("firebox",
-        FireboxMenu::new, BlockPosPayload.CODEC);
+    public static final ExtendedMenuRegistration<FuelboxMenu, BlockPosPayload> FUELBOX = register("fuelbox",
+        FuelboxMenu::new, BlockPosPayload.CODEC);
 
     public static final ExtendedMenuRegistration<SmelteryControllerMenu, BlockPosPayload> SMELTERY_CONTROLLER = register(
         "smeltery_controller", SmelteryControllerMenu::new, BlockPosPayload.CODEC);

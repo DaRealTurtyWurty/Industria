@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "F": "industria:firebrick",
+    "I": "#c:ingots/iron",
+    "T": "minecraft:iron_trapdoor"
+  },
+  "pattern": [
+    " I ",
+    "ITI",
+    " F "
+  ],
+  "result": {
+    "id": "industria:charging_hatch"
+  }
+}

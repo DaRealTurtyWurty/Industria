@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "front": "industria:block/firebox_front_on",
+    "front": "industria:block/fuelbox_front_on",
     "side": "industria:block/firebrick",
     "top": "industria:block/firebrick"
   }

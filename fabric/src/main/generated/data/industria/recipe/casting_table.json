@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "F": "industria:firebrick",
+    "I": "#c:storage_blocks/iron"
+  },
+  "pattern": [
+    "FFF",
+    "I I",
+    "I I"
+  ],
+  "result": {
+    "id": "industria:casting_table"
+  }
+}

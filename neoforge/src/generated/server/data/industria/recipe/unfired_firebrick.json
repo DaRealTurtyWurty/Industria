@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": "minecraft:clay_ball",
+    "N": "minecraft:nether_brick",
+    "S": "#c:sands"
+  },
+  "pattern": [
+    "CNC",
+    "NSN",
+    "CNC"
+  ],
+  "result": {
+    "count": 4,
+    "id": "industria:unfired_firebrick"
+  }
+}

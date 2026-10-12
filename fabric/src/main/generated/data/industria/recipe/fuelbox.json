@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "F": "industria:firebrick",
+    "I": "#c:ingots/iron",
+    "T": "minecraft:iron_trapdoor",
+    "U": "#c:player_workstations/furnaces"
+  },
+  "pattern": [
+    "FIF",
+    "IUI",
+    "FTF"
+  ],
+  "result": {
+    "id": "industria:fuelbox"
+  }
+}

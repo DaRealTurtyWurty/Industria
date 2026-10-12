@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.menu;
 
-import dev.turtywurty.industria.blockentity.FireboxBlockEntity;
+import dev.turtywurty.industria.blockentity.FuelboxBlockEntity;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModMenuTypes;
@@ -16,19 +16,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 
-public class FireboxMenu extends IndustriaScreenHandler<FireboxBlockEntity, BlockPosPayload> {
-    public FireboxMenu(int syncId, Inventory playerInventory, BlockPosPayload payload) {
-        super(ModMenuTypes.FIREBOX.get(), 2, syncId, playerInventory, payload, FireboxBlockEntity.class);
+public class FuelboxMenu extends IndustriaScreenHandler<FuelboxBlockEntity, BlockPosPayload> {
+    public FuelboxMenu(int syncId, Inventory playerInventory, BlockPosPayload payload) {
+        super(ModMenuTypes.FUELBOX.get(), 2, syncId, playerInventory, payload, FuelboxBlockEntity.class);
     }
 
-    public FireboxMenu(
+    public FuelboxMenu(
         int syncId,
         Inventory playerInventory,
-        FireboxBlockEntity blockEntity,
+        FuelboxBlockEntity blockEntity,
         WrappedContainerStorage<?> wrappedContainerStorage,
         ContainerData data
     ) {
-        super(ModMenuTypes.FIREBOX.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, data);
+        super(ModMenuTypes.FUELBOX.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, data);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class FireboxMenu extends IndustriaScreenHandler<FireboxBlockEntity, Bloc
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(this.context, player, ModBlocks.FIREBOX.get());
+        return stillValid(this.context, player, ModBlocks.FUELBOX.get());
     }
 
     public float getBurnProgress() {
