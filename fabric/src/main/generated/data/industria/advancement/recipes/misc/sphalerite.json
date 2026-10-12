@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:sphalerite"
+        "recipes": "industria:sphalerite"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

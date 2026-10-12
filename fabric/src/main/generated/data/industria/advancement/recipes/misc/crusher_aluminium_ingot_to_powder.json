@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_aluminium_ingot_to_powder"
+        "recipes": "industria:crusher_aluminium_ingot_to_powder"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

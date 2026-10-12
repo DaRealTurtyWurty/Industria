@@ -2,6 +2,7 @@ package dev.turtywurty.industria.init.worldgen;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.init.ModWoodSets;
+import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Vec3i;
@@ -12,10 +13,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.*;
-
-import java.util.List;
 
 public class ModPlacedFeatures {
     public static final ResourceKey<PlacedFeature> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
@@ -27,7 +26,7 @@ public class ModPlacedFeatures {
     public static final ResourceKey<PlacedFeature> RUBBER_TREE = registerKey("rubber_tree");
 
     public static void bootstrap(BootstrapContext<PlacedFeature> context) {
-        HolderGetter<ConfiguredFeature<?, ?>> registryLookup = context.lookup(Registries.CONFIGURED_FEATURE);
+        HolderGetter<Feature> registryLookup = context.lookup(Registries.FEATURE);
 
         register(context, CRUDE_OIL_POCKET, registryLookup.getOrThrow(ModConfiguredFeatures.CRUDE_OIL_POCKET),
                 Modifiers.modifiersCount(1,
@@ -53,8 +52,7 @@ public class ModPlacedFeatures {
                         BiomeFilter.biome(),
                         BlockPredicateFilter.forPredicate(
                                 BlockPredicate.wouldSurvive(
-                                        ModWoodSets.RUBBER.sapling().get().defaultBlockState(),
-                                        new Vec3i(0, -1, 0)
+                                        ModWoodSets.RUBBER.sapling().get()
                                 )
                         ),
                         BlockPredicateFilter.forPredicate(BlockPredicate.matchesTag(BlockTags.AIR))
@@ -67,7 +65,7 @@ public class ModPlacedFeatures {
 
     private static void register(BootstrapContext<PlacedFeature> context,
                                  ResourceKey<PlacedFeature> key,
-                                 Holder<ConfiguredFeature<?, ?>> config,
+                                 Holder<Feature> config,
                                  List<PlacementModifier> modifiers) {
         context.register(key, new PlacedFeature(config, List.copyOf(modifiers)));
     }

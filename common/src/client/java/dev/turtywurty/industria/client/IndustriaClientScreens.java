@@ -14,13 +14,13 @@ public final class IndustriaClientScreens {
 
     public static void openSolarPanel(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof SolarPanelBlockEntity blockEntity) {
-            Minecraft.getInstance().setScreen(new SolarPanelScreen(blockEntity));
+            Minecraft.getInstance().gui.setScreen(new SolarPanelScreen(blockEntity));
         }
     }
 
     public static void openWindTurbine(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof WindTurbineBlockEntity blockEntity) {
-            Minecraft.getInstance().setScreen(new WindTurbineScreen(blockEntity));
+            Minecraft.getInstance().gui.setScreen(new WindTurbineScreen(blockEntity));
         }
     }
 }

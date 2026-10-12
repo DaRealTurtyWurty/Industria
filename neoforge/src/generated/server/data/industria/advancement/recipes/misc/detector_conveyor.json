@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:detector_conveyor"
+        "recipes": "industria:detector_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

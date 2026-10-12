@@ -21,6 +21,8 @@ import dev.turtywurty.industria.util.OutputItemStack;
 import dev.turtywurty.slurryapi.api.SlurryVariant;
 import dev.turtywurty.turtymultiloader.datagen.convention.ConventionTags;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
+import java.util.List;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +30,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
@@ -37,9 +41,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
@@ -47,13 +53,11 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public final class IndustriaRecipes {
     private IndustriaRecipes() {
     }
 
-    public static void generate(HolderLookup.Provider wrapperLookup, RecipeOutput exporter) {
+    public static void generate(BootstrapContext<Recipe<?>> wrapperLookup, BootstrapContext<Advancement> exporter) {
         new RecipeProvider(wrapperLookup, exporter) {
             @Override
             public void buildRecipes() {
@@ -64,7 +68,7 @@ public final class IndustriaRecipes {
                                 new ItemStackTemplate(ModItems.CERAMIC_MOLD.get()),
                                 0.1f, 200), null);
 
-                HolderGetter<Item> itemLookup = wrapperLookup.lookupOrThrow(Registries.ITEM);
+                HolderGetter<Item> itemLookup = wrapperLookup.lookup(Registries.ITEM);
 
                 shaped(RecipeCategory.MISC, ModBlocks.ALLOY_FURNACE.get())
                         .pattern("AAA")
@@ -385,29 +389,29 @@ public final class IndustriaRecipes {
                         .unlockedBy(getHasName(ModBlocks.CONVEYOR.get()), has(ModBlocks.CONVEYOR.get()))
                         .save(output);
 
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ALUMINIUM_BLOCK.get());
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.TIN_INGOT.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.TIN_BLOCK.get());
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.ZINC_INGOT.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ZINC_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ALUMINIUM_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.TIN_INGOT.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.TIN_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.ZINC_INGOT.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.ZINC_BLOCK.get());
 
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.ALUMINIUM_NUGGET.get(), RecipeCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), "aluminium_nugget_to_ingot", null, "aluminium_ingot_to_nugget", null);
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.TIN_NUGGET.get(), RecipeCategory.MISC, ModItems.TIN_INGOT.get(), "tin_nugget_to_ingot", null, "tin_ingot_to_nugget", null);
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.ZINC_NUGGET.get(), RecipeCategory.MISC, ModItems.ZINC_INGOT.get(), "zinc_nugget_to_ingot", null, "zinc_ingot_to_nugget", null);
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.ALUMINIUM_NUGGET.get(), RecipeCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), "aluminium_nugget_to_ingot", null, "aluminium_ingot_to_nugget", null);
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.TIN_NUGGET.get(), RecipeCategory.MISC, ModItems.TIN_INGOT.get(), "tin_nugget_to_ingot", null, "tin_ingot_to_nugget", null);
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.ZINC_NUGGET.get(), RecipeCategory.MISC, ModItems.ZINC_INGOT.get(), "zinc_nugget_to_ingot", null, "zinc_ingot_to_nugget", null);
 
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.BAUXITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_BAUXITE_BLOCK.get());
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.CASSITERITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_CASSITERITE_BLOCK.get());
-                nineBlockStorageRecipes(RecipeCategory.MISC, ModItems.SPHALERITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_SPHALERITE_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.BAUXITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_BAUXITE_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.CASSITERITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_CASSITERITE_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.SPHALERITE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.RAW_SPHALERITE_BLOCK.get());
 
                 List<ItemLike> aluminiumOres = List.of(ModBlocks.BAUXITE_ORE.get(), ModItems.BAUXITE.get());
                 List<ItemLike> tinOres = List.of(ModBlocks.CASSITERITE_ORE.get(), ModBlocks.DEEPSLATE_CASSITERITE_ORE.get(), ModItems.CASSITERITE.get());
                 List<ItemLike> zincOres = List.of(ModBlocks.SPHALERITE_ORE.get(), ModBlocks.DEEPSLATE_SPHALERITE_ORE.get(), ModItems.SPHALERITE.get());
 
-                oreSmelting(aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), 0.7F, 200, "aluminium_ingot");
-                oreSmelting(tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.TIN_INGOT.get(), 0.7F, 200, "tin_ingot");
-                oreSmelting(zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ZINC_INGOT.get(), 0.7F, 200, "zinc_ingot");
+                metalOreCooking(SmeltingRecipe::new, "smelting", aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), 0.7F, 200, "aluminium_ingot");
+                metalOreCooking(SmeltingRecipe::new, "smelting", tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.TIN_INGOT.get(), 0.7F, 200, "tin_ingot");
+                metalOreCooking(SmeltingRecipe::new, "smelting", zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ZINC_INGOT.get(), 0.7F, 200, "zinc_ingot");
 
-                oreBlasting(aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), 0.7F, 100, "aluminium_ingot");
-                oreBlasting(tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.TIN_INGOT.get(), 0.7F, 100, "tin_ingot");
-                oreBlasting(zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ZINC_INGOT.get(), 0.7F, 100, "zinc_ingot");
+                metalOreCooking(BlastingRecipe::new, "blasting", aluminiumOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ALUMINIUM_INGOT.get(), 0.7F, 100, "aluminium_ingot");
+                metalOreCooking(BlastingRecipe::new, "blasting", tinOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.TIN_INGOT.get(), 0.7F, 100, "tin_ingot");
+                metalOreCooking(BlastingRecipe::new, "blasting", zincOres, RecipeCategory.MISC, CookingBookCategory.MISC, ModItems.ZINC_INGOT.get(), 0.7F, 100, "zinc_ingot");
 
                 offerCrusher(output, RecipeCategory.MISC,
                         new IndustriaIngredient(1, ModItems.ALUMINIUM_INGOT.get()),
@@ -501,6 +505,41 @@ public final class IndustriaRecipes {
                         "diluted_formic_acid");
 
                 offerMetalRecipes(output);
+            }
+
+            private void metalStorageRecipes(RecipeCategory unpackedCategory, ItemLike unpacked,
+                    RecipeCategory packedCategory, ItemLike packed) {
+                metalStorageRecipes(unpackedCategory, unpacked, packedCategory, packed,
+                        getSimpleRecipeName(packed), null, getSimpleRecipeName(unpacked), null);
+            }
+
+            private void metalStorageRecipes(RecipeCategory unpackedCategory, ItemLike unpacked,
+                    RecipeCategory packedCategory, ItemLike packed, String packingId, @Nullable String packingGroup,
+                    String unpackingId, @Nullable String unpackingGroup) {
+                shapeless(unpackedCategory, unpacked, 9)
+                        .requires(packed)
+                        .group(unpackingGroup)
+                        .unlockedBy(getHasName(packed), has(packed))
+                        .save(output, ResourceKey.create(Registries.RECIPE, Industria.id(unpackingId)));
+                shaped(packedCategory, packed)
+                        .define('#', unpacked)
+                        .pattern("###").pattern("###").pattern("###")
+                        .group(packingGroup)
+                        .unlockedBy(getHasName(unpacked), has(unpacked))
+                        .save(output, ResourceKey.create(Registries.RECIPE, Industria.id(packingId)));
+            }
+
+            private <T extends AbstractCookingRecipe> void metalOreCooking(AbstractCookingRecipe.Factory<T> factory,
+                    String method, List<ItemLike> ores, RecipeCategory category, CookingBookCategory bookCategory,
+                    ItemLike result, float experience, int cookingTime, String group) {
+                for (ItemLike ore : ores) {
+                    SimpleCookingRecipeBuilder.generic(Ingredient.of(ore), category, bookCategory,
+                                    result, experience, cookingTime, factory)
+                            .group(group)
+                            .unlockedBy(getHasName(ore), has(ore))
+                            .save(output, ResourceKey.create(Registries.RECIPE,
+                                    Industria.id(getItemName(result) + "_from_" + method + "_" + getItemName(ore))));
+                }
             }
         }.buildRecipes();
     }

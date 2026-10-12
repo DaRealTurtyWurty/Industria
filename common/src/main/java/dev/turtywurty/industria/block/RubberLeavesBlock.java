@@ -1,7 +1,7 @@
 package dev.turtywurty.industria.block;
 
-import com.mojang.serialization.MapCodec;
 import dev.turtywurty.turtymultiloader.registration.VanillaBlockPredicates;
+import java.util.OptionalInt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ColorParticleOption;
@@ -25,14 +25,11 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.OptionalInt;
-
 public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
     public static final int DECAY_DISTANCE = 13;
     public static final IntegerProperty DISTANCE = IntegerProperty.create("distance", 1, DECAY_DISTANCE);
     public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-    public static final MapCodec<RubberLeavesBlock> CODEC = simpleCodec(RubberLeavesBlock::new);
     private static final int TICK_DELAY = 1;
 
     public RubberLeavesBlock(Properties settings) {
@@ -43,9 +40,9 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
                 .noOcclusion()
                 .isValidSpawn(VanillaBlockPredicates::ocelotOrParrot)
                 .isSuffocating(VanillaBlockPredicates::never)
-                .isViewBlocking(VanillaBlockPredicates::never)
+                .isViewBlocking((state, world, pos, bounds) -> false)
                 .ignitedByLava()
-                .pushReaction(PushReaction.DESTROY)
+                .pushReaction(PushReaction.POPPED)
                 .isRedstoneConductor(VanillaBlockPredicates::never));
 
         registerDefaultState(this.stateDefinition.any()
@@ -84,10 +81,6 @@ public class RubberLeavesBlock extends Block implements SimpleWaterloggedBlock {
         }
     }
 
-    @Override
-    public MapCodec<? extends RubberLeavesBlock> codec() {
-        return CODEC;
-    }
 
     @Override
     protected VoxelShape getBlockSupportShape(BlockState state, BlockGetter world, BlockPos pos) {

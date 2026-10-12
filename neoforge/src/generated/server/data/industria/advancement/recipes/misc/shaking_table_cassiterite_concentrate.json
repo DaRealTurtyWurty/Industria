@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:shaking_table_cassiterite_concentrate"
+        "recipes": "industria:shaking_table_cassiterite_concentrate"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

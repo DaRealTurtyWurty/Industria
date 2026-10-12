@@ -8,11 +8,12 @@ import dev.turtywurty.industria.pipe.PipeNetwork;
 import dev.turtywurty.industria.pipe.PipeNetworkManager;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import dev.turtywurty.turtymultiloader.event.client.LevelRenderContext;
+import java.util.List;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.gizmos.Gizmos;
@@ -25,8 +26,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-
-import java.util.List;
 
 public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
     public static int getColor(TransferType<?, ?, ?> type) {
@@ -50,7 +49,7 @@ public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
         if (!DebugRenderingRegistry.debugRendering)
             return;
 
-        MultiBufferSource consumers = context.bufferSource();
+        SubmitNodeCollector consumers = context.submitNodeCollector();
         if (consumers == null)
             return;
 
@@ -58,7 +57,7 @@ public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
         if (matrices == null)
             return;
 
-        Entity cameraEntity = context.gameRenderer().getMainCamera().entity();
+        Entity cameraEntity = context.gameRenderer().mainCamera().entity();
         if (cameraEntity == null)
             return;
 
@@ -88,21 +87,22 @@ public class PipeNetworkLevelRenderer implements IndustriaLevelRenderer {
 
                     Component text = Component.literal(amountStr + pipeBlock.getUnit());
 
-                    Vec3 pos = pipe.getCenter();
-                    Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+                    Vec3 pos = Vec3.atCenterOf(pipe);
+                    Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
                     Vec3 cameraPos = camera.position();
                     pos = pos.subtract(cameraPos);
 
                     matrices.pushPose();
                     matrices.translate(pos.x, pos.y + 0.5, pos.z);
-                    matrices.mulPose(camera.rotation());
+                    matrices.rotate(camera.rotation());
                     matrices.scale(0.025F, -0.025F, 0.025F);
                     Matrix4f matrix4f = matrices.last().pose();
 
                     Font textRenderer = client.font;
                     float xOffset = (float) (-textRenderer.width(text)) / 2.0F;
 
-                    textRenderer.drawInBatch(text, xOffset, 0, CommonColors.WHITE, false, matrix4f, consumers, Font.DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
+                    consumers.submitText(matrices, xOffset, 0, text.getVisualOrderText(), false, Font.DisplayMode.NORMAL,
+                            LightCoordsUtil.FULL_BRIGHT, CommonColors.WHITE, 0, 0);
                     matrices.popPose();
                 }
             }

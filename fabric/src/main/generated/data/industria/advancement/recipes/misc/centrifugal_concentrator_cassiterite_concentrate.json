@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:centrifugal_concentrator_cassiterite_concentrate"
+        "recipes": "industria:centrifugal_concentrator_cassiterite_concentrate"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

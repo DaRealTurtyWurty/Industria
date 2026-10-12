@@ -2,6 +2,9 @@ package dev.turtywurty.industria.screen.widget;
 
 import dev.turtywurty.industria.screen.tooltip.ItemListTooltipComponent;
 import dev.turtywurty.industria.util.IndustriaIngredient;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,10 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends AbstractWidget {
     private final int slotIndex;
@@ -83,7 +82,7 @@ public class IndustriaIngredientPreviewWidget<T extends Recipe<?>> extends Abstr
             stack.getTooltipImage().ifPresent((data) -> componentList.add(componentList.isEmpty() ? 0 : 1, ClientTooltipComponent.create(data)));
             componentList.addFirst(itemListComponent);
 
-            context.tooltip(this.textRenderer, componentList, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+            context.tooltip(this.textRenderer, componentList, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null, true);
         }
     }
 

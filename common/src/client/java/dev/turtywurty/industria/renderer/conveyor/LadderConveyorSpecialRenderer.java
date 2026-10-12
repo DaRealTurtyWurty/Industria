@@ -6,6 +6,7 @@ import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.conveyor.block.impl.LadderConveyorBlock;
 import dev.turtywurty.industria.init.ModConveyorSpecialRenderers;
 import dev.turtywurty.industria.model.conveyor.LadderConveyorPlatformModel;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -67,7 +68,7 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
         float time = context.gameTime() + context.partialTick();
 
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
+        poseStack.rotate(Axis.YP.rotationDegrees(facing.toYRot()));
         for (int platformIndex = 0; platformIndex < platformCount; platformIndex++) {
             float phaseOffset = (float) platformIndex / (float) platformCount;
             float phase = wrap((time * phaseAdvancePerTick) + phaseOffset);
@@ -88,9 +89,9 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
             poseStack.pushPose();
             poseStack.translate(platformPose.x, platformPose.y + PLATFORM_Y_OFFSET, platformPose.z);
             poseStack.translate(0.0F, MODEL_PIVOT_Y, MODEL_PIVOT_Z);
-            poseStack.mulPose(Axis.XP.rotationDegrees(platformPose.yawDegrees));
+            poseStack.rotate(Axis.XP.rotationDegrees(platformPose.yawDegrees));
             poseStack.translate(0.0F, -MODEL_PIVOT_Y, -MODEL_PIVOT_Z);
-            nodeCollector.submitModel(this.platformModel, null, poseStack, RENDER_TYPE, context.lightCoords(),
+            ModelSubmitUtils.submitModel(nodeCollector, this.platformModel, null, poseStack, RENDER_TYPE, context.lightCoords(),
                     OverlayTexture.NO_OVERLAY, 0, null);
             poseStack.popPose();
         }

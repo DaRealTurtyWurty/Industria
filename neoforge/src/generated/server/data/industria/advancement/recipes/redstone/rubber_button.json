@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:rubber_button"
+        "recipes": "industria:rubber_button"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

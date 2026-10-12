@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "A": "#c:storage_blocks/iron",
     "B": "#c:player_workstations/furnaces",

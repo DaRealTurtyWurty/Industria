@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
-      "model": "industria:block/rubber_sign"
+    "facing=east": {
+      "model": "industria:block/rubber_wall_sign",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "industria:block/rubber_wall_sign",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "industria:block/rubber_wall_sign"
+    },
+    "facing=west": {
+      "model": "industria:block/rubber_wall_sign",
+      "y": 90
     }
   }
 }

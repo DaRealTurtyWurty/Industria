@@ -3,6 +3,7 @@ package dev.turtywurty.industria.model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.state.DrillRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -77,7 +78,7 @@ public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModel.SimpleDrill
 
         matrices.pushPose();
         matrices.scale(0.9F, 0.9F, 0.9F);
-        queue.submitModel(model, new SimpleDrillHeadModelRenderState(clockwiseYaw, counterClockwiseYaw), matrices, renderLayer, light, overlay, -1, state.breakProgress);
+        ModelSubmitUtils.submitModel(queue, model, new SimpleDrillHeadModelRenderState(clockwiseYaw, counterClockwiseYaw), matrices, renderLayer, light, overlay, -1, state.breakProgress);
         matrices.popPose();
     }
 

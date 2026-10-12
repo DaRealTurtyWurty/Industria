@@ -9,6 +9,10 @@ import dev.turtywurty.industria.model.DrillMotorModel;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.state.DrillRenderState;
 import dev.turtywurty.industria.util.DrillHeadable;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
@@ -24,10 +28,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<DrillBlockEntity, DrillRenderState> {
     private final Map<DrillHeadable, Model<?>> drillHeadModels = new HashMap<>();
@@ -77,7 +77,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
 
                 state.clientMotorRotation += (state.isDrilling ? 0.03f : state.isRetracting ? -0.03f : 0);
 
-                queue.submitModel(this.motorModel,
+                ModelSubmitUtils.submitModel(queue, this.motorModel,
                         new DrillMotorModel.DrillMotorModelRenderState(state.clientMotorRotation),
                         matrices, this.motorModel.renderType(DrillMotorModel.TEXTURE_LOCATION),
                         light, overlay, 0, state.breakProgress);
@@ -85,7 +85,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
         }
 
         { // Render frame
-            queue.submitModel(this.model,
+            ModelSubmitUtils.submitModel(queue, this.model,
                     new DrillFrameModel.DrillFrameModelRenderState(state.clientMotorRotation),
                     matrices, this.model.renderType(DrillFrameModel.TEXTURE_LOCATION),
                     light, overlay, 0, state.breakProgress);
@@ -99,7 +99,7 @@ public class DrillBlockEntityRenderer extends IndustriaBlockEntityRenderer<Drill
 
         { // Render cable wheel
             state.cableScaleFactor = 0.5f - (progress / 2f);
-            queue.submitModel(this.cableModel,
+            ModelSubmitUtils.submitModel(queue, this.cableModel,
                     new DrillCableModel.DrillCableModelRenderState(state.clientMotorRotation, state.cableScaleFactor),
                     matrices, this.cableModel.renderType(DrillCableModel.TEXTURE_LOCATION),
                     light, overlay, 0, state.breakProgress);

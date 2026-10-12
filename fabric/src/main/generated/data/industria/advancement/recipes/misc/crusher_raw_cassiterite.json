@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_raw_cassiterite"
+        "recipes": "industria:crusher_raw_cassiterite"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

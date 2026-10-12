@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataRegistryEntriesEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,8 @@ public final class IndustriaNeoForge {
 
         modBus.addListener(FMLCommonSetupEvent.class, event ->
                 event.enqueueWork(Industria::onRegistriesApplied));
+        modBus.addListener(GatherDataRegistryEntriesEvent.class,
+                event -> NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
         modBus.addListener(GatherDataEvent.Client.class, event ->
                 NeoForgeDataGeneration.run(event, IndustriaDataGeneration.SPEC));
         modBus.addListener(GatherDataEvent.Server.class, event ->

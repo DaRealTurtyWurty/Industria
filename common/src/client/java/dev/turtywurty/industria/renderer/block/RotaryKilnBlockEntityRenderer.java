@@ -2,10 +2,16 @@ package dev.turtywurty.industria.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity.InputRecipeEntry;
+import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.model.RotaryKilnModel;
 import dev.turtywurty.industria.state.RotaryKilnControllerRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -23,12 +29,6 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity, RotaryKilnControllerRenderState> {
     public static final Map<BlockPos, RendererData> BLOCK_POS_RENDERER_DATA_MAP = new ConcurrentHashMap<>();
@@ -78,7 +78,7 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
 
         RendererData rendererData = BLOCK_POS_RENDERER_DATA_MAP.computeIfAbsent(state.blockPos, pos -> new RendererData());
 
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 new RotaryKilnModel.RotaryKilnModelRenderState(
                         state.kilnSegments.size(),
                         rendererData.barrelBody.getAngle() + (float) Math.PI / 8f),
@@ -124,8 +124,8 @@ public class RotaryKilnBlockEntityRenderer extends IndustriaBlockEntityRenderer<
             matrices.pushPose();
             matrices.translate(body.getPosition().x, body.getPosition().y, z);
             matrices.scale(0.5f, 0.5f, 0.5f);
-            matrices.mulPose(Direction.WEST.getRotation());
-            matrices.mulPose(Axis.XP.rotation(body.getAngle()));
+            matrices.rotate(Direction.WEST.getRotation());
+            matrices.rotate(Axis.XP.rotation(body.getAngle()));
             state.renderItemRenderState(i, matrices, queue);
             matrices.popPose();
         }

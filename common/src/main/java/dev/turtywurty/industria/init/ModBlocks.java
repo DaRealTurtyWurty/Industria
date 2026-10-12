@@ -6,6 +6,8 @@ import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
 import dev.turtywurty.turtymultiloader.registration.VanillaBlockPredicates;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -15,9 +17,6 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ModBlocks {
     private static final RegistryService REGISTRIES = RegistryService.get();
@@ -189,7 +188,7 @@ public class ModBlocks {
             MotorBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final RegistrationHandle<Block, DrillTubeBlock> DRILL_TUBE = registerWithItemCopy("drill_tube",
-            DrillTubeBlock::new, Blocks.LIGHT_GRAY_CONCRETE, BlockBehaviour.Properties::noOcclusion);
+            DrillTubeBlock::new, Blocks.CONCRETE.lightGray(), BlockBehaviour.Properties::noOcclusion);
 
     public static final RegistrationHandle<Block, UpgradeStationBlock> UPGRADE_STATION = registerWithItemCopy("upgrade_station",
             UpgradeStationBlock::new, Blocks.ANVIL, BlockBehaviour.Properties::noOcclusion);

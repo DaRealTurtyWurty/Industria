@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:tin_nugget_to_ingot"
+        "recipes": "industria:tin_nugget_to_ingot"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

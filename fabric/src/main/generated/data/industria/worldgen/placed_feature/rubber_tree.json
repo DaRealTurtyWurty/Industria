@@ -19,17 +19,7 @@
       "type": "minecraft:block_predicate_filter",
       "predicate": {
         "type": "minecraft:would_survive",
-        "offset": [
-          0,
-          -1,
-          0
-        ],
-        "state": {
-          "Name": "industria:rubber_sapling",
-          "Properties": {
-            "stage": "0"
-          }
-        }
+        "state": "industria:rubber_sapling"
       }
     },
     {

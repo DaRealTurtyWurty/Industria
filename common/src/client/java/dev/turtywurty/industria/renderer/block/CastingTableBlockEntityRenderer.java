@@ -15,6 +15,7 @@ import dev.turtywurty.industria.renderer.item.MoldItemRenderer;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.FluidRenderUtils;
 import dev.turtywurty.turtymultiloader.transfer.fluid.FluidVariantAttributes;
+import java.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -32,8 +33,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-
-import java.util.*;
 
 public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<CastingTableBlockEntity,
         CastingTableBlockEntityRenderer.CastingTableRenderState> {
@@ -202,7 +201,7 @@ public class CastingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
                              float x, float top, float size, float depthSize, int overlay) {
         matrices.pushPose();
         matrices.translate(x, 1.5f - top, 0);
-        matrices.mulPose(Axis.XP.rotationDegrees(90));
+        matrices.rotate(Axis.XP.rotationDegrees(90));
         matrices.scale(size, size, depthSize);
         queue.submitCustomGeometry(matrices, draw.type, (pose, buffer) -> {
             for (MoldWorldMesh.Vertex vertex : draw.mesh.vertices()) {

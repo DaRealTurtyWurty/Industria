@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "A": "#c:storage_blocks/copper",
     "B": "#c:storage_blocks/iron"

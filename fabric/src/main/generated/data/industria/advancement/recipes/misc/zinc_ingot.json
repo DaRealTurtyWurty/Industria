@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:zinc_ingot"
+        "recipes": "industria:zinc_ingot"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

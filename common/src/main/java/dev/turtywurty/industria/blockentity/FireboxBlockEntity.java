@@ -10,6 +10,7 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.menu.FireboxMenu;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.util.FuelUtils;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
@@ -213,7 +214,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
             if (stack.isEmpty())
                 continue;
 
-            int fuelValue = this.level.fuelValues().burnDuration(stack);
+            int fuelValue = FuelUtils.burnDuration(this.level, stack);
             if (fuelValue <= 0)
                 continue;
 
@@ -235,7 +236,7 @@ public class FireboxBlockEntity extends IndustriaBlockEntity implements BlockEnt
         if (this.level == null)
             return false;
 
-        return this.level.fuelValues().isFuel(stack);
+        return FuelUtils.isFuel(stack);
     }
 
     private void storeFuelRemainder(ItemStack remainder) {

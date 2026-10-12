@@ -7,6 +7,9 @@ import com.mojang.serialization.MapCodec;
 import dev.turtywurty.industria.registry.DrillHeadRegistry;
 import dev.turtywurty.industria.state.DrillRenderState;
 import dev.turtywurty.industria.util.DrillHeadable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -17,10 +20,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
 
 public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderState> {
     public static final DrillHeadItemRenderer INSTANCE = new DrillHeadItemRenderer();
@@ -41,7 +40,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
                 Identifier textureLocation = this.drillHeadTextures.computeIfAbsent(drillHeadable, ignored -> clientData.textureLocation());
                 matrices.pushPose();
                 matrices.translate(0.5f, 0.75f, 0.5f);
-                matrices.mulPose(Axis.XP.rotationDegrees(180));
+                matrices.rotate(Axis.XP.rotationDegrees(180));
                 matrices.scale(0.5F, 0.5F, 0.5F);
                 RenderType renderLayer = model.renderType(textureLocation);
                 clientData.onRender().render(state, matrices, queue, model, renderLayer, light, overlay);

@@ -7,10 +7,13 @@ import dev.turtywurty.industria.conveyor.ConveyorStorage;
 import dev.turtywurty.industria.init.ModConveyorSpecialRenderers;
 import dev.turtywurty.industria.model.conveyor.ConveyorFlapsModel;
 import dev.turtywurty.industria.renderer.world.ConveyorNetworkLevelRenderer;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import dev.turtywurty.turtymultiloader.event.client.LevelRenderContext;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,9 +30,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector3d;
-
-import java.util.List;
-import java.util.Map;
 
 public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyorSpecialRenderers.ConveyorSpecialRenderer {
     private static final RenderType RENDER_TYPE = RenderTypes.entitySolid(ConveyorFlapsModel.TEXTURE_LOCATION);
@@ -72,7 +72,7 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
 
         PoseStack poseStack = levelRenderContext.poseStack();
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(-getFacing(conveyorState).toYRot()));
+        poseStack.rotate(Axis.YP.rotationDegrees(-getFacing(conveyorState).toYRot()));
         poseStack.translate(0, FLAP_MODEL_Y_OFFSET, getFlapModelZOffset());
 
         var state = new ConveyorFlapsModel.RenderState();
@@ -88,7 +88,7 @@ public abstract class AbstractFlapConveyorSpecialRenderer implements ModConveyor
         }
         simulation.writeAnglesToModel(state, partialTick);
 
-        nodeCollector.submitModel(this.flapsModel, state, poseStack, RENDER_TYPE, lightCoords,
+        ModelSubmitUtils.submitModel(nodeCollector, this.flapsModel, state, poseStack, RENDER_TYPE, lightCoords,
                 OverlayTexture.NO_OVERLAY, 0, null);
 
         poseStack.popPose();

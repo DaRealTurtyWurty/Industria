@@ -19,11 +19,15 @@ import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.storage.ContainerStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -38,10 +42,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 public class CastingBasinBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper, SyncableTickableBlockEntity, TappingOutletBlockEntity.TappingOutletReceiver {
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -121,7 +121,7 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity implements Blo
 
         ItemStack removed = getInventory().removeItem(0, outputStack.getCount());
         if(!removed.isEmpty()) {
-            player.getInventory().placeItemBackInInventory(removed);
+            player.getInventory().placeItemBackInInventory(removed, Prediction.SERVER_ONLY);
             setChanged();
         }
     }

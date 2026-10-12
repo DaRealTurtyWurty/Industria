@@ -8,6 +8,9 @@ import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.molding.MoldTableVisualState;
 import dev.turtywurty.industria.molding.MoldWorldMesh;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
+import java.util.Map;
+import java.util.Objects;
+import java.util.WeakHashMap;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
@@ -20,10 +23,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.WeakHashMap;
 
 public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRenderer<MoldingTableBlockEntity,
         MoldingTableBlockEntityRenderer.MoldingTableRenderState> {
@@ -110,7 +109,7 @@ public class MoldingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
 
         matrices.pushPose();
         matrices.translate(0, 1.5f - CAST_TOP, 0);
-        matrices.mulPose(Axis.XP.rotationDegrees(90));
+        matrices.rotate(Axis.XP.rotationDegrees(90));
         matrices.scale(CAST_SIZE, CAST_SIZE, CAST_SIZE);
         queue.submitCustomGeometry(matrices, RenderTypes.entityCutout(sprite.atlasLocation()), (pose, buffer) -> {
             for (MoldWorldMesh.Vertex vertex : mesh.vertices()) {

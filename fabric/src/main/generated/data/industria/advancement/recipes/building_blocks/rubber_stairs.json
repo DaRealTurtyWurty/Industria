@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:rubber_stairs"
+        "recipes": "industria:rubber_stairs"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

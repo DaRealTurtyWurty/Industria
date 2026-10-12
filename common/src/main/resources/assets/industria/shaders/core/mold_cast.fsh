@@ -1,15 +1,16 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
-#moj_import <minecraft:dynamictransforms.glsl>
+#include <minecraft:dynamictransforms.glsl>
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;
 
-in vec4 vertexColor;
-in vec2 spriteCoord;
-in vec2 maskCoord;
+layout(location = 0) in vec4 vertexColor;
+layout(location = 1) in vec2 spriteCoord;
+layout(location = 2) in vec2 maskCoord;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 void main() {
     vec4 color = texture(Sampler0, spriteCoord) * vertexColor * ColorModulator;

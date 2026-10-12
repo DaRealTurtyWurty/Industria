@@ -7,6 +7,8 @@ import dev.turtywurty.industria.model.CrystallizerModel;
 import dev.turtywurty.industria.state.CrystallizerRenderState;
 import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
+import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -15,8 +17,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Random;
 
 public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRenderer<CrystallizerBlockEntity, CrystallizerRenderState> {
     private static final Vec3[] OUTPUT_ITEM_POSITIONS = new Vec3[64];
@@ -86,7 +86,7 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
 
     @Override
     protected void onRender(CrystallizerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, null,
+        ModelSubmitUtils.submitModel(queue, this.model, null,
                 matrices, this.model.renderType(CrystallizerModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
 
@@ -110,10 +110,10 @@ public class CrystallizerBlockEntityRenderer extends IndustriaBlockEntityRendere
             matrices.pushPose();
             matrices.translate(position);
             matrices.scale(scale, scale, scale);
-            matrices.mulPose(Axis.YP.rotationDegrees((float) ((i + 1) * 360) / count));
-            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            matrices.rotate(Axis.YP.rotationDegrees((float) ((i + 1) * 360) / count));
+            matrices.rotate(Axis.XP.rotationDegrees(180));
             state.renderItemRenderState(0, matrices, queue);
-            matrices.mulPose(Axis.YP.rotationDegrees(90));
+            matrices.rotate(Axis.YP.rotationDegrees(90));
             state.renderItemRenderState(0, matrices, queue);
             matrices.popPose();
         }

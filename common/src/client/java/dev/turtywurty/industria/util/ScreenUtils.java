@@ -1,6 +1,6 @@
 package dev.turtywurty.industria.util;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import dev.turtywurty.turtymultiloader.client.rendering.GuiGraphicsExtractorAdapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:rubber_stripped_wood"
+        "recipes": "industria:rubber_stripped_wood"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

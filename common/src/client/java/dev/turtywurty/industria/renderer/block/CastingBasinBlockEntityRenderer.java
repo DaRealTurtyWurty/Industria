@@ -58,7 +58,7 @@ public class CastingBasinBlockEntityRenderer extends IndustriaBlockEntityRendere
 
         if(state.hasOutput && state.castingBlockState.isAir()) {
             matrices.pushPose();
-            matrices.mulPose(Axis.XP.rotationDegrees(180f));
+            matrices.rotate(Axis.XP.rotationDegrees(180f));
             matrices.translate(0f, -0.875f, 0f);
             matrices.scale(0.95f, 0.95f, 0.95f);
             state.renderItemRenderState(0, matrices, queue);

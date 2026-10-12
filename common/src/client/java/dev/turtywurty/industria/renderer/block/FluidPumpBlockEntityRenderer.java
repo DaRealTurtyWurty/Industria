@@ -3,12 +3,11 @@ package dev.turtywurty.industria.renderer.block;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.turtywurty.industria.blockentity.FluidPumpBlockEntity;
+import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
-import net.minecraft.world.level.material.Fluid;
-import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -16,6 +15,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -45,7 +45,7 @@ public class FluidPumpBlockEntityRenderer extends IndustriaBlockEntityRenderer<F
             float y1 = (float) state.amount / (float) state.capacity * (END_HEIGHT - START_HEIGHT) + START_HEIGHT;
 
             matrices.pushPose();
-            matrices.mulPose(Axis.YP.rotationDegrees(switch (face) {
+            matrices.rotate(Axis.YP.rotationDegrees(switch (face) {
                 case NORTH -> 0f;
                 case EAST -> 90f;
                 case SOUTH -> 180f;

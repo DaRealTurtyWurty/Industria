@@ -53,7 +53,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:distillation_tower"
+        "recipes": "industria:distillation_tower"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:gas_pipe"
+        "recipes": "industria:gas_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

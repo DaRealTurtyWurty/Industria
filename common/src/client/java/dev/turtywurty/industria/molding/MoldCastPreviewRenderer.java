@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -16,9 +16,7 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
     private MoldCastSurface.Snapshot lastSurface;
     private TextureAtlasSprite lastSprite;
 
-    public MoldCastPreviewRenderer(MultiBufferSource.BufferSource bufferSource) {
-        super(bufferSource);
-    }
+    public MoldCastPreviewRenderer() {}
 
     @Override
     public Class<MoldCastPreviewState> getRenderStateClass() {
@@ -26,13 +24,10 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
     }
 
     @Override
-    protected void renderToTexture(MoldCastPreviewState moldCastPreviewState, PoseStack poseStack) {
-        Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
+    protected void renderToTexture(MoldCastPreviewState moldCastPreviewState, PoseStack poseStack, SubmitNodeCollector collector) {
         TextureAtlasSprite sprite = moldCastPreviewState.getSprite();
-        VertexConsumer buffer = this.bufferSource.getBuffer(RenderTypes.entityCutout(sprite.atlasLocation()));
-        PoseStack.Pose pose = poseStack.last();
-
         MoldCastSurface.Snapshot surface = moldCastPreviewState.surface();
+        collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(sprite.atlasLocation()), (pose, buffer) -> {
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int column = 0; column < GRID_SIZE; column++) {
                 if (surface.removed(column, row))
@@ -44,6 +39,7 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
                         column, row, column + 1, row + 1, column + 1, row);
             }
         }
+        });
         this.lastSurface = surface;
         this.lastSprite = sprite;
     }

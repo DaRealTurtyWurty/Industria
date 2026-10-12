@@ -11,6 +11,6 @@ public class FabricIndustriaClient implements ClientModInitializer {
         IndustriaClient.onInitializeClient();
         IndustriaClient.onRegistriesAppliedClient();
 
-        PictureInPictureRendererRegistry.register(context -> new MoldCastPreviewRenderer(context.bufferSource()));
+        PictureInPictureRendererRegistry.register(context -> new MoldCastPreviewRenderer());
     }
 }

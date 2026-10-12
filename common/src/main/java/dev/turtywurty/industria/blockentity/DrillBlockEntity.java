@@ -26,6 +26,9 @@ import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -51,10 +54,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
@@ -371,7 +370,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity i
             return;
 
         List<ItemStack> drops = new ArrayList<>(state.getDrops(new LootParams.Builder(serverWorld)
-                .withParameter(LootContextParams.ORIGIN, pos.getCenter())
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
                 .withParameter(LootContextParams.BLOCK_STATE, state)
                 .withParameter(LootContextParams.TOOL, Items.DIAMOND_PICKAXE.getDefaultInstance())
                 .withOptionalParameter(LootContextParams.BLOCK_ENTITY, this)));

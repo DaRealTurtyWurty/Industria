@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:zinc_ingot_from_smelting_sphalerite"
+        "recipes": "industria:zinc_ingot_from_smelting_sphalerite"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

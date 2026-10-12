@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.ElectrolyzerBlockEntity;
 import dev.turtywurty.industria.model.ElectrolyzerModel;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
@@ -17,7 +18,7 @@ public class ElectrolyzerBlockEntityRenderer extends IndustriaBlockEntityRendere
 
     @Override
     protected void onRender(IndustriaBlockEntityRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, state,
+        ModelSubmitUtils.submitModel(queue, this.model, state,
                 matrices, this.model.renderType(ElectrolyzerModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
     }

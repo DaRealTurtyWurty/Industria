@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:rubber_slab"
+        "recipes": "industria:rubber_slab"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

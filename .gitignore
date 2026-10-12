@@ -41,6 +41,9 @@ replay_*.log
 *.jfr
 
 fabric/src/main/generated/.cache
+neoforge/src/generated/client/.cache/
+neoforge/src/generated/client/data/
+neoforge/src/generated/server/.cache/
 mc_source/
 .codex
 diagrams/*.bkp

@@ -4,6 +4,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.block.LatexBlock;
 import dev.turtywurty.industria.init.worldgen.ModTrunkPlacerTypes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -11,14 +14,10 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviders;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
 
 public class RubberTreeTrunkPlacer extends TrunkPlacer {
     public static final MapCodec<RubberTreeTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -41,7 +40,7 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(WorldGenLevel level, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, int treeHeight, BlockPos startPos, TreeConfiguration config) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(WorldGenLevel level, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, int treeHeight, BlockPos startPos, TreeFeature config) {
         List<FoliagePlacer.FoliageAttachment> nodes = new ArrayList<>();
         placeBelowTrunkBlock(level, replacer, random, startPos.below(), config);
         nodes.add(new FoliagePlacer.FoliageAttachment(startPos.above(treeHeight), 0, false));
@@ -90,7 +89,7 @@ public class RubberTreeTrunkPlacer extends TrunkPlacer {
     }
 
     @Override
-    protected boolean placeLog(WorldGenLevel world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, BlockPos pos, TreeConfiguration config) {
+    protected boolean placeLog(WorldGenLevel world, BiConsumer<BlockPos, BlockState> replacer, RandomSource random, BlockPos pos, TreeFeature config) {
         return placeLog(world, replacer, random, pos, config,
                 state -> state.setValue(LatexBlock.LATEX_LEVEL, random.nextIntBetweenInclusive(6, 9)));
     }

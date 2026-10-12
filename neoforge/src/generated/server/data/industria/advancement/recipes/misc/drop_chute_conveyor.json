@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:drop_chute_conveyor"
+        "recipes": "industria:drop_chute_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

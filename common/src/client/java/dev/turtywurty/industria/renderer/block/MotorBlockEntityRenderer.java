@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.MotorBlockEntity;
 import dev.turtywurty.industria.model.MotorModel;
 import dev.turtywurty.industria.state.MotorRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
@@ -34,7 +35,7 @@ public class MotorBlockEntityRenderer extends IndustriaBlockEntityRenderer<Motor
     public void onRender(MotorRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         state.rodRotation += state.rotationSpeed * state.tickProgress;
 
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 new MotorModel.MotorModelRenderState(state.rodRotation),
                 matrices, this.model.renderType(MotorModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);

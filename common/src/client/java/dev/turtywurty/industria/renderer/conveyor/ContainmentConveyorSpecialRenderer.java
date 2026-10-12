@@ -58,12 +58,12 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
             return;
 
         BlockState conveyorState = context.conveyorState();
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         Vec3 relativePosition = Vec3.atLowerCornerOf(pos).subtract(camera.position());
 
         poseStack.pushPose();
         poseStack.translate(relativePosition.x, relativePosition.y, relativePosition.z);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-conveyorState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()));
+        poseStack.rotate(Axis.YP.rotationDegrees(-conveyorState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()));
         poseStack.translate(-0.5D, ENTITY_BASE_Y_OFFSET, 0.5D);
 
         renderEntity(context, entity, poseStack, blockEntity, nodeCollector, renderContext);

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:aluminium_ingot"
+        "recipes": "industria:aluminium_ingot"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

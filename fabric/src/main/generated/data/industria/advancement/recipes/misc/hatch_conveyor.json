@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:hatch_conveyor"
+        "recipes": "industria:hatch_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

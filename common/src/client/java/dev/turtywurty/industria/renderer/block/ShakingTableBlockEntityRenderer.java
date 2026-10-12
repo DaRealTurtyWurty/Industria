@@ -9,6 +9,7 @@ import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import dev.turtywurty.industria.util.IndeterminateBoolean;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -64,7 +65,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
 
         state.shakeOffset = shakeOffset;
 
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 new ShakingTableModel.ShakingTableModelRenderState(state.shakeOffset),
                 matrices, this.model.renderType(ShakingTableModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
@@ -100,7 +101,7 @@ public class ShakingTableBlockEntityRenderer extends IndustriaBlockEntityRendere
             matrices.pushPose();
             matrices.translate(x, y, z);
             matrices.scale(0.5f, 0.5f, 0.5f);
-            matrices.mulPose(Axis.XP.rotationDegrees(90));
+            matrices.rotate(Axis.XP.rotationDegrees(90));
             state.renderItemRenderState(0, matrices, queue);
             matrices.popPose();
         }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:bauxite"
+        "recipes": "industria:bauxite"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

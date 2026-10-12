@@ -10,15 +10,15 @@ import dev.turtywurty.industria.menu.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.molding.MoldPattern;
 import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-
-import java.util.List;
-import java.util.Optional;
 
 public class MoldingTableMenu extends IndustriaScreenHandler<MoldingTableBlockEntity, BlockPosPayload> {
     public MoldingTableMenu(int syncId, Inventory playerInventory, BlockPosPayload payload) {
@@ -71,7 +71,7 @@ public class MoldingTableMenu extends IndustriaScreenHandler<MoldingTableBlockEn
         List<ItemStack> results = moldItem.get().createStacks(pattern.get());
         getSlot(0).remove(1);
         for (ItemStack result : results) {
-            player.getInventory().placeItemBackInInventory(result);
+            player.getInventory().placeItemBackInInventory(result, Prediction.SERVER_ONLY);
         }
 
         getSlot(0).setChanged();

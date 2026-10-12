@@ -1,6 +1,9 @@
 package dev.turtywurty.industria.testworld;
 
 import com.mojang.logging.LogUtils;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -21,10 +24,6 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.slf4j.Logger;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
 public final class IndustriaTestWorldLauncher {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -85,7 +84,7 @@ public final class IndustriaTestWorldLauncher {
                 new FlatLayerInfo(1, Blocks.GRASS_BLOCK)));
         settings.updateLayers();
 
-        return WorldPresets.createFlatWorldDimensions(registries)
+        return WorldPresets.createNormalWorldDimensions(registries)
                 .replaceOverworldGenerator(registries, new FlatLevelSource(settings));
     }
 }

@@ -1,8 +1,8 @@
 {
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "industria:item/seismic_scanner",
-		"particle": "industria:item/seismic_scanner"
+		"0": "industria:block/seismic_scanner",
+		"particle": "industria:block/seismic_scanner"
 	},
 	"elements": [
 		{

@@ -5,6 +5,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.WindTurbineBlockEntity;
 import dev.turtywurty.industria.model.WindTurbineModel;
 import dev.turtywurty.industria.state.WindTurbineRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -50,7 +51,7 @@ public class WindTurbineBlockEntityRenderer extends IndustriaBlockEntityRenderer
         float outputPercentage = getEnergyPerTickPercent(state);
         state.propellerRotation += (outputPercentage * 0.25f) * (Minecraft.getInstance().level.getGameTime() + state.tickProgress);
 
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 new WindTurbineModel.WindTurbineModelRenderState(state.propellerRotation),
                 matrices, this.model.renderType(WindTurbineModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);

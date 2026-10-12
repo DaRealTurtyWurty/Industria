@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:delay_conveyor"
+        "recipes": "industria:delay_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

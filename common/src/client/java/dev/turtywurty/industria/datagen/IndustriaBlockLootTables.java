@@ -2,6 +2,9 @@ package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModItems;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableSubProvider;
@@ -12,23 +15,18 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 public final class IndustriaBlockLootTables implements LootTableSubProvider {
     private final LootBuilders builders;
-    private BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output;
+    private final LootTableSubProvider.Context output;
 
-    public IndustriaBlockLootTables(HolderLookup.Provider registries) {
+    public IndustriaBlockLootTables(LootTableSubProvider.Context registries) {
         this.builders = new LootBuilders(registries);
+        this.output = registries;
     }
 
     @Override
-    public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
-        this.output = output;
+    public void run() {
         generateTables();
-        this.output = null;
     }
 
     private void generateTables() {
@@ -161,7 +159,7 @@ public final class IndustriaBlockLootTables implements LootTableSubProvider {
     }
 
     private static final class LootBuilders extends BlockLootSubProvider {
-        private LootBuilders(HolderLookup.Provider registries) {
+        private LootBuilders(LootTableSubProvider.Context registries) {
             super(Set.of(), FeatureFlags.DEFAULT_FLAGS, registries);
         }
 

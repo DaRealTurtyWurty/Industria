@@ -7,14 +7,14 @@ import dev.turtywurty.industria.init.ModMenuTypes;
 import dev.turtywurty.industria.menu.base.IndustriaScreenHandler;
 import dev.turtywurty.industria.menu.slot.PredicateSlot;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.util.FuelUtils;
+import java.util.Objects;
+import java.util.function.Predicate;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.Objects;
-import java.util.function.Predicate;
 
 public class FireboxMenu extends IndustriaScreenHandler<FireboxBlockEntity, BlockPosPayload> {
     public FireboxMenu(int syncId, Inventory playerInventory, BlockPosPayload payload) {
@@ -30,7 +30,7 @@ public class FireboxMenu extends IndustriaScreenHandler<FireboxBlockEntity, Bloc
     protected void addBlockEntitySlots(Inventory playerInventory) {
         SimpleContainer inventory = Objects.requireNonNull(this.wrappedContainerStorage.getInventory(0));
 
-        Predicate<ItemStack> fuelPredicate = stack -> playerInventory.player.level().fuelValues().isFuel(stack);
+        Predicate<ItemStack> fuelPredicate = stack -> FuelUtils.isFuel(stack);
         for (int slot = 0; slot < 3; slot++) {
             addSlot(new PredicateSlot(inventory, slot, 62 + (slot * 18), 35, fuelPredicate));
         }

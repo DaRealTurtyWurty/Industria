@@ -5,7 +5,10 @@ import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModFluids;
 import dev.turtywurty.industria.init.ModWoodSets;
 import dev.turtywurty.industria.worldgen.config.FluidPocketConfig;
+import dev.turtywurty.industria.worldgen.feature.FluidPocketFeature;
 import dev.turtywurty.industria.worldgen.trunkplacer.RubberTreeTrunkPlacer;
+import java.util.List;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -14,13 +17,14 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.BlockReplacement;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.OreFeature;
+import net.minecraft.world.level.levelgen.feature.ScatteredOreFeature;
+import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
@@ -28,18 +32,16 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTes
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
-import java.util.List;
-
 public class ModConfiguredFeatures {
-    public static final ResourceKey<ConfiguredFeature<?, ?>> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
+    public static final ResourceKey<Feature> CRUDE_OIL_POCKET = registerKey("crude_oil_pocket");
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> BAUXITE_ORE = registerKey("bauxite_ore");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> CASSITERITE_ORE = registerKey("cassiterite_ore");
-    public static final ResourceKey<ConfiguredFeature<?, ?>> ZINC_ORE = registerKey("zinc_ore");
+    public static final ResourceKey<Feature> BAUXITE_ORE = registerKey("bauxite_ore");
+    public static final ResourceKey<Feature> CASSITERITE_ORE = registerKey("cassiterite_ore");
+    public static final ResourceKey<Feature> ZINC_ORE = registerKey("zinc_ore");
 
-    public static final ResourceKey<ConfiguredFeature<?, ?>> RUBBER_TREE = registerKey("rubber_tree");
+    public static final ResourceKey<Feature> RUBBER_TREE = registerKey("rubber_tree");
 
-    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
+    public static void bootstrap(BootstrapContext<Feature> context) {
         RuleTest stoneOreReplaceables = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
         RuleTest deepslateOreReplaceables = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
         RuleTest netherOreReplaceables = new TagMatchTest(BlockTags.BASE_STONE_NETHER);
@@ -47,48 +49,40 @@ public class ModConfiguredFeatures {
 
         HolderGetter<PlacedFeature> registryLookup = context.lookup(Registries.PLACED_FEATURE);
 
-        register(context, CRUDE_OIL_POCKET, ModFeatures.FLUID_POCKET.get(),
-                new FluidPocketConfig(ModFluids.CRUDE_OIL.still().get().defaultFluidState(),
+        context.register(CRUDE_OIL_POCKET, new FluidPocketFeature(new FluidPocketConfig(ModFluids.CRUDE_OIL.still().get().defaultFluidState(),
                         UniformInt.of(4, 6),
                         UniformInt.of(2, 4),
-                        stoneOreReplaceables));
+                        stoneOreReplaceables)));
 
-        List<OreConfiguration.TargetBlockState> bauxiteTargets = List.of(
-                OreConfiguration.target(stoneOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()),
-                OreConfiguration.target(deepslateOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()));
+        List<BlockReplacement> bauxiteTargets = List.of(
+                BlockReplacement.replace(stoneOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()),
+                BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.BAUXITE_ORE.get().defaultBlockState()));
 
-        List<OreConfiguration.TargetBlockState> tinTargets = List.of(
-                OreConfiguration.target(stoneOreReplaceables, ModBlocks.CASSITERITE_ORE.get().defaultBlockState()),
-                OreConfiguration.target(deepslateOreReplaceables, ModBlocks.DEEPSLATE_CASSITERITE_ORE.get().defaultBlockState()));
+        List<BlockReplacement> tinTargets = List.of(
+                BlockReplacement.replace(stoneOreReplaceables, ModBlocks.CASSITERITE_ORE.get().defaultBlockState()),
+                BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.DEEPSLATE_CASSITERITE_ORE.get().defaultBlockState()));
 
-        List<OreConfiguration.TargetBlockState> zincTargets = List.of(
-                OreConfiguration.target(stoneOreReplaceables, ModBlocks.SPHALERITE_ORE.get().defaultBlockState()),
-                OreConfiguration.target(deepslateOreReplaceables, ModBlocks.DEEPSLATE_SPHALERITE_ORE.get().defaultBlockState()));
+        List<BlockReplacement> zincTargets = List.of(
+                BlockReplacement.replace(stoneOreReplaceables, ModBlocks.SPHALERITE_ORE.get().defaultBlockState()),
+                BlockReplacement.replace(deepslateOreReplaceables, ModBlocks.DEEPSLATE_SPHALERITE_ORE.get().defaultBlockState()));
 
-        register(context, BAUXITE_ORE, Feature.ORE, new OreConfiguration(bauxiteTargets, 8, 0.25f));
-        register(context, CASSITERITE_ORE, Feature.ORE, new OreConfiguration(tinTargets, 14));
-        register(context, ZINC_ORE, Feature.SCATTERED_ORE, new OreConfiguration(zincTargets, 10));
+        context.register(BAUXITE_ORE, new OreFeature(bauxiteTargets, 8, 0.25f));
+        context.register(CASSITERITE_ORE, new OreFeature(tinTargets, 14));
+        context.register(ZINC_ORE, new ScatteredOreFeature(zincTargets, 10, 0.0f));
 
-        register(context, RUBBER_TREE, Feature.TREE,
-                new TreeConfiguration.TreeConfigurationBuilder(
-                        SimpleStateProvider.simple(ModWoodSets.RUBBER.log().get()),
+        context.register(RUBBER_TREE, new TreeFeature.Builder(
+                        BlockStateProvider.of(ModWoodSets.RUBBER.log().get()),
                         new RubberTreeTrunkPlacer(15, 2, 1, UniformInt.of(10, 13), UniformInt.of(3, 5)),
-                        SimpleStateProvider.simple(ModWoodSets.RUBBER.leaves().get()),
+                        BlockStateProvider.of(ModWoodSets.RUBBER.leaves().get()),
                         new BlobFoliagePlacer(UniformInt.of(2, 4), ConstantInt.of(2), 4),
-                        new TwoLayersFeatureSize(1, 0, 1))
+                        new TwoLayersFeatureSize(1, 0, 1), Holder.direct(BlockStateProvider.of(Blocks.DIRT)))
                         .ignoreVines()
-                        .belowTrunkProvider(RuleBasedStateProvider.simple(Blocks.DIRT))
                         .build());
     }
 
-    private static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
-        return ResourceKey.create(Registries.CONFIGURED_FEATURE, Industria.id(name));
+    private static ResourceKey<Feature> registerKey(String name) {
+        return ResourceKey.create(Registries.FEATURE, Industria.id(name));
     }
 
-    private static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(BootstrapContext<ConfiguredFeature<?, ?>> context,
-                                                                                          ResourceKey<ConfiguredFeature<?, ?>> key,
-                                                                                          F feature,
-                                                                                          FC featureConfig) {
-        context.register(key, new ConfiguredFeature<>(feature, featureConfig));
-    }
+
 }

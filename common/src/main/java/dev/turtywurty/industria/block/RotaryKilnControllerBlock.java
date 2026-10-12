@@ -5,6 +5,8 @@ import dev.turtywurty.industria.blockentity.RotaryKilnControllerBlockEntity;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.network.RotaryKilnControllerRemovedPayload;
 import dev.turtywurty.turtymultiloader.network.NetworkService;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -20,9 +22,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class RotaryKilnControllerBlock extends IndustriaBlock {
     public static final Map<Direction, VoxelShape[]> SHAPES = Util.make(new HashMap<>(), map -> {
@@ -162,9 +161,10 @@ public class RotaryKilnControllerBlock extends IndustriaBlock {
     }
 
     @Override
-    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+    public void playerDestroy(ServerLevel world, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
         super.playerDestroy(world, player, pos, state, blockEntity, tool);
-        if (world instanceof ServerLevel serverWorld) {
+        {
+            ServerLevel serverWorld = world;
             var payload = new RotaryKilnControllerRemovedPayload(pos);
             for (ServerPlayer sPlayer : serverWorld.players()) {
                 NetworkService.get().sendToPlayer(sPlayer, payload);

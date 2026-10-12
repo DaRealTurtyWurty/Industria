@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.UpgradeStationBlockEntity;
 import dev.turtywurty.industria.model.UpgradeStationModel;
 import dev.turtywurty.industria.state.UpgradeStationRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
@@ -22,7 +23,7 @@ public class UpgradeStationBlockEntityRenderer extends IndustriaBlockEntityRende
 
     @Override
     public void onRender(UpgradeStationRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, null,
+        ModelSubmitUtils.submitModel(queue, this.model, null,
                 matrices, this.model.renderType(UpgradeStationModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
     }

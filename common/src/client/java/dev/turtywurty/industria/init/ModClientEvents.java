@@ -37,11 +37,13 @@ public class ModClientEvents {
 
         ClientEvents.onRenderStage(RenderStage.AFTER_SOLID_FEATURES, context -> {
             fluidPocketLevelRenderer.render(context);
-            pipeNetworkLevelRenderer.render(context);
             multiblockExportSelectionRenderer.render(context);
         });
 
         var conveyorNetworkLevelRenderer = new ConveyorNetworkLevelRenderer();
-        ClientEvents.onRenderStage(RenderStage.COLLECT_SUBMITS, conveyorNetworkLevelRenderer::render);
+        ClientEvents.onRenderStage(RenderStage.COLLECT_SUBMITS, context -> {
+            conveyorNetworkLevelRenderer.render(context);
+            pipeNetworkLevelRenderer.render(context);
+        });
     }
 }

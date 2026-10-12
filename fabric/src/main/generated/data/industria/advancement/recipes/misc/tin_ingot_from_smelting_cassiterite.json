@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:tin_ingot_from_smelting_cassiterite"
+        "recipes": "industria:tin_ingot_from_smelting_cassiterite"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

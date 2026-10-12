@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:zinc_block"
+        "recipes": "industria:zinc_block"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

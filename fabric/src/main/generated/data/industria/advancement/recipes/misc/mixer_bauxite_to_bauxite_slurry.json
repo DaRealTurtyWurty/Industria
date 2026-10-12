@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:mixer_bauxite_to_bauxite_slurry"
+        "recipes": "industria:mixer_bauxite_to_bauxite_slurry"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

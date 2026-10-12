@@ -39,6 +39,9 @@ import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -66,10 +69,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
@@ -132,7 +131,7 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
     }
 
     public AABB createShakeBox() {
-        Vec3 topCenter = this.worldPosition.getBottomCenter().add(0, 1, 0);
+        Vec3 topCenter = Vec3.atBottomCenterOf(this.worldPosition).add(0, 1, 0);
         float x1 = -18 / 16f;
         float y1 = 4 / 16f;
         float z1 = -19 / 16f;

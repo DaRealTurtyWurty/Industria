@@ -1,10 +1,11 @@
 package dev.turtywurty.industria.molding;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.turtymultiloader.client.registration.ClientRegistrations;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 
 public final class MoldRenderPipelines {
@@ -15,7 +16,7 @@ public final class MoldRenderPipelines {
             .withLocation(Industria.id("pipeline/mold_line"))
             .withVertexShader(Industria.id("core/mold_line"))
             .withFragmentShader(Industria.id("core/mold_line"))
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR).withPrimitiveTopology(PrimitiveTopology.QUADS)
             .withCull(false)
             .build());
 
@@ -23,9 +24,9 @@ public final class MoldRenderPipelines {
             .withLocation(Industria.id("pipeline/mold_cast"))
             .withVertexShader(Industria.id("core/mold_cast"))
             .withFragmentShader(Industria.id("core/mold_cast"))
-            .withSampler("Sampler0")
-            .withSampler("Sampler1")
-            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, VertexFormat.Mode.QUADS)
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP).withPrimitiveTopology(PrimitiveTopology.QUADS)
             .withCull(false)
             .build());
 }

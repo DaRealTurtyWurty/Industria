@@ -1,13 +1,17 @@
 package dev.turtywurty.industria.screen.widget;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.opengl.GlStateManager;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.util.ScreenUtils;
 import dev.turtywurty.industria.util.enums.EnumValueCacher;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
 import dev.turtywurty.industria.util.enums.TextEnum;
 import dev.turtywurty.industria.util.enums.TraversableEnum;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -19,12 +23,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValueCacher<T> & TextEnum & StringRepresentable> extends Button {
     private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"), Identifier.withDefaultNamespace("widget/button_disabled"), Identifier.withDefaultNamespace("widget/button_highlighted"));
@@ -116,8 +114,6 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
     @Override
     protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int color = ARGB.white(this.alpha);
-        GlStateManager._enableBlend(); // TODO: Come back and check if this is okay?
-        GlStateManager._enableDepthTest();
         ScreenUtils.drawGuiTexture(context, SPRITES.get(this.active, this.hoveredLastFrame), getX(), getY(), this.width, this.height, color);
         renderValue(context, this.value, getX(), getY(), color);
 

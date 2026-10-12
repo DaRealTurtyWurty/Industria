@@ -1,22 +1,19 @@
 package dev.turtywurty.industria.util;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.renderpearl.api.vertex.VertexFormatElement;
 
 public interface VertexOffsets {
     int STRIDE = DefaultVertexFormat.BLOCK.getVertexSize() / 4;
-    int POSITION = getOffset(VertexFormatElement.POSITION);
-    int COLOR = getOffset(VertexFormatElement.COLOR);
-    int UV0 = getOffset(VertexFormatElement.UV0);
-    int UV1 = getOffset(VertexFormatElement.UV1);
-    int UV2 = getOffset(VertexFormatElement.UV2);
-    int NORMAL = getOffset(VertexFormatElement.NORMAL);
+    int POSITION = getOffset("Position");
+    int COLOR = getOffset("Color");
+    int UV0 = getOffset("UV0");
+    int UV1 = getOffset("UV1");
+    int UV2 = getOffset("UV2");
+    int NORMAL = getOffset("Normal");
 
-    private static int getOffset(VertexFormatElement element) {
-        if(DefaultVertexFormat.BLOCK.contains(element)) {
-            return DefaultVertexFormat.BLOCK.getOffset(element) / 4;
-        }
-
-        return -1;
+    private static int getOffset(String name) {
+        VertexFormatElement element = DefaultVertexFormat.BLOCK.getElement(name);
+        return element == null ? -1 : element.offset() / 4;
     }
 }

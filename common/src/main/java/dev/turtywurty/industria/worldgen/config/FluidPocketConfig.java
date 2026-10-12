@@ -4,11 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviders;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.material.FluidState;
 
-public record FluidPocketConfig(FluidState fluidState, IntProvider radius, IntProvider depth, RuleTest replaceable) implements FeatureConfiguration {
+public record FluidPocketConfig(FluidState fluidState, IntProvider radius, IntProvider depth, RuleTest replaceable) {
     public static final Codec<FluidPocketConfig> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     FluidState.CODEC.fieldOf("fluid_state").forGetter(FluidPocketConfig::fluidState),

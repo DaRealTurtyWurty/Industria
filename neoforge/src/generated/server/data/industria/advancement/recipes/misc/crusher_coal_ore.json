@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_coal_ore"
+        "recipes": "industria:crusher_coal_ore"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -7,6 +7,7 @@ import dev.turtywurty.industria.model.MixerModel;
 import dev.turtywurty.industria.state.MixerRenderState;
 import dev.turtywurty.industria.util.ColorMode;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -58,7 +59,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
     @Override
     protected void onRender(MixerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         var texture = state.isMixing ? MixerModel.CLOSED_TEXTURE_LOCATION : MixerModel.OPEN_TEXTURE_LOCATION;
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 state,
                 matrices, this.model.renderType(texture),
                 light, overlay, 0, state.breakProgress);
@@ -103,9 +104,9 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
 
                 if (state.isMixing) {
                     matrices.scale(1f - progress, 1f - progress, 1f - progress); // TODO: Make them fade away instead (maybe? :3)
-                    matrices.mulPose(Axis.YP.rotation(world.getGameTime() * 0.25f));
-                    matrices.mulPose(Axis.XP.rotation(world.getGameTime() * 0.25f));
-                    matrices.mulPose(Axis.ZP.rotation(world.getGameTime() * 0.25f));
+                    matrices.rotate(Axis.YP.rotation(world.getGameTime() * 0.25f));
+                    matrices.rotate(Axis.XP.rotation(world.getGameTime() * 0.25f));
+                    matrices.rotate(Axis.ZP.rotation(world.getGameTime() * 0.25f));
                 }
 
                 state.renderItemRenderState(index, matrices, queue);
@@ -122,7 +123,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
                 x2, maxHeightPixels, z2,
                 0xFFFFFFFF, ColorMode.MULTIPLICATION);
 
-        queue.submitModel(this.glassModel,
+        ModelSubmitUtils.submitModel(queue, this.glassModel,
                 state,
                 matrices, this.glassModel.renderType(texture),
                 light, overlay, 0, state.breakProgress);

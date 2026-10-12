@@ -4,18 +4,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import dev.turtywurty.turtymultiloader.event.client.LevelRenderContext;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class FluidPocketLevelRenderer implements IndustriaLevelRenderer {
     public static final Map<ResourceKey<Level>, List<WorldFluidPocketsState.FluidPocket>> FLUID_POCKETS = new HashMap<>();
@@ -41,9 +39,6 @@ public class FluidPocketLevelRenderer implements IndustriaLevelRenderer {
         if (matrixStack == null)
             return;
 
-        MultiBufferSource provider = context.bufferSource();
-        if (provider == null)
-            return;
 
         Level world = player.level();
         if (world == null)

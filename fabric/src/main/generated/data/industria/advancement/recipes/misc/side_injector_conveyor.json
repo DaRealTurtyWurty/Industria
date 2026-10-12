@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:side_injector_conveyor"
+        "recipes": "industria:side_injector_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -12,9 +12,12 @@ import dev.turtywurty.industria.init.ModRecipeTypes;
 import dev.turtywurty.industria.menu.AlloyFurnaceScreenHandler;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.recipe.AlloyingRecipe;
+import dev.turtywurty.industria.util.FuelUtils;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -37,9 +40,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Optional;
 
 public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("alloy_furnace");
@@ -88,11 +88,11 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity implements Syn
     }
 
     public boolean isFuel(ItemStack stack) {
-        return this.level.fuelValues().isFuel(stack);
+        return FuelUtils.isFuel(stack);
     }
 
     public int getFuelTime(ItemStack stack) {
-        return this.level.fuelValues().burnDuration(stack);
+        return FuelUtils.burnDuration(this.level, stack);
     }
 
     public ResourceStorage<ResourceVariant<Item>> getInventoryProvider(Direction direction) {

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.fluid;
 
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -16,8 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-
-import java.util.function.Supplier;
 
 public abstract class MoltenFluid extends IndustriaFluid {
     public void animateTick(Level world, BlockPos pos, FluidState state, RandomSource random) {
@@ -55,7 +54,7 @@ public abstract class MoltenFluid extends IndustriaFluid {
                             world.setBlockAndUpdate(blockPos, BaseFireBlock.getState(world, blockPos));
                             return;
                         }
-                    } else if (blockState.blocksMotion()) {
+                    } else if (blockState.isSolid()) {
                         return;
                     }
                 }

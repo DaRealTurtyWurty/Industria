@@ -7,6 +7,17 @@ import dev.turtywurty.multiblocklib.data.MultiblockDefinition;
 import dev.turtywurty.multiblocklib.match.BlockMatcherList;
 import dev.turtywurty.multiblocklib.pattern.MultiblockPattern;
 import dev.turtywurty.turtymultiloader.player.FakePlayerService;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -22,18 +33,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.PriorityQueue;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public record TestWorldContext(MinecraftServer server, ServerLevel overworld, BlockPos origin) {
     private static final int MAX_PATHFINDING_NODES = 250_000;
@@ -427,7 +426,7 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
         BlockPos pos = pos(x, y, z);
         player.setItemInHand(hand, stack);
 
-        Vec3 hitPos = pos.getCenter().add(0, 0.5, 0);
+        Vec3 hitPos = Vec3.atCenterOf(pos).add(0, 0.5, 0);
         var hitResult = new BlockHitResult(hitPos, Direction.UP, pos, false);
         return player.gameMode.useItemOn(player, overworld, stack, hand, hitResult);
     }

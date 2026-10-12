@@ -7,6 +7,11 @@ import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.turtymultiloader.client.registration.ClientRegistrations;
 import dev.turtywurty.turtymultiloader.transfer.fluid.FluidVariantAttributes;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
@@ -20,12 +25,6 @@ import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 public class InWorldFluidRenderingComponent {
     private static final Function<Identifier, RenderType> ENTITY_TRANSLUCENT_CULL = Util.memoize(texture -> {
@@ -85,10 +84,10 @@ public class InWorldFluidRenderingComponent {
         float y2 = ((fillPercentage * maxHeightPixels) / 16f) + y1;
 
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            matrices.rotate(Axis.XP.rotationDegrees(180));
         }
 
         int blockLight = (light >> 4) & 0xF;
@@ -156,10 +155,10 @@ public class InWorldFluidRenderingComponent {
         renderLayer = wrapRenderLayer.apply(renderLayer);
 
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            matrices.rotate(Axis.XP.rotationDegrees(180));
         }
 
         queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) -> {
@@ -185,7 +184,7 @@ public class InWorldFluidRenderingComponent {
         RenderType renderLayer = RenderTypes.entityTranslucent(sprite.atlasLocation());
 
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
 
         queue.submitCustomGeometry(matrices, renderLayer, (entry, vertexConsumer) ->
                 drawTiledTopQuad(vertexConsumer, entry, x1, y, z1 + 0.001F, x2, z2 - 0.001F, sprite, color, light, overlay));
@@ -269,10 +268,10 @@ public class InWorldFluidRenderingComponent {
         RenderType renderLayer = RenderTypes.entityTranslucent(flowingSprite.atlasLocation());
 
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            matrices.rotate(Axis.XP.rotationDegrees(180));
         }
 
         int blockLight = (light >> 4) & 0xF;
@@ -485,10 +484,10 @@ public class InWorldFluidRenderingComponent {
         RenderType renderLayer = ENTITY_TRANSLUCENT_CULL.apply(stillSprite.atlasLocation());
 
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
 
         if (FluidVariantAttributes.isLighterThanAir(fluidVariant)) {
-            matrices.mulPose(Axis.XP.rotationDegrees(180));
+            matrices.rotate(Axis.XP.rotationDegrees(180));
         }
 
         int blockLight = (light >> 4) & 0xF;
@@ -516,7 +515,7 @@ public class InWorldFluidRenderingComponent {
                                     int light, int overlay, float x1, float y1, float z1, float x2, float y2, float z2,
                                     boolean reversed) {
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
         queue.submitCustomGeometry(matrices, ENTITY_TRANSLUCENT_CULL.apply(sprite.atlasLocation()), (pose, vertices) -> {
             if (reversed) {
                 drawReversedTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, 1f);

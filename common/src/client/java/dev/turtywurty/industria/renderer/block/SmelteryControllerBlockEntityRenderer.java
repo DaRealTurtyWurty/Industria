@@ -6,6 +6,7 @@ import dev.turtywurty.industria.blockentity.util.SmelteryChamberRenderData;
 import dev.turtywurty.industria.util.FluidRenderUtils;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
 import dev.turtywurty.turtymultiloader.transfer.fluid.FluidVariantAttributes;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -17,11 +18,10 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-
-import java.util.List;
 
 public class SmelteryControllerBlockEntityRenderer implements BlockEntityRenderer<SmelteryControllerBlockEntity, SmelteryControllerBlockEntityRenderer.SmelteryRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderingComponent = new InWorldFluidRenderingComponent();
@@ -86,7 +86,7 @@ public class SmelteryControllerBlockEntityRenderer implements BlockEntityRendere
             float y2 = (float) (bounds.minY - smelteryRenderState.blockPos.getY() + Math.min(filledHeight, bounds.getYsize() - 0.001f));
             float z2 = (float) (bounds.maxZ - smelteryRenderState.blockPos.getZ() - 0.001f);
 
-            int light = LevelRenderer.getLightCoords(level, BlockPos.containing(bounds.getCenter()));
+            int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(bounds.getCenter()));
             if (chamber.molten()) {
                 light = (light & 0xF00000) | (Math.max((light >> 4) & 15, FluidVariantAttributes.getLuminance(chamber.fluid().variant())) << 4);
             }

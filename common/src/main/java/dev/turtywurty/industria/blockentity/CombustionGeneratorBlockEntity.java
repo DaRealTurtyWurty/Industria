@@ -14,11 +14,13 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.menu.CombustionGeneratorScreenHandler;
 import dev.turtywurty.industria.network.BlockPosPayload;
+import dev.turtywurty.industria.util.FuelUtils;
 import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -34,8 +36,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
@@ -56,11 +56,11 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity impleme
     }
 
     public boolean isFuel(ItemStack stack) {
-        return this.level.fuelValues().isFuel(stack);
+        return FuelUtils.isFuel(stack);
     }
 
     public int getFuelTime(ItemStack stack) {
-        return this.level.fuelValues().burnDuration(stack);
+        return FuelUtils.burnDuration(this.level, stack);
     }
 
     @Override

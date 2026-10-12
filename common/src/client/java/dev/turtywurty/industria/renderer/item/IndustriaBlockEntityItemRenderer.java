@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.function.Consumer;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -18,8 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
 
-import java.util.function.Consumer;
-
 public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
         implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
@@ -31,11 +30,11 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         if (stack.isEmpty() || this.modelPart == null)
             return;
 
-        RenderType renderLayer = RenderTypes.entityTranslucent(this.texture);
+        RenderType renderLayer = glint ? RenderTypes.itemTranslucentGlint(this.texture) : RenderTypes.entityTranslucent(this.texture);
         matrices.pushPose();
         setupTransformations(matrices);
         queue.submitModelPart(this.modelPart, matrices, renderLayer, light, overlay,
-                null, false, glint, -1, null, i);
+                null, -1, i);
         matrices.popPose();
     }
 
@@ -48,8 +47,8 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
 
     private static void setupTransformations(PoseStack matrices) {
         matrices.translate(0.5F, 1.5F, 0.5F);
-        matrices.mulPose(Axis.XP.rotationDegrees(180.0F));
-        matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+        matrices.rotate(Axis.XP.rotationDegrees(180.0F));
+        matrices.rotate(Axis.YP.rotationDegrees(180.0F));
     }
 
     @Override

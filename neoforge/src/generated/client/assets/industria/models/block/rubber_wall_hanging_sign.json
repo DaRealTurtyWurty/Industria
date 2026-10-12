@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_hanging_sign",
+  "textures": {
+    "all": "industria:block/rubber_hanging_sign",
+    "particle": "industria:block/rubber_stripped_log"
+  }
+}

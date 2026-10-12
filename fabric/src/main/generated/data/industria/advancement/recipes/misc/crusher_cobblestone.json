@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_cobblestone"
+        "recipes": "industria:crusher_cobblestone"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -1,12 +1,12 @@
 package dev.turtywurty.industria.util;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.init.ModKeyBindings;
 import dev.turtywurty.turtymultiloader.event.client.ClientEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 public class DebugRenderingRegistry {
     public static boolean debugRendering = false;
@@ -16,7 +16,7 @@ public class DebugRenderingRegistry {
 
         KeyMapping toggleDebugRenderingKey = ClientEvents.registerKeyMapping(new KeyMapping(
                 "key." + Industria.MOD_ID + ".toggle_debug_rendering",
-                GLFW.GLFW_KEY_F6,
+                InputConstants.KEY_F6,
                 ModKeyBindings.CATEGORY
         ));
 

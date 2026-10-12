@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_nether_gold_ore"
+        "recipes": "industria:crusher_nether_gold_ore"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.blockentity.util.inventory;
 
+import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.blockentity.util.WrappedStorage;
 import dev.turtywurty.industria.util.ViewSerializable;
 import dev.turtywurty.industria.util.ViewUtils;
@@ -7,9 +8,11 @@ import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.storage.CombinedStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.ContainerStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -23,14 +26,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
 public class WrappedContainerStorage<T extends SimpleContainer>
         extends WrappedStorage<ResourceStorage<ResourceVariant<Item>>> {
     private final List<T> inventories = new ArrayList<>();
-    private final List<Tuple<Direction, T>> sidedInventories = new ArrayList<>();
+    private final List<Pair<Direction, T>> sidedInventories = new ArrayList<>();
 
     public void addInventory(@NotNull T inventory) {
         addInventory(inventory, null);
@@ -38,7 +37,7 @@ public class WrappedContainerStorage<T extends SimpleContainer>
 
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
-        this.sidedInventories.add(new Tuple<>(side, inventory));
+        this.sidedInventories.add(Pair.of(side, inventory));
         var storage = ContainerStorage.of(inventory, side);
         addStorage(storage, side);
     }
@@ -65,7 +64,7 @@ public class WrappedContainerStorage<T extends SimpleContainer>
 
     public void addInventory(@NotNull T inventory, Direction side, BooleanSupplier canInsert, BooleanSupplier canExtract) {
         this.inventories.add(inventory);
-        this.sidedInventories.add(new Tuple<>(side, inventory));
+        this.sidedInventories.add(Pair.of(side, inventory));
         var storage = PredicateContainerStorage.of(ContainerStorage.of(inventory, side), canInsert, canExtract);
         addStorage(storage, side);
     }
@@ -124,7 +123,7 @@ public class WrappedContainerStorage<T extends SimpleContainer>
         return new RecipeSimpleInventory(getStacks().toArray(new ItemStack[0]));
     }
 
-    public List<Tuple<Direction, T>> getSidedInventories() {
+    public List<Pair<Direction, T>> getSidedInventories() {
         return this.sidedInventories;
     }
 

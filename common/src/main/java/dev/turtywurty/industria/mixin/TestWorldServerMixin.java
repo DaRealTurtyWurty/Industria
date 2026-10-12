@@ -2,6 +2,7 @@ package dev.turtywurty.industria.mixin;
 
 import com.mojang.logging.LogUtils;
 import dev.turtywurty.industria.testworld.IndustriaTestWorld;
+import java.io.IOException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -16,8 +17,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.io.IOException;
-
 @Mixin(MinecraftServer.class)
 public abstract class TestWorldServerMixin {
     @Shadow @Final
@@ -26,7 +25,7 @@ public abstract class TestWorldServerMixin {
     @Unique
     private boolean industria$isDisposableTestWorld() {
         var server = (MinecraftServer) (Object) this;
-        return !server.isDedicatedServer()
+        return (!server.isDedicatedServer() || Boolean.getBoolean("industria.test.disposableWorld"))
                 && IndustriaTestWorld.WORLD_ID.equals(this.storageSource.getLevelId())
                 && IndustriaTestWorld.WORLD_ID.equals(server.getWorldData().getLevelName());
     }

@@ -110,12 +110,14 @@ neoForge {
     }
 }
 
-sourceSets.main.resources {
-    srcDir 'src/generated/client'
-    srcDir 'src/generated/server'
-}
-
 processResources {
+    // NeoForge gathers registry data in both datagen modes; package each side once.
+    from('src/generated/client') {
+        include 'assets/**'
+    }
+    from('src/generated/server') {
+        include 'data/**'
+    }
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.recipe;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,20 +12,18 @@ import dev.turtywurty.industria.init.ModRecipeSerializers;
 import dev.turtywurty.industria.init.ModRecipeTypes;
 import dev.turtywurty.industria.util.IndustriaIngredient;
 import dev.turtywurty.industria.util.OutputItemStack;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
-
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, OutputItemStack outputB, int processTime)
         implements Recipe<RecipeSimpleInventory> {
@@ -33,8 +32,8 @@ public record CrusherRecipe(IndustriaIngredient input, OutputItemStack outputA, 
         return this.input.testForRecipe(input.getItem(0));
     }
 
-    public Tuple<ItemStack, ItemStack> assemble(RandomSource random) {
-        return new Tuple<>(this.outputA.createStack(random), this.outputB.createStack(random));
+    public Pair<ItemStack, ItemStack> assemble(RandomSource random) {
+        return Pair.of(this.outputA.createStack(random), this.outputB.createStack(random));
     }
 
     @Override

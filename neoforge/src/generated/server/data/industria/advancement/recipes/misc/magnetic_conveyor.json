@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:magnetic_conveyor"
+        "recipes": "industria:magnetic_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

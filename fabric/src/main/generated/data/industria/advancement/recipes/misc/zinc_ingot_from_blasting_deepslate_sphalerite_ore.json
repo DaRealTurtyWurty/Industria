@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:zinc_ingot_from_blasting_deepslate_sphalerite_ore"
+        "recipes": "industria:zinc_ingot_from_blasting_deepslate_sphalerite_ore"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

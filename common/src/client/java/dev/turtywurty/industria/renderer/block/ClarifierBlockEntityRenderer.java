@@ -7,6 +7,7 @@ import dev.turtywurty.industria.model.ClarifierModel;
 import dev.turtywurty.industria.state.ClarifierRenderState;
 import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -73,7 +74,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
 
     @Override
     protected void onRender(ClarifierRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, state,
+        ModelSubmitUtils.submitModel(queue, this.model, state,
                 matrices, this.model.renderType(ClarifierModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
 
@@ -144,7 +145,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
         matrices.pushPose();
         matrices.translate(0, 0.75 - scale / 2 - dy, 0 + dz);
         matrices.scale(scale, scale, scale);
-        matrices.mulPose(Axis.XP.rotation(rotation));
+        matrices.rotate(Axis.XP.rotation(rotation));
         state.renderItemRenderState(1, matrices, queue);
         matrices.popPose();
     }
@@ -192,7 +193,7 @@ public class ClarifierBlockEntityRenderer extends IndustriaBlockEntityRenderer<C
                 0.375f, 1.4375f);
 
         matrices.pushPose();
-        matrices.mulPose(Axis.YP.rotationDegrees(180));
+        matrices.rotate(Axis.YP.rotationDegrees(180));
         this.fluidRenderer.drawTiledXYQuadOnly(fluidVariant,
                 queue, matrices,
                 light, overlay,

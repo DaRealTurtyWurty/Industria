@@ -11,8 +11,8 @@ import dev.turtywurty.industria.init.worldgen.ModPlacedFeatures;
 import dev.turtywurty.industria.init.worldgen.ModTrunkPlacerTypes;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
 import dev.turtywurty.turtymultiloader.worldgen.WorldGeneration;
-import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class Industria {
         ModRecipeTypes.init();
         ModRecipeSerializers.init();
         ModCreativeModeTabs.init();
-        WorldGeneration.registerBootstrap(Registries.CONFIGURED_FEATURE, ModConfiguredFeatures::bootstrap);
+        WorldGeneration.registerBootstrap(Registries.FEATURE, ModConfiguredFeatures::bootstrap);
         WorldGeneration.registerBootstrap(Registries.PLACED_FEATURE, ModPlacedFeatures::bootstrap);
         ModBiomeModifications.init();
         ModFeatures.init();

@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_diamond_ore"
+        "recipes": "industria:crusher_diamond_ore"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

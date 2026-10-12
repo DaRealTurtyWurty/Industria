@@ -14,12 +14,11 @@ import dev.turtywurty.industria.init.worldgen.ModConfiguredFeatures;
 import dev.turtywurty.industria.init.worldgen.ModPlacedFeatures;
 import dev.turtywurty.turtymultiloader.datagen.DataGeneration;
 import dev.turtywurty.turtymultiloader.datagen.DataGenerationSpec;
+import java.util.List;
+import java.util.Set;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-
-import java.util.List;
-import java.util.Set;
 
 public final class IndustriaDataGeneration {
     public static final DataGenerationSpec SPEC = DataGeneration.spec(Industria.MOD_ID)
@@ -35,7 +34,7 @@ public final class IndustriaDataGeneration {
             .language("en_us", IndustriaEnglishLanguage::generate)
             .vanillaModels(IndustriaModels::generate)
             .damageTypes(ModDamageTypes::bootstrap)
-            .worldGeneration(Registries.CONFIGURED_FEATURE, ModConfiguredFeatures::bootstrap)
+            .worldGeneration(Registries.FEATURE, ModConfiguredFeatures::bootstrap)
             .worldGeneration(Registries.PLACED_FEATURE, ModPlacedFeatures::bootstrap)
             .build();
 

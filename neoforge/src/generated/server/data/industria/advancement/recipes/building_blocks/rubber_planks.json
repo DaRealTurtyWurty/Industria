@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:rubber_planks"
+        "recipes": "industria:rubber_planks"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:rubber_fence"
+        "recipes": "industria:rubber_fence"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

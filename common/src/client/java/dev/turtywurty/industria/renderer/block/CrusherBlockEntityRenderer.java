@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.turtywurty.industria.blockentity.CrusherBlockEntity;
 import dev.turtywurty.industria.model.CrusherModel;
 import dev.turtywurty.industria.state.CrusherRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
@@ -32,7 +33,7 @@ public class CrusherBlockEntityRenderer extends IndustriaBlockEntityRenderer<Cru
 
     @Override
     public void onRender(CrusherRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 state.progress > 0 ? (float) (((double) state.progress / state.maxProgress) * Math.PI) : 0F,
                 matrices, this.model.renderType(CrusherModel.TEXTURE),
                 light, overlay, 0, state.breakProgress);

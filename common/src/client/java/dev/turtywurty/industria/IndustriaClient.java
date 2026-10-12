@@ -1,10 +1,11 @@
 package dev.turtywurty.industria;
 
-import dev.turtywurty.industria.data.ClientConveyorNetworks;
-import dev.turtywurty.industria.pipe.ClientPipeNetworks;
 import dev.turtywurty.industria.client.IndustriaWoodSetClient;
+import dev.turtywurty.industria.data.ClientConveyorNetworks;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.pipe.ClientPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeConnectionModelLoading;
+import dev.turtywurty.industria.testworld.ClientStartupValidation;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 
 public class IndustriaClient {
@@ -26,6 +27,7 @@ public class IndustriaClient {
         ClientConveyorNetworks.init();
         ModReloadListeners.init();
         ModTooltips.init();
+        ClientStartupValidation.initialize();
     }
 
     public static synchronized void onRegistriesAppliedClient() {

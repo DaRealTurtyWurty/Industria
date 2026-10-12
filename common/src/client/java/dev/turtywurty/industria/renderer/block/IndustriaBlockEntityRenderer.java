@@ -8,11 +8,11 @@ import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.WireframeExtractor;
 import dev.turtywurty.multiblocklib.block.entity.MultiblockControllerBlockEntity;
 import dev.turtywurty.multiblocklib.data.MultiblockPartEntry;
+import java.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -42,8 +42,6 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-
-import java.util.*;
 
 /**
  * A block entity renderer for Industria block entities.
@@ -179,26 +177,6 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     }
 
     /**
-     * Gets the vertex consumer for the high contrast wireframe.
-     *
-     * @param vertexConsumers The vertex consumer provider
-     * @return The vertex consumer for the high contrast wireframe
-     */
-    public static VertexConsumer getHighContrastWireframeVertexConsumer(MultiBufferSource vertexConsumers) {
-        return vertexConsumers.getBuffer(RenderTypes.secondaryBlockOutline());
-    }
-
-    /**
-     * Gets the vertex consumer for the wireframe.
-     *
-     * @param vertexConsumers The vertex consumer provider
-     * @return The vertex consumer for the wireframe
-     */
-    public static VertexConsumer getWireframeVertexConsumer(MultiBufferSource vertexConsumers) {
-        return vertexConsumers.getBuffer(RenderTypes.lines());
-    }
-
-    /**
      * Gets the color of the wireframe.
      *
      * @param isHighContrast If the wireframe should be high contrast
@@ -227,12 +205,15 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
         int color = getWireframeColor(isHighContrast);
         RenderType renderType = isHighContrast ? RenderTypes.secondaryBlockOutline() : RenderTypes.lines();
         for (int iteration = 0; iteration < (isHighContrast ? 2 : 1); iteration++) {
-            VertexConsumer vertexConsumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(renderType);
-            for (ModelPart modelPart : modelParts) {
-                matrices.pushPose();
-                visitPart(modelPart, matrices, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
-                matrices.popPose();
-            }
+            queue.submitCustomGeometry(matrices, renderType, (pose, vertexConsumer) -> {
+                PoseStack renderPoses = new PoseStack();
+                renderPoses.mulPose(pose.pose());
+                for (ModelPart modelPart : modelParts) {
+                    renderPoses.pushPose();
+                    visitPart(modelPart, renderPoses, vertexConsumer, color, v0, v1, v2, v3, pos, normal);
+                    renderPoses.popPose();
+                }
+            });
         }
     }
 
@@ -284,13 +265,13 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
                 vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
                         .setColor(color)
                         .setLineWidth(2.0f)
-                        .setNormal(normal.x, normal.y, normal.z);
+                        .setNormal(normal.x, normal.y, normal.z).setLineWidth(1.0F);
 
                 pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
                 vertexConsumer.addVertex(pos.x(), pos.y(), pos.z())
                         .setColor(color)
                         .setLineWidth(2.0f)
-                        .setNormal(normal.x, normal.y, normal.z);
+                        .setNormal(normal.x, normal.y, normal.z).setLineWidth(1.0F);
             }
         }
 
@@ -343,7 +324,7 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
 
     protected void renderUnformedBlock(S state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         if (state.movingBlockRenderState != null) {
-            queue.submitMovingBlock(matrices, state.movingBlockRenderState);
+            queue.submitMovingBlock(matrices, state.movingBlockRenderState, 0);
         }
     }
 
@@ -442,13 +423,13 @@ public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S exte
     protected void setupBlockEntityTransformations(PoseStack matrices, S state) {
         matrices.pushPose();
         matrices.translate(0.5f + state.multiblockRenderOffsetX, 1.5f, 0.5f + state.multiblockRenderOffsetZ);
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
 
         if (!state.blockState.getProperties().contains(BlockStateProperties.HORIZONTAL_FACING))
             return;
 
         Direction facing = state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
-        matrices.mulPose(Axis.YP.rotationDegrees(180 + switch (facing) {
+        matrices.rotate(Axis.YP.rotationDegrees(180 + switch (facing) {
             case EAST -> 90;
             case SOUTH -> 180;
             case WEST -> 270;

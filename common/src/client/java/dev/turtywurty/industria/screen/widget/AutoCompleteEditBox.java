@@ -1,5 +1,11 @@
 package dev.turtywurty.industria.screen.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,13 +16,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class AutoCompleteEditBox<T> extends EditBox {
     private static final int DROPDOWN_BACKGROUND_COLOR = 0xFF111111;
@@ -116,24 +115,24 @@ public class AutoCompleteEditBox<T> extends EditBox {
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (isDropdownVisible()) {
-            if (event.key() == GLFW.GLFW_KEY_DOWN) {
+            if (event.key() == InputConstants.KEY_DOWN) {
                 moveHighlightedSuggestion(1);
                 return true;
             }
 
-            if (event.key() == GLFW.GLFW_KEY_UP) {
+            if (event.key() == InputConstants.KEY_UP) {
                 moveHighlightedSuggestion(-1);
                 return true;
             }
 
-            if (event.key() == GLFW.GLFW_KEY_ENTER || event.key() == GLFW.GLFW_KEY_KP_ENTER || event.key() == GLFW.GLFW_KEY_TAB) {
+            if (event.key() == InputConstants.KEY_RETURN || event.key() == InputConstants.KEY_NUMPADENTER || event.key() == InputConstants.KEY_TAB) {
                 if (isValidSuggestionIndex(this.highlightedSuggestionIndex)) {
                     selectSuggestion(this.highlightedSuggestionIndex);
                     return true;
                 }
             }
 
-            if (event.key() == GLFW.GLFW_KEY_ESCAPE) {
+            if (event.key() == InputConstants.KEY_ESCAPE) {
                 closeSuggestions();
                 return true;
             }

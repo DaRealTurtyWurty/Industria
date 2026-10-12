@@ -7,6 +7,8 @@ import dev.turtywurty.industria.init.ModItems;
 import dev.turtywurty.industria.molding.MoldPattern;
 import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.molding.MoldPiece;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,11 +24,8 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ClayMoldSmeltingRecipe extends SmeltingRecipe {
-    private static final MapCodec<SmeltingRecipe> CODEC = cookingMapCodec(ClayMoldSmeltingRecipe::new, 200);
+    private static final MapCodec<SmeltingRecipe> CODEC = cookingMapCodec(ClayMoldSmeltingRecipe::new);
     private static final StreamCodec<RegistryFriendlyByteBuf, SmeltingRecipe> NETWORK_CODEC =
             cookingStreamCodec(ClayMoldSmeltingRecipe::new);
     public static final RecipeSerializer<SmeltingRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, NETWORK_CODEC);

@@ -16,6 +16,8 @@ import dev.turtywurty.industria.mixin.ModelPartAccessor;
 import dev.turtywurty.industria.util.DebugRenderingRegistry;
 import dev.turtywurty.turtymultiloader.event.client.LevelRenderContext;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
@@ -32,6 +34,7 @@ import net.minecraft.gizmos.Gizmos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -41,9 +44,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector3d;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
     public static final String DEFAULT_ANCHOR_ROUTE = "default";
@@ -140,7 +140,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
         SubmitNodeCollector nodeCollector = context.submitNodeCollector();
         PoseStack poseStack = context.poseStack();
 
-        Entity cameraEntity = context.gameRenderer().getMainCamera().entity();
+        Entity cameraEntity = context.gameRenderer().mainCamera().entity();
         if (cameraEntity == null)
             return;
 
@@ -174,7 +174,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 if (!(state.getBlock() instanceof ConveyorLike))
                     continue;
 
-                int lightCoords = LevelRenderer.getLightCoords(level, conveyorPos);
+                int lightCoords = LightCoordsUtil.getLightCoords(level, conveyorPos);
 
                 ModConveyorSpecialRenderers.ConveyorSpecialRendererEntry rendererEntry = ModConveyorSpecialRenderers.getRenderer(state);
                 ModConveyorSpecialRenderers.RenderContext renderContext = null;
@@ -209,8 +209,8 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                                      PoseStack poseStack, SubmitNodeCollector nodeCollector, int lightCoords, long gameTime, float partialTick,
                                      ModConveyorSpecialRenderers.ConveyorSpecialRendererEntry rendererEntry, ModConveyorSpecialRenderers.RenderContext renderContext,
                                      Set<UUID> visibleItems) {
-        Vec3 conveyorCenter = conveyorPos.getCenter();
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Vec3 conveyorCenter = Vec3.atCenterOf(conveyorPos);
+        Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         Vec3 cameraPosition = camera.position();
         Vec3 relativePosition = conveyorCenter.subtract(cameraPosition);
 
@@ -327,12 +327,12 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
                 double horizontalLength = Math.sqrt(smoothedDirection.x * smoothedDirection.x + smoothedDirection.z * smoothedDirection.z);
                 float yaw = (float) Math.toDegrees(Math.atan2(smoothedDirection.x, smoothedDirection.z));
                 float pitch = (float) -Math.toDegrees(Math.atan2(smoothedDirection.y, horizontalLength));
-                poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
-                poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
+                poseStack.rotate(Axis.YP.rotationDegrees(yaw));
+                poseStack.rotate(Axis.XP.rotationDegrees(pitch));
             }
         }
 
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+        poseStack.rotate(Axis.XP.rotationDegrees(-90.0F));
         renderItem(stack, poseStack, nodeCollector, lightCoords);
 
         poseStack.popPose();

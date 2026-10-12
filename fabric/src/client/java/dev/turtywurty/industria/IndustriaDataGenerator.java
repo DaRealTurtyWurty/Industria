@@ -14,6 +14,11 @@ public class IndustriaDataGenerator implements DataGeneratorEntrypoint {
 
     @Override
     public void buildRegistry(RegistrySetBuilder registryBuilder) {
-        DataGeneration.addRegistryBootstraps(IndustriaDataGeneration.SPEC, registryBuilder);
+        DataGeneration.addWorldRegistryBootstraps(IndustriaDataGeneration.SPEC, registryBuilder);
+    }
+
+    @Override
+    public void buildReloadableRegistry(RegistrySetBuilder registryBuilder) {
+        DataGeneration.addReloadableRegistryBootstraps(IndustriaDataGeneration.SPEC, registryBuilder);
     }
 }

@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "industria:item/seismic_scanner",
+      "sprite": "industria:block/seismic_scanner"
+    }
+  ]
+}

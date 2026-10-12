@@ -5,14 +5,13 @@ import dev.turtywurty.industria.fluid.FluidRegistryObject;
 import dev.turtywurty.industria.metal.MetalDefinition;
 import dev.turtywurty.industria.metal.MetalForm;
 import dev.turtywurty.industria.metal.MetalRegistry;
+import java.util.Map;
+import java.util.function.Supplier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Map;
-import java.util.function.Supplier;
 
 public final class ModMetals {
     private ModMetals() {
@@ -140,7 +139,7 @@ public final class ModMetals {
 
     public static final MetalDefinition COPPER = register("copper",
             1084.62f,
-            () -> Blocks.COPPER_BLOCK,
+            () -> Blocks.COPPER_BLOCK.weathering().unaffected(),
             ModFluids.MOLTEN_COPPER,
             Map.of(
                     MetalForm.INGOT, () -> Items.COPPER_INGOT,

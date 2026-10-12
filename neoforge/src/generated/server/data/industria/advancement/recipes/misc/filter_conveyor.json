@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:filter_conveyor"
+        "recipes": "industria:filter_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

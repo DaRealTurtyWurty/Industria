@@ -6,6 +6,7 @@ import dev.turtywurty.industria.blockentity.util.slurry.InputSlurryStorage;
 import dev.turtywurty.industria.model.DigesterModel;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import dev.turtywurty.slurryapi.api.Slurry;
 import dev.turtywurty.slurryapi.client.SlurryRenderHandler;
 import dev.turtywurty.slurryapi.client.SlurryRenderHandlerRegistry;
@@ -39,11 +40,11 @@ public class DigesterBlockEntityRenderer extends IndustriaBlockEntityRenderer<Di
 
     @Override
     protected void onRender(DigesterRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, state,
+        ModelSubmitUtils.submitModel(queue, this.model, state,
                 matrices, this.model.renderType(DigesterModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
         renderSlurry(state, matrices, queue, light, overlay);
-        queue.submitModel(this.glassModel, state,
+        ModelSubmitUtils.submitModel(queue, this.glassModel, state,
                 matrices, this.glassModel.renderType(DigesterModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
     }

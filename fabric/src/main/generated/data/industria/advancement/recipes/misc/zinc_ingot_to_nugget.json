@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:zinc_ingot_to_nugget"
+        "recipes": "industria:zinc_ingot_to_nugget"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

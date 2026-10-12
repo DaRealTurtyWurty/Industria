@@ -7,6 +7,7 @@ import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.blockentity.SolarPanelBlockEntity;
 import dev.turtywurty.industria.model.AdvancedSolarPanelModel;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -62,7 +63,7 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
         state.yaw = getTrackingYaw(facing) + (state.onStair ? (float) Math.PI : 0.0F);
 
         state.powered = state.blockState.getValue(SolarPanelBlock.POWERED);
-        float sunAngle = Minecraft.getInstance().gameRenderer.getMainCamera().attributeProbe()
+        float sunAngle = Minecraft.getInstance().gameRenderer.mainCamera().attributeProbe()
                 .getValue(EnvironmentAttributes.SUN_ANGLE, tickProgress);
         state.pitch = getTrackingPitch(sunAngle);
     }
@@ -77,10 +78,10 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
 
             matrices.pushPose();
             if (state.onStair) {
-                matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+                matrices.rotate(Axis.YP.rotationDegrees(180.0F));
             }
 
-            queue.submitModel(selectedModel, new AdvancedSolarPanelModel.RenderState(state.yaw, state.pitch),
+            ModelSubmitUtils.submitModel(queue, selectedModel, new AdvancedSolarPanelModel.RenderState(state.yaw, state.pitch),
                     matrices, selectedModel.renderType(texture), light, overlay, 0, state.breakProgress);
             matrices.popPose();
         }
@@ -101,7 +102,7 @@ public class AdvancedSolarPanelBlockEntityRenderer extends IndustriaBlockEntityR
 
         matrices.pushPose();
         if (state.onStair)
-            matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+            matrices.rotate(Axis.YP.rotationDegrees(180.0F));
 
         queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(ENERGY_BAR_TEXTURE), (entry, vertexConsumer) -> {
             vertexConsumer.addVertex(entry, ENERGY_BAR_MIN_X, minY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F).setUv(0.0F, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);

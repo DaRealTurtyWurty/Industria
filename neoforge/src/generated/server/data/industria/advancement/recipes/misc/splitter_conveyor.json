@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:splitter_conveyor"
+        "recipes": "industria:splitter_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -8,6 +8,7 @@ import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
 import dev.turtywurty.industria.model.CentrifugalConcentratorModel;
 import dev.turtywurty.industria.state.CentrifugalConcentratorRenderState;
 import dev.turtywurty.industria.util.FluidRenderUtils;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -59,7 +60,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
     @Override
     protected void onRender(CentrifugalConcentratorRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 state.bowlRotation,
                 matrices, this.model.renderType(CentrifugalConcentratorModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
@@ -126,8 +127,8 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
             matrices.pushPose();
             matrices.translate(x, y, z);
-            matrices.mulPose(Axis.XP.rotationDegrees(180));
-            matrices.mulPose(Axis.YP.rotation(angle + (float) Math.PI / 2f));
+            matrices.rotate(Axis.XP.rotationDegrees(180));
+            matrices.rotate(Axis.YP.rotation(angle + (float) Math.PI / 2f));
             matrices.scale(0.5f, 0.5f, 0.5f);
             state.renderItemRenderState(0, matrices, queue);
 
@@ -142,7 +143,7 @@ public class CentrifugalConcentratorBlockEntityRenderer extends IndustriaBlockEn
 
     private Vector3f localToWorldPosition(PoseStack matrices) {
         Vector3f pos = matrices.last().pose().transformPosition(0, 0, 0, new Vector3f());
-        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
+        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.mainCamera().position();
 
         return new Vector3f((float) (pos.x() + cameraPos.x), (float) (pos.y() + cameraPos.y), (float) (pos.z() + cameraPos.z));
     }

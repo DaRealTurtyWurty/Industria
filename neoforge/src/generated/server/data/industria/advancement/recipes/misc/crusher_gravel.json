@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:crusher_gravel"
+        "recipes": "industria:crusher_gravel"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

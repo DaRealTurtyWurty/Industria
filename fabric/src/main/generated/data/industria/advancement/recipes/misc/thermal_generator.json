@@ -53,7 +53,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:thermal_generator"
+        "recipes": "industria:thermal_generator"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:merger_conveyor"
+        "recipes": "industria:merger_conveyor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

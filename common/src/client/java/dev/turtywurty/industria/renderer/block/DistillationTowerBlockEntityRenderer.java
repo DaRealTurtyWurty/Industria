@@ -8,6 +8,7 @@ import dev.turtywurty.industria.model.DistillationTowerModel;
 import dev.turtywurty.industria.state.DistillationTowerRenderState;
 import dev.turtywurty.industria.util.FluidAmounts;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -38,14 +39,14 @@ public class DistillationTowerBlockEntityRenderer extends IndustriaBlockEntityRe
     protected void setupBlockEntityTransformations(PoseStack matrices, DistillationTowerRenderState state) {
         matrices.pushPose();
         matrices.translate(0.5F, 1.5F, 0.5F);
-        matrices.mulPose(Axis.XP.rotationDegrees(180));
+        matrices.rotate(Axis.XP.rotationDegrees(180));
         matrices.translate(0.0F, 1.0F, 0.0F);
 
         if (!state.blockState.getProperties().contains(BlockStateProperties.HORIZONTAL_FACING))
             return;
 
         Direction facing = state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
-        matrices.mulPose(Axis.YP.rotationDegrees(180 + switch (facing) {
+        matrices.rotate(Axis.YP.rotationDegrees(180 + switch (facing) {
             case EAST -> 90;
             case SOUTH -> 180;
             case WEST -> 270;
@@ -65,7 +66,7 @@ public class DistillationTowerBlockEntityRenderer extends IndustriaBlockEntityRe
 
     @Override
     protected void onRender(DistillationTowerRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, state,
+        ModelSubmitUtils.submitModel(queue, this.model, state,
                 matrices, this.model.renderType(DistillationTowerModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
 

@@ -1,12 +1,12 @@
 package dev.turtywurty.industria.testworld;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.authlib.GameProfile;
+import com.mojang.logging.LogUtils;
+import dev.turtywurty.industria.blockentity.CastingBasinBlockEntity;
 import dev.turtywurty.industria.blockentity.ChargingHatchBlockEntity;
 import dev.turtywurty.industria.blockentity.FireboxBlockEntity;
 import dev.turtywurty.industria.blockentity.SmelteryControllerBlockEntity;
 import dev.turtywurty.industria.blockentity.TappingOutletBlockEntity;
-import dev.turtywurty.industria.blockentity.CastingBasinBlockEntity;
 import dev.turtywurty.industria.blockentity.util.StorageOperations;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.init.ModBlocks;
@@ -16,8 +16,10 @@ import dev.turtywurty.industria.menu.ChargingHatchMenu;
 import dev.turtywurty.industria.menu.FireboxMenu;
 import dev.turtywurty.industria.network.BlockPosPayload;
 import dev.turtywurty.industria.network.ChargingHatchOpenPayload;
+import dev.turtywurty.industria.recipe.SmelteryRecipe;
 import dev.turtywurty.industria.util.ExtraCodecs;
 import dev.turtywurty.industria.util.FluidAmounts;
+import dev.turtywurty.industria.util.FuelUtils;
 import dev.turtywurty.turtymultiloader.transfer.TransferService;
 import dev.turtywurty.turtymultiloader.transfer.lookup.StorageKeys;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
@@ -25,29 +27,30 @@ import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.TransferSupport;
 import dev.turtywurty.turtymultiloader.transfer.transaction.TransferTransaction;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.storage.TagValueInput;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
 
 /** Opt-in server tests that mutate real structures and inspect their serialized controller state. */
 public final class SmelteryValidationTestWorld {
@@ -647,7 +650,7 @@ public final class SmelteryValidationTestWorld {
                 .step(60, "insert coal with pending work", s -> s.startWorkingWithFuel(Items.COAL, 3))
                 .step(1, "first fuel lights immediately", s -> {
                     var firebox = s.firebox();
-                    int duration = s.context.overworld().fuelValues().burnDuration(new ItemStack(Items.COAL));
+                    int duration = FuelUtils.burnDuration(s.context.overworld(), new ItemStack(Items.COAL));
                     check(s.fuelCount(Items.COAL) == 2, "Starting fire did not consume exactly one coal");
                     check(firebox.getMaxBurnTime() == duration, "Maximum duration differs from fuel value");
                     check(firebox.getBurnTime() >= duration - 1 && firebox.getBurnTime() <= duration,
@@ -770,8 +773,7 @@ public final class SmelteryValidationTestWorld {
                 .step(1, "bucket remainder and duration preserved", s -> {
                     check(s.fuelCount(Items.LAVA_BUCKET) == 0 && s.fuelCount(Items.BUCKET) == 1,
                             "Lava fuel lost or duplicated its bucket remainder");
-                    check(s.firebox().getMaxBurnTime() == s.context.overworld().fuelValues()
-                            .burnDuration(new ItemStack(Items.LAVA_BUCKET)), "Wrong lava duration");
+                    check(s.firebox().getMaxBurnTime() == FuelUtils.burnDuration(s.context.overworld(), new ItemStack(Items.LAVA_BUCKET)), "Wrong lava duration");
                     check(s.firebox().getBlockState().getValue(BlockStateProperties.LIT), "Lava did not light immediately");
                     var storage = TransferService.get().findBlock(StorageKeys.ITEM,
                             s.context.overworld(), s.context.pos(0, 1, 2), Direction.WEST);
@@ -931,7 +933,7 @@ public final class SmelteryValidationTestWorld {
         suite.scenario("refuel loop repays saved negative energy", 8)
                 .step(60, "load fuel debt", s -> {
                     s.addPendingInput();
-                    long unitsPerStick = 9L * s.context.overworld().fuelValues().burnDuration(new ItemStack(Items.STICK));
+                    long unitsPerStick = 9L * FuelUtils.burnDuration(s.context.overworld(), new ItemStack(Items.STICK));
                     check(unitsPerStick > 0, "Stick is not fuel");
                     var data = s.firebox().saveWithoutMetadata(s.context.overworld().registryAccess());
                     data.putLong("RemainingFuelUnits", -2 * unitsPerStick - 1);
@@ -950,41 +952,41 @@ public final class SmelteryValidationTestWorld {
                 .step(60, "warm chamber and verify loaded recipe", s -> {
                     var recipe = s.controller().getMatchingRecipe(new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                     check(recipe.isPresent(), "Generated aluminium melting recipe was not loaded");
-                    check(recipe.get().value().processTime() == 40, "Unexpected test recipe duration");
+                    check(recipe.get().value().processTime() == 200, "Unexpected test recipe duration");
                     s.warmForMelting();
                 })
-                .step(40, "insert input behind nonmelting item", s -> {
+                .step(200, "insert input behind nonmelting item", s -> {
                     s.hatch().getInventory().setItem(0, new ItemStack(Items.IRON_INGOT, 3));
                     s.hatch().getInventory().setItem(4, new ItemStack(ModItems.ALUMINIUM_INGOT.get(), 2));
                 })
-                .step(19, "input remains until accelerated completion", s -> {
-                    check(s.hatch().getMeltingProgress(4) == 38, "Progress did not respect the speed cap");
+                .step(95, "input remains until accelerated completion", s -> {
+                    check(s.hatch().getMeltingProgress(4) == 190, "Progress did not respect the speed cap");
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 1, "Input consumed early");
                     check(s.meltingStorage().getAmount() == 0, "Fluid produced early");
                 })
-                .step(1, "one batch completes exactly", s -> {
+                .step(5, "one batch completes exactly", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Incorrect melting input count");
                     check(s.itemCount(Items.IRON_INGOT) == 1, "Melting extracted from wrong slot");
                     s.expectMolten(FluidAmounts.INGOT);
                     check(s.hatch().getMeltingProgress(4) == 0, "Completed batch kept progress");
                     s.hatch().getInventory().setItem(4, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                 })
-                .step(40, "second batch completes independently", s -> {
+                .step(200, "second batch completes independently", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Second batch not consumed");
                     s.expectMolten(2 * FluidAmounts.INGOT);
                 });
 
         suite.scenario("all 18 hatch slots melt simultaneously including hidden slots", 4)
                 .step(60, "warm chamber", Scenario::warmForMelting)
-                .step(40, "fill all slots", s -> {
+                .step(200, "fill all slots", s -> {
                     for (int slot = 0; slot < 18; slot++) {
                         s.hatch().getInventory().setItem(slot, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                     }
                 })
-                .step(19, "all slots advance independently at capped speed", s -> {
+                .step(95, "all slots advance independently at capped speed", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 18, "Parallel input consumed early");
                     for (int slot = 0; slot < 18; slot++) {
-                        check(s.hatch().getMeltingProgress(slot) == 38, "Slot " + slot + " did not progress");
+                        check(s.hatch().getMeltingProgress(slot) == 190, "Slot " + slot + " did not progress");
                     }
                     var player = s.context.createFakePlayer(2, 3, -2,
                             new GameProfile(UUID.randomUUID(), "ParallelMenuTest"));
@@ -996,7 +998,7 @@ public final class SmelteryValidationTestWorld {
                     menu.removed(player);
                     check(s.meltingStorage().getAmount() == 0, "Parallel melting produced fluid early");
                 })
-                .step(1, "all slots complete together", s -> {
+                .step(5, "all slots complete together", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Parallel melting left input");
                     s.expectMolten(18 * FluidAmounts.INGOT);
                     for (int slot = 0; slot < 18; slot++) {
@@ -1006,24 +1008,24 @@ public final class SmelteryValidationTestWorld {
 
         suite.scenario("staggered slot progress survives save load independently", 4)
                 .step(60, "warm chamber", Scenario::warmForMelting)
-                .step(40, "start first slot", s ->
+                .step(200, "start first slot", s ->
                         s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get())))
-                .step(5, "start later slot", s ->
+                .step(25, "start later slot", s ->
                         s.hatch().getInventory().setItem(4, new ItemStack(ModItems.ALUMINIUM_INGOT.get())))
-                .step(5, "save two different progress values", s -> {
+                .step(25, "save two different progress values", s -> {
                     var data = s.hatch().saveWithoutMetadata(s.context.overworld().registryAccess()).copy();
                     s.hatch().resetMeltingProgress();
                     s.hatch().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                             s.context.overworld().registryAccess(), data));
-                    check(s.hatch().getMeltingProgress(0) == 20 && s.hatch().getMeltingProgress(4) == 10,
+                    check(s.hatch().getMeltingProgress(0) == 100 && s.hatch().getMeltingProgress(4) == 50,
                             "Reload combined or lost independent progress");
                 })
-                .step(10, "first slot finishes alone", s -> {
+                .step(50, "first slot finishes alone", s -> {
                     check(s.hatch().getInventory().getItem(0).isEmpty(), "First slot did not complete");
-                    check(s.hatch().getMeltingProgress(4) == 30, "Other slot was reset by completion");
+                    check(s.hatch().getMeltingProgress(4) == 150, "Other slot was reset by completion");
                     s.expectMolten(FluidAmounts.INGOT);
                 })
-                .step(5, "later slot completes", s -> {
+                .step(25, "later slot completes", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Later slot did not complete");
                     s.expectMolten(2 * FluidAmounts.INGOT);
                 });
@@ -1034,19 +1036,19 @@ public final class SmelteryValidationTestWorld {
                             s.meltingStorage().getCapacity() - FluidAmounts.INGOT);
                     s.warmForMelting();
                 })
-                .step(40, "start two slots", s -> {
+                .step(200, "start two slots", s -> {
                     s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                     s.hatch().getInventory().setItem(4, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                 })
-                .step(40, "only first slot completes", s -> {
+                .step(200, "only first slot completes", s -> {
                     check(s.hatch().getInventory().getItem(0).isEmpty()
                                     && !s.hatch().getInventory().getItem(4).isEmpty(),
                             "Capacity contention lost input or chose wrong completion");
-                    check(s.hatch().getMeltingProgress(4) == 38, "Waiting slot lost progress");
+                    check(s.hatch().getMeltingProgress(4) == s.aluminiumRecipe().processTime() - s.aluminiumRecipe().maxSpeedMultiplier(), "Waiting slot lost progress");
                     check(s.meltingStorage().getAmount() == s.meltingStorage().getCapacity(), "Chamber overfilled");
                 })
-                .step(5, "waiting progress remains intact and free space", s -> {
-                    check(s.hatch().getMeltingProgress(4) == 38, "Blocked progress changed");
+                .step(25, "waiting progress remains intact and free space", s -> {
+                    check(s.hatch().getMeltingProgress(4) == s.aluminiumRecipe().processTime() - s.aluminiumRecipe().maxSpeedMultiplier(), "Blocked progress changed");
                     var storage = s.meltingStorage();
                     try (var transaction = TransferTransaction.openRoot()) {
                         check(storage.extract(storage.getResource(), FluidAmounts.INGOT, transaction)
@@ -1054,7 +1056,7 @@ public final class SmelteryValidationTestWorld {
                         transaction.commit();
                     }
                 })
-                .step(1, "waiting slot completes when space returns", s -> {
+                .step(5, "waiting slot completes when space returns", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Waiting item did not resume");
                     check(s.meltingStorage().getAmount() == s.meltingStorage().getCapacity(), "Resumed output is wrong");
                 });
@@ -1063,13 +1065,13 @@ public final class SmelteryValidationTestWorld {
                 .step(60, "validate loaded recipe speed limits", s -> {
                     var recipe = s.controller().getMatchingRecipe(new ItemStack(ModItems.ALUMINIUM_INGOT.get()))
                             .orElseThrow().value();
-                    check(recipe.getSpeedMultiplier(99) == 0.0, "Cold recipe has a speed");
-                    check(recipe.getSpeedMultiplier(100) == 1.0, "Minimum temperature is not normal speed");
-                    check(recipe.getSpeedMultiplier(125) == 1.5, "Midpoint did not interpolate speed");
-                    check(recipe.getSpeedMultiplier(150) == 2.0 && recipe.getSpeedMultiplier(2000) == 2.0,
+                    check(recipe.getSpeedMultiplier(recipe.requiredTemperature() - 1) == 0.0, "Cold recipe has a speed");
+                    check(recipe.getSpeedMultiplier(recipe.requiredTemperature()) == 1.0, "Minimum temperature is not normal speed");
+                    check(recipe.getSpeedMultiplier((recipe.requiredTemperature() + recipe.preferredTemperature()) / 2) == 1.5, "Midpoint did not interpolate speed");
+                    check(recipe.getSpeedMultiplier(recipe.preferredTemperature()) == 2.0 && recipe.getSpeedMultiplier(2000) == 2.0,
                             "Recipe exceeded or missed its speed cap");
-                    float[] temperatures = {100, 125, 150, 2000};
-                    int[] durations = {40, 27, 20, 20};
+                    float[] temperatures = {recipe.requiredTemperature(), (recipe.requiredTemperature() + recipe.preferredTemperature()) / 2, recipe.preferredTemperature(), 2000};
+                    int[] durations = {recipe.processTime(), (int) Math.ceil(recipe.processTime() / 1.5), recipe.processTime() / 2, recipe.processTime() / 2};
                     for (int test = 0; test < temperatures.length; test++) {
                         s.setTemperature(temperatures[test]);
                         s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
@@ -1105,20 +1107,20 @@ public final class SmelteryValidationTestWorld {
 
         suite.scenario("heating stops at recipe target and pauses when work is removed", 4)
                 .step(60, "prepare chamber just below preferred temperature", s -> {
-                    s.setTemperature(149.75F);
+                    s.setTemperature(s.aluminiumRecipe().preferredTemperature() - 0.25F);
                     s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                     s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
                 })
                 .step(1, "heating clamps without overshoot", s ->
-                        check(s.controller().getTemperature() == 150.0F, "Heating overshot preferred temperature"))
+                        check(s.controller().getTemperature() == s.aluminiumRecipe().preferredTemperature(), "Heating overshot preferred temperature"))
                 .step(10, "maintain target while melting", s -> {
-                    check(s.controller().getTemperature() == 150.0F && s.firebox().isBurning(),
+                    check(s.controller().getTemperature() == s.aluminiumRecipe().preferredTemperature() && s.firebox().isBurning(),
                             "Loaded recipe did not maintain preferred temperature");
                     s.lastFuelUnits = s.remainingUnits();
                     s.hatch().getInventory().clearContent();
                 })
                 .step(10, "no work cools without fuel", s -> {
-                    check(s.controller().getTemperature() < 150.0F, "Idle smeltery did not cool");
+                    check(s.controller().getTemperature() < s.aluminiumRecipe().preferredTemperature(), "Idle smeltery did not cool");
                     check(s.remainingUnits() == s.lastFuelUnits && !s.firebox().isBurning(),
                             "Empty hatch kept consuming fuel");
                 });
@@ -1153,37 +1155,37 @@ public final class SmelteryValidationTestWorld {
 
         suite.scenario("changing melting slot restarts duration", 4)
                 .step(60, "warm chamber", Scenario::warmForMelting)
-                .step(40, "start slot zero", s -> s.hatch().getInventory().setItem(0,
+                .step(200, "start slot zero", s -> s.hatch().getInventory().setItem(0,
                         new ItemStack(ModItems.ALUMINIUM_INGOT.get())))
-                .step(10, "move input to another slot", s -> {
-                    check(s.hatch().getMeltingProgress(0) == 20, "Expected partial progress");
+                .step(50, "move input to another slot", s -> {
+                    check(s.hatch().getMeltingProgress(0) == 100, "Expected partial progress");
                     s.hatch().getInventory().setItem(0, ItemStack.EMPTY);
                     s.hatch().getInventory().setItem(4, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                 })
-                .step(10, "new slot has its own partial duration", s -> {
-                    check(s.hatch().getMeltingProgress(4) == 20 && s.hatch().getMeltingProgress(0) == 0,
+                .step(50, "new slot has its own partial duration", s -> {
+                    check(s.hatch().getMeltingProgress(4) == 100 && s.hatch().getMeltingProgress(0) == 0,
                             "Moved input did not receive independent progress");
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 1, "Moved input melted early");
                     check(s.meltingStorage().getAmount() == 0, "Moved input produced early fluid");
                 })
-                .step(10, "new slot finishes after accelerated duration", s -> s.expectMolten(FluidAmounts.INGOT));
+                .step(50, "new slot finishes after accelerated duration", s -> s.expectMolten(FluidAmounts.INGOT));
 
         suite.scenario("melting progress survives hatch save load", 4)
                 .step(60, "warm chamber", Scenario::warmForMelting)
-                .step(40, "start input", s -> s.hatch().getInventory().setItem(0,
+                .step(200, "start input", s -> s.hatch().getInventory().setItem(0,
                         new ItemStack(ModItems.ALUMINIUM_INGOT.get())))
-                .step(10, "round trip partial progress", s -> {
+                .step(50, "round trip partial progress", s -> {
                     var data = s.hatch().saveWithoutMetadata(s.context.overworld().registryAccess()).copy();
                     s.hatch().resetMeltingProgress();
                     s.hatch().loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                             s.context.overworld().registryAccess(), data));
-                    check(s.hatch().getMeltingProgress(0) == 20, "Reload lost partial progress");
+                    check(s.hatch().getMeltingProgress(0) == 100, "Reload lost partial progress");
                 })
-                .step(9, "saved duration not shortened", s -> {
-                    check(s.hatch().getMeltingProgress(0) == 38 && s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 1,
+                .step(45, "saved duration not shortened", s -> {
+                    check(s.hatch().getMeltingProgress(0) == 190 && s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 1,
                             "Reload changed duration or lost input");
                 })
-                .step(1, "saved batch completes once", s -> {
+                .step(5, "saved batch completes once", s -> {
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Reloaded batch did not consume input");
                     s.expectMolten(FluidAmounts.INGOT);
                 });
@@ -1329,7 +1331,7 @@ public final class SmelteryValidationTestWorld {
                     check(!s.firebox().isBurning() && !s.firebox().getBlockState().getValue(BlockStateProperties.LIT),
                             "Idle firebox shows burning");
                     check(s.controller().getTemperature() == 20.0F, "Idle smeltery heated without work");
-                    s.hatch().getInventory().setItem(0, new ItemStack(Items.IRON_INGOT));
+                    s.hatch().getInventory().setItem(0, new ItemStack(Items.STICK));
                 })
                 .step(40, "nonmelting input still does not start fuel", s -> {
                     check(s.fuelCount(Items.COAL) == 3 && s.remainingUnits() == 0, "Nonmelting input started fuel");
@@ -1367,22 +1369,22 @@ public final class SmelteryValidationTestWorld {
 
         suite.scenario("last completed batch pauses fuel until another item arrives", 4)
                 .step(60, "warm chamber", Scenario::warmForMelting)
-                .step(40, "insert one batch and fuel", s -> {
+                .step(200, "insert one batch and fuel", s -> {
                     s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                     s.firebox().getInventory().setItem(0, new ItemStack(Items.COAL, 2));
                 })
-                .step(40, "capture energy at completion", s -> {
+                .step(200, "capture energy at completion", s -> {
                     s.expectMolten(FluidAmounts.INGOT);
                     check(s.itemCount(ModItems.ALUMINIUM_INGOT.get()) == 0, "Final input did not finish");
                     s.lastFuelUnits = s.remainingUnits();
                 })
-                .step(40, "completed chamber preserves remaining fuel", s -> {
+                .step(200, "completed chamber preserves remaining fuel", s -> {
                     check(s.remainingUnits() == s.lastFuelUnits && s.fuelCount(Items.COAL) == 2,
                             "Finished chamber continued consuming fuel");
                     check(!s.firebox().isBurning(), "Finished chamber remained active");
                     s.hatch().getInventory().setItem(0, new ItemStack(ModItems.ALUMINIUM_INGOT.get()));
                 })
-                .step(40, "next batch uses remaining fuel", s -> {
+                .step(200, "next batch uses remaining fuel", s -> {
                     s.expectMolten(2 * FluidAmounts.INGOT);
                     check(s.remainingUnits() == s.lastFuelUnits && s.fuelCount(Items.COAL) == 2,
                             "Next batch burned fuel despite sufficient stored heat");
@@ -1416,7 +1418,7 @@ public final class SmelteryValidationTestWorld {
         suite.scenario("outlet registered extraction commits and rolls back", 4)
                 .step(60, "seed chamber", s -> s.seed(BLOCK))
                 .step(40, "extract through registered providers on every side", s -> {
-                    var water = ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder());
+                    var water = ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder());
                     for (Direction direction : Direction.values()) {
                         var storage = TransferService.get().findBlock(StorageKeys.FLUID,
                                 s.context.overworld(), s.context.pos(2, 3, -1), direction);
@@ -1439,7 +1441,7 @@ public final class SmelteryValidationTestWorld {
                 .step(40, "cached provider follows replacement tank", s -> {
                     check(s.outletStorage.amount(0) == BLOCK - 1000, "Cached provider lost current tank");
                     try (var transaction = TransferTransaction.openRoot()) {
-                        check(s.outletStorage.extract(ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()),
+                        check(s.outletStorage.extract(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()),
                                 1000, transaction) == 1000, "Cached provider cannot extract");
                         transaction.commit();
                     }
@@ -1458,7 +1460,7 @@ public final class SmelteryValidationTestWorld {
                     var west = s.context.requireBlockEntity(-1, 3, 2, TappingOutletBlockEntity.class);
                     check(s.outlet().getChamber() != null && east.getChamber() == s.outlet().getChamber()
                             && west.getChamber() == s.outlet().getChamber(), "Outlets do not resolve the same chamber");
-                    var water = ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder());
+                    var water = ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder());
                     check(StorageOperations.set(s.meltingStorage(), water, 2500), "Cannot seed shared tank");
                     var providers = List.of(s.outlet().getFluidProvider(Direction.DOWN),
                             east.getFluidProvider(Direction.DOWN), west.getFluidProvider(Direction.DOWN));
@@ -1485,7 +1487,7 @@ public final class SmelteryValidationTestWorld {
                         s.context.setBlock(5, 3, 2, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
                                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)))
                 .step(40, "save and reload the list-only format", s -> {
-                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()),
+                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()),
                             BLOCK), "Cannot seed saved shared tank");
                     var snapshot = s.save().copy();
                     var savedChamber = (CompoundTag) snapshot.getListOrEmpty("Chambers").getFirst();
@@ -1508,7 +1510,7 @@ public final class SmelteryValidationTestWorld {
                         s.context.setBlock(5, 3, 2, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
                                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)))
                 .step(40, "seed and remove the original outlet", s -> {
-                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()),
+                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()),
                             BLOCK), "Cannot seed shared tank before removal");
                     s.outletStorage = s.outlet().getFluidProvider(Direction.DOWN);
                     s.context.removeBlock(2, 3, -1);
@@ -1527,7 +1529,7 @@ public final class SmelteryValidationTestWorld {
                         s.context.setBlock(5, 3, 2, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
                                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)))
                 .step(40, "seed tank and invalidate the chamber", s -> {
-                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()),
+                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()),
                             BLOCK), "Cannot seed shared tank before invalidation");
                     s.context.removeBlock(2, 6, 2);
                 })
@@ -1556,7 +1558,7 @@ public final class SmelteryValidationTestWorld {
                 .step(40, "pour both receivers without overdrawing the source", s -> {
                     var east = s.context.requireBlockEntity(5, 3, 2, TappingOutletBlockEntity.class);
                     var eastBasin = s.context.requireBlockEntity(5, 2, 2, CastingBasinBlockEntity.class);
-                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()),
+                    check(StorageOperations.set(s.meltingStorage(), ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()),
                             2500), "Cannot seed shared pouring source");
                     s.outlet().startPouring();
                     east.startPouring();
@@ -1579,7 +1581,7 @@ public final class SmelteryValidationTestWorld {
                 })
                 .step(40, "pour and extract during the same server tick", s -> {
                     var east = s.context.requireBlockEntity(5, 3, 2, TappingOutletBlockEntity.class);
-                    var water = ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder());
+                    var water = ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder());
                     check(StorageOperations.set(s.meltingStorage(), water, 1500), "Cannot seed mixed extraction source");
                     s.outlet().startPouring();
                     s.outlet().tick();
@@ -1605,7 +1607,7 @@ public final class SmelteryValidationTestWorld {
                             "Broken chamber still exposes fluid");
                     check(s.outletStorage.support(0) == TransferSupport.NONE, "Invalid outlet still supports transfers");
                     try (var transaction = TransferTransaction.openRoot()) {
-                        check(s.outletStorage.extract(ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()),
+                        check(s.outletStorage.extract(ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()),
                                 BLOCK, transaction) == 0, "Broken chamber allowed extraction");
                     }
                     s.context.setBlock(2, 6, 2, ModBlocks.CHIMNEY.get().defaultBlockState());
@@ -1640,7 +1642,7 @@ public final class SmelteryValidationTestWorld {
                     s.outlet().tick();
                     check(s.basin().getFluidStorage().getAmount() == 1000
                             && s.meltingStorage().getAmount() == 500, "First pour did not transfer one nugget");
-                    check(s.outlet().getPouringFluid().value() == Fluids.WATER,
+                    check(s.outlet().getPouringFluid().value() == ModFluids.MOLTEN_ALUMINIUM.still().get(),
                             "Active stream does not expose transferred fluid");
                     var streamTag = s.outlet().getUpdateTag(s.context.overworld().registryAccess());
                     check(streamTag.contains("PouringFluid"), "Stream variant missing from client update tag");
@@ -1649,7 +1651,7 @@ public final class SmelteryValidationTestWorld {
                             && s.meltingStorage().getAmount() == 0, "Partial final pour lost fluid");
                     check(s.outlet().getPouringFluid().isBlank(), "Empty source left stream active");
                     check(StorageOperations.set(s.meltingStorage(),
-                            ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()), 1000), "Cannot refill test chamber");
+                            ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()), 1000), "Cannot refill test chamber");
                 })
                 .step(5, "refilling chamber does not restart pouring", s -> {
                     check(s.basin().getFluidStorage().getAmount() == 1500, "Empty-source stop restarted itself");
@@ -1665,7 +1667,7 @@ public final class SmelteryValidationTestWorld {
                     s.seed(BLOCK);
                     s.context.setBlock(2, 2, -1, ModBlocks.CASTING_BASIN.get());
                     check(StorageOperations.set(s.basin().getFluidStorage(),
-                            ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()), BLOCK - 500), "Cannot seed basin");
+                            ResourceTypes.FLUID.of(ModFluids.MOLTEN_ALUMINIUM.still().get().builtInRegistryHolder()), BLOCK - 500), "Cannot seed basin");
                 })
                 .step(40, "pour only remaining capacity", s -> {
                     s.outlet().startPouring();
@@ -1928,6 +1930,29 @@ public final class SmelteryValidationTestWorld {
             return (CastingBasinBlockEntity) context.overworld().getBlockEntity(context.pos(2, 2, -1));
         }
 
+        private boolean usesTappableFluid() {
+            return name.startsWith("pouring rejects") || Set.of(
+                "outlet registered extraction commits and rolls back",
+                "three outlets share one tank and transactional extraction",
+                "multiple outlet lists and fluid survive save load",
+                "removing one outlet retains chamber until its last outlet is removed",
+                "chamber invalidation clears every outlet link",
+                "two outlets pour from the same limited tank",
+                "pipe extraction and pouring share the remaining fluid",
+                "cached outlet provider disables and recovers with chamber",
+                "removed outlet cannot keep cached access",
+                "pouring drains only available fluid and stays stopped after empty",
+                "pouring fills basin exactly and does not restart after draining").contains(name);
+        }
+
+        private Fluid fixtureFluid() {
+            return usesTappableFluid() ? ModFluids.MOLTEN_ALUMINIUM.still().get() : Fluids.WATER;
+        }
+
+        private SmelteryRecipe aluminiumRecipe() {
+            return controller().getMatchingRecipe(new ItemStack(ModItems.ALUMINIUM_INGOT.get())).orElseThrow().value();
+        }
+
         private Scenario(Suite suite, String name, TestWorldContext context) {
             this.suite = suite;
             this.name = name;
@@ -1981,6 +2006,7 @@ public final class SmelteryValidationTestWorld {
             if (!(context.overworld().getBlockEntity(context.pos(0, 3, 1)) instanceof SmelteryControllerBlockEntity))
                 context.setBlock(0, 3, 1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
                         .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
+            if (usesTappableFluid() && controller().getTemperature() < aluminiumRecipe().requiredTemperature()) setTemperature(aluminiumRecipe().preferredTemperature() + 100.0F);
             int startChunk = context.origin().getX() >> 4;
             int endChunk = context.pos(width, 0, 0).getX() >> 4;
             for (int chunk = startChunk; chunk <= endChunk; chunk++) {
@@ -2088,7 +2114,7 @@ public final class SmelteryValidationTestWorld {
 
         private void warmForMelting() {
             var data = save();
-            data.putFloat("Temperature", 500.0F);
+            data.putFloat("Temperature", aluminiumRecipe().preferredTemperature() + 100.0F);
             load(data);
         }
 
@@ -2153,7 +2179,7 @@ public final class SmelteryValidationTestWorld {
 
         private void seed(long... amounts) {
             Fluid[] fluids = new Fluid[amounts.length];
-            java.util.Arrays.fill(fluids, Fluids.WATER);
+            Arrays.fill(fluids, fixtureFluid());
             seed(fluids, amounts);
         }
 
@@ -2194,7 +2220,7 @@ public final class SmelteryValidationTestWorld {
             for (var entry : data.getListOrEmpty("RetainedFluids")) {
                 var stack = FluidStack.CODEC.codec().parse(ops, ((CompoundTag) entry).get("fluid_stack")).getOrThrow();
                 check(stack.amount() >= 0, "Negative reserve");
-                check(stack.isEmpty() || stack.variant().value() == Fluids.WATER, "Reserve fluid type changed");
+                check(stack.isEmpty() || stack.variant().value() == fixtureFluid(), "Reserve fluid type changed");
                 retained += stack.amount();
             }
             LOGGER.info("[SmelterySuite] OBSERVED {}: active={} retainedAmount={}", name, active, retained);
@@ -2206,7 +2232,7 @@ public final class SmelteryValidationTestWorld {
                 check(chamber.capacity() == capacity, "Wrong capacity: " + chamber.capacity());
                 check(chamber.fluid().amount() == expected[i].amount(), "Wrong active amount: expected " + expected[i].amount() + ", got " + chamber.fluid().amount());
                 check(chamber.fluid().amount() >= 0 && chamber.fluid().amount() <= capacity, "Active storage exceeds capacity");
-                check(chamber.fluid().isEmpty() || chamber.fluid().variant().value() == Fluids.WATER, "Active fluid type changed");
+                check(chamber.fluid().isEmpty() || chamber.fluid().variant().value() == fixtureFluid(), "Active fluid type changed");
             }
             check(retained == retainedAmount, "Wrong retained amount: expected " + retainedAmount + ", got " + retained);
         }

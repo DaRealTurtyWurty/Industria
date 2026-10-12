@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.blockentity;
 
+import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
@@ -20,6 +21,9 @@ import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -27,7 +31,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -45,10 +48,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
@@ -146,7 +145,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
         }
 
         Optional<RecipeHolder<CrusherRecipe>> recipeEntry = getCurrentRecipe();
-        Tuple<ItemStack, ItemStack> outputs;
+        Pair<ItemStack, ItemStack> outputs;
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
             this.currentRecipeId = null;
             this.maxProgress = 0;
@@ -155,7 +154,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
             return;
         } else {
             outputs = recipeEntry.get().value().assemble(this.level.getRandom());
-            if (!canOutput(outputs.getA()) || !canOutput(outputs.getB())) {
+            if (!canOutput(outputs.getFirst()) || !canOutput(outputs.getSecond())) {
                 this.currentRecipeId = null;
                 this.maxProgress = 0;
                 this.progress = 0;
@@ -167,8 +166,8 @@ public class CrusherBlockEntity extends IndustriaBlockEntity implements Syncable
         CrusherRecipe recipe = recipeEntry.get().value();
         if (this.progress >= this.maxProgress) {
             if (hasEnergy()) {
-                ItemStack outputA = outputs.getA();
-                ItemStack outputB = outputs.getB();
+                ItemStack outputA = outputs.getFirst();
+                ItemStack outputB = outputs.getSecond();
                 if (!canOutput(outputA) || !canOutput(outputB))
                     return;
 

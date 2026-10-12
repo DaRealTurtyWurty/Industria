@@ -6,6 +6,7 @@ import dev.turtywurty.industria.blockentity.OilPumpJackBlockEntity;
 import dev.turtywurty.industria.mixin.ModelPartAccessor;
 import dev.turtywurty.industria.model.OilPumpJackModel;
 import dev.turtywurty.industria.state.OilPumpJackRenderState;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -75,7 +76,7 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
         // Draw bridle
         drawBridle(state, matrices, queue, attachmentBPosition, attachmentCPosition, attachmentDPosition);
 
-        queue.submitModel(this.model,
+        ModelSubmitUtils.submitModel(queue, this.model,
                 new OilPumpJackModel.OilPumpJackModelRenderState(state.wheelPitch, state.counterWeightsPitch, state.pitmanArmPitch, state.armPitch),
                 matrices, this.model.renderType(OilPumpJackModel.TEXTURE_LOCATION),
                 light, overlay, 0, state.breakProgress);
@@ -87,7 +88,7 @@ public class OilPumpJackBlockEntityRenderer extends IndustriaBlockEntityRenderer
 
         matrices.pushPose();
         matrices.translate((attachmentBPosition.x - attachmentCPosition.x) / 16f, (attachmentBPosition.y - attachmentCPosition.y) / 16f, (attachmentBPosition.z - attachmentCPosition.z) / 16f);
-        matrices.mulPose(Axis.XP.rotation(state.armPitch));
+        matrices.rotate(Axis.XP.rotation(state.armPitch));
         matrices.translate((attachmentCPosition.x - attachmentBPosition.x) / 16f, (attachmentCPosition.y - attachmentBPosition.y) / 16f, (attachmentCPosition.z - attachmentBPosition.z) / 16f);
         queue.submitCustomGeometry(matrices, RenderTypes.lines(), (matricesEntry, vertexConsumer) ->
                 vertexConsumer.addVertex(matricesEntry, attachmentCPosition.x, attachmentCPosition.y, attachmentCPosition.z)

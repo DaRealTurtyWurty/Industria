@@ -7,15 +7,16 @@ import dev.turtywurty.industria.blockentity.util.fluid.OutputFluidStorage;
 import dev.turtywurty.industria.model.TreeTapModel;
 import dev.turtywurty.industria.state.IndustriaBlockEntityRenderState;
 import dev.turtywurty.industria.util.InWorldFluidRenderingComponent;
+import dev.turtywurty.industria.util.ModelSubmitUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceTypes;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -31,7 +32,7 @@ public class TreeTapBlockEntityRenderer extends IndustriaBlockEntityRenderer<Tre
 
     @Override
     protected void onRender(TreeTapRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
-        queue.submitModel(this.model, state, matrices, RenderTypes.entitySolid(TreeTapModel.TEXTURE_LOCATION), light, overlay, 0, null);
+        ModelSubmitUtils.submitModel(queue, this.model, state, matrices, RenderTypes.entitySolid(TreeTapModel.TEXTURE_LOCATION), light, overlay, 0, null);
 
         ClientLevel level = Minecraft.getInstance().level;
         if (level != null) {
@@ -77,9 +78,9 @@ public class TreeTapBlockEntityRenderer extends IndustriaBlockEntityRenderer<Tre
         float fluidHeight = (height * fluidPercentage) - 0.001f;
 
         matrices.pushPose();
-        matrices.mulPose(Axis.XP.rotationDegrees(45f));
+        matrices.rotate(Axis.XP.rotationDegrees(45f));
         this.fluidRenderer.renderTopFaceOnly(state.fluidVariant, queue, matrices, light, overlay, level, state.blockPos, -0.1249f, -0.985f + fluidHeight, 0f, 0.1249f, 0.464f);
-        matrices.mulPose(Axis.XN.rotationDegrees(-90f));
+        matrices.rotate(Axis.XN.rotationDegrees(-90f));
         this.fluidRenderer.renderTopFaceOnly(state.fluidVariant, queue, matrices, light, overlay, level, state.blockPos, -0.1249f, 0.1865f + fluidHeight, 0.707f, 0.1249f, 0.7965f);
         matrices.popPose();
     }

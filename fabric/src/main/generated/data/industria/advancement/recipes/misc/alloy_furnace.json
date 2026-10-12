@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "industria:alloy_furnace"
+        "recipes": "industria:alloy_furnace"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

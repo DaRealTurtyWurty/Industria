@@ -13,6 +13,7 @@ import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
 import dev.turtywurty.turtymultiloader.transfer.storage.SimpleEnergyStorage;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -23,11 +24,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
+import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-
-import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
@@ -37,7 +36,7 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();
     private float windSpeed = -1F;
 
-    private ImprovedNoise windNoise;
+    private PerlinNoise windNoise;
     private boolean canReceiveWind = true;
 
     private final float propellerRotation = 0F; // Client side only
@@ -88,12 +87,12 @@ public class WindTurbineBlockEntity extends IndustriaBlockEntity implements Sync
             return;
 
         if (this.windNoise == null) {
-            this.windNoise = new ImprovedNoise(this.level.getRandom());
+            this.windNoise = new PerlinNoise(this.level.getRandom());
         }
 
         if (this.windSpeed == -1F || this.level.getGameTime() % 24000 == 0) {
             float offset = this.level.getGameTime() / 24000F;
-            this.windSpeed = (float) this.windNoise.noise(
+            this.windSpeed = (float) this.windNoise.get(
                     this.worldPosition.getX() + offset,
                     this.worldPosition.getY() + offset,
                     this.worldPosition.getZ() + offset) + 1.0F;

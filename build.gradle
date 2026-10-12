@@ -1,7 +1,7 @@
 plugins {
     id 'base'
-    id 'net.fabricmc.fabric-loom' version '1.15.5' apply false
-    id 'net.neoforged.moddev' version '2.0.141' apply false
+    id 'net.fabricmc.fabric-loom' version '1.18.4' apply false
+    id 'net.neoforged.moddev' version '2.0.148' apply false
 }
 
 allprojects {
@@ -9,7 +9,11 @@ allprojects {
     version = mod_version
 
     repositories {
-        mavenLocal()
+        mavenLocal {
+            content {
+                excludeGroup(turtymultiloader_group)
+            }
+        }
         mavenCentral()
         maven { url = 'https://maven.fabricmc.net/' }
         maven { url = 'https://api.modrinth.com/maven' }

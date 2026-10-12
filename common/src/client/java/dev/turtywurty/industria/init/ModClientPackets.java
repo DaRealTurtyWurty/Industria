@@ -17,7 +17,7 @@ public class ModClientPackets {
     public static void init() {
         NetworkService networkService = NetworkService.get();
         networkService.registerClientHandler(PayloadPhase.PLAY, OpenSeismicScannerPayload.ID, (payload, context) ->
-                context.enqueueWork(() -> Minecraft.getInstance().setScreen(new SeismicScannerScreen(payload.stack()))));
+                context.enqueueWork(() -> Minecraft.getInstance().gui.setScreen(new SeismicScannerScreen(payload.stack()))));
 
         networkService.registerClientHandler(PayloadPhase.PLAY, SyncFluidPocketsPayload.ID, (payload, context) -> {
             ResourceKey<Level> worldKey = context.player().get().level().dimension();

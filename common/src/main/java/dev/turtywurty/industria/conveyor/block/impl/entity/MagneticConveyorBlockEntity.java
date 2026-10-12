@@ -5,9 +5,10 @@ import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.conveyor.ConveyorItem;
 import dev.turtywurty.industria.conveyor.ConveyorNetwork;
 import dev.turtywurty.industria.conveyor.ConveyorStorage;
-import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
+import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -16,8 +17,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.List;
 
 // TODO: Maybe get rid of this and add magnetic chest or somethin
 public class MagneticConveyorBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity {
@@ -50,7 +49,7 @@ public class MagneticConveyorBlockEntity extends IndustriaBlockEntity implements
     }
 
     private void pullItemEntity(ItemEntity itemEntity, ConveyorStorage storage) {
-        Vec3 conveyorPos = this.worldPosition.getCenter();
+        Vec3 conveyorPos = Vec3.atCenterOf(this.worldPosition);
         Vec3 entityPos = itemEntity.position();
 
         Vec3 delta = conveyorPos.subtract(entityPos);
