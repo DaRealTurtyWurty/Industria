@@ -118,6 +118,7 @@ processResources {
 
     def properties = [
         version : project.version,
+        mod_license : mod_license,
         minecraft_version : minecraft_version,
         fabric_loader_version : fabric_loader_version,
         turtymultiloader_version: turtymultiloader_version
