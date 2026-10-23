@@ -732,7 +732,6 @@ public final class IndustriaModels {
         blockStateModelGenerator.createFurnace(ModBlocks.FUELBOX.get(), firebrickFront);
         firebrickFront.create(ModBlocks.CHARGING_HATCH.get(), blockStateModelGenerator.modelOutput);
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.CHARGING_HATCH.get());
-        firebrickFront.create(ModBlocks.SMELTERY_CONTROLLER.get(), blockStateModelGenerator.modelOutput);
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.SMELTERY_CONTROLLER.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CHIMNEY.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_BASIN.get());

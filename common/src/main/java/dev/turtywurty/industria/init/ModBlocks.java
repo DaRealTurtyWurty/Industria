@@ -6,17 +6,21 @@ import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
 import dev.turtywurty.turtymultiloader.registration.VanillaBlockPredicates;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DropExperienceBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ModBlocks {
     private static final RegistryService REGISTRIES = RegistryService.get();
@@ -389,7 +393,7 @@ public class ModBlocks {
 
     public static final RegistrationHandle<Block, SmelteryControllerBlock> SMELTERY_CONTROLLER = registerWithItemCopy(
         "smeltery_controller",
-        SmelteryControllerBlock::new, Blocks.BRICKS);
+        SmelteryControllerBlock::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
 
     public static final RegistrationHandle<Block, Block> CHIMNEY = registerWithItemCopy("chimney",
         Block::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
