@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
+  "loader": "industria:connected",
   "textures": {
     "all": "industria:block/smeltery_glass"
   }

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "industria:block/smeltery_glass"
+    "model": "industria:block/smeltery_glass_item"
   }
 }

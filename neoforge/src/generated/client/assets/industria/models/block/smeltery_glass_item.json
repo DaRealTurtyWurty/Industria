@@ -1,0 +1,6 @@
+{
+  "parent": "industria:block/parent/connected_cube_item",
+  "textures": {
+    "all": "industria:block/smeltery_glass"
+  }
+}

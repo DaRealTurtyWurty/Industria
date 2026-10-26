@@ -1,14 +1,26 @@
 package dev.turtywurty.industria.neoforge;
 
+import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
 import dev.turtywurty.industria.molding.MoldCastPreviewRenderer;
 import dev.turtywurty.industria.molding.MoldCastPreviewState;
+import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureLoader;
+import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureModel;
+import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedUnbakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ResolvedModel;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Mod(value = IndustriaNeoForge.MOD_ID, dist = Dist.CLIENT)
 public final class IndustriaNeoForgeClient {
@@ -19,9 +31,35 @@ public final class IndustriaNeoForgeClient {
             event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
 
         modBus.addListener(RegisterPictureInPictureRenderersEvent.class, this::registerPictureInPictureRenderers);
+
+        modBus.addListener(ModelEvent.RegisterLoaders.class, this::registerModelLoaders);
+        modBus.addListener(ModelEvent.ModifyBakingResult.class, this::modifyBakingResult);
     }
 
     private void registerPictureInPictureRenderers(RegisterPictureInPictureRenderersEvent event) {
         event.register(MoldCastPreviewState.class, MoldCastPreviewRenderer::new);
+    }
+
+    private void registerModelLoaders(ModelEvent.RegisterLoaders event) {
+        event.register(Industria.id("connected"), new NeoForgeConnectedTextureLoader());
+    }
+
+    private void modifyBakingResult(ModelEvent.ModifyBakingResult event) {
+        ModelBakery modelBakery = event.getModelBakery();
+        event.getBakingResult().blockStateModels().replaceAll((state, model) -> {
+            BlockStateModel.UnbakedRoot source = modelBakery.unbakedBlockStateModels.get(state);
+            if(source == null)
+                return model;
+
+            Set<Identifier> dependencies = new HashSet<>();
+            source.resolveDependencies(dependencies::add);
+            for (Identifier dependency : dependencies) {
+                ResolvedModel resolvedModel = modelBakery.resolvedModels.get(dependency);
+                if (NeoForgeConnectedUnbakedModel.isConnected(resolvedModel))
+                    return new NeoForgeConnectedTextureModel(model);
+            }
+
+            return model;
+        });
     }
 }
