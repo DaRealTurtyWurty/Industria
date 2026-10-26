@@ -726,7 +726,7 @@ public final class IndustriaModels {
 
         // Smeltery
         blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
-        blockStateModelGenerator.createTrivialCube(ModBlocks.FIREBRICK.get());
+        registerConnectedCube(blockStateModelGenerator, ModBlocks.FIREBRICK.get());
         registerConnectedCube(blockStateModelGenerator, ModBlocks.SMELTERY_GLASS.get());
         TexturedModel.Provider firebrickFront = TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(
                 mapping -> mapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get()))
@@ -1018,6 +1018,7 @@ public final class IndustriaModels {
                 ModBlocks.WELLHEAD.get().asItem(),
                 ModBlocks.WIND_TURBINE.get().asItem(),
                 ModBlocks.SMELTERY_GLASS.get().asItem(),
+                ModBlocks.FIREBRICK.get().asItem(),
                 ModWoodSets.RUBBER.button().item().get(),
                 ModWoodSets.RUBBER.door().item().get(),
                 ModWoodSets.RUBBER.fence().item().get(),

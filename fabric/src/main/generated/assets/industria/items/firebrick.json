@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "industria:block/firebrick"
+    "model": "industria:block/firebrick_item"
   }
 }

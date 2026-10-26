@@ -1,4 +1,5 @@
 {
+  "fabric:type": "industria:connected",
   "parent": "minecraft:block/cube_all",
   "textures": {
     "all": "industria:block/firebrick"
