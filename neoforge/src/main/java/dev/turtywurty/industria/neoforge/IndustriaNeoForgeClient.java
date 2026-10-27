@@ -2,6 +2,7 @@ package dev.turtywurty.industria.neoforge;
 
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
+import dev.turtywurty.industria.connected.ConnectedTextureSettings;
 import dev.turtywurty.industria.molding.MoldCastPreviewRenderer;
 import dev.turtywurty.industria.molding.MoldCastPreviewState;
 import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureLoader;
@@ -28,7 +29,7 @@ public final class IndustriaNeoForgeClient {
         NeoForge.EVENT_BUS.addListener(NeoForgeIndustriaTestWorldButton::onScreenInit);
         IndustriaClient.onInitializeClient();
         modBus.addListener(FMLClientSetupEvent.class,
-            event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
+                event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
 
         modBus.addListener(RegisterPictureInPictureRenderersEvent.class, this::registerPictureInPictureRenderers);
 
@@ -48,15 +49,17 @@ public final class IndustriaNeoForgeClient {
         ModelBakery modelBakery = event.getModelBakery();
         event.getBakingResult().blockStateModels().replaceAll((state, model) -> {
             BlockStateModel.UnbakedRoot source = modelBakery.unbakedBlockStateModels.get(state);
-            if(source == null)
+            if (source == null)
                 return model;
 
             Set<Identifier> dependencies = new HashSet<>();
             source.resolveDependencies(dependencies::add);
             for (Identifier dependency : dependencies) {
-                ResolvedModel resolvedModel = modelBakery.resolvedModels.get(dependency);
-                if (NeoForgeConnectedUnbakedModel.isConnected(resolvedModel))
-                    return new NeoForgeConnectedTextureModel(model);
+                ResolvedModel resolved = modelBakery.resolvedModels.get(dependency);
+                ConnectedTextureSettings settings = NeoForgeConnectedUnbakedModel.findSettings(resolved);
+
+                if (settings != null)
+                    return new NeoForgeConnectedTextureModel(model, settings);
             }
 
             return model;

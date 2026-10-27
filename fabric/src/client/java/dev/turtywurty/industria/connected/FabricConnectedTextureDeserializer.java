@@ -8,9 +8,11 @@ import net.minecraft.client.resources.model.UnbakedModel;
 public class FabricConnectedTextureDeserializer implements UnbakedModelDeserializer {
     @Override
     public UnbakedModel deserialize(JsonObject jsonObject, JsonDeserializationContext context) {
+        ConnectedTextureSettings settings = ConnectedTextureSettings.fromJson(jsonObject);
         JsonObject deepCopy = jsonObject.deepCopy();
         deepCopy.remove("fabric:type");
+        deepCopy.remove("connects_to");
         UnbakedModel unbakedModel = context.deserialize(deepCopy, UnbakedModel.class);
-        return new FabricConnectedUnbakedModel(unbakedModel);
+        return new FabricConnectedUnbakedModel(unbakedModel, settings);
     }
 }

@@ -6,6 +6,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Set;
+
 public final class ConnectedTextureNeighborhood {
     private final BlockGetter level;
     private final Block targetBlock;
@@ -13,19 +15,23 @@ public final class ConnectedTextureNeighborhood {
 
     private final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
+    private final Set<Block> additionalConnections;
+
     private int checkedMask;
     private int connectedMask;
 
     public ConnectedTextureNeighborhood(
             BlockGetter level,
             BlockPos pos,
-            BlockState state
+            BlockState state,
+            Set<Block> additionalConnections
     ) {
         this.level = level;
         this.targetBlock = state.getBlock();
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
+        this.additionalConnections = additionalConnections;
     }
 
     public boolean isConnected(int dx, int dy, int dz) {
@@ -39,7 +45,7 @@ public final class ConnectedTextureNeighborhood {
 
         cursor.set(x + dx, y + dy, z + dz);
         BlockState state = level.getBlockState(cursor);
-        boolean connected = state.is(targetBlock);
+        boolean connected = state.is(targetBlock) || additionalConnections.contains(state.getBlock());
         checkedMask |= mask;
         if (connected) {
             connectedMask |= mask;

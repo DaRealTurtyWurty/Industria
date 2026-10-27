@@ -1,5 +1,8 @@
 {
   "parent": "minecraft:block/cube_all",
+  "connects_to": [
+    "industria:smeltery_glass"
+  ],
   "loader": "industria:connected",
   "textures": {
     "all": "industria:block/firebrick"

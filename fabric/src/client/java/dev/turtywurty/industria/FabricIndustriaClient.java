@@ -1,5 +1,6 @@
 package dev.turtywurty.industria;
 
+import dev.turtywurty.industria.connected.ConnectedTextureSettings;
 import dev.turtywurty.industria.connected.FabricConnectedTextureDeserializer;
 import dev.turtywurty.industria.connected.FabricConnectedTextureModel;
 import dev.turtywurty.industria.connected.FabricConnectedUnbakedModel;
@@ -32,8 +33,11 @@ public class FabricIndustriaClient implements ClientModInitializer {
                             context.sourceModel().resolveDependencies(dependencies::add);
                             for (Identifier dependency : dependencies) {
                                 ResolvedModel resolved = context.baker().getModel(dependency);
-                                if (FabricConnectedUnbakedModel.isConnected(resolved))
-                                    return new FabricConnectedTextureModel(model);
+                                ConnectedTextureSettings settings =
+                                        FabricConnectedUnbakedModel.findSettings(resolved);
+
+                                if (settings != null)
+                                    return new FabricConnectedTextureModel(model, settings);
                             }
 
                             return model;

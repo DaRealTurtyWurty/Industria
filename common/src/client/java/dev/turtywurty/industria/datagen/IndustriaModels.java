@@ -1,6 +1,8 @@
 package dev.turtywurty.industria.datagen;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
@@ -726,7 +728,7 @@ public final class IndustriaModels {
 
         // Smeltery
         blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
-        registerConnectedCube(blockStateModelGenerator, ModBlocks.FIREBRICK.get());
+        registerConnectedCube(blockStateModelGenerator, ModBlocks.FIREBRICK.get(), ModBlocks.SMELTERY_GLASS.get());
         registerConnectedCube(blockStateModelGenerator, ModBlocks.SMELTERY_GLASS.get());
         TexturedModel.Provider firebrickFront = TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(
                 mapping -> mapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get()))
@@ -778,11 +780,23 @@ public final class IndustriaModels {
                 ModelTemplates.CUBE_ALL));
     }
 
-    private static void registerConnectedCube(BlockModelGenerators generator, Block block) {
+    private static void registerConnectedCube(
+            BlockModelGenerators generator,
+            Block block,
+            Block... additionalConnections
+    ) {
         Identifier identifier = TexturedModel.CUBE.create(block, (modelId, modelInstance) -> {
             generator.modelOutput.accept(modelId, () -> {
                 JsonObject json = modelInstance.get().getAsJsonObject();
                 ModelDatagenService.get().addModelLoader(json, Industria.id("connected"));
+                if (additionalConnections.length > 0) {
+                    var connections = new JsonArray();
+                    for (Block connection : additionalConnections) {
+                        connections.add(new JsonPrimitive(BuiltInRegistries.BLOCK.getKey(connection).toString()));
+                    }
+
+                    json.add("connects_to", connections);
+                }
                 return json;
             });
         });

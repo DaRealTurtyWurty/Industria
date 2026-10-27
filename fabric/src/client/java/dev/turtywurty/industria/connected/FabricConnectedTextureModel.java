@@ -10,16 +10,20 @@ import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class FabricConnectedTextureModel extends WrapperBlockStateModel {
     private final FabricConnectedTextureQuadCache quadCache = new FabricConnectedTextureQuadCache();
+    private final Set<Block> additionalConnections;
 
-    public FabricConnectedTextureModel(BlockStateModel model) {
+    public FabricConnectedTextureModel(BlockStateModel model, ConnectedTextureSettings settings) {
         super(model);
+        this.additionalConnections = settings.resolveBlocks();
     }
 
     @Override
@@ -31,7 +35,7 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
             @Override
             public boolean transform(MutableQuadView quad) {
                 if (neighborhood == null) {
-                    neighborhood = new ConnectedTextureNeighborhood(level, pos, state);
+                    neighborhood = new ConnectedTextureNeighborhood(level, pos, state, additionalConnections);
                 }
 
                 Direction direction = quad.lightFace();

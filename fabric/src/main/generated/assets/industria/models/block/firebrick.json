@@ -1,6 +1,9 @@
 {
   "fabric:type": "industria:connected",
   "parent": "minecraft:block/cube_all",
+  "connects_to": [
+    "industria:smeltery_glass"
+  ],
   "textures": {
     "all": "industria:block/firebrick"
   }
