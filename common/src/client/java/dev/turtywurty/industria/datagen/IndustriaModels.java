@@ -730,12 +730,10 @@ public final class IndustriaModels {
         blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
         registerConnectedCube(blockStateModelGenerator, ModBlocks.FIREBRICK.get(), ModBlocks.SMELTERY_GLASS.get());
         registerConnectedCube(blockStateModelGenerator, ModBlocks.SMELTERY_GLASS.get());
-        TexturedModel.Provider firebrickFront = TexturedModel.ORIENTABLE_ONLY_TOP.updateTexture(
-                mapping -> mapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get()))
-                        .put(TextureSlot.TOP, TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get())));
-        blockStateModelGenerator.createFurnace(ModBlocks.FUELBOX.get(), firebrickFront);
-        firebrickFront.create(ModBlocks.CHARGING_HATCH.get(), blockStateModelGenerator.modelOutput);
-        blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.CHARGING_HATCH.get());
+        blockStateModelGenerator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+                ModBlocks.FUELBOX.get(), BlockModelGenerators.plainVariant(Industria.id("block/firebrick"))));
+        blockStateModelGenerator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+                ModBlocks.CHARGING_HATCH.get(), BlockModelGenerators.plainVariant(Industria.id("block/firebrick"))));
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.SMELTERY_CONTROLLER.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CHIMNEY.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_BASIN.get());
@@ -874,6 +872,15 @@ public final class IndustriaModels {
                 new IndustriaBlockEntityItemRenderer.Unbaked(MotorModel.LAYER_LOCATION, MotorModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock());
 
+        generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.CHARGING_HATCH.get(),
+                new IndustriaBlockEntityItemRenderer.Unbaked(ChargingHatchModel.LAYER_LOCATION,
+                        ChargingHatchModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock());
+
+        generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.FUELBOX.get(),
+                new IndustriaBlockEntityItemRenderer.Unbaked(FuelboxModel.LAYER_LOCATION, FuelboxModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock());
+
         BuiltinEntityModelBuilder.write(itemModelGenerator, ModItems.SEISMIC_SCANNER.get());
         BuiltinEntityModelBuilder.write(itemModelGenerator, (ItemLike) ModItems.SIMPLE_DRILL_HEAD.get(),
                 Industria.id("block/simple_drill_head"),
@@ -1005,6 +1012,7 @@ public final class IndustriaModels {
                 ModBlocks.ARC_FURNACE.get().asItem(),
                 ModBlocks.BASIC_BATTERY.get().asItem(),
                 ModBlocks.CENTRIFUGAL_CONCENTRATOR.get().asItem(),
+                ModBlocks.CHARGING_HATCH.get().asItem(),
                 ModBlocks.CLARIFIER.get().asItem(),
                 ModBlocks.CONTAINMENT_CONVEYOR.get().asItem(),
                 ModBlocks.COUNT_CONVEYOR.get().asItem(),
@@ -1019,6 +1027,7 @@ public final class IndustriaModels {
                 ModBlocks.DROP_CHUTE_CONVEYOR.get().asItem(),
                 ModBlocks.ELECTROLYZER.get().asItem(),
                 ModBlocks.ELITE_BATTERY.get().asItem(),
+                ModBlocks.FUELBOX.get().asItem(),
                 ModBlocks.LADDER_CONVEYOR.get().asItem(),
                 ModBlocks.MIXER.get().asItem(),
                 ModBlocks.MOTOR.get().asItem(),

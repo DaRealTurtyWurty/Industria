@@ -49,5 +49,9 @@ public class ModBlockEntityRenderers {
             SmelteryControllerBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.MOLDING_TABLE,
             MoldingTableBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CHARGING_HATCH,
+            ChargingHatchBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.FUELBOX,
+            FuelboxBlockEntityRenderer::new);
     }
 }

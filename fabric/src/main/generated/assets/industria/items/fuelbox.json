@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/fuelbox"
+    "type": "minecraft:special",
+    "base": "industria:item/fuelbox",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:fuelbox",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/fuelbox.png"
+    }
   }
 }

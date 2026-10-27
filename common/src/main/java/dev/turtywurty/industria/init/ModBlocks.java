@@ -395,8 +395,8 @@ public class ModBlocks {
         "smeltery_controller",
         SmelteryControllerBlock::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
 
-    public static final RegistrationHandle<Block, Block> CHIMNEY = registerWithItemCopy("chimney",
-        Block::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
+    public static final RegistrationHandle<Block, ChimneyBlock> CHIMNEY = registerWithItemCopy("chimney",
+        ChimneyBlock::new, Blocks.BRICKS, BlockBehaviour.Properties::noOcclusion);
 
     public static final RegistrationHandle<Block, SmelteryGlassBlock> SMELTERY_GLASS = registerWithItemCopy(
         "smeltery_glass",

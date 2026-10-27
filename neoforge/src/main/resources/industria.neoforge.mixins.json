@@ -5,6 +5,9 @@
   "mixins": [
     "IndustriaFluidMixin"
   ],
+  "client": [
+    "EnhancedBlockModelLighterMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

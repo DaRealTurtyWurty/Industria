@@ -191,7 +191,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         for (BlockPos position : emittedPositions) {
             serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,
                 position.getX() + 0.5, position.getY() + 1.05, position.getZ() + 0.5,
-                1, 0.08, 0.08, 0.08, 0.02);
+                1, 0.04, 0.0, 0.04, 0.02);
         }
     }
 
@@ -574,7 +574,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             } else if (state.is(ModBlocks.CHARGING_HATCH.get())) {
                 hatchPositions.add(pos);
             } else if (state.is(ModBlocks.TAPPING_OUTLET.get())) {
-                outletPositions.add(pos);
+                if (state.canSurvive(this.level, pos)) {
+                    outletPositions.add(pos);
+                }
             }
         }
 
@@ -980,7 +982,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
     }
 
     public SmelteryChamber getChamberForOutlet(BlockPos outletPos) {
-        if (!this.structureReady || outletPos == null)
+        if (!this.structureReady || outletPos == null || this.level == null || !this.level.isLoaded(outletPos))
+            return null;
+
+        BlockState outletState = this.level.getBlockState(outletPos);
+        if (!outletState.is(ModBlocks.TAPPING_OUTLET.get()) || !outletState.canSurvive(this.level, outletPos))
             return null;
 
         for (SmelteryChamber chamber : this.chambers) {

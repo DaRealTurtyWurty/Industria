@@ -29,6 +29,15 @@ public final class SmelteryTestWorld {
         context.fillAir(1, 1, 1, 3, 1, 3);
         context.fillAir(1, 3, 1, 3, 4, 3);
 
+        // Viewing windows in both side walls and the back wall.
+        context.fill(0, 3, 1, 0, 4, 3, ModBlocks.SMELTERY_GLASS.get());
+        context.fill(4, 3, 1, 4, 4, 3, ModBlocks.SMELTERY_GLASS.get());
+        context.fill(1, 3, 4, 3, 4, 4, ModBlocks.SMELTERY_GLASS.get());
+
+        // Outlets need solid mounts rather than glass behind their spouts.
+        context.setBlock(4, 3, 2, ModBlocks.FIREBRICK);
+        context.setBlock(4, 3, 3, ModBlocks.FIREBRICK);
+
         context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
         context.setBlock(2, 3, 0, ModBlocks.CHARGING_HATCH.get().defaultBlockState()

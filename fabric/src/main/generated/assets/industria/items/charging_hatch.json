@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/charging_hatch"
+    "type": "minecraft:special",
+    "base": "industria:item/charging_hatch",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:charging_hatch",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/charging_hatch.png"
+    }
   }
 }

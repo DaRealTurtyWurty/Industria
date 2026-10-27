@@ -3,7 +3,6 @@ package dev.turtywurty.industria.blockentity;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
-import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
 import dev.turtywurty.industria.blockentity.util.inventory.PredicateSimpleInventory;
 import dev.turtywurty.industria.blockentity.util.inventory.WrappedContainerStorage;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
@@ -21,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -35,11 +35,10 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
-public class FuelboxBlockEntity extends IndustriaBlockEntity
+public class FuelboxBlockEntity extends DoorContainerBlockEntity
     implements
         BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload>,
-        TickableBlockEntity {
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("fuelbox");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -81,11 +80,22 @@ public class FuelboxBlockEntity extends IndustriaBlockEntity
         super(ModBlocks.FUELBOX.get(), ModBlockEntityTypes.FUELBOX.get(), pos, state);
         this.wrappedContainerStorage.addInventory(
             new PredicateSimpleInventory(this, 3,
-                (itemStack, _) -> isFuel(itemStack)));
+                (itemStack, _) -> isFuel(itemStack)) {
+                    @Override
+                    public void startOpen(ContainerUser user) {
+                        FuelboxBlockEntity.this.startOpen(user);
+                    }
+
+                    @Override
+                    public void stopOpen(ContainerUser user) {
+                        FuelboxBlockEntity.this.stopOpen(user);
+                    }
+                });
     }
 
     @Override
     public void tick() {
+        super.tick();
         if (this.level == null || this.level.isClientSide())
             return;
 

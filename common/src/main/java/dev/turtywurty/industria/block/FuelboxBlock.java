@@ -1,17 +1,18 @@
 package dev.turtywurty.industria.block;
 
-import dev.turtywurty.industria.block.abstraction.IndustriaBlock;
+import dev.turtywurty.industria.block.abstraction.DoorContainerBlock;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 
-public class FuelboxBlock extends IndustriaBlock {
+public class FuelboxBlock extends DoorContainerBlock {
     public FuelboxBlock(Properties settings) {
         super(settings, new BlockProperties()
             .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
                 ModBlockEntityTypes.FUELBOX)
                 .dropContentsOnBreak()
                 .rightClickToOpenGui()
-                .shouldTick())
+                .shouldTickAllowClient(true))
             .hasHorizontalFacing()
+            .hasBlockEntityRenderer()
             .hasLitProperty());
     }
 }

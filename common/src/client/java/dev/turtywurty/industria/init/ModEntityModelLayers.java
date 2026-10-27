@@ -65,5 +65,8 @@ public class ModEntityModelLayers {
         ClientRegistrations.registerModelLayer(TreeTapModel.LAYER_LOCATION, TreeTapModel::createMainLayer);
         ClientRegistrations.registerModelLayer(DistillationTowerModel.LAYER_LOCATION,
             DistillationTowerModel::createMainLayer);
+        ClientRegistrations.registerModelLayer(ChargingHatchModel.LAYER_LOCATION,
+            ChargingHatchModel::getTexturedModelData);
+        ClientRegistrations.registerModelLayer(FuelboxModel.LAYER_LOCATION, FuelboxModel::getTexturedModelData);
     }
 }

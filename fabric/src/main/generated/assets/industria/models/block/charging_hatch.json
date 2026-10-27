@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "industria:block/charging_hatch_front",
-    "side": "industria:block/firebrick",
-    "top": "industria:block/firebrick"
-  }
-}

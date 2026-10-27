@@ -19,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -35,7 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class ChargingHatchBlockEntity extends IndustriaBlockEntity
+public class ChargingHatchBlockEntity extends DoorContainerBlockEntity
     implements
         BlockEntityContentsDropper,
         BlockEntityWithGui<ChargingHatchOpenPayload> {
@@ -57,7 +58,17 @@ public class ChargingHatchBlockEntity extends IndustriaBlockEntity
                 public int getMaxStackSize() {
                     return 1;
                 }
-            });
+            }) {
+                @Override
+                public void startOpen(ContainerUser user) {
+                    ChargingHatchBlockEntity.this.startOpen(user);
+                }
+
+                @Override
+                public void stopOpen(ContainerUser user) {
+                    ChargingHatchBlockEntity.this.stopOpen(user);
+                }
+            };
 
         this.inventory.setInsertionPredicate((slot, _) -> slot < this.processingSlotCount);
         this.wrappedContainerStorage.addInventory(this.inventory);
