@@ -2,6 +2,7 @@ package dev.turtywurty.industria.neoforge.connected;
 
 import dev.turtywurty.industria.connected.ConnectedTextureFace;
 import dev.turtywurty.industria.connected.ConnectedTextureLayout;
+import dev.turtywurty.industria.connected.ConnectedTextureNeighborhood;
 import dev.turtywurty.industria.connected.ConnectedTextureTile;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
@@ -27,10 +28,11 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
         List<BlockStateModelPart> tempParts = new ArrayList<>();
         super.collectParts(level, pos, state, random, tempParts);
 
+        var neighbourhood = new ConnectedTextureNeighborhood(level, pos, state);
         long packedTiles = 0L;
         for (Direction direction : Direction.values()) {
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
-            int mask = face.getMask(level, pos, state);
+            int mask = face.getMask(neighbourhood);
             ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
             packedTiles |= (long) tile.index() << (direction.ordinal() * 6);
         }
