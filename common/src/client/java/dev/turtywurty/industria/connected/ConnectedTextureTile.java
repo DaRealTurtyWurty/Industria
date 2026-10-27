@@ -24,4 +24,8 @@ public record ConnectedTextureTile(int column, int row) {
     public float maxV() {
         return (row + 1) / 4f;
     }
+
+    public int index() {
+        return row * 12 + column;
+    }
 }

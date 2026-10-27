@@ -13,11 +13,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.DelegateBlockStateModel;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
+    private final NeoForgeConnectedTextureQuadCache quadCache = new NeoForgeConnectedTextureQuadCache();
+
     public NeoForgeConnectedTextureModel(BlockStateModel delegate) {
         super(delegate);
     }
@@ -27,16 +27,16 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
         List<BlockStateModelPart> tempParts = new ArrayList<>();
         super.collectParts(level, pos, state, random, tempParts);
 
-        Map<Direction, ConnectedTextureTile> tiles = new EnumMap<>(Direction.class);
+        long packedTiles = 0L;
         for (Direction direction : Direction.values()) {
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
             int mask = face.getMask(level, pos, state);
             ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
-            tiles.put(direction, tile);
+            packedTiles |= (long) tile.index() << (direction.ordinal() * 6);
         }
 
         for (BlockStateModelPart part : tempParts) {
-            parts.add(new NeoForgeConnectedTexturePart(part, tiles));
+            parts.add(new NeoForgeConnectedTexturePart(part, packedTiles, quadCache));
         }
     }
 }

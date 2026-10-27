@@ -73,8 +73,31 @@ public class ConnectedTextureLayout {
             Map.entry(CENTER | TOP | LEFT | RIGHT | BOTTOM | TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT, new ConnectedTextureTile(6, 2))
     );
 
+    private static final ConnectedTextureTile[] TILES_BY_INDEX = createTileIndex();
+
     public static ConnectedTextureTile getTile(int mask) {
         return Optional.ofNullable(TILE_MASK_MAP.get(mask))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid mask: " + mask));
+    }
+
+    public static ConnectedTextureTile getTileByIndex(int index) {
+        if (index < 0 || index >= TILES_BY_INDEX.length)
+            throw new IllegalArgumentException("Invalid index: " + index);
+
+        ConnectedTextureTile tile = TILES_BY_INDEX[index];
+        if (tile == null)
+            throw new IllegalArgumentException("Unused tile index: " + index);
+
+        return tile;
+    }
+
+    private static ConnectedTextureTile[] createTileIndex() {
+        ConnectedTextureTile[] tiles = new ConnectedTextureTile[48];
+        for (ConnectedTextureTile tile : TILE_MASK_MAP.values()) {
+            int index = tile.index();
+            tiles[index] = tile;
+        }
+
+        return tiles;
     }
 }
