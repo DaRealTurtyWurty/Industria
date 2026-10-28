@@ -23,49 +23,49 @@ public final class SmelteryTestWorld {
     }
 
     public static void place(TestWorldContext context) {
-        // Local coordinates: bottom Y=0, enclosed fuel Y=1, floor Y=2,
-        // 3x2x3 interior at (1,3,1)..(3,4,3), roof Y=5, chimney Y=6.
-        context.fill(0, 0, 0, 4, 5, 4, ModBlocks.FIREBRICK.get());
-        context.fillAir(1, 1, 1, 3, 1, 3);
-        context.fillAir(1, 3, 1, 3, 4, 3);
+        // The hearth and casting equipment rest on the ground at Y=0.
+        // Interior (1,1,1)..(3,2,3), roof Y=3, chimney Y=4.
+        context.fill(0, 0, 0, 4, 3, 4, ModBlocks.FIREBRICK.get());
+        context.fill(0, 0, 0, 4, 0, 4, ModBlocks.SMELTERY_HEARTH.get());
+        context.fillAir(1, 1, 1, 3, 2, 3);
 
         // Viewing windows in both side walls and the back wall.
-        context.fill(0, 3, 1, 0, 4, 3, ModBlocks.SMELTERY_GLASS.get());
-        context.fill(4, 3, 1, 4, 4, 3, ModBlocks.SMELTERY_GLASS.get());
-        context.fill(1, 3, 4, 3, 4, 4, ModBlocks.SMELTERY_GLASS.get());
+        context.fill(0, 1, 1, 0, 2, 3, ModBlocks.SMELTERY_GLASS.get());
+        context.fill(4, 1, 1, 4, 2, 3, ModBlocks.SMELTERY_GLASS.get());
+        context.fill(1, 1, 4, 3, 2, 4, ModBlocks.SMELTERY_GLASS.get());
 
         // Outlets need solid mounts rather than glass behind their spouts.
-        context.setBlock(4, 3, 2, ModBlocks.FIREBRICK);
-        context.setBlock(4, 3, 3, ModBlocks.FIREBRICK);
+        context.setBlock(4, 1, 2, ModBlocks.FIREBRICK);
+        context.setBlock(4, 1, 3, ModBlocks.FIREBRICK);
 
-        context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
+        context.setBlock(0, 0, 2, ModBlocks.FUELBOX.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
-        context.setBlock(2, 3, 0, ModBlocks.CHARGING_HATCH.get().defaultBlockState()
+        context.setBlock(2, 1, 0, ModBlocks.CHARGING_HATCH.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
-        context.setBlock(2, 6, 2, ModBlocks.CHIMNEY);
-        context.setBlock(5, 3, 2, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
+        context.setBlock(2, 4, 2, ModBlocks.CHIMNEY);
+        context.setBlock(5, 1, 2, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
-        context.setBlock(5, 2, 2, ModBlocks.CASTING_BASIN.get());
-        context.setBlock(5, 3, 3, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
+        context.setBlock(5, 0, 2, ModBlocks.CASTING_BASIN.get());
+        context.setBlock(5, 1, 3, ModBlocks.TAPPING_OUTLET.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
-        context.setBlock(5, 2, 3, ModBlocks.CASTING_TABLE.get().defaultBlockState()
+        context.setBlock(5, 0, 3, ModBlocks.CASTING_TABLE.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
 
         // Embed the controller in the north wall beside the charging hatch.
-        context.setBlock(1, 3, 0, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
+        context.setBlock(1, 1, 0, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
 
         LOGGER.info(
             "Smeltery test fixture: controller={}, hatch={}, fuelbox={}, chimney={}, outlet={}, basin={}, table outlet={}, casting table={}, spare parts={}",
-            context.pos(1, 3, 0), context.pos(2, 3, 0), context.pos(0, 1, 2),
-            context.pos(2, 6, 2), context.pos(5, 3, 2), context.pos(5, 2, 2),
-            context.pos(5, 3, 3), context.pos(5, 2, 3), context.pos(2, 0, -3));
+            context.pos(1, 1, 0), context.pos(2, 1, 0), context.pos(0, 0, 2),
+            context.pos(2, 4, 2), context.pos(5, 1, 2), context.pos(5, 0, 2),
+            context.pos(5, 1, 3), context.pos(5, 0, 3), context.pos(2, 0, -3));
 
         context.afterTicks(40, current -> {
-            if (!(current.overworld().getBlockEntity(current.pos(1, 3, 0)) instanceof SmelteryControllerBlockEntity)) {
+            if (!(current.overworld().getBlockEntity(current.pos(1, 1, 0)) instanceof SmelteryControllerBlockEntity)) {
                 LOGGER.warn("Smeltery test controller at {} has no SmelteryControllerBlockEntity; "
                     + "configure its block entity and ticker before testing formation.",
-                    current.pos(1, 3, 0));
+                    current.pos(1, 1, 0));
             }
         });
 
@@ -79,7 +79,7 @@ public final class SmelteryTestWorld {
     private static final long TEST_AMOUNT = FluidAmounts.BUCKET * 7 + FluidAmounts.BUCKET / 2;
 
     private static void seedFluid(TestWorldContext context) {
-        var controller = context.requireBlockEntity(1, 3, 0, SmelteryControllerBlockEntity.class);
+        var controller = context.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
         CompoundTag data = controller.saveWithoutMetadata(context.overworld().registryAccess());
         check(data.getListOrEmpty("Chambers").size() == 1, "Expected one formed chamber before seeding");
         check(data.getListOrEmpty("RetainedFluids").isEmpty(), "Expected no initial retained fluid");
@@ -92,17 +92,17 @@ public final class SmelteryTestWorld {
             context.overworld().registryAccess(), data));
         controller.setChanged();
         verifyFluid(context, 1, 0, "seeded");
-        context.removeBlock(2, 6, 2);
+        context.removeBlock(2, 4, 2);
         context.afterTicks(40, current -> runTestStep(current, "broken chamber", () -> {
             verifyFluid(current, 0, 1, "chimney removed");
-            var entity = current.requireBlockEntity(1, 3, 0, SmelteryControllerBlockEntity.class);
+            var entity = current.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
             CompoundTag saved = entity.saveWithoutMetadata(current.overworld().registryAccess());
             entity.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                 current.overworld().registryAccess(), saved));
             verifyFluid(current, 0, 1, "retained fluid save/load round trip");
             current.afterTicks(40, waiting -> runTestStep(waiting, "repeat broken scan", () -> {
                 verifyFluid(waiting, 0, 1, "repeated scan without duplication");
-                waiting.setBlock(2, 6, 2, ModBlocks.CHIMNEY);
+                waiting.setBlock(2, 4, 2, ModBlocks.CHIMNEY);
                 waiting.afterTicks(40, repaired -> runTestStep(repaired, "repair", () -> {
                     verifyFluid(repaired, 1, 0, "chimney restored");
                     repaired.afterTicks(40, stable -> runTestStep(stable, "stable repaired scan", () -> {
@@ -118,7 +118,7 @@ public final class SmelteryTestWorld {
     }
 
     private static void verifyFluid(TestWorldContext context, int activeCount, int retainedCount, String stage) {
-        var entity = context.requireBlockEntity(1, 3, 0, SmelteryControllerBlockEntity.class);
+        var entity = context.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
         CompoundTag data = entity.saveWithoutMetadata(context.overworld().registryAccess());
         var active = data.getListOrEmpty("Chambers");
         var retained = data.getListOrEmpty("RetainedFluids");
@@ -153,7 +153,7 @@ public final class SmelteryTestWorld {
         try {
             action.run();
         } catch (Exception exception) {
-            context.setBlock(2, 6, 2, ModBlocks.CHIMNEY);
+            context.setBlock(2, 4, 2, ModBlocks.CHIMNEY);
             LOGGER.error("[SmelteryRetentionTest] FAIL at " + stage, exception);
             stopTestServer(context);
         }

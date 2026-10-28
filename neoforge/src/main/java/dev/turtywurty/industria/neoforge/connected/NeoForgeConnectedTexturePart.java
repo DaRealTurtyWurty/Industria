@@ -17,6 +17,8 @@ public record NeoForgeConnectedTexturePart(
         long packedTiles,
         NeoForgeConnectedTextureQuadCache quadCache
 ) implements BlockStateModelPart {
+    static final int DISABLED_TILE_INDEX = 0x3F;
+
     @Override
     public List<BakedQuad> getQuads(@Nullable Direction direction) {
         List<BakedQuad> source = delegate.getQuads(direction);
@@ -25,12 +27,21 @@ public record NeoForgeConnectedTexturePart(
 
         if (source.size() == 1) {
             BakedQuad quad = source.getFirst();
-            return quadCache.getQuadList(quad, getTileForDirection(quad.direction()));
+            ConnectedTextureTile tile = getTileForDirection(quad.direction());
+            return tile == null ? source : quadCache.getQuadList(quad, tile);
         }
 
-        List<BakedQuad> quads = new ArrayList<>(source);
-        quads.replaceAll(this::remapQuad);
-        return quads;
+        List<BakedQuad> quads = null;
+        for (int index = 0; index < source.size(); index++) {
+            BakedQuad quad = source.get(index);
+            ConnectedTextureTile tile = getTileForDirection(quad.direction());
+            if (tile != null) {
+                if (quads == null)
+                    quads = new ArrayList<>(source);
+                quads.set(index, quadCache.getQuad(quad, tile));
+            }
+        }
+        return quads == null ? source : quads;
     }
 
     @SuppressWarnings("deprecation")
@@ -54,13 +65,9 @@ public record NeoForgeConnectedTexturePart(
         return delegate.materialFlags();
     }
 
-    private BakedQuad remapQuad(BakedQuad quad) {
-        return quadCache.getQuad(quad, getTileForDirection(quad.direction()));
-    }
-
-    private ConnectedTextureTile getTileForDirection(Direction direction) {
+    private @Nullable ConnectedTextureTile getTileForDirection(Direction direction) {
         int shift = direction.ordinal() * 6;
         int tileIndex = (int) ((packedTiles >>> shift) & 0x3FL);
-        return ConnectedTextureLayout.getTileByIndex(tileIndex);
+        return tileIndex == DISABLED_TILE_INDEX ? null : ConnectedTextureLayout.getTileByIndex(tileIndex);
     }
 }

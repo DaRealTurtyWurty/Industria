@@ -728,6 +728,8 @@ public final class IndustriaModels {
 
         // Smeltery
         blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
+        registerCustomCube(blockStateModelGenerator, ModBlocks.SMELTERY_HEARTH.get(),
+                Identifier.withDefaultNamespace("block/polished_deepslate"));
         registerConnectedCube(blockStateModelGenerator, ModBlocks.FIREBRICK.get(), ModBlocks.SMELTERY_GLASS.get());
         registerConnectedCube(blockStateModelGenerator, ModBlocks.SMELTERY_GLASS.get());
         blockStateModelGenerator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
@@ -783,10 +785,28 @@ public final class IndustriaModels {
             Block block,
             Block... additionalConnections
     ) {
+        registerConnectedCube(generator, block, EnumSet.allOf(Direction.class), additionalConnections);
+    }
+
+    private static void registerConnectedCube(
+            BlockModelGenerators generator,
+            Block block,
+            Set<Direction> connectedFaces,
+            Block... additionalConnections
+    ) {
+        Set<Direction> faces = Set.copyOf(connectedFaces);
         Identifier identifier = TexturedModel.CUBE.create(block, (modelId, modelInstance) -> {
             generator.modelOutput.accept(modelId, () -> {
                 JsonObject json = modelInstance.get().getAsJsonObject();
                 ModelDatagenService.get().addModelLoader(json, Industria.id("connected"));
+                if (faces.size() != Direction.values().length) {
+                    var faceNames = new JsonArray();
+                    for (Direction direction : Direction.values()) {
+                        if (faces.contains(direction))
+                            faceNames.add(new JsonPrimitive(direction.getName()));
+                    }
+                    json.add("connected_faces", faceNames);
+                }
                 if (additionalConnections.length > 0) {
                     var connections = new JsonArray();
                     for (Block connection : additionalConnections) {

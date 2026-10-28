@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
 import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
+import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.resources.Identifier;
 
@@ -37,7 +38,8 @@ public class FabricIndustriaClient implements ClientModInitializer {
                                         FabricConnectedUnbakedModel.findSettings(resolved);
 
                                 if (settings != null)
-                                    return new FabricConnectedTextureModel(model, settings);
+                                    return new FabricConnectedTextureModel(model, settings,
+                                            context.baker().materials().spriteFinder(QuadAtlas.BLOCK));
                             }
 
                             return model;

@@ -12,6 +12,7 @@ public class FabricConnectedTextureDeserializer implements UnbakedModelDeseriali
         JsonObject deepCopy = jsonObject.deepCopy();
         deepCopy.remove("fabric:type");
         deepCopy.remove("connects_to");
+        deepCopy.remove("connected_faces");
         UnbakedModel unbakedModel = context.deserialize(deepCopy, UnbakedModel.class);
         return new FabricConnectedUnbakedModel(unbakedModel, settings);
     }

@@ -345,6 +345,7 @@ public final class IndustriaEnglishLanguage {
         // Smeltery
         translationBuilder.add(ModBlocks.UNFIRED_FIREBRICK.get(), "Unfired Firebrick");
         translationBuilder.add(ModBlocks.FIREBRICK.get(), "Firebrick");
+        translationBuilder.add(ModBlocks.SMELTERY_HEARTH.get(), "Smeltery Hearth");
         translationBuilder.add(ModBlocks.FUELBOX.get(), "Fuelbox");
         addText(translationBuilder, FuelboxBlockEntity.TITLE, "Fuelbox");
         translationBuilder.add(ModBlocks.CHARGING_HATCH.get(), "Charging Hatch");

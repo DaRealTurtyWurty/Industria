@@ -4,9 +4,9 @@ import net.fabricmc.fabric.api.client.model.loading.v1.wrapper.WrapperBlockState
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadTransform;
+import net.fabricmc.fabric.api.client.renderer.v1.sprite.SpriteFinder;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
-import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -20,29 +20,41 @@ import java.util.function.Predicate;
 public class FabricConnectedTextureModel extends WrapperBlockStateModel {
     private final FabricConnectedTextureQuadCache quadCache = new FabricConnectedTextureQuadCache();
     private final Set<Block> additionalConnections;
+    private final Set<Direction> connectedFaces;
+    private final SpriteFinder spriteFinder;
 
-    public FabricConnectedTextureModel(BlockStateModel model, ConnectedTextureSettings settings) {
+    public FabricConnectedTextureModel(BlockStateModel model, ConnectedTextureSettings settings, SpriteFinder spriteFinder) {
         super(model);
         this.additionalConnections = settings.resolveBlocks();
+        this.connectedFaces = settings.connectedFaces();
+        this.spriteFinder = spriteFinder;
     }
 
     @Override
     public void emitQuads(QuadEmitter emitter, BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, Predicate<@Nullable Direction> cullTest) {
-        Material.Baked material = wrapped.particleMaterial(level, pos, state);
+        if (connectedFaces.isEmpty()) {
+            super.emitQuads(emitter, level, pos, state, random, cullTest);
+            return;
+        }
+
         emitter.pushTransform(new QuadTransform() {
             private @Nullable ConnectedTextureNeighborhood neighborhood;
 
             @Override
             public boolean transform(MutableQuadView quad) {
+                Direction direction = quad.lightFace();
+                if (!connectedFaces.contains(direction))
+                    return true;
+
                 if (neighborhood == null) {
                     neighborhood = new ConnectedTextureNeighborhood(level, pos, state, additionalConnections);
                 }
 
-                Direction direction = quad.lightFace();
                 ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
                 int mask = face.getMask(neighborhood);
                 ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
-                FabricConnectedTextureModel.this.quadCache.apply(quad, material, tile);
+                FabricConnectedTextureModel.this.quadCache.apply(quad, spriteFinder.find(quad),
+                        quad.chunkLayer().translucent(), tile);
                 return true;
             }
         });

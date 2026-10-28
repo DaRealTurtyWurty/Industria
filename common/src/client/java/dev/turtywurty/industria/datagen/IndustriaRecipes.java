@@ -574,6 +574,16 @@ public final class IndustriaRecipes {
                         .unlockedBy(hasTag(ConventionalItemTags.QUARTZ_GEMS), has(ConventionalItemTags.QUARTZ_GEMS))
                         .save(output);
 
+                shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SMELTERY_HEARTH.get(), 4)
+                        .pattern("FIF")
+                        .pattern("I I")
+                        .pattern("FIF")
+                        .define('F', ModBlocks.FIREBRICK.get())
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .save(output);
+
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SMELTERY_CONTROLLER.get())
                         .pattern("FIF")
                         .pattern("IRI")

@@ -30,6 +30,7 @@ public final class IndustriaBlockLootTables implements LootTableSubProvider {
     }
 
     private void generateTables() {
+        dropSelf(ModBlocks.SMELTERY_HEARTH.get());
         add(ModBlocks.BAUXITE_ORE.get(), block -> createOreDrop(block, ModItems.BAUXITE.get()));
         dropSelf(ModBlocks.RAW_BAUXITE_BLOCK.get());
         dropSelf(ModBlocks.ALUMINIUM_BLOCK.get());

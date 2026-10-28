@@ -75,7 +75,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
     private boolean structureReady;
     private float temperature = AMBIENT_TEMPERATURE;
     private boolean keepMolten = false;
-    private int fuelSpaceSize;
+    private int heatedArea;
 
     private List<SmelteryChamberRenderData> renderSnapshot = List.of();
 
@@ -113,7 +113,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         this.renderSnapshot = List.of();
 
         this.structureReady = false;
-        this.fuelSpaceSize = 0;
+        this.heatedArea = 0;
 
         this.chambers.clear();
         this.chambers.addAll(input.read("Chambers", this.chambersCodec).orElseGet(List::of));
@@ -146,7 +146,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             && this.level.getBlockEntity(this.fuelBoxPos) instanceof FuelboxBlockEntity fuelbox
             && targetTemperature > AMBIENT_TEMPERATURE
             && this.temperature <= targetTemperature) {
-            fuelbox.setFuelSpaceSize(this.fuelSpaceSize);
+            fuelbox.setHeatedArea(this.heatedArea);
             heating = fuelbox.burnForTick();
         }
 
@@ -289,8 +289,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         return this.temperature;
     }
 
-    public int getFuelSpaceSize() {
-        return this.fuelSpaceSize;
+    public int getHeatedArea() {
+        return this.heatedArea;
     }
 
     private boolean isValidMeltingRecipe(SmelteryRecipe recipe) {
@@ -489,7 +489,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
     private void validateStructure() {
         this.structureReady = false;
-        this.fuelSpaceSize = 0;
+        this.heatedArea = 0;
         SearchResult result = collectSmelteryBlocks();
         if (result.type() == SearchResultType.VALID) {
             Set<BlockPos> positions = result.positions();
@@ -515,16 +515,26 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
             AABB boundingBox = calculateBounds(positions);
 
-            Direction fuelSpaceDirection = this.level.getBlockState(this.fuelBoxPos)
-                .getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
-            BlockPos fuelSpaceStartPos = this.fuelBoxPos.relative(fuelSpaceDirection);
-            SearchResult fuelSpaceResult = floodFillFuelSpace(fuelSpaceStartPos, boundingBox);
-            if (fuelSpaceResult.type() == SearchResultType.NOT_FOUND) {
+            Direction fuelboxFacing = this.level.getBlockState(this.fuelBoxPos)
+                .getValue(BlockStateProperties.HORIZONTAL_FACING);
+            BlockPos fuelboxFront = this.fuelBoxPos.relative(fuelboxFacing);
+            if (!this.level.isLoaded(fuelboxFront))
+                return;
+
+            BlockState frontState = this.level.getBlockState(fuelboxFront);
+            if (frontState.is(ModBlocks.SMELTERY_HEARTH.get()) || frontState.is(ModBlocks.FIREBRICK.get())) {
                 deactivateChambers();
                 return;
             }
 
-            if (fuelSpaceResult.type() != SearchResultType.VALID)
+            BlockPos hearthStartPos = this.fuelBoxPos.relative(fuelboxFacing.getOpposite());
+            SearchResult hearthResult = floodFillHearth(hearthStartPos, boundingBox);
+            if (hearthResult.type() == SearchResultType.NOT_FOUND) {
+                deactivateChambers();
+                return;
+            }
+
+            if (hearthResult.type() != SearchResultType.VALID)
                 return;
 
             List<ChamberCandidate> chamberCandidates = discoverChambers(
@@ -532,7 +542,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                 hatchPositions,
                 chimneyPositions,
                 outletPositions,
-                fuelSpaceResult);
+                hearthResult);
 
             if (chamberCandidates == null)
                 return;
@@ -552,7 +562,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                 return;
             }
 
-            reconcileChambers(chamberCandidates, fuelSpaceResult.positions().size());
+            reconcileChambers(chamberCandidates, countHeatedArea(chamberCandidates));
         }
     }
 
@@ -667,6 +677,9 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                     if (!this.level.isLoaded(pos))
                         return SearchResultType.UNLOADED_CHUNK;
 
+                    if (y == firstY)
+                        continue;
+
                     BlockState state = this.level.getBlockState(pos);
                     if (state.is(ModBlocks.FIREBRICK.get())
                         || (pos.equals(hatchPos) && state.is(ModBlocks.CHARGING_HATCH.get()))
@@ -684,62 +697,43 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
     }
 
     private SearchResultType validateChamberFoundation(
-        BlockPos hatchPos,
         int firstX,
         int lastX,
-        int firstY,
+        int floorY,
         int firstZ,
         int lastZ,
-        SearchResult fuelSpaceResult
+        SearchResult hearthResult
     ) {
-        boolean foundationValid = true;
         for (int x = firstX; x <= lastX; x++) {
             for (int z = firstZ; z <= lastZ; z++) {
-                var airPos = new BlockPos(x, firstY - 1, z);
-                var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
-                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos))
+                var pos = new BlockPos(x, floorY, z);
+                if (!this.level.isLoaded(pos))
                     return SearchResultType.UNLOADED_CHUNK;
 
-                BlockState firebrickBottomState = this.level.getBlockState(firebrickBottomPos);
-                if (firebrickBottomState.is(ModBlocks.SMELTERY_GLASS.get())) {
-                    foundationValid = false;
-                    break;
-                }
+                BlockState state = this.level.getBlockState(pos);
+                boolean perimeter = x == firstX || x == lastX || z == firstZ || z == lastZ;
+                if (perimeter && pos.equals(this.fuelBoxPos) && state.is(ModBlocks.FUELBOX.get()))
+                    continue;
 
-                if (x == firstX || x == lastX || z == firstZ || z == lastZ) {
-                    BlockState fuelPerimeterState = this.level.getBlockState(airPos);
-                    if (fuelPerimeterState.is(ModBlocks.SMELTERY_GLASS.get())) {
-                        foundationValid = false;
-                        break;
-                    }
-                }
+                if (!state.is(ModBlocks.SMELTERY_HEARTH.get()) || !hearthResult.positions().contains(pos))
+                    return SearchResultType.NOT_FOUND;
             }
         }
 
-        for (int x = firstX + 1; x < lastX; x++) {
-            for (int z = firstZ + 1; z < lastZ; z++) {
-                var airPos = new BlockPos(x, firstY - 1, z);
-                var firebrickBottomPos = new BlockPos(x, firstY - 2, z);
+        return SearchResultType.VALID;
+    }
 
-                if (!this.level.isLoaded(airPos) || !this.level.isLoaded(firebrickBottomPos))
-                    return SearchResultType.UNLOADED_CHUNK;
-
-                BlockState airState = this.level.getBlockState(airPos);
-                BlockState firebrickBottomState = this.level.getBlockState(firebrickBottomPos);
-
-                if (!airState.isAir()
-                    || !firebrickBottomState.is(ModBlocks.FIREBRICK.get())
-                    || !fuelSpaceResult.positions().contains(airPos)) {
-                    foundationValid = false;
-                    break;
+    private static int countHeatedArea(List<ChamberCandidate> chambers) {
+        Set<BlockPos> heatedBlocks = new HashSet<>();
+        for (ChamberCandidate chamber : chambers) {
+            AABB bounds = chamber.boundingBox();
+            for (int x = (int) bounds.minX; x < (int) bounds.maxX; x++) {
+                for (int z = (int) bounds.minZ; z < (int) bounds.maxZ; z++) {
+                    heatedBlocks.add(new BlockPos(x, (int) bounds.minY - 1, z));
                 }
             }
-
-            if (!foundationValid)
-                break;
         }
-
-        return foundationValid ? SearchResultType.VALID : SearchResultType.NOT_FOUND;
+        return heatedBlocks.size();
     }
 
     private List<ChamberCandidate> discoverChambers(
@@ -747,7 +741,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         Set<BlockPos> hatchPositions,
         Set<BlockPos> chimneyPositions,
         Set<BlockPos> outletPositions,
-        SearchResult fuelSpaceResult
+        SearchResult hearthResult
     ) {
         List<ChamberCandidate> chamberCandidates = new ArrayList<>();
         for (BlockPos hatchPos : hatchPositions) {
@@ -797,8 +791,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             if (chamberOutletPositions.isEmpty())
                 continue;
 
-            SearchResultType foundationResult = validateChamberFoundation(hatchPos, firstX, lastX, firstY, firstZ,
-                lastZ, fuelSpaceResult);
+            SearchResultType foundationResult = validateChamberFoundation(firstX, lastX, firstY, firstZ,
+                lastZ, hearthResult);
             if (foundationResult == SearchResultType.UNLOADED_CHUNK)
                 return null;
 
@@ -951,7 +945,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         return true;
     }
 
-    private void reconcileChambers(List<ChamberCandidate> chamberCandidates, int fuelSpaceSize) {
+    private void reconcileChambers(List<ChamberCandidate> chamberCandidates, int heatedArea) {
         List<ChamberFluidSource> sources = collectFluidSources();
         List<ChamberReconciliationGroup> groups = groupChamberOverlaps(sources, chamberCandidates);
 
@@ -966,7 +960,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         if (newChambers.size() != chamberCandidates.size())
             return;
 
-        commitChambers(newChambers, newRetainedFluids, fuelSpaceSize);
+        commitChambers(newChambers, newRetainedFluids, heatedArea);
     }
 
     public SmelteryChamber getChamberForHatch(BlockPos hatchPos) {
@@ -1049,7 +1043,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
     private void commitChambers(
         List<SmelteryChamber> newChambers,
         List<RetainedChamberFluid> newRetainedFluids,
-        int fuelSpaceSize
+        int heatedArea
     ) {
         for (SmelteryChamber oldChamber : this.chambers) {
             if (newChambers.stream().noneMatch(candidate -> Objects.equals(candidate.hatchPos, oldChamber.hatchPos))) {
@@ -1068,7 +1062,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         this.retainedFluids.clear();
         this.retainedFluids.addAll(newRetainedFluids);
         this.structureReady = !this.chambers.isEmpty();
-        this.fuelSpaceSize = fuelSpaceSize;
+        this.heatedArea = heatedArea;
 
         for (SmelteryChamber chamber : this.chambers) {
             chamber.hasGlass = hasGlassInWalls(chamber.getBoundingBox());
@@ -1096,7 +1090,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
     private void deactivateChambers() {
         this.structureReady = false;
-        this.fuelSpaceSize = 0;
+        this.heatedArea = 0;
 
         if (this.chambers.isEmpty())
             return;
@@ -1118,27 +1112,12 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         setChanged();
     }
 
-    private boolean isSandwiched(BlockPos pos) {
-        BlockPos abovePos = pos.above();
-        BlockPos belowPos = pos.below();
-
-        BlockState aboveState = this.level.getBlockState(abovePos);
-        BlockState middleState = this.level.getBlockState(pos);
-        BlockState belowState = this.level.getBlockState(belowPos);
-        return aboveState.is(ModBlocks.FIREBRICK.get())
-            && middleState.isAir()
-            && belowState.is(ModBlocks.FIREBRICK.get());
-    }
-
-    private SearchResult floodFillFuelSpace(BlockPos startPos, AABB boundingBox) {
-        if (!this.level.isLoaded(startPos) || !this.level.isLoaded(startPos.above())
-            || !this.level.isLoaded(startPos.below()))
+    private SearchResult floodFillHearth(BlockPos startPos, AABB boundingBox) {
+        if (!this.level.isLoaded(startPos))
             return SearchResult.unloadedChunk();
 
-        if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5))
-            return SearchResult.notFound();
-
-        if (!isSandwiched(startPos))
+        if (!boundingBox.contains(startPos.getX() + 0.5, startPos.getY() + 0.5, startPos.getZ() + 0.5)
+            || !this.level.getBlockState(startPos).is(ModBlocks.SMELTERY_HEARTH.get()))
             return SearchResult.notFound();
 
         Deque<BlockPos> toVisit = new ArrayDeque<>();
@@ -1148,40 +1127,20 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
         while (!toVisit.isEmpty()) {
             BlockPos currentPos = toVisit.removeFirst();
-            for (Direction direction : BlockStateProperties.HORIZONTAL_FACING.getPossibleValues()) {
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
                 BlockPos neighborPos = currentPos.relative(direction);
-                if (visited.contains(neighborPos))
+                if (visited.contains(neighborPos)
+                    || !boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5))
                     continue;
 
                 if (!this.level.isLoaded(neighborPos))
                     return SearchResult.unloadedChunk();
 
-                BlockState neighborState = this.level.getBlockState(neighborPos);
-                if (neighborState.is(ModBlocks.FIREBRICK.get()))
+                if (!this.level.getBlockState(neighborPos).is(ModBlocks.SMELTERY_HEARTH.get()))
                     continue;
-
-                if (neighborState.is(ModBlocks.FUELBOX.get())) {
-                    if (!neighborPos.equals(this.fuelBoxPos) || !currentPos.equals(startPos))
-                        return SearchResult.notFound();
-
-                    continue;
-                }
-
-                if (!neighborState.isAir())
-                    return SearchResult.notFound();
-
-                if (!boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5))
-                    return SearchResult.notFound();
-
-                if (!this.level.isLoaded(neighborPos.above()) || !this.level.isLoaded(neighborPos.below()))
-                    return SearchResult.unloadedChunk();
-
-                if (!isSandwiched(neighborPos))
-                    return SearchResult.notFound();
 
                 visited.add(neighborPos);
                 toVisit.add(neighborPos);
-
                 if (visited.size() > 10_000)
                     return SearchResult.tooLarge();
             }
@@ -1270,6 +1229,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
     private boolean isValidSmelteryBlock(BlockState state) {
         return state.is(ModBlocks.FIREBRICK.get())
+            || state.is(ModBlocks.SMELTERY_HEARTH.get())
             || state.is(ModBlocks.SMELTERY_CONTROLLER.get())
             || state.is(ModBlocks.FUELBOX.get())
             || state.is(ModBlocks.CHARGING_HATCH.get())

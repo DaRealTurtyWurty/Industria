@@ -65,6 +65,81 @@ public final class SmelteryValidationTestWorld {
     public static void start(TestWorldContext root) {
         var suite = new Suite(root);
 
+        suite.scenario("manual hearth fixture forms with casting equipment beside its base", 4)
+                .step(60, "place the manual test-world smeltery", s ->
+                        SmelteryTestWorld.place(s.context.at(6, 2, 0)))
+                .step(60, "manual fixture forms and its receivers sit at foundation height", s -> {
+                    var controller = s.context.requireBlockEntity(7, 3, 0, SmelteryControllerBlockEntity.class);
+                    check(controller.isStructureReady() && controller.getHeatedArea() == 9,
+                            "Manual fixture did not form on its single hearth layer");
+                    check(controller.getChamberForOutlet(s.context.pos(11, 3, 2)) != null
+                                    && controller.getChamberForOutlet(s.context.pos(11, 3, 3)) != null,
+                            "Manual fixture outlets did not connect");
+                    check(s.context.overworld().getBlockState(s.context.pos(6, 2, 2)).is(ModBlocks.FUELBOX.get())
+                                    && s.context.overworld().getBlockState(s.context.pos(11, 2, 2)).is(ModBlocks.CASTING_BASIN.get())
+                                    && s.context.overworld().getBlockState(s.context.pos(11, 2, 3)).is(ModBlocks.CASTING_TABLE.get()),
+                            "Fuelbox or casting equipment is not at foundation height");
+                });
+
+        suite.scenario("single hearth layer forms without an underground fuel cavity", 4)
+                .step(60, "check floor, fuelbox height and empty space below", s -> {
+                    s.expect(0, s.expected(1, 3, 0));
+                    check(s.context.overworld().getBlockState(s.context.pos(2, 2, 2)).is(ModBlocks.SMELTERY_HEARTH.get()),
+                            "Chamber floor is not hearth");
+                    check(s.context.overworld().getBlockState(s.context.pos(2, 1, 2)).isAir()
+                                    && s.context.overworld().getBlockState(s.context.pos(2, 0, 2)).isAir(),
+                            "Fixture still requires the old underground foundation");
+                    check(s.fuelbox().getBlockPos().getY() == s.context.pos(0, 2, 2).getY(),
+                            "Fuelbox is not in the exposed hearth edge");
+                    check(s.controller().getHeatedArea() == 9, "Wrong heated area for the 3x3 chamber");
+                });
+
+        suite.scenario("unused hearth extensions do not increase fuel consumption", 4)
+                .step(60, "extend the hearth beyond the chamber", s ->
+                        s.context.fill(5, 2, 0, 8, 2, 4, ModBlocks.SMELTERY_HEARTH.get()))
+                .step(40, "only the chamber interior contributes to heated area", s -> {
+                    s.expect(0, s.expected(1, 3, 0));
+                    check(s.controller().getHeatedArea() == 9, "Unused hearth increased fuel cost");
+                });
+
+        suite.scenario("disconnected hearth retains fluid until its bridge is restored", 4)
+                .step(60, "connect a second chamber through a hearth bridge", s -> {
+                    s.context.fill(6, 2, 0, 10, 5, 4, ModBlocks.FIREBRICK.get());
+                    s.context.fill(6, 2, 0, 10, 2, 4, ModBlocks.SMELTERY_HEARTH.get());
+                    s.context.fillAir(7, 3, 1, 9, 4, 3);
+                    s.context.setBlock(8, 3, 0, ModBlocks.CHARGING_HATCH.get().defaultBlockState()
+                            .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
+                    s.context.setBlock(8, 6, 2, ModBlocks.CHIMNEY);
+                    s.context.setBlock(8, 3, -1, ModBlocks.TAPPING_OUTLET);
+                    s.context.setBlock(5, 2, 2, ModBlocks.SMELTERY_HEARTH);
+                })
+                .step(40, "both chambers share heat before disconnecting", s -> {
+                    s.expect(0, s.expected(1, 3, 0), s.expected(7, 9, 0));
+                    check(s.controller().getHeatedArea() == 18, "Bridge or walls were charged as heated floor");
+                    s.seed(BLOCK, 2 * BLOCK);
+                    s.context.removeBlock(5, 2, 2);
+                })
+                .step(40, "disconnected chamber loses heat while its fluid is retained", s -> {
+                    s.expect(2 * BLOCK, s.expected(1, 3, BLOCK));
+                    check(s.controller().getHeatedArea() == 9, "Disconnected hearth still costs fuel");
+                    s.context.setBlock(5, 2, 2, ModBlocks.SMELTERY_HEARTH);
+                })
+                .step(40, "reconnecting restores fluid and the combined heated area", s -> {
+                    s.expect(0, s.expected(1, 3, BLOCK), s.expected(7, 9, 2 * BLOCK));
+                    check(s.controller().getHeatedArea() == 18, "Repaired hearth did not restore fuel scaling");
+                });
+
+        invalidStructure(suite, "legacy three layer firebrick foundation requires conversion", s -> {
+            s.context.fill(0, 0, 0, 4, 2, 4, ModBlocks.FIREBRICK.get());
+            s.context.fillAir(1, 1, 1, 3, 1, 3);
+            s.context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
+                    .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
+        });
+
+        invalidStructure(suite, "fuelbox front buried in hearth rejected", s ->
+                s.context.setBlock(0, 2, 2, ModBlocks.FUELBOX.get().defaultBlockState()
+                        .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)));
+
         suite.scenario("glass side walls and vertical corners accepted", 4)
                 .step(60, "replace side wall and corner with glass", s -> {
                     s.expect(0, s.expected(1, 3, 0));
@@ -85,14 +160,14 @@ public final class SmelteryValidationTestWorld {
 
         invalidStructure(suite, "glass roof rejected", s -> s.context.setBlock(2, 5, 1, ModBlocks.SMELTERY_GLASS));
         invalidStructure(suite, "glass floor rejected", s -> s.context.setBlock(2, 2, 1, ModBlocks.SMELTERY_GLASS));
-        invalidStructure(suite, "glass foundation bottom rejected",
-                s -> s.context.setBlock(2, 0, 2, ModBlocks.SMELTERY_GLASS));
-        invalidStructure(suite, "glass foundation bottom corner rejected",
-                s -> s.context.setBlock(0, 0, 0, ModBlocks.SMELTERY_GLASS));
-        invalidStructure(suite, "glass fuel perimeter rejected",
-                s -> s.context.setBlock(2, 1, 0, ModBlocks.SMELTERY_GLASS));
-        invalidStructure(suite, "glass fuel perimeter corner rejected",
-                s -> s.context.setBlock(0, 1, 0, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "firebrick hearth interior rejected",
+                s -> s.context.setBlock(2, 2, 2, ModBlocks.FIREBRICK));
+        invalidStructure(suite, "glass hearth corner rejected",
+                s -> s.context.setBlock(0, 2, 0, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "glass hearth perimeter rejected",
+                s -> s.context.setBlock(2, 2, 0, ModBlocks.SMELTERY_GLASS));
+        invalidStructure(suite, "firebrick hearth corner rejected",
+                s -> s.context.setBlock(4, 2, 4, ModBlocks.FIREBRICK));
 
         suite.scenario("controller embedded rebuild preserves fluid", 4)
                 .step(60, "embedded formation and shared-wall resize", s -> {
@@ -136,11 +211,11 @@ public final class SmelteryValidationTestWorld {
                 .step(60, "disconnect fuel", s -> {
                     s.expect(0, s.expected(1, 3, 0), s.expected(5, 7, 0));
                     s.seed(BLOCK, 2 * BLOCK);
-                    s.context.fill(4, 1, 1, 4, 1, 3, ModBlocks.FIREBRICK.get());
+                    s.context.fill(5, 2, 0, 5, 2, 4, ModBlocks.FIREBRICK.get());
                 })
                 .step(40, "unheated chamber rejected", s -> {
                     s.expect(2 * BLOCK, s.expected(1, 3, BLOCK));
-                    s.context.fillAir(4, 1, 1, 4, 1, 3);
+                    s.context.fill(5, 2, 0, 5, 2, 4, ModBlocks.SMELTERY_HEARTH.get());
                 })
                 .step(40, "reconnected chamber restored", s -> s.expect(0,
                         s.expected(1, 3, BLOCK), s.expected(5, 7, 2 * BLOCK)));
@@ -258,11 +333,11 @@ public final class SmelteryValidationTestWorld {
         invalidStructure(suite, "second connected controller", s -> s.context.setBlock(4, 2, -1,
                 ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
                         .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)));
-        invalidStructure(suite, "second fuelbox", s -> s.context.setBlock(4, 1, 2,
+        invalidStructure(suite, "second fuelbox", s -> s.context.setBlock(4, 2, 2,
                 ModBlocks.FUELBOX.get().defaultBlockState()
                         .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)));
-        invalidStructure(suite, "missing fuelbox", s -> s.context.removeBlock(0, 1, 2));
-        invalidStructure(suite, "fuelbox faces into structure", s -> s.context.setBlock(0, 1, 2,
+        invalidStructure(suite, "missing fuelbox", s -> s.context.removeBlock(0, 2, 2));
+        invalidStructure(suite, "fuelbox faces into structure", s -> s.context.setBlock(0, 2, 2,
                 ModBlocks.FUELBOX.get().defaultBlockState()
                         .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST)));
         invalidStructure(suite, "missing hatch", s -> s.context.setBlock(2, 3, 0, ModBlocks.FIREBRICK));
@@ -297,10 +372,10 @@ public final class SmelteryValidationTestWorld {
             s.context.removeBlock(2, 3, -1);
             s.context.setBlock(2, 6, 0, ModBlocks.TAPPING_OUTLET);
         });
-        invalidStructure(suite, "fuel perimeter breach", s -> s.context.removeBlock(4, 1, 2));
-        invalidStructure(suite, "missing bottom foundation brick", s -> s.context.removeBlock(2, 0, 2));
-        invalidStructure(suite, "missing chamber floor brick", s -> s.context.removeBlock(2, 2, 2));
-        invalidStructure(suite, "obstructed fuel layer", s -> s.context.setBlock(2, 1, 2, ModBlocks.FIREBRICK));
+        invalidStructure(suite, "hearth perimeter breach", s -> s.context.removeBlock(4, 2, 2));
+        invalidStructure(suite, "missing hearth corner", s -> s.context.removeBlock(0, 2, 0));
+        invalidStructure(suite, "missing hearth floor", s -> s.context.removeBlock(2, 2, 2));
+        invalidStructure(suite, "fuelbox backed by firebrick", s -> s.context.setBlock(1, 2, 2, ModBlocks.FIREBRICK));
         invalidStructure(suite, "chamber wall breach", s -> s.context.removeBlock(4, 3, 2));
         invalidStructure(suite, "chamber roof breach", s -> s.context.removeBlock(1, 5, 1));
         invalidStructure(suite, "noncuboid chamber interior", s -> s.context.setBlock(1, 3, 1, ModBlocks.FIREBRICK));
@@ -358,12 +433,12 @@ public final class SmelteryValidationTestWorld {
         suite.scenario("deactivation clears empty chamber hatch link", 4)
                 .step(60, "remove fuelbox from empty chamber", s -> {
                     s.expectHatchLink(true);
-                    s.context.removeBlock(0, 1, 2);
+                    s.context.removeBlock(0, 2, 2);
                 })
                 .step(40, "empty chamber hatch unlinked", s -> {
                     s.expect(0);
                     s.expectHatchLink(false);
-                    s.context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
+                    s.context.setBlock(0, 2, 2, ModBlocks.FUELBOX.get().defaultBlockState()
                             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
                 })
                 .step(40, "fuelbox repair restores link", s -> {
@@ -791,7 +866,7 @@ public final class SmelteryValidationTestWorld {
                     check(inventory.getItem(0).getCount() == bucketLimit && s.fuelCount(Items.COAL) == 128,
                             "Partial remainder merge exceeded the stack limit or changed fuel");
                     int dropped = s.context.overworld().getEntitiesOfClass(ItemEntity.class,
-                                    new AABB(s.context.pos(0, 1, 2)).inflate(3)).stream()
+                                    new AABB(s.context.pos(0, 2, 2)).inflate(3)).stream()
                             .filter(entity -> entity.getItem().is(Items.BUCKET))
                             .mapToInt(entity -> entity.getItem().getCount()).sum();
                     check(dropped == 2, "Full inventory did not drop exactly the leftover remainder");
@@ -817,7 +892,7 @@ public final class SmelteryValidationTestWorld {
                             new ItemStack(Items.LAVA_BUCKET)), "Wrong lava duration");
                     check(s.fuelbox().getBlockState().getValue(BlockStateProperties.LIT), "Lava did not light immediately");
                     var storage = TransferService.get().findBlock(StorageKeys.ITEM,
-                            s.context.overworld(), s.context.pos(0, 1, 2), Direction.WEST);
+                            s.context.overworld(), s.context.pos(0, 2, 2), Direction.WEST);
                     var bucket = ResourceTypes.ITEM.of(Items.BUCKET.builtInRegistryHolder());
                     try (var transaction = TransferTransaction.openRoot()) {
                         check(storage.extract(bucket, 1, transaction) == 1, "Automation cannot retrieve bucket remainder");
@@ -845,7 +920,7 @@ public final class SmelteryValidationTestWorld {
                     var coal = ResourceTypes.ITEM.of(Items.COAL.builtInRegistryHolder());
                     for (Direction direction : Direction.values()) {
                         var storage = TransferService.get().findBlock(StorageKeys.ITEM,
-                                s.context.overworld(), s.context.pos(0, 1, 2), direction);
+                                s.context.overworld(), s.context.pos(0, 2, 2), direction);
                         check(storage != null, "Missing fuelbox storage on " + direction);
                         try (var transaction = TransferTransaction.openRoot()) {
                             check(storage.insert(iron, 1, transaction) == 0, "Fuelbox accepted nonfuel on " + direction);
@@ -880,10 +955,10 @@ public final class SmelteryValidationTestWorld {
                 });
 
         for (int width : new int[]{3, 8, 31}) {
-            int airCount = (width - 1) * 3;
-            suite.scenario("exact fuel scaling for " + airCount + " air blocks", width)
+            int heatedArea = (width - 1) * 3;
+            suite.scenario("exact fuel scaling for " + heatedArea + " heated hearth blocks", width)
                     .step(60, "start fuel at derived foundation rate", s -> {
-                        check(s.controller().getFuelSpaceSize() == airCount, "Incorrect fuel air count");
+                        check(s.controller().getHeatedArea() == heatedArea, "Incorrect heated hearth area");
                         s.addPendingInput();
                         s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
                     })
@@ -897,7 +972,7 @@ public final class SmelteryValidationTestWorld {
                     })
                     .step(40, "energy scales while heating rate stays constant", s -> {
                         long elapsed = s.context.overworld().getGameTime() - s.lastGameTime;
-                        check(s.remainingUnits() == s.lastFuelUnits - airCount * elapsed,
+                        check(s.remainingUnits() == s.lastFuelUnits - heatedArea * elapsed,
                                 "Incorrect exact energy consumption for foundation size");
                         check(Math.abs(s.controller().getTemperature() - s.lastTemperature - 0.5F * elapsed) < 0.01F,
                                 "Heating rate changed with foundation size");
@@ -905,27 +980,27 @@ public final class SmelteryValidationTestWorld {
                     });
         }
 
-        suite.scenario("shared chambers count common fuel space only once", 8, 4)
+        suite.scenario("shared chambers charge only their heated hearth area", 8, 4)
                 .step(60, "start shared fuel", s -> {
-                    check(s.controller().getFuelSpaceSize() == 21, "Common fuel space counted per chamber");
+                    check(s.controller().getHeatedArea() == 18, "Shared walls were charged as chamber interiors");
                     s.addPendingInput();
                     s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 3));
                 })
                 .step(1, "capture shared energy", Scenario::captureEnergyAndTemperature)
-                .step(40, "shared heat consumes 21 units per tick",
+                .step(40, "shared heat consumes 18 units per tick",
                         s -> check(
-                                s.remainingUnits() == s.lastFuelUnits - 21 * (s.context.overworld().getGameTime() - s.lastGameTime),
+                                s.remainingUnits() == s.lastFuelUnits - 18 * (s.context.overworld().getGameTime() - s.lastGameTime),
                                 "Shared chambers multiplied fuel cost"));
 
         suite.scenario("foundation growth updates existing fuelbox consumption", 4)
                 .step(60, "start coal", s -> s.startWorkingWithFuel(Items.COAL, 3))
                 .step(1, "extend foundation and chamber without replacing fuelbox", s -> {
-                    s.context.fill(5, 0, 0, 8, 5, 4, ModBlocks.FIREBRICK.get());
-                    s.context.fillAir(4, 1, 1, 7, 1, 3);
+                    s.context.fill(5, 2, 0, 8, 5, 4, ModBlocks.FIREBRICK.get());
+                    s.context.fill(1, 2, 0, 8, 2, 4, ModBlocks.SMELTERY_HEARTH.get());
                     s.context.fillAir(4, 3, 1, 7, 4, 3);
                 })
                 .step(40, "new foundation size applied", s -> {
-                    check(s.controller().getFuelSpaceSize() == 21, "Resize kept previous fuel space size");
+                    check(s.controller().getHeatedArea() == 21, "Resize kept previous heated area");
                     check(s.fuelCount(Items.COAL) == 2, "Resize consumed extra fuel");
                     s.captureEnergyAndTemperature();
                 })
@@ -1339,7 +1414,7 @@ public final class SmelteryValidationTestWorld {
                     check(!menu.stillValid(player), "Distant player can use fuelbox menu");
                     player.setPos(s.context.origin().getX() + 0.5, s.context.origin().getY() + 1,
                             s.context.origin().getZ() + 1.5);
-                    s.context.removeBlock(0, 1, 2);
+                    s.context.removeBlock(0, 2, 2);
                     check(!menu.stillValid(player), "Removed fuelbox remains usable");
                     menu.removed(player);
                 });
@@ -1349,7 +1424,7 @@ public final class SmelteryValidationTestWorld {
                     var player = s.context.createFakePlayer(0, 1, 1,
                             new GameProfile(UUID.randomUUID(), "FuelboxPayloadTest"));
                     s.fuelbox().getInventory().setItem(0, new ItemStack(Items.COAL, 7));
-                    var menu = new FuelboxMenu(1, player.getInventory(), new BlockPosPayload(s.context.pos(0, 1, 2)));
+                    var menu = new FuelboxMenu(1, player.getInventory(), new BlockPosPayload(s.context.pos(0, 2, 2)));
                     check(menu.slots.size() == 39 && menu.getSlot(0).container != s.fuelbox().getInventory(),
                             "Payload menu has incorrect inventory");
                     check(menu.getSlot(0).getItem().isEmpty(), "Payload inventory is not initially empty");
@@ -2137,8 +2212,8 @@ public final class SmelteryValidationTestWorld {
             // Preserve the controller embedded in the west wall through every rebuild.
             fillExceptController(0, 0, 0, Math.max(width, 12), 6, 4, Blocks.AIR);
             context.fillAir(1, 3, -1, Math.max(width, 12), 3, -1);
-            fillExceptController(0, 0, 0, width, 5, 4, ModBlocks.FIREBRICK.get());
-            context.fillAir(1, 1, 1, width - 1, 1, 3);
+            fillExceptController(0, 2, 0, width, 5, 4, ModBlocks.FIREBRICK.get());
+            context.fill(0, 2, 0, width, 2, 4, ModBlocks.SMELTERY_HEARTH.get());
             context.fillAir(1, 3, 1, width - 1, 4, 3);
             for (int partition : partitions) {
                 context.fill(partition, 3, 1, partition, 4, 3, ModBlocks.FIREBRICK.get());
@@ -2153,7 +2228,7 @@ public final class SmelteryValidationTestWorld {
                 context.setBlock(center, 3, -1, ModBlocks.TAPPING_OUTLET);
                 first = last + 2;
             }
-            context.setBlock(0, 1, 2, ModBlocks.FUELBOX.get().defaultBlockState()
+            context.setBlock(0, 2, 2, ModBlocks.FUELBOX.get().defaultBlockState()
                     .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.WEST));
             if (!(context.overworld().getBlockEntity(context.pos(0, 3, 1)) instanceof SmelteryControllerBlockEntity)) {
                 context.setBlock(0, 3, 1, ModBlocks.SMELTERY_CONTROLLER.get().defaultBlockState()
@@ -2193,7 +2268,7 @@ public final class SmelteryValidationTestWorld {
         }
 
         private FuelboxBlockEntity fuelbox() {
-            return context.requireBlockEntity(0, 1, 2, FuelboxBlockEntity.class);
+            return context.requireBlockEntity(0, 2, 2, FuelboxBlockEntity.class);
         }
 
         private void storeFuelRemainderForTest(ItemStack remainder) {

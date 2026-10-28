@@ -210,9 +210,9 @@ public class FuelboxBlockEntity extends DoorContainerBlockEntity
         return this.maxBurnTime;
     }
 
-    public void setFuelSpaceSize(int size) {
+    public void setHeatedArea(int size) {
         if (size < 1)
-            throw new IllegalArgumentException("Fuel space size must be at least 1");
+            throw new IllegalArgumentException("Heated hearth area must be at least 1");
 
         int previousFuelUnitsPerTick = this.fuelUnitsPerTick;
         this.fuelUnitsPerTick = size;

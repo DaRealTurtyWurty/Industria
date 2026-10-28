@@ -18,20 +18,32 @@ import java.util.Set;
 public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
     private final NeoForgeConnectedTextureQuadCache quadCache = new NeoForgeConnectedTextureQuadCache();
     private final Set<Block> additionalConnections;
+    private final Set<Direction> connectedFaces;
 
     public NeoForgeConnectedTextureModel(BlockStateModel delegate, ConnectedTextureSettings settings) {
         super(delegate);
         this.additionalConnections = settings.resolveBlocks();
+        this.connectedFaces = settings.connectedFaces();
     }
 
     @Override
     public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
+        if (connectedFaces.isEmpty()) {
+            super.collectParts(level, pos, state, random, parts);
+            return;
+        }
+
         List<BlockStateModelPart> tempParts = new ArrayList<>();
         super.collectParts(level, pos, state, random, tempParts);
 
         var neighbourhood = new ConnectedTextureNeighborhood(level, pos, state, additionalConnections);
         long packedTiles = 0L;
         for (Direction direction : Direction.values()) {
+            if (!connectedFaces.contains(direction)) {
+                packedTiles |= (long) NeoForgeConnectedTexturePart.DISABLED_TILE_INDEX << (direction.ordinal() * 6);
+                continue;
+            }
+
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
             int mask = face.getMask(neighbourhood);
             ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);

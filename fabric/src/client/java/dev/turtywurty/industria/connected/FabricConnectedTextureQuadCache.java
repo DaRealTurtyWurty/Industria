@@ -33,14 +33,18 @@ public class FabricConnectedTextureQuadCache {
     }
 
     public void apply(MutableQuadView quad, Material.Baked material, ConnectedTextureTile tile) {
+        apply(quad, material.sprite(), material.forceTranslucent(), tile);
+    }
+
+    public void apply(MutableQuadView quad, TextureAtlasSprite sprite, boolean forceTranslucent, ConnectedTextureTile tile) {
         long uv0 = UVPair.pack(quad.u(0), quad.v(0));
         long uv1 = UVPair.pack(quad.u(1), quad.v(1));
         long uv2 = UVPair.pack(quad.u(2), quad.v(2));
         long uv3 = UVPair.pack(quad.u(3), quad.v(3));
 
-        SourceLayout layout = getOrCreateLayout(material.sprite(), material.forceTranslucent(), uv0, uv1, uv2, uv3);
+        SourceLayout layout = getOrCreateLayout(sprite, forceTranslucent, uv0, uv1, uv2, uv3);
         if (layout == null) {
-            remapQuad(quad, material, tile);
+            remapQuad(quad, new Material.Baked(sprite, forceTranslucent), tile);
             return;
         }
 
@@ -51,7 +55,7 @@ public class FabricConnectedTextureQuadCache {
             return;
         }
 
-        remapQuad(quad, material, tile);
+        remapQuad(quad, new Material.Baked(sprite, forceTranslucent), tile);
         layout.variants().compareAndSet(index, null, PreparedQuad.capture(quad));
     }
 
