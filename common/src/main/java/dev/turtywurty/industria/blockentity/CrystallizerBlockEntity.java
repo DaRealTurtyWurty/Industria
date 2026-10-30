@@ -386,14 +386,14 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.FLUID, this::getCrystalFluidStorage)
-            .at(new BlockPos(0, 3, 0));
+            .at(new BlockPos(1, 2, 0));
         ports.input(TransferType.FLUID, this::getWaterFluidStorage)
-            .wherePosition(offset -> offset.getY() == 3 && offset.getZ() == 1);
+            .at(new BlockPos(0, 2, -1));
         ports.input(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.WEST))
             .wherePosition(offset -> offset.getY() == 0 && offset.getX() == -1);
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.NORTH))
-            .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == -1);
+            .at(new BlockPos(1, 0, 0));
         ports.output(TransferType.ITEM, () -> this.wrappedContainerStorage.getStorage(Direction.EAST))
-            .wherePosition(offset -> offset.getY() == 0 && offset.getX() == 1);
+            .wherePosition(offset -> offset.getY() == 0 && offset.getZ() == -1);
     }
 }
