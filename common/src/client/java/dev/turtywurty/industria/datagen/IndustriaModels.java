@@ -8,6 +8,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.block.SolarPanelBlock;
+import dev.turtywurty.industria.connected.ConnectedTextureAxis;
 import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.ModBlocks;
@@ -794,6 +795,17 @@ public final class IndustriaModels {
             Set<Direction> connectedFaces,
             Block... additionalConnections
     ) {
+        registerConnectedCube(generator, block, connectedFaces,
+                ConnectedTextureAxis.BOTH, additionalConnections);
+    }
+
+    private static void registerConnectedCube(
+            BlockModelGenerators generator,
+            Block block,
+            Set<Direction> connectedFaces,
+            ConnectedTextureAxis axis,
+            Block... additionalConnections
+    ) {
         Set<Direction> faces = Set.copyOf(connectedFaces);
         Identifier identifier = TexturedModel.CUBE.create(block, (modelId, modelInstance) -> {
             generator.modelOutput.accept(modelId, () -> {
@@ -807,6 +819,7 @@ public final class IndustriaModels {
                     }
                     json.add("connected_faces", faceNames);
                 }
+
                 if (additionalConnections.length > 0) {
                     var connections = new JsonArray();
                     for (Block connection : additionalConnections) {
@@ -815,6 +828,12 @@ public final class IndustriaModels {
 
                     json.add("connects_to", connections);
                 }
+
+                if (axis != ConnectedTextureAxis.BOTH) {
+                    json.add("connection_axis",
+                            new JsonPrimitive(axis.name().toLowerCase(Locale.ROOT)));
+                }
+
                 return json;
             });
         });

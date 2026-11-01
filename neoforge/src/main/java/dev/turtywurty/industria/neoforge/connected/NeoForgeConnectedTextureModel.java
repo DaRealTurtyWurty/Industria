@@ -19,11 +19,13 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
     private final NeoForgeConnectedTextureQuadCache quadCache = new NeoForgeConnectedTextureQuadCache();
     private final Set<Block> additionalConnections;
     private final Set<Direction> connectedFaces;
+    private final ConnectedTextureAxis axis;
 
     public NeoForgeConnectedTextureModel(BlockStateModel delegate, ConnectedTextureSettings settings) {
         super(delegate);
         this.additionalConnections = settings.resolveBlocks();
         this.connectedFaces = settings.connectedFaces();
+        this.axis = settings.axis();
     }
 
     @Override
@@ -45,7 +47,7 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
             }
 
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
-            int mask = face.getMask(neighbourhood);
+            int mask = face.getMask(neighbourhood, axis);
             ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
             packedTiles |= (long) tile.index() << (direction.ordinal() * 6);
         }

@@ -31,13 +31,13 @@ public record ConnectedTextureFace(Direction up, Direction right) {
         };
     }
 
-    public int getMask(ConnectedTextureNeighborhood neighborhood) {
+    public int getMask(ConnectedTextureNeighborhood neighborhood, ConnectedTextureAxis axis) {
         Direction leftDirection = this.right.getOpposite();
         Direction downDirection = this.up.getOpposite();
-        boolean top = neighborhood.isConnected(this.up);
-        boolean bottom = neighborhood.isConnected(downDirection);
-        boolean left = neighborhood.isConnected(leftDirection);
-        boolean right = neighborhood.isConnected(this.right);
+        boolean top = axis.allowsVertical() && neighborhood.isConnected(this.up);
+        boolean bottom = axis.allowsVertical() && neighborhood.isConnected(downDirection);
+        boolean left = axis.allowsHorizontal() && neighborhood.isConnected(leftDirection);
+        boolean right = axis.allowsHorizontal() && neighborhood.isConnected(this.right);
         boolean topLeft = top && left && neighborhood.isConnected(this.up, leftDirection);
         boolean topRight = top && right && neighborhood.isConnected(this.up, this.right);
         boolean bottomLeft = bottom && left && neighborhood.isConnected(downDirection, leftDirection);

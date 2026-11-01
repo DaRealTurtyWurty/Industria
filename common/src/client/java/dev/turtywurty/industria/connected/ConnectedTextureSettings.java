@@ -8,13 +8,21 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public record ConnectedTextureSettings(Set<Identifier> connectsTo, Set<Direction> connectedFaces) {
+public record ConnectedTextureSettings(
+        Set<Identifier> connectsTo,
+        Set<Direction> connectedFaces,
+        ConnectedTextureAxis axis
+) {
     public static final ConnectedTextureSettings DEFAULT =
-            new ConnectedTextureSettings(Set.of(), EnumSet.allOf(Direction.class));
+            new ConnectedTextureSettings(Set.of(), EnumSet.allOf(Direction.class), ConnectedTextureAxis.BOTH);
+
+    public ConnectedTextureSettings(
+            Set<Identifier> connectsTo,
+            Set<Direction> connectedFaces) {
+        this(connectsTo, connectedFaces, ConnectedTextureAxis.BOTH);
+    }
 
     public ConnectedTextureSettings(Set<Identifier> connectsTo) {
         this(connectsTo, DEFAULT.connectedFaces());
@@ -23,10 +31,11 @@ public record ConnectedTextureSettings(Set<Identifier> connectsTo, Set<Direction
     public ConnectedTextureSettings {
         connectsTo = Set.copyOf(connectsTo);
         connectedFaces = Set.copyOf(connectedFaces);
+        Objects.requireNonNull(axis, "Connection axis cannot be null");
     }
 
     public static ConnectedTextureSettings fromJson(JsonObject json) {
-        return new ConnectedTextureSettings(readConnections(json), readFaces(json));
+        return new ConnectedTextureSettings(readConnections(json), readFaces(json), readAxis(json));
     }
 
     private static Set<Identifier> readConnections(JsonObject json) {
@@ -84,6 +93,22 @@ public record ConnectedTextureSettings(Set<Identifier> connectsTo, Set<Direction
         }
 
         return faces;
+    }
+
+    private static ConnectedTextureAxis readAxis(JsonObject json) {
+        JsonElement axisJson = json.get("connection_axis");
+        if (axisJson == null)
+            return DEFAULT.axis();
+
+        if (!axisJson.isJsonPrimitive() || !axisJson.getAsJsonPrimitive().isString())
+            throw new JsonParseException("connection_axis must be a string");
+
+        String axisName = axisJson.getAsString();
+        try {
+            return ConnectedTextureAxis.valueOf(axisName.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException _) {
+            throw new JsonParseException("Unknown connection_axis: " + axisName + "; expected both, horizontal or vertical");
+        }
     }
 
     public Set<Block> resolveBlocks() {

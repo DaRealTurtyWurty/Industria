@@ -13,6 +13,7 @@ public class FabricConnectedTextureDeserializer implements UnbakedModelDeseriali
         deepCopy.remove("fabric:type");
         deepCopy.remove("connects_to");
         deepCopy.remove("connected_faces");
+        deepCopy.remove("connection_axis");
         UnbakedModel unbakedModel = context.deserialize(deepCopy, UnbakedModel.class);
         return new FabricConnectedUnbakedModel(unbakedModel, settings);
     }

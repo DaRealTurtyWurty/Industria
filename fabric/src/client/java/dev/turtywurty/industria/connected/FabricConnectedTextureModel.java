@@ -22,12 +22,14 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
     private final Set<Block> additionalConnections;
     private final Set<Direction> connectedFaces;
     private final SpriteFinder spriteFinder;
+    private final ConnectedTextureAxis axis;
 
     public FabricConnectedTextureModel(BlockStateModel model, ConnectedTextureSettings settings, SpriteFinder spriteFinder) {
         super(model);
         this.additionalConnections = settings.resolveBlocks();
         this.connectedFaces = settings.connectedFaces();
         this.spriteFinder = spriteFinder;
+        this.axis = settings.axis();
     }
 
     @Override
@@ -51,7 +53,7 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
                 }
 
                 ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
-                int mask = face.getMask(neighborhood);
+                int mask = face.getMask(neighborhood, axis);
                 ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
                 FabricConnectedTextureModel.this.quadCache.apply(quad, spriteFinder.find(quad),
                         quad.chunkLayer().translucent(), tile);
