@@ -65,7 +65,7 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
 
                 ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
                 int mask = face.getMask(faceNeighborhood, rules.axis(direction));
-                ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
+                ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask, rules.layout(direction));
                 FabricConnectedTextureModel.this.quadCache.apply(quad, spriteFinder.find(quad),
                         quad.chunkLayer().translucent(), tile);
                 return true;

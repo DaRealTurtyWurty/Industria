@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.neoforge.connected;
 
 import com.mojang.blaze3d.platform.Transparency;
+import dev.turtywurty.industria.connected.ConnectedTextureLayout;
 import dev.turtywurty.industria.connected.ConnectedTextureTile;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -14,7 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class NeoForgeConnectedTextureQuadCache {
-    private static final int TILE_COUNT = 12 * 4;
     private static final int MAX_SOURCE_QUADS = 64;
 
     private final ConcurrentMap<BakedQuad, AtomicReferenceArray<List<BakedQuad>>> variants = new ConcurrentHashMap<>();
@@ -56,7 +56,7 @@ public class NeoForgeConnectedTextureQuadCache {
             if (this.variants.size() >= MAX_SOURCE_QUADS)
                 return null;
 
-            quads = new AtomicReferenceArray<>(TILE_COUNT);
+            quads = new AtomicReferenceArray<>(ConnectedTextureLayout.TILE_COUNT);
             this.variants.put(quad, quads);
             return quads;
         }

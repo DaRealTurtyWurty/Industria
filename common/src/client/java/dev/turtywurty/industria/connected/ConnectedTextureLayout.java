@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.connected;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,11 +74,48 @@ public class ConnectedTextureLayout {
             Map.entry(CENTER | TOP | LEFT | RIGHT | BOTTOM | TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT, new ConnectedTextureTile(6, 2))
     );
 
+    public static final int TILE_COUNT =
+            Arrays.stream(ConnectedTextureLayoutType.values())
+                    .mapToInt(layout -> layout.getIndexOffset() + layout.tileCount())
+                    .max()
+                    .orElseThrow();
+
     private static final ConnectedTextureTile[] TILES_BY_INDEX = createTileIndex();
 
     public static ConnectedTextureTile getTile(int mask) {
         return Optional.ofNullable(TILE_MASK_MAP.get(mask))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid mask: " + mask));
+    }
+
+    public static ConnectedTextureTile getTile(int mask, ConnectedTextureLayoutType layout) {
+        return switch (layout) {
+            case CTM47 -> getTile(mask);
+            case HORIZONTAL_STRIP -> getStripTile(mask, LEFT, RIGHT, layout);
+            case VERTICAL_STRIP -> getStripTile(mask, TOP, BOTTOM, layout);
+        };
+    }
+
+    private static ConnectedTextureTile getStripTile(
+            int mask,
+            int negativeBit,
+            int positiveBit,
+            ConnectedTextureLayoutType layout) {
+        boolean negative = (mask & negativeBit) != 0;
+        boolean positive = (mask & positiveBit) != 0;
+
+        int localIndex;
+        if (!negative && !positive) {
+            localIndex = 0;
+        } else if (!negative && positive) {
+            localIndex = 1;
+        } else if (negative && positive) {
+            localIndex = 2;
+        } else {
+            localIndex = 3;
+        }
+
+        int index = layout.getIndexOffset() + localIndex;
+        return getTileByIndex(index);
     }
 
     public static ConnectedTextureTile getTileByIndex(int index) {
@@ -92,10 +130,22 @@ public class ConnectedTextureLayout {
     }
 
     private static ConnectedTextureTile[] createTileIndex() {
-        ConnectedTextureTile[] tiles = new ConnectedTextureTile[48];
+        ConnectedTextureTile[] tiles = new ConnectedTextureTile[TILE_COUNT];
         for (ConnectedTextureTile tile : TILE_MASK_MAP.values()) {
             int index = tile.index();
             tiles[index] = tile;
+        }
+
+        for (ConnectedTextureLayoutType layout : ConnectedTextureLayoutType.values()) {
+            if (layout == ConnectedTextureLayoutType.CTM47)
+                continue;
+
+            for (int column = 0; column < layout.getColumns(); column++) {
+                for (int row = 0; row < layout.getRows(); row++) {
+                    var tile = new ConnectedTextureTile(column, row, layout);
+                    tiles[tile.index()] = tile;
+                }
+            }
         }
 
         return tiles;

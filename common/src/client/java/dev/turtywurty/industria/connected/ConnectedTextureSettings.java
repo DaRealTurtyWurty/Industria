@@ -99,7 +99,7 @@ public record ConnectedTextureSettings(
             JsonObject ruleJson = entry.getValue().getAsJsonObject();
             for (Map.Entry<String, JsonElement> property : ruleJson.entrySet()) {
                 String key = property.getKey();
-                if (!key.equals("connects_to") && !key.equals("connection_axis"))
+                if (!key.equals("connects_to") && !key.equals("connection_axis") && !key.equals("layout_type"))
                     throw new JsonParseException("Unknown property in face_rules." + entry.getKey() + ": " + key);
             }
 

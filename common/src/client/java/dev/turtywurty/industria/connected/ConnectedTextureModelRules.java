@@ -9,6 +9,7 @@ import java.util.*;
 public final class ConnectedTextureModelRules {
     private final int[] connectionGroups = new int[Direction.values().length];
     private final ConnectedTextureAxis[] axes = new ConnectedTextureAxis[Direction.values().length];
+    private final ConnectedTextureLayoutType[] layouts = new ConnectedTextureLayoutType[Direction.values().length];
     private final List<Set<Block>> connections;
 
     public ConnectedTextureModelRules(ConnectedTextureSettings settings) {
@@ -28,6 +29,7 @@ public final class ConnectedTextureModelRules {
             }
             connectionGroups[face.ordinal()] = group;
             axes[face.ordinal()] = rule.axis();
+            layouts[face.ordinal()] = rule.layout();
         }
         connections = List.copyOf(resolved);
     }
@@ -50,5 +52,9 @@ public final class ConnectedTextureModelRules {
 
     public Set<Block> connections(int group) {
         return connections.get(group);
+    }
+
+    public ConnectedTextureLayoutType layout(Direction face) {
+        return layouts[face.ordinal()];
     }
 }

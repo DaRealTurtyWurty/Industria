@@ -8,6 +8,8 @@ import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.connected.ConnectedTextureAxis;
+import dev.turtywurty.industria.connected.ConnectedTextureLayoutType;
+import dev.turtywurty.industria.connected.ConnectedTextureRule;
 import dev.turtywurty.industria.connected.ConnectedTextureSettings;
 import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
@@ -24,9 +26,7 @@ import dev.turtywurty.industria.renderer.item.MoldItemRenderer;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
-import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerator;
-import net.minecraft.client.data.models.blockstates.ConditionBuilder;
-import net.minecraft.client.data.models.blockstates.MultiPartGenerator;
+import net.minecraft.client.data.models.blockstates.*;
 import net.minecraft.client.data.models.model.*;
 import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.resources.model.sprite.Material;
@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM;
 import static net.minecraft.client.data.models.model.TexturedModel.createDefault;
@@ -59,6 +60,14 @@ public final class IndustriaModels {
             Optional.of(Industria.id("block/parent/connected_cube_item")),
             Optional.of("_item"),
             TextureSlot.ALL
+    );
+
+    private static final ModelTemplate CONNECTED_HEARTH_ITEM = new ModelTemplate(
+            Optional.of(Industria.id("block/parent/connected_hearth_item")),
+            Optional.of("_item"),
+            TextureSlot.SIDE,
+            TextureSlot.TOP,
+            TextureSlot.BOTTOM
     );
 
     private IndustriaModels() {
@@ -729,8 +738,7 @@ public final class IndustriaModels {
 
         // Smeltery
         blockStateModelGenerator.createTrivialCube(ModBlocks.UNFIRED_FIREBRICK.get());
-        registerCustomCube(blockStateModelGenerator, ModBlocks.SMELTERY_HEARTH.get(),
-                Identifier.withDefaultNamespace("block/polished_deepslate"));
+        registerSmelteryHearth(blockStateModelGenerator);
         registerConnectedCube(blockStateModelGenerator, ModBlocks.FIREBRICK.get(), ModBlocks.SMELTERY_GLASS.get());
         registerConnectedCube(blockStateModelGenerator, ModBlocks.SMELTERY_GLASS.get());
         blockStateModelGenerator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
@@ -819,17 +827,7 @@ public final class IndustriaModels {
             Block block,
             ConnectedTextureSettings settings
     ) {
-        Identifier identifier = TexturedModel.CUBE.create(block, (modelId, modelInstance) -> {
-            generator.modelOutput.accept(modelId, () -> {
-                JsonObject json = modelInstance.get().getAsJsonObject();
-                ModelDatagenService.get().addModelLoader(json, Industria.id("connected"));
-                for (Map.Entry<String, JsonElement> entry : settings.toJson().entrySet()) {
-                    json.add(entry.getKey(), entry.getValue());
-                }
-
-                return json;
-            });
-        });
+        Identifier identifier = TexturedModel.CUBE.create(block, connectedModelOutput(generator, settings));
         generator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
                 block,
                 BlockModelGenerators.plainVariant(identifier))
@@ -840,6 +838,79 @@ public final class IndustriaModels {
                 generator.modelOutput
         );
         generator.registerSimpleItemModel(block, itemModel);
+    }
+
+    private static void registerSmelteryHearth(BlockModelGenerators generator) {
+        Block block = ModBlocks.SMELTERY_HEARTH.get();
+        var sideRule = new ConnectedTextureRule(
+                Set.of(),
+                ConnectedTextureAxis.HORIZONTAL,
+                ConnectedTextureLayoutType.HORIZONTAL_STRIP
+        );
+
+        var settings = new ConnectedTextureSettings(
+                sideRule,
+                EnumSet.allOf(Direction.class),
+                Map.of(
+                        Direction.UP, ConnectedTextureRule.DEFAULT,
+                        Direction.DOWN, ConnectedTextureRule.DEFAULT
+                )
+        );
+
+        Material firebrick = TextureMapping.getBlockTexture(ModBlocks.FIREBRICK.get());
+
+        TextureMapping unlitTextures = new TextureMapping()
+                .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block))
+                .put(TextureSlot.TOP, firebrick)
+                .put(TextureSlot.BOTTOM, firebrick);
+
+        TextureMapping litTextures = unlitTextures.copyAndUpdate(
+                TextureSlot.SIDE,
+                TextureMapping.getBlockTexture(block, "_lit"));
+
+        Identifier unlitModel = ModelTemplates.CUBE_BOTTOM_TOP.create(
+                block,
+                unlitTextures,
+                connectedModelOutput(generator, settings)
+        );
+
+        Identifier litModel = ModelTemplates.CUBE_BOTTOM_TOP.createWithSuffix(
+                block,
+                "_lit",
+                litTextures,
+                connectedModelOutput(generator, settings)
+        );
+
+        PropertyDispatch.C1<MultiVariant, Boolean> propertyDispatch = PropertyDispatch.initial(BlockStateProperties.LIT)
+                .select(true, BlockModelGenerators.plainVariant(litModel))
+                .select(false, BlockModelGenerators.plainVariant(unlitModel));
+
+        generator.blockStateOutput.accept(MultiVariantGenerator.dispatch(block).with(propertyDispatch));
+
+        Identifier itemModel = CONNECTED_HEARTH_ITEM.create(
+                block,
+                unlitTextures,
+                generator.modelOutput
+        );
+
+        generator.registerSimpleItemModel(block, itemModel);
+    }
+
+    private static BiConsumer<Identifier, ModelInstance> connectedModelOutput(
+            BlockModelGenerators generator,
+            ConnectedTextureSettings settings
+    ) {
+        return (modelId, modelInstance) -> {
+            generator.modelOutput.accept(modelId, () -> {
+                JsonObject json = modelInstance.get().getAsJsonObject();
+                ModelDatagenService.get().addModelLoader(json, Industria.id("connected"));
+                for (Map.Entry<String, JsonElement> entry : settings.toJson().entrySet()) {
+                    json.add(entry.getKey(), entry.getValue());
+                }
+
+                return json;
+            });
+        };
     }
 
     public void generateItemModels(ItemModelGenerators itemModelGenerator) {
@@ -1074,6 +1145,7 @@ public final class IndustriaModels {
                 ModBlocks.WIND_TURBINE.get().asItem(),
                 ModBlocks.SMELTERY_GLASS.get().asItem(),
                 ModBlocks.FIREBRICK.get().asItem(),
+                ModBlocks.SMELTERY_HEARTH.get().asItem(),
                 ModWoodSets.RUBBER.button().item().get(),
                 ModWoodSets.RUBBER.door().item().get(),
                 ModWoodSets.RUBBER.fence().item().get(),

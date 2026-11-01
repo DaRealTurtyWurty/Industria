@@ -34,7 +34,8 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
 
         var neighbourhood = new ConnectedTextureNeighborhood(level, pos, state, rules.connections(0));
         ConnectedTextureNeighborhood[] otherNeighborhoods = rules.groupCount() > 1
-                ? new ConnectedTextureNeighborhood[rules.groupCount() - 1] : null;
+                ? new ConnectedTextureNeighborhood[rules.groupCount() - 1] : new ConnectedTextureNeighborhood[0];
+
         long packedTiles = 0L;
         for (Direction direction : Direction.values()) {
             int group = rules.connectionGroup(direction);
@@ -53,7 +54,7 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
             }
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
             int mask = face.getMask(faceNeighborhood, rules.axis(direction));
-            ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask);
+            ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask, rules.layout(direction));
             packedTiles |= (long) tile.index() << (direction.ordinal() * 6);
         }
 

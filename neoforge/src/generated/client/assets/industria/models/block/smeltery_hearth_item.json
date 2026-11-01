@@ -1,0 +1,8 @@
+{
+  "parent": "industria:block/parent/connected_hearth_item",
+  "textures": {
+    "bottom": "industria:block/firebrick",
+    "side": "industria:block/smeltery_hearth",
+    "top": "industria:block/firebrick"
+  }
+}

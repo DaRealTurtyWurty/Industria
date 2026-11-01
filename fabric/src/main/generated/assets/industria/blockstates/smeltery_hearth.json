@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "lit=false": {
       "model": "industria:block/smeltery_hearth"
+    },
+    "lit=true": {
+      "model": "industria:block/smeltery_hearth_lit"
     }
   }
 }

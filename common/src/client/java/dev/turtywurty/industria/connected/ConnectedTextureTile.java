@@ -1,31 +1,39 @@
 package dev.turtywurty.industria.connected;
 
-public record ConnectedTextureTile(int column, int row) {
-    public ConnectedTextureTile {
-        if (column < 0 || column > 11)
-            throw new IllegalArgumentException("Column must be between 0 and 11");
+import java.util.Objects;
 
-        if (row < 0 || row > 3)
-            throw new IllegalArgumentException("Row must be between 0 and 3");
+public record ConnectedTextureTile(int column, int row, ConnectedTextureLayoutType layout) {
+    public ConnectedTextureTile {
+        Objects.requireNonNull(layout, "layout cannot be null");
+
+        if (column < 0 || column >= layout.getColumns())
+            throw new IllegalArgumentException("Column must be between 0 and " + (layout.getColumns() - 1));
+
+        if (row < 0 || row >= layout.getRows())
+            throw new IllegalArgumentException("Row must be between 0 and " + (layout.getRows() - 1));
+    }
+
+    public ConnectedTextureTile(int column, int row) {
+        this(column, row, ConnectedTextureLayoutType.CTM47);
     }
 
     public float minU() {
-        return column / 12f;
+        return column / (float) layout.getColumns();
     }
 
     public float maxU() {
-        return (column + 1) / 12f;
+        return (column + 1) / (float) layout.getColumns();
     }
 
     public float minV() {
-        return row / 4f;
+        return row / (float) layout.getRows();
     }
 
     public float maxV() {
-        return (row + 1) / 4f;
+        return (row + 1) / (float) layout.getRows();
     }
 
     public int index() {
-        return row * 12 + column;
+        return layout.getIndexOffset() + (row * layout.getColumns()) + column;
     }
 }

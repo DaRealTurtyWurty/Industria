@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class FabricConnectedTextureQuadCache {
-    private static final int TILE_COUNT = 12 * 4;
     private static final int MAX_SOURCE_LAYOUTS = 64;
 
     private volatile SourceLayout[] sourceLayouts = new SourceLayout[0];
@@ -93,7 +92,7 @@ public class FabricConnectedTextureQuadCache {
                     sprite,
                     forceTranslucent,
                     uv0, uv1, uv2, uv3,
-                    new AtomicReferenceArray<>(TILE_COUNT)
+                    new AtomicReferenceArray<>(ConnectedTextureLayout.TILE_COUNT)
             );
 
             SourceLayout[] updated = Arrays.copyOf(this.sourceLayouts, this.sourceLayouts.length + 1);

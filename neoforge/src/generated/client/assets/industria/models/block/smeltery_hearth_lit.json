@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "connection_axis": "horizontal",
+  "face_rules": {
+    "down": {
+      "connection_axis": "both",
+      "layout_type": "ctm47"
+    },
+    "up": {
+      "connection_axis": "both",
+      "layout_type": "ctm47"
+    }
+  },
+  "layout_type": "horizontal_strip",
+  "loader": "industria:connected",
+  "textures": {
+    "bottom": "industria:block/firebrick",
+    "side": "industria:block/smeltery_hearth_lit",
+    "top": "industria:block/firebrick"
+  }
+}
