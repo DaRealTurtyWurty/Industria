@@ -170,6 +170,40 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         if (previousTemperature != this.temperature) {
             setChanged();
         }
+
+        if ((previousTemperature > AMBIENT_TEMPERATURE) != (this.temperature > AMBIENT_TEMPERATURE)
+            || this.level.getGameTime() % 20 == 0) {
+            setHearthLit(this.temperature > AMBIENT_TEMPERATURE);
+        }
+    }
+
+    private void setHearthLit(boolean lit) {
+        for (SmelteryChamber chamber : this.chambers) {
+            setFoundationLit(chamber.getBoundingBox(), lit);
+        }
+    }
+
+    private void setFoundationLit(AABB bounds, boolean lit) {
+        int floorY = (int) bounds.minY - 1;
+        for (BlockPos pos : BlockPos.betweenClosed((int) bounds.minX - 1, floorY, (int) bounds.minZ - 1,
+            (int) bounds.maxX, floorY, (int) bounds.maxZ)) {
+            if (!this.level.isLoaded(pos))
+                continue;
+
+            BlockState state = this.level.getBlockState(pos);
+            if (state.is(ModBlocks.SMELTERY_HEARTH.get()) && state.getValue(BlockStateProperties.LIT) != lit) {
+                this.level.setBlock(pos, state.setValue(BlockStateProperties.LIT, lit), Block.UPDATE_CLIENTS);
+            }
+        }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        if (this.level != null && !this.level.isClientSide()
+            && !this.level.getBlockState(pos).is(oldState.getBlock())) {
+            setHearthLit(false);
+        }
     }
 
     private void emitChimneyParticles(boolean heating) {
@@ -1046,6 +1080,11 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         int heatedArea
     ) {
         for (SmelteryChamber oldChamber : this.chambers) {
+            if (newChambers.stream()
+                .noneMatch(candidate -> candidate.getBoundingBox().equals(oldChamber.getBoundingBox()))) {
+                setFoundationLit(oldChamber.getBoundingBox(), false);
+            }
+
             if (newChambers.stream().noneMatch(candidate -> Objects.equals(candidate.hatchPos, oldChamber.hatchPos))) {
                 clearHatchLink(oldChamber.hatchPos);
             }
@@ -1094,6 +1133,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
         if (this.chambers.isEmpty())
             return;
+        setHearthLit(false);
         for (SmelteryChamber chamber : this.chambers) {
             clearHatchLink(chamber.hatchPos);
             for (BlockPos outletPos : chamber.outletPositions) {
