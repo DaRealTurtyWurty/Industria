@@ -16,6 +16,7 @@ public class NeoForgeConnectedTextureLoader implements UnbakedModelLoader<NeoFor
         deepCopy.remove("connects_to");
         deepCopy.remove("connected_faces");
         deepCopy.remove("connection_axis");
+        deepCopy.remove("face_rules");
         UnbakedModel unbakedModel = context.deserialize(deepCopy, UnbakedModel.class);
         return new NeoForgeConnectedUnbakedModel(unbakedModel, settings);
     }

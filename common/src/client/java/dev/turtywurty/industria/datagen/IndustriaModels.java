@@ -1,14 +1,14 @@
 package dev.turtywurty.industria.datagen;
 
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mojang.math.Quadrant;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.connected.ConnectedTextureAxis;
+import dev.turtywurty.industria.connected.ConnectedTextureSettings;
 import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.ModBlocks;
@@ -806,32 +806,25 @@ public final class IndustriaModels {
             ConnectedTextureAxis axis,
             Block... additionalConnections
     ) {
-        Set<Direction> faces = Set.copyOf(connectedFaces);
+        Set<Identifier> targets = new HashSet<>();
+        for (Block connection : additionalConnections) {
+            targets.add(BuiltInRegistries.BLOCK.getKey(connection));
+        }
+
+        registerConnectedCube(generator, block, new ConnectedTextureSettings(targets, connectedFaces, axis));
+    }
+
+    private static void registerConnectedCube(
+            BlockModelGenerators generator,
+            Block block,
+            ConnectedTextureSettings settings
+    ) {
         Identifier identifier = TexturedModel.CUBE.create(block, (modelId, modelInstance) -> {
             generator.modelOutput.accept(modelId, () -> {
                 JsonObject json = modelInstance.get().getAsJsonObject();
                 ModelDatagenService.get().addModelLoader(json, Industria.id("connected"));
-                if (faces.size() != Direction.values().length) {
-                    var faceNames = new JsonArray();
-                    for (Direction direction : Direction.values()) {
-                        if (faces.contains(direction))
-                            faceNames.add(new JsonPrimitive(direction.getName()));
-                    }
-                    json.add("connected_faces", faceNames);
-                }
-
-                if (additionalConnections.length > 0) {
-                    var connections = new JsonArray();
-                    for (Block connection : additionalConnections) {
-                        connections.add(new JsonPrimitive(BuiltInRegistries.BLOCK.getKey(connection).toString()));
-                    }
-
-                    json.add("connects_to", connections);
-                }
-
-                if (axis != ConnectedTextureAxis.BOTH) {
-                    json.add("connection_axis",
-                            new JsonPrimitive(axis.name().toLowerCase(Locale.ROOT)));
+                for (Map.Entry<String, JsonElement> entry : settings.toJson().entrySet()) {
+                    json.add(entry.getKey(), entry.getValue());
                 }
 
                 return json;
