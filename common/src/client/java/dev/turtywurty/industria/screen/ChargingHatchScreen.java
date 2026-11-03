@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.turtywurty.industria.menu.ChargingHatchMenu;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -99,7 +100,7 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
         int x = this.leftPos + SCROLLBAR_X;
         int y = this.topPos + SCROLLBAR_Y;
 
-        if (event.button() == 0
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT
             && event.x() >= x && event.x() < x + SCROLLBAR_WIDTH
             && event.y() >= y && event.y() < y + SCROLLBAR_HEIGHT
             && this.menu.getMaxScrollRow() > 0
@@ -114,7 +115,7 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (this.draggingScrollbar && event.button() == 0) {
+        if (this.draggingScrollbar && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             scrollToMouse(event.y());
             return true;
         }
@@ -124,7 +125,7 @@ public class ChargingHatchScreen extends AbstractContainerScreen<ChargingHatchMe
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0 && this.draggingScrollbar) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && this.draggingScrollbar) {
             this.draggingScrollbar = false;
             return true;
         }

@@ -1,5 +1,6 @@
 package dev.turtywurty.industria.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.menu.MoldingTableMenu;
 import dev.turtywurty.industria.molding.*;
@@ -206,7 +207,8 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() != 0 || !this.menu.getSlot(0).hasItem() || !this.menu.getCarried().isEmpty())
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT
+            || !this.menu.getSlot(0).hasItem() || !this.menu.getCarried().isEmpty())
             return super.mouseClicked(event, doubleClick);
 
         double mouseX = event.x() - this.leftPos;
@@ -239,7 +241,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() != 0 || !this.tracing)
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT || !this.tracing)
             return super.mouseReleased(event);
 
         this.tracing = false;
@@ -250,7 +252,7 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-        if (event.button() != 0 || !this.tracing)
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT || !this.tracing)
             return super.mouseDragged(event, dx, dy);
 
         double mouseX = event.x() - this.leftPos;
