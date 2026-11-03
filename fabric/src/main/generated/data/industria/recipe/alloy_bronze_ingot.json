@@ -1,0 +1,17 @@
+{
+  "type": "industria:alloying",
+  "inputA": {
+    "data": {
+      "count": 3
+    },
+    "ingredients": "minecraft:copper_ingot"
+  },
+  "inputB": {
+    "ingredients": "industria:tin_ingot"
+  },
+  "output": {
+    "count": 4,
+    "id": "industria:bronze_ingot"
+  },
+  "smelt_time": 400
+}

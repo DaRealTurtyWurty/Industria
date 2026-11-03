@@ -166,6 +166,9 @@ public class ModBlocks {
         settings -> settings.sound(SoundType.DEEPSLATE).lightLevel(_ -> 3).strength(4.5F, 3.0F)
             .mapColor(MapColor.DEEPSLATE));
 
+    public static final RegistrationHandle<Block, Block> BRONZE_BLOCK = registerWithItemCopy("bronze_block",
+        Block::new, Blocks.IRON_BLOCK);
+
     public static final RegistrationHandle<Block, AlloyFurnaceBlock> ALLOY_FURNACE = registerWithItemCopy(
         "alloy_furnace",
         AlloyFurnaceBlock::new, Blocks.FURNACE, BlockBehaviour.Properties::noOcclusion);

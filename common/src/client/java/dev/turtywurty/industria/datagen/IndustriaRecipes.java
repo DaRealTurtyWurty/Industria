@@ -433,6 +433,17 @@ public final class IndustriaRecipes {
                 metalOreCooking(BlastingRecipe::new, "blasting", zincOres, RecipeCategory.MISC,
                         CookingBookCategory.MISC, ModItems.ZINC_INGOT.get(), 0.7F, 100, "zinc_ingot");
 
+                // Bronze
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.BRONZE_INGOT.get(), RecipeCategory.BUILDING_BLOCKS,
+                        ModBlocks.BRONZE_BLOCK.get());
+                metalStorageRecipes(RecipeCategory.MISC, ModItems.BRONZE_NUGGET.get(), RecipeCategory.MISC, ModItems.BRONZE_INGOT.get(),
+                        "bronze_nugget_to_ingot", null, "bronze_ingot_to_nugget", null);
+                offerAlloySmelting(output, RecipeCategory.MISC,
+                        new IndustriaIngredient(3, Items.COPPER_INGOT),
+                        new IndustriaIngredient(1, ModItems.TIN_INGOT.get()),
+                        new ItemStackTemplate(ModItems.BRONZE_INGOT.get(), 4),
+                        400);
+
                 offerCrusher(output, RecipeCategory.MISC,
                         new IndustriaIngredient(1, ModItems.ALUMINIUM_INGOT.get()),
                         new OutputItemStack(ModItems.ALUMINIUM_POWDER.get(), 1, 1),
@@ -556,54 +567,58 @@ public final class IndustriaRecipes {
                         .unlockedBy(hasTag(ConventionalItemTags.SANDS), has(ConventionalItemTags.SANDS))
                         .save(output);
 
-                SimpleCookingRecipeBuilder
-                        .smelting(Ingredient.of(ModBlocks.UNFIRED_FIREBRICK.get()), RecipeCategory.BUILDING_BLOCKS,
-                                CookingBookCategory.BLOCKS, ModBlocks.FIREBRICK.get().asItem(), 0.1F, 200)
-                        .unlockedBy(getHasName(ModBlocks.UNFIRED_FIREBRICK.get()), has(ModBlocks.UNFIRED_FIREBRICK.get()))
-                        .save(output, ResourceKey.create(Registries.RECIPE, Industria.id("firebrick")));
+                offerAlloySmelting(output, RecipeCategory.BUILDING_BLOCKS,
+                        new IndustriaIngredient(1, ModItems.BRONZE_NUGGET.get()),
+                        new IndustriaIngredient(1, ModBlocks.UNFIRED_FIREBRICK.get().asItem()),
+                        new ItemStackTemplate(ModBlocks.FIREBRICK.get().asItem()),
+                        200);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SMELTERY_GLASS.get(), 4)
-                        .pattern("FGF")
+                        .pattern("BGB")
                         .pattern("GQG")
-                        .pattern("FGF")
-                        .define('F', ModBlocks.FIREBRICK.get())
+                        .pattern("BGB")
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .define('G', ConventionalItemTags.GLASS)
                         .define('Q', ConventionalItemTags.QUARTZ_GEMS)
-                        .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .unlockedBy(hasTag(ConventionalItemTags.GLASS), has(ConventionalItemTags.GLASS))
                         .unlockedBy(hasTag(ConventionalItemTags.QUARTZ_GEMS), has(ConventionalItemTags.QUARTZ_GEMS))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SMELTERY_HEARTH.get(), 4)
-                        .pattern("FIF")
+                        .pattern("BIB")
                         .pattern("I I")
-                        .pattern("FIF")
-                        .define('F', ModBlocks.FIREBRICK.get())
+                        .pattern("BIB")
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .define('I', ConventionalItemTags.IRON_INGOTS)
-                        .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.SMELTERY_CONTROLLER.get())
-                        .pattern("FIF")
+                        .pattern("BIB")
                         .pattern("IRI")
                         .pattern("FIF")
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .define('F', ModBlocks.FIREBRICK.get())
                         .define('I', ConventionalItemTags.IRON_INGOTS)
                         .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
                         .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                         .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.FUELBOX.get())
-                        .pattern("FIF")
+                        .pattern("BIB")
                         .pattern("IUI")
                         .pattern("FTF")
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .define('F', ModBlocks.FIREBRICK.get())
                         .define('I', ConventionalItemTags.IRON_INGOTS)
                         .define('U', ConventionalItemTags.FURNACES)
                         .define('T', Items.IRON_TRAPDOOR)
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
                         .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                         .unlockedBy(hasTag(ConventionalItemTags.FURNACES), has(ConventionalItemTags.FURNACES))
@@ -611,12 +626,14 @@ public final class IndustriaRecipes {
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHARGING_HATCH.get())
-                        .pattern(" I ")
+                        .pattern("BIB")
                         .pattern("ITI")
                         .pattern(" F ")
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .define('I', ConventionalItemTags.IRON_INGOTS)
                         .define('T', Items.IRON_TRAPDOOR)
                         .define('F', ModBlocks.FIREBRICK.get())
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
                         .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                         .unlockedBy(getHasName(Items.IRON_TRAPDOOR), has(Items.IRON_TRAPDOOR))
@@ -624,53 +641,52 @@ public final class IndustriaRecipes {
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHIMNEY.get())
                         .pattern("F F")
-                        .pattern("F F")
+                        .pattern("FBF")
                         .define('F', ModBlocks.FIREBRICK.get())
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.TAPPING_OUTLET.get())
-                        .pattern(" F ")
-                        .pattern("FIF")
-                        .pattern(" F ")
-                        .define('F', ModBlocks.FIREBRICK.get())
-                        .define('I', ConventionalItemTags.IRON_INGOTS)
-                        .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
-                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .pattern("  B")
+                        .pattern("BB ")
+                        .define('B', ModItems.BRONZE_NUGGET.get())
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.MOLDING_TABLE.get())
                         .pattern("PPP")
-                        .pattern("ICI")
-                        .pattern("P P")
+                        .pattern("BCB")
+                        .pattern("L L")
                         .define('P', Items.OAK_PLANKS)
-                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .define('C', ConventionalItemTags.CRAFTING_TABLES)
+                        .define('L', ConventionalItemTags.LOGS)
                         .unlockedBy(getHasName(Items.OAK_PLANKS), has(Items.OAK_PLANKS))
-                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .unlockedBy(hasTag(ConventionalItemTags.CRAFTING_TABLES), has(ConventionalItemTags.CRAFTING_TABLES))
+                        .unlockedBy(hasTag(ConventionalItemTags.LOGS), has(ConventionalItemTags.LOGS))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CASTING_TABLE.get())
-                        .pattern("FFF")
-                        .pattern("I I")
-                        .pattern("I I")
+                        .pattern("BFB")
+                        .pattern("F F")
+                        .pattern("F F")
                         .define('F', ModBlocks.FIREBRICK.get())
-                        .define('I', ConventionalItemTags.STORAGE_BLOCKS_IRON)
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
-                        .unlockedBy(hasTag(ConventionalItemTags.STORAGE_BLOCKS_IRON),
-                                has(ConventionalItemTags.STORAGE_BLOCKS_IRON))
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CASTING_BASIN.get())
                         .pattern("F F")
                         .pattern("F F")
-                        .pattern("IFI")
+                        .pattern("BFB")
                         .define('F', ModBlocks.FIREBRICK.get())
-                        .define('I', ConventionalItemTags.STORAGE_BLOCKS_IRON)
+                        .define('B', ModItems.BRONZE_NUGGET.get())
                         .unlockedBy(getHasName(ModBlocks.FIREBRICK.get()), has(ModBlocks.FIREBRICK.get()))
-                        .unlockedBy(hasTag(ConventionalItemTags.STORAGE_BLOCKS_IRON),
-                                has(ConventionalItemTags.STORAGE_BLOCKS_IRON))
+                        .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                         .save(output);
 
                 shaped(RecipeCategory.TOOLS, ModItems.BLANK_SAND_CAST.get(), 4)
@@ -1059,6 +1075,7 @@ public final class IndustriaRecipes {
         private static final TagKey<Item> FURNACES = ConventionTags.item("player_workstations/furnaces").key();
         private static final TagKey<Item> CRAFTING_TABLES = ConventionTags.item("player_workstations/crafting_tables")
                 .key();
+        private static final TagKey<Item> LOGS = ConventionTags.item("natural_logs").key();
 
         private ConventionalItemTags() {
         }

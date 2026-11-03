@@ -645,6 +645,9 @@ public final class IndustriaModels {
         registerSimpleOreBlock(blockStateModelGenerator, ModBlocks.QUARTZ_ORE.get(), "stone");
         registerSimpleOreBlock(blockStateModelGenerator, ModBlocks.DEEPSLATE_QUARTZ_ORE.get(), "deepslate");
 
+        // Bronze
+        blockStateModelGenerator.createTrivialCube(ModBlocks.BRONZE_BLOCK.get());
+
         blockStateModelGenerator.createFurnace(ModBlocks.ALLOY_FURNACE.get(), TexturedModel.ORIENTABLE_ONLY_TOP);
         blockStateModelGenerator.createFurnace(ModBlocks.THERMAL_GENERATOR.get(), TexturedModel.ORIENTABLE_ONLY_TOP);
         createBattery(blockStateModelGenerator, ModBlocks.BASIC_BATTERY.get());

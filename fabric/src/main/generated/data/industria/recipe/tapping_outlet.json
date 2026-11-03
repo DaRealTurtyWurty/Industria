@@ -2,13 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "F": "industria:firebrick",
-    "I": "#c:ingots/iron"
+    "B": "industria:bronze_nugget"
   },
   "pattern": [
-    " F ",
-    "FIF",
-    " F "
+    "  B",
+    "BB "
   ],
   "result": {
     "id": "industria:tapping_outlet"

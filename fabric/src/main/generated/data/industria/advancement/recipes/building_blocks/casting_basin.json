@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_c:storage_blocks/iron": {
+    "has_bronze_nugget": {
       "conditions": {
         "items": [
           {
-            "items": "#c:storage_blocks/iron"
+            "items": "industria:bronze_nugget"
           }
         ]
       },
@@ -32,7 +32,7 @@
     [
       "has_the_recipe",
       "has_firebrick",
-      "has_c:storage_blocks/iron"
+      "has_bronze_nugget"
     ]
   ],
   "rewards": {

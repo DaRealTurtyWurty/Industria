@@ -328,6 +328,11 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.QUARTZ_ORE.get(), "Quartz Ore");
         translationBuilder.add(ModBlocks.DEEPSLATE_QUARTZ_ORE.get(), "Deepslate Quartz Ore");
 
+        // Bronze
+        translationBuilder.add(ModItems.BRONZE_INGOT.get(), "Bronze Ingot");
+        translationBuilder.add(ModItems.BRONZE_NUGGET.get(), "Bronze Nugget");
+        translationBuilder.add(ModBlocks.BRONZE_BLOCK.get(), "Block of Bronze");
+
         // Miscellaneous
         translationBuilder.add(ModItems.RED_MUD.get(), "Red Mud");
         translationBuilder.add(ModItems.CRYOLITE.get(), "Cryolite");

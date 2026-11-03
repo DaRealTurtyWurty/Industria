@@ -1,0 +1,13 @@
+{
+  "type": "industria:alloying",
+  "inputA": {
+    "ingredients": "industria:bronze_nugget"
+  },
+  "inputB": {
+    "ingredients": "industria:unfired_firebrick"
+  },
+  "output": {
+    "id": "industria:firebrick"
+  },
+  "smelt_time": 200
+}

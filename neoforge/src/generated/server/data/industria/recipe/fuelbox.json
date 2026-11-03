@@ -2,13 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
+    "B": "industria:bronze_nugget",
     "F": "industria:firebrick",
     "I": "#c:ingots/iron",
     "T": "minecraft:iron_trapdoor",
     "U": "#c:player_workstations/furnaces"
   },
   "pattern": [
-    "FIF",
+    "BIB",
     "IUI",
     "FTF"
   ],

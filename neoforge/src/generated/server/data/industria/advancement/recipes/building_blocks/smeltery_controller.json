@@ -1,6 +1,16 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
+    "has_bronze_nugget": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:bronze_nugget"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
     "has_c:dusts/redstone": {
       "conditions": {
         "items": [
@@ -41,6 +51,7 @@
   "requirements": [
     [
       "has_the_recipe",
+      "has_bronze_nugget",
       "has_firebrick",
       "has_c:ingots/iron",
       "has_c:dusts/redstone"

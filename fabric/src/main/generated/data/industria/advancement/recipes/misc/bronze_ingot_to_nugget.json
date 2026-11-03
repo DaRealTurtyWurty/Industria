@@ -1,32 +1,32 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_the_recipe": {
-      "conditions": {
-        "recipes": "industria:firebrick"
-      },
-      "trigger": "minecraft:recipe_unlocked"
-    },
-    "has_unfired_firebrick": {
+    "has_bronze_ingot": {
       "conditions": {
         "items": [
           {
-            "items": "industria:unfired_firebrick"
+            "items": "industria:bronze_ingot"
           }
         ]
       },
       "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "industria:bronze_ingot_to_nugget"
+      },
+      "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
       "has_the_recipe",
-      "has_unfired_firebrick"
+      "has_bronze_ingot"
     ]
   ],
   "rewards": {
     "recipes": [
-      "industria:firebrick"
+      "industria:bronze_ingot_to_nugget"
     ]
   }
 }

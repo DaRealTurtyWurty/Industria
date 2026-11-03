@@ -2,14 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "F": "industria:firebrick",
+    "B": "industria:bronze_nugget",
     "G": "#c:glass_blocks",
     "Q": "#c:gems/quartz"
   },
   "pattern": [
-    "FGF",
+    "BGB",
     "GQG",
-    "FGF"
+    "BGB"
   ],
   "result": {
     "count": 4,

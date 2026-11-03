@@ -2,14 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
+    "B": "industria:bronze_nugget",
     "C": "#c:player_workstations/crafting_tables",
-    "I": "#c:ingots/iron",
+    "L": "#c:natural_logs",
     "P": "minecraft:oak_planks"
   },
   "pattern": [
     "PPP",
-    "ICI",
-    "P P"
+    "BCB",
+    "L L"
   ],
   "result": {
     "id": "industria:molding_table"

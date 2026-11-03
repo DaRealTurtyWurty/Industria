@@ -128,6 +128,10 @@ public class ModItems {
     public static final RegistrationHandle<Item, Item> SODIUM_HYDROXIDE = register("sodium_hydroxide");
     public static final RegistrationHandle<Item, Item> SODIUM_CARBONATE = register("sodium_carbonate");
 
+    // Bronze
+    public static final RegistrationHandle<Item, Item> BRONZE_INGOT = register("bronze_ingot");
+    public static final RegistrationHandle<Item, Item> BRONZE_NUGGET = register("bronze_nugget");
+
     // Miscellaneous
     public static final RegistrationHandle<Item, Item> RED_MUD = register("red_mud");
     public static final RegistrationHandle<Item, Item> CRYOLITE = register("cryolite");

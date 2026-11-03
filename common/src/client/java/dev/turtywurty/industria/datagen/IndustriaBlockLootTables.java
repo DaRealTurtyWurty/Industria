@@ -2,18 +2,16 @@ package dev.turtywurty.industria.datagen;
 
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModItems;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableSubProvider;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
+
+import java.util.Set;
+import java.util.function.Function;
 
 public final class IndustriaBlockLootTables implements LootTableSubProvider {
     private final LootBuilders builders;
@@ -82,6 +80,8 @@ public final class IndustriaBlockLootTables implements LootTableSubProvider {
 
         add(ModBlocks.QUARTZ_ORE.get(), block -> createOreDrop(block, Items.QUARTZ));
         add(ModBlocks.DEEPSLATE_QUARTZ_ORE.get(), block -> createOreDrop(block, Items.QUARTZ));
+
+        dropSelf(ModBlocks.BRONZE_BLOCK.get());
 
         dropSelf(ModBlocks.ALLOY_FURNACE.get());
         dropSelf(ModBlocks.THERMAL_GENERATOR.get());

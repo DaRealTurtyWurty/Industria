@@ -2,11 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
+    "B": "industria:bronze_nugget",
     "F": "industria:firebrick"
   },
   "pattern": [
     "F F",
-    "F F"
+    "FBF"
   ],
   "result": {
     "id": "industria:chimney"

@@ -2,12 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
+    "B": "industria:bronze_nugget",
     "F": "industria:firebrick",
     "I": "#c:ingots/iron",
     "R": "#c:dusts/redstone"
   },
   "pattern": [
-    "FIF",
+    "BIB",
     "IRI",
     "FIF"
   ],

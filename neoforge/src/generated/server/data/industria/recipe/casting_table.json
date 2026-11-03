@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "F": "industria:firebrick",
-    "I": "#c:storage_blocks/iron"
+    "B": "industria:bronze_nugget",
+    "F": "industria:firebrick"
   },
   "pattern": [
-    "FFF",
-    "I I",
-    "I I"
+    "BFB",
+    "F F",
+    "F F"
   ],
   "result": {
     "id": "industria:casting_table"
