@@ -24,6 +24,7 @@ public class ModRenderFluidHandlers {
         Map.entry("molten_iridium", 0xFFBCD9EF),
         Map.entry("molten_silicon", 0xFF9FB4D1),
         Map.entry("molten_tin", 0xFFDCE4E5),
+        Map.entry("molten_bronze", 0xFFCD7F32),
         Map.entry("molten_steel", 0xFFA2B4C6),
         Map.entry("molten_iron", 0xFFD8B09B),
         Map.entry("molten_copper", 0xFFE9A069),

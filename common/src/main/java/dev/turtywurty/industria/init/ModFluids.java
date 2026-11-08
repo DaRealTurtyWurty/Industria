@@ -45,6 +45,7 @@ public class ModFluids {
     public static final FluidRegistryObject<?, ?> MOLTEN_IRIDIUM = registerMoltenFluid("molten_iridium");
     public static final FluidRegistryObject<?, ?> MOLTEN_SILICON = registerMoltenFluid("molten_silicon");
     public static final FluidRegistryObject<?, ?> MOLTEN_TIN = registerMoltenFluid("molten_tin");
+    public static final FluidRegistryObject<?, ?> MOLTEN_BRONZE = registerMoltenFluid("molten_bronze");
     public static final FluidRegistryObject<?, ?> MOLTEN_STEEL = registerMoltenFluid("molten_steel");
     public static final FluidRegistryObject<?, ?> MOLTEN_IRON = registerMoltenFluid("molten_iron");
     public static final FluidRegistryObject<?, ?> MOLTEN_COPPER = registerMoltenFluid("molten_copper");

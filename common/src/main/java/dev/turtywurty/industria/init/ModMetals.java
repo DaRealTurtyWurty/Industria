@@ -108,6 +108,14 @@ public final class ModMetals {
             MetalForm.INGOT, ModItems.TIN_INGOT,
             MetalForm.NUGGET, ModItems.TIN_NUGGET));
 
+    public static final MetalDefinition BRONZE = register("bronze",
+        800f,
+        ModBlocks.BRONZE_BLOCK,
+        ModFluids.MOLTEN_BRONZE,
+        Map.of(
+            MetalForm.INGOT, ModItems.BRONZE_INGOT,
+            MetalForm.NUGGET, ModItems.BRONZE_NUGGET));
+
     public static final MetalDefinition STEEL = register("steel",
         1500f,
         ModBlocks.STEEL_BLOCK,

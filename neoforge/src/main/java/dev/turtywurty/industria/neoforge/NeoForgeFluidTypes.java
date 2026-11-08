@@ -27,8 +27,7 @@ public final class NeoForgeFluidTypes {
         register(ModFluids.CRUDE_OIL);
         register(ModFluids.DIRTY_SODIUM_ALUMINATE);
         register(ModFluids.SODIUM_ALUMINATE);
-        register(ModFluids.MOLTEN_ALUMINIUM);
-        register(ModFluids.MOLTEN_CRYOLITE);
+        ModFluids.getMoltenFluids().values().forEach(NeoForgeFluidTypes::register);
         register(ModFluids.LATEX);
         register(ModFluids.METHANOL);
         register(ModFluids.FORMIC_ACID);
