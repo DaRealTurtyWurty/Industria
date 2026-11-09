@@ -4,13 +4,16 @@ import dev.turtywurty.industria.connected.ConnectedTextureSettings;
 import dev.turtywurty.industria.connected.FabricConnectedTextureDeserializer;
 import dev.turtywurty.industria.connected.FabricConnectedTextureModel;
 import dev.turtywurty.industria.connected.FabricConnectedUnbakedModel;
+import dev.turtywurty.industria.connected.model.*;
 import dev.turtywurty.industria.molding.MoldCastPreviewRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
-import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
+import net.fabricmc.fabric.api.client.renderer.v1.sprite.SpriteFinder;
+import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.resources.Identifier;
 
@@ -36,13 +39,35 @@ public class FabricIndustriaClient implements ClientModInitializer {
                                 ResolvedModel resolved = context.baker().getModel(dependency);
                                 ConnectedTextureSettings settings =
                                         FabricConnectedUnbakedModel.findSettings(resolved);
+                                VerticalConnectedModelSettings verticalSettings =
+                                        FabricVerticalConnectedUnbakedModel.findSettings(resolved);
 
-                                if (settings != null)
-                                    return new FabricConnectedTextureModel(model, settings,
-                                            context.baker().materials().spriteFinder(QuadAtlas.BLOCK));
+                                if (settings != null) {
+                                    SpriteFinder spriteFinder =
+                                            context.baker().materials().spriteFinder(QuadAtlas.BLOCK);
+                                    return new FabricConnectedTextureModel(model, settings, spriteFinder);
+                                } else if (verticalSettings != null) {
+                                    BakedVerticalConnectedModels variants =
+                                            BakedVerticalConnectedModels.bake(context.baker(), verticalSettings);
+                                    return new FabricVerticalConnectedModel(variants, verticalSettings);
+                                }
                             }
 
                             return model;
                         }));
+
+        UnbakedModelDeserializer.register(Industria.id("vertical_connected"), new FabricVerticalConnectedModelDeserializer());
+        ModelLoadingPlugin.register(pluginContext -> {
+            pluginContext.modifyModelOnLoad().register(((model, context) -> {
+                if (model instanceof FabricVerticalConnectedUnbakedModel verticalModel) {
+                    pluginContext.addModel(
+                            ExtraModelKey.create(context.id()::toString),
+                            new FabricVerticalConnectedModelDependencies(verticalModel.getSettings())
+                    );
+                }
+
+                return model;
+            }));
+        });
     }
 }

@@ -3,6 +3,7 @@ package dev.turtywurty.industria.datagen;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.math.Quadrant;
+import com.mojang.serialization.JsonOps;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
 import dev.turtywurty.industria.block.PipeBlock;
@@ -11,6 +12,7 @@ import dev.turtywurty.industria.connected.ConnectedTextureAxis;
 import dev.turtywurty.industria.connected.ConnectedTextureLayoutType;
 import dev.turtywurty.industria.connected.ConnectedTextureRule;
 import dev.turtywurty.industria.connected.ConnectedTextureSettings;
+import dev.turtywurty.industria.connected.model.VerticalConnectedModelSettings;
 import dev.turtywurty.industria.conveyor.block.impl.*;
 import dev.turtywurty.industria.datagen.builder.BuiltinEntityModelBuilder;
 import dev.turtywurty.industria.init.ModBlocks;
@@ -28,6 +30,7 @@ import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.blockstates.*;
 import net.minecraft.client.data.models.model.*;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelDispatcher;
 import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
@@ -749,7 +752,17 @@ public final class IndustriaModels {
         blockStateModelGenerator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
                 ModBlocks.CHARGING_HATCH.get(), BlockModelGenerators.plainVariant(Industria.id("block/firebrick"))));
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.SMELTERY_CONTROLLER.get());
-        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CHIMNEY.get());
+        registerVerticalConnectedBlock(
+                blockStateModelGenerator,
+                ModBlocks.CHIMNEY.get(),
+                new VerticalConnectedModelSettings(
+                        Industria.id("block/chimney"),
+                        Industria.id("block/chimney_lower"),
+                        Industria.id("block/chimney_middle"),
+                        Industria.id("block/chimney_upper"),
+                        Set.of()
+                )
+        );
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_BASIN.get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_TABLE.get());
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.MOLDING_TABLE.get());
@@ -841,6 +854,46 @@ public final class IndustriaModels {
                 generator.modelOutput
         );
         generator.registerSimpleItemModel(block, itemModel);
+    }
+
+    private static void registerVerticalConnectedBlock(
+            BlockModelGenerators generator,
+            Block block,
+            VerticalConnectedModelSettings settings
+    ) {
+        Identifier selectorId = ModelLocationUtils.getModelLocation(block, "_connected");
+        generator.modelOutput.accept(selectorId, () -> {
+            JsonObject json = settings.toJson();
+            ModelDatagenService.get().addModelLoader(json, Industria.id("vertical_connected"));
+            return json;
+        });
+
+        generator.blockStateOutput.accept(new BlockModelDefinitionGenerator() {
+            @Override
+            public Block block() {
+                return block;
+            }
+
+            @Override
+            public BlockStateModelDispatcher create() {
+                var variant = new JsonObject();
+                variant.addProperty("model", selectorId.toString());
+                ModelDatagenService.get().configureBlockStateModel(
+                        variant,
+                        Industria.id("vertical_connected")
+                );
+
+                var variants = new JsonObject();
+                variants.add("", variant);
+
+                var definition = new JsonObject();
+                definition.add("variants", variants);
+
+                return BlockStateModelDispatcher.CODEC
+                        .parse(JsonOps.INSTANCE, definition)
+                        .getOrThrow();
+            }
+        });
     }
 
     private static void registerSmelteryHearth(BlockModelGenerators generator) {

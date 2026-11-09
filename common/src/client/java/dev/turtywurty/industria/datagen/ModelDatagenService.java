@@ -12,6 +12,8 @@ public interface ModelDatagenService {
 
     void addModelLoader(JsonObject json, Identifier loaderId);
 
+    void configureBlockStateModel(JsonObject json, Identifier typeId);
+
     final class ServiceHolder {
         private static final ModelDatagenService INSTANCE = ServiceLoader.load(
                 ModelDatagenService.class,

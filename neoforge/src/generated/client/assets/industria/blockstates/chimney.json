@@ -1,7 +1,8 @@
 {
   "variants": {
     "": {
-      "model": "industria:block/chimney"
+      "type": "industria:vertical_connected",
+      "model": "industria:block/chimney_connected"
     }
   }
 }

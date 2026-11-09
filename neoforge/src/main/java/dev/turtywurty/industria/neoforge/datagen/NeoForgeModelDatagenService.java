@@ -9,4 +9,9 @@ public final class NeoForgeModelDatagenService implements ModelDatagenService {
     public void addModelLoader(JsonObject json, Identifier loaderId) {
         json.addProperty("loader", loaderId.toString());
     }
+
+    @Override
+    public void configureBlockStateModel(JsonObject json, Identifier typeId) {
+        json.addProperty("type", typeId.toString());
+    }
 }

@@ -8,6 +8,8 @@ import dev.turtywurty.industria.molding.MoldCastPreviewState;
 import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureLoader;
 import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureModel;
 import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedUnbakedModel;
+import dev.turtywurty.industria.neoforge.connected.model.NeoForgeVerticalConnectedBlockStateModel;
+import dev.turtywurty.industria.neoforge.connected.model.NeoForgeVerticalConnectedModelLoader;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ResolvedModel;
@@ -17,6 +19,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -35,6 +38,7 @@ public final class IndustriaNeoForgeClient {
 
         modBus.addListener(ModelEvent.RegisterLoaders.class, this::registerModelLoaders);
         modBus.addListener(ModelEvent.ModifyBakingResult.class, this::modifyBakingResult);
+        modBus.addListener(RegisterBlockStateModels.class, this::registerBlockStateModels);
     }
 
     private void registerPictureInPictureRenderers(RegisterPictureInPictureRenderersEvent event) {
@@ -43,6 +47,7 @@ public final class IndustriaNeoForgeClient {
 
     private void registerModelLoaders(ModelEvent.RegisterLoaders event) {
         event.register(Industria.id("connected"), new NeoForgeConnectedTextureLoader());
+        event.register(Industria.id("vertical_connected"), new NeoForgeVerticalConnectedModelLoader());
     }
 
     private void modifyBakingResult(ModelEvent.ModifyBakingResult event) {
@@ -64,5 +69,9 @@ public final class IndustriaNeoForgeClient {
 
             return model;
         });
+    }
+
+    private void registerBlockStateModels(RegisterBlockStateModels event) {
+        event.registerModel(Industria.id("vertical_connected"), NeoForgeVerticalConnectedBlockStateModel.CODEC);
     }
 }

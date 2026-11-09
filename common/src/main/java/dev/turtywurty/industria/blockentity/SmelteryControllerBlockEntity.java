@@ -216,10 +216,16 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
         Set<BlockPos> emittedPositions = new HashSet<>();
         for (SmelteryChamber chamber : this.chambers) {
             BlockPos chimneyPos = chamber.chimneyPos;
-            if (chimneyPos == null || !this.level.isLoaded(chimneyPos) || emittedPositions.contains(chimneyPos))
+            if (chimneyPos == null || !serverLevel.isLoaded(chimneyPos))
                 continue;
 
-            emittedPositions.add(chimneyPos);
+            BlockPos topPos = chimneyPos;
+            while (serverLevel.isLoaded(topPos.above())
+                    && serverLevel.getBlockState(topPos.above()).is(ModBlocks.CHIMNEY.get())) {
+                topPos = topPos.above();
+            }
+
+            emittedPositions.add(topPos);
         }
 
         for (BlockPos position : emittedPositions) {

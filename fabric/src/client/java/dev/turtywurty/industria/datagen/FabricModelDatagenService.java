@@ -8,4 +8,9 @@ public final class FabricModelDatagenService implements ModelDatagenService {
     public void addModelLoader(JsonObject json, Identifier loaderId) {
         json.addProperty("fabric:type", loaderId.toString());
     }
+
+    @Override
+    public void configureBlockStateModel(JsonObject json, Identifier typeId) {
+        // Fabric installs the selector through its model-loading hook
+    }
 }

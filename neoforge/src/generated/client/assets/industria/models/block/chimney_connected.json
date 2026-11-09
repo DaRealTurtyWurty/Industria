@@ -1,0 +1,9 @@
+{
+  "loader": "industria:vertical_connected",
+  "models": {
+    "lower": "industria:block/chimney_lower",
+    "middle": "industria:block/chimney_middle",
+    "normal": "industria:block/chimney",
+    "upper": "industria:block/chimney_upper"
+  }
+}
