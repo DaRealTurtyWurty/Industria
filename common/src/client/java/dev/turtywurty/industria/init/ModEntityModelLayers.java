@@ -9,6 +9,8 @@ import dev.turtywurty.turtymultiloader.client.registration.ClientRegistrations;
 
 public class ModEntityModelLayers {
     public static void init() {
+        ClientRegistrations.registerModelLayer(AlloyFurnaceModel.LAYER_LOCATION, AlloyFurnaceModel::createBodyLayer);
+        ClientRegistrations.registerModelLayer(AlloyFurnaceModel.ITEM_LAYER_LOCATION, AlloyFurnaceModel::createItemLayer);
         ClientRegistrations.registerModelLayer(CrusherModel.LAYER_LOCATION, CrusherModel::getTexturedModelData);
         ClientRegistrations.registerModelLayer(AdvancedSolarPanelModel.LAYER_LOCATION,
             AdvancedSolarPanelModel::createMainLayer);

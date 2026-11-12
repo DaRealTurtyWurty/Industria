@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "industria:block/alloy_furnace"
+    "type": "minecraft:special",
+    "base": "industria:item/alloy_furnace",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:alloy_furnace",
+        "name": "item"
+      },
+      "texture": "industria:textures/block/alloy_furnace.png"
+    }
   }
 }

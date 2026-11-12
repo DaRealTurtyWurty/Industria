@@ -651,7 +651,11 @@ public final class IndustriaModels {
         // Bronze
         blockStateModelGenerator.createTrivialCube(ModBlocks.BRONZE_BLOCK.get());
 
-        blockStateModelGenerator.createFurnace(ModBlocks.ALLOY_FURNACE.get(), TexturedModel.ORIENTABLE_ONLY_TOP);
+        ModelTemplates.PARTICLE_ONLY.create(ModBlocks.ALLOY_FURNACE.get(),
+                new TextureMapping().put(TextureSlot.PARTICLE, new Material(Industria.id("block/firebrick"), false)),
+                blockStateModelGenerator.modelOutput);
+        blockStateModelGenerator.blockStateOutput.accept(MultiVariantGenerator.dispatch(
+                ModBlocks.ALLOY_FURNACE.get(), BlockModelGenerators.plainVariant(Industria.id("block/alloy_furnace"))));
         blockStateModelGenerator.createFurnace(ModBlocks.THERMAL_GENERATOR.get(), TexturedModel.ORIENTABLE_ONLY_TOP);
         createBattery(blockStateModelGenerator, ModBlocks.BASIC_BATTERY.get());
         createBattery(blockStateModelGenerator, ModBlocks.ADVANCED_BATTERY.get());
@@ -991,6 +995,16 @@ public final class IndustriaModels {
                         AdvancedSolarPanelModel.TEXTURE_LOCATION),
                 BuiltinEntityModelBuilder.defaultBlock());
 
+        generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.ALLOY_FURNACE.get(),
+                new IndustriaBlockEntityItemRenderer.Unbaked(AlloyFurnaceModel.ITEM_LAYER_LOCATION,
+                        AlloyFurnaceModel.TEXTURE_LOCATION),
+                BuiltinEntityModelBuilder.defaultBlock()
+                        .copyModifyAll(displaySettings -> displaySettings.setScale(0.25f, 0.25f, 0.25f))
+                        .copyModifyGui(displaySettings -> {
+                            displaySettings.setTranslation(0, -2, 0);
+                            displaySettings.setScale(0.3f, 0.3f, 0.3f);
+                        }));
+
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.WIND_TURBINE.get(),
                 new IndustriaBlockEntityItemRenderer.Unbaked(WindTurbineModel.LAYER_LOCATION,
                         WindTurbineModel.TEXTURE_LOCATION),
@@ -1166,6 +1180,7 @@ public final class IndustriaModels {
                 ModWoodSets.RUBBER.chestBoatItem().get());
 
         final Set<Item> simpleBlockItemExclusionList = Set.of(
+                ModBlocks.ALLOY_FURNACE.get().asItem(),
                 ModBlocks.ADVANCED_BATTERY.get().asItem(),
                 ModBlocks.ADVANCED_SOLAR_PANEL.get().asItem(),
                 ModBlocks.ARC_FURNACE.get().asItem(),

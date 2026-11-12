@@ -20,12 +20,14 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -41,7 +43,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
-public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity
+public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
     implements
         SyncableTickableBlockEntity,
         BlockEntityWithGui<BlockPosPayload>,
@@ -85,7 +87,17 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity
     public AlloyFurnaceBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.ALLOY_FURNACE.get(), ModBlockEntityTypes.ALLOY_FURNACE.get(), pos, state);
 
-        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.EAST);
+        this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1) {
+            @Override
+            public void startOpen(ContainerUser user) {
+                AlloyFurnaceBlockEntity.this.startOpen(user);
+            }
+
+            @Override
+            public void stopOpen(ContainerUser user) {
+                AlloyFurnaceBlockEntity.this.stopOpen(user);
+            }
+        }, Direction.EAST);
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
         this.wrappedContainerStorage
             .addInventory(new PredicateSimpleInventory(this, 1, (itemStack, slot) -> isFuel(itemStack)), Direction.UP);
@@ -94,6 +106,47 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity
 
     public boolean isFuel(ItemStack stack) {
         return FuelUtils.isFuel(stack);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        SyncableTickableBlockEntity.super.tick();
+    }
+
+    @Override
+    protected float getDoorAnimationSpeed() {
+        return 1.0F / 20.0F;
+    }
+
+    @Override
+    public void onClientTick() {
+        if (this.level == null || !getBlockState().getValue(BlockStateProperties.LIT))
+            return;
+
+        float openness = getOpenNess(1.0F);
+        if (openness < 0.25F)
+            return;
+
+        Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+        Direction right = facing.getClockWise();
+        var random = this.level.getRandom();
+        double closed = 1.0 - openness;
+        double angle = (1.0 - closed * closed * closed) * Math.PI / 2.0;
+        double minHeight = 0.75 + Math.cos(angle) * 0.875 + 0.03;
+
+        for (int i = 0; i < 1 + (int) (openness * 3); i++) {
+            double sideOffset = 0.5 + (random.nextDouble() - 0.5) * 0.9;
+            double outwardSpeed = 0.06 + random.nextDouble() * 0.1;
+            double sidewaysSpeed = (random.nextDouble() - 0.5) * 0.04;
+            this.level.addParticle(ParticleTypes.FLAME,
+                this.worldPosition.getX() + 0.5 + facing.getStepX() * 0.55 + right.getStepX() * sideOffset,
+                this.worldPosition.getY() + minHeight + random.nextDouble() * (1.55 - minHeight),
+                this.worldPosition.getZ() + 0.5 + facing.getStepZ() * 0.55 + right.getStepZ() * sideOffset,
+                facing.getStepX() * outwardSpeed + right.getStepX() * sidewaysSpeed,
+                0.015 + random.nextDouble() * 0.04,
+                facing.getStepZ() * outwardSpeed + right.getStepZ() * sidewaysSpeed);
+        }
     }
 
     public int getFuelTime(ItemStack stack) {
@@ -270,6 +323,15 @@ public class AlloyFurnaceBlockEntity extends IndustriaBlockEntity
     @Override
     public WrappedContainerStorage<SimpleContainer> getWrappedContainerStorage() {
         return wrappedContainerStorage;
+    }
+
+    @Override
+    protected void dropContentsOnBreak() {
+        super.dropContentsOnBreak();
+        if (this.level != null && !this.bufferedStack.isEmpty()) {
+            Block.popResource(this.level, this.worldPosition, this.bufferedStack);
+            this.bufferedStack = ItemStack.EMPTY;
+        }
     }
 
     @Override

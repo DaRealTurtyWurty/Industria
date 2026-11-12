@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "industria:alloy_furnace",
     "industria:smeltery_hearth"
   ]
 }

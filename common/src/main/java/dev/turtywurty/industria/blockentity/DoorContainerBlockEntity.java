@@ -7,11 +7,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.ChestLidController;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +19,9 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity, LidBlockEntity {
     private static final int EVENT_SET_OPEN_COUNT = 1;
 
-    private final ChestLidController doorController = new ChestLidController();
+    private boolean doorOpen;
+    private float doorOpenness;
+    private float previousDoorOpenness;
     private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
         @Override
         protected void onOpen(Level level, BlockPos pos, BlockState state) {
@@ -69,14 +71,20 @@ public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity impl
     @Override
     public void tick() {
         if (this.level != null && this.level.isClientSide()) {
-            this.doorController.tickLid();
+            this.previousDoorOpenness = this.doorOpenness;
+            float step = getDoorAnimationSpeed();
+            this.doorOpenness = Mth.clamp(this.doorOpenness + (this.doorOpen ? step : -step), 0.0F, 1.0F);
         }
+    }
+
+    protected float getDoorAnimationSpeed() {
+        return 0.1F;
     }
 
     @Override
     public boolean triggerEvent(int id, int data) {
         if (id == EVENT_SET_OPEN_COUNT) {
-            this.doorController.shouldBeOpen(data > 0);
+            this.doorOpen = data > 0;
             return true;
         }
 
@@ -85,7 +93,7 @@ public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity impl
 
     @Override
     public float getOpenNess(float partialTick) {
-        return this.doorController.getOpenness(partialTick);
+        return Mth.lerp(partialTick, this.previousDoorOpenness, this.doorOpenness);
     }
 
     private static void playDoorSound(Level level, BlockPos pos, SoundEvent sound) {

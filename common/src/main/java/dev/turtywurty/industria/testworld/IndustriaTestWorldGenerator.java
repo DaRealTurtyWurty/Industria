@@ -23,6 +23,11 @@ public final class IndustriaTestWorldGenerator {
     }
 
     public static void generate(TestWorldContext context) {
+        if (Boolean.getBoolean("industria.test.alloyFurnace.validation") && context.server().isDedicatedServer()) {
+            AlloyFurnaceValidationTestWorld.start(context);
+            return;
+        }
+
         if (Boolean.getBoolean("industria.test.smeltery.validation") && context.server().isDedicatedServer()) {
             SmelteryValidationTestWorld.start(context);
             return;
@@ -75,6 +80,7 @@ public final class IndustriaTestWorldGenerator {
         ClarifierTestWorld.connectMachines(clarifierContext, digesterContext);
         CrystallizerTestWorld.connectMachines(crystallizerContext, clarifierContext, poolContext);
         SmelteryTestWorld.place(context.at(8, 0, -10));
+        AlloyFurnaceTestWorld.place(context.at(16, 0, -10));
     }
 
     private static void connectMachines(

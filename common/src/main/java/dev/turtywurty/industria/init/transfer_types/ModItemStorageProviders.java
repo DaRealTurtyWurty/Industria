@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.industria.blockentity.*;
+import dev.turtywurty.industria.block.AlloyFurnaceBlock;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEntity;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
@@ -15,8 +16,10 @@ public final class ModItemStorageProviders {
 
     public static void init() {
         TransferService transfers = TransferService.get();
-        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.ALLOY_FURNACE,
-            AlloyFurnaceBlockEntity::getInventoryProvider);
+        transfers.registerBlockProvider(StorageKeys.ITEM, (level, pos, state, _, side) -> {
+            var controller = level.getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
+            return controller instanceof AlloyFurnaceBlockEntity furnace ? furnace.getInventoryProvider(side) : null;
+        }, ModBlocks.ALLOY_FURNACE);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.THERMAL_GENERATOR,
             ThermalGeneratorBlockEntity::getInventoryProvider);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.BATTERY,

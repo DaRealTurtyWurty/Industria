@@ -5,6 +5,8 @@ import dev.turtywurty.turtymultiloader.client.registration.ClientRegistrations;
 
 public class ModBlockEntityRenderers {
     public static void init() {
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.ALLOY_FURNACE,
+            AlloyFurnaceBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.SOLAR_PANEL,
             AdvancedSolarPanelBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.CRUSHER, CrusherBlockEntityRenderer::new);
