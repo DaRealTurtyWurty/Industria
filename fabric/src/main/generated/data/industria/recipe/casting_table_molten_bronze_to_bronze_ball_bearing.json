@@ -1,0 +1,17 @@
+{
+  "type": "industria:casting",
+  "block_type": "table",
+  "cooling_time": 100,
+  "input_fluid": {
+    "amount": 1125,
+    "variant": {
+      "id": "industria:molten_bronze"
+    }
+  },
+  "mold": "industria:ball_bearing",
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:bronze_ball_bearing"
+  }
+}
