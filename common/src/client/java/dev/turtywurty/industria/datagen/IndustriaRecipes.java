@@ -788,6 +788,10 @@ public final class IndustriaRecipes {
                         case ROD -> FluidAmounts.INGOT / 2;
                         case WIRE -> FluidAmounts.INGOT / 4;
                         case INGOT, PLATE, POWDER -> FluidAmounts.INGOT;
+                        case COIL -> FluidAmounts.INGOT;
+                        case BALL_BEARING -> FluidAmounts.INGOT / 8;
+                        case GEAR -> FluidAmounts.INGOT * 3 / 2;
+                        case MACHINE_FRAME -> FluidAmounts.INGOT * 4;
                     };
                     var fluid = new FluidStack(
                             ResourceTypes.FLUID.of(metal.moltenFluid().still().holder()), amount);
@@ -799,6 +803,9 @@ public final class IndustriaRecipes {
                     Identifier moldId = switch (form) {
                         case INGOT -> MoldPatterns.INGOT.id();
                         case ROD -> MoldPatterns.ROD.id();
+                        case BALL_BEARING -> MoldPatterns.BALL_BEARING.id();
+                        case GEAR -> MoldPatterns.GEAR.id();
+                        case PLATE -> MoldPatterns.PLATE.id();
                         default -> null;
                     };
                     if (moldId != null) {

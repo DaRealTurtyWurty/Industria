@@ -6,5 +6,9 @@ public enum MetalForm {
     PLATE,
     POWDER,
     ROD,
-    WIRE;
+    WIRE,
+    COIL,
+    BALL_BEARING,
+    GEAR,
+    MACHINE_FRAME
 }

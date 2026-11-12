@@ -123,6 +123,8 @@ public class ModItems {
     // Steel
     public static final RegistrationHandle<Item, Item> STEEL_INGOT = register("steel_ingot");
     public static final RegistrationHandle<Item, Item> STEEL_NUGGET = register("steel_nugget");
+    public static final RegistrationHandle<Item, Item> STEEL_MACHINE_FRAME = register("steel_machine_frame");
+    public static final RegistrationHandle<Item, Item> STEEL_BALL_BEARING = register("steel_ball_bearing");
 
     // Sodium
     public static final RegistrationHandle<Item, Item> SODIUM_HYDROXIDE = register("sodium_hydroxide");
@@ -131,6 +133,13 @@ public class ModItems {
     // Bronze
     public static final RegistrationHandle<Item, Item> BRONZE_INGOT = register("bronze_ingot");
     public static final RegistrationHandle<Item, Item> BRONZE_NUGGET = register("bronze_nugget");
+    public static final RegistrationHandle<Item, Item> BRONZE_BALL_BEARING = register("bronze_ball_bearing");
+    public static final RegistrationHandle<Item, Item> BRONZE_GEAR = register("bronze_gear");
+
+    // Copper
+    public static final RegistrationHandle<Item, Item> COPPER_ROD = register("copper_rod");
+    public static final RegistrationHandle<Item, Item> COPPER_WIRE = register("copper_wire");
+    public static final RegistrationHandle<Item, Item> COPPER_COIL = register("copper_coil");
 
     // Miscellaneous
     public static final RegistrationHandle<Item, Item> RED_MUD = register("red_mud");
@@ -149,6 +158,8 @@ public class ModItems {
         settings -> settings.craftRemainder(Items.GLASS_BOTTLE)
             .stacksTo(16)
             .food(FoodList.FORMIC_ACID_FOOD, FoodList.FORMIC_ACID_CONSUMABLE));
+    public static final RegistrationHandle<Item, Item> WIRE_DRAWPLATE = register("wire_drawplate");
+    public static final RegistrationHandle<Item, Item> ELECTRIC_MOTOR = register("electric_motor");
 
     // Casting/Smeltery
     public static final RegistrationHandle<Item, Item> BLANK_SAND_CAST = register("blank_sand_cast");

@@ -38,7 +38,46 @@ public final class MoldPatterns {
                 new MoldPoint(0.6f, 0.85f),
                 new MoldPoint(0.4f, 0.85f))));
 
-    public static final List<MoldPattern> ALL = List.of(INGOT, ROD);
+    public static final MoldPattern BALL_BEARING = new MoldPattern(
+        Industria.id("ball_bearing"),
+        List.of(
+            List.of(
+                new MoldPoint(0.5f, 0.15f),
+                new MoldPoint(0.65f, 0.3f),
+                new MoldPoint(0.65f, 0.7f),
+                new MoldPoint(0.5f, 0.85f),
+                new MoldPoint(0.35f, 0.7f),
+                new MoldPoint(0.35f, 0.3f))));
+
+    public static final MoldPattern GEAR = new MoldPattern(
+        Industria.id("gear"),
+        List.of(
+            List.of(
+                new MoldPoint(0.5f, 0.15f),
+                new MoldPoint(0.65f, 0.3f),
+                new MoldPoint(0.85f, 0.3f),
+                new MoldPoint(0.85f, 0.5f),
+                new MoldPoint(0.65f, 0.7f),
+                new MoldPoint(0.85f, 0.7f),
+                new MoldPoint(0.85f, 0.85f),
+                new MoldPoint(0.5f, 0.85f),
+                new MoldPoint(0.15f, 0.85f),
+                new MoldPoint(0.15f, 0.7f),
+                new MoldPoint(0.35f, 0.7f),
+                new MoldPoint(0.15f, 0.5f),
+                new MoldPoint(0.15f, 0.3f),
+                new MoldPoint(0.35f, 0.3f))));
+
+    public static final MoldPattern PLATE = new MoldPattern(
+        Industria.id("plate"),
+        List.of(
+            List.of(
+                new MoldPoint(0.15f, 0.15f),
+                new MoldPoint(0.85f, 0.15f),
+                new MoldPoint(0.85f, 0.85f),
+                new MoldPoint(0.15f, 0.85f))));
+
+    public static final List<MoldPattern> ALL = List.of(INGOT, ROD, BALL_BEARING, GEAR, PLATE);
 
     public static Optional<MoldPattern> find(Identifier id) {
         return ALL.stream().filter(pattern -> pattern.id().equals(id)).findFirst();

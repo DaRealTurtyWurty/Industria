@@ -5,13 +5,14 @@ import dev.turtywurty.industria.fluid.FluidRegistryObject;
 import dev.turtywurty.industria.metal.MetalDefinition;
 import dev.turtywurty.industria.metal.MetalForm;
 import dev.turtywurty.industria.metal.MetalRegistry;
-import java.util.Map;
-import java.util.function.Supplier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
+import java.util.function.Supplier;
 
 public final class ModMetals {
     private ModMetals() {
@@ -114,7 +115,9 @@ public final class ModMetals {
         ModFluids.MOLTEN_BRONZE,
         Map.of(
             MetalForm.INGOT, ModItems.BRONZE_INGOT,
-            MetalForm.NUGGET, ModItems.BRONZE_NUGGET));
+            MetalForm.NUGGET, ModItems.BRONZE_NUGGET,
+            MetalForm.BALL_BEARING, ModItems.BRONZE_BALL_BEARING,
+            MetalForm.GEAR, ModItems.BRONZE_GEAR));
 
     public static final MetalDefinition STEEL = register("steel",
         1500f,
@@ -122,7 +125,9 @@ public final class ModMetals {
         ModFluids.MOLTEN_STEEL,
         Map.of(
             MetalForm.INGOT, ModItems.STEEL_INGOT,
-            MetalForm.NUGGET, ModItems.STEEL_NUGGET));
+            MetalForm.NUGGET, ModItems.STEEL_NUGGET,
+            MetalForm.BALL_BEARING, ModItems.STEEL_BALL_BEARING,
+            MetalForm.MACHINE_FRAME, ModItems.STEEL_MACHINE_FRAME));
 
     public static final MetalDefinition IRON = register("iron",
         1538f,
@@ -138,7 +143,10 @@ public final class ModMetals {
         ModFluids.MOLTEN_COPPER,
         Map.of(
             MetalForm.INGOT, () -> Items.COPPER_INGOT,
-            MetalForm.NUGGET, () -> Items.COPPER_NUGGET));
+            MetalForm.NUGGET, () -> Items.COPPER_NUGGET,
+            MetalForm.ROD, ModItems.COPPER_ROD,
+            MetalForm.WIRE, ModItems.COPPER_WIRE,
+            MetalForm.COIL, ModItems.COPPER_COIL));
 
     public static final MetalDefinition GOLD = register("gold",
         1064.18f,
