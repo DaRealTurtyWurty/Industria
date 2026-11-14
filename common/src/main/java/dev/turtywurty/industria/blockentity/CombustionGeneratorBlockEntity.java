@@ -70,8 +70,8 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        SyncingEnergyStorage energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
+        SyncingSimpleInventory inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         return List.of(energy, inventory);
     }
 

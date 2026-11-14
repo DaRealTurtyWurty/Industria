@@ -55,6 +55,7 @@ public class ConveyorNetwork {
 
             return network;
         }));
+
     public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorNetwork> STREAM_CODEC = StreamCodec.composite(
         UUIDUtil.STREAM_CODEC, ConveyorNetwork::getId,
         ExtraStreamCodecs.listOf(BlockPos.STREAM_CODEC), ConveyorNetwork::getConveyors,
@@ -141,6 +142,7 @@ public class ConveyorNetwork {
             entry.getValue().values().removeIf(pos::equals);
             return entry.getValue().isEmpty();
         });
+
         onConnectedBlocksChanged(level);
     }
 
@@ -175,6 +177,7 @@ public class ConveyorNetwork {
                 this.connectedBlocks.remove(entry.getKey());
             }
         }
+
         onConnectedBlocksChanged(level);
     }
 

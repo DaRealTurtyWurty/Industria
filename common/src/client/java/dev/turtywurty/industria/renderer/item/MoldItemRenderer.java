@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class MoldItemRenderer implements SpecialModelRenderer<MoldItemRenderer.RenderData> {
+public class MoldItemRenderer implements SpecialModelRenderer<RenderData> {
     private static final Map<RenderData, Identifier> TEXTURES = new HashMap<>();
     private static int nextTextureId;
 
     @Override
     public void submit(
-        MoldItemRenderer.@Nullable RenderData renderData,
+        RenderData renderData,
         PoseStack poseStack,
         SubmitNodeCollector submitNodeCollector,
         int light,

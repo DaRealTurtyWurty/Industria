@@ -260,6 +260,7 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
             case TURN_RIGHT -> ConveyorShape.TURN_LEFT;
             default -> state.getValue(SHAPE);
         };
+
         return state.setValue(FACING, mirroredFacing).setValue(SHAPE, mirroredShape);
     }
 
@@ -464,6 +465,7 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         }
 
         // Check for solid blocks in the conveyor's space.
+
         for (BlockPos checkPos : BlockPos.betweenClosed(pos, pos.above())) {
             if (level.getBlockState(checkPos).isSolidRender())
                 return false;
@@ -485,11 +487,13 @@ public class BasicConveyorBlock extends BaseConveyorBlock {
         }
 
         // Upstream scoring: Prefer receiving from other conveyors.
+
         if (connectsFromConveyorOutput(level, input.expectedSourcePos(), pos)) {
             score += 80;
         }
 
         // Small preference for straight shapes for aesthetic reasons.
+
         if (shape == ConveyorShape.STRAIGHT) {
             score += 2;
         }

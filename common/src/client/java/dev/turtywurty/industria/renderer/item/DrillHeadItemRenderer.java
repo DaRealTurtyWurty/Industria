@@ -74,7 +74,7 @@ public class DrillHeadItemRenderer implements SpecialModelRenderer<DrillRenderSt
     }
 
     public record Unbaked() implements SpecialModelRenderer.Unbaked<DrillRenderState> {
-        public static final MapCodec<Unbaked> CODEC = MapCodec.unit(new DrillHeadItemRenderer.Unbaked());
+        public static final MapCodec<Unbaked> CODEC = MapCodec.unit(new Unbaked());
 
         @Override
         public SpecialModelRenderer<DrillRenderState> bake(BakingContext context) {

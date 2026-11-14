@@ -30,6 +30,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 
 public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRenderers.ConveyorSpecialRenderer {
     public static final ContainmentConveyorSpecialRenderer INSTANCE = new ContainmentConveyorSpecialRenderer();
@@ -169,7 +170,9 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
         double maxZ = Double.NEGATIVE_INFINITY;
 
         double[] xs = {entityBoundingBox.minX, entityBoundingBox.maxX};
+
         double[] ys = {entityBoundingBox.minY, entityBoundingBox.maxY};
+
         double[] zs = {entityBoundingBox.minZ, entityBoundingBox.maxZ};
 
         for (double x : xs) {
@@ -191,7 +194,7 @@ public class ContainmentConveyorSpecialRenderer implements ModConveyorSpecialRen
 
     private void renderMobJar(SubmitNodeCollector nodeCollector, PoseStack poseStack, int lightCoords) {
         Minecraft minecraft = Minecraft.getInstance();
-        var modelResolver = minecraft.getItemModelResolver();
+        ItemModelResolver modelResolver = minecraft.getItemModelResolver();
         var itemState = new ItemStackRenderState();
 
         ItemStack jarStack = ModItems.EMPTY_MOB_JAR.get().getDefaultInstance();

@@ -15,9 +15,9 @@ import java.util.function.Function;
 
 public final class IndustriaBlockLootTables implements LootTableSubProvider {
     private final LootBuilders builders;
-    private final LootTableSubProvider.Context output;
+    private final Context output;
 
-    public IndustriaBlockLootTables(LootTableSubProvider.Context registries) {
+    public IndustriaBlockLootTables(Context registries) {
         this.builders = new LootBuilders(registries);
         this.output = registries;
     }
@@ -160,7 +160,7 @@ public final class IndustriaBlockLootTables implements LootTableSubProvider {
     }
 
     private static final class LootBuilders extends BlockLootSubProvider {
-        private LootBuilders(LootTableSubProvider.Context registries) {
+        private LootBuilders(Context registries) {
             super(Set.of(), FeatureFlags.DEFAULT_FLAGS, registries);
         }
 

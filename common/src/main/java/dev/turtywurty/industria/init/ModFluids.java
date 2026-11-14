@@ -54,7 +54,7 @@ public class ModFluids {
     public static final FluidRegistryObject<?, ?> MOLTEN_CRYOLITE = registerMoltenFluid("molten_cryolite");
 
     public static FluidRegistryObject<MoltenFluid.Still, MoltenFluid.Flowing> registerMoltenFluid(String name) {
-        var fluid = registerFluid(
+        FluidRegistryObject<MoltenFluid.Still, MoltenFluid.Flowing> fluid = registerFluid(
             name,
             MoltenFluid.Still::new,
             MoltenFluid.Flowing::new);
@@ -83,7 +83,7 @@ public class ModFluids {
         AtomicReference<RegistrationHandle<Item, BucketItem>> bucketRef = new AtomicReference<>();
         AtomicReference<RegistrationHandle<Block, LiquidBlock>> blockRef = new AtomicReference<>();
 
-        var still = REGISTRIES.registerFluid(
+        RegistrationHandle<Fluid, S> still = REGISTRIES.registerFluid(
             Industria.id(name),
             () -> stillFactory.create(
                 () -> stillRef.get().get(),
@@ -92,7 +92,7 @@ public class ModFluids {
                 () -> blockRef.get().get()));
         stillRef.set(still);
 
-        var flowing = REGISTRIES.registerFluid(
+        RegistrationHandle<Fluid, F> flowing = REGISTRIES.registerFluid(
             Industria.id("flowing_" + name),
             () -> flowingFactory.create(
                 () -> stillRef.get().get(),
@@ -126,7 +126,7 @@ public class ModFluids {
     }
 
     private static final class RegisteredLiquidBlock extends LiquidBlock {
-        private RegisteredLiquidBlock(FlowingFluid fluid, BlockBehaviour.Properties properties) {
+        private RegisteredLiquidBlock(FlowingFluid fluid, Properties properties) {
             super(fluid, properties);
         }
     }

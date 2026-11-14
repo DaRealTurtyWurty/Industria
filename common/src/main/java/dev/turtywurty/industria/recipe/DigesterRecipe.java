@@ -128,7 +128,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
                 ByteBufCodecs.INT, DigesterRecipeDisplay::processTime,
                 DigesterRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<DigesterRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<DigesterRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -137,7 +137,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
         }
 
         @Override
-        public RecipeDisplay.Type<DigesterRecipeDisplay> type() {
+        public Type<DigesterRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

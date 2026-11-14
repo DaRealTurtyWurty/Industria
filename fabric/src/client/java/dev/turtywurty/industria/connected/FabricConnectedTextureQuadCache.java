@@ -35,7 +35,12 @@ public class FabricConnectedTextureQuadCache {
         apply(quad, material.sprite(), material.forceTranslucent(), tile);
     }
 
-    public void apply(MutableQuadView quad, TextureAtlasSprite sprite, boolean forceTranslucent, ConnectedTextureTile tile) {
+    public void apply(
+        MutableQuadView quad,
+        TextureAtlasSprite sprite,
+        boolean forceTranslucent,
+        ConnectedTextureTile tile
+    ) {
         long uv0 = UVPair.pack(quad.u(0), quad.v(0));
         long uv1 = UVPair.pack(quad.u(1), quad.v(1));
         long uv2 = UVPair.pack(quad.u(2), quad.v(2));
@@ -59,9 +64,12 @@ public class FabricConnectedTextureQuadCache {
     }
 
     private @Nullable SourceLayout findLayout(
-            TextureAtlasSprite sprite,
-            boolean forceTranslucent,
-            long uv0, long uv1, long uv2, long uv3
+        TextureAtlasSprite sprite,
+        boolean forceTranslucent,
+        long uv0,
+        long uv1,
+        long uv2,
+        long uv3
     ) {
         for (SourceLayout layout : this.sourceLayouts) {
             if (layout.matches(sprite, forceTranslucent, uv0, uv1, uv2, uv3))
@@ -72,9 +80,12 @@ public class FabricConnectedTextureQuadCache {
     }
 
     private @Nullable SourceLayout getOrCreateLayout(
-            TextureAtlasSprite sprite,
-            boolean forceTranslucent,
-            long uv0, long uv1, long uv2, long uv3
+        TextureAtlasSprite sprite,
+        boolean forceTranslucent,
+        long uv0,
+        long uv1,
+        long uv2,
+        long uv3
     ) {
         SourceLayout layout = findLayout(sprite, forceTranslucent, uv0, uv1, uv2, uv3);
         if (layout != null)
@@ -89,11 +100,10 @@ public class FabricConnectedTextureQuadCache {
                 return null;
 
             var newLayout = new SourceLayout(
-                    sprite,
-                    forceTranslucent,
-                    uv0, uv1, uv2, uv3,
-                    new AtomicReferenceArray<>(ConnectedTextureLayout.TILE_COUNT)
-            );
+                sprite,
+                forceTranslucent,
+                uv0, uv1, uv2, uv3,
+                new AtomicReferenceArray<>(ConnectedTextureLayout.TILE_COUNT));
 
             SourceLayout[] updated = Arrays.copyOf(this.sourceLayouts, this.sourceLayouts.length + 1);
             updated[updated.length - 1] = newLayout;
@@ -103,16 +113,16 @@ public class FabricConnectedTextureQuadCache {
     }
 
     private record PreparedQuad(
-            long uv0,
-            long uv1,
-            long uv2,
-            long uv3,
-            QuadAtlas atlas,
-            boolean animated,
-            ChunkSectionLayer chunkLayer,
-            RenderType itemRenderType,
-            RenderType itemGlintRenderType,
-            RenderType itemGlintSpecialRenderType
+        long uv0,
+        long uv1,
+        long uv2,
+        long uv3,
+        QuadAtlas atlas,
+        boolean animated,
+        ChunkSectionLayer chunkLayer,
+        RenderType itemRenderType,
+        RenderType itemGlintRenderType,
+        RenderType itemGlintSpecialRenderType
     ) {
         public void apply(MutableQuadView quad) {
             quad.uv(0, UVPair.unpackU(uv0), UVPair.unpackV(uv0));
@@ -129,36 +139,42 @@ public class FabricConnectedTextureQuadCache {
 
         public static PreparedQuad capture(QuadView quad) {
             return new PreparedQuad(
-                    UVPair.pack(quad.u(0), quad.v(0)),
-                    UVPair.pack(quad.u(1), quad.v(1)),
-                    UVPair.pack(quad.u(2), quad.v(2)),
-                    UVPair.pack(quad.u(3), quad.v(3)),
-                    quad.atlas(),
-                    quad.animated(),
-                    quad.chunkLayer(),
-                    quad.itemRenderType(),
-                    quad.itemGlintRenderType(),
-                    quad.itemGlintSpecialRenderType()
-            );
+                UVPair.pack(quad.u(0), quad.v(0)),
+                UVPair.pack(quad.u(1), quad.v(1)),
+                UVPair.pack(quad.u(2), quad.v(2)),
+                UVPair.pack(quad.u(3), quad.v(3)),
+                quad.atlas(),
+                quad.animated(),
+                quad.chunkLayer(),
+                quad.itemRenderType(),
+                quad.itemGlintRenderType(),
+                quad.itemGlintSpecialRenderType());
         }
     }
 
     private record SourceLayout(
+        TextureAtlasSprite sprite,
+        boolean forceTranslucent,
+        long uv0,
+        long uv1,
+        long uv2,
+        long uv3,
+        AtomicReferenceArray<PreparedQuad> variants
+    ) {
+        public boolean matches(
             TextureAtlasSprite sprite,
             boolean forceTranslucent,
             long uv0,
             long uv1,
             long uv2,
-            long uv3,
-            AtomicReferenceArray<PreparedQuad> variants
-    ) {
-        public boolean matches(TextureAtlasSprite sprite, boolean forceTranslucent, long uv0, long uv1, long uv2, long uv3) {
+            long uv3
+        ) {
             return this.sprite == sprite &&
-                    this.forceTranslucent == forceTranslucent &&
-                    this.uv0 == uv0 &&
-                    this.uv1 == uv1 &&
-                    this.uv2 == uv2 &&
-                    this.uv3 == uv3;
+                this.forceTranslucent == forceTranslucent &&
+                this.uv0 == uv0 &&
+                this.uv1 == uv1 &&
+                this.uv2 == uv2 &&
+                this.uv3 == uv3;
         }
     }
 }

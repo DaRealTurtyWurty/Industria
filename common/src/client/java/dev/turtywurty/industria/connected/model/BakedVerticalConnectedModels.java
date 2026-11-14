@@ -16,10 +16,10 @@ import java.util.Objects;
 import java.util.Set;
 
 public record BakedVerticalConnectedModels(
-        BlockStateModel normal,
-        BlockStateModel lower,
-        BlockStateModel middle,
-        BlockStateModel upper
+    BlockStateModel normal,
+    BlockStateModel lower,
+    BlockStateModel middle,
+    BlockStateModel upper
 ) {
     public BakedVerticalConnectedModels {
         Objects.requireNonNull(normal, "normal cannot be null");
@@ -38,10 +38,10 @@ public record BakedVerticalConnectedModels(
     }
 
     public BlockStateModel select(
-            BlockGetter level,
-            BlockPos pos,
-            BlockState state,
-            Set<Block> additionalConnections
+        BlockGetter level,
+        BlockPos pos,
+        BlockState state,
+        Set<Block> additionalConnections
     ) {
         var neighbourhood = new ConnectedTextureNeighborhood(level, pos, state, additionalConnections);
         boolean above = neighbourhood.isConnected(Direction.UP);
@@ -53,11 +53,10 @@ public record BakedVerticalConnectedModels(
 
     public static BakedVerticalConnectedModels bake(ModelBaker baker, VerticalConnectedModelSettings settings) {
         return new BakedVerticalConnectedModels(
-                bakeModel(baker, settings.normal()),
-                bakeModel(baker, settings.lower()),
-                bakeModel(baker, settings.middle()),
-                bakeModel(baker, settings.upper())
-        );
+            bakeModel(baker, settings.normal()),
+            bakeModel(baker, settings.lower()),
+            bakeModel(baker, settings.middle()),
+            bakeModel(baker, settings.upper()));
     }
 
     private static BlockStateModel bakeModel(ModelBaker baker, Identifier id) {

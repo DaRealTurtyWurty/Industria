@@ -84,6 +84,7 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
             return 1;
         }
     };
+
     private boolean isFirstRead = true;
     private ItemStack overflowStack = ItemStack.EMPTY;
 
@@ -133,6 +134,7 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
                 updateHandlers(serverWorld);
             }
         };
+
         this.wrappedContainerStorage.addInventory(inputInventory, Direction.UP);
 
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.DOWN);
@@ -204,7 +206,8 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
             view.putString("SelectedRecipe", this.selectedRecipe.identifier().toString());
         }
 
-        var availableRecipes = view.list("AvailableRecipes", RECIPE_CODEC);
+        ValueOutput.TypedOutputList<ResourceKey<Recipe<?>>> availableRecipes = view.list("AvailableRecipes",
+            RECIPE_CODEC);
         this.availableRecipes.forEach(availableRecipes::add);
 
         view.putInt("SelectedRecipeIndex", this.selectedRecipeIndex);
@@ -222,7 +225,7 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
         this.selectedRecipe = getRecipeKey(Objects.requireNonNull(view.getStringOr("SelectedRecipe", "")));
 
         this.availableRecipes.clear();
-        for (var recipe : view.listOrEmpty("AvailableRecipes", RECIPE_CODEC)) {
+        for (ResourceKey<Recipe<?>> recipe : view.listOrEmpty("AvailableRecipes", RECIPE_CODEC)) {
             this.availableRecipes.add(recipe);
         }
 
@@ -238,9 +241,9 @@ public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBloc
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var inputInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
-        var outputInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
-        var energyStorage = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        SyncingSimpleInventory inputInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        SyncingSimpleInventory outputInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
+        SyncingEnergyStorage energyStorage = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         return List.of(inputInventory, outputInventory, energyStorage);
     }
 

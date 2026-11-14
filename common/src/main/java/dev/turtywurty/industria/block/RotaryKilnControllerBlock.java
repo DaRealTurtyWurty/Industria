@@ -113,7 +113,7 @@ public class RotaryKilnControllerBlock extends IndustriaBlock {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             VoxelShape[] rotatedShapes = new VoxelShape[16];
             for (int i = 0; i < segments.length; i++) {
-                rotatedShapes[i] = IndustriaBlock.BlockProperties.calculateShape(direction, segments[i]);
+                rotatedShapes[i] = BlockProperties.calculateShape(direction, segments[i]);
             }
 
             map.put(direction, rotatedShapes);

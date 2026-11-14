@@ -252,11 +252,13 @@ public class ScreenUtils {
                         texWidth, texHeight);
                 }
             }
+
             ScreenUtils.drawTexture(context, texture, rightStart, startY + y, u2, v1, sliceSize, drawHeight, texWidth,
                 texHeight);
         }
 
         // Bottom row
+
         ScreenUtils.drawTexture(context, texture, startX, bottomStart, u0, v2, sliceSize, sliceSize, texWidth,
             texHeight);
         for (int x = sliceSize; x < rightStart - startX; x += sliceSize) {
@@ -264,6 +266,7 @@ public class ScreenUtils {
             ScreenUtils.drawTexture(context, texture, startX + x, bottomStart, u1, v2, drawWidth, sliceSize, texWidth,
                 texHeight);
         }
+
         ScreenUtils.drawTexture(context, texture, rightStart, bottomStart, u2, v2, sliceSize, sliceSize, texWidth,
             texHeight);
     }

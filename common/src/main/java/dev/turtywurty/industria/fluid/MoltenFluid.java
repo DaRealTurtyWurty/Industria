@@ -58,6 +58,7 @@ public abstract class MoltenFluid extends IndustriaFluid {
                         }
                     } else if (blockState.isSolid())
                         return;
+
                 }
             } else {
                 for (int k = 0; k < 2; ++k) {
@@ -70,7 +71,6 @@ public abstract class MoltenFluid extends IndustriaFluid {
                     }
                 }
             }
-
         }
     }
 

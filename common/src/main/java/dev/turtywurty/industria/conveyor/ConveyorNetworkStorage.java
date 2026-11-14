@@ -33,6 +33,7 @@ public class ConveyorNetworkStorage {
             storage.storages.putAll(networks);
             return storage;
         }));
+
     public static final StreamCodec<RegistryFriendlyByteBuf, ConveyorNetworkStorage> STREAM_CODEC = StreamCodec
         .composite(
             STORAGE_MAP_STREAM_CODEC, ConveyorNetworkStorage::getStorages,

@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jetbrains.annotations.Nullable;
 
 public class RotaryKilnBlockItem extends BlockItem {
-    public RotaryKilnBlockItem(Item.Properties settings) {
+    public RotaryKilnBlockItem(Properties settings) {
         super(ModBlocks.ROTARY_KILN_CONTROLLER.get(), settings);
     }
 

@@ -31,13 +31,25 @@ public class FabricVerticalConnectedModel extends WrapperBlockStateModel {
     }
 
     @Override
-    public void emitQuads(QuadEmitter emitter, BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, Predicate<@Nullable Direction> cullTest) {
+    public void emitQuads(
+        QuadEmitter emitter,
+        BlockAndTintGetter level,
+        BlockPos pos,
+        BlockState state,
+        RandomSource random,
+        Predicate<@Nullable Direction> cullTest
+    ) {
         BlockStateModel selected = select(level, pos, state);
         selected.emitQuads(emitter, level, pos, state, random, cullTest);
     }
 
     @Override
-    public @Nullable Object createGeometryKey(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random) {
+    public @Nullable Object createGeometryKey(
+        BlockAndTintGetter level,
+        BlockPos pos,
+        BlockState state,
+        RandomSource random
+    ) {
         return select(level, pos, state).createGeometryKey(level, pos, state, random);
     }
 
@@ -47,12 +59,23 @@ public class FabricVerticalConnectedModel extends WrapperBlockStateModel {
     }
 
     @Override
-    public @BakedQuad.MaterialFlags int materialFlags(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random) {
+    public @BakedQuad.MaterialFlags int materialFlags(
+        BlockAndTintGetter level,
+        BlockPos pos,
+        BlockState state,
+        RandomSource random
+    ) {
         return select(level, pos, state).materialFlags(level, pos, state, random);
     }
 
     @Override
-    public boolean hasMaterialFlag(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, @BakedQuad.MaterialFlags int flag) {
+    public boolean hasMaterialFlag(
+        BlockAndTintGetter level,
+        BlockPos pos,
+        BlockState state,
+        RandomSource random,
+        @BakedQuad.MaterialFlags int flag
+    ) {
         return select(level, pos, state).hasMaterialFlag(level, pos, state, random, flag);
     }
 }

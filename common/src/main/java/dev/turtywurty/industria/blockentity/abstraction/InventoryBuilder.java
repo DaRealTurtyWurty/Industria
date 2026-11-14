@@ -77,7 +77,7 @@ public class InventoryBuilder {
     }
 
     public IndustriaSimpleInventory build() {
-        var inventory = new IndustriaSimpleInventory(this.size);
+        IndustriaSimpleInventory inventory = new IndustriaSimpleInventory(this.size);
         if (this.stacks != null) {
             for (int index = 0; index < this.stacks.length; index++) {
                 inventory.setItem(index, this.stacks[index]);

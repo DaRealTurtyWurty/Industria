@@ -80,13 +80,12 @@ public class NeoForgeConnectedTextureQuadCache {
         }
 
         return new BakedQuad(
-                quad.position0(), quad.position1(), quad.position2(), quad.position3(),
-                packedUVs[0], packedUVs[1], packedUVs[2], packedUVs[3],
-                quad.direction(),
-                remapMaterialInfo(quad.materialInfo(), packedUVs),
-                quad.bakedNormals(),
-                quad.bakedColors()
-        );
+            quad.position0(), quad.position1(), quad.position2(), quad.position3(),
+            packedUVs[0], packedUVs[1], packedUVs[2], packedUVs[3],
+            quad.direction(),
+            remapMaterialInfo(quad.materialInfo(), packedUVs),
+            quad.bakedNormals(),
+            quad.bakedColors());
     }
 
     private static Transparency computeTransparency(TextureAtlasSprite sprite, long[] packedUVs) {
@@ -114,19 +113,17 @@ public class NeoForgeConnectedTextureQuadCache {
         return sprite.contents().computeTransparency(minU, minV, maxU, maxV);
     }
 
-
     private static BakedQuad.MaterialInfo remapMaterialInfo(BakedQuad.MaterialInfo original, long[] packedUVs) {
         if (original.layer().translucent())
             return original;
 
         Transparency transparency = computeTransparency(original.sprite(), packedUVs);
         return BakedQuad.MaterialInfo.of(
-                new Material.Baked(original.sprite(), false),
-                transparency,
-                original.tintIndex(),
-                original.shadeDirectionOverride(),
-                original.lightEmission(),
-                original.ambientOcclusion()
-        );
+            new Material.Baked(original.sprite(), false),
+            transparency,
+            original.tintIndex(),
+            original.shadeDirectionOverride(),
+            original.lightEmission(),
+            original.ambientOcclusion());
     }
 }

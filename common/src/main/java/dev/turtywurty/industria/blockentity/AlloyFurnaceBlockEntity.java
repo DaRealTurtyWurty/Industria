@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.RandomSource;
 
 public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
     implements
@@ -81,6 +82,7 @@ public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
             return 4;
         }
     };
+
     private ItemStack bufferedStack = ItemStack.EMPTY;
     private ResourceKey<Recipe<?>> currentRecipeId;
 
@@ -130,7 +132,7 @@ public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
 
         Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
         Direction right = facing.getClockWise();
-        var random = this.level.getRandom();
+        RandomSource random = this.level.getRandom();
         double closed = 1.0 - openness;
         double angle = (1.0 - closed * closed * closed) * Math.PI / 2.0;
         double minHeight = 0.75 + Math.cos(angle) * 0.875 + 0.03;
@@ -176,10 +178,10 @@ public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var input0 = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
-        var input1 = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
-        var fuel = (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(2);
-        var output = (OutputSimpleInventory) this.wrappedContainerStorage.getInventory(3);
+        SyncingSimpleInventory input0 = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        SyncingSimpleInventory input1 = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
+        PredicateSimpleInventory fuel = (PredicateSimpleInventory) this.wrappedContainerStorage.getInventory(2);
+        OutputSimpleInventory output = (OutputSimpleInventory) this.wrappedContainerStorage.getInventory(3);
         return List.of(input0, input1, fuel, output);
     }
 
@@ -195,6 +197,7 @@ public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
                 update();
             } else
                 return;
+
         }
 
         if (this.burnTime > 0) {
@@ -286,7 +289,7 @@ public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
             return Optional.empty();
 
         Container inventory = getInventory();
-        var recipeInventory = new RecipeSimpleInventory(inventory.getItem(INPUT_SLOT_0),
+        RecipeSimpleInventory recipeInventory = new RecipeSimpleInventory(inventory.getItem(INPUT_SLOT_0),
             inventory.getItem(INPUT_SLOT_1));
         return serverWorld.recipeAccess().getRecipeFor(ModRecipeTypes.ALLOYING.get(), recipeInventory, this.level);
     }

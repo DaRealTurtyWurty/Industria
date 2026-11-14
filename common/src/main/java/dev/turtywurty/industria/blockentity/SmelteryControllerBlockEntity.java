@@ -110,6 +110,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             this.renderSnapshot = List.copyOf(renderChambers.get());
             return;
         }
+
         this.renderSnapshot = List.of();
 
         this.structureReady = false;
@@ -221,7 +222,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
             BlockPos topPos = chimneyPos;
             while (serverLevel.isLoaded(topPos.above())
-                    && serverLevel.getBlockState(topPos.above()).is(ModBlocks.CHIMNEY.get())) {
+                && serverLevel.getBlockState(topPos.above()).is(ModBlocks.CHIMNEY.get())) {
                 topPos = topPos.above();
             }
 
@@ -728,6 +729,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                             && isControllerInWall(firstX, lastX, firstY, lastY, firstZ, lastZ))
                         || (state.is(ModBlocks.SMELTERY_GLASS.get()) && y > firstY && y < lastY))
                         continue;
+
                     shellValid = false;
                 }
             }
@@ -773,6 +775,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                 }
             }
         }
+
         return heatedBlocks.size();
     }
 
@@ -796,7 +799,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             if (chamberPositions.type() != SearchResultType.VALID)
                 continue;
 
-            var chamberBoundingBox = calculateBounds(chamberPositions.positions());
+            AABB chamberBoundingBox = calculateBounds(chamberPositions.positions());
 
             long width = (long) chamberBoundingBox.getXsize();
             long height = (long) chamberBoundingBox.getYsize();
@@ -962,7 +965,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
         for (ChamberCandidate candidate : group.candidates()) {
             long amountToKeep = Math.min(remaining, candidate.fluidCapacity());
-            var storage = new SyncingFluidStorage(this, candidate.fluidCapacity());
+            SyncingFluidStorage storage = new SyncingFluidStorage(this, candidate.fluidCapacity());
             if (amountToKeep > 0) {
                 var snapshot = new StorageSnapshot<>(List.of(
                     new StorageSnapshot.Entry<>(survivingFluid.variant(), amountToKeep)));
@@ -1139,6 +1142,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
         if (this.chambers.isEmpty())
             return;
+
         setHearthLit(false);
         for (SmelteryChamber chamber : this.chambers) {
             clearHatchLink(chamber.hatchPos);
@@ -1150,6 +1154,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             var fluid = new FluidStack(storage.getResource(), storage.getAmount());
             if (fluid.isEmpty())
                 continue;
+
             var retainedFluid = new RetainedChamberFluid(chamber.getBoundingBox(), fluid);
             this.retainedFluids.add(retainedFluid);
         }
@@ -1176,7 +1181,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 BlockPos neighborPos = currentPos.relative(direction);
                 if (visited.contains(neighborPos)
-                    || !boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5))
+                    || !boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5,
+                        neighborPos.getZ() + 0.5))
                     continue;
 
                 if (!this.level.isLoaded(neighborPos))
@@ -1309,7 +1315,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
                 BlockPos hatchPos = data.hatchPos().orElse(null);
                 List<BlockPos> outletPositions = data.outletPositions();
 
-                var storage = new SyncingFluidStorage(owner, data.capacity());
+                SyncingFluidStorage storage = new SyncingFluidStorage(owner, data.capacity());
                 var snapshot = new StorageSnapshot<>(List.of(
                     new StorageSnapshot.Entry<>(data.fluid().variant(), data.fluid().amount())));
                 if (!snapshot.apply(storage))

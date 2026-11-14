@@ -50,7 +50,7 @@ public record FluidData(
 ) {
     public static final Map<Fluid, FluidData> FLUID_DATA = new HashMap<>();
 
-    public static void registerFluidData(@NotNull Fluid fluid, @NotNull FluidData.Builder fluidData) {
+    public static void registerFluidData(@NotNull Fluid fluid, @NotNull Builder fluidData) {
         registerFluidData(fluid, fluidData.build());
     }
 

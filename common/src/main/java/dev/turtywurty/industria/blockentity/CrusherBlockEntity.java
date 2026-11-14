@@ -87,6 +87,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
             return 2;
         }
     };
+
     private ResourceKey<Recipe<?>> currentRecipeId;
 
     public CrusherBlockEntity(BlockPos pos, BlockState state) {
@@ -104,8 +105,8 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(INPUT_SLOT);
-        var output = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
+        SyncingSimpleInventory input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(INPUT_SLOT);
+        SyncingSimpleInventory output = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
         SyncingEnergyStorage energy = getEnergy();
 
         return List.of(input, output, energy);
@@ -205,6 +206,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
                 stack.setCount(1);
                 return canInput(stack);
             });
+
         if (entities.isEmpty())
             return;
 
@@ -296,7 +298,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         }
 
         if (hasItemsInBuffer()) {
-            var bufferArray = view.list("Buffer", ItemStack.CODEC);
+            ValueOutput.TypedOutputList<ItemStack> bufferArray = view.list("Buffer", ItemStack.CODEC);
             for (ItemStack stack : this.buffer) {
                 if (stack == null || stack.isEmpty())
                     continue;

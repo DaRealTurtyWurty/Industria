@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 
 public class TreeTapBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<TreeTapBlockEntity, TreeTapBlockEntityRenderer.TreeTapRenderState> {
+        IndustriaBlockEntityRenderer<TreeTapBlockEntity, TreeTapRenderState> {
     private final TreeTapModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 

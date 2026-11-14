@@ -21,10 +21,10 @@ public final class ConnectedTextureNeighborhood {
     private int connectedMask;
 
     public ConnectedTextureNeighborhood(
-            BlockGetter level,
-            BlockPos pos,
-            BlockState state,
-            Set<Block> additionalConnections
+        BlockGetter level,
+        BlockPos pos,
+        BlockState state,
+        Set<Block> additionalConnections
     ) {
         this.level = level;
         this.targetBlock = state.getBlock();
@@ -60,9 +60,8 @@ public final class ConnectedTextureNeighborhood {
 
     public boolean isConnected(Direction first, Direction second) {
         return isConnected(
-                first.getStepX() + second.getStepX(),
-                first.getStepY() + second.getStepY(),
-                first.getStepZ() + second.getStepZ()
-        );
+            first.getStepX() + second.getStepX(),
+            first.getStepY() + second.getStepY(),
+            first.getStepZ() + second.getStepZ());
     }
 }

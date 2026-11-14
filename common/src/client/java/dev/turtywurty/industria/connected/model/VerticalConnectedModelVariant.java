@@ -7,14 +7,13 @@ public enum VerticalConnectedModelVariant {
     UPPER;
 
     public static VerticalConnectedModelVariant fromConnections(boolean above, boolean below) {
-        if (above && below) {
+        if (above && below)
             return MIDDLE;
-        } else if (above) {
+        else if (above)
             return LOWER;
-        } else if (below) {
+        else if (below)
             return UPPER;
-        } else {
+        else
             return NORMAL;
-        }
     }
 }

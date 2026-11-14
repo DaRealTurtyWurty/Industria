@@ -104,6 +104,7 @@ public class ShakingTableBlockEntityRenderer
 
     // TODO: Figure out why the items start off centered in the middle of the table
     // and then move to the left side of the table when the shaking starts.
+
     private void renderItemStacks(
         ShakingTableRenderState state,
         PoseStack matrices,

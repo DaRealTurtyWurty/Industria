@@ -145,7 +145,7 @@ public record CrusherRecipe(
                 ByteBufCodecs.INT, CrusherRecipeDisplay::processTime,
                 CrusherRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<CrusherRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<CrusherRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -154,7 +154,7 @@ public record CrusherRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<CrusherRecipeDisplay> type() {
+        public Type<CrusherRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

@@ -150,7 +150,7 @@ public record DistillationTowerRecipe(
                 ByteBufCodecs.INT, DistillationTowerRecipeDisplay::energyCost,
                 DistillationTowerRecipeDisplay::new);
 
-        private static final RecipeDisplay.Type<DistillationTowerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(
+        private static final Type<DistillationTowerRecipeDisplay> SERIALIZER = new Type<>(
             CODEC, STREAM_CODEC);
 
         @Override
@@ -159,7 +159,7 @@ public record DistillationTowerRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<DistillationTowerRecipeDisplay> type() {
+        public Type<DistillationTowerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

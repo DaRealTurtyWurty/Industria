@@ -85,6 +85,7 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity
         } else if (this.containingEntityData != null) {
             writeEntityData(output, this.containingEntityData);
         }
+
         this.jarStorage.writeData(output);
     }
 

@@ -106,11 +106,13 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var drillHeadInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
-        var motorInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
-        var outputInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(2);
-        var placeableBlockInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(3);
-        var energyStorage = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        SyncingSimpleInventory drillHeadInventory = (SyncingSimpleInventory) this.wrappedContainerStorage
+            .getInventory(0);
+        SyncingSimpleInventory motorInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(1);
+        SyncingSimpleInventory outputInventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(2);
+        SyncingSimpleInventory placeableBlockInventory = (SyncingSimpleInventory) this.wrappedContainerStorage
+            .getInventory(3);
+        SyncingEnergyStorage energyStorage = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         return List.of(drillHeadInventory, motorInventory, outputInventory, placeableBlockInventory, energyStorage);
     }
 
@@ -253,7 +255,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity
         view.store("OverflowMethod", OverflowMethod.CODEC, this.overflowMethod);
 
         if (!this.overflowStacks.isEmpty()) {
-            var overflowStacks = view.list("OverflowStacks", ItemStack.CODEC);
+            ValueOutput.TypedOutputList<ItemStack> overflowStacks = view.list("OverflowStacks", ItemStack.CODEC);
             for (ItemStack stack : this.overflowStacks) {
                 if (stack.isEmpty())
                     continue;
@@ -404,6 +406,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity
         switch (this.overflowMethod) {
             case VOID :
                 break;
+
             case PAUSE :
                 if (!drops.isEmpty()) {
                     this.drilling = false;
@@ -413,6 +416,7 @@ public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity
                 }
 
                 break;
+
             case SPILLAGE :
                 for (ItemStack drop : drops) {
                     if (!drop.isEmpty()) {

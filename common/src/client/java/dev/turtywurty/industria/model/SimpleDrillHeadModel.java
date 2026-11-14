@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 
-public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModel.SimpleDrillHeadModelRenderState> {
+public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModelRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("simple_drill_head"),
         "main");
 
@@ -86,6 +86,7 @@ public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModel.SimpleDrill
             state.counterClockwiseRotation = (float) Math.clamp(state.counterClockwiseRotation + 0.125F, 0,
                 Math.PI * 2);
         }
+
         clockwiseYaw = state.clockwiseRotation;
         counterClockwiseYaw = state.counterClockwiseRotation;
 

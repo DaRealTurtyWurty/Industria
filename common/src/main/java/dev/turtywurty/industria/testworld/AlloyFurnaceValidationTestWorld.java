@@ -26,6 +26,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
+import net.minecraft.world.item.Item;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class AlloyFurnaceValidationTestWorld {
     private AlloyFurnaceValidationTestWorld() {
@@ -38,10 +42,12 @@ public final class AlloyFurnaceValidationTestWorld {
                 context.overworld().setChunkForced(x, z, true);
             }
         }
+
         TestWorldScheduler.schedule(context, 40, test -> {
             try {
                 validate(test.at(0, 8, 0));
-                LogUtils.getLogger().info("[AlloyFurnaceSuite] PASS placement, every part/facing, drops, creative, replacement, obstruction and stocked fixture");
+                LogUtils.getLogger().info(
+                    "[AlloyFurnaceSuite] PASS placement, every part/facing, drops, creative, replacement, obstruction and stocked fixture");
             } catch (Throwable failure) {
                 LogUtils.getLogger().error("[AlloyFurnaceSuite] FAIL", failure);
             } finally {
@@ -50,16 +56,17 @@ public final class AlloyFurnaceValidationTestWorld {
                         test.overworld().setChunkForced(x, z, false);
                     }
                 }
+
                 test.server().halt(false);
             }
         });
     }
 
     private static void validate(TestWorldContext context) {
-        var level = context.overworld();
-        var block = ModBlocks.ALLOY_FURNACE.get();
-        var item = (BlockItem) block.asItem();
-        var player = context.createFakePlayer(6, 0, 6, new GameProfile(UUID.randomUUID(), "AlloyTest"));
+        ServerLevel level = context.overworld();
+        AlloyFurnaceBlock block = ModBlocks.ALLOY_FURNACE.get();
+        BlockItem item = (BlockItem) block.asItem();
+        ServerPlayer player = context.createFakePlayer(6, 0, 6, new GameProfile(UUID.randomUUID(), "AlloyTest"));
         player.setGameMode(GameType.SURVIVAL);
         BlockPos origin = context.origin();
         context.fillAir(-4, 0, -4, 4, 4, 4);
@@ -69,13 +76,13 @@ public final class AlloyFurnaceValidationTestWorld {
             player.setYRot(facing.getOpposite().toYRot());
             for (int brokenPart = 0; brokenPart <= 8; brokenPart++) {
                 clearDrops(context);
-                ItemStack stack = new ItemStack(item, 2);
-                var placement = placement(player, stack, origin);
+                var stack = new ItemStack(item, 2);
+                BlockPlaceContext placement = placement(player, stack, origin);
                 check(item.place(placement).consumesAction(), "Placement failed: " + facing);
                 check(stack.getCount() == 1, "Placement must consume exactly one furnace");
                 for (int part = 0; part <= 8; part++) {
-                    var pos = origin.offset(AlloyFurnaceBlock.getPartOffset(part, facing));
-                    var state = level.getBlockState(pos);
+                    BlockPos pos = origin.offset(AlloyFurnaceBlock.getPartOffset(part, facing));
+                    BlockState state = level.getBlockState(pos);
                     check(state.is(block) && state.getValue(AlloyFurnaceBlock.PART) == part,
                         "Missing or wrong part " + part + " facing " + facing);
                     check(state.getValue(BlockStateProperties.HORIZONTAL_FACING) == facing, "Incorrect facing");
@@ -87,8 +94,9 @@ public final class AlloyFurnaceValidationTestWorld {
                         check(state.useWithoutItem(level, player,
                             new BlockHitResult(Vec3.atCenterOf(pos), facing, pos, false)).consumesAction(),
                             "Part did not handle interaction");
-                        var controller = (AlloyFurnaceBlockEntity) level.getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
-                        var menu = controller.createMenu(1, player.getInventory(), player);
+                        AlloyFurnaceBlockEntity controller = (AlloyFurnaceBlockEntity) level
+                            .getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
+                        AbstractContainerMenu menu = controller.createMenu(1, player.getInventory(), player);
                         check(menu instanceof AlloyFurnaceScreenHandler,
                             "Part did not resolve the furnace menu");
                         menu.removed(player);
@@ -96,7 +104,8 @@ public final class AlloyFurnaceValidationTestWorld {
                             "Part did not expose controller inventory");
                     }
                 }
-                var furnace = (AlloyFurnaceBlockEntity) level.getBlockEntity(origin);
+
+                AlloyFurnaceBlockEntity furnace = (AlloyFurnaceBlockEntity) level.getBlockEntity(origin);
                 furnace.getWrappedContainerStorage().getInventory(0).setItem(0, new ItemStack(Items.IRON_INGOT, 3));
                 player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
                 check(player.hasCorrectToolForDrops(level.getBlockState(origin)), "Pickaxe cannot harvest furnace");
@@ -112,11 +121,12 @@ public final class AlloyFurnaceValidationTestWorld {
 
         player.setYRot(Direction.SOUTH.toYRot());
         for (int part = 1; part <= 8; part++) {
-            var obstruction = origin.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH));
+            BlockPos obstruction = origin.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH));
             level.setBlockAndUpdate(obstruction, Blocks.STONE.defaultBlockState());
-            ItemStack stack = new ItemStack(item);
+            var stack = new ItemStack(item);
             check(!item.place(placement(player, stack, origin)).consumesAction(), "Accepted obstructed part " + part);
-            check(stack.getCount() == 1 && level.getBlockState(origin).isAir(), "Rejected placement changed the world/item");
+            check(stack.getCount() == 1 && level.getBlockState(origin).isAir(),
+                "Rejected placement changed the world/item");
             check(level.getBlockState(obstruction).is(Blocks.STONE), "Overwrote obstruction");
             level.removeBlock(obstruction, false);
         }
@@ -134,36 +144,46 @@ public final class AlloyFurnaceValidationTestWorld {
         expectGone(context, Direction.NORTH);
         check(countDrops(context, item) == 0, "Creative breaking must not drop a furnace");
 
-        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(), "First adjacent fixture failed");
+        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(),
+            "First adjacent fixture failed");
         BlockPos adjacent = origin.offset(2, 0, 0);
-        check(item.place(placement(player, new ItemStack(item), adjacent)).consumesAction(), "Second adjacent fixture failed");
+        check(item.place(placement(player, new ItemStack(item), adjacent)).consumesAction(),
+            "Second adjacent fixture failed");
         player.gameMode.destroyBlock(origin);
         expectGone(context, Direction.NORTH);
         for (int part = 0; part <= 8; part++) {
-            check(level.getBlockState(adjacent.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH))).is(block),
+            check(
+                level.getBlockState(adjacent.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH))).is(block),
                 "Breaking furnace damaged adjacent furnace");
         }
+
         player.gameMode.destroyBlock(adjacent);
 
-        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(), "Replacement fixture failed");
-        var replaced = origin.offset(AlloyFurnaceBlock.getPartOffset(5, Direction.NORTH));
+        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(),
+            "Replacement fixture failed");
+        BlockPos replaced = origin.offset(AlloyFurnaceBlock.getPartOffset(5, Direction.NORTH));
         level.setBlockAndUpdate(replaced, Blocks.STONE.defaultBlockState());
         expectGone(context, Direction.NORTH);
         check(level.getBlockState(replaced).is(Blocks.STONE), "Cleanup removed the replacement block");
         level.removeBlock(replaced, false);
 
-        var fixture = context.at(8, 0, 0);
+        TestWorldContext fixture = context.at(8, 0, 0);
         AlloyFurnaceTestWorld.place(fixture);
-        var furnace = fixture.requireBlockEntity(0, 0, 0, AlloyFurnaceBlockEntity.class);
+        AlloyFurnaceBlockEntity furnace = fixture.requireBlockEntity(0, 0, 0, AlloyFurnaceBlockEntity.class);
         for (int part = 0; part <= 8; part++) {
-            check(level.getBlockState(fixture.origin().offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH))).is(block),
+            check(
+                level.getBlockState(fixture.origin().offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH)))
+                    .is(block),
                 "Stocked fixture is missing part " + part);
         }
+
         for (int tick = 0; tick < 403; tick++) {
             furnace.tick();
         }
+
         check(furnace.getBlockState().getValue(BlockStateProperties.LIT), "Stocked fixture did not start burning");
-        var output = furnace.getWrappedContainerStorage().getInventory(AlloyFurnaceBlockEntity.OUTPUT_SLOT).getItem(0);
+        ItemStack output = furnace.getWrappedContainerStorage().getInventory(AlloyFurnaceBlockEntity.OUTPUT_SLOT)
+            .getItem(0);
         check(output.is(ModItems.BRONZE_INGOT.get()) && output.getCount() == 4,
             "Stocked fixture did not smelt its first batch of bronze");
     }
@@ -176,13 +196,13 @@ public final class AlloyFurnaceValidationTestWorld {
 
     private static void expectGone(TestWorldContext context, Direction facing) {
         for (int part = 0; part <= 8; part++) {
-            var pos = context.origin().offset(AlloyFurnaceBlock.getPartOffset(part, facing));
+            BlockPos pos = context.origin().offset(AlloyFurnaceBlock.getPartOffset(part, facing));
             check(!context.overworld().getBlockState(pos).is(ModBlocks.ALLOY_FURNACE.get()), "Orphaned part " + part);
             check(!(context.overworld().getBlockEntity(pos) instanceof AlloyFurnaceBlockEntity), "Orphaned inventory");
         }
     }
 
-    private static int countDrops(TestWorldContext context, net.minecraft.world.item.Item item) {
+    private static int countDrops(TestWorldContext context, Item item) {
         return context.overworld().getEntitiesOfClass(ItemEntity.class, new AABB(context.origin()).inflate(5))
             .stream().map(ItemEntity::getItem).filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
     }

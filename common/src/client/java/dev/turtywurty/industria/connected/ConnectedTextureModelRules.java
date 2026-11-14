@@ -27,10 +27,12 @@ public final class ConnectedTextureModelRules {
                 resolved.add(rule.resolveBlocks());
                 groups.put(rule.connectsTo(), group);
             }
+
             connectionGroups[face.ordinal()] = group;
             axes[face.ordinal()] = rule.axis();
             layouts[face.ordinal()] = rule.layout();
         }
+
         connections = List.copyOf(resolved);
     }
 

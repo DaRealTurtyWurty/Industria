@@ -106,6 +106,7 @@ public class SeismicScannerScreen extends Screen {
                 // .pos(this.x + 96, this.y - 550)
                 // .render(context, mouseX, mouseY, delta);
             }
+
             matrixStack.popMatrix();
         }
     }

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 
 public class MotorScreenHandler extends AbstractContainerMenu {
     private final MotorBlockEntity blockEntity;
@@ -37,7 +38,7 @@ public class MotorScreenHandler extends AbstractContainerMenu {
     }
 
     public float getEnergyPercentage() {
-        var energyStorage = this.blockEntity.getEnergyStorage();
+        SyncingEnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long capacity = energyStorage.getCapacity();
         if (energy == 0 || capacity == 0)

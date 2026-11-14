@@ -80,6 +80,7 @@ public class IconButtonWidget extends Button {
         private int x, y, width = 20, height = 20;
         private OnPress onPress = button -> {
         };
+
         private Identifier iconTexture;
         private int u, vNormal, vHover, vDisabled, iconW = 16, iconH = 16, texW = 16, texH = 16;
         private boolean drawBackground = true;

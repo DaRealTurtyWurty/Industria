@@ -4,7 +4,8 @@ import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedExtraModel;
 import net.minecraft.client.resources.model.ModelBaker;
 
 public record FabricVerticalConnectedModelDependencies(
-        VerticalConnectedModelSettings settings) implements UnbakedExtraModel<VerticalConnectedModelSettings> {
+    VerticalConnectedModelSettings settings
+) implements UnbakedExtraModel<VerticalConnectedModelSettings> {
     @Override
     public void resolveDependencies(Resolver resolver) {
         settings.resolveDependencies(resolver);

@@ -23,7 +23,12 @@ public class SmelteryControllerBlock extends IndustriaBlock {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    protected VoxelShape getCollisionShape(
+        BlockState state,
+        BlockGetter world,
+        BlockPos pos,
+        CollisionContext context
+    ) {
         return COLLISION_SHAPE;
     }
 }

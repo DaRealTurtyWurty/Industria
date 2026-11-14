@@ -195,6 +195,7 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
         if (this.wellheadPos != null) {
             view.store("WellheadPos", BlockPos.CODEC, this.wellheadPos);
         }
+
         ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         view.putBoolean("Running", this.running);

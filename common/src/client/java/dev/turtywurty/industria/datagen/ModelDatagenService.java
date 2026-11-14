@@ -16,10 +16,10 @@ public interface ModelDatagenService {
 
     final class ServiceHolder {
         private static final ModelDatagenService INSTANCE = ServiceLoader.load(
-                ModelDatagenService.class,
-                ModelDatagenService.class.getClassLoader())
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No model datagen service is available for this platform"));
+            ModelDatagenService.class,
+            ModelDatagenService.class.getClassLoader())
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No model datagen service is available for this platform"));
 
         private ServiceHolder() {
         }

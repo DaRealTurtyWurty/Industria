@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class WindTurbineModel extends Model<WindTurbineModel.WindTurbineModelRenderState> {
+public class WindTurbineModel extends Model<WindTurbineModelRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("wind_turbine"),
         "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/wind_turbine.png");

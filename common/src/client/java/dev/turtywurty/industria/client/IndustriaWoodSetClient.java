@@ -11,7 +11,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
-/** Client registrations associated with Industria's common wood sets. */
+/**
+ * Client registrations associated with Industria's common wood sets.
+ */
 public final class IndustriaWoodSetClient {
     private IndustriaWoodSetClient() {
     }

@@ -44,9 +44,8 @@ public record ConnectedTextureFace(Direction up, Direction right) {
         boolean bottomRight = bottom && right && neighborhood.isConnected(downDirection, this.right);
 
         return ConnectedTextureMask.fromConnections(
-                topLeft, top, topRight,
-                left, right,
-                bottomLeft, bottom, bottomRight
-        );
+            topLeft, top, topRight,
+            left, right,
+            bottomLeft, bottom, bottomRight);
     }
 }

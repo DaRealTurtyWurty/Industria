@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 
 public class CastingBasinBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<CastingBasinBlockEntity, CastingBasinBlockEntityRenderer.CastingBasinRenderState> {
+        IndustriaBlockEntityRenderer<CastingBasinBlockEntity, CastingBasinRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public CastingBasinBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

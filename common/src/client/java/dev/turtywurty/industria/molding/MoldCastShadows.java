@@ -55,6 +55,7 @@ public final class MoldCastShadows {
                 illumination[y * (GRID_SIZE + 1) + x] = AMBIENT_LIGHT + (1 - AMBIENT_LIGHT) * visibility;
             }
         }
+
         return illumination;
     }
 
@@ -70,6 +71,7 @@ public final class MoldCastShadows {
                 rasterize(projectedDepths, surface, x, y, x + 1, y + 1, x + 1, y);
             }
         }
+
         return projectedDepths;
     }
 
@@ -134,6 +136,7 @@ public final class MoldCastShadows {
             if (sampleDepth(depths, sampleX, sampleY) + DEPTH_BIAS < rayDepth)
                 return false;
         }
+
         return true;
     }
 

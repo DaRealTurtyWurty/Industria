@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class ShakingTableModel extends Model<ShakingTableModel.ShakingTableModelRenderState> {
+public class ShakingTableModel extends Model<ShakingTableModelRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/shaking_table.png");
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("shaking_table"),
         "main");

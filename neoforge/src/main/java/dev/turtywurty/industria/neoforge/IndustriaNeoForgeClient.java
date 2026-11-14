@@ -32,7 +32,7 @@ public final class IndustriaNeoForgeClient {
         NeoForge.EVENT_BUS.addListener(NeoForgeIndustriaTestWorldButton::onScreenInit);
         IndustriaClient.onInitializeClient();
         modBus.addListener(FMLClientSetupEvent.class,
-                event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
+            event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
 
         modBus.addListener(RegisterPictureInPictureRenderersEvent.class, this::registerPictureInPictureRenderers);
 

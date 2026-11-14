@@ -13,7 +13,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class AdvancedSolarPanelModel extends Model<AdvancedSolarPanelModel.RenderState> {
+public class AdvancedSolarPanelModel extends Model<RenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("advanced_solar_panel"),
         "main");
     public static final ModelLayerLocation STAIR_LAYER_LOCATION = new ModelLayerLocation(

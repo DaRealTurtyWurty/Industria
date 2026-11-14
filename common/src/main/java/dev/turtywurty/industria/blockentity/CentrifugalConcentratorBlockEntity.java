@@ -110,6 +110,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
             return 3;
         }
     };
+
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 

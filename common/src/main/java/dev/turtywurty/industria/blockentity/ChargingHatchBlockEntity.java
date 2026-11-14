@@ -59,16 +59,16 @@ public class ChargingHatchBlockEntity extends DoorContainerBlockEntity
                     return 1;
                 }
             }) {
-                @Override
-                public void startOpen(ContainerUser user) {
-                    ChargingHatchBlockEntity.this.startOpen(user);
-                }
+            @Override
+            public void startOpen(ContainerUser user) {
+                ChargingHatchBlockEntity.this.startOpen(user);
+            }
 
-                @Override
-                public void stopOpen(ContainerUser user) {
-                    ChargingHatchBlockEntity.this.stopOpen(user);
-                }
-            };
+            @Override
+            public void stopOpen(ContainerUser user) {
+                ChargingHatchBlockEntity.this.stopOpen(user);
+            }
+        };
 
         this.inventory.setInsertionPredicate((slot, _) -> slot < this.processingSlotCount);
         this.wrappedContainerStorage.addInventory(this.inventory);

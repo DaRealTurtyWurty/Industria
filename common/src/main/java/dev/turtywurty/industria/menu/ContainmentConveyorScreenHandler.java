@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ContainmentConveyorScreenHandler
     extends
@@ -71,7 +72,7 @@ public class ContainmentConveyorScreenHandler
     }
 
     public Component getContainingEntityName() {
-        var containingEntity = this.blockEntity.getContainingEntity();
+        LivingEntity containingEntity = this.blockEntity.getContainingEntity();
         if (containingEntity == null)
             return Component.empty();
 

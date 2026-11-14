@@ -205,7 +205,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
                 SlotDisplay.STREAM_CODEC, UpgradeStationRecipeDisplay::craftingStation,
                 UpgradeStationRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<UpgradeStationRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<UpgradeStationRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -214,7 +214,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         }
 
         @Override
-        public RecipeDisplay.Type<UpgradeStationRecipeDisplay> type() {
+        public Type<UpgradeStationRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

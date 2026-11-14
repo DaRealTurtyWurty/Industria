@@ -14,8 +14,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import org.slf4j.Logger;
+import java.util.List;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 
-/** A single chamber with removable attachments and spare parts for manual formation tests. */
+/**
+ * A single chamber with removable attachments and spare parts for manual formation tests.
+ */
 public final class SmelteryTestWorld {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -79,13 +84,14 @@ public final class SmelteryTestWorld {
     private static final long TEST_AMOUNT = FluidAmounts.BUCKET * 7 + FluidAmounts.BUCKET / 2;
 
     private static void seedFluid(TestWorldContext context) {
-        var controller = context.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
+        SmelteryControllerBlockEntity controller = context.requireBlockEntity(1, 1, 0,
+            SmelteryControllerBlockEntity.class);
         CompoundTag data = controller.saveWithoutMetadata(context.overworld().registryAccess());
         check(data.getListOrEmpty("Chambers").size() == 1, "Expected one formed chamber before seeding");
         check(data.getListOrEmpty("RetainedFluids").isEmpty(), "Expected no initial retained fluid");
         var water = new FluidStack(ResourceTypes.FLUID.of(Fluids.WATER.builtInRegistryHolder()), TEST_AMOUNT);
-        var ops = context.overworld().registryAccess().createSerializationContext(NbtOps.INSTANCE);
-        var chamber = (CompoundTag) data.getListOrEmpty("Chambers").getFirst();
+        RegistryOps<Tag> ops = context.overworld().registryAccess().createSerializationContext(NbtOps.INSTANCE);
+        CompoundTag chamber = (CompoundTag) data.getListOrEmpty("Chambers").getFirst();
         check(chamber.getLongOr("capacity", 0) >= TEST_AMOUNT, "Fixture cannot hold test fluid");
         chamber.put("fluid", FluidStack.CODEC.codec().encodeStart(ops, water).getOrThrow());
         controller.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
@@ -95,7 +101,8 @@ public final class SmelteryTestWorld {
         context.removeBlock(2, 4, 2);
         context.afterTicks(40, current -> runTestStep(current, "broken chamber", () -> {
             verifyFluid(current, 0, 1, "chimney removed");
-            var entity = current.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
+            SmelteryControllerBlockEntity entity = current.requireBlockEntity(1, 1, 0,
+                SmelteryControllerBlockEntity.class);
             CompoundTag saved = entity.saveWithoutMetadata(current.overworld().registryAccess());
             entity.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,
                 current.overworld().registryAccess(), saved));
@@ -118,27 +125,29 @@ public final class SmelteryTestWorld {
     }
 
     private static void verifyFluid(TestWorldContext context, int activeCount, int retainedCount, String stage) {
-        var entity = context.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
+        SmelteryControllerBlockEntity entity = context.requireBlockEntity(1, 1, 0, SmelteryControllerBlockEntity.class);
         CompoundTag data = entity.saveWithoutMetadata(context.overworld().registryAccess());
-        var active = data.getListOrEmpty("Chambers");
-        var retained = data.getListOrEmpty("RetainedFluids");
+        List<Tag> active = data.getListOrEmpty("Chambers");
+        List<Tag> retained = data.getListOrEmpty("RetainedFluids");
         check(active.size() == activeCount, stage + ": wrong active chamber count " + active.size());
         check(retained.size() == retainedCount, stage + ": wrong retained record count " + retained.size());
-        var ops = context.overworld().registryAccess().createSerializationContext(NbtOps.INSTANCE);
+        RegistryOps<Tag> ops = context.overworld().registryAccess().createSerializationContext(NbtOps.INSTANCE);
         long total = 0;
-        for (var entry : active) {
-            var chamber = (CompoundTag) entry;
-            var fluid = FluidStack.CODEC.codec().parse(ops, chamber.getCompoundOrEmpty("fluid")).getOrThrow();
+        for (Tag entry : active) {
+            CompoundTag chamber = (CompoundTag) entry;
+            FluidStack fluid = FluidStack.CODEC.codec().parse(ops, chamber.getCompoundOrEmpty("fluid")).getOrThrow();
             check(fluid.variant().value() == Fluids.WATER, stage + ": active fluid type changed");
             check(fluid.amount() <= chamber.getLongOr("capacity", 0), stage + ": active fluid exceeds capacity");
             total += fluid.amount();
         }
-        for (var entry : retained) {
-            var fluid = FluidStack.CODEC.codec().parse(ops,
+
+        for (Tag entry : retained) {
+            FluidStack fluid = FluidStack.CODEC.codec().parse(ops,
                 ((CompoundTag) entry).getCompoundOrEmpty("fluid_stack")).getOrThrow();
             check(fluid.variant().value() == Fluids.WATER, stage + ": retained fluid type changed");
             total += fluid.amount();
         }
+
         check(total == TEST_AMOUNT, stage + ": expected " + TEST_AMOUNT + " fluid units, got " + total);
         LOGGER.info("[SmelteryRetentionTest] {}: active={} retained={} total={}", stage, active.size(), retained.size(),
             total);

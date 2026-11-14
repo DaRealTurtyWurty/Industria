@@ -140,7 +140,7 @@ public record ClarifierRecipe(
                 ByteBufCodecs.INT, ClarifierRecipeDisplay::processTime,
                 ClarifierRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<ClarifierRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<ClarifierRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -149,7 +149,7 @@ public record ClarifierRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<ClarifierRecipeDisplay> type() {
+        public Type<ClarifierRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

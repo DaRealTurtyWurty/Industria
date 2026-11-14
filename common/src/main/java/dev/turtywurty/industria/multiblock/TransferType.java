@@ -134,10 +134,12 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
     ) {
         if (!storage.hasStableIndices())
             return emptyVariant(key);
+
         for (int index = 0; index < storage.size(); index++) {
             if (storage.amount(index) > 0)
                 return storage.resource(index);
         }
+
         return emptyVariant(key);
     }
 

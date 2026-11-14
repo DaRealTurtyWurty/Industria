@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class DrillCableModel extends Model<DrillCableModel.DrillCableModelRenderState> {
+public class DrillCableModel extends Model<DrillCableModelRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("drill_cable"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_cable.png");
 

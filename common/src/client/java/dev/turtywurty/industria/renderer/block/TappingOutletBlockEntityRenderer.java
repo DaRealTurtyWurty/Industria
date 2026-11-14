@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 public class TappingOutletBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<TappingOutletBlockEntity, TappingOutletBlockEntityRenderer.TappingOutletRenderState> {
+        IndustriaBlockEntityRenderer<TappingOutletBlockEntity, TappingOutletRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public TappingOutletBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

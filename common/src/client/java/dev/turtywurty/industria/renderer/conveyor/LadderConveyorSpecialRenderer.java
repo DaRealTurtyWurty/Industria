@@ -98,6 +98,7 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
                 OverlayTexture.NO_OVERLAY, 0, null);
             poseStack.popPose();
         }
+
         poseStack.popPose();
     }
 
@@ -111,6 +112,7 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
             cursor.set(centerPos.getX(), nextY, centerPos.getZ());
             if (!isMatchingLadder(level.getBlockState(cursor), facing, upward))
                 break;
+
             bottomY = nextY;
         }
 
@@ -119,6 +121,7 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
             cursor.set(centerPos.getX(), nextY, centerPos.getZ());
             if (!isMatchingLadder(level.getBlockState(cursor), facing, upward))
                 break;
+
             topY = nextY;
         }
 
@@ -247,6 +250,5 @@ public class LadderConveyorSpecialRenderer implements ModConveyorSpecialRenderer
         private float loopPerimeter(float depth) {
             return (this.verticalHeight() * 2.0F) + (depth * 2.0F);
         }
-
     }
 }

@@ -99,6 +99,7 @@ public class CentrifugalConcentratorBlockEntityRenderer
             state.blockPos);
         if (renderData == null)
             return;
+
         TextureAtlasSprite fluidSprite = renderData.stillSprite();
 
         RenderType renderLayer = RenderTypes.entityTranslucent(fluidSprite.atlasLocation());

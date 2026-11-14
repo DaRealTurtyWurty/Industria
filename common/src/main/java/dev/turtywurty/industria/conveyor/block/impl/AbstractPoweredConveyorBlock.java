@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
 public abstract class AbstractPoweredConveyorBlock extends AbstractHorizontalConveyorBlock {
     public static final BooleanProperty ENABLED = BooleanProperty.create("enabled");
 
-    protected AbstractPoweredConveyorBlock(Properties settings, IndustriaBlock.BlockProperties properties) {
+    protected AbstractPoweredConveyorBlock(Properties settings, BlockProperties properties) {
         super(settings, properties
             .addStateProperty(ENABLED, true));
     }
