@@ -303,7 +303,7 @@ public record AgitatorRecipe(
                 ByteBufCodecs.INT, AgitatorRecipeDisplay::energyCost,
                 AgitatorRecipeDisplay::new);
 
-        public static final Type<AgitatorRecipeDisplay> SERIALIZER = new Type<>(CODEC,
+        public static final RecipeDisplay.Type<AgitatorRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -315,7 +315,7 @@ public record AgitatorRecipe(
         }
 
         @Override
-        public Type<AgitatorRecipeDisplay> type() {
+        public RecipeDisplay.Type<AgitatorRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

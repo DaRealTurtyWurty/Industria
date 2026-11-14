@@ -383,8 +383,7 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, Block> FIREBRICK = registerWithItemCopy("firebrick",
         Block::new, Blocks.BRICKS);
 
-    public static final RegistrationHandle<Block, SmelteryHearthBlock> SMELTERY_HEARTH = registerWithItemCopy(
-        "smeltery_hearth",
+    public static final RegistrationHandle<Block, SmelteryHearthBlock> SMELTERY_HEARTH = registerWithItemCopy("smeltery_hearth",
         SmelteryHearthBlock::new, Blocks.BRICKS);
 
     public static final RegistrationHandle<Block, FuelboxBlock> FUELBOX = registerWithItemCopy("fuelbox",

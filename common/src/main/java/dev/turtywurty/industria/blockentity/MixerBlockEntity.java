@@ -131,7 +131,6 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity
             return 2;
         }
     };
-
     private ResourceKey<Recipe<?>> currentRecipeId;
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private SlurryStack outputSlurryStack = SlurryStack.EMPTY;

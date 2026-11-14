@@ -100,7 +100,6 @@ public class SlurryWidget implements Renderable, LayoutElement {
         if (slurry != null && amount > 0) {
             lines.add(Component.translatable("slurry." + slurry.id().getNamespace() + "." + slurry.id().getPath()));
         }
-
         lines.add(Component.literal(((long) ((double) amount / FluidAmounts.BUCKET * 1000))
             + " / " + ((long) ((double) capacity / FluidAmounts.BUCKET * 1000)) + " mB"));
         context.setComponentTooltipForNextFrame(textRenderer, lines, mouseX, mouseY);

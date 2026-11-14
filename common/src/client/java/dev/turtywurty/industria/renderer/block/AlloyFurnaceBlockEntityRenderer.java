@@ -12,8 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 public class AlloyFurnaceBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<AlloyFurnaceBlockEntity, ContainerDoorRenderState> {
+    extends IndustriaBlockEntityRenderer<AlloyFurnaceBlockEntity, ContainerDoorRenderState> {
     private final AlloyFurnaceModel model;
 
     public AlloyFurnaceBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -39,13 +38,7 @@ public class AlloyFurnaceBlockEntityRenderer
     }
 
     @Override
-    protected void onRender(
-        ContainerDoorRenderState state,
-        PoseStack matrices,
-        SubmitNodeCollector queue,
-        int light,
-        int overlay
-    ) {
+    protected void onRender(ContainerDoorRenderState state, PoseStack matrices, SubmitNodeCollector queue, int light, int overlay) {
         ModelSubmitUtils.submitModel(queue, this.model, state, matrices,
             this.model.renderType(AlloyFurnaceModel.TEXTURE_LOCATION), light, overlay, 0, state.breakProgress);
     }

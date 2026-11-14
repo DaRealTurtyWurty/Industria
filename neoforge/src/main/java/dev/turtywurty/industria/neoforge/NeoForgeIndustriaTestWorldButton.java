@@ -5,7 +5,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import java.util.List;
 
 public final class NeoForgeIndustriaTestWorldButton {
     private NeoForgeIndustriaTestWorldButton() {
@@ -22,13 +21,12 @@ public final class NeoForgeIndustriaTestWorldButton {
             .findFirst()
             .orElse(null);
         if (original == null) {
-            List<AbstractWidget> widgets = event.getListenersList().stream()
+            var widgets = event.getListenersList().stream()
                 .filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).toList();
             Button fallback = IndustriaTestWorldLauncher.createFallbackButton(event.getScreen(), widgets);
             if (fallback != null) {
                 event.addListener(fallback);
             }
-
             return;
         }
 

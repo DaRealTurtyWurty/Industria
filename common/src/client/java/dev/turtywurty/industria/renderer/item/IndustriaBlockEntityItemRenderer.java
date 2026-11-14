@@ -21,10 +21,10 @@ import org.joml.Vector3fc;
 
 public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
     implements
-        SpecialModelRenderer<BlockEntityItemRenderData> {
+        SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
     public void submit(
-        @Nullable BlockEntityItemRenderData data,
+        @Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data,
         PoseStack matrices,
         SubmitNodeCollector queue,
         int light,
@@ -69,7 +69,7 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
 
     public record Unbaked(ModelLayerLocation modelLayer, Identifier texture)
         implements
-            SpecialModelRenderer.Unbaked<BlockEntityItemRenderData> {
+            SpecialModelRenderer.Unbaked<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
         private static final Codec<ModelLayerLocation> ENTITY_MODEL_LAYER_CODEC = RecordCodecBuilder
             .create(instance -> instance.group(
                 Identifier.CODEC.fieldOf("id").forGetter(ModelLayerLocation::model),
@@ -86,7 +86,7 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         }
 
         @Override
-        public SpecialModelRenderer<BlockEntityItemRenderData> bake(
+        public SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> bake(
             BakingContext context
         ) {
             EntityModelSet entityModels = context.entityModelSet();

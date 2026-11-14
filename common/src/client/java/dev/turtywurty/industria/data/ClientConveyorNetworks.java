@@ -79,14 +79,12 @@ public class ClientConveyorNetworks {
                         network.addConveyor(pos);
                         manager.addConveyor(pos, networkId);
                     }
-
                     case REMOVE_CONVEYOR -> {
                         network.removeConveyor(pos);
                         manager.removeConveyor(pos);
                     }
                     // case ADD_CONNECTED_BLOCK -> network.getConnectedBlocks().add(pos);
                     // case REMOVE_CONNECTED_BLOCK -> network.getConnectedBlocks().remove(pos);
-
                     default ->
                         throw new UnsupportedOperationException(
                             "Operation " + operation + " is not supported for ConveyorNetwork yet");

@@ -141,7 +141,6 @@ public final class MoldCastSurface {
             while (!hasValidCells(scale)) {
                 scale *= 0.5f;
             }
-
             this.displacementScale = scale;
             this.illumination = MoldCastShadows.calculate(this);
         }

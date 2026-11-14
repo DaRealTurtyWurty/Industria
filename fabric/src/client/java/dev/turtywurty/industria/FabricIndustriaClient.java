@@ -30,38 +30,40 @@ public class FabricIndustriaClient implements ClientModInitializer {
         PictureInPictureRendererRegistry.register(_ -> new MoldCastPreviewRenderer());
 
         UnbakedModelDeserializer.register(Industria.id("connected"), new FabricConnectedTextureDeserializer());
-        ModelLoadingPlugin
-            .register(pluginContext -> pluginContext.modifyBlockModelAfterBake().register(ModelModifier.WRAP_LAST_PHASE,
-                (model, context) -> {
-                    Set<Identifier> dependencies = new HashSet<>();
-                    context.sourceModel().resolveDependencies(dependencies::add);
-                    for (Identifier dependency : dependencies) {
-                        ResolvedModel resolved = context.baker().getModel(dependency);
-                        ConnectedTextureSettings settings = FabricConnectedUnbakedModel.findSettings(resolved);
-                        VerticalConnectedModelSettings verticalSettings = FabricVerticalConnectedUnbakedModel
-                            .findSettings(resolved);
+        ModelLoadingPlugin.register(pluginContext ->
+                pluginContext.modifyBlockModelAfterBake().register(ModelModifier.WRAP_LAST_PHASE,
+                        (model, context) -> {
+                            Set<Identifier> dependencies = new HashSet<>();
+                            context.sourceModel().resolveDependencies(dependencies::add);
+                            for (Identifier dependency : dependencies) {
+                                ResolvedModel resolved = context.baker().getModel(dependency);
+                                ConnectedTextureSettings settings =
+                                        FabricConnectedUnbakedModel.findSettings(resolved);
+                                VerticalConnectedModelSettings verticalSettings =
+                                        FabricVerticalConnectedUnbakedModel.findSettings(resolved);
 
-                        if (settings != null) {
-                            SpriteFinder spriteFinder = context.baker().materials().spriteFinder(QuadAtlas.BLOCK);
-                            return new FabricConnectedTextureModel(model, settings, spriteFinder);
-                        } else if (verticalSettings != null) {
-                            BakedVerticalConnectedModels variants = BakedVerticalConnectedModels.bake(context.baker(),
-                                verticalSettings);
-                            return new FabricVerticalConnectedModel(variants, verticalSettings);
-                        }
-                    }
+                                if (settings != null) {
+                                    SpriteFinder spriteFinder =
+                                            context.baker().materials().spriteFinder(QuadAtlas.BLOCK);
+                                    return new FabricConnectedTextureModel(model, settings, spriteFinder);
+                                } else if (verticalSettings != null) {
+                                    BakedVerticalConnectedModels variants =
+                                            BakedVerticalConnectedModels.bake(context.baker(), verticalSettings);
+                                    return new FabricVerticalConnectedModel(variants, verticalSettings);
+                                }
+                            }
 
-                    return model;
-                }));
+                            return model;
+                        }));
 
-        UnbakedModelDeserializer.register(Industria.id("vertical_connected"),
-            new FabricVerticalConnectedModelDeserializer());
+        UnbakedModelDeserializer.register(Industria.id("vertical_connected"), new FabricVerticalConnectedModelDeserializer());
         ModelLoadingPlugin.register(pluginContext -> {
             pluginContext.modifyModelOnLoad().register(((model, context) -> {
                 if (model instanceof FabricVerticalConnectedUnbakedModel verticalModel) {
                     pluginContext.addModel(
-                        ExtraModelKey.create(context.id()::toString),
-                        new FabricVerticalConnectedModelDependencies(verticalModel.getSettings()));
+                            ExtraModelKey.create(context.id()::toString),
+                            new FabricVerticalConnectedModelDependencies(verticalModel.getSettings())
+                    );
                 }
 
                 return model;

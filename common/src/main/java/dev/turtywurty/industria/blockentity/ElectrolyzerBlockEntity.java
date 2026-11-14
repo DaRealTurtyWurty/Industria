@@ -106,7 +106,6 @@ public class ElectrolyzerBlockEntity extends IndustriaMultiblockControllerBlockE
             return 4;
         }
     };
-
     private ResourceKey<Recipe<?>> currentRecipeId;
     private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
     private GasStack leftoverOutputGas = GasStack.EMPTY;

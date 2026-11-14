@@ -148,7 +148,7 @@ public record ShakingTableRecipe(
                 ByteBufCodecs.INT, ShakingTableRecipeDisplay::frequency,
                 ShakingTableRecipeDisplay::new);
 
-        public static final Type<ShakingTableRecipeDisplay> SERIALIZER = new Type<>(CODEC,
+        public static final RecipeDisplay.Type<ShakingTableRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -157,7 +157,7 @@ public record ShakingTableRecipe(
         }
 
         @Override
-        public Type<ShakingTableRecipeDisplay> type() {
+        public RecipeDisplay.Type<ShakingTableRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

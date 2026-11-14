@@ -190,7 +190,6 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedCont
             } else
                 throw new IllegalArgumentException(
                     "Block entity at " + pos + " is not of type " + blockEntityClass.getSimpleName());
-
         }
     }
 }

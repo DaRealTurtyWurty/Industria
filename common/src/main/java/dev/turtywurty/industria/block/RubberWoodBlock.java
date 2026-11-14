@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 public class RubberWoodBlock extends Block implements LatexBlock {
     public final boolean isStripped;
 
-    public RubberWoodBlock(Properties settings, boolean isStripped) {
+    public RubberWoodBlock(BlockBehaviour.Properties settings, boolean isStripped) {
         super(isStripped ? settings.randomTicks() : settings);
         this.isStripped = isStripped;
 

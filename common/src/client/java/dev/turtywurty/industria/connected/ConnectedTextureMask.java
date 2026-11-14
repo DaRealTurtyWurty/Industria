@@ -12,48 +12,19 @@ public class ConnectedTextureMask {
     public static final int BOTTOM_RIGHT = 256;
 
     public static int fromConnections(
-        boolean topLeft,
-        boolean top,
-        boolean topRight,
-        boolean left,
-        boolean right,
-        boolean bottomLeft,
-        boolean bottom,
-        boolean bottomRight
+            boolean topLeft, boolean top, boolean topRight,
+            boolean left, boolean right,
+            boolean bottomLeft, boolean bottom, boolean bottomRight
     ) {
         int mask = CENTER;
-        if (topLeft && top && left) {
-            mask |= TOP_LEFT;
-        }
-
-        if (top) {
-            mask |= TOP;
-        }
-
-        if (topRight && top && right) {
-            mask |= TOP_RIGHT;
-        }
-
-        if (left) {
-            mask |= LEFT;
-        }
-
-        if (right) {
-            mask |= RIGHT;
-        }
-
-        if (bottomLeft && bottom && left) {
-            mask |= BOTTOM_LEFT;
-        }
-
-        if (bottom) {
-            mask |= BOTTOM;
-        }
-
-        if (bottomRight && bottom && right) {
-            mask |= BOTTOM_RIGHT;
-        }
-
+        if (topLeft && top && left) mask |= TOP_LEFT;
+        if (top) mask |= TOP;
+        if (topRight && top && right) mask |= TOP_RIGHT;
+        if (left) mask |= LEFT;
+        if (right) mask |= RIGHT;
+        if (bottomLeft && bottom && left) mask |= BOTTOM_LEFT;
+        if (bottom) mask |= BOTTOM;
+        if (bottomRight && bottom && right) mask |= BOTTOM_RIGHT;
         return mask;
     }
 }

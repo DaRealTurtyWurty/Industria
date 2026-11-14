@@ -21,8 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
-import net.minecraft.world.level.material.Fluid;
 
 public class CrystallizerBlockEntityRenderer
     extends
@@ -184,7 +182,7 @@ public class CrystallizerBlockEntityRenderer
         if (tank == null || tank.getAmount() <= 0 || tank.getCapacity() <= 0)
             return;
 
-        ResourceVariant<Fluid> fluid = tank.getResource();
+        var fluid = tank.getResource();
         FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluid, world, state.blockPos);
         if (renderData == null)
             return;

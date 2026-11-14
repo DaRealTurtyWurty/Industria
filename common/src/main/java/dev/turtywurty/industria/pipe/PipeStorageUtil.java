@@ -15,7 +15,6 @@ public final class PipeStorageUtil {
         for (int index = 0; index < storage.size(); index++) {
             amount = saturatedAdd(amount, storage.amount(index));
         }
-
         return amount;
     }
 
@@ -25,7 +24,6 @@ public final class PipeStorageUtil {
         for (int index = 0; index < storage.size(); index++) {
             capacity = saturatedAdd(capacity, storage.capacity(index, storage.resource(index)));
         }
-
         return capacity;
     }
 
@@ -37,7 +35,6 @@ public final class PipeStorageUtil {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             if (!storage.set(0, resource, amount, transaction))
                 throw new IllegalArgumentException("Stored pipe contents exceed the pipe network capacity");
-
             transaction.commit();
         }
     }
@@ -45,7 +42,6 @@ public final class PipeStorageUtil {
     public static long scaledCapacity(int pipeCount, long capacityPerPipe) {
         if (pipeCount <= 0 || capacityPerPipe <= 0)
             return 0;
-
         try {
             return Math.multiplyExact((long) pipeCount, capacityPerPipe);
         } catch (ArithmeticException _) {
@@ -61,7 +57,6 @@ public final class PipeStorageUtil {
     private static long saturatedAdd(long left, long right) {
         if (right > Long.MAX_VALUE - left)
             return Long.MAX_VALUE;
-
         return left + right;
     }
 }

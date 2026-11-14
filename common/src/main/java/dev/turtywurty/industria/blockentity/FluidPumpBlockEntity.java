@@ -131,7 +131,6 @@ public class FluidPumpBlockEntity extends IndustriaBlockEntity implements Syncab
                 requiredFluid = fluidState.getType();
             } else if (!requiredFluid.isSame(fluidState.getType()))
                 return null;
-
         }
 
         return requiredFluid;

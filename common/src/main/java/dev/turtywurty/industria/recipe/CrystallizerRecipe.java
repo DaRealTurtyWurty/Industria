@@ -187,7 +187,7 @@ public record CrystallizerRecipe(
                 ByteBufCodecs.INT, CrystallizerRecipeDisplay::processTime,
                 CrystallizerRecipeDisplay::new);
 
-        private static final Type<CrystallizerRecipeDisplay> SERIALIZER = new Type<>(CODEC,
+        private static final RecipeDisplay.Type<CrystallizerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -196,7 +196,7 @@ public record CrystallizerRecipe(
         }
 
         @Override
-        public Type<CrystallizerRecipeDisplay> type() {
+        public RecipeDisplay.Type<CrystallizerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

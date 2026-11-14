@@ -259,7 +259,6 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
             return true;
         } else
             return super.mouseDragged(click, offsetX, offsetY);
-
     }
 
     private int getMaxScroll() {
@@ -290,7 +289,6 @@ public class SelectRecipeWidget<T extends Recipe<?>> extends AbstractWidget {
         private Function<T, ItemStack> outputFunction = recipe -> ItemStack.EMPTY;
         private BiConsumer<SelectRecipeWidget<T>, Integer> onRecipeSelected = (widget, index) -> {
         };
-
         private boolean canCraft = false;
         private int scrollBarX;
         private int scrollBarY;

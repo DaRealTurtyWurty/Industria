@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class RotaryKilnModel extends Model<RotaryKilnModelRenderState> {
+public class RotaryKilnModel extends Model<RotaryKilnModel.RotaryKilnModelRenderState> {
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/rotary_kiln.png");
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("rotary_kiln"), "main");
 

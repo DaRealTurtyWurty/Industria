@@ -24,19 +24,19 @@ public class TappingOutletBlock extends IndustriaBlock {
 
     public TappingOutletBlock(Properties settings) {
         super(settings, new BlockProperties()
-            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
-                ModBlockEntityTypes.TAPPING_OUTLET)
-                .shouldTick())
-            .useRotatedShapes(SHAPE));
+                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
+                        ModBlockEntityTypes.TAPPING_OUTLET)
+                        .shouldTick())
+                .useRotatedShapes(SHAPE));
     }
 
     @Override
     protected InteractionResult useWithoutItem(
-        BlockState state,
-        Level level,
-        BlockPos pos,
-        Player player,
-        BlockHitResult hit
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            BlockHitResult hit
     ) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof TappingOutletBlockEntity blockEntity) {
             blockEntity.startPouring();

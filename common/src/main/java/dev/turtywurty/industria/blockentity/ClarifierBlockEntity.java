@@ -94,7 +94,6 @@ public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEnti
             return 2;
         }
     };
-
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private FluidStack outputFluidStack = FluidStack.EMPTY;
     private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering

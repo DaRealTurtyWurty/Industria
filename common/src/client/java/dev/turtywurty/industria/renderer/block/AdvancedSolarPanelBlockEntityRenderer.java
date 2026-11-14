@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AdvancedSolarPanelBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<SolarPanelBlockEntity, RenderState> {
+        IndustriaBlockEntityRenderer<SolarPanelBlockEntity, AdvancedSolarPanelBlockEntityRenderer.RenderState> {
     private static final float MAXIMUM_TILT = 60.0F * Mth.DEG_TO_RAD;
     private static final float HALF_PI = (float) Math.PI / 2.0F;
     private static final Identifier ENERGY_BAR_TEXTURE = Industria.id("textures/block/energy_bar.png");
@@ -129,7 +129,6 @@ public class AdvancedSolarPanelBlockEntityRenderer
                 vertexConsumer.addVertex(entry, maxX, minY, z).setColor(1.0F, 1.0F, 1.0F, 1.0F)
                     .setUv(fillPercentage, 0.0F).setOverlay(overlay).setLight(light).setNormal(0.0F, 0.0F, -1.0F);
             });
-
         matrices.popPose();
     }
 
@@ -140,7 +139,6 @@ public class AdvancedSolarPanelBlockEntityRenderer
             case WEST -> 270;
             default -> 0;
         };
-
         return (90.0F - blockRotation) * Mth.DEG_TO_RAD;
     }
 

@@ -7,7 +7,7 @@ import net.minecraft.core.particles.ParticleTypes;
 public class ModFluidData {
     public static void init() {
         // TODO: Change particles
-        FluidData commonFluidData = new FluidData.Builder(TagList.Fluids.CRUDE_OIL)
+        var commonFluidData = new FluidData.Builder(TagList.Fluids.CRUDE_OIL)
             .preventsBlockSpreading()
             .canSwim()
             .fluidMovementSpeed((_, _) -> 0.01F)
@@ -31,7 +31,7 @@ public class ModFluidData {
         FluidData.registerFluidData(ModFluids.SODIUM_ALUMINATE.flowing().get(), commonFluidData);
 
         ModFluids.getMoltenFluids().forEach((name, fluid) -> {
-            FluidData data = new FluidData.Builder(TagList.Fluids.of(name))
+            var data = new FluidData.Builder(TagList.Fluids.of(name))
                 .preventsBlockSpreading()
                 .canSwim()
                 .fluidMovementSpeed((_, _) -> 0.01F)

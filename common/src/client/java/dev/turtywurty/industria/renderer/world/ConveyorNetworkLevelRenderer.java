@@ -55,7 +55,7 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
 
     private static void loadAnchorCache() {
         ModConveyorAnchorProviders.getAnchorProviders().forEach((block, provider) -> {
-            List<BlockState> possibleStates = block.getStateDefinition().getPossibleStates();
+            ImmutableList<BlockState> possibleStates = block.getStateDefinition().getPossibleStates();
             for (BlockState state : possibleStates) {
                 if (!ITEM_ANCHORS_CACHE.containsKey(state)) {
                     Map<String, Model<?>> models = provider.apply(state);
@@ -409,7 +409,6 @@ public class ConveyorNetworkLevelRenderer implements IndustriaLevelRenderer {
             if (normalizedRaw != null) {
                 state.currentDirection = new Vector3d(normalizedRaw);
             }
-
             state.lastConveyorChangeGameTime = gameTime;
         } else if (normalizedRaw != null) {
             state.currentDirection = new Vector3d(normalizedRaw);

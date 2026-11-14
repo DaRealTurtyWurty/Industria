@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DigesterBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<DigesterBlockEntity, DigesterRenderState> {
+        IndustriaBlockEntityRenderer<DigesterBlockEntity, DigesterBlockEntityRenderer.DigesterRenderState> {
     private static final float WINDOW_LEFT = -10f / 16f;
     private static final float WINDOW_RIGHT = 10f / 16f;
     private static final float TANK_BOTTOM = 1.0f;
@@ -70,11 +70,9 @@ public class DigesterBlockEntityRenderer
 
         if (state.slurry == null || state.slurry.isBlank())
             return;
-
         SlurryRenderHandler handler = SlurryRenderHandlerRegistry.get(state.slurry.value());
         if (handler == null)
             return;
-
         TextureAtlasSprite sprite = handler.getSprite(level, state.blockPos);
         int color = 0xFF000000 | (handler.getColor(level, state.blockPos) & 0xFFFFFF);
 

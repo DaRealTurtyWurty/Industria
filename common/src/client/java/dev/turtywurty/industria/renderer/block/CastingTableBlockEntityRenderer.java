@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
 
 public class CastingTableBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<CastingTableBlockEntity, CastingTableRenderState> {
+        IndustriaBlockEntityRenderer<CastingTableBlockEntity, CastingTableBlockEntityRenderer.CastingTableRenderState> {
     private static final MoldCastSurface.Snapshot FLAT = new MoldCastSurface().snapshot();
     private static final float TRAY_HEIGHT = 15f / 16f;
     private static final float MOLD_SIZE = 14f / 16f;
@@ -244,7 +244,6 @@ public class CastingTableBlockEntityRenderer
                     .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
             }
         });
-
         matrices.popPose();
     }
 

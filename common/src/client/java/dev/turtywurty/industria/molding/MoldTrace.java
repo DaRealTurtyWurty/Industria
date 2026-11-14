@@ -36,7 +36,6 @@ public final class MoldTrace {
         if (complete || distanceToEdge(point, edge) > tolerance) {
             failed = true;
         }
-
         end = point;
         if (!failed && distance(point, polygon.get(edge)) <= tolerance) {
             visitedCorners[edge] = true;
@@ -70,7 +69,6 @@ public final class MoldTrace {
             complete = true;
             return true;
         }
-
         return false;
     }
 
@@ -98,7 +96,6 @@ public final class MoldTrace {
         float end = Math.max(from, to);
         if (start == end)
             return;
-
         List<ProgressRange> ranges = progress.get(edge);
         for (int i = ranges.size() - 1; i >= 0; i--) {
             ProgressRange range = ranges.get(i);
@@ -108,7 +105,6 @@ public final class MoldTrace {
                 ranges.remove(i);
             }
         }
-
         ranges.add(new ProgressRange(start, end));
         ranges.sort(Comparator.comparingDouble(ProgressRange::start));
     }
@@ -140,7 +136,6 @@ public final class MoldTrace {
                 nearestDistance = distance;
             }
         }
-
         return nearest;
     }
 

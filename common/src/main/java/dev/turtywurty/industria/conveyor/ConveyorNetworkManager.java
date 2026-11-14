@@ -519,7 +519,6 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
             int next = current == null ? 1 : current + 1;
             return Math.floorMod(next, outputCount);
         });
-
         this.routingStateChanged = true;
     }
 
@@ -589,7 +588,7 @@ public class ConveyorNetworkManager implements ConveyorRoutingState {
 
         List<BlockPos> orderedConveyors = new ArrayList<>(conveyorSet.size());
         Set<BlockPos> processed = new HashSet<>();
-        Queue<BlockPos> ready = new PriorityQueue<>(comparator);
+        PriorityQueue<BlockPos> ready = new PriorityQueue<>(comparator);
 
         inDegree.entrySet().stream()
             .filter(entry -> entry.getValue() == 0)

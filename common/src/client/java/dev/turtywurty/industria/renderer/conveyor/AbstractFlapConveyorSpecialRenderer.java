@@ -37,7 +37,6 @@ public abstract class AbstractFlapConveyorSpecialRenderer
     private static final RenderType RENDER_TYPE = RenderTypes.entitySolid(ConveyorFlapsModel.TEXTURE_LOCATION);
     private static final float FLAP_MODEL_Y_OFFSET = -0.875f;
     private static final float[] FLAP_X_OFFSETS = {-4.5f, -1.5f, 1.5f, 4.5f};
-
     private static final float FLAP_TRIGGER_Z = -0.5f;
     private static final float FLAP_TRIGGER_Z_RANGE = 1.75f;
     private static final float FLAP_TRIGGER_X_RANGE = 1.75f;
@@ -89,7 +88,6 @@ public abstract class AbstractFlapConveyorSpecialRenderer
             Vector3d localAnchor = toFlapModelLocal(anchor, conveyorState);
             simulation.applyImpulseAtLocal(localAnchor);
         }
-
         simulation.writeAnglesToModel(state, partialTick);
 
         ModelSubmitUtils.submitModel(nodeCollector, this.flapsModel, state, poseStack, RENDER_TYPE, lightCoords,
@@ -180,7 +178,6 @@ public abstract class AbstractFlapConveyorSpecialRenderer
                         this.velocities[flapIndex] = 0f;
                     }
                 }
-
                 this.accumulator -= FIXED_DT;
             }
         }

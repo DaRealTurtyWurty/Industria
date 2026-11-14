@@ -8,18 +8,14 @@ import net.minecraft.world.level.block.Block;
 import java.util.*;
 
 public record ConnectedTextureSettings(
-    ConnectedTextureRule defaultRule,
-    Set<Direction> connectedFaces,
-    Map<Direction, ConnectedTextureRule> faceRules
+        ConnectedTextureRule defaultRule,
+        Set<Direction> connectedFaces,
+        Map<Direction, ConnectedTextureRule> faceRules
 ) {
     public static final ConnectedTextureSettings DEFAULT = new ConnectedTextureSettings(
-        ConnectedTextureRule.DEFAULT, EnumSet.allOf(Direction.class), Map.of());
+            ConnectedTextureRule.DEFAULT, EnumSet.allOf(Direction.class), Map.of());
 
-    public ConnectedTextureSettings(
-        Set<Identifier> connectsTo,
-        Set<Direction> connectedFaces,
-        ConnectedTextureAxis axis
-    ) {
+    public ConnectedTextureSettings(Set<Identifier> connectsTo, Set<Direction> connectedFaces, ConnectedTextureAxis axis) {
         this(new ConnectedTextureRule(connectsTo, axis), connectedFaces, Map.of());
     }
 
@@ -81,7 +77,7 @@ public record ConnectedTextureSettings(
         Direction face = Direction.byName(name);
         if (face == null)
             throw new JsonParseException("Unknown face in " + property + ": " + name
-                + "; expected down, up, north, south, west or east");
+                    + "; expected down, up, north, south, west or east");
 
         return face;
     }
@@ -131,7 +127,7 @@ public record ConnectedTextureSettings(
         }
 
         if (!faceRules.isEmpty()) {
-            var overrides = new JsonObject();
+            JsonObject overrides = new JsonObject();
             for (Direction face : Direction.values()) {
                 ConnectedTextureRule rule = faceRules.get(face);
                 if (rule != null) {

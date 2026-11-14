@@ -9,10 +9,11 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 
 public record NeoForgeVerticalConnectedBlockStateModel(Identifier model) implements CustomUnbakedBlockStateModel {
-    public static final MapCodec<NeoForgeVerticalConnectedBlockStateModel> CODEC = Identifier.CODEC.fieldOf("model")
-        .xmap(
-            NeoForgeVerticalConnectedBlockStateModel::new,
-            NeoForgeVerticalConnectedBlockStateModel::model);
+    public static final MapCodec<NeoForgeVerticalConnectedBlockStateModel> CODEC =
+            Identifier.CODEC.fieldOf("model").xmap(
+                    NeoForgeVerticalConnectedBlockStateModel::new,
+                    NeoForgeVerticalConnectedBlockStateModel::model
+            );
 
     @Override
     public MapCodec<? extends CustomUnbakedBlockStateModel> codec() {
@@ -26,12 +27,13 @@ public record NeoForgeVerticalConnectedBlockStateModel(Identifier model) impleme
 
     @Override
     public BlockStateModel bake(ModelBaker baker) {
-        VerticalConnectedModelSettings settings = NeoForgeVerticalConnectedUnbakedModel
-            .findSettings(baker.getModel(model));
+        VerticalConnectedModelSettings settings =
+                NeoForgeVerticalConnectedUnbakedModel.findSettings(baker.getModel(model));
         if (settings == null)
             throw new IllegalStateException("No vertical connected model settings found for model: " + model);
 
-        BakedVerticalConnectedModels variants = BakedVerticalConnectedModels.bake(baker, settings);
+        BakedVerticalConnectedModels variants =
+                BakedVerticalConnectedModels.bake(baker, settings);
 
         return new NeoForgeVerticalConnectedModel(variants, settings);
     }

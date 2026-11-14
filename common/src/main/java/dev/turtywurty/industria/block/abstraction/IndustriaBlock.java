@@ -81,6 +81,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
             this.blockEntityTicker = properties.blockEntityProperties.blockEntityTicker;
             this.rightClickToOpenGui = properties.blockEntityProperties.rightClickToOpenGui;
             this.dropContentsOnBreak = properties.blockEntityProperties.dropContentsOnBreak;
+
         } else {
             this.blockEntityTypeSupplier = null;
             this.shouldTick = false;
@@ -535,6 +536,7 @@ public class IndustriaBlock extends Block implements EntityBlock {
                 this.dropContentsOnBreak = dropContentsOnBreak;
                 return this;
             }
+
         }
     }
 }

@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public class DropChuteConveyorBlock extends AbstractPoweredConveyorBlock {
-    public DropChuteConveyorBlock(Properties settings) {
-        super(settings, new BlockProperties());
+    public DropChuteConveyorBlock(BlockBehaviour.Properties settings) {
+        super(settings, new IndustriaBlock.BlockProperties());
     }
 
     @Override

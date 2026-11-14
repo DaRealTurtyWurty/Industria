@@ -292,7 +292,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             || !canCast(recipe.inputFluid().variant().value()))
             return false;
 
-        ContainerStorage outputStorage = ContainerStorage.of(getInventory(), null);
+        var outputStorage = ContainerStorage.of(getInventory(), null);
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long extracted = getFluidStorage().extractInternal(

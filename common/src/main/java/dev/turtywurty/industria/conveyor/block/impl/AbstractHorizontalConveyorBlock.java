@@ -36,7 +36,7 @@ public abstract class AbstractHorizontalConveyorBlock extends BaseConveyorBlock 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-    protected AbstractHorizontalConveyorBlock(Properties settings, BlockProperties properties) {
+    protected AbstractHorizontalConveyorBlock(Properties settings, IndustriaBlock.BlockProperties properties) {
         super(settings, properties
             .addStateProperty(FACING, Direction.NORTH)
             .addStateProperty(WATERLOGGED, false)

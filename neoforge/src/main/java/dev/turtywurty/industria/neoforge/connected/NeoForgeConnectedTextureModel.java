@@ -23,13 +23,7 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
     }
 
     @Override
-    public void collectParts(
-        BlockAndTintGetter level,
-        BlockPos pos,
-        BlockState state,
-        RandomSource random,
-        List<BlockStateModelPart> parts
-    ) {
+    public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
         if (rules.isEmpty()) {
             super.collectParts(level, pos, state, random, parts);
             return;
@@ -40,8 +34,7 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
 
         var neighbourhood = new ConnectedTextureNeighborhood(level, pos, state, rules.connections(0));
         ConnectedTextureNeighborhood[] otherNeighborhoods = rules.groupCount() > 1
-            ? new ConnectedTextureNeighborhood[rules.groupCount() - 1]
-            : new ConnectedTextureNeighborhood[0];
+                ? new ConnectedTextureNeighborhood[rules.groupCount() - 1] : new ConnectedTextureNeighborhood[0];
 
         long packedTiles = 0L;
         for (Direction direction : Direction.values()) {
@@ -59,7 +52,6 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
                     otherNeighborhoods[group - 1] = faceNeighborhood;
                 }
             }
-
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
             int mask = face.getMask(faceNeighborhood, rules.axis(direction));
             ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask, rules.layout(direction));

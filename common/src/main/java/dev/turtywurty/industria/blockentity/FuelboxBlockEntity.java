@@ -61,7 +61,6 @@ public class FuelboxBlockEntity extends DoorContainerBlockEntity
                     yield (int) (Mth.clamp((remainingFuelUnits / ((float) maxBurnTime * FUEL_UNITS_PER_BURN_TICK)), 0,
                         1) * 1000);
                 }
-
                 case 1 -> isBurning() ? 1 : 0;
                 default -> 0;
             };
@@ -82,16 +81,16 @@ public class FuelboxBlockEntity extends DoorContainerBlockEntity
         this.wrappedContainerStorage.addInventory(
             new PredicateSimpleInventory(this, 3,
                 (itemStack, _) -> isFuel(itemStack)) {
-                @Override
-                public void startOpen(ContainerUser user) {
-                    FuelboxBlockEntity.this.startOpen(user);
-                }
+                    @Override
+                    public void startOpen(ContainerUser user) {
+                        FuelboxBlockEntity.this.startOpen(user);
+                    }
 
-                @Override
-                public void stopOpen(ContainerUser user) {
-                    FuelboxBlockEntity.this.stopOpen(user);
-                }
-            });
+                    @Override
+                    public void stopOpen(ContainerUser user) {
+                        FuelboxBlockEntity.this.stopOpen(user);
+                    }
+                });
     }
 
     @Override

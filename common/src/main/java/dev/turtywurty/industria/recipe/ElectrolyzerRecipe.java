@@ -186,7 +186,7 @@ public record ElectrolyzerRecipe(
                 ByteBufCodecs.INT, ElectrolyzerRecipeDisplay::temperature,
                 ElectrolyzerRecipeDisplay::new);
 
-        private static final Type<ElectrolyzerRecipeDisplay> SERIALIZER = new Type<>(CODEC,
+        private static final RecipeDisplay.Type<ElectrolyzerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -195,7 +195,7 @@ public record ElectrolyzerRecipe(
         }
 
         @Override
-        public Type<ElectrolyzerRecipeDisplay> type() {
+        public RecipeDisplay.Type<ElectrolyzerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

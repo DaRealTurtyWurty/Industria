@@ -72,7 +72,6 @@ public class ClayMoldSmeltingRecipe extends SmeltingRecipe {
             MoldPiece[] pieces = pattern.split()
                 ? new MoldPiece[]{MoldPiece.HALF_1, MoldPiece.HALF_2}
                 : new MoldPiece[]{MoldPiece.WHOLE};
-
             for (MoldPiece piece : pieces) {
                 DataComponentPatch patch = DataComponentPatch.builder()
                     .set(ModDataComponentTypes.MOLD.get(), new MoldComponent(pattern.id(), piece)).build();

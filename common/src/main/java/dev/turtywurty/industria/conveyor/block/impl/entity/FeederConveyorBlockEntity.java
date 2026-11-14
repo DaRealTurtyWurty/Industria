@@ -87,7 +87,6 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
             this.conveyorStorage = null;
             return;
         }
-
         if (this.conveyorStorage == null || !this.conveyorStorage.isFor(conveyorStorage)) {
             this.conveyorStorage = new FeederItemStorage((ServerLevel) this.level, conveyorStorage);
         }
@@ -161,12 +160,10 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
     ) {
         if (!storage.hasStableIndices())
             return null;
-
         for (int index = 0; index < storage.size(); index++) {
             if (storage.amount(index) > 0 && !storage.resource(index).isBlank())
                 return storage.resource(index);
         }
-
         return null;
     }
 
@@ -233,7 +230,6 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
                 : TransferSupport.NONE;
             if (!supportsInsertion())
                 return extraction;
-
             return extraction == TransferSupport.EXTRACT_ONLY
                 ? TransferSupport.BOTH
                 : TransferSupport.INSERT_ONLY;
@@ -352,7 +348,6 @@ public class FeederConveyorBlockEntity extends IndustriaBlockEntity implements T
             ResourceStorage<ResourceVariant<Item>> storage = resolveItemStorage();
             if (storage == null)
                 throw new IllegalStateException("The feeder conveyor is not attached to a conveyor network");
-
             return storage;
         }
 

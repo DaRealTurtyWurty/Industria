@@ -102,7 +102,6 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
             return 4;
         }
     };
-
     private ItemStack nextOutputItemStack = ItemStack.EMPTY; // Used for rendering
 
     public CrystallizerBlockEntity(BlockPos pos, BlockState state) {

@@ -71,7 +71,6 @@ public class ElectricFurnaceScreenHandler extends IndustriaScreenHandler<Electri
     }
 
     // TODO: Abstract out and make its own class
-
     public static class ExperienceOutputSlot extends OutputSlot {
         private final Player player;
         private final ElectricFurnaceBlockEntity blockEntity;

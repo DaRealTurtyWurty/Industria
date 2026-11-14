@@ -38,7 +38,6 @@ public class DigesterBlock extends IndustriaBlock {
                 0.5 + x / 16.0, bottom / 16.0, 0.5 - depth / 16.0,
                 0.5 + (x + 4) / 16.0, top / 16.0, 0.5 + depth / 16.0));
         }
-
         return shape;
     }
 }

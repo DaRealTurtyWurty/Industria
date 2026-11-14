@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 
 public class FluidPumpBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<FluidPumpBlockEntity, FluidPumpRenderState> {
+        IndustriaBlockEntityRenderer<FluidPumpBlockEntity, FluidPumpBlockEntityRenderer.FluidPumpRenderState> {
     private static final float START_HEIGHT = 17f / 16f;
     private static final float START_WIDTH = 6.5f / 16f;
     private static final float DEPTH = 1f / 16f;
@@ -60,7 +60,6 @@ public class FluidPumpBlockEntityRenderer
                 case WEST -> 270f;
                 default -> throw new IllegalStateException("Unexpected horizontal face: " + face);
             }));
-
             matrices.translate(0f, 1.5f, 0.5f);
 
             this.inWorldFluidRenderer.drawTiledXYQuadOnly(

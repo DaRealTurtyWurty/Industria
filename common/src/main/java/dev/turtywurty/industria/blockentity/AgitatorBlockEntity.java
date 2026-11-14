@@ -79,7 +79,6 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     private static final long PORT_CAPACITY = FluidAmounts.BUCKET * 10;
 
     private static final Direction[] INPUT_DIRECTIONS = {Direction.NORTH, Direction.WEST, Direction.UP};
-
     private static final Direction[] OUTPUT_DIRECTIONS = {Direction.SOUTH, Direction.EAST};
 
     private static final BlockPos[] INPUT_OFFSETS = {
@@ -87,12 +86,10 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
         new BlockPos(-1, 0, 0),
         new BlockPos(0, 1, 0)
     };
-
     private static final BlockPos[] OUTPUT_OFFSETS = {
         new BlockPos(0, 0, 1),
         new BlockPos(1, 0, 0)
     };
-
     private static final BlockPos ENERGY_OFFSET = new BlockPos(0, -1, 0);
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -134,7 +131,6 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             return 2;
         }
     };
-
     private ResourceKey<Recipe<?>> currentRecipeId;
     private int progress;
     private int maxProgress;
@@ -307,7 +303,6 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
             this.outputModes[index] = AgitatorPortType
                 .fromOrdinal(index < outputModes.length ? outputModes[index] : AgitatorPortType.ITEM.ordinal());
         }
-
         this.progress = input.getIntOr("Progress", 0);
         this.maxProgress = input.getIntOr("MaxProgress", 0);
         this.currentRecipeId = input.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE)).orElse(null);
@@ -539,7 +534,6 @@ public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntit
     ) {
         if (!isFormed())
             return side == null ? null : getGasProvider(side);
-
         return super.getGasStorageForExternal(worldPos, side);
     }
 

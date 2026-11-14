@@ -43,7 +43,7 @@ public abstract class PipeNetwork<V extends ResourceVariant<?>> {
             ExtraCodecs.BLOCK_POS_SET_CODEC.fieldOf("connectedBlocks").forGetter(PipeNetwork::getConnectedBlocks),
             TransferType.CODEC.fieldOf("transferType").forGetter(PipeNetwork::getTransferType),
             storageApp).apply(instance, (id, pipes, connectedBlocks, transferType, storage) -> {
-                N network = factory.apply(id);
+                var network = factory.apply(id);
                 network.pipes.addAll(pipes);
                 network.connectedBlocks.addAll(connectedBlocks);
                 storageModifier.accept(network.storage, storage);
@@ -65,7 +65,7 @@ public abstract class PipeNetwork<V extends ResourceVariant<?>> {
             TransferType.STREAM_CODEC, PipeNetwork::getTransferType,
             storageTypeCodec, storageTypeRetriever,
             (id, pipes, connectedBlocks, transferType, storage) -> {
-                N network = factory.apply(id);
+                var network = factory.apply(id);
                 network.pipes.addAll(pipes);
                 network.connectedBlocks.addAll(connectedBlocks);
                 storageModifier.accept(network.storage, storage);

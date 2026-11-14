@@ -9,8 +9,7 @@ import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 
 public class NeoForgeConnectedTextureLoader implements UnbakedModelLoader<NeoForgeConnectedUnbakedModel> {
     @Override
-    public NeoForgeConnectedUnbakedModel read(JsonObject jsonObject, JsonDeserializationContext context)
-        throws JsonParseException {
+    public NeoForgeConnectedUnbakedModel read(JsonObject jsonObject, JsonDeserializationContext context) throws JsonParseException {
         ConnectedTextureSettings settings = ConnectedTextureSettings.fromJson(jsonObject);
         JsonObject deepCopy = jsonObject.deepCopy();
         deepCopy.remove("loader");

@@ -16,7 +16,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
-import java.util.Collection;
 
 public class AutoCompleteEditBox<T> extends EditBox {
     private static final int DROPDOWN_BACKGROUND_COLOR = 0xFF111111;
@@ -37,7 +36,6 @@ public class AutoCompleteEditBox<T> extends EditBox {
 
     private Consumer<String> responder = _ -> {
     };
-
     private Consumer<T> suggestionSelectedListener = _ -> {
     };
 
@@ -258,7 +256,7 @@ public class AutoCompleteEditBox<T> extends EditBox {
 
     private void refreshSuggestions() {
         this.suggestions.clear();
-        Collection<T> providedSuggestions = this.provider.getSuggestions(getValue());
+        var providedSuggestions = this.provider.getSuggestions(getValue());
         if (providedSuggestions != null) {
             this.suggestions.addAll(providedSuggestions);
         }
@@ -480,7 +478,6 @@ public class AutoCompleteEditBox<T> extends EditBox {
                 contentWidth - DROPDOWN_PADDING * 2);
             graphics.text(this.font, text, contentX + DROPDOWN_PADDING, entryY + 2, DROPDOWN_TEXT_COLOR, false);
         }
-
         graphics.disableScissor();
 
         if (shouldScrollSuggestions()) {
@@ -517,10 +514,8 @@ public class AutoCompleteEditBox<T> extends EditBox {
         private @Nullable String value;
         private Consumer<String> responder = _ -> {
         };
-
         private Consumer<T> suggestionSelectedListener = _ -> {
         };
-
         private int maxLength = 32;
         private boolean bordered = true;
         private boolean editable = true;

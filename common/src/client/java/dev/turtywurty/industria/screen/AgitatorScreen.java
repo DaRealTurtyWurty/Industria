@@ -163,19 +163,16 @@ public class AgitatorScreen extends AbstractContainerScreen<AgitatorScreenHandle
         switch (mode) {
             case ITEM -> {
             }
-
             case FLUID -> {
                 drawWidgetFrame(context, this.inputFluidWidgets[index].getX(), this.inputFluidWidgets[index].getY(),
                     176, 35, 14, 47);
                 this.inputFluidWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
-
             case GAS -> {
                 drawWidgetFrame(context, this.inputGasWidgets[index].getX(), this.inputGasWidgets[index].getY(), 176,
                     35, 14, 47);
                 this.inputGasWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
-
             case SLURRY -> {
                 drawWidgetFrame(context, this.inputSlurryWidgets[index].getX(), this.inputSlurryWidgets[index].getY(),
                     176, 35, 14, 47);
@@ -194,19 +191,16 @@ public class AgitatorScreen extends AbstractContainerScreen<AgitatorScreenHandle
         switch (mode) {
             case ITEM -> {
             }
-
             case FLUID -> {
                 drawWidgetFrame(context, this.outputFluidWidgets[index].getX(), this.outputFluidWidgets[index].getY(),
                     176, 35, 14, 47);
                 this.outputFluidWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
-
             case GAS -> {
                 drawWidgetFrame(context, this.outputGasWidgets[index].getX(), this.outputGasWidgets[index].getY(), 176,
                     35, 14, 47);
                 this.outputGasWidgets[index].extractRenderState(context, mouseX, mouseY, 0.0F);
             }
-
             case SLURRY -> {
                 drawWidgetFrame(context, this.outputSlurryWidgets[index].getX(), this.outputSlurryWidgets[index].getY(),
                     176, 35, 14, 47);

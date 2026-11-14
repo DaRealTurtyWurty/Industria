@@ -19,9 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
-import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
-import net.minecraft.world.level.material.Fluid;
 
 public final class ModPipeConnectionModels {
     private static final ConnectionModelSet CABLE = ConnectionModelSet.horizontalAndVertical(
@@ -184,19 +181,14 @@ public final class ModPipeConnectionModels {
             BlockPos controllerPos = targetPos.relative(targetFace.getOpposite(), 2).below(height);
             if (!(level.getBlockEntity(controllerPos) instanceof ClarifierBlockEntity clarifier))
                 continue;
-
-            ResourceStorage<ResourceVariant<Fluid>> storage = clarifier.getFluidStorageForExternal(targetPos,
-                targetFace);
+            var storage = clarifier.getFluidStorageForExternal(targetPos, targetFace);
             if (storage == null)
                 continue;
-
             if (storage.supportsInsertion())
                 return CLARIFIER_FLUID_INPUT;
-
             if (storage.supportsExtraction())
                 return CLARIFIER_FLUID_OUTPUT;
         }
-
         return null;
     }
 
@@ -210,14 +202,12 @@ public final class ModPipeConnectionModels {
                 case WEST -> Variant.SimpleModelState.DEFAULT;
                 default -> throw new IllegalStateException("Unexpected mixer facing: " + facing);
             };
-
             models.put(facing, ConnectionModelSet.forDirection(
                 Industria.id("mixer_fluid_pipe/" + facing.getName()),
                 Direction.DOWN,
                 Industria.id("block/mixer_fluid_pipe_connection"),
                 state));
         }
-
         return Map.copyOf(models);
     }
 

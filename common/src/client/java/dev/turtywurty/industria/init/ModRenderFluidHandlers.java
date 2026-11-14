@@ -42,7 +42,6 @@ public class ModRenderFluidHandlers {
             int color = MOLTEN_COLORS.getOrDefault(name, 0xFFFFFFFF);
             registerFluidModel("molten_metal", fluid.still(), fluid.flowing(), state -> color);
         });
-
         registerFluidModel("fluid_latex", ModFluids.LATEX.still(), ModFluids.LATEX.flowing());
         registerFluidModel("methanol", ModFluids.METHANOL.still(), ModFluids.METHANOL.flowing());
         registerFluidModel("formic_acid", ModFluids.FORMIC_ACID.still(), ModFluids.FORMIC_ACID.flowing());

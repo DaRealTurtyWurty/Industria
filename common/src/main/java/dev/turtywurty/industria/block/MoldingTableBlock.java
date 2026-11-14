@@ -11,12 +11,12 @@ public class MoldingTableBlock extends IndustriaBlock {
 
     public MoldingTableBlock(Properties settings) {
         super(settings, new BlockProperties()
-            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
-                ModBlockEntityTypes.MOLDING_TABLE)
-                .rightClickToOpenGui()
-                .dropContentsOnBreak())
-            .hasHorizontalFacing()
-            .constantShape(SHAPE));
+                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
+                        ModBlockEntityTypes.MOLDING_TABLE)
+                        .rightClickToOpenGui()
+                        .dropContentsOnBreak())
+                .hasHorizontalFacing()
+                .constantShape(SHAPE));
     }
 
     private static VoxelShape makeShape() {

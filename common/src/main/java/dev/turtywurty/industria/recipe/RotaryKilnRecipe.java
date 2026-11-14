@@ -129,11 +129,11 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
                 ByteBufCodecs.INT, RotaryKilnRecipeDisplay::requiredTemperature,
                 RotaryKilnRecipeDisplay::new);
 
-        private static final Type<RotaryKilnRecipeDisplay> SERIALIZER = new Type<>(CODEC,
+        private static final RecipeDisplay.Type<RotaryKilnRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
-        public Type<RotaryKilnRecipeDisplay> type() {
+        public RecipeDisplay.Type<RotaryKilnRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

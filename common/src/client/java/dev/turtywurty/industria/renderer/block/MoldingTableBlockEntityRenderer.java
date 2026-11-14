@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
 
 public class MoldingTableBlockEntityRenderer
     extends
-        IndustriaBlockEntityRenderer<MoldingTableBlockEntity, MoldingTableRenderState> {
+        IndustriaBlockEntityRenderer<MoldingTableBlockEntity, MoldingTableBlockEntityRenderer.MoldingTableRenderState> {
     private static final float CAST_SIZE = 14f / 16f;
     private static final float CAST_TOP = 15f / 16f + CAST_SIZE * MoldWorldMesh.THICKNESS + 0.001f;
     private final Map<MoldingTableBlockEntity, CachedMesh> meshes = new WeakHashMap<>();
@@ -92,7 +92,6 @@ public class MoldingTableBlockEntityRenderer
                 }
             });
         }
-
         int width = sprite.contents().width();
         int height = sprite.contents().height();
         boolean[] opaque = new boolean[width * height];
@@ -134,7 +133,6 @@ public class MoldingTableBlockEntityRenderer
                     .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
             }
         });
-
         matrices.popPose();
     }
 

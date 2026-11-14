@@ -153,7 +153,7 @@ public record CentrifugalConcentratorRecipe(
                 ByteBufCodecs.INT, CentrifugalConcentratorRecipeDisplay::rpm,
                 CentrifugalConcentratorRecipeDisplay::new);
 
-        public static final Type<CentrifugalConcentratorRecipeDisplay> SERIALIZER = new Type<>(
+        public static final RecipeDisplay.Type<CentrifugalConcentratorRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(
             CODEC, STREAM_CODEC);
 
         @Override
@@ -162,7 +162,7 @@ public record CentrifugalConcentratorRecipe(
         }
 
         @Override
-        public Type<CentrifugalConcentratorRecipeDisplay> type() {
+        public RecipeDisplay.Type<CentrifugalConcentratorRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

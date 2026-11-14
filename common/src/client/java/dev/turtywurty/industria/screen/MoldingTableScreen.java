@@ -129,7 +129,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         for (int polygonIndex = 0; polygonIndex < this.selectedPattern.polygons().size(); polygonIndex++) {
             if (polygonIndex < this.currentPolygonIndex)
                 continue;
-
             List<MoldPoint> polygon = this.selectedPattern.polygons().get(polygonIndex);
             for (int i = 0; i < polygon.size(); i++) {
                 MoldPoint p1 = polygon.get(i);
@@ -141,7 +140,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 } else if (polygonIndex == this.currentPolygonIndex && i == this.currentEdge) {
                     color = 0x5555DDFF;
                 }
-
                 float position = 0;
                 if (!this.failedCast && polygonIndex == this.currentPolygonIndex && this.moldTrace != null) {
                     for (MoldTrace.ProgressRange range : this.moldTrace.progress(i)) {
@@ -150,7 +148,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                         position = range.end();
                     }
                 }
-
                 drawGuideSection(graphics, p1, p2, position, 1, color);
             }
 
@@ -165,7 +162,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                         color = 0xFF33EE77;
                     }
                 }
-
                 MoldPoint point = polygon.get(i);
                 int x = Math.round(this.leftPos + CAST_X + point.x() * CAST_SIZE);
                 int y = Math.round(this.topPos + CAST_Y + point.y() * CAST_SIZE);
@@ -184,7 +180,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 clearCast();
             }
         }
-
         if (++this.visualSyncTicks >= 4) {
             this.visualSyncTicks = 0;
             syncVisual();
@@ -231,7 +226,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                 this.moldTrace = new MoldTrace(this.selectedPattern.polygons().get(this.currentPolygonIndex),
                     (float) MAX_DISTANCE / CAST_SIZE);
             }
-
             this.moldTrace.begin(point);
             this.failedCast |= this.moldTrace.failed();
             this.currentEdge = this.moldTrace.edge();
@@ -334,14 +328,12 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         if (this.visualStrokes.size() < MoldTableVisualState.MAX_STROKES) {
             this.visualStrokes.add(new MoldTableVisualState.Stroke(from, to, GROOVE_RADIUS));
         }
-
         this.visualDirty = true;
     }
 
     private void syncVisual() {
         if (!this.visualDirty || this.menu.getSlot(0).getItem().isEmpty())
             return;
-
         var visual = new MoldTableVisualState(
             BuiltInRegistries.ITEM.getKey(this.menu.getSlot(0).getItem().getItem()),
             this.selectedPattern.id(), this.currentPolygonIndex, this.failedCast, this.visualStrokes);
@@ -354,7 +346,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         MoldTableVisualState visual = this.menu.getBlockEntity().getVisualState();
         if (visual == null || !visual.matches(this.lastStack) || !visual.isValid())
             return false;
-
         this.selectedPattern = MoldPatterns.find(visual.moldId()).orElseThrow();
         this.currentPolygonIndex = visual.completedPolygons();
         this.failedCast = visual.failed();
@@ -367,7 +358,6 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
         for (int i = 0; i < this.currentPolygonIndex; i++) {
             this.castSurface.removePolygon(this.selectedPattern, i);
         }
-
         for (MoldTableVisualState.Stroke stroke : visual.strokes()) {
             this.castSurface.carve(stroke.from(), stroke.to(), stroke.radius());
             if (this.currentPolygonIndex < this.selectedPattern.polygons().size()) {
@@ -375,24 +365,20 @@ public class MoldingTableScreen extends AbstractContainerScreen<MoldingTableMenu
                     this.moldTrace = new MoldTrace(this.selectedPattern.polygons().get(this.currentPolygonIndex),
                         (float) MAX_DISTANCE / CAST_SIZE);
                 }
-
                 if (stroke.from().equals(stroke.to())) {
                     this.moldTrace.begin(stroke.from());
                 } else {
                     this.moldTrace.move(stroke.to());
                 }
-
                 this.failedCast |= this.moldTrace.failed();
                 this.currentEdge = this.moldTrace.edge();
             }
         }
-
         this.visualStrokes.addAll(visual.strokes());
         this.visualDirty = false;
         if (this.moldGrid != null) {
             this.moldGrid.selectPattern(this.selectedPattern);
         }
-
         updateControls();
         return true;
     }

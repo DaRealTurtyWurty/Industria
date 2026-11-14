@@ -11,9 +11,7 @@ import net.neoforged.neoforge.data.event.GatherDataRegistryEntriesEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Temporary NeoForge bootstrap while Industria content is moved into the common module.
- */
+/** Temporary NeoForge bootstrap while Industria content is moved into the common module. */
 @Mod(IndustriaNeoForge.MOD_ID)
 public final class IndustriaNeoForge {
     public static final String MOD_ID = "industria";

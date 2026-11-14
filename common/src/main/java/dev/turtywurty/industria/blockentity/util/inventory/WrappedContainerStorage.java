@@ -39,7 +39,7 @@ public class WrappedContainerStorage<T extends SimpleContainer>
     public void addInventory(@NotNull T inventory, Direction side) {
         this.inventories.add(inventory);
         this.sidedInventories.add(Pair.of(side, inventory));
-        ContainerStorage storage = ContainerStorage.of(inventory, side);
+        var storage = ContainerStorage.of(inventory, side);
         addStorage(storage, side);
     }
 
@@ -71,8 +71,7 @@ public class WrappedContainerStorage<T extends SimpleContainer>
     ) {
         this.inventories.add(inventory);
         this.sidedInventories.add(Pair.of(side, inventory));
-        PredicateContainerStorage storage = PredicateContainerStorage.of(ContainerStorage.of(inventory, side),
-            canInsert, canExtract);
+        var storage = PredicateContainerStorage.of(ContainerStorage.of(inventory, side), canInsert, canExtract);
         addStorage(storage, side);
     }
 

@@ -17,12 +17,8 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.Supplier;
-import dev.turtywurty.multiblocklib.data.MultiblockDefinition;
-import net.minecraft.world.level.block.state.BlockState;
 
-/**
- * The digester stage of the test world's aluminium production line.
- */
+/** The digester stage of the test world's aluminium production line. */
 public final class DigesterTestWorld {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -43,7 +39,6 @@ public final class DigesterTestWorld {
         if (digester.overworld().getBlockState(digester.pos(0, 0, -6)).is(ModBlocks.FLUID_TANK.get())) {
             digester.removeBlock(0, 0, -6);
         }
-
         return digester;
     }
 
@@ -78,10 +73,10 @@ public final class DigesterTestWorld {
     }
 
     private static void removeValidationFixtures(TestWorldContext context) {
-        MultiblockDefinition definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("digester"));
+        var definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("digester"));
         int index = 0;
         for (Rotation rotation : Rotation.values()) {
-            TestWorldContext fixture = context.at(10 + (index % 2) * 10, 0, (index / 2) * 10);
+            var fixture = context.at(10 + (index % 2) * 10, 0, (index / 2) * 10);
             index++;
             if (!(fixture.overworld().getBlockEntity(fixture.origin()) instanceof DigesterBlockEntity digester))
                 continue;
@@ -90,13 +85,12 @@ public final class DigesterTestWorld {
             digester.breakMultiblock();
             for (BlockPos position : definition.pattern().positions()) {
                 BlockPos offset = position.subtract(new BlockPos(2, 0, 2)).rotate(rotation);
-                BlockState expected = definition.pattern().matcherAt(position).exampleState().orElseThrow();
+                var expected = definition.pattern().matcherAt(position).exampleState().orElseThrow();
                 BlockPos worldPos = fixture.origin().offset(offset);
                 if (fixture.overworld().getBlockState(worldPos).is(expected.getBlock())) {
                     fixture.overworld().removeBlock(worldPos, false);
                 }
             }
-
             Direction front = rotation.rotate(Direction.NORTH);
             BlockPos fluid = DigesterBlockEntity.FLUID_OUTPUT_PORT.rotate(rotation).relative(front);
             removePipe(fixture, fluid, ModBlocks.FLUID_PIPE.get());
@@ -121,7 +115,7 @@ public final class DigesterTestWorld {
         BlockPos energy,
         BlockPos slurry
     ) {
-        DigesterBlockEntity digester = context.requireBlockEntity(0, 0, 0, DigesterBlockEntity.class);
+        var digester = context.requireBlockEntity(0, 0, 0, DigesterBlockEntity.class);
         boolean formed = digester.isFormed();
         boolean fluidPort = digester.getFluidStorageForExternal(context.origin().offset(fluid), front) != null;
         boolean energyPort = digester.getEnergyStorageForExternal(context.origin().offset(energy),

@@ -86,4 +86,5 @@ public class ModConfiguredFeatures {
     private static ResourceKey<Feature> registerKey(String name) {
         return ResourceKey.create(Registries.FEATURE, Industria.id(name));
     }
+
 }

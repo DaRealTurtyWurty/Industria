@@ -12,8 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 public class ChargingHatchModel extends Model<ContainerDoorRenderState> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("charging_hatch"),
-        "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("charging_hatch"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/charging_hatch.png");
 
     private final ModelPart door;

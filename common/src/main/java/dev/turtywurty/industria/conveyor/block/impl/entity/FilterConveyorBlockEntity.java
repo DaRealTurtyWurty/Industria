@@ -85,7 +85,6 @@ public class FilterConveyorBlockEntity extends IndustriaBlockEntity
         if (this.filterTag != null) {
             output.store("FilterTagKey", TagKey.codec(Registries.ITEM), this.filterTag);
         }
-
         output.putBoolean("IsTagFiltering", this.isTagFiltering);
     }
 

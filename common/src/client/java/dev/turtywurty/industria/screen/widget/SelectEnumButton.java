@@ -158,7 +158,6 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
             }
 
             // draw hover tooltip
-
             if (isMouseOverSelectionArea(mouseX, mouseY)) {
                 int ordinal = getOrdinal(mouseX, mouseY);
 

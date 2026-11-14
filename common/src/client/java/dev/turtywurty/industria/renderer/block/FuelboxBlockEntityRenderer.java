@@ -13,7 +13,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-import net.minecraft.core.BlockPos;
 
 public class FuelboxBlockEntityRenderer
     extends
@@ -43,8 +42,7 @@ public class FuelboxBlockEntityRenderer
 
         Level level = blockEntity.getLevel();
         if (level != null) {
-            BlockPos frontPos = state.blockPos
-                .relative(state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING));
+            var frontPos = state.blockPos.relative(state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING));
             state.lightCoords = LightCoordsUtil.max(state.lightCoords, LightCoordsUtil.getLightCoords(level, frontPos));
         }
     }

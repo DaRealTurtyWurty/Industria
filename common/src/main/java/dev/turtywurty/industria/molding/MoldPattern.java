@@ -31,7 +31,6 @@ public record MoldPattern(
                 inside = !inside;
             }
         }
-
         return inside;
     }
 

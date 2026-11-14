@@ -54,7 +54,7 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
             ExtraCodecs.BLOCK_POS_TO_UUID_CODEC.fieldOf("pipeToNetworkId")
                 .forGetter(PipeNetworkManager::getPipeToNetworkId))
             .apply(instance, (networks, pipeToNetworkId) -> {
-                M manager = factory.get();
+                var manager = factory.get();
                 manager.networks.addAll(networks);
                 manager.pipeToNetworkId.putAll(pipeToNetworkId);
                 return manager;
@@ -69,7 +69,7 @@ public abstract class PipeNetworkManager<V extends ResourceVariant<?>, N extends
             ExtraStreamCodecs.setOf(networkCodec), PipeNetworkManager::getNetworks,
             ExtraStreamCodecs.BLOCK_POS_TO_UUID_STREAM_CODEC, PipeNetworkManager::getPipeToNetworkId,
             (networks, pipeToNetworkId) -> {
-                M manager = factory.get();
+                var manager = factory.get();
                 manager.networks.addAll(networks);
                 manager.pipeToNetworkId.putAll(pipeToNetworkId);
                 return manager;

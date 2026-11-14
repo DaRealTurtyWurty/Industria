@@ -46,7 +46,6 @@ public class MoldingTableBlockEntity extends IndustriaBlockEntity
                 if (visual != null && !visual.matches(getItem(0))) {
                     MoldingTableBlockEntity.this.visualState = null;
                 }
-
                 super.setChanged();
             }
         });

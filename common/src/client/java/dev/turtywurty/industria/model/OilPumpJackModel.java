@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class OilPumpJackModel extends Model<OilPumpJackModelRenderState> {
+public class OilPumpJackModel extends Model<OilPumpJackModel.OilPumpJackModelRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("oil_pump_jack"),
         "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/oil_pump_jack.png");

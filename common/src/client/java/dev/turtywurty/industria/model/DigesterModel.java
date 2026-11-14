@@ -398,4 +398,5 @@ public class DigesterModel extends Model<IndustriaBlockEntityRenderState> {
 
         return LayerDefinition.create(meshdefinition, 512, 512);
     }
+
 }

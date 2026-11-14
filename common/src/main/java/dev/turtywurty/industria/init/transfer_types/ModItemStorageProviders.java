@@ -9,7 +9,6 @@ import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.turtymultiloader.transfer.TransferService;
 import dev.turtywurty.turtymultiloader.transfer.lookup.StorageKeys;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 public final class ModItemStorageProviders {
     private ModItemStorageProviders() {
@@ -18,7 +17,7 @@ public final class ModItemStorageProviders {
     public static void init() {
         TransferService transfers = TransferService.get();
         transfers.registerBlockProvider(StorageKeys.ITEM, (level, pos, state, _, side) -> {
-            BlockEntity controller = level.getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
+            var controller = level.getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
             return controller instanceof AlloyFurnaceBlockEntity furnace ? furnace.getInventoryProvider(side) : null;
         }, ModBlocks.ALLOY_FURNACE);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.THERMAL_GENERATOR,

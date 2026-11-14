@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class DrillMotorModel extends Model<DrillMotorModelRenderState> {
+public class DrillMotorModel extends Model<DrillMotorModel.DrillMotorModelRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("drill_motor"), "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/drill_motor.png");
 

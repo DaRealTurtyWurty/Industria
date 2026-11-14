@@ -13,7 +13,6 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 
 public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity, BlockPosPayload> {
     public DrillScreenHandler(int syncId, Inventory playerInv, BlockPosPayload payload) {
@@ -71,7 +70,7 @@ public class DrillScreenHandler extends IndustriaScreenHandler<DrillBlockEntity,
     }
 
     public float getEnergyPercentage() {
-        SyncingEnergyStorage energyStorage = this.blockEntity.getEnergyStorage();
+        var energyStorage = this.blockEntity.getEnergyStorage();
         long energy = energyStorage.getAmount();
         long capacity = energyStorage.getCapacity();
         if (energy == 0 || capacity == 0)

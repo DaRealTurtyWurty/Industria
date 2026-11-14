@@ -212,12 +212,12 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         view.store("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
 
-        ValueOutput.ValueOutputList recipesView = view.childrenList("Recipes");
+        var recipesView = view.childrenList("Recipes");
         for (InputRecipeEntry inputRecipeEntry : this.recipes) {
             if (inputRecipeEntry == null)
                 continue;
 
-            ValueOutput recipeView = recipesView.addChild();
+            var recipeView = recipesView.addChild();
 
             ResourceKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey;
             if (registryKey != null && registryKey.identifier() != null) {
@@ -283,11 +283,9 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
                     level.setBlockAndUpdate(offsetPos,
                         offsetState.setValue(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
                 }
-
                 addKilnSegment(offsetPos);
             } else
                 break;
-
         }
     }
 
@@ -401,11 +399,9 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
         public boolean equals(Object obj) {
             if (obj == this)
                 return true;
-
             if (obj == null || obj.getClass() != this.getClass())
                 return false;
-
-            InputRecipeEntry that = (InputRecipeEntry) obj;
+            var that = (InputRecipeEntry) obj;
 
             return uuid.equals(that.uuid);
         }

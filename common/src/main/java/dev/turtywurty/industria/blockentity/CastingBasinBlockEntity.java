@@ -229,7 +229,7 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity
             || !recipe.inputFluid().testForRecipe(getFluidStorage()))
             return false;
 
-        ContainerStorage outputStorage = ContainerStorage.of(getInventory(), null);
+        var outputStorage = ContainerStorage.of(getInventory(), null);
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long extracted = getFluidStorage().extract(

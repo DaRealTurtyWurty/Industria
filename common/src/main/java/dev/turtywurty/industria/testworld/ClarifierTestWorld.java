@@ -28,14 +28,8 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.function.Supplier;
-import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
-import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.material.Fluid;
 
-/**
- * Powered clarification after digestion, with separate fluid and red-mud collection.
- */
+/** Powered clarification after digestion, with separate fluid and red-mud collection. */
 public final class ClarifierTestWorld {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -96,18 +90,15 @@ public final class ClarifierTestWorld {
     }
 
     private static void validateConnections(TestWorldContext context) {
-        ClarifierBlockEntity clarifier = context.requireBlockEntity(0, 0, 0, ClarifierBlockEntity.class);
+        var clarifier = context.requireBlockEntity(0, 0, 0, ClarifierBlockEntity.class);
         check(clarifier.isFormed(), "Clarifier failed to form");
         BlockPos input = context.origin().offset(ClarifierBlockEntity.FLUID_INPUT_PORT);
         BlockPos output = context.origin().offset(ClarifierBlockEntity.FLUID_OUTPUT_PORT);
         BlockPos energy = context.origin().offset(ClarifierBlockEntity.ENERGY_PORT);
         BlockPos item = context.origin().offset(ClarifierBlockEntity.ITEM_OUTPUT_PORT);
-        ResourceStorage<ResourceVariant<Fluid>> inputStorage = TransferType.FLUID.lookup(context.overworld(), input,
-            Direction.WEST);
-        ResourceStorage<ResourceVariant<Fluid>> outputStorage = TransferType.FLUID.lookup(context.overworld(), output,
-            Direction.NORTH);
-        ResourceStorage<ResourceVariant<UnitResource>> energyStorage = TransferType.ENERGY.lookup(context.overworld(),
-            energy, Direction.WEST);
+        var inputStorage = TransferType.FLUID.lookup(context.overworld(), input, Direction.WEST);
+        var outputStorage = TransferType.FLUID.lookup(context.overworld(), output, Direction.NORTH);
+        var energyStorage = TransferType.ENERGY.lookup(context.overworld(), energy, Direction.WEST);
         check(inputStorage != null && inputStorage.supportsInsertion() && !inputStorage.supportsExtraction(),
             "Input port lookup");
         check(outputStorage != null && outputStorage.supportsExtraction() && !outputStorage.supportsInsertion(),
@@ -125,12 +116,11 @@ public final class ClarifierTestWorld {
                     .getValue(PipeBlock.propertyFor(side)) == PipeBlock.ConnectorType.BLOCK,
                 "Disconnected pipe at " + pipe);
         }
-
         LOGGER.info("Clarifier production-line validation passed at {}", context.origin());
     }
 
     private static void validateProcessing(TestWorldContext context) {
-        ClarifierBlockEntity clarifier = context.requireBlockEntity(0, 0, 0, ClarifierBlockEntity.class);
+        var clarifier = context.requireBlockEntity(0, 0, 0, ClarifierBlockEntity.class);
         var dirty = ResourceVariant.of(ResourceTypes.FLUID,
             BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.DIRTY_SODIUM_ALUMINATE.still().get()));
         StorageOperations.set(clarifier.getInputFluidTank(), dirty, FluidAmounts.BUCKET);
@@ -140,28 +130,25 @@ public final class ClarifierTestWorld {
         for (int i = 0; i < 5; i++) {
             clarifier.onTick();
         }
-
         check(clarifier.getMaxProgress() > 0 && clarifier.getProgress() == initialProgress
             && clarifier.getInputFluidTank().getAmount() == FluidAmounts.BUCKET, "Processed without power");
         try (var transaction = TransferTransaction.openRoot()) {
-            ResourceStorage<ResourceVariant<UnitResource>> external = clarifier
+            var external = clarifier
                 .getEnergyStorageForExternal(context.origin().offset(ClarifierBlockEntity.ENERGY_PORT), Direction.WEST);
             check(external.insert(SimpleEnergyStorage.ENERGY, 300, transaction) == 300, "Energy insertion rejected");
             check(!external.supportsExtraction(), "Energy input allows external extraction");
             transaction.commit();
         }
-
         for (int i = 0; i < 3; i++) {
             clarifier.onTick();
         }
-
         check(clarifier.getProgress() == initialProgress + 3 && clarifier.getEnergyStorage().getAmount() == 0,
             "Incorrect energy consumption");
         clarifier.onTick();
         check(clarifier.getProgress() == initialProgress + 3 && !clarifier.isRunning(),
             "Did not pause when power ran out");
         StorageOperations.setEnergy(clarifier.getEnergyStorage(), 100_000);
-        CompoundTag saved = clarifier.saveWithoutMetadata(context.overworld().registryAccess());
+        var saved = clarifier.saveWithoutMetadata(context.overworld().registryAccess());
         StorageOperations.setEnergy(clarifier.getEnergyStorage(), 0);
         clarifier.loadWithComponents(
             TagValueInput.create(ProblemReporter.DISCARDING, context.overworld().registryAccess(), saved));
@@ -171,7 +158,6 @@ public final class ClarifierTestWorld {
         for (int i = 0; i < remaining + 3; i++) {
             clarifier.onTick();
         }
-
         check(clarifier.getEnergyStorage().getAmount() == 100_000 - remaining * ClarifierBlockEntity.ENERGY_PER_TICK,
             "Incorrect batch energy cost");
         check(clarifier.getInputFluidTank().getAmount() == 0, "Input not consumed");

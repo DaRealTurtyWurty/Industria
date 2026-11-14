@@ -138,7 +138,7 @@ public class BuiltinEntityModelBuilder {
 
                 if (displaySetting.rotation.x != 0 || displaySetting.rotation.y != 0
                     || displaySetting.rotation.z != 0) {
-                    JsonArray rotation = new JsonArray();
+                    var rotation = new JsonArray();
                     rotation.add(new JsonPrimitive(displaySetting.rotation.x));
                     rotation.add(new JsonPrimitive(displaySetting.rotation.y));
                     rotation.add(new JsonPrimitive(displaySetting.rotation.z));
@@ -147,7 +147,7 @@ public class BuiltinEntityModelBuilder {
 
                 if (displaySetting.translation.x != 0 || displaySetting.translation.y != 0
                     || displaySetting.translation.z != 0) {
-                    JsonArray translation = new JsonArray();
+                    var translation = new JsonArray();
                     translation.add(new JsonPrimitive(displaySetting.translation.x));
                     translation.add(new JsonPrimitive(displaySetting.translation.y));
                     translation.add(new JsonPrimitive(displaySetting.translation.z));
@@ -155,7 +155,7 @@ public class BuiltinEntityModelBuilder {
                 }
 
                 if (displaySetting.scale.x != 1 || displaySetting.scale.y != 1 || displaySetting.scale.z != 1) {
-                    JsonArray scale = new JsonArray();
+                    var scale = new JsonArray();
                     scale.add(new JsonPrimitive(displaySetting.scale.x));
                     scale.add(new JsonPrimitive(displaySetting.scale.y));
                     scale.add(new JsonPrimitive(displaySetting.scale.z));
@@ -209,7 +209,7 @@ public class BuiltinEntityModelBuilder {
         Identifier particleTextureId,
         DefaultDisplaySettingsBuilder defaultBuilder
     ) {
-        new Builder(writer, item, id, particleTextureId)
+        new BuiltinEntityModelBuilder.Builder(writer, item, id, particleTextureId)
             .defaultDisplaySettings(defaultBuilder).build().write();
     }
 
@@ -403,7 +403,6 @@ public class BuiltinEntityModelBuilder {
             for (Map.Entry<String, DisplaySettings.Builder> builderEntry : this.displaySettings.entrySet()) {
                 builder.displaySettings.add(builderEntry.getValue().build(builderEntry.getKey()));
             }
-
             return builder;
         }
     }

@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.resources.Identifier;
 
 public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<MixerBlockEntity, MixerRenderState> {
     private final MixerModel model;
@@ -71,7 +70,7 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         int light,
         int overlay
     ) {
-        Identifier texture = state.isMixing ? MixerModel.CLOSED_TEXTURE_LOCATION : MixerModel.OPEN_TEXTURE_LOCATION;
+        var texture = state.isMixing ? MixerModel.CLOSED_TEXTURE_LOCATION : MixerModel.OPEN_TEXTURE_LOCATION;
         ModelSubmitUtils.submitModel(queue, this.model,
             state,
             matrices, this.model.renderType(texture),
@@ -133,7 +132,6 @@ public class MixerBlockEntityRenderer extends IndustriaBlockEntityRenderer<Mixer
         }
 
         // TODO: Temperature-based color
-
         this.fluidRenderer.render(state.fluidTank,
             queue, matrices,
             light, overlay,

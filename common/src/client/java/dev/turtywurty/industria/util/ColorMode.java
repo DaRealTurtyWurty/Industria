@@ -36,35 +36,30 @@ public enum ColorMode {
                 b += blueModifier;
                 a += alphaModifier;
                 break;
-
             case MULTIPLICATION :
                 r *= redModifier;
                 g *= greenModifier;
                 b *= blueModifier;
                 a *= alphaModifier;
                 break;
-
             case SUBTRACTION :
                 r -= redModifier;
                 g -= greenModifier;
                 b -= blueModifier;
                 a -= alphaModifier;
                 break;
-
             case DIVISION :
                 r /= redModifier;
                 g /= greenModifier;
                 b /= blueModifier;
                 a /= alphaModifier;
                 break;
-
             case REPLACE :
                 r = redModifier;
                 g = greenModifier;
                 b = blueModifier;
                 a = alphaModifier;
                 break;
-
             default :
                 throw new UnsupportedOperationException("Unexpected value: " + mode);
         }

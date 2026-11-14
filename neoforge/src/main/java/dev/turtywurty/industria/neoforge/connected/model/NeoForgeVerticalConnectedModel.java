@@ -21,10 +21,7 @@ public class NeoForgeVerticalConnectedModel extends DelegateBlockStateModel {
     private final BakedVerticalConnectedModels models;
     private final Set<Block> additionalConnections;
 
-    public NeoForgeVerticalConnectedModel(
-        BakedVerticalConnectedModels models,
-        VerticalConnectedModelSettings settings
-    ) {
+    public NeoForgeVerticalConnectedModel(BakedVerticalConnectedModels models, VerticalConnectedModelSettings settings) {
         super(models.normal());
         this.models = models;
         this.additionalConnections = settings.resolveBlocks();
@@ -35,24 +32,13 @@ public class NeoForgeVerticalConnectedModel extends DelegateBlockStateModel {
     }
 
     @Override
-    public void collectParts(
-        BlockAndTintGetter level,
-        BlockPos pos,
-        BlockState state,
-        RandomSource random,
-        List<BlockStateModelPart> parts
-    ) {
+    public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
         BlockStateModel selected = select(level, pos, state);
         selected.collectParts(level, pos, state, random, parts);
     }
 
     @Override
-    public @Nullable Object createGeometryKey(
-        BlockAndTintGetter level,
-        BlockPos pos,
-        BlockState state,
-        RandomSource random
-    ) {
+    public @Nullable Object createGeometryKey(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random) {
         return select(level, pos, state).createGeometryKey(level, pos, state, random);
     }
 

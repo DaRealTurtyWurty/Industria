@@ -20,25 +20,14 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
     private final ConnectedTextureModelRules rules;
     private final SpriteFinder spriteFinder;
 
-    public FabricConnectedTextureModel(
-        BlockStateModel model,
-        ConnectedTextureSettings settings,
-        SpriteFinder spriteFinder
-    ) {
+    public FabricConnectedTextureModel(BlockStateModel model, ConnectedTextureSettings settings, SpriteFinder spriteFinder) {
         super(model);
         this.rules = new ConnectedTextureModelRules(settings);
         this.spriteFinder = spriteFinder;
     }
 
     @Override
-    public void emitQuads(
-        QuadEmitter emitter,
-        BlockAndTintGetter level,
-        BlockPos pos,
-        BlockState state,
-        RandomSource random,
-        Predicate<@Nullable Direction> cullTest
-    ) {
+    public void emitQuads(QuadEmitter emitter, BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, Predicate<@Nullable Direction> cullTest) {
         if (rules.isEmpty()) {
             super.emitQuads(emitter, level, pos, state, random, cullTest);
             return;
@@ -69,8 +58,7 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
 
                     faceNeighborhood = otherNeighborhoods[group - 1];
                     if (faceNeighborhood == null) {
-                        faceNeighborhood = new ConnectedTextureNeighborhood(level, pos, state,
-                            rules.connections(group));
+                        faceNeighborhood = new ConnectedTextureNeighborhood(level, pos, state, rules.connections(group));
                         otherNeighborhoods[group - 1] = faceNeighborhood;
                     }
                 }
@@ -79,7 +67,7 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
                 int mask = face.getMask(faceNeighborhood, rules.axis(direction));
                 ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask, rules.layout(direction));
                 FabricConnectedTextureModel.this.quadCache.apply(quad, spriteFinder.find(quad),
-                    quad.chunkLayer().translucent(), tile);
+                        quad.chunkLayer().translucent(), tile);
                 return true;
             }
         });
@@ -92,12 +80,7 @@ public class FabricConnectedTextureModel extends WrapperBlockStateModel {
     }
 
     @Override
-    public @Nullable Object createGeometryKey(
-        BlockAndTintGetter level,
-        BlockPos pos,
-        BlockState state,
-        RandomSource random
-    ) {
+    public @Nullable Object createGeometryKey(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random) {
         return null;
     }
 }

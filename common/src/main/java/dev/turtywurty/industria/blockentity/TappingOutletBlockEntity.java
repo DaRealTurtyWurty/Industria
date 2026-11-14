@@ -22,7 +22,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
 import java.util.Objects;
-import net.minecraft.world.item.ItemStack;
 
 public class TappingOutletBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity {
     private final SingleSlotStorage<ResourceVariant<Fluid>> fluidProvider = new SingleSlotStorage<>() {
@@ -69,7 +68,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
         @Override
         public TransferSupport support(int index) {
             StoragePreconditions.index(index, 1);
-            Iterable<ResourceStorageView<ResourceVariant<Fluid>>> storage = getChamberStorage();
+            SyncingFluidStorage storage = getChamberStorage();
             if (storage == null || !canTap())
                 return TransferSupport.NONE;
 
@@ -108,7 +107,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
         if (this.level == null || this.level.isClientSide())
             return;
 
-        Iterable<ResourceStorageView<ResourceVariant<Fluid>>> storage = getChamberStorage();
+        SyncingFluidStorage storage = getChamberStorage();
         if (storage == null || !canTap())
             return;
 
@@ -211,7 +210,7 @@ public class TappingOutletBlockEntity extends IndustriaBlockEntity implements Sy
             return;
         }
 
-        Iterable<ItemStack> inventory = receiver.getInventory();
+        SimpleContainer inventory = receiver.getInventory();
         if (inventory == null || !receiver.isAcceptingFluid()) {
             stopPouring();
             return;

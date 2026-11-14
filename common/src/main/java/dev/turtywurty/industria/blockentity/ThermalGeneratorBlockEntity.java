@@ -74,9 +74,9 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        SyncingEnergyStorage energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
-        SyncingFluidStorage fluid = (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(null);
-        SyncingSimpleInventory inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        var fluid = (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(null);
+        var inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         return List.of(energy, fluid, inventory);
     }
 
@@ -117,7 +117,7 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
             return;
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-            ResourceVariant<Fluid> lava = ResourceTypes.FLUID.of(Fluids.LAVA.builtInRegistryHolder());
+            var lava = ResourceTypes.FLUID.of(Fluids.LAVA.builtInRegistryHolder());
 
             long extracted = storage.extract(lava, FluidAmounts.BUCKET, transaction);
             if (extracted > 0) {

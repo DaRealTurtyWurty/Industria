@@ -236,13 +236,10 @@ public class LadderConveyorBlock extends AbstractPoweredConveyorBlock {
         boolean matchesAbove = isMatchingLineSegment(level.getBlockState(pos.above()), facing, upward);
         if (matchesBelow && matchesAbove)
             return LinePosition.MIDDLE;
-
         if (matchesBelow)
             return LinePosition.TOP;
-
         if (matchesAbove)
             return LinePosition.BOTTOM;
-
         return LinePosition.SINGLE;
     }
 

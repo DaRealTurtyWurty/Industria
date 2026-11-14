@@ -25,7 +25,7 @@ public abstract class TestWorldServerMixin {
 
     @Unique
     private boolean industria$isDisposableTestWorld() {
-        MinecraftServer server = (MinecraftServer) (Object) this;
+        var server = (MinecraftServer) (Object) this;
         return (!server.isDedicatedServer() || Boolean.getBoolean("industria.test.disposableWorld"))
             && IndustriaTestWorld.WORLD_ID.equals(this.storageSource.getLevelId())
             && IndustriaTestWorld.WORLD_ID.equals(server.getWorldData().getLevelName());
