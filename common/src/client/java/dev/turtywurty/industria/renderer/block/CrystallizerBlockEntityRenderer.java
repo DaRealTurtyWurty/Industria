@@ -91,6 +91,8 @@ public class CrystallizerBlockEntityRenderer
         super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         state.progress = blockEntity.getProgress();
         state.maxProgress = blockEntity.getMaxProgress();
+        float progress = state.progress + (blockEntity.isRunning() ? tickProgress : 0f);
+        state.bladeRotation = state.maxProgress > 0 ? progress * 0.1f : 0f;
         state.nextOutputItemStack = blockEntity.getNextOutputItemStack();
         state.crystalFluidStorage = blockEntity.getCrystalFluidStorage();
         state.waterFluidStorage = blockEntity.getWaterFluidStorage();
@@ -105,14 +107,14 @@ public class CrystallizerBlockEntityRenderer
         int light,
         int overlay
     ) {
-        ModelSubmitUtils.submitModel(queue, this.model, null,
+        ModelSubmitUtils.submitModel(queue, this.model, state,
             matrices, this.model.renderType(CrystallizerModel.TEXTURE_LOCATION),
             light, overlay, 0, state.breakProgress);
 
         renderNextOutputItem(state, matrices, queue, light, overlay);
         renderFluids(state, matrices, queue, light, overlay);
 
-        ModelSubmitUtils.submitModel(queue, this.glassModel, null,
+        ModelSubmitUtils.submitModel(queue, this.glassModel, state,
             matrices, this.glassModel.renderType(CrystallizerModel.TEXTURE_LOCATION),
             light, overlay, 0, state.breakProgress);
     }

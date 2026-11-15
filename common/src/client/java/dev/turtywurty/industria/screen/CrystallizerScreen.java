@@ -1,7 +1,9 @@
 package dev.turtywurty.industria.screen;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.screen.widget.EnergyWidget;
 import dev.turtywurty.industria.screen.widget.FluidWidget;
+import dev.turtywurty.industria.screen.widget.util.Orientation;
 import dev.turtywurty.industria.menu.CrystallizerScreenHandler;
 import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,6 +24,11 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerScre
         super.init();
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
+        addRenderableOnly(new EnergyWidget.Builder(this.menu.getBlockEntity().getEnergyStorage())
+            .bounds(this.leftPos + 76, this.topPos + 68, 64, 6)
+            .orientation(Orientation.HORIZONTAL)
+            .build());
+
         addRenderableOnly(new FluidWidget.Builder(this.menu.getBlockEntity().getWaterFluidStorage())
             .bounds(this.leftPos + 8, this.topPos + 12, 20, 66)
             .posSupplier(() -> this.menu.getBlockEntity().getBlockPos())
@@ -36,6 +43,7 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerScre
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        context.fill(this.leftPos + 75, this.topPos + 67, this.leftPos + 141, this.topPos + 75, 0xFF373737);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 94, this.topPos + 38, 176, 0,
             this.menu.getProgressScaled(), 17);
 

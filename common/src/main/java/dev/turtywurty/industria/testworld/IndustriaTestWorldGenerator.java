@@ -44,9 +44,13 @@ public final class IndustriaTestWorldGenerator {
         }
 
         TestWorldContext energyGenContext = context.at(0, 0, 5);
-        energyGenContext.setBlock(-1, 0, 0, ModBlocks.WIND_TURBINE);
-        energyGenContext.setBlock(0, 0, 0, ModBlocks.WIND_TURBINE);
-        energyGenContext.setBlock(1, 0, 0, ModBlocks.WIND_TURBINE);
+        var windTurbine = ModBlocks.WIND_TURBINE.get();
+        var windTurbineState = windTurbine.defaultBlockState();
+        for (int x = -1; x <= 1; x++) {
+            energyGenContext.setBlock(x, 0, 0, windTurbineState);
+            windTurbine.setPlacedBy(energyGenContext.overworld(), energyGenContext.pos(x, 0, 0),
+                windTurbineState, null, new ItemStack(windTurbine));
+        }
 
         energyGenContext.setBlock(-3, 0, 1, ModBlocks.SOLAR_PANEL.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
@@ -85,7 +89,7 @@ public final class IndustriaTestWorldGenerator {
         ClarifierTestWorld.connectMachines(clarifierContext, digesterContext);
         CrystallizerTestWorld.connectMachines(crystallizerContext, clarifierContext, poolContext);
         SmelteryTestWorld.place(context.at(8, 0, -10));
-        AlloyFurnaceTestWorld.place(context.at(16, 0, -10));
+        AlloyFurnaceTestWorld.place(context.at(4, 0, -10));
         WaterWheelTestWorld.place(context.at(7, 3, 7));
     }
 

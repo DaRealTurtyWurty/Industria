@@ -31,7 +31,7 @@ public class CrystallizerScreenHandler extends IndustriaScreenHandler<Crystalliz
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
         WrappedContainerStorage<?> wrappedStorage = this.wrappedContainerStorage;
-        addSlot(new PredicateSlot(wrappedStorage.getInventory(0), 0, 54, 12, _ -> !blockEntity.isRunning()));
+        addSlot(new PredicateSlot(wrappedStorage.getInventory(0), 0, 54, 12, _ -> !blockEntity.isProcessing()));
         addSlot(new OutputSlot(wrappedStorage.getInventory(1), 0, 148, 27));
         addSlot(new OutputSlot(wrappedStorage.getInventory(2), 0, 148, 51));
     }

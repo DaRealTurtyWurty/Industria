@@ -4,6 +4,8 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.abstraction.BlockEntityContentsDropper;
 import dev.turtywurty.industria.block.abstraction.BlockEntityWithGui;
 import dev.turtywurty.industria.blockentity.util.SyncableStorage;
+import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
+import dev.turtywurty.industria.blockentity.util.energy.WrappedEnergyStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
 import dev.turtywurty.industria.blockentity.util.fluid.InputFluidStorage;
 import dev.turtywurty.industria.blockentity.util.fluid.SyncingFluidStorage;
@@ -63,7 +65,10 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
         BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crystallizer");
+    public static final BlockPos ENERGY_PORT = new BlockPos(0, 3, 0);
+    public static final long ENERGY_PER_TICK = 100;
 
+    private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
 
@@ -106,10 +111,11 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
 
     public CrystallizerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.CRYSTALLIZER.get(), ModBlockEntityTypes.CRYSTALLIZER.get(), pos, state);
+        this.wrappedEnergyStorage.addStorage(new SyncingEnergyStorage(this, 100_000, 5_000, 0));
 
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 5, _ -> !isRunning()),
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 5, _ -> !isProcessing()),
             Direction.SOUTH);
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET, _ -> !isRunning()),
+        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET, _ -> !isProcessing()),
             Direction.UP);
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1), Direction.WEST);
         this.wrappedContainerStorage.addInventory(new OutputSimpleInventory(this, 1), Direction.NORTH);
@@ -117,7 +123,20 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
     }
 
     public boolean isRunning() {
+        return isFormed() && isProcessing() && this.progress < this.maxProgress
+            && this.outputItemStack.isEmpty() && this.byproductItemStack.isEmpty() && hasEnergy();
+    }
+
+    public boolean isProcessing() {
         return this.currentRecipeId != null;
+    }
+
+    public SyncingEnergyStorage getEnergyStorage() {
+        return (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+    }
+
+    private boolean hasEnergy() {
+        return getEnergyStorage().getAmount() >= ENERGY_PER_TICK;
     }
 
     @Override
@@ -138,7 +157,8 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
         OutputSimpleInventory outputInventory = getOutputInventory();
         OutputSimpleInventory byproductInventory = getByproductInventory();
 
-        return List.of(waterFluidStorage, crystalFluidStorage, catalystInventory, outputInventory, byproductInventory);
+        return List.of(waterFluidStorage, crystalFluidStorage, catalystInventory, outputInventory, byproductInventory,
+            getEnergyStorage());
     }
 
     @Override
@@ -203,6 +223,9 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
             return;
         }
 
+        if (this.progress < this.maxProgress && !hasEnergy())
+            return;
+
         if (this.catalystUsesLeft <= 0) {
             if (recipe.catalyst().testForRecipe(catalystItemStack)) {
                 this.catalystUsesLeft = recipe.catalystUses();
@@ -240,6 +263,7 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
 
             update();
         } else {
+            extract(getEnergyStorage(), ENERGY_PER_TICK);
             int progressModifier = (this.catalystUsesLeft > 0 && recipe.catalyst().testForRecipe(catalystItemStack))
                 ? 4
                 : 1;
@@ -262,6 +286,7 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
         super.saveAdditional(view);
         ViewUtils.putChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
+        ViewUtils.putChild(view, "Energy", this.wrappedEnergyStorage);
         view.putInt("Progress", this.progress);
         view.putInt("MaxProgress", this.maxProgress);
 
@@ -290,6 +315,7 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
         super.loadAdditional(view);
         ViewUtils.readChild(view, "FluidTank", this.wrappedFluidStorage);
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);
+        ViewUtils.readChild(view, "Energy", this.wrappedEnergyStorage);
 
         this.progress = view.getIntOr("Progress", 0);
         this.maxProgress = view.getIntOr("MaxProgress", 0);
@@ -385,6 +411,8 @@ public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockE
 
     @Override
     protected void definePorts(PortRegistrar ports) {
+        ports.input(TransferType.ENERGY, this::getEnergyStorage)
+            .where((offset, side) -> offset.equals(ENERGY_PORT) && side == Direction.UP);
         ports.input(TransferType.FLUID, this::getCrystalFluidStorage)
             .at(new BlockPos(1, 2, 0));
         ports.input(TransferType.FLUID, this::getWaterFluidStorage)

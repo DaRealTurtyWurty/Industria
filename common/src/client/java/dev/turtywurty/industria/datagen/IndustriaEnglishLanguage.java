@@ -318,6 +318,7 @@ public final class IndustriaEnglishLanguage {
         // Steel
         translationBuilder.add(ModItems.STEEL_INGOT.get(), "Steel Ingot");
         translationBuilder.add(ModItems.STEEL_NUGGET.get(), "Steel Nugget");
+        translationBuilder.add(ModItems.STEEL_BALL_BEARING.get(), "Steel Ball Bearing");
         translationBuilder.add(ModBlocks.STEEL_BLOCK.get(), "Block of Steel");
 
         // Sodium
@@ -331,13 +332,21 @@ public final class IndustriaEnglishLanguage {
         // Bronze
         translationBuilder.add(ModItems.BRONZE_INGOT.get(), "Bronze Ingot");
         translationBuilder.add(ModItems.BRONZE_NUGGET.get(), "Bronze Nugget");
+        translationBuilder.add(ModItems.BRONZE_BALL_BEARING.get(), "Bronze Ball Bearing");
+        translationBuilder.add(ModItems.BRONZE_GEAR.get(), "Bronze Gear");
         translationBuilder.add(ModBlocks.BRONZE_BLOCK.get(), "Block of Bronze");
+
+        // Copper
+        translationBuilder.add(ModItems.COPPER_ROD.get(), "Copper Rod");
+        translationBuilder.add(ModItems.COPPER_WIRE.get(), "Copper Wire");
+        translationBuilder.add(ModItems.COPPER_COIL.get(), "Copper Coil");
 
         // Miscellaneous
         translationBuilder.add(ModItems.RED_MUD.get(), "Red Mud");
         translationBuilder.add(ModItems.CRYOLITE.get(), "Cryolite");
         translationBuilder.add(ModItems.CARBON_ROD.get(), "Carbon Rod");
         translationBuilder.add(ModItems.BOTTLE_FORMIC_ACID.get(), "Bottle of Formic Acid");
+        translationBuilder.add(ModItems.WIRE_DRAWPLATE.get(), "Wire Drawplate");
         translationBuilder.add(ModFluids.LATEX.block().get(), "Latex");
         translationBuilder.add(ModFluids.LATEX.bucket().get(), "Bucket of Latex");
         translationBuilder.add(ModFluids.METHANOL.block().get(), "Methanol");

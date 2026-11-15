@@ -44,7 +44,7 @@ public final class ClarifierTestWorld {
         clarifier.setBlock(2, 0, -6, ModBlocks.FLUID_TANK);
         clarifier.setBlock(0, 1, -3, ModBlocks.FEEDER_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
-        clarifier.setBlock(0, 1, -4, ModBlocks.CONVEYOR.get().defaultBlockState()
+        clarifier.setBlock(0, 1, -4, ModBlocks.HATCH_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
         clarifier.setBlock(0, 1, -5, Blocks.CHEST);
         return clarifier;

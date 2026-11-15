@@ -32,12 +32,12 @@ public final class CrystallizerTestWorld {
         // Aluminium hydroxide leaves the east port; sodium carbonate leaves the north port.
         crystallizer.setBlock(2, 0, 0, ModBlocks.FEEDER_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
-        crystallizer.setBlock(3, 0, 0, ModBlocks.CONVEYOR.get().defaultBlockState()
+        crystallizer.setBlock(3, 0, 0, ModBlocks.HATCH_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
         crystallizer.setBlock(4, 0, 0, Blocks.CHEST);
         crystallizer.setBlock(0, 0, -2, ModBlocks.FEEDER_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
-        crystallizer.setBlock(0, 0, -3, ModBlocks.CONVEYOR.get().defaultBlockState()
+        crystallizer.setBlock(0, 0, -3, ModBlocks.HATCH_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
         crystallizer.setBlock(0, 0, -4, Blocks.CHEST);
         return crystallizer;
@@ -64,6 +64,20 @@ public final class CrystallizerTestWorld {
             crystallizer.pos(0, 4, -3),
             crystallizer.pos(0, 4, -2),
             crystallizer.pos(0, 2, -2)));
+
+        // Branch from the clarifier's power supply and enter the top-center energy port from above.
+        for (BlockPos pos : crystallizer.runPipe(List.of(
+            clarifier.pos(-5, 1, 0),
+            clarifier.pos(-5, 5, 0),
+            crystallizer.pos(-5, 5, 0),
+            crystallizer.pos(0, 5, 0),
+            crystallizer.pos(0, 4, 0)), ModBlocks.CABLE)) {
+            crystallizer.overworld().updateNeighborsAt(pos, ModBlocks.CABLE.get());
+        }
+
+        if (Boolean.getBoolean("industria.test.crystallizer.validation") && crystallizer.server().isDedicatedServer()) {
+            crystallizer.afterTicks(20, CrystallizerValidationTestWorld::validate);
+        }
     }
 
     private static void connect(TestWorldContext context, List<BlockPos> waypoints) {

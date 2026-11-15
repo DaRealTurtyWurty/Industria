@@ -7,6 +7,7 @@ public class CrystallizerRenderState extends IndustriaBlockEntityRenderState {
     public ItemStack nextOutputItemStack = ItemStack.EMPTY;
     public int progress = 0;
     public int maxProgress = 0;
+    public float bladeRotation;
     public SyncingFluidStorage crystalFluidStorage;
     public SyncingFluidStorage waterFluidStorage;
 

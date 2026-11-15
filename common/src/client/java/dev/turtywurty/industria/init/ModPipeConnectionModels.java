@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.block.WindTurbineBlock;
 import dev.turtywurty.industria.blockentity.ClarifierBlockEntity;
 import dev.turtywurty.industria.blockentity.DigesterBlockEntity;
 import dev.turtywurty.industria.blockentity.MixerBlockEntity;
@@ -152,6 +153,18 @@ public final class ModPipeConnectionModels {
             (state, targetFace) -> {
                 Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
                 return targetFace == facing.getClockWise() || targetFace == facing.getCounterClockWise();
+            },
+            SOLAR_PANEL_CABLE,
+            0);
+
+        PipeConnectionModelApi.register(
+            Industria.id("wind_turbine_cable"),
+            ModBlocks.CABLE.get(),
+            ModBlocks.WIND_TURBINE.get(),
+            (state, targetFace) -> {
+                Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+                return state.getValue(WindTurbineBlock.PART) == 0
+                    && (targetFace == facing.getClockWise() || targetFace == facing.getCounterClockWise());
             },
             SOLAR_PANEL_CABLE,
             0);

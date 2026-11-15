@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.model;
 
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.state.CrystallizerRenderState;
 import dev.turtywurty.industria.util.IndustriaRenderTypes;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -10,10 +11,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
-public class CrystallizerModel extends Model<Void> {
+public class CrystallizerModel extends Model<CrystallizerRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("crystallizer"),
         "main");
     public static final Identifier TEXTURE_LOCATION = Industria.id("textures/block/crystallizer.png");
+    private final ModelPart blades;
 
     public CrystallizerModel(ModelPart root) {
         this(root, false);
@@ -22,6 +24,7 @@ public class CrystallizerModel extends Model<Void> {
     public CrystallizerModel(ModelPart root, boolean glassOnly) {
         super(root, glassOnly ? IndustriaRenderTypes.GLASS_RENDER_TYPE : RenderTypes::entityCutout);
         ModelPart main = root.getChild("main");
+        this.blades = main.getChild("structure").getChild("blades");
         main.getChild("support").visible = !glassOnly;
         main.getChild("window").visible = !glassOnly;
         main.getChild("structure").visible = !glassOnly;
@@ -31,6 +34,12 @@ public class CrystallizerModel extends Model<Void> {
         main.getChild("output").visible = !glassOnly;
         main.getChild("energy").visible = !glassOnly;
         main.getChild("glass").visible = glassOnly;
+    }
+
+    @Override
+    public void setupAnim(CrystallizerRenderState state) {
+        super.setupAnim(state);
+        this.blades.yRot = state == null ? 0f : state.bladeRotation;
     }
 
     public static LayerDefinition getTexturedModelData() {
