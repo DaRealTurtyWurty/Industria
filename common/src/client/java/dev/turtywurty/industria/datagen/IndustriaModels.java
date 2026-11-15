@@ -655,6 +655,10 @@ public final class IndustriaModels {
         blockStateModelGenerator.blockStateOutput.accept(MultiVariantGenerator.dispatch(
             ModBlocks.ALLOY_FURNACE.get(), BlockModelGenerators.plainVariant(Industria.id("block/alloy_furnace"))));
         blockStateModelGenerator.createFurnace(ModBlocks.THERMAL_GENERATOR.get(), TexturedModel.ORIENTABLE_ONLY_TOP);
+        blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.WATER_WHEEL.get());
+        ModelTemplates.PARTICLE_ONLY.create(ModBlocks.WATER_WHEEL.get(),
+            TextureMapping.particle(Blocks.OAK_PLANKS),
+            blockStateModelGenerator.modelOutput);
         createBattery(blockStateModelGenerator, ModBlocks.BASIC_BATTERY.get());
         createBattery(blockStateModelGenerator, ModBlocks.ADVANCED_BATTERY.get());
         createBattery(blockStateModelGenerator, ModBlocks.ELITE_BATTERY.get());
@@ -961,6 +965,15 @@ public final class IndustriaModels {
     }
 
     public void generateItemModels(ItemModelGenerators itemModelGenerator) {
+        itemModelGenerator.itemModelOutput.accept(ModBlocks.WATER_WHEEL.get().asItem(),
+            ItemModelUtils.specialModel(Industria.id("item/water_wheel"),
+                new IndustriaBlockEntityItemRenderer.Unbaked(WaterWheelModel.LAYER_LOCATION,
+                    WaterWheelModel.TEXTURE_LOCATION)));
+        BuiltinEntityModelBuilder.write(itemModelGenerator, ModBlocks.WATER_WHEEL.get(),
+            Identifier.withDefaultNamespace("block/oak_planks"),
+            BuiltinEntityModelBuilder.defaultBlock()
+                .copyModifyAll(displaySettings -> displaySettings.setScale(0.25F, 0.25F, 0.25F))
+                .copyModifyGui(displaySettings -> displaySettings.setScale(0.28F, 0.28F, 0.28F)));
         itemModelGenerator.itemModelOutput.accept(ModItems.SIMPLE_DRILL_HEAD.get(),
             ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ModItems.SIMPLE_DRILL_HEAD.get()),
                 new DrillHeadItemRenderer.Unbaked()));
@@ -1201,6 +1214,7 @@ public final class IndustriaModels {
             ModBlocks.UPGRADE_STATION.get().asItem(),
             ModBlocks.WELLHEAD.get().asItem(),
             ModBlocks.WIND_TURBINE.get().asItem(),
+            ModBlocks.WATER_WHEEL.get().asItem(),
             ModBlocks.SMELTERY_GLASS.get().asItem(),
             ModBlocks.FIREBRICK.get().asItem(),
             ModBlocks.SMELTERY_HEARTH.get().asItem(),

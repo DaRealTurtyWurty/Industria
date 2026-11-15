@@ -30,6 +30,10 @@ public class StateProperties {
         addProperty(new StateProperty<>(BlockStateProperties.WATERLOGGED, false));
     }
 
+    public void addFacing() {
+        addProperty(new StateProperty<>(BlockStateProperties.FACING, Direction.NORTH));
+    }
+
     public <T extends Comparable<T>> void addProperty(StateProperty<T> property) {
         if (this.properties.containsKey(property.delegate().getName()))
             throw new IllegalArgumentException(

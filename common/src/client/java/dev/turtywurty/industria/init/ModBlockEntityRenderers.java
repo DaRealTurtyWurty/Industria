@@ -55,5 +55,7 @@ public class ModBlockEntityRenderers {
             ChargingHatchBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.FUELBOX,
             FuelboxBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.WATER_WHEEL,
+            WaterWheelBlockEntityRenderer::new);
     }
 }

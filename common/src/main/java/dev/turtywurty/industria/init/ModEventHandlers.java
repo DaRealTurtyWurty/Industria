@@ -4,6 +4,7 @@ import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.command.ResetConveyorNetworksCommand;
 import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.consumeeffect.DestroyStomachConsumeEffect;
+import dev.turtywurty.industria.mechanical.MechanicalNetworkManager;
 import dev.turtywurty.industria.menu.base.TickableScreenHandler;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
@@ -64,6 +65,7 @@ public class ModEventHandlers {
         });
 
         Events.onEndLevelTick(world -> {
+            MechanicalNetworkManager.getOrCreate(world).tick(world);
             for (ServerPlayer player : world.players()) {
                 if (player.containerMenu instanceof TickableScreenHandler tickable) {
                     tickable.tick(player);
@@ -87,6 +89,14 @@ public class ModEventHandlers {
                     }
                 }
             }
+        });
+
+        Events.onChunkLoad((level, chunk) -> {
+            MechanicalNetworkManager.getOrCreate(level).onChunkLoaded(chunk);
+        });
+
+        Events.onChunkUnload((level, chunk) -> {
+            MechanicalNetworkManager.getOrCreate(level).onChunkUnloaded(chunk.getPos());
         });
     }
 }

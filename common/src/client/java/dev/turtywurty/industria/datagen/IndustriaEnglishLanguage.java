@@ -401,6 +401,9 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, MoldGrid.TITLE, "Molds");
         addText(translationBuilder, MoldPatterns.INGOT.getDisplayName(), "Ingot");
         addText(translationBuilder, MoldPatterns.ROD.getDisplayName(), "Rod");
+
+        translationBuilder.add(ModBlocks.WATER_WHEEL.get(), "Water Wheel");
+        translationBuilder.add(ModBlocks.KINETIC_DYNAMO.get(), "Kinetic Dynamo");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

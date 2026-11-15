@@ -4,8 +4,11 @@ import com.mojang.datafixers.util.Function4;
 import dev.turtywurty.industria.block.abstraction.state.StateProperties;
 import dev.turtywurty.industria.block.abstraction.state.StateProperty;
 import dev.turtywurty.industria.blockentity.util.TickableBlockEntity;
+import dev.turtywurty.industria.mechanical.MechanicalNetworkManager;
+import dev.turtywurty.industria.mechanical.MechanicalNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -126,19 +129,42 @@ public class IndustriaBlock extends Block implements EntityBlock {
     }
 
     @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+
+        if (this instanceof MechanicalNode && level instanceof ServerLevel serverLevel) {
+            MechanicalNetworkManager.getOrCreate(serverLevel).markDirty(pos);
+        }
+    }
+
+    @Override
+    protected void affectNeighborsAfterRemoval(
+        BlockState state,
+        ServerLevel level,
+        BlockPos pos,
+        boolean movedByPiston
+    ) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+
+        if (this instanceof MechanicalNode) {
+            MechanicalNetworkManager.getOrCreate(level).markDirty(pos);
+        }
+    }
+
+    @Override
     protected BlockState rotate(BlockState state, Rotation rotation) {
-        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING))
-            return state.setValue(BlockStateProperties.HORIZONTAL_FACING,
-                rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+        Property<Direction> facingProperty = this.stateProperties.getProperty(BlockStateProperties.FACING);
+        if (facingProperty != null)
+            return state.setValue(facingProperty, rotation.rotate(state.getValue(facingProperty)));
 
         return super.rotate(state, rotation);
     }
 
     @Override
     protected BlockState mirror(BlockState state, Mirror mirror) {
-        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING))
-            return state.setValue(BlockStateProperties.HORIZONTAL_FACING,
-                mirror.mirror(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+        Property<Direction> facingProperty = this.stateProperties.getProperty(BlockStateProperties.FACING);
+        if (facingProperty != null)
+            return state.setValue(facingProperty, mirror.mirror(state.getValue(facingProperty)));
 
         return super.mirror(state, mirror);
     }
@@ -149,13 +175,16 @@ public class IndustriaBlock extends Block implements EntityBlock {
         if (state == null)
             return null;
 
-        if (this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            Direction facing = ctx.getHorizontalDirection();
+        Property<Direction> facingProperty = this.stateProperties.getProperty(BlockStateProperties.FACING);
+        if (facingProperty != null) {
+            Direction facing = facingProperty == BlockStateProperties.FACING
+                ? ctx.getNearestLookingDirection()
+                : ctx.getHorizontalDirection();
             if (this.placeFacingOpposite) {
                 facing = facing.getOpposite();
             }
 
-            state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, facing);
+            state = state.setValue(facingProperty, facing);
         }
 
         if (this.stateProperties.containsProperty(BlockStateProperties.AXIS)) {
@@ -299,6 +328,18 @@ public class IndustriaBlock extends Block implements EntityBlock {
         public static VoxelShape calculateShape(Direction to, VoxelShape shape) {
             final VoxelShape[] buffer = {shape, Shapes.empty()};
 
+            if (to == Direction.UP) {
+                shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1],
+                    Shapes.box(minX, 1 - maxZ, minY, maxX, 1 - minZ, maxY)));
+                return buffer[1];
+            }
+
+            if (to == Direction.DOWN) {
+                shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1],
+                    Shapes.box(minX, minZ, 1 - maxY, maxX, maxZ, 1 - minY)));
+                return buffer[1];
+            }
+
             final int times = (to.get2DDataValue() - Direction.NORTH.get2DDataValue() + 4) % 4;
             for (int i = 0; i < times; i++) {
                 buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1],
@@ -317,6 +358,18 @@ public class IndustriaBlock extends Block implements EntityBlock {
         public BlockProperties hasHorizontalFacing(boolean hasHorizontalFacing) {
             if (hasHorizontalFacing) {
                 this.stateProperties.addHorizontalFacing();
+            }
+
+            return this;
+        }
+
+        public BlockProperties hasFacing() {
+            return hasFacing(true);
+        }
+
+        public BlockProperties hasFacing(boolean hasFacing) {
+            if (hasFacing) {
+                this.stateProperties.addFacing();
             }
 
             return this;
@@ -466,16 +519,17 @@ public class IndustriaBlock extends Block implements EntityBlock {
         }
 
         public BlockProperties useRotatedShapes(VoxelShape shape) {
-            if (!this.stateProperties.containsProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            if (!this.stateProperties.containsProperty("facing")) {
                 hasHorizontalFacing();
             }
 
+            Property<Direction> facingProperty = this.stateProperties.getProperty(BlockStateProperties.FACING);
             if (this.cachedDirectionalShapes.isEmpty()) {
                 runShapeCalculation(this.cachedDirectionalShapes, shape);
             }
 
             return shapeFactory((state, world, pos, context) -> this.cachedDirectionalShapes
-                .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+                .get(state.getValue(facingProperty)));
         }
 
         public static class BlockBlockEntityProperties<T extends BlockEntity> {

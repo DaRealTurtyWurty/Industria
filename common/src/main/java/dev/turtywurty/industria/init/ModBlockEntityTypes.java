@@ -193,6 +193,14 @@ public class ModBlockEntityTypes {
         "molding_table",
         MoldingTableBlockEntity::new, builder -> builder.validBlock(ModBlocks.MOLDING_TABLE));
 
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<WaterWheelBlockEntity>> WATER_WHEEL = register(
+        "water_wheel",
+        WaterWheelBlockEntity::new, builder -> builder.validBlock(ModBlocks.WATER_WHEEL));
+
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<KineticDynamoBlockEntity>> KINETIC_DYNAMO = register(
+        "kinetic_dynamo",
+        KineticDynamoBlockEntity::new, builder -> builder.validBlock(ModBlocks.KINETIC_DYNAMO));
+
     public static <T extends BlockEntity> RegistrationHandle<BlockEntityType<?>, BlockEntityType<T>> register(
         String name,
         BiFunction<BlockPos, BlockState, T> factory,

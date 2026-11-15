@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "industria:item/water_wheel",
+    "model": {
+      "type": "industria:block_entity_item",
+      "model_layer": {
+        "id": "industria:water_wheel",
+        "name": "main"
+      },
+      "texture": "industria:textures/block/water_wheel.png"
+    }
+  }
+}

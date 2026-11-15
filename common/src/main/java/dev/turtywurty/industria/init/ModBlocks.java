@@ -421,6 +421,14 @@ public class ModBlocks {
         "casting_basin",
         CastingBasinBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final RegistrationHandle<Block, WaterWheelBlock> WATER_WHEEL = registerWithItemCopy(
+        "water_wheel",
+        WaterWheelBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, KineticDynamoBlock> KINETIC_DYNAMO = registerWithItemCopy(
+        "kinetic_dynamo",
+        KineticDynamoBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> RegistrationHandle<Block, T> register(
         String name,
         Function<BlockBehaviour.Properties, T> constructor,

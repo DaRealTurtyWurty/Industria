@@ -146,6 +146,15 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
                 }
             }
         }
+
+        if (state.getBlock() instanceof PipeBlock<?, ?>) {
+            for (BlockPos pathPos : path) {
+                BlockState placedState = overworld.getBlockState(pathPos);
+                BlockState connectedState = Block.updateFromNeighbourShapes(placedState, overworld, pathPos);
+                if (connectedState != placedState)
+                    overworld.setBlockAndUpdate(pathPos, connectedState);
+            }
+        }
     }
 
     public List<BlockPos> findShortestPath(BlockPos start, BlockPos end, Predicate<BlockPos> canTraverse) {

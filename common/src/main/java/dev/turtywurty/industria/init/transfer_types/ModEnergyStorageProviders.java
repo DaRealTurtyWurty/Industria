@@ -69,5 +69,7 @@ public final class ModEnergyStorageProviders {
 
             return null;
         }, ModBlocks.CABLE);
+        transfers.registerBlockEntityProvider(StorageKeys.ENERGY, ModBlockEntityTypes.KINETIC_DYNAMO,
+            KineticDynamoBlockEntity::getEnergyProvider);
     }
 }
