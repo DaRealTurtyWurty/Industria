@@ -12,11 +12,11 @@ import java.util.Objects;
 import java.util.Set;
 
 public record VerticalConnectedModelSettings(
-        Identifier normal,
-        Identifier lower,
-        Identifier middle,
-        Identifier upper,
-        Set<Identifier> connectsTo
+    Identifier normal,
+    Identifier lower,
+    Identifier middle,
+    Identifier upper,
+    Set<Identifier> connectsTo
 ) {
     public VerticalConnectedModelSettings {
         Objects.requireNonNull(normal, "normal cannot be null");
@@ -61,9 +61,8 @@ public record VerticalConnectedModelSettings(
         var models = new JsonObject();
         for (VerticalConnectedModelVariant variant : VerticalConnectedModelVariant.values()) {
             models.addProperty(
-                    variant.name().toLowerCase(Locale.ROOT),
-                    modelFor(variant).toString()
-            );
+                variant.name().toLowerCase(Locale.ROOT),
+                modelFor(variant).toString());
         }
         json.add("models", models);
 
@@ -73,9 +72,9 @@ public record VerticalConnectedModelSettings(
             } else {
                 var array = new JsonArray();
                 for (String id : connectsTo.stream()
-                        .map(Identifier::toString)
-                        .sorted()
-                        .toList()) {
+                    .map(Identifier::toString)
+                    .sorted()
+                    .toList()) {
                     array.add(new JsonPrimitive(id));
                 }
 
@@ -103,13 +102,15 @@ public record VerticalConnectedModelSettings(
             if (connectsToElement.isJsonPrimitive() && connectsToElement.getAsJsonPrimitive().isString()) {
                 Identifier id = Identifier.tryParse(connectsToElement.getAsString());
                 if (id == null)
-                    throw new JsonParseException("connects_to must be a valid identifier, but was: " + connectsToElement);
+                    throw new JsonParseException(
+                        "connects_to must be a valid identifier, but was: " + connectsToElement);
 
                 connectsTo.add(id);
             } else if (connectsToElement.isJsonArray()) {
                 for (JsonElement element : connectsToElement.getAsJsonArray()) {
                     if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString())
-                        throw new JsonParseException("connects_to must be an array of strings, but was: " + connectsToElement);
+                        throw new JsonParseException(
+                            "connects_to must be an array of strings, but was: " + connectsToElement);
 
                     Identifier id = Identifier.tryParse(element.getAsString());
                     if (id == null)
@@ -117,9 +118,9 @@ public record VerticalConnectedModelSettings(
 
                     connectsTo.add(id);
                 }
-            } else {
-                throw new JsonParseException("connects_to must be a string or an array of strings, but was: " + connectsToElement);
-            }
+            } else
+                throw new JsonParseException(
+                    "connects_to must be a string or an array of strings, but was: " + connectsToElement);
         }
 
         return new VerticalConnectedModelSettings(normal, lower, middle, upper, connectsTo);

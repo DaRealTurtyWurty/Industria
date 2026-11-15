@@ -117,14 +117,21 @@ public class AlloyFurnaceBlock extends DoorContainerBlock {
                 || !level.isUnobstructed(state.setValue(PART, part), partPos, CollisionContext.empty())
                 || (context.getPlayer() != null
                     && (!level.mayInteract(context.getPlayer(), partPos)
-                        || !context.getPlayer().mayUseItemAt(partPos, context.getClickedFace(), context.getItemInHand()))))
+                        || !context.getPlayer().mayUseItemAt(partPos, context.getClickedFace(),
+                            context.getItemInHand()))))
                 return null;
         }
         return state;
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+    public void setPlacedBy(
+        Level level,
+        BlockPos pos,
+        BlockState state,
+        @Nullable LivingEntity placer,
+        ItemStack stack
+    ) {
         super.setPlacedBy(level, pos, state, placer, stack);
         if (state.getValue(PART) != 0)
             return;
@@ -136,7 +143,13 @@ public class AlloyFurnaceBlock extends DoorContainerBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        BlockHitResult hit
+    ) {
         BlockPos controllerPos = getControllerPos(pos, state);
         if (player instanceof ServerPlayer serverPlayer
             && level.getBlockEntity(controllerPos) instanceof BlockEntityWithGui<?> furnace) {

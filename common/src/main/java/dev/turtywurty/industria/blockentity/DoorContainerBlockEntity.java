@@ -16,7 +16,10 @@ import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity implements TickableBlockEntity, LidBlockEntity {
+public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity
+    implements
+        TickableBlockEntity,
+        LidBlockEntity {
     private static final int EVENT_SET_OPEN_COUNT = 1;
 
     private boolean doorOpen;
@@ -58,7 +61,8 @@ public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity impl
 
     public void stopOpen(ContainerUser user) {
         if (!isRemoved() && this.level != null && !this.level.isClientSide() && !user.getLivingEntity().isSpectator()) {
-            this.openersCounter.decrementOpeners(user.getLivingEntity(), this.level, this.worldPosition, getBlockState());
+            this.openersCounter.decrementOpeners(user.getLivingEntity(), this.level, this.worldPosition,
+                getBlockState());
         }
     }
 

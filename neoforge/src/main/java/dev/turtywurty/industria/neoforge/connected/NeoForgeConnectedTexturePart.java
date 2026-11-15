@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record NeoForgeConnectedTexturePart(
-        BlockStateModelPart delegate,
-        long packedTiles,
-        NeoForgeConnectedTextureQuadCache quadCache
+    BlockStateModelPart delegate,
+    long packedTiles,
+    NeoForgeConnectedTextureQuadCache quadCache
 ) implements BlockStateModelPart {
     static final int DISABLED_TILE_INDEX = 0x3F;
 
@@ -36,8 +36,9 @@ public record NeoForgeConnectedTexturePart(
             BakedQuad quad = source.get(index);
             ConnectedTextureTile tile = getTileForDirection(quad.direction());
             if (tile != null) {
-                if (quads == null)
+                if (quads == null) {
                     quads = new ArrayList<>(source);
+                }
                 quads.set(index, quadCache.getQuad(quad, tile));
             }
         }

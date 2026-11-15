@@ -81,16 +81,16 @@ public class FuelboxBlockEntity extends DoorContainerBlockEntity
         this.wrappedContainerStorage.addInventory(
             new PredicateSimpleInventory(this, 3,
                 (itemStack, _) -> isFuel(itemStack)) {
-                    @Override
-                    public void startOpen(ContainerUser user) {
-                        FuelboxBlockEntity.this.startOpen(user);
-                    }
+                @Override
+                public void startOpen(ContainerUser user) {
+                    FuelboxBlockEntity.this.startOpen(user);
+                }
 
-                    @Override
-                    public void stopOpen(ContainerUser user) {
-                        FuelboxBlockEntity.this.stopOpen(user);
-                    }
-                });
+                @Override
+                public void stopOpen(ContainerUser user) {
+                    FuelboxBlockEntity.this.stopOpen(user);
+                }
+            });
     }
 
     @Override

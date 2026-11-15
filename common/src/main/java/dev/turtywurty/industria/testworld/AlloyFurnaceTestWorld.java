@@ -21,8 +21,10 @@ public final class AlloyFurnaceTestWorld {
 
         context.configureBlockEntity(0, 0, 0, AlloyFurnaceBlockEntity.class, furnace -> {
             var storage = furnace.getWrappedContainerStorage();
-            storage.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0).setItem(0, new ItemStack(Items.COPPER_INGOT, 48));
-            storage.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1).setItem(0, new ItemStack(ModItems.TIN_INGOT.get(), 16));
+            storage.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_0).setItem(0,
+                new ItemStack(Items.COPPER_INGOT, 48));
+            storage.getInventory(AlloyFurnaceBlockEntity.INPUT_SLOT_1).setItem(0,
+                new ItemStack(ModItems.TIN_INGOT.get(), 16));
             storage.getInventory(AlloyFurnaceBlockEntity.FUEL_SLOT).setItem(0, new ItemStack(Items.COAL, 16));
         });
     }

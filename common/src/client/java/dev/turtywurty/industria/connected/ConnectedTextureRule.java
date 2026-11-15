@@ -10,9 +10,13 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
-public record ConnectedTextureRule(Set<Identifier> connectsTo, ConnectedTextureAxis axis, ConnectedTextureLayoutType layout) {
-    public static final ConnectedTextureRule DEFAULT =
-            new ConnectedTextureRule(Set.of(), ConnectedTextureAxis.BOTH, ConnectedTextureLayoutType.CTM47);
+public record ConnectedTextureRule(
+    Set<Identifier> connectsTo,
+    ConnectedTextureAxis axis,
+    ConnectedTextureLayoutType layout
+) {
+    public static final ConnectedTextureRule DEFAULT = new ConnectedTextureRule(Set.of(), ConnectedTextureAxis.BOTH,
+        ConnectedTextureLayoutType.CTM47);
 
     public ConnectedTextureRule {
         connectsTo = Set.copyOf(connectsTo);
@@ -21,17 +25,17 @@ public record ConnectedTextureRule(Set<Identifier> connectsTo, ConnectedTextureA
     }
 
     public ConnectedTextureRule(
-            Set<Identifier> connectsTo,
-            ConnectedTextureAxis axis
+        Set<Identifier> connectsTo,
+        ConnectedTextureAxis axis
     ) {
         this(connectsTo, axis, ConnectedTextureLayoutType.CTM47);
     }
 
     public static ConnectedTextureRule fromJson(JsonObject json, ConnectedTextureRule defaults) {
         return new ConnectedTextureRule(
-                readConnections(json, defaults.connectsTo()),
-                readAxis(json, defaults.axis()),
-                readLayout(json, defaults.layout()));
+            readConnections(json, defaults.connectsTo()),
+            readAxis(json, defaults.axis()),
+            readLayout(json, defaults.layout()));
     }
 
     private static Set<Identifier> readConnections(JsonObject json, Set<Identifier> defaults) {
@@ -74,7 +78,8 @@ public record ConnectedTextureRule(Set<Identifier> connectsTo, ConnectedTextureA
         try {
             return ConnectedTextureAxis.valueOf(name.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException _) {
-            throw new JsonParseException("Unknown connection_axis: " + name + "; expected both, horizontal or vertical");
+            throw new JsonParseException(
+                "Unknown connection_axis: " + name + "; expected both, horizontal or vertical");
         }
     }
 
@@ -90,14 +95,15 @@ public record ConnectedTextureRule(Set<Identifier> connectsTo, ConnectedTextureA
         try {
             return ConnectedTextureLayoutType.valueOf(name.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException _) {
-            throw new JsonParseException("Unknown layout_type: " + name + "; expected ctm47, horizontal_strip or vertical_strip");
+            throw new JsonParseException(
+                "Unknown layout_type: " + name + "; expected ctm47, horizontal_strip or vertical_strip");
         }
     }
 
     public JsonObject toJson(ConnectedTextureRule defaults) {
-        JsonObject json = new JsonObject();
+        var json = new JsonObject();
         if (!connectsTo.equals(defaults.connectsTo())) {
-            JsonArray targets = new JsonArray();
+            var targets = new JsonArray();
             for (String id : connectsTo.stream().map(Identifier::toString).sorted().toList()) {
                 targets.add(new JsonPrimitive(id));
             }
@@ -109,7 +115,7 @@ public record ConnectedTextureRule(Set<Identifier> connectsTo, ConnectedTextureA
             json.add("connection_axis", new JsonPrimitive(axis.name().toLowerCase(Locale.ROOT)));
         }
 
-        if(layout != defaults.layout()) {
+        if (layout != defaults.layout()) {
             json.add("layout_type", new JsonPrimitive(layout.name().toLowerCase(Locale.ROOT)));
         }
 

@@ -10,7 +10,8 @@ import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 
 public class NeoForgeVerticalConnectedModelLoader implements UnbakedModelLoader<NeoForgeVerticalConnectedUnbakedModel> {
     @Override
-    public NeoForgeVerticalConnectedUnbakedModel read(JsonObject jsonObject, JsonDeserializationContext context) throws JsonParseException {
+    public NeoForgeVerticalConnectedUnbakedModel read(JsonObject jsonObject, JsonDeserializationContext context)
+        throws JsonParseException {
         VerticalConnectedModelSettings settings = VerticalConnectedModelSettings.fromJson(jsonObject);
         JsonObject deepCopy = jsonObject.deepCopy();
         deepCopy.remove("loader");

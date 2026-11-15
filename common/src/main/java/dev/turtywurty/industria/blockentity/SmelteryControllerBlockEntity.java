@@ -221,7 +221,7 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
 
             BlockPos topPos = chimneyPos;
             while (serverLevel.isLoaded(topPos.above())
-                    && serverLevel.getBlockState(topPos.above()).is(ModBlocks.CHIMNEY.get())) {
+                && serverLevel.getBlockState(topPos.above()).is(ModBlocks.CHIMNEY.get())) {
                 topPos = topPos.above();
             }
 
@@ -1176,7 +1176,8 @@ public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 BlockPos neighborPos = currentPos.relative(direction);
                 if (visited.contains(neighborPos)
-                    || !boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5))
+                    || !boundingBox.contains(neighborPos.getX() + 0.5, neighborPos.getY() + 0.5,
+                        neighborPos.getZ() + 0.5))
                     continue;
 
                 if (!this.level.isLoaded(neighborPos))

@@ -26,6 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
+import net.minecraft.world.item.Item;
 
 public final class AlloyFurnaceValidationTestWorld {
     private AlloyFurnaceValidationTestWorld() {
@@ -41,7 +42,8 @@ public final class AlloyFurnaceValidationTestWorld {
         TestWorldScheduler.schedule(context, 40, test -> {
             try {
                 validate(test.at(0, 8, 0));
-                LogUtils.getLogger().info("[AlloyFurnaceSuite] PASS placement, every part/facing, drops, creative, replacement, obstruction and stocked fixture");
+                LogUtils.getLogger().info(
+                    "[AlloyFurnaceSuite] PASS placement, every part/facing, drops, creative, replacement, obstruction and stocked fixture");
             } catch (Throwable failure) {
                 LogUtils.getLogger().error("[AlloyFurnaceSuite] FAIL", failure);
             } finally {
@@ -69,7 +71,7 @@ public final class AlloyFurnaceValidationTestWorld {
             player.setYRot(facing.getOpposite().toYRot());
             for (int brokenPart = 0; brokenPart <= 8; brokenPart++) {
                 clearDrops(context);
-                ItemStack stack = new ItemStack(item, 2);
+                var stack = new ItemStack(item, 2);
                 var placement = placement(player, stack, origin);
                 check(item.place(placement).consumesAction(), "Placement failed: " + facing);
                 check(stack.getCount() == 1, "Placement must consume exactly one furnace");
@@ -87,7 +89,8 @@ public final class AlloyFurnaceValidationTestWorld {
                         check(state.useWithoutItem(level, player,
                             new BlockHitResult(Vec3.atCenterOf(pos), facing, pos, false)).consumesAction(),
                             "Part did not handle interaction");
-                        var controller = (AlloyFurnaceBlockEntity) level.getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
+                        var controller = (AlloyFurnaceBlockEntity) level
+                            .getBlockEntity(AlloyFurnaceBlock.getControllerPos(pos, state));
                         var menu = controller.createMenu(1, player.getInventory(), player);
                         check(menu instanceof AlloyFurnaceScreenHandler,
                             "Part did not resolve the furnace menu");
@@ -114,9 +117,10 @@ public final class AlloyFurnaceValidationTestWorld {
         for (int part = 1; part <= 8; part++) {
             var obstruction = origin.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH));
             level.setBlockAndUpdate(obstruction, Blocks.STONE.defaultBlockState());
-            ItemStack stack = new ItemStack(item);
+            var stack = new ItemStack(item);
             check(!item.place(placement(player, stack, origin)).consumesAction(), "Accepted obstructed part " + part);
-            check(stack.getCount() == 1 && level.getBlockState(origin).isAir(), "Rejected placement changed the world/item");
+            check(stack.getCount() == 1 && level.getBlockState(origin).isAir(),
+                "Rejected placement changed the world/item");
             check(level.getBlockState(obstruction).is(Blocks.STONE), "Overwrote obstruction");
             level.removeBlock(obstruction, false);
         }
@@ -134,18 +138,22 @@ public final class AlloyFurnaceValidationTestWorld {
         expectGone(context, Direction.NORTH);
         check(countDrops(context, item) == 0, "Creative breaking must not drop a furnace");
 
-        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(), "First adjacent fixture failed");
+        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(),
+            "First adjacent fixture failed");
         BlockPos adjacent = origin.offset(2, 0, 0);
-        check(item.place(placement(player, new ItemStack(item), adjacent)).consumesAction(), "Second adjacent fixture failed");
+        check(item.place(placement(player, new ItemStack(item), adjacent)).consumesAction(),
+            "Second adjacent fixture failed");
         player.gameMode.destroyBlock(origin);
         expectGone(context, Direction.NORTH);
         for (int part = 0; part <= 8; part++) {
-            check(level.getBlockState(adjacent.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH))).is(block),
+            check(
+                level.getBlockState(adjacent.offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH))).is(block),
                 "Breaking furnace damaged adjacent furnace");
         }
         player.gameMode.destroyBlock(adjacent);
 
-        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(), "Replacement fixture failed");
+        check(item.place(placement(player, new ItemStack(item), origin)).consumesAction(),
+            "Replacement fixture failed");
         var replaced = origin.offset(AlloyFurnaceBlock.getPartOffset(5, Direction.NORTH));
         level.setBlockAndUpdate(replaced, Blocks.STONE.defaultBlockState());
         expectGone(context, Direction.NORTH);
@@ -156,7 +164,9 @@ public final class AlloyFurnaceValidationTestWorld {
         AlloyFurnaceTestWorld.place(fixture);
         var furnace = fixture.requireBlockEntity(0, 0, 0, AlloyFurnaceBlockEntity.class);
         for (int part = 0; part <= 8; part++) {
-            check(level.getBlockState(fixture.origin().offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH))).is(block),
+            check(
+                level.getBlockState(fixture.origin().offset(AlloyFurnaceBlock.getPartOffset(part, Direction.NORTH)))
+                    .is(block),
                 "Stocked fixture is missing part " + part);
         }
         for (int tick = 0; tick < 403; tick++) {
@@ -182,7 +192,7 @@ public final class AlloyFurnaceValidationTestWorld {
         }
     }
 
-    private static int countDrops(TestWorldContext context, net.minecraft.world.item.Item item) {
+    private static int countDrops(TestWorldContext context, Item item) {
         return context.overworld().getEntitiesOfClass(ItemEntity.class, new AABB(context.origin()).inflate(5))
             .stream().map(ItemEntity::getItem).filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
     }
