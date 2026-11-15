@@ -2,12 +2,15 @@ package dev.turtywurty.industria.mechanical;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.*;
 
 public class MechanicalNetwork {
     private final Set<BlockPos> nodes;
     private final MechanicalSimulation simulation;
+    private final List<BlockPos> participantPositions = new ArrayList<>();
+    private boolean participantsCached;
 
     public MechanicalNetwork(Set<BlockPos> nodes, double initialRPM) {
         this.nodes = Set.copyOf(Objects.requireNonNull(nodes, "nodes cannot be null"));
@@ -23,32 +26,41 @@ public class MechanicalNetwork {
     }
 
     public void tick(ServerLevel level) {
-        List<MechanicalSource> sources = findSources(level);
-        simulation.tick(sources, findConsumers(level));
+        if (!participantsCached) {
+            refreshParticipants(level);
+        }
+
+        List<MechanicalSource> sources = new ArrayList<>();
+        List<MechanicalConsumer> consumers = new ArrayList<>();
+        for (BlockPos pos : participantPositions) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof MechanicalSource source) {
+                sources.add(source);
+            }
+
+            if (blockEntity instanceof MechanicalConsumer consumer) {
+                consumers.add(consumer);
+            }
+        }
+
+        simulation.tick(sources, consumers);
         for (MechanicalSource source : sources) {
             source.onShaftUpdate(simulation.getState().rpm(), simulation.getRotationDelta());
         }
     }
 
-    private List<MechanicalSource> findSources(ServerLevel level) {
-        List<MechanicalSource> sources = new ArrayList<>();
+    public void refreshParticipants(ServerLevel level) {
+        participantPositions.clear();
         for (BlockPos pos : nodes) {
-            if (level.getBlockEntity(pos) instanceof MechanicalSource source) {
-                sources.add(source);
+            if (!level.getBlockState(pos).hasBlockEntity())
+                continue;
+
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof MechanicalSource || blockEntity instanceof MechanicalConsumer) {
+                participantPositions.add(pos);
             }
         }
 
-        return sources;
-    }
-
-    private List<MechanicalConsumer> findConsumers(ServerLevel level) {
-        List<MechanicalConsumer> consumers = new ArrayList<>();
-        for (BlockPos pos : nodes) {
-            if (level.getBlockEntity(pos) instanceof MechanicalConsumer consumer) {
-                consumers.add(consumer);
-            }
-        }
-
-        return consumers;
+        participantsCached = true;
     }
 }

@@ -7,4 +7,8 @@ import java.util.Set;
 
 public interface MechanicalNode {
     Set<Direction> getMechanicalPorts(BlockState state);
+
+    default boolean isActiveMechanicalNode(BlockState state) {
+        return !getMechanicalPorts(state).isEmpty();
+    }
 }

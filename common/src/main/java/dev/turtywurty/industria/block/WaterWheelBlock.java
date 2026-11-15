@@ -7,14 +7,20 @@ import dev.turtywurty.industria.mechanical.MechanicalNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public class WaterWheelBlock extends IndustriaBlock implements MechanicalNode {
+public class WaterWheelBlock extends IndustriaBlock implements MechanicalNode, SimpleWaterloggedBlock {
     public static final IntegerProperty PART = IntegerProperty.create("part", 0, 8);
     private static final List<BlockPos> OFFSETS = List.of(
         BlockPos.ZERO,
@@ -82,7 +88,8 @@ public class WaterWheelBlock extends IndustriaBlock implements MechanicalNode {
                 return null;
         }
 
-        return state;
+        return state.setValue(BlockStateProperties.WATERLOGGED,
+            level.getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
     }
 
     @Override
@@ -99,8 +106,36 @@ public class WaterWheelBlock extends IndustriaBlock implements MechanicalNode {
 
         Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
         for (int part = 1; part < OFFSETS.size(); part++) {
-            level.setBlock(pos.offset(getPartOffset(part, facing)), state.setValue(PART, part), Block.UPDATE_ALL);
+            BlockPos partPos = pos.offset(getPartOffset(part, facing));
+            boolean waterlogged = level.getFluidState(partPos).getType() == Fluids.WATER;
+            level.setBlock(partPos, state.setValue(PART, part)
+                .setValue(BlockStateProperties.WATERLOGGED, waterlogged), Block.UPDATE_ALL);
         }
+    }
+
+    @Override
+    protected BlockState updateShape(
+        BlockState state,
+        LevelReader level,
+        ScheduledTickAccess ticks,
+        BlockPos pos,
+        Direction direction,
+        BlockPos neighborPos,
+        BlockState neighborState,
+        RandomSource random
+    ) {
+        if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+            ticks.getFluidTicks().schedule(ticks.createTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level)));
+        }
+
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
+    }
+
+    @Override
+    protected FluidState getFluidState(BlockState state) {
+        return state.getValue(BlockStateProperties.WATERLOGGED)
+            ? Fluids.WATER.getSource(false)
+            : super.getFluidState(state);
     }
 
     @Override

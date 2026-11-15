@@ -11,6 +11,7 @@ public final class MechanicalSimulation {
     private static final double FRICTION_PER_RPM = 0.02;
     private static final double STOPPED_RPM = 0.0001;
     private static final int MIN_SUBSTEPS = 16;
+    private static final int MAX_SUBSTEPS = 256;
 
     private double rpm;
     private double rotationDelta;
@@ -116,8 +117,9 @@ public final class MechanicalSimulation {
             slope += Math.abs(consumer.getRequiredTorque(probe) - consumer.getRequiredTorque(rpm));
         }
 
-        return Math.max(MIN_SUBSTEPS,
-            (int) Math.ceil(4.0 * slope * SECONDS_PER_TICK / (INERTIA * RADIANS_PER_RPM)));
+        return Math.clamp(
+            (int) Math.ceil(4.0 * slope * SECONDS_PER_TICK / (INERTIA * RADIANS_PER_RPM)),
+            MIN_SUBSTEPS, MAX_SUBSTEPS);
     }
 
     private static double sourceTorque(List<MechanicalSource> sources, double shaftRPM) {

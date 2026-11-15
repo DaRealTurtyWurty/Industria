@@ -54,7 +54,7 @@ public final class MechanicalNetworkManager {
         unloadingChunks.remove(chunk.getPos().pack());
 
         chunk.findBlocks(
-            state -> state.getBlock() instanceof MechanicalNode,
+            MechanicalNetworkManager::isMechanicalNode,
             (pos, _) -> markDirty(pos));
     }
 
@@ -92,6 +92,7 @@ public final class MechanicalNetworkManager {
                 continue;
 
             var network = recreateNetwork(component, previousNetworks);
+            network.refreshParticipants(level);
             networks.add(network);
             for (BlockPos pos : component) {
                 networksByPos.put(pos, network);
@@ -140,7 +141,7 @@ public final class MechanicalNetworkManager {
                 continue;
 
             BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof MechanicalNode node))
+            if (!(state.getBlock() instanceof MechanicalNode node) || !node.isActiveMechanicalNode(state))
                 continue;
 
             result.add(pos);
@@ -150,7 +151,8 @@ public final class MechanicalNetworkManager {
                     continue;
 
                 BlockState neighborState = level.getBlockState(neighborPos);
-                if (!(neighborState.getBlock() instanceof MechanicalNode neighborNode))
+                if (!(neighborState.getBlock() instanceof MechanicalNode neighborNode)
+                    || !neighborNode.isActiveMechanicalNode(neighborState))
                     continue;
 
                 if (neighborNode.getMechanicalPorts(neighborState).contains(direction.getOpposite())) {
@@ -168,6 +170,10 @@ public final class MechanicalNetworkManager {
     }
 
     private boolean isMechanicalNode(ServerLevel level, BlockPos pos) {
-        return isAvailable(level, pos) && level.getBlockState(pos).getBlock() instanceof MechanicalNode;
+        return isAvailable(level, pos) && isMechanicalNode(level.getBlockState(pos));
+    }
+
+    private static boolean isMechanicalNode(BlockState state) {
+        return state.getBlock() instanceof MechanicalNode node && node.isActiveMechanicalNode(state);
     }
 }
