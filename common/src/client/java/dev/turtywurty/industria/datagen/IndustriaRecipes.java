@@ -719,6 +719,11 @@ public final class IndustriaRecipes {
                     .unlockedBy(getHasName(Items.CLAY), has(Items.CLAY))
                     .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
                     .save(output);
+
+                offerWireDrawplateRecipe(output,
+                    new IndustriaIngredient(1, ModItems.COPPER_ROD.get()),
+                    new OutputItemStack(ModItems.COPPER_WIRE.get(), 1, 1),
+                    50, "copper_rod_to_wire");
             }
 
             private void metalStorageRecipes(
@@ -1048,6 +1053,17 @@ public final class IndustriaRecipes {
         }
         builder.offerTo(exporter, ResourceKey.create(Registries.RECIPE,
             Industria.id("casting_" + blockType.getSerializedName() + "_" + name)));
+    }
+
+    private static void offerWireDrawplateRecipe(
+        RecipeOutput exporter,
+        IndustriaIngredient input,
+        OutputItemStack output,
+        int duration,
+        String name
+    ) {
+        new WireDrawplateRecipeBuilder(input, output, duration)
+            .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("wire_drawplate_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {

@@ -31,6 +31,7 @@ public class ModRecipeBookCategories {
         "distillation_tower");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> SMELTERY = register("smeltery");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> CASTING = register("casting");
+    public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> WIRE_DRAWPLATE = register("wire_drawplate");
 
     public static RegistrationHandle<RecipeBookCategory, RecipeBookCategory> register(String name) {
         return REGISTRIES.registerRecipeBookCategory(Industria.id(name), RecipeBookCategory::new);

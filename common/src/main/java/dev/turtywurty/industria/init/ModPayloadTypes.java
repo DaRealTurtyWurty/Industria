@@ -191,6 +191,7 @@ public class ModPayloadTypes {
         registerClientbound(OpenSeismicScannerPayload.ID, OpenSeismicScannerPayload.CODEC);
         registerClientbound(SyncFluidPocketsPayload.ID, SyncFluidPocketsPayload.CODEC);
         registerClientbound(UpgradeStationUpdateRecipesPayload.ID, UpgradeStationUpdateRecipesPayload.CODEC);
+        registerClientbound(SyncWireDrawplateRecipesPayload.ID, SyncWireDrawplateRecipesPayload.CODEC);
         registerClientbound(SyncPipeNetworkManagerPayload.ID, SyncPipeNetworkManagerPayload.CODEC);
         registerClientbound(AddPipeNetworkPayload.ID, AddPipeNetworkPayload.CODEC);
         registerClientbound(RemovePipeNetworkPayload.ID, RemovePipeNetworkPayload.CODEC);

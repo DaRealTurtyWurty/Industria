@@ -64,6 +64,9 @@ public class ModRecipeSerializers {
     public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<SmeltingRecipe>> CLAY_MOLD_SMELTING = register(
         "clay_mold_smelting", () -> ClayMoldSmeltingRecipe.SERIALIZER);
 
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<WireDrawplateRecipe>> WIRE_DRAWPLATE = register(
+        "wire_drawplate", () -> WireDrawplateRecipe.SERIALIZER);
+
     public static <T extends Recipe<?>> RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<T>> register(
         String name,
         Supplier<RecipeSerializer<T>> serializer

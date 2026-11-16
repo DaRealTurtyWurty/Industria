@@ -6,6 +6,7 @@ import dev.turtywurty.industria.command.ResetPipeNetworksCommand;
 import dev.turtywurty.industria.consumeeffect.DestroyStomachConsumeEffect;
 import dev.turtywurty.industria.mechanical.MechanicalNetworkManager;
 import dev.turtywurty.industria.menu.base.TickableScreenHandler;
+import dev.turtywurty.industria.network.SyncWireDrawplateRecipesPayload;
 import dev.turtywurty.industria.persistent.LevelConveyorNetworks;
 import dev.turtywurty.industria.persistent.WorldFluidPocketsState;
 import dev.turtywurty.industria.persistent.WorldPipeNetworks;
@@ -31,7 +32,12 @@ public class ModEventHandlers {
             NetworkService.get().sendToPlayer(sender, WorldFluidPocketsState.createSyncPacket(sender.level()));
             WorldPipeNetworks.syncToClient(sender);
             LevelConveyorNetworks.syncToClient(sender);
+            NetworkService.get().sendToPlayer(sender,
+                SyncWireDrawplateRecipesPayload.fromRecipes(sender.level().recipeAccess()));
         });
+
+        Events.onDatapackReload(server -> NetworkService.get().sendToAll(server,
+            SyncWireDrawplateRecipesPayload.fromRecipes(server.getRecipeManager())));
 
         Events.onBlockBroken((level, _, pos, _, _) -> {
             if (!(level instanceof ServerLevel serverLevel))

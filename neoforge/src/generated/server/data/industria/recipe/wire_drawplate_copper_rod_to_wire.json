@@ -1,0 +1,12 @@
+{
+  "type": "industria:wire_drawplate",
+  "duration": 50,
+  "input": {
+    "ingredients": "industria:copper_rod"
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:copper_wire"
+  }
+}

@@ -4,11 +4,10 @@ import com.mojang.serialization.MapCodec;
 import dev.turtywurty.industria.component.MoldComponent;
 import dev.turtywurty.industria.init.ModDataComponentTypes;
 import dev.turtywurty.industria.init.ModItems;
+import dev.turtywurty.industria.init.ModRecipeSerializers;
 import dev.turtywurty.industria.molding.MoldPattern;
 import dev.turtywurty.industria.molding.MoldPatterns;
 import dev.turtywurty.industria.molding.MoldPiece;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -23,6 +22,9 @@ import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClayMoldSmeltingRecipe extends SmeltingRecipe {
     private static final MapCodec<SmeltingRecipe> CODEC = cookingMapCodec(ClayMoldSmeltingRecipe::new);
@@ -62,7 +64,7 @@ public class ClayMoldSmeltingRecipe extends SmeltingRecipe {
 
     @Override
     public RecipeSerializer<SmeltingRecipe> getSerializer() {
-        return SERIALIZER;
+        return ModRecipeSerializers.CLAY_MOLD_SMELTING.get();
     }
 
     @Override

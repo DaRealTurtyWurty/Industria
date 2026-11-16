@@ -6,6 +6,7 @@ import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.renderer.block.RotaryKilnBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.world.FluidPocketLevelRenderer;
 import dev.turtywurty.industria.screen.SeismicScannerScreen;
+import dev.turtywurty.industria.util.WireDrawplateClientCache;
 import dev.turtywurty.turtymultiloader.network.NetworkService;
 import dev.turtywurty.turtymultiloader.network.PayloadPhase;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,10 @@ import net.minecraft.world.level.Level;
 public class ModClientPackets {
     public static void init() {
         NetworkService networkService = NetworkService.get();
+        networkService.registerClientHandler(PayloadPhase.PLAY, SyncWireDrawplateRecipesPayload.ID,
+            (payload, context) -> context.enqueueWork(() -> WireDrawplateClientCache.update(payload.recipes())));
+        networkService.onClientDisconnect(WireDrawplateClientCache::clear);
+
         networkService.registerClientHandler(PayloadPhase.PLAY, OpenSeismicScannerPayload.ID,
             (payload, context) -> context
                 .enqueueWork(() -> Minecraft.getInstance().gui.setScreen(new SeismicScannerScreen(payload.stack()))));
