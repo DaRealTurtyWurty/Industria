@@ -6,21 +6,15 @@ import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -29,14 +23,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedBlock {
+public class FluidPumpBlock extends IndustriaBlock {
     private static final Map<Direction, Map<DoubleBlockHalf, VoxelShape>> SHAPES = createShapes();
 
     public FluidPumpBlock(Properties settings) {
         super(settings, new BlockProperties()
             .hasHorizontalFacing()
             .addStateProperty(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
-            .addStateProperty(BlockStateProperties.WATERLOGGED, false)
+            .hasWaterloggableProperty()
             .shapeFactory((state, _, _, _) -> SHAPES
                 .get(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
                 .get(state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)))
@@ -95,11 +89,7 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
             || !context.getLevel().getBlockState(upperPos).canBeReplaced())
             return null;
 
-        BlockState state = super.getStateForPlacement(context);
-        return state == null
-            ? null
-            : state.setValue(BlockStateProperties.WATERLOGGED,
-                context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
+        return super.getStateForPlacement(context);
     }
 
     @Override
@@ -113,37 +103,11 @@ public class FluidPumpBlock extends IndustriaBlock implements SimpleWaterloggedB
         super.setPlacedBy(level, pos, state, placer, stack);
         if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
             BlockPos upperPos = pos.above();
-            boolean upperWaterlogged = level.getFluidState(upperPos).getType() == Fluids.WATER;
             level.setBlock(upperPos,
-                state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER)
-                    .setValue(BlockStateProperties.WATERLOGGED, upperWaterlogged),
+                withWaterlogging(state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER),
+                    level, upperPos),
                 Block.UPDATE_ALL);
         }
-    }
-
-    @Override
-    protected BlockState updateShape(
-        BlockState state,
-        LevelReader level,
-        ScheduledTickAccess ticks,
-        BlockPos pos,
-        Direction direction,
-        BlockPos neighborPos,
-        BlockState neighborState,
-        RandomSource random
-    ) {
-        if (state.getValue(BlockStateProperties.WATERLOGGED)) {
-            ticks.getFluidTicks().schedule(ticks.createTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level)));
-        }
-
-        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
-    }
-
-    @Override
-    protected FluidState getFluidState(BlockState state) {
-        return state.getValue(BlockStateProperties.WATERLOGGED)
-            ? Fluids.WATER.getSource(false)
-            : super.getFluidState(state);
     }
 
     @Override

@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.*;
@@ -32,6 +33,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -42,7 +46,7 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public class IndustriaBlock extends Block implements EntityBlock {
+public class IndustriaBlock extends Block implements EntityBlock, SimpleWaterloggedBlock {
     private static final ThreadLocal<Deque<BlockProperties>> PENDING_PROPERTIES = ThreadLocal
         .withInitial(ArrayDeque::new);
 
@@ -191,7 +195,45 @@ public class IndustriaBlock extends Block implements EntityBlock {
             state = state.setValue(BlockStateProperties.AXIS, ctx.getClickedFace().getAxis());
         }
 
-        return state;
+        return withWaterlogging(state, ctx.getLevel(), ctx.getClickedPos());
+    }
+
+    protected BlockState withWaterlogging(BlockState state, BlockGetter level, BlockPos pos) {
+        return state.hasProperty(BlockStateProperties.WATERLOGGED)
+            ? state.setValue(BlockStateProperties.WATERLOGGED, level.getFluidState(pos).getType() == Fluids.WATER)
+            : state;
+    }
+
+    @Override
+    protected FluidState getFluidState(BlockState state) {
+        return state.hasProperty(BlockStateProperties.WATERLOGGED) && state.getValue(BlockStateProperties.WATERLOGGED)
+            ? Fluids.WATER.getSource(false)
+            : super.getFluidState(state);
+    }
+
+    @Override
+    public boolean canPlaceLiquid(
+        @Nullable LivingEntity user,
+        BlockGetter level,
+        BlockPos pos,
+        BlockState state,
+        Fluid type
+    ) {
+        return state.hasProperty(BlockStateProperties.WATERLOGGED)
+            && SimpleWaterloggedBlock.super.canPlaceLiquid(user, level, pos, state, type);
+    }
+
+    @Override
+    public boolean placeLiquid(LevelAccessor level, BlockPos pos, BlockState state, FluidState fluidState) {
+        return state.hasProperty(BlockStateProperties.WATERLOGGED)
+            && SimpleWaterloggedBlock.super.placeLiquid(level, pos, state, fluidState);
+    }
+
+    @Override
+    public ItemStack pickupBlock(@Nullable LivingEntity user, LevelAccessor level, BlockPos pos, BlockState state) {
+        return state.hasProperty(BlockStateProperties.WATERLOGGED)
+            ? SimpleWaterloggedBlock.super.pickupBlock(user, level, pos, state)
+            : ItemStack.EMPTY;
     }
 
     @Override
@@ -284,6 +326,10 @@ public class IndustriaBlock extends Block implements EntityBlock {
         BlockState neighborState,
         RandomSource random
     ) {
+        if (state.hasProperty(BlockStateProperties.WATERLOGGED) && state.getValue(BlockStateProperties.WATERLOGGED)) {
+            tickView.getFluidTicks().schedule(tickView.createTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world)));
+        }
+
         return !state.canSurvive(world, pos)
             ? Blocks.AIR.defaultBlockState()
             : super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
