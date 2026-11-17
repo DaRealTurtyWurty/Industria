@@ -37,3 +37,19 @@ tasks.named('assemble') {
 tasks.named('check') {
     dependsOn(':common:check', ':fabric:check', ':neoforge:check')
 }
+
+tasks.register('runDatagen') {
+    group = 'data generation'
+    description = 'Runs Fabric, NeoForge client, and NeoForge server datagen sequentially.'
+    dependsOn(':fabric:runDataGeneration', ':neoforge:runData', ':neoforge:runServerData')
+}
+
+project(':neoforge') {
+    tasks.configureEach {
+        if (name == 'runData') {
+            mustRunAfter(':fabric:runDataGeneration')
+        } else if (name == 'runServerData') {
+            mustRunAfter(':neoforge:runData')
+        }
+    }
+}

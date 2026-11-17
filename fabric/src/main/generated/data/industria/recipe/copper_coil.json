@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "W": "industria:copper_wire"
+  },
+  "pattern": [
+    " W ",
+    "WNW",
+    " W "
+  ],
+  "result": {
+    "id": "industria:copper_coil"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "industria:bronze_ball_bearing",
+    "C": "industria:copper_coil",
+    "I": "#c:ingots/iron",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "ICI",
+    "RBR",
+    " I "
+  ],
+  "result": {
+    "id": "industria:electric_motor"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:ingots/copper",
+    "D": "industria:kinetic_dynamo",
+    "F": "#c:player_workstations/furnaces",
+    "G": "industria:bronze_gear",
+    "I": "#c:ingots/iron"
+  },
+  "pattern": [
+    "IFI",
+    "CDC",
+    "IGI"
+  ],
+  "result": {
+    "id": "industria:combustion_generator"
+  }
+}

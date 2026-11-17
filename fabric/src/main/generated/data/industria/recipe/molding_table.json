@@ -4,7 +4,7 @@
   "key": {
     "B": "industria:bronze_nugget",
     "C": "#c:player_workstations/crafting_tables",
-    "L": "#c:natural_logs",
+    "L": "#minecraft:logs",
     "P": "minecraft:oak_planks"
   },
   "pattern": [

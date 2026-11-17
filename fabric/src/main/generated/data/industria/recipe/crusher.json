@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": "industria:bronze_gear",
+    "I": "#c:ingots/iron",
+    "M": "industria:electric_motor",
+    "P": "minecraft:piston",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "IGI",
+    "PMP",
+    "IRI"
+  ],
+  "result": {
+    "id": "industria:crusher"
+  }
+}

@@ -83,14 +83,14 @@ public final class IndustriaRecipes {
                     .pattern("CDC")
                     .pattern("AEA")
                     .define('A', ConventionalItemTags.STORAGE_BLOCKS_IRON)
-                    .define('B', ConventionalItemTags.PLAYER_WORKSTATIONS_FURNACES)
+                        .define('B', ConventionalItemTags.FURNACES)
                     .define('C', ConventionalItemTags.STORAGE_BLOCKS_REDSTONE)
                     .define('D', ConventionalItemTags.STORAGE_BLOCKS_COAL)
                     .define('E', Blocks.IRON_BARS)
                     .unlockedBy(hasTag(ConventionalItemTags.STORAGE_BLOCKS_IRON),
                         has(ConventionalItemTags.STORAGE_BLOCKS_IRON))
-                    .unlockedBy(hasTag(ConventionalItemTags.PLAYER_WORKSTATIONS_FURNACES),
-                        has(ConventionalItemTags.PLAYER_WORKSTATIONS_FURNACES))
+                        .unlockedBy(hasTag(ConventionalItemTags.FURNACES),
+                                has(ConventionalItemTags.FURNACES))
                     .unlockedBy(hasTag(ConventionalItemTags.STORAGE_BLOCKS_REDSTONE),
                         has(ConventionalItemTags.STORAGE_BLOCKS_REDSTONE))
                     .unlockedBy(hasTag(ConventionalItemTags.STORAGE_BLOCKS_COAL),
@@ -663,11 +663,11 @@ public final class IndustriaRecipes {
                     .define('P', Items.OAK_PLANKS)
                     .define('B', ModItems.BRONZE_NUGGET.get())
                     .define('C', ConventionalItemTags.CRAFTING_TABLES)
-                    .define('L', ConventionalItemTags.LOGS)
+                    .define('L', ItemTags.LOGS)
                     .unlockedBy(getHasName(Items.OAK_PLANKS), has(Items.OAK_PLANKS))
                     .unlockedBy(getHasName(ModItems.BRONZE_NUGGET.get()), has(ModItems.BRONZE_NUGGET.get()))
                     .unlockedBy(hasTag(ConventionalItemTags.CRAFTING_TABLES), has(ConventionalItemTags.CRAFTING_TABLES))
-                    .unlockedBy(hasTag(ConventionalItemTags.LOGS), has(ConventionalItemTags.LOGS))
+                    .unlockedBy(hasTag(ItemTags.LOGS), has(ItemTags.LOGS))
                     .save(output);
 
                 shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CASTING_TABLE.get())
@@ -724,6 +724,88 @@ public final class IndustriaRecipes {
                     new IndustriaIngredient(1, ModItems.COPPER_ROD.get()),
                     new OutputItemStack(ModItems.COPPER_WIRE.get(), 1, 1),
                     50, "copper_rod_to_wire");
+
+                shaped(RecipeCategory.MISC, ModItems.COPPER_COIL.get())
+                        .pattern(" W ")
+                        .pattern("WNW")
+                        .pattern(" W ")
+                        .define('W', ModItems.COPPER_WIRE.get())
+                        .define('N', Items.IRON_NUGGET)
+                        .unlockedBy(getHasName(ModItems.COPPER_WIRE.get()), has(ModItems.COPPER_WIRE.get()))
+                        .unlockedBy(getHasName(Items.IRON_NUGGET), has(Items.IRON_NUGGET))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, ModItems.ELECTRIC_MOTOR.get())
+                        .pattern("ICI")
+                        .pattern("RBR")
+                        .pattern(" I ")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('C', ModItems.COPPER_COIL.get())
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .define('B', ModItems.BRONZE_BALL_BEARING.get())
+                        .unlockedBy(getHasName(ModItems.COPPER_COIL.get()), has(ModItems.COPPER_COIL.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .unlockedBy(getHasName(ModItems.BRONZE_BALL_BEARING.get()), has(ModItems.BRONZE_BALL_BEARING.get()))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.WATER_WHEEL.get())
+                        .pattern("PLP")
+                        .pattern("PIP")
+                        .pattern("PLP")
+                        .define('P', ItemTags.PLANKS)
+                        .define('L', ItemTags.LOGS)
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .unlockedBy(hasTag(ItemTags.PLANKS), has(ItemTags.PLANKS))
+                        .unlockedBy(hasTag(ItemTags.LOGS), has(ItemTags.LOGS))
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.KINETIC_DYNAMO.get())
+                        .pattern("ICI")
+                        .pattern("RBR")
+                        .pattern("ICI")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('C', ModItems.COPPER_COIL.get())
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .define('B', ModItems.BRONZE_BALL_BEARING.get())
+                        .unlockedBy(getHasName(ModItems.COPPER_COIL.get()), has(ModItems.COPPER_COIL.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .unlockedBy(getHasName(ModItems.BRONZE_BALL_BEARING.get()), has(ModItems.BRONZE_BALL_BEARING.get()))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.COMBUSTION_GENERATOR.get())
+                        .pattern("IFI")
+                        .pattern("CDC")
+                        .pattern("IGI")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('F', ConventionalItemTags.FURNACES)
+                        .define('C', ConventionalItemTags.COPPER_INGOTS)
+                        .define('D', ModBlocks.KINETIC_DYNAMO.get())
+                        .define('G', ModItems.BRONZE_GEAR.get())
+                        .unlockedBy(getHasName(ModBlocks.KINETIC_DYNAMO.get()), has(ModBlocks.KINETIC_DYNAMO.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(hasTag(ConventionalItemTags.FURNACES), has(ConventionalItemTags.FURNACES))
+                        .unlockedBy(hasTag(ConventionalItemTags.COPPER_INGOTS), has(ConventionalItemTags.COPPER_INGOTS))
+                        .unlockedBy(getHasName(ModItems.BRONZE_GEAR.get()), has(ModItems.BRONZE_GEAR.get()))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.CRUSHER.get())
+                        .pattern("IGI")
+                        .pattern("PMP")
+                        .pattern("IRI")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('G', ModItems.BRONZE_GEAR.get())
+                        .define('P', Blocks.PISTON)
+                        .define('M', ModItems.ELECTRIC_MOTOR.get())
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .unlockedBy(getHasName(ModItems.BRONZE_GEAR.get()), has(ModItems.BRONZE_GEAR.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(Blocks.PISTON), has(Blocks.PISTON))
+                        .unlockedBy(getHasName(ModItems.ELECTRIC_MOTOR.get()), has(ModItems.ELECTRIC_MOTOR.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .save(output);
             }
 
             private void metalStorageRecipes(
@@ -1082,10 +1164,9 @@ public final class IndustriaRecipes {
         private static final TagKey<Item> COPPER_RAW_MATERIALS = ConventionTags.item("raw_materials/copper").key();
         private static final TagKey<Item> GOLD_ORES = ConventionTags.item("ores/gold").key();
         private static final TagKey<Item> IRON_INGOTS = ConventionTags.item("ingots/iron").key();
+        private static final TagKey<Item> COPPER_INGOTS = ConventionTags.item("ingots/copper").key();
         private static final TagKey<Item> IRON_RAW_MATERIALS = ConventionTags.item("raw_materials/iron").key();
         private static final TagKey<Item> LAPIS_GEMS = ConventionTags.item("gems/lapis").key();
-        private static final TagKey<Item> PLAYER_WORKSTATIONS_FURNACES = ConventionTags
-            .item("player_workstations/furnaces").key();
         private static final TagKey<Item> QUARTZ_GEMS = ConventionTags.item("gems/quartz").key();
         private static final TagKey<Item> QUARTZ_ORES = ConventionTags.item("ores/quartz").key();
         private static final TagKey<Item> REDSTONE_DUSTS = ConventionTags.item("dusts/redstone").key();
@@ -1099,7 +1180,6 @@ public final class IndustriaRecipes {
         private static final TagKey<Item> FURNACES = ConventionTags.item("player_workstations/furnaces").key();
         private static final TagKey<Item> CRAFTING_TABLES = ConventionTags.item("player_workstations/crafting_tables")
             .key();
-        private static final TagKey<Item> LOGS = ConventionTags.item("natural_logs").key();
 
         private ConventionalItemTags() {
         }
