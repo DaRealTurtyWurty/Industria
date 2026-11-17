@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "industria:copper_coil",
+    "F": "#c:player_workstations/furnaces",
+    "I": "#c:ingots/iron",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "III",
+    "CFC",
+    "IRI"
+  ],
+  "result": {
+    "id": "industria:electric_furnace"
+  }
+}

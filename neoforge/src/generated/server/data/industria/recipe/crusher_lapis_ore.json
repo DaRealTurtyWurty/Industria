@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": [
-      "minecraft:lapis_ore",
-      "minecraft:deepslate_lapis_ore"
-    ]
+    "ingredients": "minecraft:lapis_ore"
   },
   "output_a": {
     "chance": 1.0,

@@ -1,0 +1,17 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "ingredients": "industria:deepslate_argentite_ore"
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:crushed_argentite"
+  },
+  "output_b": {
+    "chance": 0.15,
+    "count": 1,
+    "item": "industria:crushed_argentite"
+  },
+  "process_time": 100
+}

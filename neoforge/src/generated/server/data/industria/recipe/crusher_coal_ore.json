@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": [
-      "minecraft:coal_ore",
-      "minecraft:deepslate_coal_ore"
-    ]
+    "ingredients": "minecraft:coal_ore"
   },
   "output_a": {
     "chance": 1.0,

@@ -315,6 +315,13 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.END_PYRITE_ORE.get(), "End Pyrite Ore");
         translationBuilder.add(ModBlocks.PYRITE_BLOCK.get(), "Block of Pyrite");
 
+        // Iron
+        translationBuilder.add(ModItems.CRUSHED_IRON.get(), "Crushed Iron");
+        translationBuilder.add(ModItems.IRON_ROD.get(), "Iron Rod");
+
+        // Gold
+        translationBuilder.add(ModItems.CRUSHED_GOLD.get(), "Crushed Gold");
+
         // Steel
         translationBuilder.add(ModItems.STEEL_INGOT.get(), "Steel Ingot");
         translationBuilder.add(ModItems.STEEL_NUGGET.get(), "Steel Nugget");
@@ -337,6 +344,7 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.BRONZE_BLOCK.get(), "Block of Bronze");
 
         // Copper
+        translationBuilder.add(ModItems.CRUSHED_COPPER.get(), "Crushed Copper");
         translationBuilder.add(ModItems.COPPER_ROD.get(), "Copper Rod");
         translationBuilder.add(ModItems.COPPER_WIRE.get(), "Copper Wire");
         translationBuilder.add(ModItems.COPPER_COIL.get(), "Copper Coil");

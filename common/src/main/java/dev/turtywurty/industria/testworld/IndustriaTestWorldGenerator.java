@@ -23,6 +23,16 @@ public final class IndustriaTestWorldGenerator {
     }
 
     public static void generate(TestWorldContext context) {
+        if (Boolean.getBoolean("industria.test.casting.validation") && context.server().isDedicatedServer()) {
+            CastingValidationTestWorld.start(context);
+            return;
+        }
+
+        if (Boolean.getBoolean("industria.test.crusher.validation") && context.server().isDedicatedServer()) {
+            CrusherValidationTestWorld.start(context);
+            return;
+        }
+
         if (Boolean.getBoolean("industria.test.waterWheel.validation") && context.server().isDedicatedServer()) {
             WaterWheelTestWorld.startValidation(context.at(7, 3, 7));
             return;

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "industria:copper_coil",
+    "I": "#c:ingots/iron",
+    "M": "#c:ingots/copper",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "IRI",
+    "CMC",
+    "IRI"
+  ],
+  "result": {
+    "id": "industria:basic_battery"
+  }
+}

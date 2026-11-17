@@ -1,0 +1,17 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "ingredients": "industria:deepslate_pentlandite_ore"
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:crushed_pentlandite"
+  },
+  "output_b": {
+    "chance": 0.15,
+    "count": 1,
+    "item": "industria:crushed_pentlandite"
+  },
+  "process_time": 100
+}

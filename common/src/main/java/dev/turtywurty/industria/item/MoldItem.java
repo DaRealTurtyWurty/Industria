@@ -56,7 +56,7 @@ public class MoldItem extends Item {
     }
 
     public List<ItemStack> createStacks(MoldPattern pattern) {
-        if (pattern.split())
+        if (pattern.split() && this != ModItems.GOLD_MOLD.get())
             return List.of(createStack(pattern.id(), MoldPiece.HALF_1), createStack(pattern.id(), MoldPiece.HALF_2));
 
         return List.of(createStack(pattern.id(), MoldPiece.WHOLE));

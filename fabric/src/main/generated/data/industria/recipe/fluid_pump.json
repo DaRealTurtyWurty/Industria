@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "I": "#c:ingots/iron",
+    "M": "industria:electric_motor",
+    "P": "industria:fluid_pipe",
+    "R": "#c:dusts/redstone"
+  },
+  "pattern": [
+    "IMI",
+    "PBP",
+    "IRI"
+  ],
+  "result": {
+    "id": "industria:fluid_pump"
+  }
+}

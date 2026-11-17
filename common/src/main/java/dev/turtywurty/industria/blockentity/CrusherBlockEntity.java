@@ -21,9 +21,6 @@ import dev.turtywurty.industria.util.ViewUtils;
 import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
 import dev.turtywurty.turtymultiloader.transfer.resource.UnitResource;
 import dev.turtywurty.turtymultiloader.transfer.storage.ResourceStorage;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -49,6 +46,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
 public class CrusherBlockEntity extends IndustriaBlockEntity
@@ -62,7 +63,8 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
-    private final ItemStack[] buffer = new ItemStack[2];
+    private final ItemStack[] buffer = {ItemStack.EMPTY, ItemStack.EMPTY};
+    private List<ItemStack> pendingOutputs = List.of();
     private int progress, maxProgress;
     private final ContainerData propertyDelegate = new ContainerData() {
         @Override
@@ -142,6 +144,8 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
                 this.currentRecipeId = recipeEntry.get().id();
                 this.maxProgress = recipeEntry.get().value().processTime();
                 this.progress = 0;
+                Pair<ItemStack, ItemStack> outputs = recipeEntry.get().value().assemble(this.level.getRandom());
+                this.pendingOutputs = List.of(outputs.getFirst(), outputs.getSecond());
                 update();
             }
 
@@ -149,41 +153,23 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         }
 
         Optional<RecipeHolder<CrusherRecipe>> recipeEntry = getCurrentRecipe();
-        Pair<ItemStack, ItemStack> outputs;
         if (recipeEntry.isEmpty() || !recipeEntry.get().id().equals(this.currentRecipeId)) {
-            this.currentRecipeId = null;
-            this.maxProgress = 0;
-            this.progress = 0;
-            update();
+            reset();
             return;
-        } else {
-            outputs = recipeEntry.get().value().assemble(this.level.getRandom());
-            if (!canOutput(outputs.getFirst()) || !canOutput(outputs.getSecond())) {
-                this.currentRecipeId = null;
-                this.maxProgress = 0;
-                this.progress = 0;
-                update();
-                return;
-            }
         }
+
+        if (!canOutput())
+            return;
 
         CrusherRecipe recipe = recipeEntry.get().value();
         if (this.progress >= this.maxProgress) {
             if (hasEnergy()) {
-                ItemStack outputA = outputs.getFirst();
-                ItemStack outputB = outputs.getSecond();
-                if (!canOutput(outputA) || !canOutput(outputB))
-                    return;
-
                 consumeEnergy();
                 this.wrappedContainerStorage.getInventory(INPUT_SLOT).removeItem(0, recipe.input().stackData().count());
 
-                if (!outputA.isEmpty()) {
-                    this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).addItem(outputA);
-                }
-
-                if (!outputB.isEmpty()) {
-                    this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).addItem(outputB);
+                for (int i = 0; i < this.pendingOutputs.size(); i++) {
+                    this.buffer[i] = this.wrappedContainerStorage.getInventory(OUTPUT_SLOT)
+                        .addItem(this.pendingOutputs.get(i).copy());
                 }
 
                 reset();
@@ -219,11 +205,22 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         }
     }
 
-    private boolean canOutput(ItemStack stack) {
-        if (stack.isEmpty())
-            return true;
+    private boolean canOutput() {
+        if (this.pendingOutputs.isEmpty())
+            return false;
 
-        return this.wrappedContainerStorage.getInventory(OUTPUT_SLOT).canAddItem(stack);
+        SimpleContainer output = this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
+        var simulated = new SimpleContainer(output.getContainerSize());
+        for (int i = 0; i < output.getContainerSize(); i++) {
+            simulated.setItem(i, output.getItem(i).copy());
+        }
+
+        for (ItemStack stack : this.pendingOutputs) {
+            if (!simulated.addItem(stack.copy()).isEmpty())
+                return false;
+        }
+
+        return true;
     }
 
     private boolean canInput(ItemStack stack) {
@@ -242,6 +239,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         this.progress = 0;
         this.maxProgress = 0;
         this.currentRecipeId = null;
+        this.pendingOutputs = List.of();
         update();
     }
 
@@ -293,6 +291,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         view.putInt("MaxProgress", this.maxProgress);
         if (this.currentRecipeId != null) {
             view.store("CurrentRecipe", RECIPE_CODEC, this.currentRecipeId);
+            view.store("PendingOutputs", ItemStack.OPTIONAL_CODEC.listOf(), this.pendingOutputs);
         }
 
         if (hasItemsInBuffer()) {
@@ -317,10 +316,19 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         this.currentRecipeId = view.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE))
             .orElse(null);
 
-        for (int i = 0; i < view.listOrEmpty("Buffer", ItemStack.CODEC).stream().toList().size(); i++) {
+        this.pendingOutputs = view.read("PendingOutputs", ItemStack.OPTIONAL_CODEC.listOf())
+            .filter(stacks -> stacks.size() == 2).orElse(List.of());
+        if (this.currentRecipeId == null || this.pendingOutputs.isEmpty()) {
+            this.currentRecipeId = null;
+            this.pendingOutputs = List.of();
+            this.progress = 0;
+            this.maxProgress = 0;
+        }
 
-            this.buffer[i] = view.read(ItemStack.MAP_CODEC)
-                .orElse(ItemStack.EMPTY);
+        Arrays.fill(this.buffer, ItemStack.EMPTY);
+        List<ItemStack> savedBuffer = view.listOrEmpty("Buffer", ItemStack.CODEC).stream().toList();
+        for (int i = 0; i < Math.min(savedBuffer.size(), this.buffer.length); i++) {
+            this.buffer[i] = savedBuffer.get(i);
         }
 
         ViewUtils.readChild(view, "Inventory", this.wrappedContainerStorage);

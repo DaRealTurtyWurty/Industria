@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": [
-      "minecraft:emerald_ore",
-      "minecraft:deepslate_emerald_ore"
-    ]
+    "ingredients": "minecraft:emerald_ore"
   },
   "output_a": {
     "chance": 1.0,

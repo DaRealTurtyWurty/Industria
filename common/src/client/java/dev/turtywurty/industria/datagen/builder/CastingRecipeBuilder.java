@@ -7,6 +7,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ public class CastingRecipeBuilder {
     private final OutputItemStack output;
     private final int coolingTime;
     private Optional<Identifier> moldId = Optional.empty();
+    private Optional<CastingRecipe.MoldCreation> moldCreation = Optional.empty();
 
     public CastingRecipeBuilder(
         CastingRecipe.BlockType blockType,
@@ -36,7 +38,12 @@ public class CastingRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-            new CastingRecipe(this.blockType, this.input, this.output, this.coolingTime, this.moldId),
+            new CastingRecipe(this.blockType, this.input, this.output, this.coolingTime, this.moldId, this.moldCreation),
             null);
+    }
+
+    public CastingRecipeBuilder goldMold(Ingredient template, Identifier pattern) {
+        this.moldCreation = Optional.of(new CastingRecipe.MoldCreation(template, pattern));
+        return this;
     }
 }

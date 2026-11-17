@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": [
-      "minecraft:redstone_ore",
-      "minecraft:deepslate_redstone_ore"
-    ]
+    "ingredients": "minecraft:redstone_ore"
   },
   "output_a": {
     "chance": 1.0,

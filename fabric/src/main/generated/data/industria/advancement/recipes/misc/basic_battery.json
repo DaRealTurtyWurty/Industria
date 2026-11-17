@@ -1,0 +1,65 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_c:dusts/redstone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:dusts/redstone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:ingots/copper": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ingots/copper"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:ingots/iron": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ingots/iron"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_copper_coil": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:copper_coil"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "industria:basic_battery"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_c:ingots/iron",
+      "has_copper_coil",
+      "has_c:dusts/redstone",
+      "has_c:ingots/copper"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:basic_battery"
+    ]
+  }
+}

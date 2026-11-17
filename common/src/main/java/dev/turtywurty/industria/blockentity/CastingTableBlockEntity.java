@@ -15,6 +15,7 @@ import dev.turtywurty.industria.component.MoldComponent;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModDataComponentTypes;
+import dev.turtywurty.industria.init.ModItems;
 import dev.turtywurty.industria.init.ModRecipeTypes;
 import dev.turtywurty.industria.item.MoldItem;
 import dev.turtywurty.industria.menu.CastingTableMenu;
@@ -72,6 +73,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
     private int coolingProgress;
     private int coolingDuration;
     private ItemStack castingItemStack = ItemStack.EMPTY;
+    private ItemStack castingTemplate = ItemStack.EMPTY;
     private ResourceKey<Recipe<?>> currentRecipeId;
     private long requiredFluidAmount;
 
@@ -118,16 +120,12 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
     private long getFluidRequirement(ResourceVariant<Fluid> fluid) {
         if (!(this.level instanceof ServerLevel serverLevel)
             || fluid.isBlank()
-            || !getOutputInventory().isEmpty()
             || !canCast(fluid.value()))
             return 0;
 
         Optional<MoldPattern> mold = getAssembledMold();
-        if (mold.isEmpty())
-            return 0;
-
         var input = new CastingRecipeInput(CastingRecipe.BlockType.TABLE,
-            new FluidStack(fluid, Long.MAX_VALUE), mold.map(MoldPattern::id));
+            new FluidStack(fluid, Long.MAX_VALUE), mold.map(MoldPattern::id), getOutputInventory().getItem(0));
         return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel)
             .map(holder -> holder.value().inputFluid().amount()).orElse(0L);
     }
@@ -141,7 +139,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
 
     @Override
     public boolean isAcceptingFluid() {
-        if (getAssembledMold().isEmpty() || !getOutputInventory().isEmpty())
+        if (!hasCastingSetup())
             return false;
 
         return getFluidStorage().getAmount() == 0
@@ -160,7 +158,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         var input = new CastingRecipeInput(
             CastingRecipe.BlockType.TABLE,
             fluidStack,
-            getAssembledMold().map(MoldPattern::id));
+            getAssembledMold().map(MoldPattern::id), getOutputInventory().getItem(0));
 
         return serverLevel.recipeAccess().getRecipeFor(ModRecipeTypes.CASTING.get(), input, serverLevel);
     }
@@ -169,12 +167,14 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         if (this.coolingProgress == 0
             && this.currentRecipeId == null
             && this.coolingDuration == 0
-            && this.castingItemStack.isEmpty())
+            && this.castingItemStack.isEmpty()
+            && this.castingTemplate.isEmpty())
             return;
 
         this.coolingProgress = 0;
         this.coolingDuration = 0;
         this.castingItemStack = ItemStack.EMPTY;
+        this.castingTemplate = ItemStack.EMPTY;
         this.currentRecipeId = null;
         update();
     }
@@ -185,7 +185,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             return;
 
         updateRequiredFluidAmount();
-        if (!getOutputInventory().isEmpty() || getAssembledMold().isEmpty()) {
+        if (!hasCastingSetup()) {
             resetCoolingProgress();
             return;
         }
@@ -209,16 +209,15 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             return;
         }
 
-        ItemStack outputStack = recipe.output().createStack(this.level.getRandom());
-        if (this.coolingDuration != recipe.coolingTime() || !Objects.equals(this.castingItemStack, outputStack)) {
-            this.coolingDuration = recipe.coolingTime();
-            this.castingItemStack = outputStack;
-            update();
-        }
-
-        if (this.currentRecipeId == null || !this.currentRecipeId.equals(recipeHolder.id())) {
+        ItemStack template = getOutputInventory().getItem(0);
+        if (!Objects.equals(this.currentRecipeId, recipeHolder.id())
+            || this.coolingDuration != recipe.coolingTime()
+            || !ItemStack.matches(this.castingTemplate, template)) {
             this.currentRecipeId = recipeHolder.id();
             this.coolingProgress = 0;
+            this.coolingDuration = recipe.coolingTime();
+            this.castingItemStack = recipe.assemble(this.level.getRandom());
+            this.castingTemplate = template.copy();
             update();
         }
 
@@ -268,6 +267,9 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         if (pattern.isEmpty())
             return Optional.empty();
 
+        if (first.is(ModItems.GOLD_MOLD.get()) && firstData.piece() == MoldPiece.WHOLE && second.isEmpty())
+            return pattern;
+
         if (!pattern.get().split())
             return firstData.piece() == MoldPiece.WHOLE && second.isEmpty()
                 ? pattern
@@ -286,7 +288,10 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
     }
 
     private boolean completeCasting(CastingRecipe recipe) {
-        if (!getInventory().isEmpty()
+        if (!ItemStack.matches(this.castingTemplate, getOutputInventory().getItem(0))
+            || !recipe.matches(new CastingRecipeInput(CastingRecipe.BlockType.TABLE,
+                new FluidStack(getFluidStorage().getResource(), getFluidStorage().getAmount()),
+                getAssembledMold().map(MoldPattern::id), getOutputInventory().getItem(0)), this.level)
             || recipe.inputFluid().isEmpty()
             || !recipe.inputFluid().testForRecipe(getFluidStorage())
             || !canCast(recipe.inputFluid().variant().value()))
@@ -295,6 +300,12 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         var outputStorage = ContainerStorage.of(getInventory(), null);
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
+            if (recipe.moldCreation().isPresent()) {
+                long extractedItem = outputStorage.extract(0, ResourceVariant.ofItem(this.castingTemplate), 1, transaction);
+                if (extractedItem != 1)
+                    return false;
+            }
+
             long extracted = getFluidStorage().extractInternal(
                 recipe.inputFluid().variant(),
                 recipe.inputFluid().amount(),
@@ -302,7 +313,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             if (extracted != recipe.inputFluid().amount())
                 return false;
 
-            ItemStack output = recipe.output().createStack(this.level.getRandom());
+            ItemStack output = this.castingItemStack.copy();
             if (!output.isEmpty()) {
                 long inserted = outputStorage.insert(
                     0,
@@ -314,7 +325,8 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             }
 
             transaction.commit();
-            useMolds();
+            if (recipe.moldCreation().isEmpty())
+                useMolds();
             return true;
         }
     }
@@ -339,6 +351,12 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
     }
 
     private boolean canCast(Fluid fluid) {
+        if (getInputInventory().isEmpty())
+            return !getOutputInventory().isEmpty();
+
+        if (!getOutputInventory().isEmpty())
+            return false;
+
         if (getAssembledMold().isEmpty())
             return false;
 
@@ -352,6 +370,12 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         }
 
         return true;
+    }
+
+    private boolean hasCastingSetup() {
+        return getInputInventory().isEmpty()
+            ? !getOutputInventory().isEmpty() && !(getOutputInventory().getItem(0).getItem() instanceof MoldItem)
+            : getOutputInventory().isEmpty() && getAssembledMold().isPresent();
     }
 
     @Override
@@ -388,6 +412,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         output.putInt("CoolingProgress", this.coolingProgress);
         output.putInt("CoolingDuration", this.coolingDuration);
         output.store("CastingItemStack", ItemStack.OPTIONAL_CODEC, this.castingItemStack);
+        output.store("CastingTemplate", ItemStack.OPTIONAL_CODEC, this.castingTemplate);
         output.storeNullable("CurrentRecipe", ResourceKey.codec(Registries.RECIPE), this.currentRecipeId);
     }
 
@@ -400,6 +425,7 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
         this.coolingProgress = Math.max(0, input.getIntOr("CoolingProgress", 0));
         this.coolingDuration = Math.max(0, input.getIntOr("CoolingDuration", 0));
         this.castingItemStack = input.read("CastingItemStack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+        this.castingTemplate = input.read("CastingTemplate", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
         this.currentRecipeId = input.read("CurrentRecipe", ResourceKey.codec(Registries.RECIPE)).orElse(null);
     }
 

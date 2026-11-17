@@ -135,7 +135,9 @@ public final class ModMetals {
         ModFluids.MOLTEN_IRON,
         Map.of(
             MetalForm.INGOT, () -> Items.IRON_INGOT,
-            MetalForm.NUGGET, () -> Items.IRON_NUGGET));
+            MetalForm.NUGGET, () -> Items.IRON_NUGGET,
+            MetalForm.CRUSHED, ModItems.CRUSHED_IRON,
+            MetalForm.ROD, ModItems.IRON_ROD));
 
     public static final MetalDefinition COPPER = register("copper",
         1084.62f,
@@ -144,6 +146,7 @@ public final class ModMetals {
         Map.of(
             MetalForm.INGOT, () -> Items.COPPER_INGOT,
             MetalForm.NUGGET, () -> Items.COPPER_NUGGET,
+            MetalForm.CRUSHED, ModItems.CRUSHED_COPPER,
             MetalForm.ROD, ModItems.COPPER_ROD,
             MetalForm.WIRE, ModItems.COPPER_WIRE,
             MetalForm.COIL, ModItems.COPPER_COIL));
@@ -154,7 +157,8 @@ public final class ModMetals {
         ModFluids.MOLTEN_GOLD,
         Map.of(
             MetalForm.INGOT, () -> Items.GOLD_INGOT,
-            MetalForm.NUGGET, () -> Items.GOLD_NUGGET));
+            MetalForm.NUGGET, () -> Items.GOLD_NUGGET,
+            MetalForm.CRUSHED, ModItems.CRUSHED_GOLD));
 
     public static final MetalDefinition NETHERITE = register("netherite",
         2000f,

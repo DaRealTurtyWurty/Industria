@@ -1,10 +1,7 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": [
-      "minecraft:diamond_ore",
-      "minecraft:deepslate_diamond_ore"
-    ]
+    "ingredients": "minecraft:diamond_ore"
   },
   "output_a": {
     "chance": 1.0,

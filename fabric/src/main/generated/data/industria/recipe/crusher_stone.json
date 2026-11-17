@@ -1,12 +1,12 @@
 {
   "type": "industria:crusher",
   "input": {
-    "ingredients": "minecraft:stone"
+    "ingredients": "#industria:crushable_stone"
   },
   "output_a": {
     "chance": 1.0,
     "count": 1,
-    "item": "minecraft:cobblestone"
+    "item": "minecraft:gravel"
   },
   "output_b": {
     "chance": 0.25,

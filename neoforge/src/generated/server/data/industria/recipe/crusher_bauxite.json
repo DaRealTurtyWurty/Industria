@@ -1,0 +1,17 @@
+{
+  "type": "industria:crusher",
+  "input": {
+    "ingredients": "industria:bauxite"
+  },
+  "output_a": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:crushed_bauxite"
+  },
+  "output_b": {
+    "chance": 0.15,
+    "count": 1,
+    "item": "industria:crushed_bauxite"
+  },
+  "process_time": 100
+}

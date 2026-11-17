@@ -5,6 +5,7 @@ public enum MetalForm {
     NUGGET,
     PLATE,
     POWDER,
+    CRUSHED,
     ROD,
     WIRE,
     COIL,

@@ -1,0 +1,20 @@
+{
+  "type": "industria:casting",
+  "block_type": "table",
+  "cooling_time": 100,
+  "input_fluid": {
+    "amount": 18000,
+    "variant": {
+      "id": "industria:molten_gold"
+    }
+  },
+  "mold_creation": {
+    "pattern": "industria:gear",
+    "template": "industria:bronze_gear"
+  },
+  "output": {
+    "chance": 1.0,
+    "count": 1,
+    "item": "industria:gold_mold"
+  }
+}

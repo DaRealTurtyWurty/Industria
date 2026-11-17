@@ -5,10 +5,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.util.fluid.FluidStack;
+import dev.turtywurty.industria.component.MoldComponent;
+import dev.turtywurty.industria.init.ModDataComponentTypes;
 import dev.turtywurty.industria.init.ModRecipeBookCategories;
 import dev.turtywurty.industria.init.ModRecipeSerializers;
 import dev.turtywurty.industria.init.ModRecipeTypes;
 import dev.turtywurty.industria.recipe.input.CastingRecipeInput;
+import dev.turtywurty.industria.molding.MoldPiece;
 import dev.turtywurty.industria.util.OutputItemStack;
 import dev.turtywurty.industria.util.enums.StringRepresentable;
 import io.netty.buffer.ByteBuf;
@@ -16,6 +19,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -32,18 +36,51 @@ public record CastingRecipe(
     FluidStack inputFluid,
     OutputItemStack output,
     int coolingTime,
-    Optional<Identifier> moldId
+    Optional<Identifier> moldId,
+    Optional<MoldCreation> moldCreation
 ) implements Recipe<CastingRecipeInput> {
+    public CastingRecipe(BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime,
+                         Optional<Identifier> moldId) {
+        this(blockType, inputFluid, output, coolingTime, moldId, Optional.empty());
+    }
+
     @Override
     public boolean matches(CastingRecipeInput input, Level world) {
-        return input.blockType() == this.blockType
-            && input.fluidStack().testForRecipe(this.inputFluid)
-            && this.moldId.equals(input.moldId());
+        if (input.blockType() != this.blockType || !input.fluidStack().testForRecipe(this.inputFluid))
+            return false;
+
+        if (this.moldCreation.isPresent()) {
+            return this.blockType == BlockType.TABLE && input.moldId().isEmpty()
+                && this.moldCreation.get().template().test(input.template());
+        }
+
+        return input.template().isEmpty() && this.moldId.equals(input.moldId());
     }
 
     @Override
     public ItemStack assemble(CastingRecipeInput input) {
-        return this.output.createStack(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
+        return assemble(new SingleThreadedRandomSource(ThreadLocalRandom.current().nextLong()));
+    }
+
+    public ItemStack assemble(RandomSource random) {
+        ItemStack result = this.output.createStack(random);
+        this.moldCreation.ifPresent(creation -> {
+            if (!result.isEmpty()) {
+                result.set(ModDataComponentTypes.MOLD.get(), new MoldComponent(creation.pattern(), MoldPiece.WHOLE));
+            }
+        });
+        return result;
+    }
+
+    public record MoldCreation(Ingredient template, Identifier pattern) {
+        public static final Codec<MoldCreation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Ingredient.CODEC.fieldOf("template").forGetter(MoldCreation::template),
+            Identifier.CODEC.fieldOf("pattern").forGetter(MoldCreation::pattern)).apply(instance, MoldCreation::new));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, MoldCreation> STREAM_CODEC = StreamCodec.composite(
+            Ingredient.CONTENTS_STREAM_CODEC, MoldCreation::template,
+            Identifier.STREAM_CODEC, MoldCreation::pattern,
+            MoldCreation::new);
     }
 
     @Override
@@ -103,7 +140,9 @@ public record CastingRecipe(
         FluidStack.CODEC.fieldOf("input_fluid").forGetter(CastingRecipe::inputFluid),
         OutputItemStack.CODEC.fieldOf("output").forGetter(CastingRecipe::output),
         Codec.intRange(1, Integer.MAX_VALUE).fieldOf("cooling_time").forGetter(CastingRecipe::coolingTime),
-        Identifier.CODEC.optionalFieldOf("mold").forGetter(CastingRecipe::moldId)).apply(instance, CastingRecipe::new));
+        Identifier.CODEC.optionalFieldOf("mold").forGetter(CastingRecipe::moldId),
+        MoldCreation.CODEC.optionalFieldOf("mold_creation").forGetter(CastingRecipe::moldCreation))
+        .apply(instance, CastingRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, CastingRecipe> STREAM_CODEC = StreamCodec.composite(
         BlockType.STREAM_CODEC, CastingRecipe::blockType,
@@ -111,6 +150,7 @@ public record CastingRecipe(
         OutputItemStack.STREAM_CODEC, CastingRecipe::output,
         ByteBufCodecs.INT, CastingRecipe::coolingTime,
         ByteBufCodecs.optional(Identifier.STREAM_CODEC), CastingRecipe::moldId,
+        ByteBufCodecs.optional(MoldCreation.STREAM_CODEC), CastingRecipe::moldCreation,
         CastingRecipe::new);
 
     public static final RecipeSerializer<CastingRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);

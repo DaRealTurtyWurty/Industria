@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_c:glass_blocks": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:glass_blocks"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:ingots/copper": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ingots/copper"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "industria:fluid_pipe"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_c:ingots/copper",
+      "has_c:glass_blocks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:fluid_pipe"
+    ]
+  }
+}

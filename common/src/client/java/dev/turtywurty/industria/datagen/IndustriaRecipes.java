@@ -7,10 +7,12 @@ import dev.turtywurty.industria.blockentity.util.gas.GasStack;
 import dev.turtywurty.industria.blockentity.util.slurry.SlurryStack;
 import dev.turtywurty.industria.datagen.builder.*;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.metal.MetalDefinition;
 import dev.turtywurty.industria.metal.MetalForm;
 import dev.turtywurty.industria.metal.MetalRegistry;
 import dev.turtywurty.industria.molding.MoldPatterns;
+import dev.turtywurty.industria.molding.MoldPattern;
 import dev.turtywurty.industria.recipe.AgitatorRecipe;
 import dev.turtywurty.industria.recipe.CastingRecipe;
 import dev.turtywurty.industria.recipe.ClayMoldSmeltingRecipe;
@@ -47,6 +49,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public final class IndustriaRecipes {
     private IndustriaRecipes() {
@@ -105,18 +109,11 @@ public final class IndustriaRecipes {
                     400);
 
                 offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.STONE),
-                    new OutputItemStack(Items.COBBLESTONE, 1, 1),
+                    new IndustriaIngredient(itemLookup.getOrThrow(TagList.Items.CRUSHABLE_STONE), 1),
+                    new OutputItemStack(Items.GRAVEL, 1, 1),
                     new OutputItemStack(Items.GRAVEL, 1, 0.25F),
                     100,
                     "stone");
-
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.COBBLESTONE),
-                    new OutputItemStack(Items.GRAVEL, 1, 1),
-                    new OutputItemStack(Items.FLINT, 1, 0.1F),
-                    100,
-                    "cobblestone");
 
                 offerCrusher(output, RecipeCategory.MISC,
                     new IndustriaIngredient(1, Items.GRAVEL),
@@ -132,78 +129,84 @@ public final class IndustriaRecipes {
                     100,
                     "sand");
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.COAL_ORE, Items.DEEPSLATE_COAL_ORE),
-                    new OutputItemStack(Items.COAL, 1, 1),
-                    new OutputItemStack(Items.COAL, 1, 0.15F),
-                    100,
-                    "coal_ore");
+                offerOreCrushing(output, List.of(Items.COAL_ORE, Items.DEEPSLATE_COAL_ORE), Items.COAL);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE),
+                offerOreCrushing(output,
+                    List.of(Items.IRON_ORE, Items.DEEPSLATE_IRON_ORE, Items.RAW_IRON),
+                    ModItems.CRUSHED_IRON.get());
+
+                offerOreCrushing(output,
+                    List.of(Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE, Items.RAW_COPPER),
+                    ModItems.CRUSHED_COPPER.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.BAUXITE_ORE.get(), ModItems.BAUXITE.get()),
+                    ModItems.CRUSHED_BAUXITE.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.ARGENTITE_ORE.get(), ModBlocks.DEEPSLATE_ARGENTITE_ORE.get(),
+                        ModItems.ARGENTITE.get()),
+                    ModItems.CRUSHED_ARGENTITE.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.GALENA_ORE.get(), ModBlocks.DEEPSLATE_GALENA_ORE.get(), ModItems.GALENA.get()),
+                    ModItems.CRUSHED_GALENA.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.ILMENITE_ORE.get(), ModBlocks.DEEPSLATE_ILMENITE_ORE.get(),
+                        ModItems.ILMENITE.get()),
+                    ModItems.CRUSHED_ILMENITE.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.SPHALERITE_ORE.get(), ModBlocks.DEEPSLATE_SPHALERITE_ORE.get(),
+                        ModItems.SPHALERITE.get()),
+                    ModItems.CRUSHED_SPHALERITE.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.COBALTITE_ORE.get(), ModBlocks.DEEPSLATE_COBALTITE_ORE.get(),
+                        ModItems.COBALTITE.get()),
+                    ModItems.CRUSHED_COBALTITE.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.PENTLANDITE_ORE.get(), ModBlocks.DEEPSLATE_PENTLANDITE_ORE.get(),
+                        ModItems.PENTLANDITE.get()),
+                    ModItems.CRUSHED_PENTLANDITE.get());
+
+                offerOreCrushing(output,
+                    List.of(ModBlocks.NETHER_PYRITE_ORE.get(), ModBlocks.END_PYRITE_ORE.get(), ModItems.PYRITE.get()),
+                    ModItems.CRUSHED_SULFUR.get());
+
+                offerOreCrushing(output,
+                    List.of(Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE),
                     new OutputItemStack(Items.REDSTONE, UniformInt.of(2, 5), 1),
                     new OutputItemStack(Items.REDSTONE, 1, 0.15F),
-                    100,
-                    "redstone_ore");
+                    100);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.LAPIS_ORE, Items.DEEPSLATE_LAPIS_ORE),
+                offerOreCrushing(output,
+                    List.of(Items.LAPIS_ORE, Items.DEEPSLATE_LAPIS_ORE),
                     new OutputItemStack(Items.LAPIS_LAZULI, UniformInt.of(1, 4), 1),
                     new OutputItemStack(Items.LAPIS_LAZULI, UniformInt.of(1, 2), 0.15F),
-                    100,
-                    "lapis_ore");
+                    100);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.DIAMOND_ORE, Items.DEEPSLATE_DIAMOND_ORE),
-                    new OutputItemStack(Items.DIAMOND, 1, 1),
-                    new OutputItemStack(Items.DIAMOND, 1, 0.15F),
-                    100,
-                    "diamond_ore");
+                offerOreCrushing(output, List.of(Items.DIAMOND_ORE, Items.DEEPSLATE_DIAMOND_ORE), Items.DIAMOND);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE),
-                    new OutputItemStack(Items.EMERALD, 1, 1),
-                    new OutputItemStack(Items.EMERALD, 1, 0.15F),
-                    100,
-                    "emerald_ore");
+                offerOreCrushing(output, List.of(Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE), Items.EMERALD);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.QUARTZ_ORES), 1),
-                    new OutputItemStack(Items.QUARTZ, 1, 1),
-                    new OutputItemStack(Items.QUARTZ, UniformInt.of(1, 3), 0.15F),
-                    100,
-                    "quartz_ore");
+                offerOreCrushing(output,
+                    List.of(Items.NETHER_QUARTZ_ORE, ModBlocks.QUARTZ_ORE.get(),
+                        ModBlocks.DEEPSLATE_QUARTZ_ORE.get(), Items.QUARTZ),
+                    new OutputItemStack(ModItems.CRUSHED_QUARTZ.get(), 1, 1),
+                    new OutputItemStack(ModItems.CRUSHED_QUARTZ.get(), UniformInt.of(1, 3), 0.15F),
+                    100);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, Items.NETHER_GOLD_ORE),
+                offerOreCrushing(output,
+                    List.of(Items.GOLD_ORE, Items.DEEPSLATE_GOLD_ORE, Items.RAW_GOLD),
+                    ModItems.CRUSHED_GOLD.get());
+
+                offerOreCrushing(output, List.of(Items.NETHER_GOLD_ORE),
                     new OutputItemStack(Items.GOLD_NUGGET, UniformInt.of(2, 6), 1),
                     new OutputItemStack(Items.GOLD_NUGGET, UniformInt.of(1, 3), 0.15F),
-                    100,
-                    "nether_gold_ore");
-
-                // offerCrusher(exporter, RecipeCategory.MISC,
-                // new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.IRON_RAW_MATERIALS), 1),
-                // ModItems.IRON_DUST.get().getDefaultStack(),
-                // 1.0F,
-                // ModItems.IRON_DUST.get().getDefaultStack(),
-                // 0.1F,
-                // 200);
-
-                // offerCrusher(exporter, RecipeCategory.MISC,
-                // new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.GOLD_ORES), 1),
-                // ModItems.GOLD_DUST.get().getDefaultStack(),
-                // 1.0F,
-                // ModItems.GOLD_DUST.get().getDefaultStack(),
-                // 0.1F,
-                // 200);
-
-                // offerCrusher(exporter, RecipeCategory.MISC,
-                // new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.COPPER_RAW_MATERIALS), 1),
-                // ModItems.COPPER_DUST.get().getDefaultStack(),
-                // 1.0F,
-                // ModItems.COPPER_DUST.get().getDefaultStack(),
-                // 0.1F,
-                // 200);
+                    100);
 
                 shaped(RecipeCategory.MISC, ModBlocks.CABLE.get(), 8)
                     .pattern("III")
@@ -223,6 +226,44 @@ public final class IndustriaRecipes {
                     .define('G', Items.GLASS_BOTTLE)
                     .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
                     .unlockedBy(getHasName(Items.GLASS_BOTTLE), has(Items.GLASS_BOTTLE))
+                    .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.FLUID_PIPE.get(), 8)
+                    .pattern("CCC")
+                    .pattern(" G ")
+                    .pattern("CCC")
+                    .define('C', ConventionalItemTags.COPPER_INGOTS)
+                    .define('G', ConventionalItemTags.GLASS)
+                    .unlockedBy(hasTag(ConventionalItemTags.COPPER_INGOTS), has(ConventionalItemTags.COPPER_INGOTS))
+                    .unlockedBy(hasTag(ConventionalItemTags.GLASS), has(ConventionalItemTags.GLASS))
+                    .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.FLUID_TANK.get())
+                    .pattern("IGI")
+                    .pattern("GBG")
+                    .pattern("IGI")
+                    .define('I', ConventionalItemTags.IRON_INGOTS)
+                    .define('G', ConventionalItemTags.GLASS)
+                    .define('B', Items.BUCKET)
+                    .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                    .unlockedBy(hasTag(ConventionalItemTags.GLASS), has(ConventionalItemTags.GLASS))
+                    .unlockedBy(getHasName(Items.BUCKET), has(Items.BUCKET))
+                    .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.FLUID_PUMP.get())
+                    .pattern("IMI")
+                    .pattern("PBP")
+                    .pattern("IRI")
+                    .define('I', ConventionalItemTags.IRON_INGOTS)
+                    .define('M', ModItems.ELECTRIC_MOTOR.get())
+                    .define('P', ModBlocks.FLUID_PIPE.get())
+                    .define('B', Items.BUCKET)
+                    .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                    .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                    .unlockedBy(getHasName(ModItems.ELECTRIC_MOTOR.get()), has(ModItems.ELECTRIC_MOTOR.get()))
+                    .unlockedBy(getHasName(ModBlocks.FLUID_PIPE.get()), has(ModBlocks.FLUID_PIPE.get()))
+                    .unlockedBy(getHasName(Items.BUCKET), has(Items.BUCKET))
+                    .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
                     .save(output);
 
                 shaped(RecipeCategory.MISC, ModBlocks.CONVEYOR.get(), 8)
@@ -502,11 +543,10 @@ public final class IndustriaRecipes {
                     new GasStack(GasVariant.of(ModGases.CARBON_DIOXIDE.holder()), FluidAmounts.NUGGET),
                     2_000, 10_000, 1_000);
 
-                offerCrusher(output, RecipeCategory.MISC,
-                    new IndustriaIngredient(1, ModItems.CASSITERITE.get()),
-                    new OutputItemStack(ModItems.CRUSHED_CASSITERITE.get(), 2, 1),
-                    new OutputItemStack(ModItems.CRUSHED_CASSITERITE.get(), 1, (3 / 10F)),
-                    100, "raw_cassiterite");
+                offerOreCrushing(output,
+                    List.of(ModBlocks.CASSITERITE_ORE.get(), ModBlocks.DEEPSLATE_CASSITERITE_ORE.get(),
+                        ModItems.CASSITERITE.get()),
+                    ModItems.CRUSHED_CASSITERITE.get());
 
                 offerShakingTableRecipe(output,
                     new IndustriaIngredient(1, ModItems.CRUSHED_CASSITERITE.get()),
@@ -749,6 +789,34 @@ public final class IndustriaRecipes {
                         .unlockedBy(getHasName(ModItems.BRONZE_BALL_BEARING.get()), has(ModItems.BRONZE_BALL_BEARING.get()))
                         .save(output);
 
+                shaped(RecipeCategory.MISC, ModBlocks.BASIC_BATTERY.get())
+                        .pattern("IRI")
+                        .pattern("CMC")
+                        .pattern("IRI")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('C', ModItems.COPPER_COIL.get())
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .define('M', ConventionalItemTags.COPPER_INGOTS)
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(ModItems.COPPER_COIL.get()), has(ModItems.COPPER_COIL.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .unlockedBy(hasTag(ConventionalItemTags.COPPER_INGOTS), has(ConventionalItemTags.COPPER_INGOTS))
+                        .save(output);
+
+                shaped(RecipeCategory.MISC, ModBlocks.ELECTRIC_FURNACE.get())
+                        .pattern("III")
+                        .pattern("CFC")
+                        .pattern("IRI")
+                        .define('I', ConventionalItemTags.IRON_INGOTS)
+                        .define('C', ModItems.COPPER_COIL.get())
+                        .define('F', ConventionalItemTags.FURNACES)
+                        .define('R', ConventionalItemTags.REDSTONE_DUSTS)
+                        .unlockedBy(hasTag(ConventionalItemTags.IRON_INGOTS), has(ConventionalItemTags.IRON_INGOTS))
+                        .unlockedBy(getHasName(ModItems.COPPER_COIL.get()), has(ModItems.COPPER_COIL.get()))
+                        .unlockedBy(hasTag(ConventionalItemTags.FURNACES), has(ConventionalItemTags.FURNACES))
+                        .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
+                        .save(output);
+
                 shaped(RecipeCategory.MISC, ModBlocks.WATER_WHEEL.get())
                         .pattern("PLP")
                         .pattern("PIP")
@@ -865,6 +933,8 @@ public final class IndustriaRecipes {
     }
 
     private static void offerMetalRecipes(RecipeOutput exporter) {
+        offerGoldMoldRecipes(exporter);
+
         for (MetalDefinition metal : MetalRegistry.getAll()) {
             String fluidName = getRecipeName(metal.moltenFluid().still().get());
             int preferredTemperature = Math.round(metal.meltingTemperature() + 50);
@@ -875,7 +945,7 @@ public final class IndustriaRecipes {
                         case NUGGET -> FluidAmounts.NUGGET;
                         case ROD -> FluidAmounts.INGOT / 2;
                         case WIRE -> FluidAmounts.INGOT / 4;
-                        case INGOT, PLATE, POWDER -> FluidAmounts.INGOT;
+                        case INGOT, PLATE, POWDER, CRUSHED -> FluidAmounts.INGOT;
                         case COIL -> FluidAmounts.INGOT;
                         case BALL_BEARING -> FluidAmounts.INGOT / 8;
                         case GEAR -> FluidAmounts.INGOT * 3 / 2;
@@ -919,6 +989,28 @@ public final class IndustriaRecipes {
         }
     }
 
+    private static void offerGoldMoldRecipes(RecipeOutput exporter) {
+        Map<MetalForm, MoldPattern> patterns = Map.of(
+            MetalForm.INGOT, MoldPatterns.INGOT,
+            MetalForm.ROD, MoldPatterns.ROD,
+            MetalForm.PLATE, MoldPatterns.PLATE,
+            MetalForm.GEAR, MoldPatterns.GEAR,
+            MetalForm.BALL_BEARING, MoldPatterns.BALL_BEARING);
+        patterns.forEach((form, pattern) -> {
+            List<Item> templates = MetalRegistry.getAll().stream()
+                .map(metal -> metal.getItem(form)).flatMap(Optional::stream).distinct().toList();
+            if (templates.isEmpty())
+                return;
+
+            new CastingRecipeBuilder(CastingRecipe.BlockType.TABLE,
+                new FluidStack(ResourceTypes.FLUID.of(ModFluids.MOLTEN_GOLD.still().holder()), FluidAmounts.INGOT * 2),
+                new OutputItemStack(ModItems.GOLD_MOLD.get(), 1, 1), 100)
+                .goldMold(Ingredient.of(templates.stream()), pattern.id())
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE,
+                    Industria.id("casting_table_gold_" + pattern.id().getPath() + "_mold")));
+        });
+    }
+
     private static void offerAlloySmelting(
         RecipeOutput exporter,
         RecipeCategory category,
@@ -942,6 +1034,26 @@ public final class IndustriaRecipes {
     ) {
         new AlloyFurnaceRecipeBuilder(inputA, inputB, output, smeltTime, category).save(exporter,
             ResourceKey.create(Registries.RECIPE, Industria.id("alloy_" + name)));
+    }
+
+    private static void offerOreCrushing(RecipeOutput exporter, List<? extends ItemLike> inputs, ItemLike crushedOutput) {
+        offerOreCrushing(exporter, inputs,
+            new OutputItemStack(crushedOutput.asItem(), 1, 1),
+            new OutputItemStack(crushedOutput.asItem(), 1, 0.15F), 100);
+    }
+
+    private static void offerOreCrushing(
+        RecipeOutput exporter,
+        List<? extends ItemLike> inputs,
+        OutputItemStack outputA,
+        OutputItemStack outputB,
+        int processTime
+    ) {
+        for (ItemLike input : inputs) {
+            offerCrusher(exporter, RecipeCategory.MISC,
+                new IndustriaIngredient(1, input.asItem()),
+                outputA, outputB, processTime, getSimpleRecipeName(input));
+        }
     }
 
     private static void offerCrusher(

@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_bucket": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:bucket"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:dusts/redstone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:dusts/redstone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_c:ingots/iron": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ingots/iron"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_electric_motor": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:electric_motor"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_fluid_pipe": {
+      "conditions": {
+        "items": [
+          {
+            "items": "industria:fluid_pipe"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "industria:fluid_pump"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_c:ingots/iron",
+      "has_electric_motor",
+      "has_fluid_pipe",
+      "has_bucket",
+      "has_c:dusts/redstone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "industria:fluid_pump"
+    ]
+  }
+}

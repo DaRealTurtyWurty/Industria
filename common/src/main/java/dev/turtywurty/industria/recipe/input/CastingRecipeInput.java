@@ -8,17 +8,22 @@ import net.minecraft.world.item.crafting.RecipeInput;
 
 import java.util.Optional;
 
-public record CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId)
+public record CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId,
+                                 ItemStack template)
     implements
         RecipeInput {
+    public CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId) {
+        this(blockType, fluidStack, moldId, ItemStack.EMPTY);
+    }
+
     @Override
     public ItemStack getItem(int slot) {
-        return ItemStack.EMPTY;
+        return slot == 0 ? this.template : ItemStack.EMPTY;
     }
 
     @Override
     public int size() {
-        return 0;
+        return 1;
     }
 
     @Override

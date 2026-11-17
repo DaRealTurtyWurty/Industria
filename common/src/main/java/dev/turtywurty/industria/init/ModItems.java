@@ -120,6 +120,13 @@ public class ModItems {
     public static final RegistrationHandle<Item, Item> CRUSHED_SULFUR = register("crushed_sulfur");
     public static final RegistrationHandle<Item, Item> SULFUR = register("sulfur");
 
+    // Iron
+    public static final RegistrationHandle<Item, Item> CRUSHED_IRON = register("crushed_iron");
+    public static final RegistrationHandle<Item, Item> IRON_ROD = register("iron_rod");
+
+    // Gold
+    public static final RegistrationHandle<Item, Item> CRUSHED_GOLD = register("crushed_gold");
+
     // Steel
     public static final RegistrationHandle<Item, Item> STEEL_INGOT = register("steel_ingot");
     public static final RegistrationHandle<Item, Item> STEEL_NUGGET = register("steel_nugget");
@@ -137,6 +144,7 @@ public class ModItems {
     public static final RegistrationHandle<Item, Item> BRONZE_GEAR = register("bronze_gear");
 
     // Copper
+    public static final RegistrationHandle<Item, Item> CRUSHED_COPPER = register("crushed_copper");
     public static final RegistrationHandle<Item, Item> COPPER_ROD = register("copper_rod");
     public static final RegistrationHandle<Item, Item> COPPER_WIRE = register("copper_wire");
     public static final RegistrationHandle<Item, Item> COPPER_COIL = register("copper_coil");
