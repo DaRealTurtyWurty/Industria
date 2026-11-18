@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public record FluidStack(ResourceVariant<Fluid> variant, long amount) {
     public static final FluidStack EMPTY = new FluidStack(ResourceTypes.FLUID.empty(), 0);
 
+    // TODO: Make this not a MapCodec, I'm pretty sure it doesn't need to be
     public static final MapCodec<FluidStack> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
         ResourceVariantCodecs.FLUID.fieldOf("variant").forGetter(FluidStack::variant),
         Codec.LONG.fieldOf("amount").forGetter(FluidStack::amount)).apply(instance, FluidStack::new));

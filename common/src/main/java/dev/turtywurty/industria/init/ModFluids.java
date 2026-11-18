@@ -32,6 +32,7 @@ public class ModFluids {
     public static final FluidRegistryObject<?, ?> METHANOL = registerFluid("methanol");
     public static final FluidRegistryObject<?, ?> FORMIC_ACID = registerFluid("formic_acid");
     public static final FluidRegistryObject<?, ?> DILUTED_FORMIC_ACID = registerFluid("diluted_formic_acid");
+    public static final FluidRegistryObject<?, ?> COAL_TAR = registerFluid("coal_tar");
 
     // Molten Fluids
     public static final FluidRegistryObject<?, ?> MOLTEN_ALUMINIUM = registerMoltenFluid("molten_aluminium");

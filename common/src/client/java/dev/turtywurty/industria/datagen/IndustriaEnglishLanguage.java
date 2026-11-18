@@ -421,6 +421,14 @@ public final class IndustriaEnglishLanguage {
 
         translationBuilder.add(ModBlocks.WATER_WHEEL.get(), "Water Wheel");
         translationBuilder.add(ModBlocks.KINETIC_DYNAMO.get(), "Kinetic Dynamo");
+
+        // Coke Oven
+        translationBuilder.add(ModBlocks.COKE_OVEN.get(), "Coke Oven");
+        addText(translationBuilder, CokeOvenBlockEntity.TITLE, "Coke Oven");
+        translationBuilder.add(ModItems.COAL_COKE.get(), "Coal Coke");
+        translationBuilder.add(ModBlocks.COAL_COKE_BLOCK.get(), "Block of Coal Coke");
+        translationBuilder.add(ModFluids.COAL_TAR.block().get(), "Coal Tar");
+        translationBuilder.add(ModFluids.COAL_TAR.bucket().get(), "Bucket of Coal Tar");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {
@@ -428,7 +436,6 @@ public final class IndustriaEnglishLanguage {
             translationBuilder.add(translatableTextContent.getKey(), value);
         } else
             throw new IllegalArgumentException("Text must be translatable! " + text);
-
     }
 
     private static void addTextEnum(LanguageGenerationContext translationBuilder, TextEnum textEnum, String value) {

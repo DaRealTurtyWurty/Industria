@@ -20,6 +20,7 @@ public final class ModMultiblockLibIntegration {
         MultiblockLib.registerControllerBlock(ModBlocks.SHAKING_TABLE.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.CENTRIFUGAL_CONCENTRATOR.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.ARC_FURNACE.get(), false);
+        MultiblockLib.registerControllerBlock(ModBlocks.COKE_OVEN.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.AGITATOR.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.DISTILLATION_TOWER.get(), false);
     }

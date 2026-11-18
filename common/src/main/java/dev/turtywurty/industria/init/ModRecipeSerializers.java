@@ -67,6 +67,9 @@ public class ModRecipeSerializers {
     public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<WireDrawplateRecipe>> WIRE_DRAWPLATE = register(
         "wire_drawplate", () -> WireDrawplateRecipe.SERIALIZER);
 
+    public static final RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<CokeOvenRecipe>> COKE_OVEN = register(
+        "coke_oven", () -> CokeOvenRecipe.SERIALIZER);
+
     public static <T extends Recipe<?>> RegistrationHandle<RecipeSerializer<?>, RecipeSerializer<T>> register(
         String name,
         Supplier<RecipeSerializer<T>> serializer

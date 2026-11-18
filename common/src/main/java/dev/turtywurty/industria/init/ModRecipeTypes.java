@@ -63,6 +63,9 @@ public class ModRecipeTypes {
     public static final RegistrationHandle<RecipeType<?>, RecipeType<WireDrawplateRecipe>> WIRE_DRAWPLATE = register(
         "wire_drawplate", () -> WireDrawplateRecipe.Type.INSTANCE);
 
+    public static final RegistrationHandle<RecipeType<?>, RecipeType<CokeOvenRecipe>> COKE_OVEN = register(
+        "coke_oven", () -> CokeOvenRecipe.Type.INSTANCE);
+
     public static <T extends Recipe<?>> RegistrationHandle<RecipeType<?>, RecipeType<T>> register(
         String name,
         Supplier<RecipeType<T>> type

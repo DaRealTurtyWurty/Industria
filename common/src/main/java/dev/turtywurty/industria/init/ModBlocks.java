@@ -429,6 +429,12 @@ public class ModBlocks {
         "kinetic_dynamo",
         KineticDynamoBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final RegistrationHandle<Block, CokeOvenBlock> COKE_OVEN = registerWithItemCopy("coke_oven",
+        CokeOvenBlock::new, Blocks.DEEPSLATE, BlockBehaviour.Properties::noOcclusion);
+
+    public static final RegistrationHandle<Block, Block> COAL_COKE_BLOCK = registerWithItemCopy("coal_coke_block",
+        Block::new, Blocks.COAL_BLOCK);
+
     public static <T extends Block> RegistrationHandle<Block, T> register(
         String name,
         Function<BlockBehaviour.Properties, T> constructor,

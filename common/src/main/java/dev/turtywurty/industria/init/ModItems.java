@@ -186,6 +186,9 @@ public class ModItems {
     public static final RegistrationHandle<Item, MoldItem> GOLD_MOLD = register("gold_mold",
         properties -> new MoldItem(properties, 256));
 
+    // Coke Oven
+    public static final RegistrationHandle<Item, Item> COAL_COKE = register("coal_coke");
+
     public static RegistrationHandle<Item, Item> register(String name) {
         return registerItem(name, () -> new Item(new Item.Properties()
             .setId(ResourceKey.create(Registries.ITEM, Industria.id(name)))));

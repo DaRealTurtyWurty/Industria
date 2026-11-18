@@ -33,6 +33,7 @@ public class ModRecipeBookCategories {
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> CASTING = register("casting");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> WIRE_DRAWPLATE = register(
         "wire_drawplate");
+    public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> COKE_OVEN = register("coke_oven");
 
     public static RegistrationHandle<RecipeBookCategory, RecipeBookCategory> register(String name) {
         return REGISTRIES.registerRecipeBookCategory(Industria.id(name), RecipeBookCategory::new);

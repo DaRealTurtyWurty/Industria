@@ -1,0 +1,17 @@
+{
+  "type": "industria:coke_oven",
+  "input": {
+    "ingredients": "#minecraft:coals"
+  },
+  "output_fluid": {
+    "amount": 9000,
+    "variant": {
+      "id": "industria:coal_tar"
+    }
+  },
+  "output_stack": {
+    "id": "industria:coal_coke"
+  },
+  "process_time": 300,
+  "required_temperature": 1000
+}

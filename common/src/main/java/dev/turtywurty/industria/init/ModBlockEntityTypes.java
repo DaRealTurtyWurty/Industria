@@ -201,6 +201,10 @@ public class ModBlockEntityTypes {
         "kinetic_dynamo",
         KineticDynamoBlockEntity::new, builder -> builder.validBlock(ModBlocks.KINETIC_DYNAMO));
 
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<CokeOvenBlockEntity>> COKE_OVEN = register(
+        "coke_oven",
+        CokeOvenBlockEntity::new, builder -> builder.validBlock(ModBlocks.COKE_OVEN));
+
     public static <T extends BlockEntity> RegistrationHandle<BlockEntityType<?>, BlockEntityType<T>> register(
         String name,
         BiFunction<BlockPos, BlockState, T> factory,

@@ -2,6 +2,7 @@ package dev.turtywurty.industria.testworld;
 
 import com.mojang.authlib.GameProfile;
 import dev.turtywurty.industria.Industria;
+import dev.turtywurty.industria.blockentity.CokeOvenBlockEntity;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.init.ModItems;
 import dev.turtywurty.multiblocklib.MultiblockLib;
@@ -9,6 +10,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -17,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import dev.turtywurty.industria.block.WindTurbineBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -103,7 +107,60 @@ public final class IndustriaTestWorldGenerator {
         CrystallizerTestWorld.connectMachines(crystallizerContext, clarifierContext, poolContext);
         SmelteryTestWorld.place(context.at(8, 0, -10));
         AlloyFurnaceTestWorld.place(context.at(4, 0, -10));
+        TestWorldContext cokeOven = context.at(0, 1, -10);
+        placeCokeOven(cokeOven, player);
+        connectCokeOven(cokeOven);
         WaterWheelTestWorld.place(context.at(7, 3, 7));
+    }
+
+    private static void placeCokeOven(TestWorldContext oven, ServerPlayer player) {
+        var definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("coke_oven"));
+        BlockPos controller = definition.controllerPos();
+        BlockPos worldPos = oven.origin().offset(controller);
+        if (oven.overworld().getBlockEntity(worldPos) instanceof CokeOvenBlockEntity existing && existing.isFormed())
+            return;
+
+        oven.constructMultiblockPattern(0, 0, 0, definition);
+        oven.useItemOnBlock(controller.getX(), controller.getY(), controller.getZ(), player, ModItems.WRENCH,
+            InteractionHand.MAIN_HAND);
+    }
+
+    private static void connectCokeOven(TestWorldContext oven) {
+        // The ingredient belt feeds a hopper above the oven's top port.
+        oven.setBlock(1, 2, 1, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.DOWN));
+        placeCoalChest(oven, 1, 2, -2);
+        placeConveyor(oven, 1, 2, -1, ModBlocks.FEEDER_CONVEYOR, Direction.SOUTH);
+        placeConveyor(oven, 1, 2, 0, ModBlocks.HATCH_CONVEYOR, Direction.SOUTH);
+
+        // The fuel belt inserts directly into the lower rear corner.
+        placeCoalChest(oven, 0, 0, 7);
+        placeConveyor(oven, 0, 0, 6, ModBlocks.FEEDER_CONVEYOR, Direction.NORTH);
+        placeConveyor(oven, 0, 0, 5, ModBlocks.CONVEYOR, Direction.NORTH);
+        placeConveyor(oven, 0, 0, 4, ModBlocks.HATCH_CONVEYOR, Direction.NORTH);
+
+        // The lower center port drops into a hopper that hands coke off to the output belt.
+        oven.setBlock(1, -1, 3, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.SOUTH));
+        oven.setBlock(1, -1, 6, Blocks.CHEST);
+        placeConveyor(oven, 1, -1, 4, ModBlocks.FEEDER_CONVEYOR, Direction.SOUTH);
+        placeConveyor(oven, 1, -1, 5, ModBlocks.HATCH_CONVEYOR, Direction.SOUTH);
+
+        oven.setBlock(1, 1, 6, ModBlocks.FLUID_TANK);
+        oven.runPipe(oven.pos(1, 1, 4), oven.pos(1, 1, 5));
+    }
+
+    private static void placeCoalChest(TestWorldContext context, int x, int y, int z) {
+        if (context.overworld().getBlockState(context.pos(x, y, z)).is(Blocks.CHEST))
+            return;
+
+        context.setBlock(x, y, z, Blocks.CHEST);
+        context.configureBlockEntity(x, y, z, ChestBlockEntity.class,
+            chest -> chest.setItem(0, new ItemStack(Items.COAL, 8)));
+    }
+
+    private static void placeConveyor(TestWorldContext context, int x, int y, int z,
+                                      Supplier<? extends Block> conveyor, Direction facing) {
+        context.setBlock(x, y, z, conveyor.get().defaultBlockState()
+            .setValue(BlockStateProperties.HORIZONTAL_FACING, facing));
     }
 
     private static void connectMachines(

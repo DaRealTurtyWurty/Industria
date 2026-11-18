@@ -11,7 +11,7 @@ public interface BlockEntityContentsDropper extends WrappedContainerStorageHolde
 
     default void dropContents(Level world, BlockPos pos) {
         WrappedContainerStorage<?> wrappedStorage = getWrappedContainerStorage();
-        if (wrappedStorage != null) {
+        if (world != null && wrappedStorage != null) {
             wrappedStorage.dropContents(world, pos);
 
             Block block = getBlock();

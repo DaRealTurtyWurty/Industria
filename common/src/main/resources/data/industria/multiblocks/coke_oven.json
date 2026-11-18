@@ -1,0 +1,24 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:coke_oven",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 0],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:polished_deepslate", "industria:coke_oven", "minecraft:polished_deepslate"],
+        ["minecraft:polished_deepslate", "minecraft:polished_deepslate", "minecraft:polished_deepslate"],
+        ["minecraft:polished_deepslate", "minecraft:polished_deepslate", "minecraft:polished_deepslate"],
+        ["minecraft:polished_deepslate", "minecraft:polished_deepslate", "minecraft:polished_deepslate"]
+      ],
+      [
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"]
+      ]
+    ]
+  }
+}
