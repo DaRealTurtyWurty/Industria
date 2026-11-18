@@ -11,8 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 
 public class CombustionGeneratorScreenHandler
-    extends
-        IndustriaScreenHandler<CombustionGeneratorBlockEntity, BlockPosPayload> {
+    extends IndustriaScreenHandler<CombustionGeneratorBlockEntity, BlockPosPayload> {
     public CombustionGeneratorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ModMenuTypes.COMBUSTION_GENERATOR.get(), syncId, playerInventory, payload,
             CombustionGeneratorBlockEntity.class);

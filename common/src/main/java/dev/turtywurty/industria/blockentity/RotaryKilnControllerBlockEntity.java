@@ -44,8 +44,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import java.util.*;
 
 public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityContentsDropper {
+    implements BlockEntityContentsDropper {
     private final List<BlockPos> kilnSegments = new ArrayList<>();
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
@@ -212,12 +211,12 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         view.store("KilnSegments", BlockPos.CODEC.listOf(), this.kilnSegments);
 
-        var recipesView = view.childrenList("Recipes");
+        ValueOutput.ValueOutputList recipesView = view.childrenList("Recipes");
         for (InputRecipeEntry inputRecipeEntry : this.recipes) {
             if (inputRecipeEntry == null)
                 continue;
 
-            var recipeView = recipesView.addChild();
+            ValueOutput recipeView = recipesView.addChild();
 
             ResourceKey<Recipe<?>> registryKey = inputRecipeEntry.registryKey;
             if (registryKey != null && registryKey.identifier() != null) {
@@ -283,9 +282,11 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
                     level.setBlockAndUpdate(offsetPos,
                         offsetState.setValue(RotaryKilnBlock.SEGMENT_INDEX, segmentIndex));
                 }
+
                 addKilnSegment(offsetPos);
             } else
                 break;
+
         }
     }
 
@@ -399,9 +400,11 @@ public class RotaryKilnControllerBlockEntity extends IndustriaMultiblockControll
         public boolean equals(Object obj) {
             if (obj == this)
                 return true;
+
             if (obj == null || obj.getClass() != this.getClass())
                 return false;
-            var that = (InputRecipeEntry) obj;
+
+            InputRecipeEntry that = (InputRecipeEntry) obj;
 
             return uuid.equals(that.uuid);
         }

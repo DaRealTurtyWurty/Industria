@@ -32,14 +32,14 @@ public class SmelteryControllerBlockEntityRenderer
     }
 
     @Override
-    public SmelteryControllerBlockEntityRenderer.SmelteryRenderState createRenderState() {
-        return new SmelteryControllerBlockEntityRenderer.SmelteryRenderState();
+    public SmelteryRenderState createRenderState() {
+        return new SmelteryRenderState();
     }
 
     @Override
     public void extractRenderState(
         SmelteryControllerBlockEntity blockEntity,
-        SmelteryControllerBlockEntityRenderer.SmelteryRenderState state,
+        SmelteryRenderState state,
         float partialTicks,
         Vec3 cameraPosition,
         ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress
@@ -50,7 +50,7 @@ public class SmelteryControllerBlockEntityRenderer
 
     @Override
     public void submit(
-        SmelteryControllerBlockEntityRenderer.SmelteryRenderState smelteryRenderState,
+        SmelteryRenderState smelteryRenderState,
         PoseStack poseStack,
         SubmitNodeCollector submitNodeCollector,
         CameraRenderState cameraRenderState
@@ -89,6 +89,7 @@ public class SmelteryControllerBlockEntityRenderer
                         .sprite(),
                     0xFFFFFFFF);
             }
+
             if (renderData == null || renderData.stillSprite() == null)
                 continue;
 
@@ -105,6 +106,7 @@ public class SmelteryControllerBlockEntityRenderer
                 light = (light & 0xF00000) | (Math.max((light >> 4) & 15,
                     FluidVariantAttributes.getLuminance(chamber.fluid().variant())) << 4);
             }
+
             this.fluidRenderingComponent.renderTexturedCuboid(renderData.stillSprite(), renderData.tintColor(),
                 submitNodeCollector, poseStack,
                 light, OverlayTexture.NO_OVERLAY,

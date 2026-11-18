@@ -46,6 +46,7 @@ public final class NeoForgeFluidTypes {
         Supplier<FluidType> type = BY_SOURCE.get(id);
         if (type == null)
             throw new IllegalStateException("No NeoForge fluid type registered for " + id);
+
         return type.get();
     }
 }

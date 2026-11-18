@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output, int requiredTemperature)
-    implements
-        Recipe<SingleItemStackRecipeInput> {
+    implements Recipe<SingleItemStackRecipeInput> {
     @Override
     public boolean matches(SingleItemStackRecipeInput input, Level world) {
         return this.input.testForRecipe(input.stack());
@@ -129,11 +128,11 @@ public record RotaryKilnRecipe(IndustriaIngredient input, OutputItemStack output
                 ByteBufCodecs.INT, RotaryKilnRecipeDisplay::requiredTemperature,
                 RotaryKilnRecipeDisplay::new);
 
-        private static final RecipeDisplay.Type<RotaryKilnRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        private static final Type<RotaryKilnRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
-        public RecipeDisplay.Type<RotaryKilnRecipeDisplay> type() {
+        public Type<RotaryKilnRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

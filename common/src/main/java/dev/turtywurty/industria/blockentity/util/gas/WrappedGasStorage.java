@@ -57,8 +57,7 @@ public class WrappedGasStorage<T extends ResourceStorage<ResourceVariant<Gas>>> 
     }
 
     public record GasStorageSerializer<T extends ResourceStorage<ResourceVariant<Gas>>>(T storage)
-        implements
-            ViewSerializable {
+        implements ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);

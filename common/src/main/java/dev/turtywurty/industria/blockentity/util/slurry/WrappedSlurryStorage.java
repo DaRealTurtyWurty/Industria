@@ -57,8 +57,7 @@ public class WrappedSlurryStorage<T extends ResourceStorage<ResourceVariant<Slur
     }
 
     public record SlurryStorageSerializer<T extends ResourceStorage<ResourceVariant<Slurry>>>(T storage)
-        implements
-            ViewSerializable {
+        implements ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);

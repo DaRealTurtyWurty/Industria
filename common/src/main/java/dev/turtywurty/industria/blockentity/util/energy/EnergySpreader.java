@@ -63,6 +63,7 @@ public interface EnergySpreader {
                 long remaining = totalExtractable - totalInserted;
                 if (remaining <= 0)
                     break;
+
                 long insertable = simulateInsertion(storage, remaining, transaction);
                 long inserted = storage.insert(SimpleEnergyStorage.ENERGY, insertable, transaction);
                 totalInserted += inserted;

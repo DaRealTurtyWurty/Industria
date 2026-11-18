@@ -37,8 +37,7 @@ public record CrystallizerRecipe(
     int catalystUses,
     int processTime
 )
-    implements
-        Recipe<CrystallizerRecipeInput> {
+    implements Recipe<CrystallizerRecipeInput> {
     @Override
     public boolean matches(CrystallizerRecipeInput input, Level world) {
         FluidStack waterFluid = input.waterFluid();
@@ -159,8 +158,7 @@ public record CrystallizerRecipe(
         int catalystUses,
         int processTime
     )
-        implements
-            RecipeDisplay {
+        implements RecipeDisplay {
         private static final MapCodec<CrystallizerRecipeDisplay> CODEC = RecordCodecBuilder
             .mapCodec(instance -> instance.group(
                 FluidStack.CODEC.fieldOf("water_fluid").forGetter(CrystallizerRecipeDisplay::waterFluid),
@@ -187,7 +185,7 @@ public record CrystallizerRecipe(
                 ByteBufCodecs.INT, CrystallizerRecipeDisplay::processTime,
                 CrystallizerRecipeDisplay::new);
 
-        private static final RecipeDisplay.Type<CrystallizerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        private static final Type<CrystallizerRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -196,7 +194,7 @@ public record CrystallizerRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<CrystallizerRecipeDisplay> type() {
+        public Type<CrystallizerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

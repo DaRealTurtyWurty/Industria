@@ -13,7 +13,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
 
-/** Crystallization after clarification, with water supplied by the production line's pump. */
+/**
+ * Crystallization after clarification, with water supplied by the production line's pump.
+ */
 public final class CrystallizerTestWorld {
     private CrystallizerTestWorld() {
     }
@@ -30,6 +32,7 @@ public final class CrystallizerTestWorld {
         }
 
         // Aluminium hydroxide leaves the east port; sodium carbonate leaves the north port.
+
         crystallizer.setBlock(2, 0, 0, ModBlocks.FEEDER_CONVEYOR.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
         crystallizer.setBlock(3, 0, 0, ModBlocks.HATCH_CONVEYOR.get().defaultBlockState()

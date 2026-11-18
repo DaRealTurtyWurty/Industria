@@ -11,8 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record SyncFluidPocketsPayload(List<WorldFluidPocketsState.FluidPocket> fluidPockets)
-    implements
-        CustomPacketPayload {
+    implements CustomPacketPayload {
     public static final Type<SyncFluidPocketsPayload> ID = new Type<>(Industria.id("sync_fluid_pockets"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncFluidPocketsPayload> CODEC = StreamCodec.composite(

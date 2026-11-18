@@ -120,7 +120,7 @@ public record ConnectedTextureSettings(
     public JsonObject toJson() {
         JsonObject json = defaultRule.toJson(ConnectedTextureRule.DEFAULT);
         if (connectedFaces.size() != Direction.values().length) {
-            var names = new JsonArray();
+            JsonArray names = new JsonArray();
             for (Direction face : Direction.values()) {
                 if (connectedFaces.contains(face)) {
                     names.add(new JsonPrimitive(face.getName()));

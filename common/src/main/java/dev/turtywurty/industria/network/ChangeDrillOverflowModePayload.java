@@ -8,8 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record ChangeDrillOverflowModePayload(DrillBlockEntity.OverflowMethod overflowMethod)
-    implements
-        CustomPacketPayload {
+    implements CustomPacketPayload {
     public static final Type<ChangeDrillOverflowModePayload> ID = new Type<>(
         Industria.id("change_drill_overflow_mode"));
 

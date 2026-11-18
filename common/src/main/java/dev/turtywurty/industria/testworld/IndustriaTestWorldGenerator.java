@@ -17,6 +17,9 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 import java.util.List;
 import java.util.UUID;
+import dev.turtywurty.industria.block.WindTurbineBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class IndustriaTestWorldGenerator {
     private IndustriaTestWorldGenerator() {
@@ -54,8 +57,8 @@ public final class IndustriaTestWorldGenerator {
         }
 
         TestWorldContext energyGenContext = context.at(0, 0, 5);
-        var windTurbine = ModBlocks.WIND_TURBINE.get();
-        var windTurbineState = windTurbine.defaultBlockState();
+        WindTurbineBlock windTurbine = ModBlocks.WIND_TURBINE.get();
+        BlockState windTurbineState = windTurbine.defaultBlockState();
         for (int x = -1; x <= 1; x++) {
             energyGenContext.setBlock(x, 0, 0, windTurbineState);
             windTurbine.setPlacedBy(energyGenContext.overworld(), energyGenContext.pos(x, 0, 0),
@@ -76,7 +79,7 @@ public final class IndustriaTestWorldGenerator {
         TestWorldContext poolContext = energyGenContext.at(-10, 0, 0);
         poolContext.fill(-1, -2, -1, 1, -1, 1, Blocks.WATER);
 
-        var pumpState = ModBlocks.FLUID_PUMP.get().defaultBlockState()
+        BlockState pumpState = ModBlocks.FLUID_PUMP.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH);
         poolContext.setBlock(0, -2, 0, pumpState.setValue(BlockStateProperties.WATERLOGGED, true));
         poolContext.setBlock(0, -1, 0, pumpState
@@ -84,7 +87,7 @@ public final class IndustriaTestWorldGenerator {
             .setValue(BlockStateProperties.WATERLOGGED, true));
 
         for (int y = 0; y < 3; y++) {
-            var oldPipe = poolContext.pos(2, y, 0);
+            BlockPos oldPipe = poolContext.pos(2, y, 0);
             if (context.overworld().getBlockState(oldPipe).is(ModBlocks.FLUID_PIPE.get())) {
                 context.overworld().removeBlock(oldPipe, false);
             }

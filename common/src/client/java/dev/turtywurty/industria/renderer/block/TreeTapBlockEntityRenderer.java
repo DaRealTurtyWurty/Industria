@@ -21,8 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 public class TreeTapBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<TreeTapBlockEntity, TreeTapBlockEntityRenderer.TreeTapRenderState> {
+    extends IndustriaBlockEntityRenderer<TreeTapBlockEntity, TreeTapBlockEntityRenderer.TreeTapRenderState> {
     private final TreeTapModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 

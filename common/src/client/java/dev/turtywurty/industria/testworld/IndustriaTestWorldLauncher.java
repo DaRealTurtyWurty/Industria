@@ -62,10 +62,10 @@ public final class IndustriaTestWorldLauncher {
 
         int firstRowY = singleplayer.getY();
         int lastRowY = realms.getY();
-        var menuWidgets = widgets.stream()
+        List<? extends AbstractWidget> menuWidgets = widgets.stream()
             .filter(widget -> widget.getHeight() >= 20 && widget.getY() >= firstRowY)
             .toList();
-        var rows = menuWidgets.stream().map(AbstractWidget::getY).distinct().sorted().toList();
+        List<Integer> rows = menuWidgets.stream().map(AbstractWidget::getY).distinct().sorted().toList();
         int insertedRow = rows.indexOf(lastRowY) + 1;
         int rowCount = rows.size() + 1;
         // Keep the menu below the logo and above the footer, tightening gaps on small screens.
@@ -77,8 +77,10 @@ public final class IndustriaTestWorldLauncher {
             if (row >= insertedRow) {
                 row++;
             }
+
             widget.setY(top + row * spacing);
         }
+
         return createButton(screen, singleplayer.getX(), top + insertedRow * spacing,
             singleplayer.getWidth(), singleplayer.getHeight());
     }

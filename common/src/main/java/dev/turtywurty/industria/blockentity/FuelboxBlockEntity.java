@@ -36,8 +36,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 public class FuelboxBlockEntity extends DoorContainerBlockEntity
-    implements
-        BlockEntityContentsDropper,
+    implements BlockEntityContentsDropper,
         BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("fuelbox");
 
@@ -61,6 +60,7 @@ public class FuelboxBlockEntity extends DoorContainerBlockEntity
                     yield (int) (Mth.clamp((remainingFuelUnits / ((float) maxBurnTime * FUEL_UNITS_PER_BURN_TICK)), 0,
                         1) * 1000);
                 }
+
                 case 1 -> isBurning() ? 1 : 0;
                 default -> 0;
             };

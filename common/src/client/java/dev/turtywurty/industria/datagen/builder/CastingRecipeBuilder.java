@@ -38,7 +38,8 @@ public class CastingRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-            new CastingRecipe(this.blockType, this.input, this.output, this.coolingTime, this.moldId, this.moldCreation),
+            new CastingRecipe(this.blockType, this.input, this.output, this.coolingTime, this.moldId,
+                this.moldCreation),
             null);
     }
 

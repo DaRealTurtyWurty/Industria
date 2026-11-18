@@ -27,8 +27,7 @@ import org.joml.Vector3f;
 
 // TODO: Finish OBJLoader and use that for rendering
 public class CentrifugalConcentratorBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity, CentrifugalConcentratorRenderState> {
+    extends IndustriaBlockEntityRenderer<CentrifugalConcentratorBlockEntity, CentrifugalConcentratorRenderState> {
     private static final int NUM_SPINNING_ITEMS = 5;
 
     private final CentrifugalConcentratorModel model;
@@ -99,6 +98,7 @@ public class CentrifugalConcentratorBlockEntityRenderer
             state.blockPos);
         if (renderData == null)
             return;
+
         TextureAtlasSprite fluidSprite = renderData.stillSprite();
 
         RenderType renderLayer = RenderTypes.entityTranslucent(fluidSprite.atlasLocation());

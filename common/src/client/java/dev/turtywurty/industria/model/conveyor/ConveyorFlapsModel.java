@@ -130,16 +130,19 @@ public class ConveyorFlapsModel extends Model<ConveyorFlapsModel.RenderState> {
                     this.flap1MidRot = midRot;
                     this.flap1BotRot = botRot;
                 }
+
                 case 1 -> {
                     this.flap2TopRot = topRot;
                     this.flap2MidRot = midRot;
                     this.flap2BotRot = botRot;
                 }
+
                 case 2 -> {
                     this.flap3TopRot = topRot;
                     this.flap3MidRot = midRot;
                     this.flap3BotRot = botRot;
                 }
+
                 case 3 -> {
                     this.flap4TopRot = topRot;
                     this.flap4MidRot = midRot;

@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.InteractionHand;
 
 public record HandPayload(InteractionHand hand) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<HandPayload> ID = new CustomPacketPayload.Type<>(Industria.id("hand"));
+    public static final Type<HandPayload> ID = new Type<>(Industria.id("hand"));
     public static final StreamCodec<RegistryFriendlyByteBuf, HandPayload> CODEC = StreamCodec.composite(
         ByteBufCodecs.STRING_UTF8,
         payload -> payload.hand().name(),

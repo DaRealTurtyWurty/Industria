@@ -6,8 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 
 public record MixerRecipeInput(RecipeSimpleInventory recipeInventory, FluidStack fluidStack, int temperature)
-    implements
-        RecipeInput {
+    implements RecipeInput {
     @Override
     public ItemStack getItem(int slot) {
         return this.recipeInventory.getItem(slot);

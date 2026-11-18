@@ -23,8 +23,7 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, int processTime)
-    implements
-        Recipe<DigesterRecipeInput> {
+    implements Recipe<DigesterRecipeInput> {
     @Override
     public boolean matches(DigesterRecipeInput input, Level world) {
         return input.slurryStack().matches(this.inputSlurry);
@@ -110,8 +109,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
         FluidStack outputFluid,
         int processTime
     )
-        implements
-            RecipeDisplay {
+        implements RecipeDisplay {
         public static final MapCodec<DigesterRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipeDisplay::inputSlurry),
@@ -128,7 +126,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
                 ByteBufCodecs.INT, DigesterRecipeDisplay::processTime,
                 DigesterRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<DigesterRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<DigesterRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -137,7 +135,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
         }
 
         @Override
-        public RecipeDisplay.Type<DigesterRecipeDisplay> type() {
+        public Type<DigesterRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

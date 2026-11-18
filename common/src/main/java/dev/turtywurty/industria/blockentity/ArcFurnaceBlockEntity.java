@@ -65,8 +65,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
 public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("arc_furnace");
 
@@ -90,7 +89,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
     private final RecipeManager.CachedCheck<RecipeSimpleInventory, AlloyingRecipe> alloyingMatchGetter;
     private final RecipeManager.CachedCheck<SingleRecipeInput, RecyclingRecipe> recyclingMatchGetter;
     private final List<ResourceKey<Recipe<?>>> currentRecipeIds = new ArrayList<>();
-    private final NonNullList<ItemStack> bufferedOutputs = NonNullList.withSize(9, ItemStack.EMPTY);
+    private final List<ItemStack> bufferedOutputs = NonNullList.withSize(9, ItemStack.EMPTY);
     private final int[] progress = new int[9], maxProgress = new int[9];
     private Mode mode = Mode.BLASTING;
     private boolean hasOverheated = false;
@@ -193,7 +192,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         if (recipeId == null)
             return;
 
-        var serverLevel = (ServerLevel) level;
+        ServerLevel serverLevel = (ServerLevel) level;
         SyncingSimpleInventory inputInventory = getInputInventory();
         var singleRecipeInput = new SingleRecipeInput(inputInventory.getItem(index));
         Optional<? extends Recipe<?>> recipeOpt = (switch (mode) {
@@ -221,6 +220,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                 case ALLOYING -> ((AlloyingRecipe) recipe).smeltTime() / 2;
                 case RECYCLING -> ((RecyclingRecipe) recipe).processTime() / 2;
             };
+
             update();
         } else {
             int effectiveMaxProgress = getEffectiveMaxProgress(index);
@@ -255,11 +255,13 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
                         inputStack.shrink(1);
                         inputInventory.setItem(index, inputStack);
                     }
+
                     case RECYCLING -> {
                         ItemStack inputStack = inputInventory.getItem(index);
                         inputStack.shrink(((RecyclingRecipe) recipe).input().stackData().count());
                         inputInventory.setItem(index, inputStack);
                     }
+
                     case ALLOYING -> {
                     } // This is a NO-OP because the recipe itself does this
                 }
@@ -333,6 +335,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
         }
 
         // Buffer full. Merge into the last slot if possible; otherwise replace it.
+
         int lastIndex = this.bufferedOutputs.size() - 1;
         ItemStack lastStack = this.bufferedOutputs.get(lastIndex);
         if (!lastStack.isEmpty() && ItemStack.isSameItemSameComponents(lastStack, stack)) {
@@ -375,6 +378,7 @@ public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEnt
 
                 yield recipeIds;
             }
+
             case ALLOYING -> this.alloyingMatchGetter.getRecipeFor(inputInventory, level)
                 .stream()
                 .map(RecipeHolder::id)

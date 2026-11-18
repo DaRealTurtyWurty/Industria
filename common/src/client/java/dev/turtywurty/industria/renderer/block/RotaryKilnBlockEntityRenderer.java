@@ -31,8 +31,7 @@ import org.jbox2d.dynamics.*;
 import org.jetbrains.annotations.Nullable;
 
 public class RotaryKilnBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity, RotaryKilnControllerRenderState> {
+    extends IndustriaBlockEntityRenderer<RotaryKilnControllerBlockEntity, RotaryKilnControllerRenderState> {
     public static final Map<BlockPos, RendererData> BLOCK_POS_RENDERER_DATA_MAP = new ConcurrentHashMap<>();
 
     private static final float BARREL_ANGULAR_VELOCITY = 1.5f;

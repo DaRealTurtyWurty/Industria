@@ -60,8 +60,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class CastingTableBlockEntity extends IndustriaBlockEntity
-    implements
-        BlockEntityContentsDropper,
+    implements BlockEntityContentsDropper,
         BlockEntityWithGui<BlockPosPayload>,
         SyncableTickableBlockEntity,
         TappingOutletBlockEntity.TappingOutletReceiver {
@@ -297,11 +296,12 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             || !canCast(recipe.inputFluid().variant().value()))
             return false;
 
-        var outputStorage = ContainerStorage.of(getInventory(), null);
+        ContainerStorage outputStorage = ContainerStorage.of(getInventory(), null);
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             if (recipe.moldCreation().isPresent()) {
-                long extractedItem = outputStorage.extract(0, ResourceVariant.ofItem(this.castingTemplate), 1, transaction);
+                long extractedItem = outputStorage.extract(0, ResourceVariant.ofItem(this.castingTemplate), 1,
+                    transaction);
                 if (extractedItem != 1)
                     return false;
             }
@@ -325,8 +325,10 @@ public class CastingTableBlockEntity extends IndustriaBlockEntity
             }
 
             transaction.commit();
-            if (recipe.moldCreation().isEmpty())
+            if (recipe.moldCreation().isEmpty()) {
                 useMolds();
+            }
+
             return true;
         }
     }

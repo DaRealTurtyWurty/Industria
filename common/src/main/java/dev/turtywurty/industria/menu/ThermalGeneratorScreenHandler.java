@@ -12,8 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluid;
 
 public class ThermalGeneratorScreenHandler
-    extends
-        IndustriaScreenHandler<ThermalGeneratorBlockEntity, BlockPosPayload> {
+    extends IndustriaScreenHandler<ThermalGeneratorBlockEntity, BlockPosPayload> {
     public ThermalGeneratorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
         super(ModMenuTypes.THERMAL_GENERATOR.get(), syncId, playerInventory, payload,
             ThermalGeneratorBlockEntity.class);

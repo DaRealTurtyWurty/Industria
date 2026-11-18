@@ -17,8 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 public class OilPumpJackBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<OilPumpJackBlockEntity, OilPumpJackRenderState> {
+    extends IndustriaBlockEntityRenderer<OilPumpJackBlockEntity, OilPumpJackRenderState> {
     private final OilPumpJackModel model;
     private final OilPumpJackModel.OilPumpJackParts parts;
 

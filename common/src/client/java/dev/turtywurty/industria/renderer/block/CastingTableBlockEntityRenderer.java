@@ -244,6 +244,7 @@ public class CastingTableBlockEntityRenderer
                     .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
             }
         });
+
         matrices.popPose();
     }
 

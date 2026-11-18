@@ -18,8 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class WindTurbineBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<WindTurbineBlockEntity, WindTurbineRenderState> {
+    extends IndustriaBlockEntityRenderer<WindTurbineBlockEntity, WindTurbineRenderState> {
     private static final Identifier ENERGY_BAR_TEXTURE = Industria.id("textures/block/energy_bar.png");
     private static final float ENERGY_BAR_MIN_X = -4.0F / 16.0F;
     private static final float ENERGY_BAR_MAX_X = 4.0F / 16.0F;

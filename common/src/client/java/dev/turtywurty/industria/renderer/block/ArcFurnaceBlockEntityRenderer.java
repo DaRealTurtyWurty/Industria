@@ -9,8 +9,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 public class ArcFurnaceBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<ArcFurnaceBlockEntity, IndustriaBlockEntityRenderState> {
+    extends IndustriaBlockEntityRenderer<ArcFurnaceBlockEntity, IndustriaBlockEntityRenderState> {
     private final ArcFurnaceModel model;
 
     public ArcFurnaceBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

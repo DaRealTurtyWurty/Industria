@@ -38,8 +38,7 @@ public record MixerRecipe(
     SlurryStack outputSlurry,
     int processTime
 )
-    implements
-        Recipe<MixerRecipeInput> {
+    implements Recipe<MixerRecipeInput> {
     @Override
     public boolean matches(MixerRecipeInput input, Level world) {
         if (!input.fluidStack().matches(this.inputFluid) || input.temperature() < this.minTemp
@@ -223,7 +222,7 @@ public record MixerRecipe(
                 ByteBufCodecs.INT, MixerRecipeDisplay::processTime,
                 MixerRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<MixerRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<MixerRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -232,7 +231,7 @@ public record MixerRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<MixerRecipeDisplay> type() {
+        public Type<MixerRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

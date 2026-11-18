@@ -46,6 +46,7 @@ public class MoldCastPreviewRenderer extends PictureInPictureRenderer<MoldCastPr
                     }
                 }
             });
+
         this.lastSurface = surface;
         this.lastSprite = sprite;
     }

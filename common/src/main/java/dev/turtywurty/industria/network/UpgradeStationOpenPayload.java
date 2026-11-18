@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record UpgradeStationOpenPayload(BlockPos pos, List<UpgradeStationRecipe> recipes)
-    implements
-        HasPositionPayload {
+    implements HasPositionPayload {
     public static final Type<UpgradeStationOpenPayload> ID = new Type<>(Industria.id("upgrade_station_open"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpgradeStationOpenPayload> CODEC = StreamCodec.composite(
         BlockPos.STREAM_CODEC, UpgradeStationOpenPayload::pos,

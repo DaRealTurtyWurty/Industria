@@ -17,10 +17,11 @@ public record SyncWireDrawplateRecipesPayload(List<WireDrawplateClientCache.Entr
     implements CustomPacketPayload {
     public static final Type<SyncWireDrawplateRecipesPayload> ID = new Type<>(
         Industria.id("sync_wire_drawplate_recipes"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, SyncWireDrawplateRecipesPayload> CODEC = StreamCodec.composite(
-        ByteBufCodecs.collection(ArrayList::new, WireDrawplateClientCache.Entry.STREAM_CODEC),
-        SyncWireDrawplateRecipesPayload::recipes,
-        SyncWireDrawplateRecipesPayload::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncWireDrawplateRecipesPayload> CODEC = StreamCodec
+        .composite(
+            ByteBufCodecs.collection(ArrayList::new, WireDrawplateClientCache.Entry.STREAM_CODEC),
+            SyncWireDrawplateRecipesPayload::recipes,
+            SyncWireDrawplateRecipesPayload::new);
 
     public SyncWireDrawplateRecipesPayload {
         recipes = List.copyOf(recipes);

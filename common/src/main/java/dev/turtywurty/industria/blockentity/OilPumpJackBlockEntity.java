@@ -42,8 +42,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
 public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         WrappedContainerStorageHolder {
     public static final Component TITLE = Industria.containerTitle("oil_pump_jack");
 
@@ -195,6 +194,7 @@ public class OilPumpJackBlockEntity extends IndustriaMultiblockControllerBlockEn
         if (this.wellheadPos != null) {
             view.store("WellheadPos", BlockPos.CODEC, this.wellheadPos);
         }
+
         ViewUtils.putChild(view, "EnergyStorage", this.wrappedEnergyStorage);
         ViewUtils.putChild(view, "Inventory", this.wrappedContainerStorage);
         view.putBoolean("Running", this.running);

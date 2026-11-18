@@ -28,8 +28,7 @@ import java.util.List;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
 public class SolarPanelBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         ChainedGeneratorEnergyOutput {
     public static final Component TITLE = Industria.containerTitle("solar_panel");
     public static final Component ADVANCED_TITLE = Industria.containerTitle("advanced_solar_panel");

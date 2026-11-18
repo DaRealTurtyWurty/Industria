@@ -35,8 +35,8 @@ public final class WireDrawplateClientCache {
 
     public record Entry(IndustriaIngredient input, int duration) {
         public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
-                IndustriaIngredient.STREAM_CODEC, Entry::input,
-                ByteBufCodecs.VAR_INT, Entry::duration,
-                Entry::new);
+            IndustriaIngredient.STREAM_CODEC, Entry::input,
+            ByteBufCodecs.VAR_INT, Entry::duration,
+            Entry::new);
     }
 }

@@ -91,7 +91,7 @@ public final class MechanicalNetworkManager {
             if (component.isEmpty())
                 continue;
 
-            var network = recreateNetwork(component, previousNetworks);
+            MechanicalNetwork network = recreateNetwork(component, previousNetworks);
             network.refreshParticipants(level);
             networks.add(network);
             for (BlockPos pos : component) {

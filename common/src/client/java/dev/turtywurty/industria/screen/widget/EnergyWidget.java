@@ -126,6 +126,7 @@ public class EnergyWidget implements Renderable, LayoutElement {
             return Long.toString(value);
 
         String[] suffixes = {"k", "m", "b", "t", "q"};
+
         double compactValue = value;
         int suffixIndex = -1;
         while (Math.abs(compactValue) >= 1000 && suffixIndex < suffixes.length - 1) {

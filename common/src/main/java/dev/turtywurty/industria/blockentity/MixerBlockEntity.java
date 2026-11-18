@@ -96,8 +96,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert
 //                        .build());
 //    }
 public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("mixer");
 
@@ -131,6 +130,7 @@ public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity
             return 2;
         }
     };
+
     private ResourceKey<Recipe<?>> currentRecipeId;
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private SlurryStack outputSlurryStack = SlurryStack.EMPTY;

@@ -23,8 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 
 public class DistillationTowerBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<DistillationTowerBlockEntity, DistillationTowerRenderState> {
+    extends IndustriaBlockEntityRenderer<DistillationTowerBlockEntity, DistillationTowerRenderState> {
     private final DistillationTowerModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 

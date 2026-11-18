@@ -11,8 +11,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.TagValueInput;
+import dev.turtywurty.industria.recipe.CrusherRecipe;
+import net.minecraft.world.SimpleContainer;
 
-/** Opt-in dedicated-server regression checks using the probabilistic coal ore recipe. */
+/**
+ * Opt-in dedicated-server regression checks using the probabilistic coal ore recipe.
+ */
 public final class CrusherValidationTestWorld {
     private CrusherValidationTestWorld() {
     }
@@ -37,12 +41,12 @@ public final class CrusherValidationTestWorld {
 
     private static void validate(TestWorldContext context, boolean secondary) {
         context.setBlock(0, 0, 0, ModBlocks.CRUSHER);
-        var crusher = context.requireBlockEntity(0, 0, 0, CrusherBlockEntity.class);
-        var input = crusher.getWrappedContainerStorage().getInventory(CrusherBlockEntity.INPUT_SLOT);
-        var output = crusher.getWrappedContainerStorage().getInventory(CrusherBlockEntity.OUTPUT_SLOT);
+        CrusherBlockEntity crusher = context.requireBlockEntity(0, 0, 0, CrusherBlockEntity.class);
+        SimpleContainer input = crusher.getWrappedContainerStorage().getInventory(CrusherBlockEntity.INPUT_SLOT);
+        SimpleContainer output = crusher.getWrappedContainerStorage().getInventory(CrusherBlockEntity.OUTPUT_SLOT);
         input.setItem(0, new ItemStack(Items.COAL_ORE));
         StorageOperations.setEnergy(crusher.getEnergy(), 10_000);
-        var recipe = context.overworld().recipeAccess()
+        CrusherRecipe recipe = context.overworld().recipeAccess()
             .getRecipeFor(ModRecipeTypes.CRUSHER.get(), crusher.getInventory(), context.overworld())
             .orElseThrow().value();
         check(recipe.outputA().item() == Items.COAL && recipe.outputB().item() == Items.COAL,
@@ -55,6 +59,7 @@ public final class CrusherValidationTestWorld {
             check(++seed < 10_000, "Could not find a seed for the requested secondary outcome");
             expectedRandom.setSeed(seed);
         }
+
         long expectedNextRandom = expectedRandom.nextLong();
         context.overworld().getRandom().setSeed(seed);
 
@@ -66,6 +71,7 @@ public final class CrusherValidationTestWorld {
         for (int tick = 0; tick < 20; tick++) {
             crusher.onTick();
         }
+
         check(crusher.getProgress() == 0 && crusher.getEnergy().getAmount() == 10_000,
             "Full output storage consumed work or energy");
         check(started.get("PendingOutputs").equals(save(context, crusher).get("PendingOutputs")),
@@ -75,6 +81,7 @@ public final class CrusherValidationTestWorld {
         for (int tick = 0; tick < 4; tick++) {
             crusher.onTick();
         }
+
         check(crusher.getProgress() == 4, "Operation failed to resume");
         output.setItem(0, new ItemStack(Items.COAL, 63));
         output.setItem(1, new ItemStack(Items.STONE, 64));
@@ -82,10 +89,12 @@ public final class CrusherValidationTestWorld {
         if (!secondary) {
             output.setItem(0, new ItemStack(Items.COAL, 64));
         }
+
         long pausedEnergy = crusher.getEnergy().getAmount();
         for (int tick = 0; tick < 20; tick++) {
             crusher.onTick();
         }
+
         check(crusher.getProgress() == 4 && crusher.getEnergy().getAmount() == pausedEnergy,
             "Blocked operation lost progress or consumed energy");
         check(input.getItem(0).getCount() == 1 && output.getItem(0).getCount() == (secondary ? 63 : 64),
@@ -110,6 +119,7 @@ public final class CrusherValidationTestWorld {
         for (int tick = 0; tick < remaining; tick++) {
             reloaded.onTick();
         }
+
         check(reloaded.getProgress() == reloaded.getMaxProgress(), "Operation failed to finish processing");
 
         // Also block the completion tick and verify input/output insertion is all-or-nothing.
@@ -119,7 +129,8 @@ public final class CrusherValidationTestWorld {
         check(reloaded.getProgress() == recipe.processTime()
             && reloaded.getEnergy().getAmount() == completionEnergy
             && reloaded.getWrappedContainerStorage().getInventory(CrusherBlockEntity.INPUT_SLOT)
-                .getItem(0).getCount() == 1, "Blocked completion consumed input, energy or progress");
+                .getItem(0).getCount() == 1,
+            "Blocked completion consumed input, energy or progress");
         output.setItem(0, new ItemStack(Items.COAL, secondary ? 62 : 63));
         reloaded.onTick();
         check(reloaded.getProgress() == 0 && reloaded.getMaxProgress() == 0, "Completed operation did not reset");

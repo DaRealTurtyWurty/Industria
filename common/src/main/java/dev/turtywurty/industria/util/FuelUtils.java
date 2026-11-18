@@ -13,7 +13,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 import net.minecraft.world.phys.Vec3;
 
-/** Resolves the reloadable fuel component that replaced the level fuel registry. */
+/**
+ * Resolves the reloadable fuel component that replaced the level fuel registry.
+ */
 public final class FuelUtils {
     private FuelUtils() {
     }
@@ -25,6 +27,7 @@ public final class FuelUtils {
     public static int burnDuration(Level level, ItemStack stack) {
         if (!(level instanceof ServerLevel serverLevel) || !isFuel(stack))
             return 0;
+
         LootParams params = new LootParams.Builder(serverLevel)
             .withParameter(LootContextParams.ORIGIN, Vec3.ZERO)
             .create(LootContextParamSets.COMMAND);

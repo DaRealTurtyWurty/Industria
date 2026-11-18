@@ -20,11 +20,10 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
 
 public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier texture)
-    implements
-        SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
+    implements SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
     @Override
     public void submit(
-        @Nullable IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData data,
+        @Nullable BlockEntityItemRenderData data,
         PoseStack matrices,
         SubmitNodeCollector queue,
         int light,
@@ -68,8 +67,7 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
     }
 
     public record Unbaked(ModelLayerLocation modelLayer, Identifier texture)
-        implements
-            SpecialModelRenderer.Unbaked<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
+        implements SpecialModelRenderer.Unbaked<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> {
         private static final Codec<ModelLayerLocation> ENTITY_MODEL_LAYER_CODEC = RecordCodecBuilder
             .create(instance -> instance.group(
                 Identifier.CODEC.fieldOf("id").forGetter(ModelLayerLocation::model),
@@ -86,7 +84,7 @@ public record IndustriaBlockEntityItemRenderer(ModelPart modelPart, Identifier t
         }
 
         @Override
-        public SpecialModelRenderer<IndustriaBlockEntityItemRenderer.BlockEntityItemRenderData> bake(
+        public SpecialModelRenderer<BlockEntityItemRenderData> bake(
             BakingContext context
         ) {
             EntityModelSet entityModels = context.entityModelSet();

@@ -37,8 +37,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ChargingHatchBlockEntity extends DoorContainerBlockEntity
-    implements
-        BlockEntityContentsDropper,
+    implements BlockEntityContentsDropper,
         BlockEntityWithGui<ChargingHatchOpenPayload> {
     public static final Component TITLE = Industria.containerTitle("charging_hatch");
 

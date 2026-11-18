@@ -29,8 +29,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 public class MoldingTableBlockEntity extends IndustriaBlockEntity
-    implements
-        BlockEntityContentsDropper,
+    implements BlockEntityContentsDropper,
         BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("molding_table");
 
@@ -46,6 +45,7 @@ public class MoldingTableBlockEntity extends IndustriaBlockEntity
                 if (visual != null && !visual.matches(getItem(0))) {
                     MoldingTableBlockEntity.this.visualState = null;
                 }
+
                 super.setChanged();
             }
         });

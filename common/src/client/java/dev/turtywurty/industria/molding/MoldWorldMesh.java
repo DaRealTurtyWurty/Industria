@@ -25,6 +25,7 @@ public final class MoldWorldMesh {
                     (x + 1) * SIZE / textureWidth, (y + 1) * SIZE / textureHeight);
             }
         }
+
         addWalls();
     }
 
@@ -50,6 +51,7 @@ public final class MoldWorldMesh {
                 solid &= !removed;
             }
         }
+
         if (empty)
             return;
 
@@ -63,6 +65,7 @@ public final class MoldWorldMesh {
                 }
             }
         }
+
         if (flat || (x1 - x0 == 1 && y1 - y0 == 1)) {
             if (flat) {
                 addQuad(top(x0, y0), top(x1, y0), top(x1, y1), top(x0, y1));
@@ -70,6 +73,7 @@ public final class MoldWorldMesh {
                 addTriangle(top(x0, y0), top(x1, y0), top(x1, y1));
                 addTriangle(top(x0, y0), top(x1, y1), top(x0, y1));
             }
+
             addQuad(bottom(x0, y0), bottom(x0, y1), bottom(x1, y1), bottom(x1, y0));
             return;
         }

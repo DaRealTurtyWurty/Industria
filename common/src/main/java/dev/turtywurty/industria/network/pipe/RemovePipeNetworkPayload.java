@@ -13,8 +13,7 @@ import net.minecraft.world.level.Level;
 import java.util.UUID;
 
 public record RemovePipeNetworkPayload(ResourceKey<Level> world, TransferType<?, ?, ?> transferType, UUID networkId)
-    implements
-        CustomPacketPayload {
+    implements CustomPacketPayload {
     public static final Type<RemovePipeNetworkPayload> ID = new Type<>(Industria.id("remove_pipe_network"));
     public static final StreamCodec<RegistryFriendlyByteBuf, RemovePipeNetworkPayload> CODEC = StreamCodec.composite(
         ResourceKey.streamCodec(Registries.DIMENSION), RemovePipeNetworkPayload::world,

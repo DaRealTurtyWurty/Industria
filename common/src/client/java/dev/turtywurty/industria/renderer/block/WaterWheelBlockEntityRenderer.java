@@ -45,15 +45,21 @@ public class WaterWheelBlockEntityRenderer
     protected void setupBlockEntityTransformations(PoseStack matrices, WaterWheelRenderState state) {
         matrices.pushPose();
         matrices.translate(0.5F, 1.5F, 0.5F);
-        if (state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING).getAxis() == Direction.Axis.X)
+        if (state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING).getAxis() == Direction.Axis.X) {
             matrices.rotate(Axis.YP.rotationDegrees(90));
+        }
 
         matrices.rotate(Axis.XP.rotationDegrees(180));
     }
 
     @Override
-    protected void onRender(WaterWheelRenderState state, PoseStack matrices, SubmitNodeCollector queue,
-                            int light, int overlay) {
+    protected void onRender(
+        WaterWheelRenderState state,
+        PoseStack matrices,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
         ModelSubmitUtils.submitModel(queue, model, new WaterWheelModel.WaterWheelModelRenderState(-state.rotation),
             matrices, model.renderType(WaterWheelModel.TEXTURE_LOCATION), light, overlay, 0, state.breakProgress);
     }

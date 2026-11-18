@@ -64,13 +64,14 @@ public record VerticalConnectedModelSettings(
                 variant.name().toLowerCase(Locale.ROOT),
                 modelFor(variant).toString());
         }
+
         json.add("models", models);
 
         if (!connectsTo.isEmpty()) {
             if (connectsTo.size() == 1) {
                 json.addProperty("connects_to", connectsTo.iterator().next().toString());
             } else {
-                var array = new JsonArray();
+                JsonArray array = new JsonArray();
                 for (String id : connectsTo.stream()
                     .map(Identifier::toString)
                     .sorted()
@@ -121,6 +122,7 @@ public record VerticalConnectedModelSettings(
             } else
                 throw new JsonParseException(
                     "connects_to must be a string or an array of strings, but was: " + connectsToElement);
+
         }
 
         return new VerticalConnectedModelSettings(normal, lower, middle, upper, connectsTo);

@@ -172,7 +172,7 @@ public class MultiblockExportItem extends Item {
         root.addProperty("trigger_item", Industria.id("wrench").toString());
         root.addProperty("controller_block", BuiltInRegistries.BLOCK.getKey(controllerBlock).toString());
 
-        var allowedRotations = new JsonArray();
+        JsonArray allowedRotations = new JsonArray();
         allowedRotations.add("none");
         allowedRotations.add("cw_90");
         allowedRotations.add("cw_180");
@@ -180,7 +180,7 @@ public class MultiblockExportItem extends Item {
         root.add("allowed_rotations", allowedRotations);
         root.addProperty("allow_mirror", false);
 
-        var controller = new JsonArray();
+        JsonArray controller = new JsonArray();
         controller.add(bounds.controller().getX() - bounds.minX());
         controller.add(bounds.controller().getY() - bounds.minY());
         controller.add(bounds.controller().getZ() - bounds.minZ());
@@ -188,12 +188,12 @@ public class MultiblockExportItem extends Item {
 
         var pattern = new JsonObject();
         pattern.addProperty("type", "multiblocklib:grid");
-        var layers = new JsonArray();
+        JsonArray layers = new JsonArray();
 
         for (int y = bounds.minY(); y <= bounds.maxY(); y++) {
-            var layer = new JsonArray();
+            JsonArray layer = new JsonArray();
             for (int z = bounds.minZ(); z <= bounds.maxZ(); z++) {
-                var row = new JsonArray();
+                JsonArray row = new JsonArray();
                 for (int x = bounds.minX(); x <= bounds.maxX(); x++) {
                     BlockState state = level.getBlockState(new BlockPos(x, y, z));
                     row.add(BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString());

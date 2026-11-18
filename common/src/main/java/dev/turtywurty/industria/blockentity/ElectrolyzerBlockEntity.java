@@ -64,8 +64,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
 public class ElectrolyzerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("electrolyzer");
 
@@ -106,6 +105,7 @@ public class ElectrolyzerBlockEntity extends IndustriaMultiblockControllerBlockE
             return 4;
         }
     };
+
     private ResourceKey<Recipe<?>> currentRecipeId;
     private FluidStack leftoverOutputFluid = FluidStack.EMPTY;
     private GasStack leftoverOutputGas = GasStack.EMPTY;

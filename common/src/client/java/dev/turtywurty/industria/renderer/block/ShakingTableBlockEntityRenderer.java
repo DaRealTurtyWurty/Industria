@@ -24,8 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class ShakingTableBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<ShakingTableBlockEntity, ShakingTableRenderState> {
+    extends IndustriaBlockEntityRenderer<ShakingTableBlockEntity, ShakingTableRenderState> {
     private final ShakingTableModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
@@ -104,6 +103,7 @@ public class ShakingTableBlockEntityRenderer
 
     // TODO: Figure out why the items start off centered in the middle of the table
     // and then move to the left side of the table when the shaking starts.
+
     private void renderItemStacks(
         ShakingTableRenderState state,
         PoseStack matrices,

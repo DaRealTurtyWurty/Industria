@@ -167,7 +167,7 @@ public class ModItems {
             .stacksTo(16)
             .food(FoodList.FORMIC_ACID_FOOD, FoodList.FORMIC_ACID_CONSUMABLE));
     public static final RegistrationHandle<Item, WireDrawplateItem> WIRE_DRAWPLATE = register("wire_drawplate",
-            WireDrawplateItem::new, properties -> properties.durability(128));
+        WireDrawplateItem::new, properties -> properties.durability(128));
     public static final RegistrationHandle<Item, Item> ELECTRIC_MOTOR = register("electric_motor");
 
     // Casting/Smeltery

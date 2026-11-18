@@ -9,8 +9,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 public class UpgradeStationBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<UpgradeStationBlockEntity, UpgradeStationRenderState> {
+    extends IndustriaBlockEntityRenderer<UpgradeStationBlockEntity, UpgradeStationRenderState> {
     private final UpgradeStationModel model;
 
     public UpgradeStationBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

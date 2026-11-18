@@ -103,7 +103,7 @@ public record ConnectedTextureRule(
     public JsonObject toJson(ConnectedTextureRule defaults) {
         var json = new JsonObject();
         if (!connectsTo.equals(defaults.connectsTo())) {
-            var targets = new JsonArray();
+            JsonArray targets = new JsonArray();
             for (String id : connectsTo.stream().map(Identifier::toString).sorted().toList()) {
                 targets.add(new JsonPrimitive(id));
             }

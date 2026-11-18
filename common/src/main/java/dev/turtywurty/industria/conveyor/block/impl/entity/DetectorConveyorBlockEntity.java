@@ -34,8 +34,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 
 public class DetectorConveyorBlockEntity extends IndustriaBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         WrappedContainerStorageHolder,
         ConveyorFilterAccess,
         TickableBlockEntity {
@@ -93,6 +92,7 @@ public class DetectorConveyorBlockEntity extends IndustriaBlockEntity
         if (this.filterTag != null) {
             output.store("FilterTagKey", TagKey.codec(Registries.ITEM), this.filterTag);
         }
+
         output.putBoolean("IsTagFiltering", this.isTagFiltering);
     }
 

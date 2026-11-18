@@ -16,8 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class DistillationTowerScreenHandler
-    extends
-        IndustriaScreenHandler<DistillationTowerBlockEntity, BlockPosPayload> {
+    extends IndustriaScreenHandler<DistillationTowerBlockEntity, BlockPosPayload> {
     public DistillationTowerScreenHandler(int syncId, Inventory playerInv, BlockPosPayload payload) {
         super(ModMenuTypes.DISTILLATION_TOWER.get(), 2, syncId, playerInv, payload, DistillationTowerBlockEntity.class);
     }

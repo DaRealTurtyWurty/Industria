@@ -42,7 +42,7 @@ public class WellheadBlockEntity extends IndustriaBlockEntity implements Syncabl
     public WellheadBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.UPGRADE_STATION.get(), ModBlockEntityTypes.WELLHEAD.get(), pos, state);
 
-        var storage = new OutputFluidStorage(this, FluidAmounts.BUCKET);
+        OutputFluidStorage storage = new OutputFluidStorage(this, FluidAmounts.BUCKET);
         Direction.Plane.HORIZONTAL.stream()
             .forEach(direction -> this.wrappedFluidStorage.addStorage(storage, direction));
         this.wrappedFluidStorage.addStorage(storage, Direction.UP);

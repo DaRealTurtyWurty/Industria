@@ -15,8 +15,7 @@ import net.minecraft.world.level.Level;
 import java.util.UUID;
 
 public record ModifyConveyorNetworkPayload(Operation operation, ResourceKey<Level> level, UUID networkId, BlockPos pos)
-    implements
-        CustomPacketPayload {
+    implements CustomPacketPayload {
     public static final Type<ModifyConveyorNetworkPayload> ID = new Type<>(Industria.id("modify_conveyor_network"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ModifyConveyorNetworkPayload> CODEC = StreamCodec
         .composite(

@@ -68,8 +68,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert
 
 // TODO: Make this work with temperature and pressure
 public class DigesterBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("digester");
     public static final BlockPos ENERGY_PORT = new BlockPos(0, 1, 2);

@@ -31,8 +31,7 @@ public record CrusherRecipe(
     OutputItemStack outputB,
     int processTime
 )
-    implements
-        Recipe<RecipeSimpleInventory> {
+    implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
         return this.input.testForRecipe(input.getItem(0));
@@ -127,8 +126,7 @@ public record CrusherRecipe(
         SlotDisplay craftingStation,
         int processTime
     )
-        implements
-            RecipeDisplay {
+        implements RecipeDisplay {
         public static final MapCodec<CrusherRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(CrusherRecipeDisplay::input),
@@ -145,7 +143,7 @@ public record CrusherRecipe(
                 ByteBufCodecs.INT, CrusherRecipeDisplay::processTime,
                 CrusherRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<CrusherRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<CrusherRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -154,7 +152,7 @@ public record CrusherRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<CrusherRecipeDisplay> type() {
+        public Type<CrusherRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

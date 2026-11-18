@@ -20,7 +20,7 @@ public class WaterWheelModel extends Model<WaterWheelModel.WaterWheelModelRender
     }
 
     public static LayerDefinition createMainLayer() {
-        MeshDefinition meshdefinition = new MeshDefinition();
+        var meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
         PartDefinition rotor = partdefinition.addOrReplaceChild("rotor",

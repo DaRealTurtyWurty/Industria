@@ -43,8 +43,7 @@ import java.text.DecimalFormat;
 import java.util.Locale;
 
 public abstract class PipeBlock<V extends ResourceVariant<?>, N extends PipeNetwork<V>> extends Block
-    implements
-        SimpleWaterloggedBlock {
+    implements SimpleWaterloggedBlock {
     protected static final ShapeProfile CABLE_SHAPE = new ShapeProfile(6.5, 9.5, 6.5, 9.5, 6, 10, 3);
     protected static final ShapeProfile FLUID_PIPE_SHAPE = new ShapeProfile(6, 10, 6, 10, 5, 11, 1);
     protected static final ShapeProfile GAS_PIPE_SHAPE = new ShapeProfile(6, 10, 6, 10, 4, 12, 1.5);

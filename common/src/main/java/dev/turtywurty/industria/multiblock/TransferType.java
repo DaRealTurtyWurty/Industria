@@ -43,8 +43,7 @@ import java.util.function.Predicate;
  * @param <A> the amount type exposed to existing pipe code
  */
 public class TransferType<S extends ResourceStorage<V>, V extends ResourceVariant<?>, A extends Number>
-    implements
-        PortTransfer<S> {
+    implements PortTransfer<S> {
     private static final List<TransferType<?, ?, ?>> VALUES = new ArrayList<>();
 
     public static final TransferType<ResourceStorage<ResourceVariant<Item>>, ResourceVariant<Item>, Long> ITEM = standard(
@@ -134,10 +133,12 @@ public class TransferType<S extends ResourceStorage<V>, V extends ResourceVarian
     ) {
         if (!storage.hasStableIndices())
             return emptyVariant(key);
+
         for (int index = 0; index < storage.size(); index++) {
             if (storage.amount(index) > 0)
                 return storage.resource(index);
         }
+
         return emptyVariant(key);
     }
 

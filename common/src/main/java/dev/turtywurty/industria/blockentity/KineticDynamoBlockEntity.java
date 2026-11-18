@@ -23,8 +23,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import java.util.List;
 
 public class KineticDynamoBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         MechanicalConsumer,
         EnergySpreader {
     private static final double MAX_TORQUE = 16.0;
@@ -90,6 +89,7 @@ public class KineticDynamoBlockEntity extends IndustriaBlockEntity
             energyStorage.setAmount(energyStorage.getAmount() + wholeEnergy, transaction);
             transaction.commit();
         }
+
         setChanged();
     }
 

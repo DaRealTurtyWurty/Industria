@@ -51,8 +51,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
 public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         BlockEntityWithGui<BlockPosPayload>,
         EnergySpreader,
         BlockEntityContentsDropper {
@@ -74,9 +73,9 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
-        var fluid = (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        SyncingEnergyStorage energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        SyncingFluidStorage fluid = (SyncingFluidStorage) this.wrappedFluidStorage.getStorage(null);
+        SyncingSimpleInventory inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         return List.of(energy, fluid, inventory);
     }
 
@@ -117,7 +116,7 @@ public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
             return;
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-            var lava = ResourceTypes.FLUID.of(Fluids.LAVA.builtInRegistryHolder());
+            ResourceVariant<Fluid> lava = ResourceTypes.FLUID.of(Fluids.LAVA.builtInRegistryHolder());
 
             long extracted = storage.extract(lava, FluidAmounts.BUCKET, transaction);
             if (extracted > 0) {

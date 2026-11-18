@@ -8,8 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record AgitatorSetPortModePayload(boolean output, int index, AgitatorPortType portType)
-    implements
-        CustomPacketPayload {
+    implements CustomPacketPayload {
     public static final Type<AgitatorSetPortModePayload> ID = new Type<>(Industria.id("agitator_set_port_mode"));
     public static final StreamCodec<RegistryFriendlyByteBuf, AgitatorSetPortModePayload> CODEC = StreamCodec.composite(
         ByteBufCodecs.BOOL, AgitatorSetPortModePayload::output,

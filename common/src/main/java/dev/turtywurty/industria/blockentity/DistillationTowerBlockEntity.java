@@ -47,8 +47,7 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.*;
 
 public class DistillationTowerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityContentsDropper,
+    implements BlockEntityContentsDropper,
         BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("distillation_tower");
 

@@ -9,8 +9,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 public class ElectrolyzerBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<ElectrolyzerBlockEntity, IndustriaBlockEntityRenderState> {
+    extends IndustriaBlockEntityRenderer<ElectrolyzerBlockEntity, IndustriaBlockEntityRenderState> {
     private final ElectrolyzerModel model;
 
     public ElectrolyzerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

@@ -17,8 +17,7 @@ import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class DoorContainerBlockEntity extends IndustriaBlockEntity
-    implements
-        TickableBlockEntity,
+    implements TickableBlockEntity,
         LidBlockEntity {
     private static final int EVENT_SET_OPEN_COUNT = 1;
 

@@ -15,10 +15,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ContainmentConveyorScreenHandler
-    extends
-        IndustriaScreenHandler<ContainmentConveyorBlockEntity, BlockPosPayload> {
+    extends IndustriaScreenHandler<ContainmentConveyorBlockEntity, BlockPosPayload> {
     public static final Component CAPTURING_STATUS_TEXT = Component
         .translatable("container." + Industria.MOD_ID + ".containment_conveyor.status.capturing");
     public static final Component IDLE_STATUS_TEXT = Component
@@ -71,7 +71,7 @@ public class ContainmentConveyorScreenHandler
     }
 
     public Component getContainingEntityName() {
-        var containingEntity = this.blockEntity.getContainingEntity();
+        LivingEntity containingEntity = this.blockEntity.getContainingEntity();
         if (containingEntity == null)
             return Component.empty();
 

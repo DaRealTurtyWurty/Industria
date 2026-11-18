@@ -17,8 +17,7 @@ import net.minecraft.world.level.block.Block;
 import java.util.List;
 
 public class DetectorConveyorScreenHandler
-    extends
-        IndustriaScreenHandler<DetectorConveyorBlockEntity, BlockPosPayload> {
+    extends IndustriaScreenHandler<DetectorConveyorBlockEntity, BlockPosPayload> {
     private static final NetworkService NETWORK = NetworkService.get();
 
     public DetectorConveyorScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {

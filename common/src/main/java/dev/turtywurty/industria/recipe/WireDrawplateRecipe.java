@@ -112,13 +112,15 @@ public record WireDrawplateRecipe(IndustriaIngredient input, OutputItemStack out
         SlotDisplay result,
         int duration
     ) implements RecipeDisplay {
-        private static final MapCodec<WireDrawplateRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
-            .group(
-                SlotDisplay.CODEC.fieldOf("input").forGetter(WireDrawplateRecipeDisplay::input),
-                SlotDisplay.CODEC.fieldOf("crafting_station").forGetter(WireDrawplateRecipeDisplay::craftingStation),
-                SlotDisplay.CODEC.fieldOf("result").forGetter(WireDrawplateRecipeDisplay::result),
-                Codec.INT.fieldOf("duration").forGetter(WireDrawplateRecipeDisplay::duration))
-            .apply(instance, WireDrawplateRecipeDisplay::new));
+        private static final MapCodec<WireDrawplateRecipeDisplay> CODEC = RecordCodecBuilder
+            .mapCodec(instance -> instance
+                .group(
+                    SlotDisplay.CODEC.fieldOf("input").forGetter(WireDrawplateRecipeDisplay::input),
+                    SlotDisplay.CODEC.fieldOf("crafting_station")
+                        .forGetter(WireDrawplateRecipeDisplay::craftingStation),
+                    SlotDisplay.CODEC.fieldOf("result").forGetter(WireDrawplateRecipeDisplay::result),
+                    Codec.INT.fieldOf("duration").forGetter(WireDrawplateRecipeDisplay::duration))
+                .apply(instance, WireDrawplateRecipeDisplay::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, WireDrawplateRecipeDisplay> STREAM_CODEC = StreamCodec
             .composite(

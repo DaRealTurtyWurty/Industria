@@ -25,8 +25,7 @@ import java.util.*;
 
 // 3x3 crafting grid
 public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, String[] pattern, ItemStackTemplate output)
-    implements
-        Recipe<RecipeSimpleInventory> {
+    implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
         ItemStack[][] grid = new ItemStack[3][3];
@@ -189,8 +188,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
     public static final RecipeSerializer<UpgradeStationRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
     public record UpgradeStationRecipeDisplay(List<SlotDisplay> inputs, SlotDisplay output, SlotDisplay craftingStation)
-        implements
-            RecipeDisplay {
+        implements RecipeDisplay {
         public static final MapCodec<UpgradeStationRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlotDisplay.CODEC.listOf().fieldOf("inputs").forGetter(UpgradeStationRecipeDisplay::inputs),
@@ -205,7 +203,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
                 SlotDisplay.STREAM_CODEC, UpgradeStationRecipeDisplay::craftingStation,
                 UpgradeStationRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<UpgradeStationRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<UpgradeStationRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -214,7 +212,7 @@ public record UpgradeStationRecipe(Map<Character, IndustriaIngredient> key, Stri
         }
 
         @Override
-        public RecipeDisplay.Type<UpgradeStationRecipeDisplay> type() {
+        public Type<UpgradeStationRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

@@ -25,27 +25,35 @@ public class ConnectedTextureMask {
         if (topLeft && top && left) {
             mask |= TOP_LEFT;
         }
+
         if (top) {
             mask |= TOP;
         }
+
         if (topRight && top && right) {
             mask |= TOP_RIGHT;
         }
+
         if (left) {
             mask |= LEFT;
         }
+
         if (right) {
             mask |= RIGHT;
         }
+
         if (bottomLeft && bottom && left) {
             mask |= BOTTOM_LEFT;
         }
+
         if (bottom) {
             mask |= BOTTOM;
         }
+
         if (bottomRight && bottom && right) {
             mask |= BOTTOM_RIGHT;
         }
+
         return mask;
     }
 }

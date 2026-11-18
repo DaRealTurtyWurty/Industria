@@ -36,8 +36,7 @@ public class WrappedEnergyStorage extends WrappedStorage<ResourceStorage<Resourc
     }
 
     public record EnergyStorageSerializer(ResourceStorage<ResourceVariant<UnitResource>> storage)
-        implements
-            ViewSerializable {
+        implements ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);

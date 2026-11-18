@@ -12,8 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class FluidTankBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<FluidTankBlockEntity, FluidTankRenderState> {
+    extends IndustriaBlockEntityRenderer<FluidTankBlockEntity, FluidTankRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderingComponent = new InWorldFluidRenderingComponent();
 
     public FluidTankBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

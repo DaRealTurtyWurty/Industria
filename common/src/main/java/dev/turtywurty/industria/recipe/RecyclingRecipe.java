@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> outputs, int processTime)
-    implements
-        Recipe<SingleRecipeInput> {
+    implements Recipe<SingleRecipeInput> {
     @Override
     public boolean matches(SingleRecipeInput input, Level world) {
         return this.input.testForRecipe(input.getItem(0));
@@ -122,8 +121,7 @@ public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> o
         SlotDisplay craftingStation,
         int processTime
     )
-        implements
-            RecipeDisplay {
+        implements RecipeDisplay {
         public static final MapCodec<RecyclingRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(RecyclingRecipeDisplay::input),

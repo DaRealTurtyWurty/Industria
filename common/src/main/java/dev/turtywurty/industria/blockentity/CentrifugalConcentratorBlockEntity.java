@@ -70,8 +70,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
 public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("centrifugal_concentrator");
 
@@ -110,6 +109,7 @@ public class CentrifugalConcentratorBlockEntity extends IndustriaMultiblockContr
             return 3;
         }
     };
+
     private ItemStack outputItemStack = ItemStack.EMPTY;
     private SlurryStack outputSlurryStack = SlurryStack.EMPTY;
 

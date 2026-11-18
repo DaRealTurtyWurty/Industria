@@ -48,8 +48,7 @@ import java.util.List;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
 public class BatteryBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         EnergySpreader,
         BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
@@ -70,7 +69,7 @@ public class BatteryBlockEntity extends IndustriaBlockEntity
         this.batteryLevel = block.getLevel();
 
         this.wrappedContainerStorage.addInventory(new SyncingSimpleInventory(this, 1));
-        var energyStorage = new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(),
+        SyncingEnergyStorage energyStorage = new SyncingEnergyStorage(this, this.batteryLevel.getCapacity(),
             this.batteryLevel.getMaxTransfer(), this.batteryLevel.getMaxTransfer());
         this.wrappedEnergyStorage.addStorage(energyStorage);
         this.inputEnergyStorage = RestrictedStorage.insertionOnly(energyStorage);
@@ -82,8 +81,8 @@ public class BatteryBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
-        var energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
+        SyncingSimpleInventory input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        SyncingEnergyStorage energy = (SyncingEnergyStorage) this.wrappedEnergyStorage.getStorage(null);
         List<SyncableStorage> storages = new ArrayList<>();
         storages.add(input);
         if (batteryLevel != BatteryBlock.BatteryLevel.CREATIVE) {
@@ -104,7 +103,8 @@ public class BatteryBlockEntity extends IndustriaBlockEntity
 
         ItemStack stack = getInventory().getItem(0);
         if (!stack.isEmpty()) {
-            var itemEnergyStorage = MutableItemContext.ofContainerSlot(getInventory(), 0).find(StorageKeys.ENERGY);
+            ResourceStorage<ResourceVariant<UnitResource>> itemEnergyStorage = MutableItemContext
+                .ofContainerSlot(getInventory(), 0).find(StorageKeys.ENERGY);
             if (itemEnergyStorage != null) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                     if (this.chargeMode == ChargeMode.CHARGE && itemEnergyStorage.supportsExtraction()
@@ -201,7 +201,8 @@ public class BatteryBlockEntity extends IndustriaBlockEntity
     }
 
     public boolean isValid(ItemStack stack, int slot) {
-        var itemEnergyStorage = MutableItemContext.withConstant(stack).find(StorageKeys.ENERGY);
+        ResourceStorage<ResourceVariant<UnitResource>> itemEnergyStorage = MutableItemContext.withConstant(stack)
+            .find(StorageKeys.ENERGY);
         return itemEnergyStorage != null;
     }
 

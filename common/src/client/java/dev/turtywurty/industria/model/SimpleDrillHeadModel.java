@@ -86,6 +86,7 @@ public class SimpleDrillHeadModel extends Model<SimpleDrillHeadModel.SimpleDrill
             state.counterClockwiseRotation = (float) Math.clamp(state.counterClockwiseRotation + 0.125F, 0,
                 Math.PI * 2);
         }
+
         clockwiseYaw = state.clockwiseRotation;
         counterClockwiseYaw = state.counterClockwiseRotation;
 

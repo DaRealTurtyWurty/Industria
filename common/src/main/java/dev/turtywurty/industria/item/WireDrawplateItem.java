@@ -50,10 +50,9 @@ public class WireDrawplateItem extends Item {
             return itemStack;
 
         Optional<RecipeHolder<WireDrawplateRecipe>> recipe = serverLevel.recipeAccess().getRecipeFor(
-                WireDrawplateRecipe.Type.INSTANCE,
-                new SingleItemStackRecipeInput(offHandStack),
-                serverLevel
-        );
+            WireDrawplateRecipe.Type.INSTANCE,
+            new SingleItemStackRecipeInput(offHandStack),
+            serverLevel);
         if (recipe.isEmpty())
             return itemStack;
 
@@ -63,26 +62,27 @@ public class WireDrawplateItem extends Item {
             player.getInventory().placeItemBackInInventory(result, Prediction.SERVER_ONLY);
         } else {
             ResourceStorage<ResourceVariant<Item>> storage = TransferService.get()
-                    .findEntity(StorageKeys.ITEM, entity, EntityStorageContext.EMPTY);
-            if(storage != null) {
+                .findEntity(StorageKeys.ITEM, entity, EntityStorageContext.EMPTY);
+            if (storage != null) {
                 long inserted;
-                try(TransferTransaction transaction = TransferTransaction.openRoot()) {
+                try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                     inserted = storage.insert(ResourceVariant.ofItem(result), result.getCount(), transaction);
                     transaction.commit();
                 }
+
                 result.shrink((int) inserted);
             } else {
-                if(!result.isEmpty()) {
+                if (!result.isEmpty()) {
                     entity.spawnAtLocation(serverLevel, result);
                 }
             }
         }
+
         offHandStack.consume(wireDrawplateRecipe.input().stackData().count(), entity);
         itemStack.hurtAndBreak(1, entity, InteractionHand.MAIN_HAND);
 
         return itemStack;
     }
-
 
     @Override
     public ItemUseAnimation getUseAnimation(ItemStack stack) {
@@ -93,13 +93,12 @@ public class WireDrawplateItem extends Item {
     public int getUseDuration(ItemStack stack, LivingEntity user) {
         ItemStack input = user.getOffhandItem();
 
-        if (user.level() instanceof ServerLevel level) {
+        if (user.level() instanceof ServerLevel level)
             return level.recipeAccess()
-                    .getRecipeFor(WireDrawplateRecipe.Type.INSTANCE,
-                            new SingleItemStackRecipeInput(input), level)
-                    .map(holder -> holder.value().duration())
-                    .orElse(0);
-        }
+                .getRecipeFor(WireDrawplateRecipe.Type.INSTANCE,
+                    new SingleItemStackRecipeInput(input), level)
+                .map(holder -> holder.value().duration())
+                .orElse(0);
 
         return WireDrawplateClientCache.findDuration(input);
     }

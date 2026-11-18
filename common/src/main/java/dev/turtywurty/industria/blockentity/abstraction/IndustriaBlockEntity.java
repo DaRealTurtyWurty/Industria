@@ -19,8 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public abstract class IndustriaBlockEntity<T extends IndustriaBlockEntity<T>> extends UpdatableBlockEntity
-    implements
-        SyncableTickableBlockEntity {
+    implements SyncableTickableBlockEntity {
     private BlockEntityFields<T> fields;
 
     private int tickRate;

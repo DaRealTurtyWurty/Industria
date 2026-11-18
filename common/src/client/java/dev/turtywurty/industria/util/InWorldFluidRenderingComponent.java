@@ -275,6 +275,7 @@ public class InWorldFluidRenderingComponent {
         FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
         if (renderData == null)
             return;
+
         int fluidColor = renderData.tintColor();
         int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
         TextureAtlasSprite stillSprite = renderData.stillSprite();
@@ -404,6 +405,7 @@ public class InWorldFluidRenderingComponent {
         float edge = radius - Mth.clamp(cornerCut, 0f, radius);
         float[][] perimeter = {{-edge, -radius}, {edge, -radius}, {radius, -edge}, {radius, edge},
             {edge, radius}, {-edge, radius}, {-radius, edge}, {-radius, -edge}};
+
         queue.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(sprite.atlasLocation()),
             (pose, vertices) -> {
                 // Clip each block-sized tile to the octagon, keeping every UV inside the atlas sprite.
@@ -417,6 +419,7 @@ public class InWorldFluidRenderingComponent {
                         for (int i = 1; i + 1 < polygon.size(); i++) {
                             float[][] triangle = {polygon.getFirst(), polygon.get(i), polygon.get(i + 1),
                                 polygon.get(i + 1)};
+
                             for (float[] point : triangle) {
                                 vertices.addVertex(pose, point[0], y, point[1]).setColor(color)
                                     .setUv(sprite.getU(Mth.clamp(point[0] - x, 0f, 1f)),
@@ -518,9 +521,11 @@ public class InWorldFluidRenderingComponent {
             if (inside) {
                 result.add(current);
             }
+
             previous = current;
             previousInside = inside;
         }
+
         return result;
     }
 
@@ -729,6 +734,7 @@ public class InWorldFluidRenderingComponent {
         FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluidVariant, world, pos);
         if (renderData == null)
             return;
+
         int fluidColor = renderData.tintColor();
         int newFluidColor = ColorMode.modifyColor(fluidColor, color, colorMode);
         TextureAtlasSprite stillSprite = renderData.stillSprite();
@@ -801,10 +807,12 @@ public class InWorldFluidRenderingComponent {
                     drawTiledXYQuad(vertices, pose, x1, y1, z1, x2, y2, z2, sprite, color, light, overlay, 0f, 0f, -1f);
                 }
             });
+
         matrices.popPose();
     }
 
     // For front and back (XY plane)
+
     public static void drawTiledXYQuad(
         VertexConsumer vertexConsumer,
         PoseStack.Pose entry,
@@ -845,6 +853,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in x
+
         if (leftoverX > 0) {
             for (int j = 0; j < fullTilesY; j++) {
                 float xStart = x1 + fullTilesX * tileSize;
@@ -861,6 +870,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in y
+
         if (leftoverY > 0) {
             for (int i = 0; i < fullTilesX; i++) {
                 float xStart = x1 + i * tileSize;
@@ -876,6 +886,7 @@ public class InWorldFluidRenderingComponent {
             }
 
             // Draw the corner leftover tile if both leftoverX and leftoverY > 0
+
             if (leftoverX > 0) {
                 float xStart = x1 + fullTilesX * tileSize;
                 float xEnd = xStart + leftoverX;
@@ -892,6 +903,7 @@ public class InWorldFluidRenderingComponent {
     }
 
     // For left and right (YZ plane)
+
     public static void drawTiledYZQuad(
         VertexConsumer vertexConsumer,
         PoseStack.Pose entry,
@@ -931,6 +943,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in z
+
         if (leftoverZ > 0) {
             for (int j = 0; j < fullTilesY; j++) {
                 float zStart = z1 + fullTilesZ * tileSize;
@@ -947,6 +960,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in y
+
         if (leftoverY > 0) {
             for (int i = 0; i < fullTilesZ; i++) {
                 float zStart = z1 + i * tileSize;
@@ -962,6 +976,7 @@ public class InWorldFluidRenderingComponent {
             }
 
             // Draw the corner leftover tile if both leftoverZ and leftoverY > 0
+
             if (leftoverZ > 0) {
                 float zStart = z1 + fullTilesZ * tileSize;
                 float zEnd = zStart + leftoverZ;
@@ -1100,6 +1115,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in x
+
         if (leftoverX > 0) {
             for (int j = 0; j < fullTilesY; j++) {
                 float xStart = x1 + fullTilesX * tileSize;
@@ -1116,6 +1132,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in y
+
         if (leftoverY > 0) {
             for (int i = 0; i < fullTilesX; i++) {
                 float xStart = x1 + i * tileSize;
@@ -1131,6 +1148,7 @@ public class InWorldFluidRenderingComponent {
             }
 
             // Draw the corner leftover tile if both leftoverX and leftoverY > 0
+
             if (leftoverX > 0) {
                 float xStart = x1 + fullTilesX * tileSize;
                 float xEnd = xStart + leftoverX;
@@ -1185,6 +1203,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in z
+
         if (leftoverZ > 0) {
             for (int j = 0; j < fullTilesY; j++) {
                 float zStart = z1 + fullTilesZ * tileSize;
@@ -1201,6 +1220,7 @@ public class InWorldFluidRenderingComponent {
         }
 
         // Draw leftover tiles in y
+
         if (leftoverY > 0) {
             for (int i = 0; i < fullTilesZ; i++) {
                 float zStart = z1 + i * tileSize;
@@ -1216,6 +1236,7 @@ public class InWorldFluidRenderingComponent {
             }
 
             // Draw the corner leftover tile if both leftoverZ and leftoverY > 0
+
             if (leftoverZ > 0) {
                 float zStart = z1 + fullTilesZ * tileSize;
                 float zEnd = zStart + leftoverZ;

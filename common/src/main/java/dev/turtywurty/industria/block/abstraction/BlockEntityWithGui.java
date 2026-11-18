@@ -12,8 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.OptionalInt;
 
 public interface BlockEntityWithGui<T extends CustomPacketPayload>
-    extends
-        ExtendedMenuProvider<T>,
+    extends ExtendedMenuProvider<T>,
         SelfOpeningMenuProvider {
     @Override
     default OptionalInt openMenu(ServerPlayer player) {

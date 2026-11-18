@@ -59,6 +59,7 @@ public class NeoForgeConnectedTextureModel extends DelegateBlockStateModel {
                     otherNeighborhoods[group - 1] = faceNeighborhood;
                 }
             }
+
             ConnectedTextureFace face = ConnectedTextureFace.fromFace(direction);
             int mask = face.getMask(faceNeighborhood, rules.axis(direction));
             ConnectedTextureTile tile = ConnectedTextureLayout.getTile(mask, rules.layout(direction));

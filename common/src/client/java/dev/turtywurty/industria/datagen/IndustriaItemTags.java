@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import net.minecraft.data.tags.TagAppender;
 
 public final class IndustriaItemTags {
     public static void generate(TagGenerationContext<Item> tags) {
@@ -32,7 +33,7 @@ public final class IndustriaItemTags {
     }
 
     private static void generateCrushableStone(TagGenerationContext<Item> tags) {
-        var stone = tags.tag(TagList.Items.CRUSHABLE_STONE)
+        TagAppender<Item> stone = tags.tag(TagList.Items.CRUSHABLE_STONE)
             .addOptionalTag(ItemTags.STONE_BRICKS);
 
         List.of(

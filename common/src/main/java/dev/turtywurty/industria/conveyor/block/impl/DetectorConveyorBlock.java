@@ -21,11 +21,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public class DetectorConveyorBlock extends AbstractHorizontalConveyorBlock {
-    public DetectorConveyorBlock(BlockBehaviour.Properties settings) {
-        super(settings, new IndustriaBlock.BlockProperties()
+    public DetectorConveyorBlock(Properties settings) {
+        super(settings, new BlockProperties()
             .hasComparatorOutput()
             .comparatorOutput((state, level, pos, direction) -> getSignalStrength(state, level, pos))
-            .blockEntityProperties(new IndustriaBlock.BlockProperties.BlockBlockEntityProperties<>(
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(
                 () -> ModBlockEntityTypes.DETECTOR_CONVEYOR.get())
                 .shouldTick()
                 .rightClickToOpenGui()));

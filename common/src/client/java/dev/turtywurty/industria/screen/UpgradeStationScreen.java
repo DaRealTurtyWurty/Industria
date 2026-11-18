@@ -118,6 +118,7 @@ public class UpgradeStationScreen extends AbstractContainerScreen<UpgradeStation
         int progress = Mth.ceil((this.menu.getProgress() / 500f) * 147);
         ScreenUtils.drawTexture(context, TEXTURE, this.leftPos + 25, this.topPos + 77, 0, 186, progress, 17);
     }
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (!super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount))

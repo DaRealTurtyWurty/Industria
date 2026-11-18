@@ -51,8 +51,7 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
 public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         BlockEntityWithGui<BlockPosPayload>,
         RecipeExperienceBlockEntity,
         BlockEntityContentsDropper {

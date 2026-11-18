@@ -11,6 +11,8 @@ import dev.turtywurty.industria.mechanical.MechanicalNetworkManager;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import dev.turtywurty.industria.mechanical.MechanicalNetwork;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class WaterWheelTestWorld {
     private WaterWheelTestWorld() {
@@ -33,7 +35,7 @@ public final class WaterWheelTestWorld {
         context.setBlock(-1, 2, 0, Blocks.STONE_BRICKS);
         context.fill(-1, -2, 1, 1, -1, 3, Blocks.STONE_BRICKS);
 
-        var wheelState = ModBlocks.WATER_WHEEL.get().defaultBlockState()
+        BlockState wheelState = ModBlocks.WATER_WHEEL.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH);
         for (int part = 0; part <= 8; part++) {
             var offset = WaterWheelBlock.getPartOffset(part, Direction.NORTH);
@@ -42,6 +44,7 @@ public final class WaterWheelTestWorld {
         }
 
         // The dynamo's north input meets the south axle port of the controller.
+
         context.setBlock(0, 0, 1, ModBlocks.KINETIC_DYNAMO.get().defaultBlockState()
             .setValue(BlockStateProperties.FACING, Direction.SOUTH));
         context.setBlock(0, 0, 3, ModBlocks.BASIC_BATTERY);
@@ -65,28 +68,30 @@ public final class WaterWheelTestWorld {
                 context.overworld().setChunkForced(x, z, true);
             }
         }
+
         place(context);
-        var initialCableState = context.overworld().getBlockState(context.pos(0, 0, 2));
+        BlockState initialCableState = context.overworld().getBlockState(context.pos(0, 0, 2));
         context.afterTicks(160, current -> {
             try {
                 if (!initialCableState.is(ModBlocks.CABLE.get())
                     || initialCableState.getValue(PipeBlock.NORTH) != PipeBlock.ConnectorType.BLOCK
-                    || initialCableState.getValue(PipeBlock.SOUTH) != PipeBlock.ConnectorType.BLOCK) {
+                    || initialCableState.getValue(PipeBlock.SOUTH) != PipeBlock.ConnectorType.BLOCK)
                     throw new IllegalStateException(
                         "Cable was placed without both connector arms: " + initialCableState);
-                }
-                var wheel = current.requireBlockEntity(0, 0, 0, WaterWheelBlockEntity.class);
+
+                WaterWheelBlockEntity wheel = current.requireBlockEntity(0, 0, 0, WaterWheelBlockEntity.class);
                 current.requireBlockEntity(0, 0, 1, KineticDynamoBlockEntity.class);
-                var battery = current.requireBlockEntity(0, 0, 3, BatteryBlockEntity.class);
+                BatteryBlockEntity battery = current.requireBlockEntity(0, 0, 3, BatteryBlockEntity.class);
                 double flow = WaterWheelBlockEntity.WaterWheelFlowSampler.sample(current.overworld(),
                     current.origin(), wheel.getBlockState()).signedTorque();
-                var network = MechanicalNetworkManager.getOrCreate(current.overworld()).getNetworks().stream()
+                MechanicalNetwork network = MechanicalNetworkManager.getOrCreate(current.overworld()).getNetworks()
+                    .stream()
                     .filter(candidate -> candidate.getNodes().contains(current.origin())).findFirst().orElseThrow();
                 if (flow <= 0.0 || network.getState().rpm() <= 0.0
-                    || !network.getNodes().contains(current.pos(0, 0, 1)) || battery.getEnergy().getAmount() <= 0) {
+                    || !network.getNodes().contains(current.pos(0, 0, 1)) || battery.getEnergy().getAmount() <= 0)
                     throw new IllegalStateException("flow=" + flow + ", state=" + network.getState()
                         + ", stored energy=" + battery.getEnergy().getAmount());
-                }
+
                 LogUtils.getLogger().info(
                     "[WaterWheelSuite] PASS initial cable connections, natural water flow={}, RPM={}, battery energy={}",
                     flow, network.getState().rpm(), battery.getEnergy().getAmount());
@@ -98,6 +103,7 @@ public final class WaterWheelTestWorld {
                         current.overworld().setChunkForced(x, z, false);
                     }
                 }
+
                 current.server().halt(false);
             }
         });

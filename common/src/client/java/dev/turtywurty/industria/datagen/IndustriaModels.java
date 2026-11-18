@@ -679,8 +679,10 @@ public final class IndustriaModels {
                 var model = new ModelTemplate(Optional.of(Industria.id("block/molten_aluminium")), Optional.empty());
                 model.create(fluid.block().get(), new TextureMapping(), blockStateModelGenerator.modelOutput);
             }
+
             blockStateModelGenerator.createNonTemplateModelBlock(fluid.block().get());
         });
+
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.FORMIC_ACID.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModFluids.DILUTED_FORMIC_ACID.block().get());
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.DRILL_TUBE.get());
@@ -777,6 +779,7 @@ public final class IndustriaModels {
         if (!"ore".equals(type)) {
             type += "_ore";
         }
+
         registerSimpleCubeAll(blockStateModelGenerator, block, type);
     }
 
@@ -1161,6 +1164,7 @@ public final class IndustriaModels {
         // displaySettings.setTranslation(-1.5f, -2.75f, 0);
         // displaySettings.setScale(0.275f, 0.275f, 0.275f);
         // }));
+
         generateSpecialBlockItemModel(itemModelGenerator, ModBlocks.DISTILLATION_TOWER.get(),
             new IndustriaBlockEntityItemRenderer.Unbaked(DistillationTowerModel.LAYER_LOCATION,
                 DistillationTowerModel.TEXTURE_LOCATION),
@@ -1257,6 +1261,7 @@ public final class IndustriaModels {
                     ItemModelUtils.plainModel(Industria.id("item/molten_aluminium_bucket")));
             }
         });
+
         Set<Item> handheldItems = Set.of(ModItems.WRENCH.get());
 
         BuiltInRegistries.ITEM.listElementIds().filter(key -> key.identifier().getNamespace().equals(Industria.MOD_ID))

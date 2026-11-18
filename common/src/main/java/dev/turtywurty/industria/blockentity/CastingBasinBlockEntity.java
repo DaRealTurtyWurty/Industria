@@ -44,8 +44,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 public class CastingBasinBlockEntity extends IndustriaBlockEntity
-    implements
-        BlockEntityContentsDropper,
+    implements BlockEntityContentsDropper,
         SyncableTickableBlockEntity,
         TappingOutletBlockEntity.TappingOutletReceiver {
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
@@ -229,7 +228,7 @@ public class CastingBasinBlockEntity extends IndustriaBlockEntity
             || !recipe.inputFluid().testForRecipe(getFluidStorage()))
             return false;
 
-        var outputStorage = ContainerStorage.of(getInventory(), null);
+        ContainerStorage outputStorage = ContainerStorage.of(getInventory(), null);
 
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long extracted = getFluidStorage().extract(

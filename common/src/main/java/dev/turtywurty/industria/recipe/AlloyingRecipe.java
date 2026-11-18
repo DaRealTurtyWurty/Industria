@@ -184,7 +184,7 @@ public record AlloyingRecipe(
                 ByteBufCodecs.INT, AlloyFurnaceRecipeDisplay::processTime,
                 AlloyFurnaceRecipeDisplay::new);
 
-        public static final RecipeDisplay.Type<AlloyFurnaceRecipeDisplay> SERIALIZER = new RecipeDisplay.Type<>(CODEC,
+        public static final Type<AlloyFurnaceRecipeDisplay> SERIALIZER = new Type<>(CODEC,
             STREAM_CODEC);
 
         @Override
@@ -193,7 +193,7 @@ public record AlloyingRecipe(
         }
 
         @Override
-        public RecipeDisplay.Type<AlloyFurnaceRecipeDisplay> type() {
+        public Type<AlloyFurnaceRecipeDisplay> type() {
             return SERIALIZER;
         }
     }

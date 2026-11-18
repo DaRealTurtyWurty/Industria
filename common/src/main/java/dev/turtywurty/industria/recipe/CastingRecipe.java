@@ -39,8 +39,13 @@ public record CastingRecipe(
     Optional<Identifier> moldId,
     Optional<MoldCreation> moldCreation
 ) implements Recipe<CastingRecipeInput> {
-    public CastingRecipe(BlockType blockType, FluidStack inputFluid, OutputItemStack output, int coolingTime,
-                         Optional<Identifier> moldId) {
+    public CastingRecipe(
+        BlockType blockType,
+        FluidStack inputFluid,
+        OutputItemStack output,
+        int coolingTime,
+        Optional<Identifier> moldId
+    ) {
         this(blockType, inputFluid, output, coolingTime, moldId, Optional.empty());
     }
 
@@ -49,10 +54,9 @@ public record CastingRecipe(
         if (input.blockType() != this.blockType || !input.fluidStack().testForRecipe(this.inputFluid))
             return false;
 
-        if (this.moldCreation.isPresent()) {
+        if (this.moldCreation.isPresent())
             return this.blockType == BlockType.TABLE && input.moldId().isEmpty()
                 && this.moldCreation.get().template().test(input.template());
-        }
 
         return input.template().isEmpty() && this.moldId.equals(input.moldId());
     }
@@ -69,6 +73,7 @@ public record CastingRecipe(
                 result.set(ModDataComponentTypes.MOLD.get(), new MoldComponent(creation.pattern(), MoldPiece.WHOLE));
             }
         });
+
         return result;
     }
 

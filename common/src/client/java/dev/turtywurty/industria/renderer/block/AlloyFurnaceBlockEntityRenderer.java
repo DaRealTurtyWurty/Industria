@@ -12,8 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 public class AlloyFurnaceBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<AlloyFurnaceBlockEntity, ContainerDoorRenderState> {
+    extends IndustriaBlockEntityRenderer<AlloyFurnaceBlockEntity, ContainerDoorRenderState> {
     private final AlloyFurnaceModel model;
 
     public AlloyFurnaceBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

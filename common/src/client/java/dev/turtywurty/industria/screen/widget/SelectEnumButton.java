@@ -25,8 +25,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValueCacher<T> & TextEnum & StringRepresentable>
-    extends
-        Button {
+    extends Button {
     private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"),
         Identifier.withDefaultNamespace("widget/button_disabled"),
         Identifier.withDefaultNamespace("widget/button_highlighted"));
@@ -158,6 +157,7 @@ public class SelectEnumButton<T extends Enum<?> & TraversableEnum<T> & EnumValue
             }
 
             // draw hover tooltip
+
             if (isMouseOverSelectionArea(mouseX, mouseY)) {
                 int ordinal = getOrdinal(mouseX, mouseY);
 

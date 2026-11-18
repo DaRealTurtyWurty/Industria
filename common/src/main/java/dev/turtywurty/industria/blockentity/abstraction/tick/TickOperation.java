@@ -32,8 +32,7 @@ public interface TickOperation<T extends IndustriaBlockEntity<T>, F extends Bloc
     }
 
     class Conditional<T extends IndustriaBlockEntity<T>, F extends BlockEntityFields<T>>
-        implements
-            TickOperation<T, F> {
+        implements TickOperation<T, F> {
         private final BiPredicate<T, F> condition;
         private final TickOperation<T, F> operation;
         private final @Nullable TickOperation<T, F> elseOperation;

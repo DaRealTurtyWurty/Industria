@@ -6,6 +6,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
+import java.util.Queue;
 
 public final class TestWorldScheduler {
     private static final Map<ServerLevel, PriorityQueue<ScheduledAction>> ACTIONS = new IdentityHashMap<>();
@@ -19,7 +20,7 @@ public final class TestWorldScheduler {
     }
 
     public static void tick(ServerLevel level) {
-        PriorityQueue<ScheduledAction> queue = ACTIONS.get(level);
+        Queue<ScheduledAction> queue = ACTIONS.get(level);
         if (queue == null)
             return;
 

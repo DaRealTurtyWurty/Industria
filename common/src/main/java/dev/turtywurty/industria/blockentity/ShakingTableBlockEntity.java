@@ -74,8 +74,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
 public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements
-        BlockEntityWithGui<BlockPosPayload>,
+    implements BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("shaking_table");
 
@@ -109,6 +108,7 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
             return 2;
         }
     };
+
     private ResourceKey<Recipe<?>> currentRecipeId;
     private int recipeFrequency;
     private ItemStack outputItemStack = ItemStack.EMPTY;
@@ -156,18 +156,21 @@ public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockE
                 dx2 = x2;
                 dz2 = z1;
                 break;
+
             case SOUTH :
                 dx1 = x1;
                 dz1 = -z1;
                 dx2 = x2;
                 dz2 = -z2;
                 break;
+
             case WEST :
                 dx1 = z1;
                 dz1 = x1;
                 dx2 = z2;
                 dz2 = x2;
                 break;
+
             case EAST :
             default :
                 dx1 = -z2;

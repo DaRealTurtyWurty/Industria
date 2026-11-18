@@ -21,10 +21,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import dev.turtywurty.turtymultiloader.transfer.resource.ResourceVariant;
+import net.minecraft.world.level.material.Fluid;
 
 public class CrystallizerBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<CrystallizerBlockEntity, CrystallizerRenderState> {
+    extends IndustriaBlockEntityRenderer<CrystallizerBlockEntity, CrystallizerRenderState> {
     private static final Vec3[] OUTPUT_ITEM_POSITIONS = new Vec3[64];
     private static final float TANK_BOTTOM = 4.9f / 16f;
     private static final float TANK_TOP = -27.1f / 16f;
@@ -184,7 +185,7 @@ public class CrystallizerBlockEntityRenderer
         if (tank == null || tank.getAmount() <= 0 || tank.getCapacity() <= 0)
             return;
 
-        var fluid = tank.getResource();
+        ResourceVariant<Fluid> fluid = tank.getResource();
         FluidRenderUtils.GuiFluidRenderData renderData = FluidRenderUtils.getRenderData(fluid, world, state.blockPos);
         if (renderData == null)
             return;

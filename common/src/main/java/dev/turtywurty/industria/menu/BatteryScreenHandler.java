@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 import java.util.Arrays;
+import dev.turtywurty.industria.blockentity.util.energy.SyncingEnergyStorage;
 
 public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEntity, BlockPosPayload> {
     public BatteryScreenHandler(int syncId, Inventory playerInventory, BlockPosPayload payload) {
@@ -57,7 +58,7 @@ public class BatteryScreenHandler extends IndustriaScreenHandler<BatteryBlockEnt
     }
 
     public float getEnergyPercent() {
-        var storage = this.blockEntity.getEnergy();
+        SyncingEnergyStorage storage = this.blockEntity.getEnergy();
         long energy = storage.getAmount();
         long capacity = storage.getCapacity();
         if (energy == 0 || capacity == 0)

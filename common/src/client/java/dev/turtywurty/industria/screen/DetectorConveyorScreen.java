@@ -26,8 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class DetectorConveyorScreen extends AbstractContainerScreen<DetectorConveyorScreenHandler>
-    implements
-        AutoCompleteProvider<TagKey<Item>> {
+    implements AutoCompleteProvider<TagKey<Item>> {
     public static final Component BLACKLIST_MODE_LABEL = Component
         .translatable("container." + Industria.MOD_ID + ".detector_conveyor.blacklist_mode");
     public static final Component MATCH_DURABILITY_LABEL = Component

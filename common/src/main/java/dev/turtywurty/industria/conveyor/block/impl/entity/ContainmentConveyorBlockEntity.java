@@ -49,8 +49,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         WrappedContainerStorageHolder,
         BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
@@ -85,6 +84,7 @@ public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity
         } else if (this.containingEntityData != null) {
             writeEntityData(output, this.containingEntityData);
         }
+
         this.jarStorage.writeData(output);
     }
 

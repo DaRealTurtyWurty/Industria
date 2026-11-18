@@ -62,8 +62,7 @@ import org.joml.Vector4f;
  * @see IndustriaBlockEntityRenderer#setupBlockEntityTransformations(PoseStack, IndustriaBlockEntityRenderState)
  */
 public abstract class IndustriaBlockEntityRenderer<T extends BlockEntity, S extends IndustriaBlockEntityRenderState>
-    implements
-        BlockEntityRenderer<T, S> {
+    implements BlockEntityRenderer<T, S> {
     protected static final List<ModelPart> EMPTY_WIREFRAME = Collections.emptyList();
 
     protected final BlockEntityRendererProvider.Context context;

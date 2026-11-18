@@ -17,7 +17,7 @@ public record NeoForgeConnectedTexturePart(
     long packedTiles,
     NeoForgeConnectedTextureQuadCache quadCache
 ) implements BlockStateModelPart {
-    static final int DISABLED_TILE_INDEX = 0x3F;
+    public static final int DISABLED_TILE_INDEX = 0x3F;
 
     @Override
     public List<BakedQuad> getQuads(@Nullable Direction direction) {
@@ -39,9 +39,11 @@ public record NeoForgeConnectedTexturePart(
                 if (quads == null) {
                     quads = new ArrayList<>(source);
                 }
+
                 quads.set(index, quadCache.getQuad(quad, tile));
             }
         }
+
         return quads == null ? source : quads;
     }
 

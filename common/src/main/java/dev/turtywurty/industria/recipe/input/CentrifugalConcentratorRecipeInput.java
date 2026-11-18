@@ -5,8 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
 
 public record CentrifugalConcentratorRecipeInput(RecipeSimpleInventory recipeInventory, long waterAmount)
-    implements
-        RecipeInput {
+    implements RecipeInput {
     @Override
     public ItemStack getItem(int slot) {
         return this.recipeInventory.getItem(slot);

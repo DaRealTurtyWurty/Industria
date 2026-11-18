@@ -7,7 +7,9 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverl
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.jspecify.annotations.Nullable;
 
-/** Submits a model and its separately queued block-breaking overlay. */
+/**
+ * Submits a model and its separately queued block-breaking overlay.
+ */
 public final class ModelSubmitUtils {
     private ModelSubmitUtils() {
     }

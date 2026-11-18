@@ -36,8 +36,7 @@ import java.util.List;
 
 // TODO
 public class InductionHeaterBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("induction_heater");
     private final WrappedEnergyStorage energyStorage = new WrappedEnergyStorage();

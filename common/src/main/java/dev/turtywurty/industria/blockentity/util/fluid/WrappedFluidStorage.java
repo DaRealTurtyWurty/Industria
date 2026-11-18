@@ -58,8 +58,7 @@ public class WrappedFluidStorage<T extends ResourceStorage<ResourceVariant<Fluid
     }
 
     public record FluidStorageSerializer<T extends ResourceStorage<ResourceVariant<Fluid>>>(T storage)
-        implements
-            ViewSerializable {
+        implements ViewSerializable {
         @Override
         public void writeData(ValueOutput view) {
             requireSingleSlot(storage);

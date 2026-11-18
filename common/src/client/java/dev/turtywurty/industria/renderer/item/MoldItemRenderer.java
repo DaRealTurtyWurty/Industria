@@ -33,7 +33,7 @@ public class MoldItemRenderer implements SpecialModelRenderer<MoldItemRenderer.R
 
     @Override
     public void submit(
-        MoldItemRenderer.@Nullable RenderData renderData,
+        RenderData renderData,
         PoseStack poseStack,
         SubmitNodeCollector submitNodeCollector,
         int light,

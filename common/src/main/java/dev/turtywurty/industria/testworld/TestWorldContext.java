@@ -33,6 +33,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import dev.turtywurty.industria.pipe.PipeNetwork;
+import dev.turtywurty.industria.pipe.PipeNetworkManager;
+import java.util.Queue;
+import java.util.Set;
 
 public record TestWorldContext(MinecraftServer server, ServerLevel overworld, BlockPos origin) {
     private static final int MAX_PATHFINDING_NODES = 250_000;
@@ -111,7 +115,7 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
         if (positions.isEmpty())
             return List.of();
 
-        var path = new LinkedHashSet<BlockPos>();
+        Set<BlockPos> path = new LinkedHashSet<BlockPos>();
         Predicate<BlockPos> canTraverse = pathPos -> canPlacePathBlock(pathPos, state);
         if (positions.size() == 1) {
             BlockPos position = positions.getFirst();
@@ -140,7 +144,7 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
 
             overworld.setBlockAndUpdate(pathPos, state);
             if (state.getBlock() instanceof PipeBlock<?, ?> pipeBlock) {
-                var networkManager = pipeBlock.getNetworkManager(overworld);
+                PipeNetworkManager<?, ? extends PipeNetwork<?>> networkManager = pipeBlock.getNetworkManager(overworld);
                 if (!networkManager.containsPipe(pathPos)) {
                     networkManager.placePipe(overworld, pathPos);
                 }
@@ -151,8 +155,9 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
             for (BlockPos pathPos : path) {
                 BlockState placedState = overworld.getBlockState(pathPos);
                 BlockState connectedState = Block.updateFromNeighbourShapes(placedState, overworld, pathPos);
-                if (connectedState != placedState)
+                if (connectedState != placedState) {
                     overworld.setBlockAndUpdate(pathPos, connectedState);
+                }
             }
         }
     }
@@ -184,7 +189,7 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
             manhattanDistance(immutableStart, immutableEnd),
             nextSequence++);
 
-        PriorityQueue<PathNode> open = new PriorityQueue<>();
+        Queue<PathNode> open = new PriorityQueue<>();
         open.add(startNode);
 
         Map<PathState, PathCost> bestCosts = new HashMap<>();

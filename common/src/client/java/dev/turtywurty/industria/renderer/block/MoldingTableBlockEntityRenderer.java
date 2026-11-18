@@ -92,6 +92,7 @@ public class MoldingTableBlockEntityRenderer
                 }
             });
         }
+
         int width = sprite.contents().width();
         int height = sprite.contents().height();
         boolean[] opaque = new boolean[width * height];
@@ -133,6 +134,7 @@ public class MoldingTableBlockEntityRenderer
                     .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
             }
         });
+
         matrices.popPose();
     }
 

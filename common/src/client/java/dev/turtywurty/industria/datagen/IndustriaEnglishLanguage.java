@@ -428,6 +428,7 @@ public final class IndustriaEnglishLanguage {
             translationBuilder.add(translatableTextContent.getKey(), value);
         } else
             throw new IllegalArgumentException("Text must be translatable! " + text);
+
     }
 
     private static void addTextEnum(LanguageGenerationContext translationBuilder, TextEnum textEnum, String value) {
@@ -452,5 +453,6 @@ public final class IndustriaEnglishLanguage {
             translationBuilder.add(translatableTextContent.getKey(), value);
         } else
             throw new IllegalArgumentException("Slurry name must be translatable! " + name);
+
     }
 }

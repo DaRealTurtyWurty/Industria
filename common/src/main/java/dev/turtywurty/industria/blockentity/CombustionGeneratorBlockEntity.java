@@ -40,8 +40,7 @@ import org.jetbrains.annotations.Nullable;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
 public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         BlockEntityWithGui<BlockPosPayload>,
         EnergySpreader,
         BlockEntityContentsDropper {
@@ -70,8 +69,8 @@ public class CombustionGeneratorBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
-        var inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
+        SyncingEnergyStorage energy = (SyncingEnergyStorage) this.energyStorage.getStorage(null);
+        SyncingSimpleInventory inventory = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(0);
         return List.of(energy, inventory);
     }
 

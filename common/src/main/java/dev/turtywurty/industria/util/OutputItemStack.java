@@ -16,6 +16,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 import java.util.stream.IntStream;
+import java.util.List;
 
 /**
  * Represents an item stack that can be outputted from a machine.
@@ -108,7 +109,7 @@ public record OutputItemStack(Item item, IntProvider count, FloatProvider chance
         if (this.item == Items.AIR || this.count.maxInclusive() <= 0)
             return SlotDisplay.Empty.INSTANCE;
 
-        var displays = IntStream.rangeClosed(this.count.minInclusive(), this.count.maxInclusive())
+        List<SlotDisplay> displays = IntStream.rangeClosed(this.count.minInclusive(), this.count.maxInclusive())
             .mapToObj(count -> new ItemStack(this.item, count))
             .filter(stack -> !stack.isEmpty())
             .map(ItemStackTemplate::fromNonEmptyStack)

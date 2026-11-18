@@ -8,10 +8,13 @@ import net.minecraft.world.item.crafting.RecipeInput;
 
 import java.util.Optional;
 
-public record CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId,
-                                 ItemStack template)
-    implements
-        RecipeInput {
+public record CastingRecipeInput(
+    CastingRecipe.BlockType blockType,
+    FluidStack fluidStack,
+    Optional<Identifier> moldId,
+    ItemStack template
+)
+    implements RecipeInput {
     public CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId) {
         this(blockType, fluidStack, moldId, ItemStack.EMPTY);
     }

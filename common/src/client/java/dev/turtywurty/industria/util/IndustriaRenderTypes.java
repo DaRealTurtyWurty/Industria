@@ -15,7 +15,9 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 
-/** Shared custom render types used by Industria renderers and models. */
+/**
+ * Shared custom render types used by Industria renderers and models.
+ */
 public final class IndustriaRenderTypes {
     private static final RenderPipeline GLASS_PIPELINE = ClientRegistrations.registerRenderPipeline(
         RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)

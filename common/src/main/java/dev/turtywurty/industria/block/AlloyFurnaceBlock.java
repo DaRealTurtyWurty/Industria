@@ -99,6 +99,7 @@ public class AlloyFurnaceBlock extends DoorContainerBlock {
                 return BlockProperties.calculateShape(facing, localShape);
             }).toList());
         }
+
         return shapes;
     }
 
@@ -121,6 +122,7 @@ public class AlloyFurnaceBlock extends DoorContainerBlock {
                             context.getItemInHand()))))
                 return null;
         }
+
         return state;
     }
 
@@ -155,6 +157,7 @@ public class AlloyFurnaceBlock extends DoorContainerBlock {
             && level.getBlockEntity(controllerPos) instanceof BlockEntityWithGui<?> furnace) {
             furnace.openMenu(serverPlayer);
         }
+
         return InteractionResult.SUCCESS;
     }
 

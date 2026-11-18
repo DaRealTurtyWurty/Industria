@@ -16,10 +16,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import net.minecraft.world.level.material.FluidState;
 
 public class WaterWheelBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         MechanicalSource {
     private static final double MAX_RPM = 20.0;
     private static final double MAX_TORQUE = 16.0;
@@ -61,8 +61,9 @@ public class WaterWheelBlockEntity extends IndustriaBlockEntity
         this.rotation = wrapRotation(this.rotation + rotationDelta);
         this.shaftRPM = shaftRPM;
         this.rotationGameTime = level.getGameTime();
-        if (rotationDelta != 0.0)
+        if (rotationDelta != 0.0) {
             setChanged();
+        }
 
         if (needsRotationSync || Math.abs(shaftRPM - previousRPM) > 0.01
             || (shaftRPM == 0.0) != (previousRPM == 0.0)
@@ -126,7 +127,7 @@ public class WaterWheelBlockEntity extends IndustriaBlockEntity
 
                     var sampleOffset = new BlockPos(horizontal.getStepX() * x, y, horizontal.getStepZ() * x);
                     BlockPos samplePos = pos.offset(sampleOffset);
-                    var fluidState = level.getFluidState(samplePos);
+                    FluidState fluidState = level.getFluidState(samplePos);
                     if (fluidState.is(FluidTags.WATER)) {
                         Vec3 flow = fluidState.getFlow(level, samplePos);
                         totalTorque += calculateTorque(Vec3.atLowerCornerOf(sampleOffset), flow, facing);
@@ -138,7 +139,7 @@ public class WaterWheelBlockEntity extends IndustriaBlockEntity
         }
 
         private static double calculateTorque(Vec3 offset, Vec3 flow, Direction facing) {
-            var axle = facing.getAxis() == Direction.Axis.X
+            Vec3 axle = facing.getAxis() == Direction.Axis.X
                 ? new Vec3(1, 0, 0)
                 : new Vec3(0, 0, 1);
 

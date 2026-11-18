@@ -18,8 +18,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedContainerStorageHolder, P extends HasPositionPayload>
-    extends
-        AbstractContainerMenu {
+    extends AbstractContainerMenu {
     protected final T blockEntity;
     protected final WrappedContainerStorage<?> wrappedContainerStorage;
     protected final ContainerLevelAccess context;
@@ -168,8 +167,7 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedCont
     protected abstract void addBlockEntitySlots(Inventory playerInventory);
 
     public static class CachedBlockEntityFetcher<T extends BlockEntity & WrappedContainerStorageHolder>
-        implements
-            BiFunction<Inventory, BlockPos, T> {
+        implements BiFunction<Inventory, BlockPos, T> {
         private final Class<T> blockEntityClass;
         private final Map<BlockPos, T> cache = new HashMap<>();
 
@@ -190,6 +188,7 @@ public abstract class IndustriaScreenHandler<T extends BlockEntity & WrappedCont
             } else
                 throw new IllegalArgumentException(
                     "Block entity at " + pos + " is not of type " + blockEntityClass.getSimpleName());
+
         }
     }
 }

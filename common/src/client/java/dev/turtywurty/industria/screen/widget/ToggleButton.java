@@ -82,6 +82,7 @@ public class ToggleButton extends Button {
         private final int x, y;
         private BiConsumer<ToggleButton, Boolean> onPressed = (button, toggled) -> {
         };
+
         private CreateNarration narrationSupplier = textSupplier -> Component.empty();
         private boolean defaultToggled;
         private WidgetSprites textures = ToggleButton.DEFAULT_TEXTURES;

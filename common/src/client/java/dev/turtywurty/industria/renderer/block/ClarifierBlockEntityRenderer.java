@@ -17,8 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class ClarifierBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<ClarifierBlockEntity, ClarifierRenderState> {
+    extends IndustriaBlockEntityRenderer<ClarifierBlockEntity, ClarifierRenderState> {
     private final ClarifierModel model;
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 

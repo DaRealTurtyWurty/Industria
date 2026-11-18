@@ -99,6 +99,7 @@ public final class MechanicalSimulation {
         for (MechanicalConsumer consumer : consumers) {
             requested += Math.max(0.0, consumer.getRequiredTorque(rpm));
         }
+
         state = new MechanicalState(rpm, sourceTorque(sources, rpm), requested, rpm == 0.0);
 
         for (int i = 0; i < consumers.size(); i++) {

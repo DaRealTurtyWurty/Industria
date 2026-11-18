@@ -53,8 +53,7 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
 public class CrusherBlockEntity extends IndustriaBlockEntity
-    implements
-        SyncableTickableBlockEntity,
+    implements SyncableTickableBlockEntity,
         BlockEntityWithGui<BlockPosPayload>,
         BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crusher");
@@ -64,6 +63,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();
 
     private final ItemStack[] buffer = {ItemStack.EMPTY, ItemStack.EMPTY};
+
     private List<ItemStack> pendingOutputs = List.of();
     private int progress, maxProgress;
     private final ContainerData propertyDelegate = new ContainerData() {
@@ -89,6 +89,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
             return 2;
         }
     };
+
     private ResourceKey<Recipe<?>> currentRecipeId;
 
     public CrusherBlockEntity(BlockPos pos, BlockState state) {
@@ -106,8 +107,8 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        var input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(INPUT_SLOT);
-        var output = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
+        SyncingSimpleInventory input = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(INPUT_SLOT);
+        SyncingSimpleInventory output = (SyncingSimpleInventory) this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
         SyncingEnergyStorage energy = getEnergy();
 
         return List.of(input, output, energy);
@@ -191,6 +192,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
                 stack.setCount(1);
                 return canInput(stack);
             });
+
         if (entities.isEmpty())
             return;
 
@@ -210,7 +212,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
             return false;
 
         SimpleContainer output = this.wrappedContainerStorage.getInventory(OUTPUT_SLOT);
-        var simulated = new SimpleContainer(output.getContainerSize());
+        SimpleContainer simulated = new SimpleContainer(output.getContainerSize());
         for (int i = 0; i < output.getContainerSize(); i++) {
             simulated.setItem(i, output.getItem(i).copy());
         }
@@ -295,7 +297,7 @@ public class CrusherBlockEntity extends IndustriaBlockEntity
         }
 
         if (hasItemsInBuffer()) {
-            var bufferArray = view.list("Buffer", ItemStack.CODEC);
+            ValueOutput.TypedOutputList<ItemStack> bufferArray = view.list("Buffer", ItemStack.CODEC);
             for (ItemStack stack : this.buffer) {
                 if (stack == null || stack.isEmpty())
                     continue;

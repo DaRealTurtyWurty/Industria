@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
+import java.util.List;
 
 public final class FabricIndustriaTestWorldButton {
     private FabricIndustriaTestWorldButton() {
@@ -16,7 +17,7 @@ public final class FabricIndustriaTestWorldButton {
             if (!(screen instanceof TitleScreen))
                 return;
 
-            var widgets = Screens.getWidgets(screen);
+            List<AbstractWidget> widgets = Screens.getWidgets(screen);
             Button original = widgets.stream()
                 .filter(Button.class::isInstance)
                 .map(Button.class::cast)
@@ -28,6 +29,7 @@ public final class FabricIndustriaTestWorldButton {
                 if (fallback != null) {
                     widgets.add(fallback);
                 }
+
                 return;
             }
 
@@ -36,5 +38,4 @@ public final class FabricIndustriaTestWorldButton {
             widgets.add(replacement);
         });
     }
-
 }
