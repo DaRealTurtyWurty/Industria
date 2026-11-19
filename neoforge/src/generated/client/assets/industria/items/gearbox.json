@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:model",
+        "model": "industria:block/gearbox"
+      },
+      {
+        "type": "minecraft:model",
+        "model": "industria:block/gearbox_input"
+      },
+      {
+        "type": "minecraft:model",
+        "model": "industria:block/gearbox_output"
+      }
+    ]
+  }
+}

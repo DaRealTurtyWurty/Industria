@@ -1,0 +1,127 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "industria:block/gearbox"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_input",
+        "x": 90
+      },
+      "when": {
+        "input": "down",
+        "output": "east|north|south|west"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_output",
+        "z": 90
+      },
+      "when": {
+        "input": "east|north|south|west",
+        "output": "down"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_input",
+        "x": 270
+      },
+      "when": {
+        "input": "up",
+        "output": "east|north|south|west"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_output",
+        "z": 270
+      },
+      "when": {
+        "input": "east|north|south|west",
+        "output": "up"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_input"
+      },
+      "when": {
+        "input": "north",
+        "output": "down|east|up|west"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_output",
+        "y": 270
+      },
+      "when": {
+        "input": "down|east|up|west",
+        "output": "north"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_input",
+        "y": 180
+      },
+      "when": {
+        "input": "south",
+        "output": "down|east|up|west"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_output",
+        "y": 90
+      },
+      "when": {
+        "input": "down|east|up|west",
+        "output": "south"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_input",
+        "y": 270
+      },
+      "when": {
+        "input": "west",
+        "output": "down|north|south|up"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_output",
+        "y": 180
+      },
+      "when": {
+        "input": "down|north|south|up",
+        "output": "west"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_input",
+        "y": 90
+      },
+      "when": {
+        "input": "east",
+        "output": "down|north|south|up"
+      }
+    },
+    {
+      "apply": {
+        "model": "industria:block/gearbox_output"
+      },
+      "when": {
+        "input": "down|north|south|up",
+        "output": "east"
+      }
+    }
+  ]
+}

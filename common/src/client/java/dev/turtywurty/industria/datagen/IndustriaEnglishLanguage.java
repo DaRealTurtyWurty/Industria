@@ -422,6 +422,7 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.WATER_WHEEL.get(), "Water Wheel");
         translationBuilder.add(ModBlocks.KINETIC_DYNAMO.get(), "Kinetic Dynamo");
         translationBuilder.add(ModBlocks.SHAFT.get(), "Shaft");
+        translationBuilder.add(ModBlocks.GEARBOX.get(), "Gearbox");
 
         // Coke Oven
         translationBuilder.add(ModBlocks.COKE_OVEN.get(), "Coke Oven");

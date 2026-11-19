@@ -438,6 +438,9 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, ShaftBlock> SHAFT = registerWithItemCopy("shaft",
         ShaftBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final RegistrationHandle<Block, GearboxBlock> GEARBOX = registerWithItemCopy("gearbox",
+        GearboxBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> RegistrationHandle<Block, T> register(
         String name,
         Function<BlockBehaviour.Properties, T> constructor,

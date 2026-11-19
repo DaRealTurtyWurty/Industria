@@ -1,0 +1,114 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "#gearbox_output",
+    "gearbox_frame": "industria:block/gearbox_frame",
+    "gearbox_housing": "industria:block/gearbox_housing",
+    "gearbox_output": "industria:block/gearbox_output"
+  },
+  "elements": [
+    {
+      "from": [14.1, 2.75, 2.75],
+      "to": [15.25, 4.75, 13.25],
+      "faces": {
+        "north": { "uv": [0.75, 11.25, 1.9, 13.25], "texture": "#gearbox_frame" },
+        "east": { "uv": [2.75, 11.25, 13.25, 13.25], "texture": "#gearbox_frame" },
+        "south": { "uv": [14.1, 11.25, 15.25, 13.25], "texture": "#gearbox_frame" },
+        "west": { "uv": [2.75, 11.25, 13.25, 13.25], "texture": "#gearbox_frame" },
+        "up": { "uv": [14.1, 2.75, 15.25, 13.25], "texture": "#gearbox_frame" },
+        "down": { "uv": [14.1, 2.75, 15.25, 13.25], "texture": "#gearbox_frame" }
+      }
+    },
+    {
+      "from": [14.1, 11.25, 2.75],
+      "to": [15.25, 13.25, 13.25],
+      "faces": {
+        "north": { "uv": [0.75, 2.75, 1.9, 4.75], "texture": "#gearbox_frame" },
+        "east": { "uv": [2.75, 2.75, 13.25, 4.75], "texture": "#gearbox_frame" },
+        "south": { "uv": [14.1, 2.75, 15.25, 4.75], "texture": "#gearbox_frame" },
+        "west": { "uv": [2.75, 2.75, 13.25, 4.75], "texture": "#gearbox_frame" },
+        "up": { "uv": [14.1, 2.75, 15.25, 13.25], "texture": "#gearbox_frame" },
+        "down": { "uv": [14.1, 2.75, 15.25, 13.25], "texture": "#gearbox_frame" }
+      }
+    },
+    {
+      "from": [14.1, 4.75, 2.75],
+      "to": [15.25, 11.25, 4.75],
+      "faces": {
+        "north": { "uv": [0.75, 4.75, 1.9, 11.25], "texture": "#gearbox_frame" },
+        "east": { "uv": [11.25, 4.75, 13.25, 11.25], "texture": "#gearbox_frame" },
+        "south": { "uv": [14.1, 4.75, 15.25, 11.25], "texture": "#gearbox_frame" },
+        "west": { "uv": [2.75, 4.75, 4.75, 11.25], "texture": "#gearbox_frame" },
+        "up": { "uv": [14.1, 2.75, 15.25, 4.75], "texture": "#gearbox_frame" },
+        "down": { "uv": [14.1, 11.25, 15.25, 13.25], "texture": "#gearbox_frame" }
+      }
+    },
+    {
+      "from": [14.1, 4.75, 11.25],
+      "to": [15.25, 11.25, 13.25],
+      "faces": {
+        "north": { "uv": [0.75, 4.75, 1.9, 11.25], "texture": "#gearbox_frame" },
+        "east": { "uv": [2.75, 4.75, 4.75, 11.25], "texture": "#gearbox_frame" },
+        "south": { "uv": [14.1, 4.75, 15.25, 11.25], "texture": "#gearbox_frame" },
+        "west": { "uv": [11.25, 4.75, 13.25, 11.25], "texture": "#gearbox_frame" },
+        "up": { "uv": [14.1, 11.25, 15.25, 13.25], "texture": "#gearbox_frame" },
+        "down": { "uv": [14.1, 2.75, 15.25, 4.75], "texture": "#gearbox_frame" }
+      }
+    },
+    {
+      "from": [15.25, 3.75, 3.75],
+      "to": [16, 5, 12.25],
+      "faces": {
+        "north": { "uv": [0, 11, 0.75, 12.25], "texture": "#gearbox_output" },
+        "east": { "uv": [3.75, 11, 12.25, 12.25], "texture": "#gearbox_output" },
+        "south": { "uv": [15.25, 11, 16, 12.25], "texture": "#gearbox_output" },
+        "west": { "uv": [3.75, 11, 12.25, 12.25], "texture": "#gearbox_output" },
+        "up": { "uv": [15.25, 3.75, 16, 12.25], "texture": "#gearbox_output" },
+        "down": { "uv": [15.25, 3.75, 16, 12.25], "texture": "#gearbox_output" }
+      }
+    },
+    {
+      "from": [15.25, 11, 3.75],
+      "to": [16, 12.25, 12.25],
+      "faces": {
+        "north": { "uv": [0, 3.75, 0.75, 5], "texture": "#gearbox_output" },
+        "east": { "uv": [3.75, 3.75, 12.25, 5], "texture": "#gearbox_output" },
+        "south": { "uv": [15.25, 3.75, 16, 5], "texture": "#gearbox_output" },
+        "west": { "uv": [3.75, 3.75, 12.25, 5], "texture": "#gearbox_output" },
+        "up": { "uv": [15.25, 3.75, 16, 12.25], "texture": "#gearbox_output" },
+        "down": { "uv": [15.25, 3.75, 16, 12.25], "texture": "#gearbox_output" }
+      }
+    },
+    {
+      "from": [15.25, 5, 3.75],
+      "to": [16, 11, 5],
+      "faces": {
+        "north": { "uv": [0, 5, 0.75, 11], "texture": "#gearbox_output" },
+        "east": { "uv": [11, 5, 12.25, 11], "texture": "#gearbox_output" },
+        "south": { "uv": [15.25, 5, 16, 11], "texture": "#gearbox_output" },
+        "west": { "uv": [3.75, 5, 5, 11], "texture": "#gearbox_output" },
+        "up": { "uv": [15.25, 3.75, 16, 5], "texture": "#gearbox_output" },
+        "down": { "uv": [15.25, 11, 16, 12.25], "texture": "#gearbox_output" }
+      }
+    },
+    {
+      "from": [15.25, 5, 11],
+      "to": [16, 11, 12.25],
+      "faces": {
+        "north": { "uv": [0, 5, 0.75, 11], "texture": "#gearbox_output" },
+        "east": { "uv": [3.75, 5, 5, 11], "texture": "#gearbox_output" },
+        "south": { "uv": [15.25, 5, 16, 11], "texture": "#gearbox_output" },
+        "west": { "uv": [11, 5, 12.25, 11], "texture": "#gearbox_output" },
+        "up": { "uv": [15.25, 11, 16, 12.25], "texture": "#gearbox_output" },
+        "down": { "uv": [15.25, 3.75, 16, 5], "texture": "#gearbox_output" }
+      }
+    },
+    {
+      "from": [14.1, 4.75, 4.75],
+      "to": [14.42, 11.25, 11.25],
+      "faces": {
+        "east": { "uv": [7, 6, 8, 7], "texture": "#gearbox_housing" }
+      }
+    }
+  ]
+}

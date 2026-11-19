@@ -6,6 +6,7 @@ import com.mojang.math.Quadrant;
 import com.mojang.serialization.JsonOps;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.block.BatteryBlock;
+import dev.turtywurty.industria.block.GearboxBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.block.SolarPanelBlock;
 import dev.turtywurty.industria.connected.ConnectedTextureAxis;
@@ -51,6 +52,9 @@ import static net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM;
 import static net.minecraft.client.data.models.model.TexturedModel.createDefault;
 
 public final class IndustriaModels {
+    private static final Identifier GEARBOX_HOUSING = Industria.id("block/gearbox");
+    private static final Identifier GEARBOX_INPUT = Industria.id("block/gearbox_input");
+    private static final Identifier GEARBOX_OUTPUT = Industria.id("block/gearbox_output");
     private static final TextureSlot ORE_KEY = TextureSlot.create("ore");
     private static final TextureSlot BASE_KEY = TextureSlot.create("base");
     private static final ModelTemplate ORE_MODEL = block("ore", ORE_KEY, BASE_KEY);
@@ -775,6 +779,8 @@ public final class IndustriaModels {
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.TAPPING_OUTLET.get());
 
         registerShaftModel(blockStateModelGenerator, ModBlocks.SHAFT.get());
+
+        registerGearboxModel(blockStateModelGenerator, ModBlocks.GEARBOX.get());
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
@@ -979,7 +985,46 @@ public final class IndustriaModels {
         generator.registerSimpleItemModel(block, Industria.id("block/shaft"));
     }
 
+    private static void registerGearboxModel(BlockModelGenerators generator, Block block) {
+        MultiPartGenerator multipart = MultiPartGenerator.multiPart(block)
+            .with(BlockModelGenerators.plainVariant(GEARBOX_HOUSING));
+
+        for (Direction face : Direction.values()) {
+            List<Direction> perpendicular = Arrays.stream(Direction.values())
+                .filter(direction -> direction.getAxis() != face.getAxis())
+                .toList();
+            Direction first = perpendicular.getFirst();
+            Direction[] others = perpendicular.subList(1, perpendicular.size()).toArray(Direction[]::new);
+
+            Variant.SimpleModelState inputRotation = switch (face) {
+                case UP -> Variant.SimpleModelState.DEFAULT.withX(Quadrant.R270);
+                case DOWN -> Variant.SimpleModelState.DEFAULT.withX(Quadrant.R90);
+                default -> rotationFor(face);
+            };
+
+            Variant.SimpleModelState outputRotation = switch (face) {
+                case UP -> Variant.SimpleModelState.DEFAULT.withZ(Quadrant.R270);
+                case DOWN -> Variant.SimpleModelState.DEFAULT.withZ(Quadrant.R90);
+                default -> rotationFor(face.getCounterClockWise());
+            };
+
+            multipart.with(new ConditionBuilder()
+                .term(GearboxBlock.INPUT, face)
+                .term(GearboxBlock.OUTPUT, first, others), createWeightedVariant(GEARBOX_INPUT, inputRotation));
+            multipart.with(new ConditionBuilder()
+                .term(GearboxBlock.OUTPUT, face)
+                .term(GearboxBlock.INPUT, first, others), createWeightedVariant(GEARBOX_OUTPUT, outputRotation));
+        }
+
+        generator.blockStateOutput.accept(multipart);
+    }
+
     public void generateItemModels(ItemModelGenerators itemModelGenerator) {
+        itemModelGenerator.itemModelOutput.accept(ModBlocks.GEARBOX.get().asItem(),
+            ItemModelUtils.composite(
+                ItemModelUtils.plainModel(GEARBOX_HOUSING),
+                ItemModelUtils.plainModel(GEARBOX_INPUT),
+                ItemModelUtils.plainModel(GEARBOX_OUTPUT)));
         itemModelGenerator.itemModelOutput.accept(ModBlocks.WATER_WHEEL.get().asItem(),
             ItemModelUtils.specialModel(Industria.id("item/water_wheel"),
                 new IndustriaBlockEntityItemRenderer.Unbaked(WaterWheelModel.LAYER_LOCATION,
@@ -1232,6 +1277,7 @@ public final class IndustriaModels {
             ModBlocks.WIND_TURBINE.get().asItem(),
             ModBlocks.WATER_WHEEL.get().asItem(),
             ModBlocks.SHAFT.get().asItem(),
+            ModBlocks.GEARBOX.get().asItem(),
             ModBlocks.SMELTERY_GLASS.get().asItem(),
             ModBlocks.FIREBRICK.get().asItem(),
             ModBlocks.SMELTERY_HEARTH.get().asItem(),

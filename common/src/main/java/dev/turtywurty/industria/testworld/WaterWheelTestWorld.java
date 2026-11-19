@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.testworld;
 
 import com.mojang.logging.LogUtils;
+import dev.turtywurty.industria.block.GearboxBlock;
 import dev.turtywurty.industria.block.PipeBlock;
 import dev.turtywurty.industria.block.WaterWheelBlock;
 import dev.turtywurty.industria.blockentity.BatteryBlockEntity;
@@ -43,22 +44,27 @@ public final class WaterWheelTestWorld {
                 wheelState.setValue(WaterWheelBlock.PART, part));
         }
 
-        // The shaft links the controller's south axle port to the dynamo's north input.
+        // The gearbox turns the wheel's southbound shaft east toward the dynamo.
 
         context.setBlock(0, 0, 1, ModBlocks.SHAFT.get().defaultBlockState()
             .setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
-        context.setBlock(0, 0, 2, ModBlocks.KINETIC_DYNAMO.get().defaultBlockState()
-            .setValue(BlockStateProperties.FACING, Direction.SOUTH));
-        context.setBlock(0, 0, 4, ModBlocks.BASIC_BATTERY);
-        context.configureBlockEntity(0, 0, 4, BatteryBlockEntity.class,
+        context.setBlock(0, 0, 2, ModBlocks.GEARBOX.get().defaultBlockState()
+            .setValue(GearboxBlock.INPUT, Direction.NORTH)
+            .setValue(GearboxBlock.OUTPUT, Direction.EAST));
+        context.setBlock(1, 0, 2, ModBlocks.SHAFT.get().defaultBlockState()
+            .setValue(BlockStateProperties.AXIS, Direction.Axis.X));
+        context.setBlock(2, 0, 2, ModBlocks.KINETIC_DYNAMO.get().defaultBlockState()
+            .setValue(BlockStateProperties.FACING, Direction.EAST));
+        context.setBlock(4, 0, 2, ModBlocks.BASIC_BATTERY);
+        context.configureBlockEntity(4, 0, 2, BatteryBlockEntity.class,
             battery -> battery.setChargeMode(BatteryBlockEntity.ChargeMode.CHARGE));
-        context.runPipe(context.pos(0, 0, 3), context.pos(0, 0, 3), ModBlocks.CABLE);
+        context.runPipe(context.pos(3, 0, 2), context.pos(3, 0, 2), ModBlocks.CABLE);
 
         // Place one real source last and let vanilla fluid ticks establish the current.
         context.setBlock(-2, 2, 0, Blocks.WATER);
         LogUtils.getLogger().info(
-            "Water wheel test fixture: wheel={}, shaft={}, dynamo={}, charging battery={}, water source={}",
-            context.origin(), context.pos(0, 0, 1), context.pos(0, 0, 2), context.pos(0, 0, 4), context.pos(-2, 2, 0));
+            "Water wheel test fixture: wheel={}, gearbox={}, dynamo={}, charging battery={}, water source={}",
+            context.origin(), context.pos(0, 0, 2), context.pos(2, 0, 2), context.pos(4, 0, 2), context.pos(-2, 2, 0));
     }
 
     public static void startValidation(TestWorldContext context) {
@@ -73,32 +79,35 @@ public final class WaterWheelTestWorld {
         }
 
         place(context);
-        BlockState initialCableState = context.overworld().getBlockState(context.pos(0, 0, 3));
+        BlockState initialCableState = context.overworld().getBlockState(context.pos(3, 0, 2));
         context.afterTicks(160, current -> {
             try {
                 if (!initialCableState.is(ModBlocks.CABLE.get())
-                    || initialCableState.getValue(PipeBlock.NORTH) != PipeBlock.ConnectorType.BLOCK
-                    || initialCableState.getValue(PipeBlock.SOUTH) != PipeBlock.ConnectorType.BLOCK)
+                    || initialCableState.getValue(PipeBlock.WEST) != PipeBlock.ConnectorType.BLOCK
+                    || initialCableState.getValue(PipeBlock.EAST) != PipeBlock.ConnectorType.BLOCK)
                     throw new IllegalStateException(
                         "Cable was placed without both connector arms: " + initialCableState);
 
                 WaterWheelBlockEntity wheel = current.requireBlockEntity(0, 0, 0, WaterWheelBlockEntity.class);
-                current.requireBlockEntity(0, 0, 2, KineticDynamoBlockEntity.class);
-                BatteryBlockEntity battery = current.requireBlockEntity(0, 0, 4, BatteryBlockEntity.class);
+                current.requireBlockEntity(2, 0, 2, KineticDynamoBlockEntity.class);
+                BatteryBlockEntity battery = current.requireBlockEntity(4, 0, 2, BatteryBlockEntity.class);
                 double flow = WaterWheelBlockEntity.WaterWheelFlowSampler.sample(current.overworld(),
                     current.origin(), wheel.getBlockState()).signedTorque();
                 MechanicalNetwork network = MechanicalNetworkManager.getOrCreate(current.overworld())
                     .getNetworkAt(current.origin());
                 if (network == null || !network.getNodes().contains(current.pos(0, 0, 1))
-                    || !network.getNodes().contains(current.pos(0, 0, 2)))
-                    throw new IllegalStateException("Water wheel, shaft, and dynamo did not join the same network");
+                    || !network.getNodes().contains(current.pos(0, 0, 2))
+                    || !network.getNodes().contains(current.pos(1, 0, 2))
+                    || !network.getNodes().contains(current.pos(2, 0, 2)))
+                    throw new IllegalStateException(
+                        "Water wheel, shafts, gearbox, and dynamo did not join the same network");
 
                 if (flow <= 0.0 || network.getState().rpm() <= 0.0 || battery.getEnergy().getAmount() <= 0)
                     throw new IllegalStateException("flow=" + flow + ", state=" + network.getState()
                         + ", stored energy=" + battery.getEnergy().getAmount());
 
                 LogUtils.getLogger().info(
-                    "[WaterWheelSuite] PASS shaft and cable connections, natural water flow={}, RPM={}, battery energy={}",
+                    "[WaterWheelSuite] PASS gearbox transmission and cable connections, flow={}, RPM={}, battery energy={}",
                     flow, network.getState().rpm(), battery.getEnergy().getAmount());
             } catch (Throwable failure) {
                 LogUtils.getLogger().error("[WaterWheelSuite] FAIL", failure);
