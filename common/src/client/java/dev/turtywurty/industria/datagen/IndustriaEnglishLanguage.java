@@ -421,6 +421,7 @@ public final class IndustriaEnglishLanguage {
 
         translationBuilder.add(ModBlocks.WATER_WHEEL.get(), "Water Wheel");
         translationBuilder.add(ModBlocks.KINETIC_DYNAMO.get(), "Kinetic Dynamo");
+        translationBuilder.add(ModBlocks.SHAFT.get(), "Shaft");
 
         // Coke Oven
         translationBuilder.add(ModBlocks.COKE_OVEN.get(), "Coke Oven");
@@ -436,6 +437,7 @@ public final class IndustriaEnglishLanguage {
             translationBuilder.add(translatableTextContent.getKey(), value);
         } else
             throw new IllegalArgumentException("Text must be translatable! " + text);
+
     }
 
     private static void addTextEnum(LanguageGenerationContext translationBuilder, TextEnum textEnum, String value) {

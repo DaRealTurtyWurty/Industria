@@ -11,6 +11,9 @@ public class ModModels {
     public static final AdditionalModel<BlockStateModel> SEISMIC_SCANNER_MODEL_KEY = ClientRegistrations
         .registerAdditionalBlockStateModel(SEISMIC_SCANNER_MODEL_ID);
 
+    public static final AdditionalModel<BlockStateModel> SHAFT_MODEL = ClientRegistrations
+        .registerAdditionalBlockStateModel(Industria.id("block/shaft"));
+
     public static void init() {
         ModPipeConnectionModels.init();
     }

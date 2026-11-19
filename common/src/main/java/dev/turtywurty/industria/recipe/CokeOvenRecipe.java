@@ -22,11 +22,11 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public record CokeOvenRecipe(
-        IndustriaIngredient input,
-        ItemStackTemplate outputTemplate,
-        FluidStack outputFluid,
-        int requiredTemperature,
-        int processTime
+    IndustriaIngredient input,
+    ItemStackTemplate outputTemplate,
+    FluidStack outputFluid,
+    int requiredTemperature,
+    int processTime
 ) implements Recipe<SingleItemStackRecipeInput> {
     @Override
     public boolean matches(SingleItemStackRecipeInput input, Level world) {
@@ -91,19 +91,19 @@ public record CokeOvenRecipe(
     }
 
     private static final MapCodec<CokeOvenRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(CokeOvenRecipe::input),
-            ItemStackTemplate.CODEC.fieldOf("output_stack").forGetter(CokeOvenRecipe::outputTemplate),
-            FluidStack.CODEC.fieldOf("output_fluid").forGetter(CokeOvenRecipe::outputFluid),
-            Codec.INT.fieldOf("required_temperature").forGetter(CokeOvenRecipe::requiredTemperature),
-            Codec.INT.fieldOf("process_time").forGetter(CokeOvenRecipe::processTime)).apply(instance, CokeOvenRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(CokeOvenRecipe::input),
+        ItemStackTemplate.CODEC.fieldOf("output_stack").forGetter(CokeOvenRecipe::outputTemplate),
+        FluidStack.CODEC.fieldOf("output_fluid").forGetter(CokeOvenRecipe::outputFluid),
+        Codec.INT.fieldOf("required_temperature").forGetter(CokeOvenRecipe::requiredTemperature),
+        Codec.INT.fieldOf("process_time").forGetter(CokeOvenRecipe::processTime)).apply(instance, CokeOvenRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, CokeOvenRecipe> STREAM_CODEC = StreamCodec.composite(
-            IndustriaIngredient.STREAM_CODEC, CokeOvenRecipe::input,
-            ItemStackTemplate.STREAM_CODEC, CokeOvenRecipe::outputTemplate,
-            FluidStack.STREAM_CODEC, CokeOvenRecipe::outputFluid,
-            ByteBufCodecs.INT, CokeOvenRecipe::requiredTemperature,
-            ByteBufCodecs.INT, CokeOvenRecipe::processTime,
-            CokeOvenRecipe::new);
+        IndustriaIngredient.STREAM_CODEC, CokeOvenRecipe::input,
+        ItemStackTemplate.STREAM_CODEC, CokeOvenRecipe::outputTemplate,
+        FluidStack.STREAM_CODEC, CokeOvenRecipe::outputFluid,
+        ByteBufCodecs.INT, CokeOvenRecipe::requiredTemperature,
+        ByteBufCodecs.INT, CokeOvenRecipe::processTime,
+        CokeOvenRecipe::new);
 
     public static final RecipeSerializer<CokeOvenRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 }

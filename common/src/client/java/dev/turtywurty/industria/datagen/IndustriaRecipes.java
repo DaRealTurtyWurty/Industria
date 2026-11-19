@@ -875,17 +875,27 @@ public final class IndustriaRecipes {
                     .unlockedBy(hasTag(ConventionalItemTags.REDSTONE_DUSTS), has(ConventionalItemTags.REDSTONE_DUSTS))
                     .save(output);
 
-                offerCokeOvenRecipe(output,
-                        new IndustriaIngredient(itemLookup.getOrThrow(ItemTags.COALS), 1),
-                        new ItemStackTemplate(ModItems.COAL_COKE.get()),
-                        new FluidStack(ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.COAL_TAR.still().get())), FluidAmounts.INGOT),
-                        300, 1000, "coal_to_coal_coke");
+                shaped(RecipeCategory.MISC, ModBlocks.SHAFT.get(), 4)
+                    .pattern("SSS")
+                    .define('S', ModItems.STEEL_INGOT.get())
+                    .unlockedBy(getHasName(ModItems.STEEL_INGOT.get()), has(ModItems.STEEL_INGOT.get()))
+                    .save(output);
 
                 offerCokeOvenRecipe(output,
-                        new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.STORAGE_BLOCKS_COAL), 1),
-                        new ItemStackTemplate(ModBlocks.COAL_COKE_BLOCK.get().asItem()),
-                        new FluidStack(ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.COAL_TAR.still().get())), FluidAmounts.BUCKET),
-                        2500, 1000, "coal_block_to_coal_coke_block");
+                    new IndustriaIngredient(itemLookup.getOrThrow(ItemTags.COALS), 1),
+                    new ItemStackTemplate(ModItems.COAL_COKE.get()),
+                    new FluidStack(
+                        ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.COAL_TAR.still().get())),
+                        FluidAmounts.INGOT),
+                    300, 1000, "coal_to_coal_coke");
+
+                offerCokeOvenRecipe(output,
+                    new IndustriaIngredient(itemLookup.getOrThrow(ConventionalItemTags.STORAGE_BLOCKS_COAL), 1),
+                    new ItemStackTemplate(ModBlocks.COAL_COKE_BLOCK.get().asItem()),
+                    new FluidStack(
+                        ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.COAL_TAR.still().get())),
+                        FluidAmounts.BUCKET),
+                    2500, 1000, "coal_block_to_coal_coke_block");
             }
 
             private void metalStorageRecipes(
@@ -1280,16 +1290,16 @@ public final class IndustriaRecipes {
     }
 
     private static void offerCokeOvenRecipe(
-            RecipeOutput exporter,
-            IndustriaIngredient input,
-            ItemStackTemplate outputItem,
-            FluidStack outputFluid,
-            int processTime,
-            int requiredTemperature,
-            String name
+        RecipeOutput exporter,
+        IndustriaIngredient input,
+        ItemStackTemplate outputItem,
+        FluidStack outputFluid,
+        int processTime,
+        int requiredTemperature,
+        String name
     ) {
         new CokeOvenRecipeBuilder(input, outputItem, outputFluid, processTime, requiredTemperature)
-                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("coke_oven_" + name)));
+            .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("coke_oven_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {

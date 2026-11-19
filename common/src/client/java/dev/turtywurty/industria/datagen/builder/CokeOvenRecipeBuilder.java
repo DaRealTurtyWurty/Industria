@@ -16,11 +16,11 @@ public class CokeOvenRecipeBuilder {
     private final int requiredTemperature;
 
     public CokeOvenRecipeBuilder(
-            IndustriaIngredient input,
-            ItemStackTemplate outputItem,
-            FluidStack outputFluid,
-            int processTime,
-            int requiredTemperature
+        IndustriaIngredient input,
+        ItemStackTemplate outputItem,
+        FluidStack outputFluid,
+        int processTime,
+        int requiredTemperature
     ) {
         this.input = input;
         this.outputItem = outputItem;
@@ -31,7 +31,7 @@ public class CokeOvenRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new CokeOvenRecipe(input, outputItem, outputFluid, requiredTemperature, processTime),
-                null);
+            new CokeOvenRecipe(input, outputItem, outputFluid, requiredTemperature, processTime),
+            null);
     }
 }

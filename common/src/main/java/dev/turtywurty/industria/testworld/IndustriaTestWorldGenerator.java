@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import dev.turtywurty.industria.block.WindTurbineBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
+import dev.turtywurty.multiblocklib.data.MultiblockDefinition;
 
 public final class IndustriaTestWorldGenerator {
     private IndustriaTestWorldGenerator() {
@@ -114,7 +115,7 @@ public final class IndustriaTestWorldGenerator {
     }
 
     private static void placeCokeOven(TestWorldContext oven, ServerPlayer player) {
-        var definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("coke_oven"));
+        MultiblockDefinition definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("coke_oven"));
         BlockPos controller = definition.controllerPos();
         BlockPos worldPos = oven.origin().offset(controller);
         if (oven.overworld().getBlockEntity(worldPos) instanceof CokeOvenBlockEntity existing && existing.isFormed())
@@ -157,8 +158,14 @@ public final class IndustriaTestWorldGenerator {
             chest -> chest.setItem(0, new ItemStack(Items.COAL, 8)));
     }
 
-    private static void placeConveyor(TestWorldContext context, int x, int y, int z,
-                                      Supplier<? extends Block> conveyor, Direction facing) {
+    private static void placeConveyor(
+        TestWorldContext context,
+        int x,
+        int y,
+        int z,
+        Supplier<? extends Block> conveyor,
+        Direction facing
+    ) {
         context.setBlock(x, y, z, conveyor.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, facing));
     }

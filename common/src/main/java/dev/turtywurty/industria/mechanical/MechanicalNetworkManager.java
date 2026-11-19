@@ -3,6 +3,7 @@ package dev.turtywurty.industria.mechanical;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -20,6 +21,7 @@ public final class MechanicalNetworkManager {
     private final Map<BlockPos, MechanicalNetwork> networksByPos = new HashMap<>();
     private final Set<MechanicalNetwork> networks = new LinkedHashSet<>();
     private final Set<BlockPos> dirtyPositions = new HashSet<>();
+    private final ShaftRotationSync rotationSync = new ShaftRotationSync();
 
     private final Set<Long> unloadingChunks = new HashSet<>();
 
@@ -39,7 +41,8 @@ public final class MechanicalNetworkManager {
     }
 
     public void tick(ServerLevel level) {
-        if (!dirtyPositions.isEmpty()) {
+        boolean topologyChanged = !dirtyPositions.isEmpty();
+        if (topologyChanged) {
             rebuildNetworks(level);
         }
 
@@ -48,6 +51,16 @@ public final class MechanicalNetworkManager {
         for (MechanicalNetwork network : new ArrayList<>(networks)) {
             network.tick(level);
         }
+
+        if (topologyChanged) {
+            rotationSync.updateTopology(level, networksByPos);
+        }
+
+        rotationSync.tick(level);
+    }
+
+    public void onChunkSent(ServerLevel level, ServerPlayer player, ChunkPos chunk) {
+        rotationSync.sendInitialChunk(level, player, chunk);
     }
 
     public void onChunkLoaded(LevelChunk chunk) {
@@ -120,14 +133,24 @@ public final class MechanicalNetworkManager {
 
         double momentum = 0.0;
         double weight = 0.0;
+        MechanicalNetwork phaseSource = null;
+        int largestOverlap = 0;
         for (Map.Entry<MechanicalNetwork, Integer> entry : overlaps.entrySet()) {
             MechanicalNetwork previous = entry.getKey();
-            double share = (double) entry.getValue() / previous.getNodes().size();
+            int overlap = entry.getValue();
+            double share = (double) overlap / previous.getNodes().size();
             momentum += previous.getState().rpm() * share;
             weight += share;
+
+            if (phaseSource == null || overlap > largestOverlap
+                || (overlap == largestOverlap && previous.getId() < phaseSource.getId())) {
+                phaseSource = previous;
+                largestOverlap = overlap;
+            }
         }
 
-        return new MechanicalNetwork(component, weight > 0.0 ? momentum / weight : 0.0);
+        return new MechanicalNetwork(component, weight > 0.0 ? momentum / weight : 0.0,
+            phaseSource == null ? 0.0 : phaseSource.getRotationRadians());
     }
 
     private Set<BlockPos> findConnectedComponent(ServerLevel level, BlockPos start) {

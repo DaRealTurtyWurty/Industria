@@ -2,6 +2,7 @@ package dev.turtywurty.industria;
 
 import dev.turtywurty.industria.client.IndustriaWoodSetClient;
 import dev.turtywurty.industria.data.ClientConveyorNetworks;
+import dev.turtywurty.industria.data.ClientShaftRotations;
 import dev.turtywurty.industria.init.*;
 import dev.turtywurty.industria.pipe.ClientPipeNetworks;
 import dev.turtywurty.industria.pipe.PipeConnectionModelLoading;
@@ -24,6 +25,7 @@ public class IndustriaClient {
         PipeConnectionModelLoading.init();
         ClientPipeNetworks.init();
         ClientConveyorNetworks.init();
+        ClientShaftRotations.init();
         ModReloadListeners.init();
         ModTooltips.init();
     }

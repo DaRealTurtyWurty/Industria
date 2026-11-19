@@ -8,6 +8,8 @@ import dev.turtywurty.industria.conveyor.block.impl.entity.ConveyorFilterAccess;
 import dev.turtywurty.industria.menu.*;
 import dev.turtywurty.industria.network.*;
 import dev.turtywurty.industria.network.conveyor.*;
+import dev.turtywurty.industria.network.mechanical.ShaftChunkPayload;
+import dev.turtywurty.industria.network.mechanical.ShaftRotationPayload;
 import dev.turtywurty.industria.network.pipe.AddPipeNetworkPayload;
 import dev.turtywurty.industria.network.pipe.ModifyPipeNetworkPayload;
 import dev.turtywurty.industria.network.pipe.RemovePipeNetworkPayload;
@@ -200,6 +202,8 @@ public class ModPayloadTypes {
         registerClientbound(AddConveyorNetworkPayload.ID, AddConveyorNetworkPayload.CODEC);
         registerClientbound(ModifyConveyorNetworkPayload.ID, ModifyConveyorNetworkPayload.CODEC);
         registerClientbound(RemoveConveyorNetworkPayload.ID, RemoveConveyorNetworkPayload.CODEC);
+        registerClientbound(ShaftChunkPayload.ID, ShaftChunkPayload.CODEC);
+        registerClientbound(ShaftRotationPayload.ID, ShaftRotationPayload.CODEC);
         registerClientbound(SmelteryControllerSnapshotPayload.ID, SmelteryControllerSnapshotPayload.CODEC);
     }
 

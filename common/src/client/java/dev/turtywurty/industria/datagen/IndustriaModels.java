@@ -773,6 +773,8 @@ public final class IndustriaModels {
         blockStateModelGenerator.createNonTemplateModelBlock(ModBlocks.CASTING_TABLE.get());
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.MOLDING_TABLE.get());
         blockStateModelGenerator.createNonTemplateHorizontalBlock(ModBlocks.TAPPING_OUTLET.get());
+
+        registerShaftModel(blockStateModelGenerator, ModBlocks.SHAFT.get());
     }
 
     private void registerSimpleOreBlock(BlockModelGenerators blockStateModelGenerator, Block block, String type) {
@@ -965,6 +967,16 @@ public final class IndustriaModels {
                 return json;
             });
         };
+    }
+
+    private static void registerShaftModel(BlockModelGenerators generator, Block block) {
+        Identifier particles = ModelTemplates.PARTICLE_ONLY.createWithSuffix(
+            block, "_particles", TextureMapping.particle(Blocks.ANVIL), generator.modelOutput);
+
+        generator.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
+            block, BlockModelGenerators.plainVariant(particles)));
+
+        generator.registerSimpleItemModel(block, Industria.id("block/shaft"));
     }
 
     public void generateItemModels(ItemModelGenerators itemModelGenerator) {
@@ -1219,6 +1231,7 @@ public final class IndustriaModels {
             ModBlocks.WELLHEAD.get().asItem(),
             ModBlocks.WIND_TURBINE.get().asItem(),
             ModBlocks.WATER_WHEEL.get().asItem(),
+            ModBlocks.SHAFT.get().asItem(),
             ModBlocks.SMELTERY_GLASS.get().asItem(),
             ModBlocks.FIREBRICK.get().asItem(),
             ModBlocks.SMELTERY_HEARTH.get().asItem(),

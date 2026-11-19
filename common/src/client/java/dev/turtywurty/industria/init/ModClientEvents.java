@@ -4,10 +4,7 @@ import dev.turtywurty.industria.conveyor.block.impl.entity.FeederConveyorBlockEn
 import dev.turtywurty.industria.renderer.block.RotaryKilnBlockEntityRenderer;
 import dev.turtywurty.industria.renderer.conveyor.FeederConveyorSpecialRenderer;
 import dev.turtywurty.industria.renderer.conveyor.HatchConveyorSpecialRenderer;
-import dev.turtywurty.industria.renderer.world.ConveyorNetworkLevelRenderer;
-import dev.turtywurty.industria.renderer.world.FluidPocketLevelRenderer;
-import dev.turtywurty.industria.renderer.world.MultiblockExportSelectionRenderer;
-import dev.turtywurty.industria.renderer.world.PipeNetworkLevelRenderer;
+import dev.turtywurty.industria.renderer.world.*;
 import dev.turtywurty.turtymultiloader.event.client.ClientEvents;
 import dev.turtywurty.turtymultiloader.event.client.RenderStage;
 
@@ -33,6 +30,7 @@ public class ModClientEvents {
         var fluidPocketLevelRenderer = new FluidPocketLevelRenderer();
         var pipeNetworkLevelRenderer = new PipeNetworkLevelRenderer();
         var multiblockExportSelectionRenderer = new MultiblockExportSelectionRenderer();
+        var mechanicalNetworkLevelRenderer = new MechanicalNetworkLevelRenderer();
 
         ClientEvents.onRenderStage(RenderStage.AFTER_SOLID_FEATURES, context -> {
             fluidPocketLevelRenderer.render(context);
@@ -43,6 +41,7 @@ public class ModClientEvents {
         ClientEvents.onRenderStage(RenderStage.COLLECT_SUBMITS, context -> {
             conveyorNetworkLevelRenderer.render(context);
             pipeNetworkLevelRenderer.render(context);
+            mechanicalNetworkLevelRenderer.render(context);
         });
     }
 }

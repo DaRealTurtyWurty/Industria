@@ -52,7 +52,9 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
+public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("coke_oven");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedInventoryStorage = new WrappedContainerStorage<>();
@@ -121,9 +123,12 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
     @Override
     public List<SyncableStorage> getSyncableStorages() {
-        SyncingSimpleInventory inputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(Direction.UP);
-        SyncingSimpleInventory fuelInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(Direction.SOUTH);
-        SyncingSimpleInventory outputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage.getInventory(Direction.DOWN);
+        SyncingSimpleInventory inputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage
+            .getInventory(Direction.UP);
+        SyncingSimpleInventory fuelInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage
+            .getInventory(Direction.SOUTH);
+        SyncingSimpleInventory outputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage
+            .getInventory(Direction.DOWN);
         SyncingFluidStorage outputFluidStorage = this.wrappedFluidStorage.getStorage(Direction.NORTH);
 
         return List.of(inputInventory, fuelInventory, outputInventory, outputFluidStorage);
@@ -145,9 +150,11 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
             if (!this.bufferedFluidStack.isEmpty() && canOutput(this.bufferedFluidStack)) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                    this.wrappedFluidStorage.getStorage(Direction.NORTH).insertInternal(this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount(), transaction);
+                    this.wrappedFluidStorage.getStorage(Direction.NORTH).insertInternal(
+                        this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount(), transaction);
                     transaction.commit();
                 }
+
                 this.bufferedFluidStack = FluidStack.EMPTY;
                 update();
                 didntOutputEither = false;
@@ -167,7 +174,7 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
             }
 
             this.level.setBlockAndUpdate(this.worldPosition,
-                    getBlockState().setValue(BlockStateProperties.LIT, this.burnTime > 0));
+                getBlockState().setValue(BlockStateProperties.LIT, this.burnTime > 0));
 
             update();
         }
@@ -187,9 +194,9 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
         Optional<RecipeHolder<CokeOvenRecipe>> currentRecipe = getCurrentRecipe();
         if (currentRecipe.isEmpty()
-                || !currentRecipe.get().id().equals(this.currentRecipeId)
-                || !canOutput(currentRecipe.get().value().outputTemplate().create())
-                || !canOutput(currentRecipe.get().value().outputFluid())) {
+            || !currentRecipe.get().id().equals(this.currentRecipeId)
+            || !canOutput(currentRecipe.get().value().outputTemplate().create())
+            || !canOutput(currentRecipe.get().value().outputFluid())) {
             reset();
             return;
         }
@@ -215,13 +222,15 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
                 this.bufferedFluidStack = currentRecipe.get().value().outputFluid();
                 this.wrappedInventoryStorage.getInventory(Direction.UP).removeItem(0, 1);
                 this.bufferedStack = this.wrappedInventoryStorage.getInventory(Direction.DOWN)
-                        .addItem(this.bufferedStack);
+                    .addItem(this.bufferedStack);
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                     long inserted = this.wrappedFluidStorage.getStorage(Direction.NORTH)
-                            .insertInternal(this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount(), transaction);
+                        .insertInternal(this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount(),
+                            transaction);
                     this.bufferedFluidStack = inserted == this.bufferedFluidStack.amount()
-                            ? FluidStack.EMPTY
-                            : new FluidStack(this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount() - inserted);
+                        ? FluidStack.EMPTY
+                        : new FluidStack(this.bufferedFluidStack.variant(),
+                            this.bufferedFluidStack.amount() - inserted);
                     transaction.commit();
                 }
 
@@ -247,7 +256,7 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
     public boolean canOutput(FluidStack output) {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
             long inserted = this.wrappedFluidStorage.getStorage(Direction.NORTH)
-                    .insertInternal(output.variant(), output.amount(), transaction);
+                .insertInternal(output.variant(), output.amount(), transaction);
             return inserted == output.amount();
         }
     }
@@ -258,10 +267,9 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
         ItemStack itemStack = this.wrappedInventoryStorage.getInventory(Direction.UP).getItem(0);
         return serverLevel.recipeAccess().getRecipeFor(
-                CokeOvenRecipe.Type.INSTANCE,
-                SingleItemStackRecipeInput.of(itemStack),
-                serverLevel
-        );
+            CokeOvenRecipe.Type.INSTANCE,
+            SingleItemStackRecipeInput.of(itemStack),
+            serverLevel);
     }
 
     @Override
@@ -343,12 +351,12 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ITEM, () -> getInventoryProvider(Direction.UP))
-                .atSides(new BlockPos(0, 1, -1), Direction.UP);
+            .atSides(new BlockPos(0, 1, -1), Direction.UP);
         ports.input(TransferType.ITEM, () -> getInventoryProvider(Direction.SOUTH))
-                .atSides(new BlockPos(1, 0, -3), Direction.NORTH);
+            .atSides(new BlockPos(1, 0, -3), Direction.NORTH);
         ports.output(TransferType.ITEM, () -> getInventoryProvider(Direction.DOWN))
-                .atSides(new BlockPos(0, 0, -3), Direction.DOWN);
+            .atSides(new BlockPos(0, 0, -3), Direction.DOWN);
         ports.output(TransferType.FLUID, () -> getFluidProvider(Direction.NORTH))
-                .atSides(new BlockPos(0, 1, -3), Direction.NORTH);
+            .atSides(new BlockPos(0, 1, -3), Direction.NORTH);
     }
 }

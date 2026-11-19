@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "S": "industria:steel_ingot"
+  },
+  "pattern": [
+    "SSS"
+  ],
+  "result": {
+    "count": 4,
+    "id": "industria:shaft"
+  }
+}

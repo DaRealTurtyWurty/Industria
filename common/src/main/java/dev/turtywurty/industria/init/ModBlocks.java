@@ -435,6 +435,9 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, Block> COAL_COKE_BLOCK = registerWithItemCopy("coal_coke_block",
         Block::new, Blocks.COAL_BLOCK);
 
+    public static final RegistrationHandle<Block, ShaftBlock> SHAFT = registerWithItemCopy("shaft",
+        ShaftBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> RegistrationHandle<Block, T> register(
         String name,
         Function<BlockBehaviour.Properties, T> constructor,

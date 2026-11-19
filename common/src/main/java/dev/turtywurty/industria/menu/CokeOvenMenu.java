@@ -22,8 +22,15 @@ public class CokeOvenMenu extends IndustriaScreenHandler<CokeOvenBlockEntity, Bl
         super(ModMenuTypes.COKE_OVEN.get(), 5, syncId, playerInventory, payload, CokeOvenBlockEntity.class);
     }
 
-    public CokeOvenMenu(int syncId, Inventory playerInventory, CokeOvenBlockEntity blockEntity, WrappedContainerStorage<?> wrappedContainerStorage, ContainerData containerData) {
-        super(ModMenuTypes.COKE_OVEN.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage, containerData);
+    public CokeOvenMenu(
+        int syncId,
+        Inventory playerInventory,
+        CokeOvenBlockEntity blockEntity,
+        WrappedContainerStorage<?> wrappedContainerStorage,
+        ContainerData containerData
+    ) {
+        super(ModMenuTypes.COKE_OVEN.get(), syncId, playerInventory, blockEntity, wrappedContainerStorage,
+            containerData);
     }
 
     @Override

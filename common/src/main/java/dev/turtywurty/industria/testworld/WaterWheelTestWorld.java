@@ -7,12 +7,12 @@ import dev.turtywurty.industria.blockentity.BatteryBlockEntity;
 import dev.turtywurty.industria.blockentity.KineticDynamoBlockEntity;
 import dev.turtywurty.industria.blockentity.WaterWheelBlockEntity;
 import dev.turtywurty.industria.init.ModBlocks;
+import dev.turtywurty.industria.mechanical.MechanicalNetwork;
 import dev.turtywurty.industria.mechanical.MechanicalNetworkManager;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import dev.turtywurty.industria.mechanical.MechanicalNetwork;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public final class WaterWheelTestWorld {
     private WaterWheelTestWorld() {
@@ -43,19 +43,22 @@ public final class WaterWheelTestWorld {
                 wheelState.setValue(WaterWheelBlock.PART, part));
         }
 
-        // The dynamo's north input meets the south axle port of the controller.
+        // The shaft links the controller's south axle port to the dynamo's north input.
 
-        context.setBlock(0, 0, 1, ModBlocks.KINETIC_DYNAMO.get().defaultBlockState()
+        context.setBlock(0, 0, 1, ModBlocks.SHAFT.get().defaultBlockState()
+            .setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
+        context.setBlock(0, 0, 2, ModBlocks.KINETIC_DYNAMO.get().defaultBlockState()
             .setValue(BlockStateProperties.FACING, Direction.SOUTH));
-        context.setBlock(0, 0, 3, ModBlocks.BASIC_BATTERY);
-        context.configureBlockEntity(0, 0, 3, BatteryBlockEntity.class,
+        context.setBlock(0, 0, 4, ModBlocks.BASIC_BATTERY);
+        context.configureBlockEntity(0, 0, 4, BatteryBlockEntity.class,
             battery -> battery.setChargeMode(BatteryBlockEntity.ChargeMode.CHARGE));
-        context.runPipe(context.pos(0, 0, 2), context.pos(0, 0, 2), ModBlocks.CABLE);
+        context.runPipe(context.pos(0, 0, 3), context.pos(0, 0, 3), ModBlocks.CABLE);
 
         // Place one real source last and let vanilla fluid ticks establish the current.
         context.setBlock(-2, 2, 0, Blocks.WATER);
-        LogUtils.getLogger().info("Water wheel test fixture: wheel={}, dynamo={}, charging battery={}, water source={}",
-            context.origin(), context.pos(0, 0, 1), context.pos(0, 0, 3), context.pos(-2, 2, 0));
+        LogUtils.getLogger().info(
+            "Water wheel test fixture: wheel={}, shaft={}, dynamo={}, charging battery={}, water source={}",
+            context.origin(), context.pos(0, 0, 1), context.pos(0, 0, 2), context.pos(0, 0, 4), context.pos(-2, 2, 0));
     }
 
     public static void startValidation(TestWorldContext context) {
@@ -70,7 +73,7 @@ public final class WaterWheelTestWorld {
         }
 
         place(context);
-        BlockState initialCableState = context.overworld().getBlockState(context.pos(0, 0, 2));
+        BlockState initialCableState = context.overworld().getBlockState(context.pos(0, 0, 3));
         context.afterTicks(160, current -> {
             try {
                 if (!initialCableState.is(ModBlocks.CABLE.get())
@@ -80,20 +83,22 @@ public final class WaterWheelTestWorld {
                         "Cable was placed without both connector arms: " + initialCableState);
 
                 WaterWheelBlockEntity wheel = current.requireBlockEntity(0, 0, 0, WaterWheelBlockEntity.class);
-                current.requireBlockEntity(0, 0, 1, KineticDynamoBlockEntity.class);
-                BatteryBlockEntity battery = current.requireBlockEntity(0, 0, 3, BatteryBlockEntity.class);
+                current.requireBlockEntity(0, 0, 2, KineticDynamoBlockEntity.class);
+                BatteryBlockEntity battery = current.requireBlockEntity(0, 0, 4, BatteryBlockEntity.class);
                 double flow = WaterWheelBlockEntity.WaterWheelFlowSampler.sample(current.overworld(),
                     current.origin(), wheel.getBlockState()).signedTorque();
-                MechanicalNetwork network = MechanicalNetworkManager.getOrCreate(current.overworld()).getNetworks()
-                    .stream()
-                    .filter(candidate -> candidate.getNodes().contains(current.origin())).findFirst().orElseThrow();
-                if (flow <= 0.0 || network.getState().rpm() <= 0.0
-                    || !network.getNodes().contains(current.pos(0, 0, 1)) || battery.getEnergy().getAmount() <= 0)
+                MechanicalNetwork network = MechanicalNetworkManager.getOrCreate(current.overworld())
+                    .getNetworkAt(current.origin());
+                if (network == null || !network.getNodes().contains(current.pos(0, 0, 1))
+                    || !network.getNodes().contains(current.pos(0, 0, 2)))
+                    throw new IllegalStateException("Water wheel, shaft, and dynamo did not join the same network");
+
+                if (flow <= 0.0 || network.getState().rpm() <= 0.0 || battery.getEnergy().getAmount() <= 0)
                     throw new IllegalStateException("flow=" + flow + ", state=" + network.getState()
                         + ", stored energy=" + battery.getEnergy().getAmount());
 
                 LogUtils.getLogger().info(
-                    "[WaterWheelSuite] PASS initial cable connections, natural water flow={}, RPM={}, battery energy={}",
+                    "[WaterWheelSuite] PASS shaft and cable connections, natural water flow={}, RPM={}, battery energy={}",
                     flow, network.getState().rpm(), battery.getEnergy().getAmount());
             } catch (Throwable failure) {
                 LogUtils.getLogger().error("[WaterWheelSuite] FAIL", failure);

@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import dev.turtywurty.industria.blockentity.CokeOvenBlockEntity;
 
 public class CokeOvenScreen extends AbstractContainerScreen<CokeOvenMenu> {
     private static final Identifier FURNACE = Identifier.withDefaultNamespace("textures/gui/container/furnace.png");
@@ -28,7 +29,7 @@ public class CokeOvenScreen extends AbstractContainerScreen<CokeOvenMenu> {
         super.init();
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
-        var oven = this.menu.getBlockEntity();
+        CokeOvenBlockEntity oven = this.menu.getBlockEntity();
         addRenderableOnly(new FluidWidget.Builder(oven.getFluidProvider(Direction.NORTH))
             .bounds(this.leftPos + 147, this.topPos + 18, 20, 46)
             .posSupplier(oven::getBlockPos)

@@ -6,6 +6,7 @@
     "AbstractContainerScreenMixin",
     "AvatarRenderStateMixin",
     "AvatarRendererMixin",
+    "ClientLevelMixin",
     "GuiMixin",
     "HumanoidModelMixin",
     "ModelPartAccessor"

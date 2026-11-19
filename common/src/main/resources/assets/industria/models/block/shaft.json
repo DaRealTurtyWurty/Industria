@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "shaft": "minecraft:block/anvil",
+    "particle": "#shaft"
+  },
+  "elements": [
+    {
+      "from": [6, 0, 6],
+      "to": [10, 16, 10],
+      "faces": {
+        "down": { "texture": "#shaft" },
+        "up": { "texture": "#shaft" },
+        "north": { "texture": "#shaft" },
+        "south": { "texture": "#shaft" },
+        "west": { "texture": "#shaft" },
+        "east": { "texture": "#shaft" }
+      }
+    }
+  ]
+}
