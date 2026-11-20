@@ -79,5 +79,7 @@ public final class ModItemStorageProviders {
             CastingTableBlockEntity::getInventoryProvider);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.COKE_OVEN,
             CokeOvenBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.WIND_MILL,
+            WindMillBlockEntity::getInventoryProvider);
     }
 }

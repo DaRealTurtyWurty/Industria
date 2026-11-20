@@ -169,6 +169,7 @@ public class ModItems {
     public static final RegistrationHandle<Item, WireDrawplateItem> WIRE_DRAWPLATE = register("wire_drawplate",
         WireDrawplateItem::new, properties -> properties.durability(128));
     public static final RegistrationHandle<Item, Item> ELECTRIC_MOTOR = register("electric_motor");
+    public static final RegistrationHandle<Item, Item> WIND_MILL_SAIL = register("wind_mill_sail");
 
     // Casting/Smeltery
     public static final RegistrationHandle<Item, Item> BLANK_SAND_CAST = register("blank_sand_cast");

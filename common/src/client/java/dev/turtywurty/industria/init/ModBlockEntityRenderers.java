@@ -57,5 +57,7 @@ public class ModBlockEntityRenderers {
             FuelboxBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.WATER_WHEEL,
             WaterWheelBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.WIND_MILL,
+            WindMillBlockEntityRenderer::new);
     }
 }

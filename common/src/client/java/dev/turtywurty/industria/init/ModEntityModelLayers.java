@@ -72,5 +72,6 @@ public class ModEntityModelLayers {
             ChargingHatchModel::getTexturedModelData);
         ClientRegistrations.registerModelLayer(FuelboxModel.LAYER_LOCATION, FuelboxModel::getTexturedModelData);
         ClientRegistrations.registerModelLayer(WaterWheelModel.LAYER_LOCATION, WaterWheelModel::createMainLayer);
+        ClientRegistrations.registerModelLayer(WindMillModel.LAYER_LOCATION, WindMillModel::createMainLayer);
     }
 }

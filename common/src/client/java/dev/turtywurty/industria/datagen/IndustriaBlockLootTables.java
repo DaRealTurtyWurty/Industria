@@ -141,6 +141,7 @@ public final class IndustriaBlockLootTables implements LootTableSubProvider {
         dropSelf(ModBlocks.KINETIC_DYNAMO.get());
         dropSelf(ModBlocks.SHAFT.get());
         dropSelf(ModBlocks.GEARBOX.get());
+        dropSelf(ModBlocks.WIND_MILL.get());
     }
 
     private void add(Block block, Function<Block, LootTable.Builder> factory) {

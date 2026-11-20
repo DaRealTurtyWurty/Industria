@@ -1237,6 +1237,7 @@ public final class IndustriaModels {
             ModItems.BLOCK_BUILDER_DRILL_HEAD.get(),
             ModItems.MULTIBLOCK_EXPORTER.get(),
             ModItems.EMPTY_MOB_JAR.get(),
+            ModItems.WIND_MILL_SAIL.get(),
             ModWoodSets.RUBBER.boatItem().get(),
             ModWoodSets.RUBBER.chestBoatItem().get());
 
@@ -1275,6 +1276,7 @@ public final class IndustriaModels {
             ModBlocks.UPGRADE_STATION.get().asItem(),
             ModBlocks.WELLHEAD.get().asItem(),
             ModBlocks.WIND_TURBINE.get().asItem(),
+            ModBlocks.WIND_MILL.get().asItem(),
             ModBlocks.WATER_WHEEL.get().asItem(),
             ModBlocks.SHAFT.get().asItem(),
             ModBlocks.GEARBOX.get().asItem(),

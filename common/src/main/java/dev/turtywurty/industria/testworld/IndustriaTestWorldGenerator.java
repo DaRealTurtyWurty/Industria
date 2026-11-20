@@ -112,6 +112,7 @@ public final class IndustriaTestWorldGenerator {
         placeCokeOven(cokeOven, player);
         connectCokeOven(cokeOven);
         WaterWheelTestWorld.place(context.at(7, 3, 7));
+        WindMillTestWorld.place(context.at(17, 4, 7));
     }
 
     private static void placeCokeOven(TestWorldContext oven, ServerPlayer player) {
