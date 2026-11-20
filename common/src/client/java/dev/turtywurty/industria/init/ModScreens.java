@@ -7,6 +7,7 @@ public class ModScreens {
     public static void init() {
         ClientMenus.register(ModMenuTypes.ALLOY_FURNACE, AlloyFurnaceScreen::new);
         ClientMenus.register(ModMenuTypes.COKE_OVEN, CokeOvenScreen::new);
+        ClientMenus.register(ModMenuTypes.BLAST_FURNACE, BlastFurnaceScreen::new);
         ClientMenus.register(ModMenuTypes.THERMAL_GENERATOR, ThermalGeneratorScreen::new);
         ClientMenus.register(ModMenuTypes.BATTERY, BatteryScreen::new);
         ClientMenus.register(ModMenuTypes.COMBUSTION_GENERATOR, CombustionGeneratorScreen::new);

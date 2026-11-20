@@ -433,6 +433,18 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.COAL_COKE_BLOCK.get(), "Block of Coal Coke");
         translationBuilder.add(ModFluids.COAL_TAR.block().get(), "Coal Tar");
         translationBuilder.add(ModFluids.COAL_TAR.bucket().get(), "Bucket of Coal Tar");
+
+        // Blast Furnace
+        translationBuilder.add(ModBlocks.BLAST_FURNACE.get(), "Blast Furnace");
+        addText(translationBuilder, BlastFurnaceBlockEntity.TITLE, "Blast Furnace");
+        translationBuilder.add("container.industria.blast_furnace.blower_connected", "Blower connected");
+        translationBuilder.add("container.industria.blast_furnace.blower_missing", "Blower missing");
+        translationBuilder.add("container.industria.blast_furnace.charge", "Ore + Flux");
+        translationBuilder.add("container.industria.blast_furnace.coke", "Coke");
+        translationBuilder.add("container.industria.blast_furnace.molten", "Molten");
+        translationBuilder.add("container.industria.blast_furnace.slag", "Slag");
+        translationBuilder.add(ModBlocks.HOT_AIR_BLOWER.get(), "Hot Air Blower");
+        translationBuilder.add(ModItems.SLAG.get(), "Slag");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

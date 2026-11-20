@@ -107,6 +107,9 @@ public class ModMenuTypes {
     public static final ExtendedMenuRegistration<CokeOvenMenu, BlockPosPayload> COKE_OVEN = register(
         "coke_oven", CokeOvenMenu::new, BlockPosPayload.CODEC);
 
+    public static final ExtendedMenuRegistration<BlastFurnaceMenu, BlockPosPayload> BLAST_FURNACE = register(
+        "blast_furnace", BlastFurnaceMenu::new, BlockPosPayload.CODEC);
+
     public static <T extends AbstractContainerMenu, D extends CustomPacketPayload> ExtendedMenuRegistration<T, D> register(
         String name,
         ExtendedMenuFactory<T, D> factory,

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "industria:block/blast_furnace" },
+    "facing=east": { "model": "industria:block/blast_furnace", "y": 90 },
+    "facing=south": { "model": "industria:block/blast_furnace", "y": 180 },
+    "facing=west": { "model": "industria:block/blast_furnace", "y": 270 }
+  }
+}

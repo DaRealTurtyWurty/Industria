@@ -1,6 +1,7 @@
 package dev.turtywurty.industria.init;
 
 import dev.turtywurty.industria.model.*;
+import dev.turtywurty.industria.renderer.block.BlastFurnaceBlockEntityRenderer;
 import dev.turtywurty.industria.model.conveyor.ConveyorFlapsModel;
 import dev.turtywurty.industria.model.conveyor.LadderConveyorPlatformModel;
 import dev.turtywurty.industria.model.conveyor.LadderConveyorTopPlatformModel;
@@ -9,6 +10,8 @@ import dev.turtywurty.turtymultiloader.client.registration.ClientRegistrations;
 
 public class ModEntityModelLayers {
     public static void init() {
+        ClientRegistrations.registerModelLayer(BlastFurnaceBlockEntityRenderer.LAYER,
+            BlastFurnaceBlockEntityRenderer::createLayer);
         ClientRegistrations.registerModelLayer(AlloyFurnaceModel.LAYER_LOCATION, AlloyFurnaceModel::createBodyLayer);
         ClientRegistrations.registerModelLayer(AlloyFurnaceModel.ITEM_LAYER_LOCATION,
             AlloyFurnaceModel::createItemLayer);

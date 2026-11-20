@@ -7,7 +7,6 @@ public final class ModMultiblockLibIntegration {
     }
 
     public static void init() {
-        // Register Industria machine controllers so MultiblockLib can form definitions onto them.
         MultiblockLib.registerControllerBlock(ModBlocks.OIL_PUMP_JACK.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.DRILL.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.UPGRADE_STATION.get(), false);
@@ -23,5 +22,6 @@ public final class ModMultiblockLibIntegration {
         MultiblockLib.registerControllerBlock(ModBlocks.COKE_OVEN.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.AGITATOR.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.DISTILLATION_TOWER.get(), false);
+        MultiblockLib.registerControllerBlock(ModBlocks.BLAST_FURNACE.get(), false);
     }
 }

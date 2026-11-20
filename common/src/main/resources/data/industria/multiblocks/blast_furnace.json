@@ -1,0 +1,32 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:blast_furnace",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 1, 0],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:iron_block", "industria:tapping_outlet", "minecraft:iron_block"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
+        ["minecraft:iron_block", "industria:firebrick", "minecraft:iron_block"]
+      ],
+      [
+        ["industria:firebrick", "industria:blast_furnace", "industria:firebrick"],
+        ["industria:firebrick", "minecraft:air", "industria:firebrick"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"]
+      ],
+      [
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
+        ["industria:firebrick", "minecraft:air", "industria:firebrick"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"]
+      ],
+      [
+        ["minecraft:iron_block", "industria:firebrick", "minecraft:iron_block"],
+        ["industria:firebrick", "industria:charging_hatch", "industria:firebrick"],
+        ["minecraft:iron_block", "industria:firebrick", "minecraft:iron_block"]
+      ]
+    ]
+  }
+}

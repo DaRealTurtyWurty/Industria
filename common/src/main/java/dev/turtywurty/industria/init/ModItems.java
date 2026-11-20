@@ -5,10 +5,14 @@ import dev.turtywurty.industria.init.list.FoodList;
 import dev.turtywurty.industria.item.*;
 import dev.turtywurty.turtymultiloader.registration.RegistrationHandle;
 import dev.turtywurty.turtymultiloader.registration.RegistryService;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CookingFuel;
+import net.minecraft.world.level.storage.loot.providers.number.floats.ResolvableFloat;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -170,6 +174,7 @@ public class ModItems {
         WireDrawplateItem::new, properties -> properties.durability(128));
     public static final RegistrationHandle<Item, Item> ELECTRIC_MOTOR = register("electric_motor");
     public static final RegistrationHandle<Item, Item> WIND_MILL_SAIL = register("wind_mill_sail");
+    public static final RegistrationHandle<Item, Item> SLAG = register("slag");
 
     // Casting/Smeltery
     public static final RegistrationHandle<Item, Item> BLANK_SAND_CAST = register("blank_sand_cast");
@@ -188,7 +193,11 @@ public class ModItems {
         properties -> new MoldItem(properties, 256));
 
     // Coke Oven
-    public static final RegistrationHandle<Item, Item> COAL_COKE = register("coal_coke");
+    public static final RegistrationHandle<Item, Item> COAL_COKE = registerWithSettings("coal_coke",
+            settings -> settings.component(DataComponents.COOKING_FUEL, new CookingFuel(
+                    new ResolvableInt.Constant(3200),
+                    new ResolvableFloat.Constant(1.0F)
+            )));
 
     public static RegistrationHandle<Item, Item> register(String name) {
         return registerItem(name, () -> new Item(new Item.Properties()

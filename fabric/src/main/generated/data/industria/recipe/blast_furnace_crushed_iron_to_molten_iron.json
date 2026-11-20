@@ -1,0 +1,22 @@
+{
+  "type": "industria:blast_furnace",
+  "byproduct": {
+    "id": "industria:slag"
+  },
+  "flux": {
+    "ingredients": "minecraft:calcite"
+  },
+  "input": {
+    "data": {
+      "count": 4
+    },
+    "ingredients": "industria:crushed_iron"
+  },
+  "output": {
+    "amount": 54000,
+    "variant": {
+      "id": "industria:molten_iron"
+    }
+  },
+  "process_time": 400
+}

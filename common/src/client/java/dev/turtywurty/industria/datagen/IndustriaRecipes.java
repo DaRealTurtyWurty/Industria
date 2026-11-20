@@ -896,6 +896,16 @@ public final class IndustriaRecipes {
                         ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.COAL_TAR.still().get())),
                         FluidAmounts.BUCKET),
                     2500, 1000, "coal_block_to_coal_coke_block");
+
+                offerBlastFurnaceRecipe(output,
+                        new IndustriaIngredient(4, ModItems.CRUSHED_IRON.get()),
+                        new IndustriaIngredient(1, Items.CALCITE),
+                        new FluidStack(
+                                ResourceTypes.FLUID.of(BuiltInRegistries.FLUID.wrapAsHolder(ModFluids.MOLTEN_IRON.still().get())),
+                                FluidAmounts.INGOT * 6
+                        ),
+                        new ItemStackTemplate(ModItems.SLAG.get()),
+                        400, "crushed_iron_to_molten_iron");
             }
 
             private void metalStorageRecipes(
@@ -1300,6 +1310,19 @@ public final class IndustriaRecipes {
     ) {
         new CokeOvenRecipeBuilder(input, outputItem, outputFluid, processTime, requiredTemperature)
             .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("coke_oven_" + name)));
+    }
+
+    private static void offerBlastFurnaceRecipe(
+            RecipeOutput exporter,
+            IndustriaIngredient input,
+            IndustriaIngredient flux,
+            FluidStack output,
+            ItemStackTemplate byproduct,
+            int processTime,
+            String name
+    ) {
+        new BlastFurnaceRecipeBuilder(input, flux, output, byproduct, processTime)
+                .offerTo(exporter, ResourceKey.create(Registries.RECIPE, Industria.id("blast_furnace_" + name)));
     }
 
     public static String getRecipeName(Fluid fluid) {

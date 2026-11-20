@@ -209,6 +209,10 @@ public class ModBlockEntityTypes {
         "wind_mill",
         WindMillBlockEntity::new, builder -> builder.validBlock(ModBlocks.WIND_MILL));
 
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<BlastFurnaceBlockEntity>> BLAST_FURNACE = register(
+        "blast_furnace",
+        BlastFurnaceBlockEntity::new, builder -> builder.validBlock(ModBlocks.BLAST_FURNACE));
+
     public static <T extends BlockEntity> RegistrationHandle<BlockEntityType<?>, BlockEntityType<T>> register(
         String name,
         BiFunction<BlockPos, BlockState, T> factory,
