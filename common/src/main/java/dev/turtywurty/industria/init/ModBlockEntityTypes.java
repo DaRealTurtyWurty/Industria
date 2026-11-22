@@ -213,6 +213,10 @@ public class ModBlockEntityTypes {
         "blast_furnace",
         BlastFurnaceBlockEntity::new, builder -> builder.validBlock(ModBlocks.BLAST_FURNACE));
 
+    public static final RegistrationHandle<BlockEntityType<?>, BlockEntityType<SteamBoilerBlockEntity>> STEAM_BOILER = register(
+        "steam_boiler",
+        SteamBoilerBlockEntity::new, builder -> builder.validBlock(ModBlocks.STEAM_BOILER));
+
     public static <T extends BlockEntity> RegistrationHandle<BlockEntityType<?>, BlockEntityType<T>> register(
         String name,
         BiFunction<BlockPos, BlockState, T> factory,

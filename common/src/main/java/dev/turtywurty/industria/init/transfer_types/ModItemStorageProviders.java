@@ -81,5 +81,7 @@ public final class ModItemStorageProviders {
             CokeOvenBlockEntity::getInventoryProvider);
         transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.WIND_MILL,
             WindMillBlockEntity::getInventoryProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.ITEM, ModBlockEntityTypes.STEAM_BOILER,
+            SteamBoilerBlockEntity::getInventoryProvider);
     }
 }

@@ -8,6 +8,10 @@ import dev.turtywurty.turtymultiloader.menu.MenuService;
 import dev.turtywurty.turtymultiloader.menu.SelfOpeningMenuProvider;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jspecify.annotations.Nullable;
 
 import java.util.OptionalInt;
 
@@ -26,4 +30,7 @@ public interface BlockEntityWithGui<T extends CustomPacketPayload>
 
         throw new IllegalStateException("Unsupported menu opening payload: " + openingData.type().id());
     }
+
+    @Override
+    @Nullable AbstractContainerMenu createMenu(int syncId, Inventory inventory, Player player);
 }

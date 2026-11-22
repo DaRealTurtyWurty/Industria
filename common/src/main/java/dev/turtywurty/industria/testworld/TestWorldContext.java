@@ -29,7 +29,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -63,6 +65,21 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
 
     public void removeBlock(int x, int y, int z) {
         overworld.removeBlock(pos(x, y, z), false);
+    }
+
+    public void placeHopperFeed(BlockPos hopperPos, Direction facing, ItemStack... supplies) {
+        overworld.setBlockAndUpdate(hopperPos, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, facing));
+        BlockPos chestPos = hopperPos.above();
+        if (overworld.getBlockState(chestPos).is(Blocks.CHEST))
+            return;
+
+        overworld.setBlockAndUpdate(chestPos, Blocks.CHEST.defaultBlockState());
+        if (overworld.getBlockEntity(chestPos) instanceof ChestBlockEntity chest) {
+            for (int slot = 0; slot < supplies.length; slot++) {
+                chest.setItem(slot, supplies[slot]);
+            }
+            chest.setChanged();
+        }
     }
 
     public List<BlockPos> runPipe(BlockPos start, BlockPos end) {

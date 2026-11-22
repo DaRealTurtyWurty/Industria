@@ -11,6 +11,7 @@ public class ModGases {
     public static final RegistrationHandle<Gas, Gas> CARBON_DIOXIDE = register("carbon_dioxide");
     public static final RegistrationHandle<Gas, Gas> METHANE = register("methane");
     public static final RegistrationHandle<Gas, Gas> CARBON_MONOXIDE = register("carbon_monoxide");
+    public static final RegistrationHandle<Gas, Gas> STEAM = register("steam");
 
     public static RegistrationHandle<Gas, Gas> register(String name) {
         return GasApi.register(Industria.id(name));

@@ -7,6 +7,8 @@ public class ModBlockEntityRenderers {
     public static void init() {
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.BLAST_FURNACE,
             BlastFurnaceBlockEntityRenderer::new);
+        ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.STEAM_BOILER,
+            SteamBoilerBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.ALLOY_FURNACE,
             AlloyFurnaceBlockEntityRenderer::new);
         ClientRegistrations.registerBlockEntityRenderer(ModBlockEntityTypes.SOLAR_PANEL,

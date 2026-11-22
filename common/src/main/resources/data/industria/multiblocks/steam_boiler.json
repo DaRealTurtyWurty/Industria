@@ -1,0 +1,32 @@
+{
+  "trigger_item": "industria:wrench",
+  "controller_block": "industria:steam_boiler",
+  "allowed_rotations": ["none", "cw_90", "cw_180", "cw_270"],
+  "allow_mirror": false,
+  "controller": [1, 0, 1],
+  "pattern": {
+    "type": "multiblocklib:grid",
+    "layers": [
+      [
+        ["minecraft:polished_deepslate", "minecraft:iron_block", "minecraft:polished_deepslate"],
+        ["minecraft:iron_block", "industria:steam_boiler", "minecraft:iron_block"],
+        ["minecraft:polished_deepslate", "minecraft:iron_block", "minecraft:polished_deepslate"]
+      ],
+      [
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
+        ["industria:firebrick", "minecraft:air", "industria:firebrick"],
+        ["industria:firebrick", "industria:firebrick", "industria:firebrick"]
+      ],
+      [
+        ["minecraft:air", "industria:steel_block", "minecraft:air"],
+        ["industria:steel_block", "industria:steel_block", "industria:steel_block"],
+        ["minecraft:air", "industria:steel_block", "minecraft:air"]
+      ],
+      [
+        ["minecraft:air", "minecraft:cut_copper", "minecraft:air"],
+        ["minecraft:cut_copper", "minecraft:lightning_rod[facing=up]", "minecraft:cut_copper"],
+        ["minecraft:air", "minecraft:cut_copper", "minecraft:air"]
+      ]
+    ]
+  }
+}

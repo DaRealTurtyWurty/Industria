@@ -61,5 +61,7 @@ public final class ModFluidStorageProviders {
             CastingTableBlockEntity::getFluidProvider);
         transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.COKE_OVEN,
             CokeOvenBlockEntity::getFluidProvider);
+        transfers.registerBlockEntityProvider(StorageKeys.FLUID, ModBlockEntityTypes.STEAM_BOILER,
+            SteamBoilerBlockEntity::getFluidProvider);
     }
 }

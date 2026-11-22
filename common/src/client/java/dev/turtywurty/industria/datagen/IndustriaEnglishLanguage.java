@@ -445,6 +445,18 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add("container.industria.blast_furnace.slag", "Slag");
         translationBuilder.add(ModBlocks.HOT_AIR_BLOWER.get(), "Hot Air Blower");
         translationBuilder.add(ModItems.SLAG.get(), "Slag");
+
+        // Steam Boiler
+        translationBuilder.add(ModBlocks.STEAM_BOILER.get(), "Steam Boiler");
+        addText(translationBuilder, SteamBoilerBlockEntity.TITLE, "Steam Boiler");
+        translationBuilder.add(SteamBoilerScreen.BURN_RATE_KEY, "Burn %s×");
+        translationBuilder.add(SteamBoilerScreen.FUEL_KEY, "Fuel");
+        translationBuilder.add(SteamBoilerScreen.PRODUCTION_RATE_KEY, "Steam %s mB/t");
+        translationBuilder.add(SteamBoilerScreen.STEAM_KEY, "Steam");
+        translationBuilder.add(SteamBoilerScreen.TANK_CONTENTS_KEY, "%s / %s mB");
+        translationBuilder.add(SteamBoilerScreen.TARGET_TEMPERATURE_KEY, "Target %s°C");
+        translationBuilder.add(SteamBoilerScreen.TEMPERATURE_KEY, "Temp %s°C");
+        translationBuilder.add(SteamBoilerScreen.WATER_KEY, "Water");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {

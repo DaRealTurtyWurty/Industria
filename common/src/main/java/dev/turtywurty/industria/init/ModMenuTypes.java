@@ -110,6 +110,9 @@ public class ModMenuTypes {
     public static final ExtendedMenuRegistration<BlastFurnaceMenu, BlockPosPayload> BLAST_FURNACE = register(
         "blast_furnace", BlastFurnaceMenu::new, BlockPosPayload.CODEC);
 
+    public static final ExtendedMenuRegistration<SteamBoilerMenu, BlockPosPayload> STEAM_BOILER = register(
+        "steam_boiler", SteamBoilerMenu::new, BlockPosPayload.CODEC);
+
     public static <T extends AbstractContainerMenu, D extends CustomPacketPayload> ExtendedMenuRegistration<T, D> register(
         String name,
         ExtendedMenuFactory<T, D> factory,

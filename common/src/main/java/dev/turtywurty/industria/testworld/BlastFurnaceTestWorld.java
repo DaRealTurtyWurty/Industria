@@ -10,8 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public final class BlastFurnaceTestWorld {
@@ -23,11 +23,11 @@ public final class BlastFurnaceTestWorld {
         BlockPos controller = definition.controllerPos();
         BlockPos controllerPos = context.origin().offset(controller);
         var level = context.overworld();
-        if (level.getBlockEntity(controllerPos) instanceof BlastFurnaceBlockEntity existing && existing.isFormed())
-            return;
+        if (!(level.getBlockEntity(controllerPos) instanceof BlastFurnaceBlockEntity existing && existing.isFormed())) {
+            context.constructMultiblockPattern(0, 0, 0, definition);
+            MultiblockPlacement.tryForm(level, controllerPos, new ItemStack(ModItems.WRENCH.get()));
+        }
 
-        context.constructMultiblockPattern(0, 0, 0, definition);
-        MultiblockPlacement.tryForm(level, controllerPos, new ItemStack(ModItems.WRENCH.get()));
         var furnace = context.requireBlockEntity(
             controller.getX(), controller.getY(), controller.getZ(), BlastFurnaceBlockEntity.class);
         if (!furnace.isFormed())
@@ -39,14 +39,21 @@ public final class BlastFurnaceTestWorld {
         level.setBlockAndUpdate(blowerPos, ModBlocks.HOT_AIR_BLOWER.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, blowerSide.getOpposite()));
 
-        // Keep the furnace idle so the player can load it and see a batch run in the menu.
-        if (!level.getBlockState(context.pos(3, 0, -2)).is(Blocks.CHEST)) {
-            context.setBlock(3, 0, -2, Blocks.CHEST);
-            context.configureBlockEntity(3, 0, -2, ChestBlockEntity.class, chest -> {
-                chest.setItem(0, new ItemStack(ModItems.CRUSHED_IRON.get(), 32));
-                chest.setItem(1, new ItemStack(Items.CALCITE, 8));
-                chest.setItem(2, new ItemStack(ModItems.COAL_COKE.get(), 4));
-            });
+        // Feed the charging hatch from above and the coke port from the blower side.
+        context.placeHopperFeed(controllerPos.relative(intoFurnace).above(3), Direction.DOWN,
+            new ItemStack(ModItems.CRUSHED_IRON.get(), 32), new ItemStack(Items.CALCITE, 8));
+        context.placeHopperFeed(blowerPos.above(), blowerSide.getOpposite(),
+            new ItemStack(ModItems.COAL_COKE.get(), 4));
+
+        // The slag port is directly below the blower. The barrel opens from the side.
+        BlockPos slagBarrel = blowerPos.below();
+        if (!level.getBlockState(slagBarrel).is(Blocks.BARREL)) {
+            level.setBlockAndUpdate(slagBarrel, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, blowerSide));
         }
+
+        Direction front = intoFurnace.getOpposite();
+        BlockPos outlet = controllerPos.below();
+        level.setBlockAndUpdate(outlet.relative(front, 3), ModBlocks.FLUID_TANK.get().defaultBlockState());
+        context.runPipe(outlet.relative(front), outlet.relative(front, 2));
     }
 }

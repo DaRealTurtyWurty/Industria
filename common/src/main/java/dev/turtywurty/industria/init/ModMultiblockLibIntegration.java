@@ -23,5 +23,6 @@ public final class ModMultiblockLibIntegration {
         MultiblockLib.registerControllerBlock(ModBlocks.AGITATOR.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.DISTILLATION_TOWER.get(), false);
         MultiblockLib.registerControllerBlock(ModBlocks.BLAST_FURNACE.get(), false);
+        MultiblockLib.registerControllerBlock(ModBlocks.STEAM_BOILER.get(), false);
     }
 }

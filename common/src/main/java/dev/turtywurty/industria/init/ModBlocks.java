@@ -453,6 +453,10 @@ public class ModBlocks {
             "hot_air_blower",
             HotAirBlowerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
+    public static final RegistrationHandle<Block, SteamBoilerBlock> STEAM_BOILER = registerWithItemCopy(
+            "steam_boiler",
+            SteamBoilerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+
     public static <T extends Block> RegistrationHandle<Block, T> register(
         String name,
         Function<BlockBehaviour.Properties, T> constructor,

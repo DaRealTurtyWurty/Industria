@@ -1,10 +1,7 @@
 package dev.turtywurty.industria.init.transfer_types;
 
 import dev.turtywurty.gasapi.api.storage.GasStorage;
-import dev.turtywurty.industria.blockentity.AgitatorBlockEntity;
-import dev.turtywurty.industria.blockentity.ArcFurnaceBlockEntity;
-import dev.turtywurty.industria.blockentity.ElectrolyzerBlockEntity;
-import dev.turtywurty.industria.blockentity.IndustriaMultiblockControllerBlockEntity;
+import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.init.ModBlockEntityTypes;
 import dev.turtywurty.industria.init.ModBlocks;
 import dev.turtywurty.industria.multiblock.TransferType;
@@ -39,6 +36,8 @@ public final class ModGasStorageProviders {
 
             return null;
         }, ModBlocks.GAS_PIPE);
+        transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.STEAM_BOILER,
+                SteamBoilerBlockEntity::getGasProvider);
     }
 
     private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(
