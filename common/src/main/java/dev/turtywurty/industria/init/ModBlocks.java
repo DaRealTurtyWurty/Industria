@@ -444,18 +444,19 @@ public class ModBlocks {
     public static final RegistrationHandle<Block, WindMillBlock> WIND_MILL = registerWithItemCopy("wind_mill",
         WindMillBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
-    public static final RegistrationHandle<Block, BlastFurnaceBlock> BLAST_FURNACE = registerWithItemCopy("blast_furnace",
-            BlastFurnaceBlock::new, Blocks.BRICKS,
-            properties -> properties.noOcclusion()
-                    .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 13 : 0));
+    public static final RegistrationHandle<Block, BlastFurnaceBlock> BLAST_FURNACE = registerWithItemCopy(
+        "blast_furnace",
+        BlastFurnaceBlock::new, Blocks.BRICKS,
+        properties -> properties.noOcclusion()
+            .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 13 : 0));
 
     public static final RegistrationHandle<Block, HotAirBlowerBlock> HOT_AIR_BLOWER = registerWithItemCopy(
-            "hot_air_blower",
-            HotAirBlowerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+        "hot_air_blower",
+        HotAirBlowerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static final RegistrationHandle<Block, SteamBoilerBlock> STEAM_BOILER = registerWithItemCopy(
-            "steam_boiler",
-            SteamBoilerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
+        "steam_boiler",
+        SteamBoilerBlock::new, Blocks.IRON_BLOCK, BlockBehaviour.Properties::noOcclusion);
 
     public static <T extends Block> RegistrationHandle<Block, T> register(
         String name,

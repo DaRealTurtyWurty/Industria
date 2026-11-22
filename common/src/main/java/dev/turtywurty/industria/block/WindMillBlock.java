@@ -22,15 +22,23 @@ import java.util.Set;
 public class WindMillBlock extends IndustriaBlock implements MechanicalNode {
     public WindMillBlock(Properties settings) {
         super(settings.pushReaction(PushReaction.IMMOVEABLE), new BlockProperties()
-                .hasHorizontalFacing()
-                .hasBlockEntityRenderer()
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.WIND_MILL)
-                        .shouldTick()
-                        .dropContentsOnBreak()));
+            .hasHorizontalFacing()
+            .hasBlockEntityRenderer()
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.WIND_MILL)
+                .shouldTick()
+                .dropContentsOnBreak()));
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(
+        ItemStack itemStack,
+        BlockState state,
+        Level level,
+        BlockPos pos,
+        Player player,
+        InteractionHand hand,
+        BlockHitResult hitResult
+    ) {
         if (!itemStack.is(ModItems.WIND_MILL_SAIL.get()))
             return super.useItemOn(itemStack, state, level, pos, player, hand, hitResult);
 

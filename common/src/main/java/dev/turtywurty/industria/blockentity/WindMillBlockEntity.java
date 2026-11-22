@@ -28,7 +28,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
 
-public class WindMillBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, MechanicalSource, BlockEntityContentsDropper {
+public class WindMillBlockEntity extends IndustriaBlockEntity
+    implements SyncableTickableBlockEntity,
+        MechanicalSource,
+        BlockEntityContentsDropper {
     private static final int SAIL_LENGTH = 3;
     private static final int SAIL_COUNT = 4;
     private static final double MAX_RPM = 20.0;
@@ -46,7 +49,7 @@ public class WindMillBlockEntity extends IndustriaBlockEntity implements Syncabl
     public WindMillBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.WIND_MILL.get(), ModBlockEntityTypes.WIND_MILL.get(), pos, state);
         this.wrappedInventoryStorage.addInventory(new PredicateSimpleInventory(this, SAIL_COUNT,
-                (stack, _) -> stack.is(ModItems.WIND_MILL_SAIL.get())) {
+            (stack, _) -> stack.is(ModItems.WIND_MILL_SAIL.get())) {
             @Override
             public int getMaxStackSize() {
                 return 1;
@@ -71,10 +74,9 @@ public class WindMillBlockEntity extends IndustriaBlockEntity implements Syncabl
 
         float dayOffset = serverLevel.getGameTime() / 24_000.0f;
         double noise = this.windNoise.get(
-                this.worldPosition.getX() + dayOffset,
-                this.worldPosition.getY() + dayOffset,
-                this.worldPosition.getZ() + dayOffset
-        );
+            this.worldPosition.getX() + dayOffset,
+            this.worldPosition.getY() + dayOffset,
+            this.worldPosition.getZ() + dayOffset);
 
         return Math.clamp(0.75 + 0.25 * noise, 0.0, 1.0);
     }
@@ -95,7 +97,8 @@ public class WindMillBlockEntity extends IndustriaBlockEntity implements Syncabl
                     continue;
 
                 BlockPos pos = this.worldPosition.offset(x * sideways.getStepX(), y, x * sideways.getStepZ());
-                if (level.isOutsideBuildHeight(pos) || !level.isLoaded(pos) || !level.getBlockState(pos).canBeReplaced())
+                if (level.isOutsideBuildHeight(pos) || !level.isLoaded(pos)
+                    || !level.getBlockState(pos).canBeReplaced())
                     return true;
             }
         }
@@ -119,8 +122,9 @@ public class WindMillBlockEntity extends IndustriaBlockEntity implements Syncabl
         SimpleContainer inventory = this.wrappedInventoryStorage.getInventory(0);
         int mask = 0;
         for (int slot = 0; slot < SAIL_COUNT; slot++) {
-            if (inventory.getItem(slot).is(ModItems.WIND_MILL_SAIL.get()))
+            if (inventory.getItem(slot).is(ModItems.WIND_MILL_SAIL.get())) {
                 mask |= 1 << slot;
+            }
         }
 
         return mask;
@@ -159,9 +163,9 @@ public class WindMillBlockEntity extends IndustriaBlockEntity implements Syncabl
         }
 
         if (needsRotationSync
-                || Math.abs(previousRPM - shaftRPM) > 0.01
-                || (shaftRPM == 0.0) != (previousRPM == 0.0)
-                || (shaftRPM != 0.0 && rotationGameTime % 10 == 0)) {
+            || Math.abs(previousRPM - shaftRPM) > 0.01
+            || (shaftRPM == 0.0) != (previousRPM == 0.0)
+            || (shaftRPM != 0.0 && rotationGameTime % 10 == 0)) {
             needsRotationSync = false;
             update();
             forceUpdate();
@@ -170,8 +174,8 @@ public class WindMillBlockEntity extends IndustriaBlockEntity implements Syncabl
 
     public float getRenderRotation(float partialTick) {
         double elapsed = level != null && level.isClientSide()
-                ? Math.max(0.0, level.getGameTime() - rotationGameTime + partialTick)
-                : 0.0;
+            ? Math.max(0.0, level.getGameTime() - rotationGameTime + partialTick)
+            : 0.0;
         return (float) wrapRotation(rotation + elapsed * shaftRPM * Math.TAU / 1200.0);
     }
 

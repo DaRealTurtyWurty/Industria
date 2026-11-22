@@ -46,7 +46,8 @@ public class SteamBoilerMenu extends IndustriaScreenHandler<SteamBoilerBlockEnti
                 }
 
                 @Override
-                public void set(int index, int value) {}
+                public void set(int index, int value) {
+                }
 
                 @Override
                 public int getCount() {

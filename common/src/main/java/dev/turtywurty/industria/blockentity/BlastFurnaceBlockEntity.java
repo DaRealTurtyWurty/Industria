@@ -46,7 +46,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
+    implements BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("blast_furnace");
 
     private final WrappedContainerStorage<SyncingSimpleInventory> wrappedInventoryStorage = new WrappedContainerStorage<>();
@@ -62,7 +63,7 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
         super(ModBlocks.BLAST_FURNACE.get(), ModBlockEntityTypes.BLAST_FURNACE.get(), pos, state);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new SyncingSimpleInventory(this, 2), Direction.UP);
         this.wrappedInventoryStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1,
-                (stack, _) -> stack.is(ModItems.COAL_COKE.get())), Direction.NORTH);
+            (stack, _) -> stack.is(ModItems.COAL_COKE.get())), Direction.NORTH);
         this.wrappedInventoryStorage.addExtractOnlyInventory(new SyncingSimpleInventory(this, 1), Direction.DOWN);
         this.wrappedFluidStorage.addStorage(new OutputFluidStorage(this, FluidAmounts.BUCKET * 4));
     }
@@ -74,7 +75,7 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
 
         SyncingSimpleInventory inputInventory = this.wrappedInventoryStorage.getInventory(Direction.UP);
         Optional<RecipeHolder<BlastFurnaceRecipe>> recipeMatch = serverLevel.recipeAccess().getRecipeFor(
-                ModRecipeTypes.BLAST_FURNACE.get(), inputInventory, serverLevel);
+            ModRecipeTypes.BLAST_FURNACE.get(), inputInventory, serverLevel);
 
         if (recipeMatch.isEmpty()) {
             clearBatch();
@@ -100,8 +101,8 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
         FluidStack molten = recipe.output();
 
         boolean byproductFits = (existingByproduct.isEmpty()
-                || ItemStack.isSameItemSameComponents(existingByproduct, byproduct))
-                && byproduct.getCount() <= byproductInventory.getMaxStackSize(byproduct) - existingByproduct.getCount();
+            || ItemStack.isSameItemSameComponents(existingByproduct, byproduct))
+            && byproduct.getCount() <= byproductInventory.getMaxStackSize(byproduct) - existingByproduct.getCount();
         if (!hasConnectedBlower() || !byproductFits || molten.isEmpty() || !fluidStorage.canInsert(molten)) {
             setLit(false);
             return;
@@ -111,8 +112,8 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
             if (this.burnTimeRemaining == 0) {
                 ItemStack fuel = fuelInventory.getItem(0);
                 int duration = fuel.is(ModItems.COAL_COKE.get())
-                        ? FuelUtils.burnDuration(serverLevel, fuel)
-                        : 0;
+                    ? FuelUtils.burnDuration(serverLevel, fuel)
+                    : 0;
 
                 if (duration <= 0) {
                     setLit(false);
@@ -161,7 +162,7 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
         BlockState state = getBlockState();
         if (state.getValue(BlockStateProperties.LIT) != lit) {
             this.level.setBlockAndUpdate(this.worldPosition,
-                    state.setValue(BlockStateProperties.LIT, lit));
+                state.setValue(BlockStateProperties.LIT, lit));
         }
     }
 
@@ -172,14 +173,14 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
         Direction facing = getControllerFacing();
         Direction blowerDirection = facing.getCounterClockWise();
         BlockPos blowerPos = this.worldPosition
-                .relative(facing)
-                .relative(blowerDirection, 2);
+            .relative(facing)
+            .relative(blowerDirection, 2);
         if (!this.level.isLoaded(blowerPos))
             return false;
 
         BlockState blowerState = this.level.getBlockState(blowerPos);
         return blowerState.is(ModBlocks.HOT_AIR_BLOWER.get())
-                && blowerState.getValue(BlockStateProperties.HORIZONTAL_FACING) == blowerDirection.getOpposite();
+            && blowerState.getValue(BlockStateProperties.HORIZONTAL_FACING) == blowerDirection.getOpposite();
     }
 
     @Override
@@ -207,8 +208,8 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
         this.burnTimeRemaining = Math.max(0, savedBurnTime);
         this.burnTimeTotal = Math.max(this.burnTimeRemaining, input.getIntOr("BurnTimeTotal", 0));
         this.progress = this.currentRecipeId == null || savedBurnTime < 0
-                ? 0
-                : Math.max(0, input.getIntOr("Progress", 0));
+            ? 0
+            : Math.max(0, input.getIntOr("Progress", 0));
     }
 
     @Override
@@ -260,15 +261,15 @@ public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockE
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.UP))
-                .atSides(new BlockPos(0, 2, -1), Direction.UP);
+            .atSides(new BlockPos(0, 2, -1), Direction.UP);
 
         ports.input(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.NORTH))
-                .atSides(new BlockPos(-1, 1, -1), Direction.WEST);
+            .atSides(new BlockPos(-1, 1, -1), Direction.WEST);
 
         ports.output(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.DOWN))
-                .atSides(new BlockPos(-1, -1, -1), Direction.WEST);
+            .atSides(new BlockPos(-1, -1, -1), Direction.WEST);
 
         ports.output(TransferType.FLUID, this::getMoltenOutput)
-                .atSides(new BlockPos(0, -1, 0), Direction.SOUTH);
+            .atSides(new BlockPos(0, -1, 0), Direction.SOUTH);
     }
 }

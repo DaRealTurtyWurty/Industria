@@ -13,22 +13,24 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import dev.turtywurty.multiblocklib.data.MultiblockDefinition;
+import net.minecraft.server.level.ServerLevel;
 
 public final class BlastFurnaceTestWorld {
     private BlastFurnaceTestWorld() {
     }
 
     public static void place(TestWorldContext context) {
-        var definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("blast_furnace"));
+        MultiblockDefinition definition = MultiblockLib.DEFINITION_MANAGER.get(Industria.id("blast_furnace"));
         BlockPos controller = definition.controllerPos();
         BlockPos controllerPos = context.origin().offset(controller);
-        var level = context.overworld();
+        ServerLevel level = context.overworld();
         if (!(level.getBlockEntity(controllerPos) instanceof BlastFurnaceBlockEntity existing && existing.isFormed())) {
             context.constructMultiblockPattern(0, 0, 0, definition);
             MultiblockPlacement.tryForm(level, controllerPos, new ItemStack(ModItems.WRENCH.get()));
         }
 
-        var furnace = context.requireBlockEntity(
+        BlastFurnaceBlockEntity furnace = context.requireBlockEntity(
             controller.getX(), controller.getY(), controller.getZ(), BlastFurnaceBlockEntity.class);
         if (!furnace.isFormed())
             throw new IllegalStateException("Could not form the test-world blast furnace at " + controllerPos);
@@ -48,7 +50,8 @@ public final class BlastFurnaceTestWorld {
         // The slag port is directly below the blower. The barrel opens from the side.
         BlockPos slagBarrel = blowerPos.below();
         if (!level.getBlockState(slagBarrel).is(Blocks.BARREL)) {
-            level.setBlockAndUpdate(slagBarrel, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, blowerSide));
+            level.setBlockAndUpdate(slagBarrel,
+                Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, blowerSide));
         }
 
         Direction front = intoFurnace.getOpposite();

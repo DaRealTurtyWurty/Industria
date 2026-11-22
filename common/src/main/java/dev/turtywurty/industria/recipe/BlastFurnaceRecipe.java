@@ -22,11 +22,11 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 public record BlastFurnaceRecipe(
-        IndustriaIngredient input,
-        IndustriaIngredient flux,
-        FluidStack output,
-        ItemStackTemplate byproduct,
-        int processTime
+    IndustriaIngredient input,
+    IndustriaIngredient flux,
+    FluidStack output,
+    ItemStackTemplate byproduct,
+    int processTime
 ) implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory inventory, Level level) {
@@ -38,10 +38,10 @@ public record BlastFurnaceRecipe(
             return -1;
 
         if (this.input.testForRecipe(inventory.getItem(0))
-                && this.flux.testForRecipe(inventory.getItem(1)))
+            && this.flux.testForRecipe(inventory.getItem(1)))
             return 0;
         else if (this.input.testForRecipe(inventory.getItem(1))
-                && this.flux.testForRecipe(inventory.getItem(0)))
+            && this.flux.testForRecipe(inventory.getItem(0)))
             return 1;
         else
             return -1;
@@ -105,22 +105,20 @@ public record BlastFurnaceRecipe(
     }
 
     private static final MapCodec<BlastFurnaceRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IndustriaIngredient.CODEC.fieldOf("input").forGetter(BlastFurnaceRecipe::input),
-            IndustriaIngredient.CODEC.fieldOf("flux").forGetter(BlastFurnaceRecipe::flux),
-            FluidStack.CODEC.fieldOf("output").forGetter(BlastFurnaceRecipe::output),
-            ItemStackTemplate.CODEC.fieldOf("byproduct").forGetter(BlastFurnaceRecipe::byproduct),
-            Codec.INT.fieldOf("process_time").forGetter(BlastFurnaceRecipe::processTime)
-    ).apply(instance, BlastFurnaceRecipe::new));
+        IndustriaIngredient.CODEC.fieldOf("input").forGetter(BlastFurnaceRecipe::input),
+        IndustriaIngredient.CODEC.fieldOf("flux").forGetter(BlastFurnaceRecipe::flux),
+        FluidStack.CODEC.fieldOf("output").forGetter(BlastFurnaceRecipe::output),
+        ItemStackTemplate.CODEC.fieldOf("byproduct").forGetter(BlastFurnaceRecipe::byproduct),
+        Codec.INT.fieldOf("process_time").forGetter(BlastFurnaceRecipe::processTime))
+        .apply(instance, BlastFurnaceRecipe::new));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, BlastFurnaceRecipe> STREAM_CODEC = StreamCodec.composite(
-            IndustriaIngredient.STREAM_CODEC, BlastFurnaceRecipe::input,
-            IndustriaIngredient.STREAM_CODEC, BlastFurnaceRecipe::flux,
-            FluidStack.STREAM_CODEC, BlastFurnaceRecipe::output,
-            ItemStackTemplate.STREAM_CODEC, BlastFurnaceRecipe::byproduct,
-            ByteBufCodecs.VAR_INT, BlastFurnaceRecipe::processTime,
-            BlastFurnaceRecipe::new
-    );
+        IndustriaIngredient.STREAM_CODEC, BlastFurnaceRecipe::input,
+        IndustriaIngredient.STREAM_CODEC, BlastFurnaceRecipe::flux,
+        FluidStack.STREAM_CODEC, BlastFurnaceRecipe::output,
+        ItemStackTemplate.STREAM_CODEC, BlastFurnaceRecipe::byproduct,
+        ByteBufCodecs.VAR_INT, BlastFurnaceRecipe::processTime,
+        BlastFurnaceRecipe::new);
 
-    public static final RecipeSerializer<BlastFurnaceRecipe> SERIALIZER =
-            new RecipeSerializer<>(CODEC, STREAM_CODEC);
+    public static final RecipeSerializer<BlastFurnaceRecipe> SERIALIZER = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 }

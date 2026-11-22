@@ -37,7 +37,7 @@ public final class ModGasStorageProviders {
             return null;
         }, ModBlocks.GAS_PIPE);
         transfers.registerBlockEntityProvider(GasStorage.KEY, ModBlockEntityTypes.STEAM_BOILER,
-                SteamBoilerBlockEntity::getGasProvider);
+            SteamBoilerBlockEntity::getGasProvider);
     }
 
     private static IndustriaMultiblockControllerBlockEntity resolveMultiblockController(

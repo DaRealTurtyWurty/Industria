@@ -35,7 +35,7 @@ public class ModRecipeBookCategories {
         "wire_drawplate");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> COKE_OVEN = register("coke_oven");
     public static final RegistrationHandle<RecipeBookCategory, RecipeBookCategory> BLAST_FURNACE = register(
-            "blast_furnace");
+        "blast_furnace");
 
     public static RegistrationHandle<RecipeBookCategory, RecipeBookCategory> register(String name) {
         return REGISTRIES.registerRecipeBookCategory(Industria.id(name), RecipeBookCategory::new);

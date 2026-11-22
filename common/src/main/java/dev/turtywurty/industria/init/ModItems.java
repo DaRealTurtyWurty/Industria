@@ -194,10 +194,9 @@ public class ModItems {
 
     // Coke Oven
     public static final RegistrationHandle<Item, Item> COAL_COKE = registerWithSettings("coal_coke",
-            settings -> settings.component(DataComponents.COOKING_FUEL, new CookingFuel(
-                    new ResolvableInt.Constant(3200),
-                    new ResolvableFloat.Constant(1.0F)
-            )));
+        settings -> settings.component(DataComponents.COOKING_FUEL, new CookingFuel(
+            new ResolvableInt.Constant(3200),
+            new ResolvableFloat.Constant(1.0F))));
 
     public static RegistrationHandle<Item, Item> register(String name) {
         return registerItem(name, () -> new Item(new Item.Properties()

@@ -16,24 +16,30 @@ import java.util.Map;
 public class BlastFurnaceBlock extends IndustriaBlock {
     public BlastFurnaceBlock(Properties settings) {
         super(settings.dynamicShape(), new BlockProperties()
-                .hasHorizontalFacing()
-                .hasLitProperty()
-                .hasBlockEntityRenderer()
-                .shapeFactory((state, level, pos, _) ->
-                        level.getBlockEntity(pos) instanceof BlastFurnaceBlockEntity furnace && furnace.isFormed()
-                                ? BlastFurnaceGeometry.SHAPES.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
-                                : Shapes.block())
-                .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.BLAST_FURNACE)
-                        .shouldTick()
-                        .rightClickToOpenGui()
-                        .dropContentsOnBreak()));
+            .hasHorizontalFacing()
+            .hasLitProperty()
+            .hasBlockEntityRenderer()
+            .shapeFactory((state, level, pos, _) -> level.getBlockEntity(pos) instanceof BlastFurnaceBlockEntity furnace
+                && furnace.isFormed()
+                    ? BlastFurnaceGeometry.SHAPES.get(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
+                    : Shapes.block())
+            .blockEntityProperties(new BlockProperties.BlockBlockEntityProperties<>(ModBlockEntityTypes.BLAST_FURNACE)
+                .shouldTick()
+                .rightClickToOpenGui()
+                .dropContentsOnBreak()));
     }
 
     /**
      * Pixel coordinates from the bottom corner of the formed furnace. The grate opens toward +Z.
      */
     public static final class BlastFurnaceGeometry {
-        public enum Material {FIREBRICK, STEEL, CAST_IRON, SOOT, FIREBED}
+        public enum Material {
+            FIREBRICK,
+            STEEL,
+            CAST_IRON,
+            SOOT,
+            FIREBED
+        }
 
         public record Box(Material material, int x, int y, int z, int width, int height, int depth) {
         }
@@ -47,7 +53,7 @@ public class BlastFurnaceBlock extends IndustriaBlock {
         }
 
         private static List<Box> build() {
-            var parts = new ArrayList<Box>();
+            List<Box> parts = new ArrayList<Box>();
             parts.add(new Box(Material.CAST_IRON, 1, 0, 1, 46, 3, 46));
             parts.add(new Box(Material.FIREBRICK, 3, 3, 3, 42, 53, 42));
             for (int x : new int[]{2, 41}) {
@@ -55,11 +61,14 @@ public class BlastFurnaceBlock extends IndustriaBlock {
                     parts.add(new Box(Material.STEEL, x, 3, z, 5, 52, 5));
                 }
             }
+
             for (int y : new int[]{13, 34, 54}) {
                 parts.add(new Box(Material.STEEL, 1, y, 1, 46, 3, 46));
-                for (int x : new int[]{3, 43})
+                for (int x : new int[]{3, 43}) {
                     parts.add(new Box(Material.CAST_IRON, x, y, 47, 2, 2, 1));
+                }
             }
+
             parts.add(new Box(Material.CAST_IRON, 22, 40, 45, 4, 14, 1));
             parts.add(new Box(Material.STEEL, 9, 38, 45, 30, 2, 2));
 
@@ -75,10 +84,14 @@ public class BlastFurnaceBlock extends IndustriaBlock {
             parts.add(new Box(Material.FIREBED, 13, 18, 45, 22, 13, 1));
             parts.add(new Box(Material.CAST_IRON, 10, 16, 45, 28, 3, 3));
             parts.add(new Box(Material.CAST_IRON, 10, 31, 45, 28, 3, 3));
-            for (int x : new int[]{10, 35})
+            for (int x : new int[]{10, 35}) {
                 parts.add(new Box(Material.CAST_IRON, x, 19, 45, 3, 12, 3));
-            for (int x : new int[]{17, 23, 29})
+            }
+
+            for (int x : new int[]{17, 23, 29}) {
                 parts.add(new Box(Material.STEEL, x, 19, 46, 2, 12, 2));
+            }
+
             parts.add(new Box(Material.FIREBED, 20, 4, 45, 8, 6, 1));
             parts.add(new Box(Material.STEEL, 18, 3, 45, 2, 9, 3));
             parts.add(new Box(Material.STEEL, 28, 3, 45, 2, 9, 3));
@@ -93,6 +106,7 @@ public class BlastFurnaceBlock extends IndustriaBlock {
                 parts.add(new Box(Material.STEEL, 0, y + 3, 18, 1, 5, 2));
                 parts.add(new Box(Material.STEEL, 0, y + 3, 28, 1, 5, 2));
             }
+
             return List.copyOf(parts);
         }
 
@@ -102,6 +116,7 @@ public class BlastFurnaceBlock extends IndustriaBlock {
                 int x = box.x - CONTROLLER_X, y = box.y - CONTROLLER_Y, z = box.z - CONTROLLER_Z;
                 shape = Shapes.or(shape, Block.box(x, y, z, x + box.width, y + box.height, z + box.depth));
             }
+
             return shape.optimize();
         }
     }

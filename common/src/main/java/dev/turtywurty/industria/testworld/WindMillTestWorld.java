@@ -25,9 +25,10 @@ public final class WindMillTestWorld {
         context.setBlock(0, 0, 0, ModBlocks.WIND_MILL.get().defaultBlockState()
             .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
         context.configureBlockEntity(0, 0, 0, WindMillBlockEntity.class, mill -> {
-            ItemStack sail = new ItemStack(ModItems.WIND_MILL_SAIL.get());
-            for (int slot = 0; slot < 4; slot++)
+            var sail = new ItemStack(ModItems.WIND_MILL_SAIL.get());
+            for (int slot = 0; slot < 4; slot++) {
                 mill.installSail(sail);
+            }
         });
 
         context.setBlock(0, 0, 1, ModBlocks.SHAFT.get().defaultBlockState()

@@ -10,11 +10,12 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 public class WindMillModel extends Model<WindMillModel.RotorState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Industria.id("wind_mill"), "main");
-    public static final Identifier TEXTURE_LOCATION =
-        Identifier.fromNamespaceAndPath("minecraft", "textures/block/white_wool.png");
+    public static final Identifier TEXTURE_LOCATION = Identifier.fromNamespaceAndPath("minecraft",
+        "textures/block/white_wool.png");
 
     private final ModelPart rotor;
     private final ModelPart[] sails = new ModelPart[4];
@@ -29,7 +30,7 @@ public class WindMillModel extends Model<WindMillModel.RotorState> {
 
     public static LayerDefinition createMainLayer() {
         var mesh = new MeshDefinition();
-        var rotor = mesh.getRoot().addOrReplaceChild("rotor",
+        PartDefinition rotor = mesh.getRoot().addOrReplaceChild("rotor",
             CubeListBuilder.create().texOffs(0, 0).addBox(-4, -4, -8, 8, 8, 16), PartPose.ZERO);
         for (int slot = 0; slot < 4; slot++) {
             rotor.addOrReplaceChild("sail_" + slot,

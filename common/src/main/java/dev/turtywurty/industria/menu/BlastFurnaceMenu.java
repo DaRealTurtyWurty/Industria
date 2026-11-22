@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.SimpleContainer;
 
 public class BlastFurnaceMenu extends IndustriaScreenHandler<BlastFurnaceBlockEntity, BlockPosPayload> {
     private static final int FUEL_SLOT = 2;
@@ -39,7 +40,8 @@ public class BlastFurnaceMenu extends IndustriaScreenHandler<BlastFurnaceBlockEn
                 }
 
                 @Override
-                public void set(int index, int value) {}
+                public void set(int index, int value) {
+                }
 
                 @Override
                 public int getCount() {
@@ -55,9 +57,9 @@ public class BlastFurnaceMenu extends IndustriaScreenHandler<BlastFurnaceBlockEn
 
     @Override
     protected void addBlockEntitySlots(Inventory playerInventory) {
-        var charge = this.wrappedContainerStorage.getInventory(Direction.UP);
-        var fuel = this.wrappedContainerStorage.getInventory(Direction.NORTH);
-        var slag = this.wrappedContainerStorage.getInventory(Direction.DOWN);
+        SimpleContainer charge = this.wrappedContainerStorage.getInventory(Direction.UP);
+        SimpleContainer fuel = this.wrappedContainerStorage.getInventory(Direction.NORTH);
+        SimpleContainer slag = this.wrappedContainerStorage.getInventory(Direction.DOWN);
         addSlot(new Slot(charge, 0, 14, 36));
         addSlot(new Slot(charge, 1, 34, 36));
         addSlot(new PredicateSlot(fuel, 0, 65, 36, stack -> stack.is(ModItems.COAL_COKE.get())));
@@ -79,10 +81,11 @@ public class BlastFurnaceMenu extends IndustriaScreenHandler<BlastFurnaceBlockEn
         if (!moveItemStackTo(stack, isCoke ? FUEL_SLOT : 0, isCoke ? FUEL_SLOT + 1 : FUEL_SLOT, false))
             return ItemStack.EMPTY;
 
-        if (stack.isEmpty())
+        if (stack.isEmpty()) {
             slot.setByPlayer(ItemStack.EMPTY);
-        else
+        } else {
             slot.setChanged();
+        }
 
         return original;
     }

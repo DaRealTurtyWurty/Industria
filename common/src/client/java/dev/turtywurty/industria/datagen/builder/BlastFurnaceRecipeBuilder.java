@@ -16,11 +16,11 @@ public class BlastFurnaceRecipeBuilder {
     private final int processTime;
 
     public BlastFurnaceRecipeBuilder(
-            IndustriaIngredient input,
-            IndustriaIngredient flux,
-            FluidStack output,
-            ItemStackTemplate byproduct,
-            int processTime
+        IndustriaIngredient input,
+        IndustriaIngredient flux,
+        FluidStack output,
+        ItemStackTemplate byproduct,
+        int processTime
     ) {
         this.input = input;
         this.flux = flux;
@@ -31,7 +31,7 @@ public class BlastFurnaceRecipeBuilder {
 
     public void offerTo(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         exporter.accept(recipeKey,
-                new BlastFurnaceRecipe(input, flux, output, byproduct, processTime),
-                null);
+            new BlastFurnaceRecipe(input, flux, output, byproduct, processTime),
+            null);
     }
 }

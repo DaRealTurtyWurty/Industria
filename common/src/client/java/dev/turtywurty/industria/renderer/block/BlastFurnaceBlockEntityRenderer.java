@@ -20,6 +20,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Unit;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.core.Direction;
 
 public class BlastFurnaceBlockEntityRenderer
     extends IndustriaBlockEntityRenderer<BlastFurnaceBlockEntity, IndustriaBlockEntityRenderState> {
@@ -29,18 +32,18 @@ public class BlastFurnaceBlockEntityRenderer
 
     public BlastFurnaceBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
-        var root = context.bakeLayer(LAYER);
+        ModelPart root = context.bakeLayer(LAYER);
         shell = new Model.Simple(root.getChild("shell"), RenderTypes::entitySolid);
         coldBed = new Model.Simple(root.getChild("cold_bed"), RenderTypes::entitySolid);
         hotBed = new Model.Simple(root.getChild("hot_bed"), RenderTypes::entitySolid);
     }
 
     public static LayerDefinition createLayer() {
-        MeshDefinition mesh = new MeshDefinition();
+        var mesh = new MeshDefinition();
         var shell = CubeListBuilder.create();
         var cold = CubeListBuilder.create();
         var hot = CubeListBuilder.create();
-        for (var box : BlastFurnaceGeometry.BOXES) {
+        for (BlastFurnaceGeometry.Box box : BlastFurnaceGeometry.BOXES) {
             switch (box.material()) {
                 case FIREBRICK -> addBox(shell, box, 0);
                 case STEEL -> addBox(shell, box, 128);
@@ -52,6 +55,7 @@ public class BlastFurnaceBlockEntityRenderer
                 }
             }
         }
+
         mesh.getRoot().addOrReplaceChild("shell", shell, PartPose.ZERO);
         mesh.getRoot().addOrReplaceChild("cold_bed", cold, PartPose.ZERO);
         mesh.getRoot().addOrReplaceChild("hot_bed", hot, PartPose.ZERO);
@@ -66,7 +70,7 @@ public class BlastFurnaceBlockEntityRenderer
     protected void setupBlockEntityTransformations(PoseStack poses, IndustriaBlockEntityRenderState state) {
         poses.pushPose();
         if (state.multiblockFormed) {
-            var facing = state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+            Direction facing = state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
             poses.translate(0.5, 0, 0.5);
             poses.rotate(Axis.YP.rotationDegrees(180 - facing.toYRot()));
             poses.translate(-0.5 - BlastFurnaceGeometry.CONTROLLER_X / 16.0,
@@ -75,10 +79,16 @@ public class BlastFurnaceBlockEntityRenderer
     }
 
     @Override
-    protected void onRender(IndustriaBlockEntityRenderState state, PoseStack poses, SubmitNodeCollector queue,
-                            int light, int overlay) {
-        var renderType = shell.renderType(TEXTURE);
-        ModelSubmitUtils.submitModel(queue, shell, Unit.INSTANCE, poses, renderType, light, overlay, 0, state.breakProgress);
+    protected void onRender(
+        IndustriaBlockEntityRenderState state,
+        PoseStack poses,
+        SubmitNodeCollector queue,
+        int light,
+        int overlay
+    ) {
+        RenderType renderType = shell.renderType(TEXTURE);
+        ModelSubmitUtils.submitModel(queue, shell, Unit.INSTANCE, poses, renderType, light, overlay, 0,
+            state.breakProgress);
         boolean lit = state.blockState.getValue(BlockStateProperties.LIT);
         ModelSubmitUtils.submitModel(queue, lit ? hotBed : coldBed, Unit.INSTANCE, poses, renderType,
             lit ? LightCoordsUtil.FULL_BRIGHT : light, overlay, 0, state.breakProgress);

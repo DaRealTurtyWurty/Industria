@@ -47,7 +47,9 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
-public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEntity implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
+public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEntity
+    implements BlockEntityContentsDropper,
+        BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("steam_boiler");
     private static final float MAX_TEMPERATURE = 1000.0f;
     private static final float MIN_TEMPERATURE = 20.0f;
@@ -65,8 +67,11 @@ public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEn
 
     public SteamBoilerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.STEAM_BOILER.get(), ModBlockEntityTypes.STEAM_BOILER.get(), pos, state);
-        this.wrappedInventoryStorage.addInsertOnlyInventory(new PredicateSimpleInventory(this, 1, (stack, _) -> FuelUtils.isFuel(stack)), Direction.SOUTH);
-        this.wrappedFluidStorage.addStorage(new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER), Direction.UP);
+        this.wrappedInventoryStorage.addInsertOnlyInventory(
+            new PredicateSimpleInventory(this, 1, (stack, _) -> FuelUtils.isFuel(stack)), Direction.SOUTH);
+        this.wrappedFluidStorage.addStorage(
+            new InputFluidStorage(this, FluidAmounts.BUCKET * 10, variant -> variant.value() == Fluids.WATER),
+            Direction.UP);
         this.wrappedGasStorage.addStorage(new OutputGasStorage(this, FluidAmounts.BUCKET * 10), Direction.UP);
     }
 
@@ -131,13 +136,14 @@ public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEn
             return;
 
         long maxInsertable = Math.min(
-                Math.min(gasStorage.getCapacity() - gasStorage.getAmount(), fluidStorage.getAmount()),
-                (long) (productionRate * FluidAmounts.MILLIBUCKET));
+            Math.min(gasStorage.getCapacity() - gasStorage.getAmount(), fluidStorage.getAmount()),
+            (long) (productionRate * FluidAmounts.MILLIBUCKET));
 
         if (maxInsertable > 0) {
             try (TransferTransaction transaction = TransferTransaction.openRoot()) {
                 long extracted = fluidStorage.extractInternal(fluidStorage.resource(), maxInsertable, transaction);
-                if (extracted > 0 && gasStorage.insertInternal(GasVariant.of(ModGases.STEAM.holder()), extracted, transaction) == extracted) {
+                if (extracted > 0 && gasStorage.insertInternal(GasVariant.of(ModGases.STEAM.holder()), extracted,
+                    transaction) == extracted) {
                     transaction.commit();
                 }
             }
@@ -210,7 +216,8 @@ public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEn
         this.maxBurnTime = Math.max(input.getFloatOr("MaxBurnTime", 0), 0);
         this.burnTime = Math.clamp(input.getFloatOr("BurnTime", 0), 0, this.maxBurnTime);
         this.temperature = Math.clamp(input.getFloatOr("Temperature", 0), MIN_TEMPERATURE, MAX_TEMPERATURE);
-        this.targetTemperature = Math.clamp(input.getFloatOr("TargetTemperature", DEFAULT_TARGET_TEMPERATURE), MIN_TEMPERATURE, MAX_TEMPERATURE);
+        this.targetTemperature = Math.clamp(input.getFloatOr("TargetTemperature", DEFAULT_TARGET_TEMPERATURE),
+            MIN_TEMPERATURE, MAX_TEMPERATURE);
     }
 
     @Override
@@ -232,11 +239,11 @@ public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEn
     @Override
     protected void definePorts(PortRegistrar ports) {
         ports.input(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.SOUTH))
-                .atSides(new BlockPos(0, 0, -1), Direction.NORTH);
+            .atSides(new BlockPos(0, 0, -1), Direction.NORTH);
         ports.input(TransferType.FLUID, () -> this.wrappedFluidStorage.getStorage(Direction.UP))
-                .atSides(new BlockPos(0, 3, -1), Direction.NORTH);
+            .atSides(new BlockPos(0, 3, -1), Direction.NORTH);
         ports.output(TransferType.GAS, () -> this.wrappedGasStorage.getStorage(Direction.UP))
-                .atSides(new BlockPos(0, 3, 0), Direction.UP);
+            .atSides(new BlockPos(0, 3, 0), Direction.UP);
     }
 
     public ResourceStorage<ResourceVariant<Item>> getInventoryProvider(Direction side) {

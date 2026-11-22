@@ -78,6 +78,7 @@ public record TestWorldContext(MinecraftServer server, ServerLevel overworld, Bl
             for (int slot = 0; slot < supplies.length; slot++) {
                 chest.setItem(slot, supplies[slot]);
             }
+
             chest.setChanged();
         }
     }

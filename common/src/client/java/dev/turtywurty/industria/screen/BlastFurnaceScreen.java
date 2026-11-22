@@ -10,6 +10,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import dev.turtywurty.industria.blockentity.BlastFurnaceBlockEntity;
+import net.minecraft.world.inventory.Slot;
 
 public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu> {
     private static final Identifier BACKGROUND = Identifier.withDefaultNamespace("textures/gui/container/furnace.png");
@@ -24,10 +26,10 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
     private static final Component COKE = Component.translatable("container.industria.blast_furnace.coke");
     private static final Component SLAG = Component.translatable("container.industria.blast_furnace.slag");
     private static final Component MOLTEN = Component.translatable("container.industria.blast_furnace.molten");
-    private static final Component BLOWER_CONNECTED =
-        Component.translatable("container.industria.blast_furnace.blower_connected");
-    private static final Component BLOWER_MISSING =
-        Component.translatable("container.industria.blast_furnace.blower_missing");
+    private static final Component BLOWER_CONNECTED = Component
+        .translatable("container.industria.blast_furnace.blower_connected");
+    private static final Component BLOWER_MISSING = Component
+        .translatable("container.industria.blast_furnace.blower_missing");
 
     public BlastFurnaceScreen(BlastFurnaceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -38,7 +40,7 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         super.init();
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
-        var furnace = this.menu.getBlockEntity();
+        BlastFurnaceBlockEntity furnace = this.menu.getBlockEntity();
         addRenderableOnly(new FluidWidget.Builder(furnace.getMoltenOutput())
             .bounds(this.leftPos + TANK_X, this.topPos + TANK_Y, TANK_WIDTH, TANK_HEIGHT)
             .posSupplier(furnace::getBlockPos)
@@ -48,10 +50,11 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         super.extractBackground(graphics, mouseX, mouseY, delta);
-        ScreenUtils.drawTexture(graphics, BACKGROUND, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        ScreenUtils.drawTexture(graphics, BACKGROUND, this.leftPos, this.topPos, 0, 0, this.imageWidth,
+            this.imageHeight);
         graphics.fill(this.leftPos + 7, this.topPos + 16, this.leftPos + 169, this.topPos + 72, 0xFFC6C6C6);
         for (int i = 0; i < 4; i++) {
-            var slot = this.menu.getSlot(i);
+            Slot slot = this.menu.getSlot(i);
             ScreenUtils.drawTexture(graphics, BACKGROUND,
                 this.leftPos + slot.x - 1, this.topPos + slot.y - 1, 55, 16, 18, 18);
         }
@@ -65,16 +68,18 @@ public class BlastFurnaceScreen extends AbstractContainerScreen<BlastFurnaceMenu
         int arrowY = this.topPos + 36;
         ScreenUtils.drawTexture(graphics, BACKGROUND, arrowX, arrowY, 79, 34, 24, 16);
         int progress = Mth.ceil(this.menu.getBatchProgress() * 24);
-        if (progress > 0)
+        if (progress > 0) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PROGRESS, 24, 16, 0, 0,
                 arrowX, arrowY, progress, 16);
+        }
 
         int fuelX = this.leftPos + this.menu.getSlot(2).x;
         int fuelY = this.topPos + 55;
         graphics.fill(fuelX, fuelY, fuelX + 16, fuelY + 3, 0xFF656565);
         int fuel = Mth.ceil(this.menu.getBurnProgress() * 16);
-        if (fuel > 0)
+        if (fuel > 0) {
             graphics.fill(fuelX, fuelY, fuelX + fuel, fuelY + 3, 0xFFE6882F);
+        }
     }
 
     @Override

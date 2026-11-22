@@ -32,5 +32,6 @@ public interface BlockEntityWithGui<T extends CustomPacketPayload>
     }
 
     @Override
-    @Nullable AbstractContainerMenu createMenu(int syncId, Inventory inventory, Player player);
+    @Nullable
+    AbstractContainerMenu createMenu(int syncId, Inventory inventory, Player player);
 }

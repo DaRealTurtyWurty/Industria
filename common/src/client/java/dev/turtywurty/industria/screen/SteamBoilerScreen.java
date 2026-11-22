@@ -17,6 +17,9 @@ import net.minecraft.world.entity.player.Inventory;
 
 import java.util.List;
 import java.util.Locale;
+import dev.turtywurty.gasapi.api.Gas;
+import dev.turtywurty.industria.blockentity.SteamBoilerBlockEntity;
+import net.minecraft.world.inventory.Slot;
 
 public class SteamBoilerScreen extends AbstractContainerScreen<SteamBoilerMenu> {
     private static final String TRANSLATION_PREFIX = "container." + Industria.MOD_ID + ".steam_boiler.";
@@ -50,11 +53,12 @@ public class SteamBoilerScreen extends AbstractContainerScreen<SteamBoilerMenu> 
         super.init();
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
-        var steam = ModGases.STEAM.get();
-        if (GasRenderHandlerRegistry.get(steam) == null)
+        Gas steam = ModGases.STEAM.get();
+        if (GasRenderHandlerRegistry.get(steam) == null) {
             GasRenderHandlerRegistry.register(steam, new SimpleGasRenderHandler(0xFFD7E4EA));
+        }
 
-        var boiler = this.menu.getBlockEntity();
+        SteamBoilerBlockEntity boiler = this.menu.getBlockEntity();
         addRenderableOnly(new FluidWidget.Builder(boiler.getWaterStorage())
             .bounds(this.leftPos + WATER_X, this.topPos + TANK_Y, TANK_WIDTH, TANK_HEIGHT)
             .posSupplier(boiler::getBlockPos)
@@ -68,18 +72,20 @@ public class SteamBoilerScreen extends AbstractContainerScreen<SteamBoilerMenu> 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         super.extractBackground(graphics, mouseX, mouseY, delta);
-        ScreenUtils.drawTexture(graphics, BACKGROUND, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        ScreenUtils.drawTexture(graphics, BACKGROUND, this.leftPos, this.topPos, 0, 0, this.imageWidth,
+            this.imageHeight);
         graphics.fill(this.leftPos + 7, this.topPos + 16, this.leftPos + 169, this.topPos + 75, 0xFFC6C6C6);
 
-        var fuelSlot = this.menu.getSlot(0);
+        Slot fuelSlot = this.menu.getSlot(0);
         int fuelX = this.leftPos + fuelSlot.x;
         int fuelY = this.topPos + fuelSlot.y;
         ScreenUtils.drawTexture(graphics, BACKGROUND, fuelX - 1, fuelY - 1, 55, 16, 18, 18);
         int burnY = fuelY + 19;
         graphics.fill(fuelX, burnY, fuelX + 16, burnY + 3, 0xFF626262);
         int burnWidth = Mth.ceil(this.menu.getBurnProgress() * 16);
-        if (burnWidth > 0)
+        if (burnWidth > 0) {
             graphics.fill(fuelX, burnY, fuelX + burnWidth, burnY + 3, 0xFFE6882F);
+        }
 
         drawTankBackground(graphics, WATER_X);
         drawTankBackground(graphics, STEAM_X);
@@ -121,7 +127,14 @@ public class SteamBoilerScreen extends AbstractContainerScreen<SteamBoilerMenu> 
         graphics.text(this.font, text, centerX - this.font.width(text) / 2, y, 0xFF404040, false);
     }
 
-    private void drawTankTooltip(GuiGraphicsExtractor graphics, Component tank, int amount, int capacity, int mouseX, int mouseY) {
+    private void drawTankTooltip(
+        GuiGraphicsExtractor graphics,
+        Component tank,
+        int amount,
+        int capacity,
+        int mouseX,
+        int mouseY
+    ) {
         Component contents = Component.translatable(TANK_CONTENTS_KEY, amount, capacity);
         graphics.setComponentTooltipForNextFrame(this.font, List.of(tank, contents), mouseX, mouseY);
     }

@@ -10,19 +10,19 @@ import org.jetbrains.annotations.Nullable;
 public class HotAirBlowerBlock extends IndustriaBlock {
     public HotAirBlowerBlock(Properties settings) {
         super(settings, new BlockProperties()
-                .hasHorizontalFacing());
+            .hasHorizontalFacing());
     }
 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
         BlockState state = super.getStateForPlacement(ctx);
-        if(state == null)
+        if (state == null)
             return null;
 
         Direction clickedFace = ctx.getClickedFace();
         Direction airOutput = clickedFace.getAxis().isHorizontal()
-                ? clickedFace.getOpposite()
-                : ctx.getHorizontalDirection().getOpposite();
+            ? clickedFace.getOpposite()
+            : ctx.getHorizontalDirection().getOpposite();
 
         return state.setValue(BlockStateProperties.HORIZONTAL_FACING, airOutput);
     }
