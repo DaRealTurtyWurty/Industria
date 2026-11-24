@@ -1,11 +1,15 @@
 package dev.turtywurty.industria.datagen;
 
+import dev.turtywurty.gasapi.api.Gas;
+import dev.turtywurty.gasapi.api.GasVariant;
+import dev.turtywurty.gasapi.api.GasVariantAttributes;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.blockentity.*;
 import dev.turtywurty.industria.conveyor.block.impl.entity.ContainmentConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.DetectorConveyorBlockEntity;
 import dev.turtywurty.industria.conveyor.block.impl.entity.FilterConveyorBlockEntity;
 import dev.turtywurty.industria.init.*;
+import dev.turtywurty.industria.init.list.TagList;
 import dev.turtywurty.industria.item.SeismicScannerItem;
 import dev.turtywurty.industria.molding.MoldGrid;
 import dev.turtywurty.industria.molding.MoldPatterns;
@@ -27,11 +31,14 @@ public final class IndustriaEnglishLanguage {
 
     public static void generate(LanguageGenerationContext translationBuilder) {
         addText(translationBuilder, ModCreativeModeTabs.MAIN_TITLE, "Industria");
+        addText(translationBuilder, ModKeyBindings.CATEGORY.label(), "Industria");
+        translationBuilder.add("key.industria.toggle_debug_rendering", "Toggle Debug Rendering");
         ModFluids.getMoltenFluids().forEach((name, fluid) -> {
             String metal = name.substring("molten_".length());
-            String displayName = Character.toUpperCase(metal.charAt(0)) + metal.substring(1);
-            translationBuilder.add(fluid.block().get(), "Molten " + displayName);
-            translationBuilder.add(fluid.bucket().get(), "Bucket of Molten " + displayName);
+            String displayName = "Molten " + Character.toUpperCase(metal.charAt(0)) + metal.substring(1);
+            translationBuilder.add(fluid.block().get(), displayName);
+            translationBuilder.add(fluid.bucket().get(), "Bucket of " + displayName);
+            translationBuilder.add(TagList.Fluids.of(name), displayName);
         });
 
         translationBuilder.add(ModBlocks.ALLOY_FURNACE.get(), "Alloy Furnace");
@@ -71,6 +78,7 @@ public final class IndustriaEnglishLanguage {
 
         translationBuilder.add(ModBlocks.OIL_PUMP_JACK.get(), "Oil Pump Jack");
         addText(translationBuilder, OilPumpJackBlockEntity.TITLE, "Oil Pump Jack");
+        translationBuilder.add(ModBlocks.WELLHEAD.get(), "Wellhead");
 
         translationBuilder.add(ModItems.SEISMIC_SCANNER.get(), "Seismic Scanner");
         addText(translationBuilder, SeismicScannerItem.TITLE, "Seismic Scanner");
@@ -83,10 +91,12 @@ public final class IndustriaEnglishLanguage {
         addTextEnum(translationBuilder, DrillBlockEntity.OverflowMethod.PAUSE, "Pause");
         translationBuilder.add(ModItems.BLOCK_BUILDER_DRILL_HEAD.get(), "Block Builder Drill Head");
         translationBuilder.add(ModBlocks.DRILL_TUBE.get(), "Drill Tube");
-        addDamageType(translationBuilder, ModDamageTypes.DRILL, "%1$s was drilled to death");
+        addDamageType(translationBuilder, ModDamageTypes.DRILL, "%1$s was drilled to death",
+            "%1$s was drilled to death while fighting %2$s", "%1$s was drilled to death by %2$s using %3$s");
 
         translationBuilder.add(ModBlocks.MOTOR.get(), "Motor");
         addText(translationBuilder, MotorBlockEntity.TITLE, "Motor");
+        translationBuilder.add(ModItems.ELECTRIC_MOTOR.get(), "Electric Motor");
 
         translationBuilder.add(ModBlocks.UPGRADE_STATION.get(), "Upgrade Station");
         addText(translationBuilder, UpgradeStationBlockEntity.TITLE, "Upgrade Station");
@@ -166,6 +176,8 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModBlocks.COUNT_CONVEYOR.get(), "Count Conveyor");
         translationBuilder.add(ModBlocks.DELAY_CONVEYOR.get(), "Delay Conveyor");
         translationBuilder.add(ModBlocks.CONTAINMENT_CONVEYOR.get(), "Containment Conveyor");
+        translationBuilder.add(ModItems.EMPTY_MOB_JAR.get(), "Empty Mob Jar");
+        translationBuilder.add(ModItems.FILLED_MOB_JAR.get(), "Filled Mob Jar");
         addText(translationBuilder, ContainmentConveyorBlockEntity.TITLE, "Containment Conveyor");
         addText(translationBuilder, Component.translatable("container.industria.containment_conveyor.status.capturing"),
             "Capturing");
@@ -180,7 +192,14 @@ public final class IndustriaEnglishLanguage {
 
         translationBuilder.add(ModFluids.CRUDE_OIL.block().get(), "Crude Oil");
         translationBuilder.add(ModFluids.CRUDE_OIL.bucket().get(), "Bucket of Crude Oil");
+        translationBuilder.add(ModFluids.CRUDE_OIL.still().id().toLanguageKey(), "Crude Oil");
         addSlurry(translationBuilder, ModSlurries.CLAY_SLURRY, "Clay Slurry");
+        addGas(translationBuilder, ModGases.OXYGEN, "Oxygen");
+        addGas(translationBuilder, ModGases.HYDROGEN, "Hydrogen");
+        addGas(translationBuilder, ModGases.CARBON_DIOXIDE, "Carbon Dioxide");
+        addGas(translationBuilder, ModGases.METHANE, "Methane");
+        addGas(translationBuilder, ModGases.CARBON_MONOXIDE, "Carbon Monoxide");
+        addGas(translationBuilder, ModGases.STEAM, "Steam");
 
         // Aluminium
         translationBuilder.add(ModItems.BAUXITE.get(), "Bauxite");
@@ -306,6 +325,26 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(ModItems.COAGULATED_LATEX.get(), "Coagulated Latex");
         translationBuilder.add(ModItems.RAW_RUBBER.get(), "Raw Rubber");
         translationBuilder.add(ModItems.RUBBER.get(), "Rubber");
+        var rubber = ModWoodSets.RUBBER;
+        translationBuilder.add(rubber.log().item().get(), "Rubber Log");
+        translationBuilder.add(rubber.wood().item().get(), "Rubber Wood");
+        translationBuilder.add(rubber.strippedLog().item().get(), "Stripped Rubber Log");
+        translationBuilder.add(rubber.strippedWood().item().get(), "Stripped Rubber Wood");
+        translationBuilder.add(rubber.planks().item().get(), "Rubber Planks");
+        translationBuilder.add(rubber.leaves().item().get(), "Rubber Leaves");
+        translationBuilder.add(rubber.sapling().item().get(), "Rubber Sapling");
+        translationBuilder.add(rubber.stairs().item().get(), "Rubber Stairs");
+        translationBuilder.add(rubber.slab().item().get(), "Rubber Slab");
+        translationBuilder.add(rubber.fence().item().get(), "Rubber Fence");
+        translationBuilder.add(rubber.fenceGate().item().get(), "Rubber Fence Gate");
+        translationBuilder.add(rubber.door().item().get(), "Rubber Door");
+        translationBuilder.add(rubber.trapdoor().item().get(), "Rubber Trapdoor");
+        translationBuilder.add(rubber.pressurePlate().item().get(), "Rubber Pressure Plate");
+        translationBuilder.add(rubber.button().item().get(), "Rubber Button");
+        translationBuilder.add(rubber.sign().get(), "Rubber Sign");
+        translationBuilder.add(rubber.wallSign().get(), "Rubber Wall Sign");
+        translationBuilder.add(rubber.hangingSign().get(), "Rubber Hanging Sign");
+        translationBuilder.add(rubber.wallHangingSign().get(), "Rubber Wall Hanging Sign");
 
         // Sulfur
         translationBuilder.add(ModItems.PYRITE.get(), "Pyrite");
@@ -325,6 +364,9 @@ public final class IndustriaEnglishLanguage {
         // Steel
         translationBuilder.add(ModItems.STEEL_INGOT.get(), "Steel Ingot");
         translationBuilder.add(ModItems.STEEL_NUGGET.get(), "Steel Nugget");
+        translationBuilder.add(ModItems.STEEL_PLATE.get(), "Steel Plate");
+        translationBuilder.add(ModItems.STEEL_ROD.get(), "Steel Rod");
+        translationBuilder.add(ModItems.STEEL_MACHINE_FRAME.get(), "Steel Machine Frame");
         translationBuilder.add(ModItems.STEEL_BALL_BEARING.get(), "Steel Ball Bearing");
         translationBuilder.add(ModBlocks.STEEL_BLOCK.get(), "Block of Steel");
 
@@ -418,6 +460,9 @@ public final class IndustriaEnglishLanguage {
         addText(translationBuilder, MoldGrid.TITLE, "Molds");
         addText(translationBuilder, MoldPatterns.INGOT.getDisplayName(), "Ingot");
         addText(translationBuilder, MoldPatterns.ROD.getDisplayName(), "Rod");
+        addText(translationBuilder, MoldPatterns.BALL_BEARING.getDisplayName(), "Ball Bearing");
+        addText(translationBuilder, MoldPatterns.GEAR.getDisplayName(), "Gear");
+        addText(translationBuilder, MoldPatterns.PLATE.getDisplayName(), "Plate");
 
         translationBuilder.add(ModBlocks.WATER_WHEEL.get(), "Water Wheel");
         translationBuilder.add(ModBlocks.KINETIC_DYNAMO.get(), "Kinetic Dynamo");
@@ -457,6 +502,22 @@ public final class IndustriaEnglishLanguage {
         translationBuilder.add(SteamBoilerScreen.TARGET_TEMPERATURE_KEY, "Target %s°C");
         translationBuilder.add(SteamBoilerScreen.TEMPERATURE_KEY, "Temp %s°C");
         translationBuilder.add(SteamBoilerScreen.WATER_KEY, "Water");
+
+        // Tags
+        translationBuilder.add(TagList.Blocks.BATTERY_BLOCKS, "Battery Blocks");
+        translationBuilder.add(TagList.Blocks.CONVEYORS, "Conveyors");
+        translationBuilder.add(rubber.logsBlockTag(), "Rubber Logs");
+        translationBuilder.add(rubber.logsItemTag(), "Rubber Logs");
+        translationBuilder.add(TagList.Items.ELECTROLYSIS_RODS, "Electrolysis Rods");
+        translationBuilder.add(TagList.Items.BLANK_MOLDS, "Blank Molds");
+        translationBuilder.add(TagList.Items.CRUSHABLE_STONE, "Crushable Stone");
+        translationBuilder.add(TagList.Fluids.CRUDE_OIL, "Crude Oil");
+        translationBuilder.add(TagList.Fluids.DIRTY_SODIUM_ALUMINATE, "Dirty Sodium Aluminate");
+        translationBuilder.add(TagList.Fluids.SODIUM_ALUMINATE, "Sodium Aluminate");
+        translationBuilder.add(TagList.Fluids.LATEX, "Latex");
+        translationBuilder.add(TagList.Fluids.METHANOL, "Methanol");
+        translationBuilder.add(TagList.Fluids.FORMIC_ACID, "Formic Acid");
+        translationBuilder.add(TagList.Fluids.DILUTED_FORMIC_ACID, "Diluted Formic Acid");
     }
 
     private static void addText(LanguageGenerationContext translationBuilder, Component text, String value) {
@@ -474,9 +535,22 @@ public final class IndustriaEnglishLanguage {
     private static void addDamageType(
         LanguageGenerationContext translationBuilder,
         ResourceKey<DamageType> key,
+        String value,
+        String player,
+        String item
+    ) {
+        String baseKey = key.identifier().toLanguageKey("death.attack");
+        translationBuilder.add(baseKey, value);
+        translationBuilder.add(baseKey + ".player", player);
+        translationBuilder.add(baseKey + ".item", item);
+    }
+
+    private static void addGas(
+        LanguageGenerationContext translationBuilder,
+        RegistrationHandle<Gas, Gas> gas,
         String value
     ) {
-        translationBuilder.add("death.attack." + key.identifier().toLanguageKey(), value);
+        addText(translationBuilder, GasVariantAttributes.getName(GasVariant.of(gas.holder())), value);
     }
 
     private static void addSlurry(

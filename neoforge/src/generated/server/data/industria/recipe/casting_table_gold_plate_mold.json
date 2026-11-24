@@ -12,7 +12,8 @@
     "pattern": "industria:plate",
     "template": [
       "industria:aluminium_plate",
-      "industria:titanium_plate"
+      "industria:titanium_plate",
+      "industria:steel_plate"
     ]
   },
   "output": {

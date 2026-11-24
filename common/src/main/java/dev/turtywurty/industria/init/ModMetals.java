@@ -126,6 +126,8 @@ public final class ModMetals {
         Map.of(
             MetalForm.INGOT, ModItems.STEEL_INGOT,
             MetalForm.NUGGET, ModItems.STEEL_NUGGET,
+            MetalForm.PLATE, ModItems.STEEL_PLATE,
+            MetalForm.ROD, ModItems.STEEL_ROD,
             MetalForm.BALL_BEARING, ModItems.STEEL_BALL_BEARING,
             MetalForm.MACHINE_FRAME, ModItems.STEEL_MACHINE_FRAME));
 

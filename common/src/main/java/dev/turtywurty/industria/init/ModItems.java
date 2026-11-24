@@ -134,6 +134,8 @@ public class ModItems {
     // Steel
     public static final RegistrationHandle<Item, Item> STEEL_INGOT = register("steel_ingot");
     public static final RegistrationHandle<Item, Item> STEEL_NUGGET = register("steel_nugget");
+    public static final RegistrationHandle<Item, Item> STEEL_PLATE = register("steel_plate");
+    public static final RegistrationHandle<Item, Item> STEEL_ROD = register("steel_rod");
     public static final RegistrationHandle<Item, Item> STEEL_MACHINE_FRAME = register("steel_machine_frame");
     public static final RegistrationHandle<Item, Item> STEEL_BALL_BEARING = register("steel_ball_bearing");
 

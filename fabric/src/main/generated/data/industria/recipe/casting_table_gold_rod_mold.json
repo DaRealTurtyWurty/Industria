@@ -12,6 +12,7 @@
     "pattern": "industria:rod",
     "template": [
       "industria:silicon_rod",
+      "industria:steel_rod",
       "industria:iron_rod",
       "industria:copper_rod"
     ]
