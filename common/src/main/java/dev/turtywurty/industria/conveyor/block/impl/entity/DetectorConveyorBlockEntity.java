@@ -33,11 +33,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-public class DetectorConveyorBlockEntity extends IndustriaBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        WrappedContainerStorageHolder,
-        ConveyorFilterAccess,
-        TickableBlockEntity {
+public class DetectorConveyorBlockEntity extends IndustriaBlockEntity implements BlockEntityWithGui<BlockPosPayload>,
+    WrappedContainerStorageHolder, ConveyorFilterAccess, TickableBlockEntity {
     public static final Component TITLE = Industria.containerTitle("detector_conveyor");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

@@ -48,8 +48,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 
 public class SteamBoilerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("steam_boiler");
     private static final float MAX_TEMPERATURE = 1000.0f;
     private static final float MIN_TEMPERATURE = 20.0f;

@@ -36,8 +36,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 public class FuelboxBlockEntity extends DoorContainerBlockEntity
-    implements BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("fuelbox");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

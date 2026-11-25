@@ -96,8 +96,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert
 //                        .build());
 //    }
 public class MixerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("mixer");
 
     public final List<Vec3> mixingItemPositions = NonNullList.withSize(6, new Vec3(0, 1, 0));

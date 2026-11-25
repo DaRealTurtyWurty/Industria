@@ -50,11 +50,8 @@ import java.util.List;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insertEnergy;
 
-public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        BlockEntityWithGui<BlockPosPayload>,
-        EnergySpreader,
-        BlockEntityContentsDropper {
+public class ThermalGeneratorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity,
+    BlockEntityWithGui<BlockPosPayload>, EnergySpreader, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("thermal_generator");
 
     private static final int CONSUME_RATE = 500;

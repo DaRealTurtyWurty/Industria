@@ -24,9 +24,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class MoldingTableBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<MoldingTableBlockEntity, MoldingTableBlockEntityRenderer.MoldingTableRenderState> {
+public class MoldingTableBlockEntityRenderer extends
+    IndustriaBlockEntityRenderer<MoldingTableBlockEntity, MoldingTableBlockEntityRenderer.MoldingTableRenderState> {
     private static final float CAST_SIZE = 14f / 16f;
     private static final float CAST_TOP = 15f / 16f + CAST_SIZE * MoldWorldMesh.THICKNESS + 0.001f;
     private final Map<MoldingTableBlockEntity, CachedMesh> meshes = new WeakHashMap<>();

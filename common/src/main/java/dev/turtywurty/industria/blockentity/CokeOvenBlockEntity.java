@@ -53,8 +53,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("coke_oven");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedInventoryStorage = new WrappedContainerStorage<>();

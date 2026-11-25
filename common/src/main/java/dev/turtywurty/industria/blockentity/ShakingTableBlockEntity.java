@@ -74,8 +74,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
 public class ShakingTableBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("shaking_table");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

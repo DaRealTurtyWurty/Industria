@@ -46,8 +46,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class BlastFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("blast_furnace");
 
     private final WrappedContainerStorage<SyncingSimpleInventory> wrappedInventoryStorage = new WrappedContainerStorage<>();

@@ -59,8 +59,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
 public class DrillBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("drill");
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();
     private final WrappedEnergyStorage wrappedEnergyStorage = new WrappedEnergyStorage();

@@ -64,8 +64,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.insert;
 
 public class ElectrolyzerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("electrolyzer");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

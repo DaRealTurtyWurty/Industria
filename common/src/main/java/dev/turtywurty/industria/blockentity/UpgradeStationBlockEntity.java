@@ -49,8 +49,7 @@ import java.util.*;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
 public class UpgradeStationBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<UpgradeStationOpenPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<UpgradeStationOpenPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("upgrade_station");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

@@ -53,9 +53,7 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
 public class CrusherBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crusher");
     public static final int INPUT_SLOT = 0, OUTPUT_SLOT = 1;
     private static final AABB PICKUP_AREA = new AABB(0, 0, 0, 1, 0.7, 1);

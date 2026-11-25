@@ -48,11 +48,8 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        WrappedContainerStorageHolder,
-        BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+public class ContainmentConveyorBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity,
+    WrappedContainerStorageHolder, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("containment_conveyor");
 
     private final AABB bounds;

@@ -30,8 +30,7 @@ public record CrusherRecipe(
     OutputItemStack outputA,
     OutputItemStack outputB,
     int processTime
-)
-    implements Recipe<RecipeSimpleInventory> {
+) implements Recipe<RecipeSimpleInventory> {
     @Override
     public boolean matches(RecipeSimpleInventory input, Level world) {
         return this.input.testForRecipe(input.getItem(0));
@@ -125,8 +124,7 @@ public record CrusherRecipe(
         SlotDisplay output,
         SlotDisplay craftingStation,
         int processTime
-    )
-        implements RecipeDisplay {
+    ) implements RecipeDisplay {
         public static final MapCodec<CrusherRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(CrusherRecipeDisplay::input),

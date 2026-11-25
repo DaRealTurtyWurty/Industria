@@ -29,8 +29,7 @@ public record ClarifierRecipe(
     FluidStack outputFluidStack,
     OutputItemStack outputItemStack,
     int processTime
-)
-    implements Recipe<ClarifierRecipeInput> {
+) implements Recipe<ClarifierRecipeInput> {
     @Override
     public boolean matches(ClarifierRecipeInput input, Level world) {
         return input.fluidStack().matches(inputFluid);

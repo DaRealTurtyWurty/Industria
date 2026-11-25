@@ -57,8 +57,7 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("DataFlowIssue")
 public class SmelteryControllerBlockEntity extends IndustriaBlockEntity
-    implements TickableBlockEntity,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements TickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("smeltery_controller");
 
     private static final float AMBIENT_TEMPERATURE = 20.0F;

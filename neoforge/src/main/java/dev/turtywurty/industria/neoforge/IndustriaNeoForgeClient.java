@@ -37,8 +37,8 @@ public final class IndustriaNeoForgeClient {
         modBus.addListener(FMLClientSetupEvent.class,
             event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
 
-        modBus.addListener(RegisterParticleProvidersEvent.class, event ->
-            event.registerSpriteSet(ModParticleTypes.COKE_OVEN_SMOKE.get(), CokeOvenSmokeProvider::new));
+        modBus.addListener(RegisterParticleProvidersEvent.class,
+            event -> event.registerSpriteSet(ModParticleTypes.COKE_OVEN_SMOKE.get(), CokeOvenSmokeProvider::new));
         modBus.addListener(RegisterPictureInPictureRenderersEvent.class, this::registerPictureInPictureRenderers);
 
         modBus.addListener(ModelEvent.RegisterLoaders.class, this::registerModelLoaders);

@@ -47,11 +47,8 @@ import java.util.List;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
-public class BatteryBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        EnergySpreader,
-        BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+public class BatteryBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity, EnergySpreader,
+    BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("battery");
     public static final Component CHARGE_MODE_BUTTON_TOOLTIP_TEXT = Component
         .translatable("gui." + Industria.MOD_ID + ".battery.charge_mode_button.tooltip");

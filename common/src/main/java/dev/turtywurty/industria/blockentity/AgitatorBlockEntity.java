@@ -69,8 +69,7 @@ import java.util.Optional;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.*;
 
 public class AgitatorBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("agitator");
 
     private static final int INPUT_PORT_COUNT = 3;

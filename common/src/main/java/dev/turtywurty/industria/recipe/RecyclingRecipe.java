@@ -120,8 +120,7 @@ public record RecyclingRecipe(IndustriaIngredient input, List<OutputItemStack> o
         SlotDisplay output,
         SlotDisplay craftingStation,
         int processTime
-    )
-        implements RecipeDisplay {
+    ) implements RecipeDisplay {
         public static final MapCodec<RecyclingRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlotDisplay.CODEC.fieldOf("input").forGetter(RecyclingRecipeDisplay::input),

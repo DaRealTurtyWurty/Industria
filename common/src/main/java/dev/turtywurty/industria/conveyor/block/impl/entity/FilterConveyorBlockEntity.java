@@ -32,9 +32,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 
 public class FilterConveyorBlockEntity extends IndustriaBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        WrappedContainerStorageHolder,
-        ConveyorFilterAccess {
+    implements BlockEntityWithGui<BlockPosPayload>, WrappedContainerStorageHolder, ConveyorFilterAccess {
     public static final Component TITLE = Industria.containerTitle("filter_conveyor");
 
     // This is purely to make the screen handler happy :)

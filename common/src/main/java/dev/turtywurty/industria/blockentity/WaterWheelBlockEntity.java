@@ -19,8 +19,7 @@ import java.util.List;
 import net.minecraft.world.level.material.FluidState;
 
 public class WaterWheelBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        MechanicalSource {
+    implements SyncableTickableBlockEntity, MechanicalSource {
     private static final double MAX_RPM = 20.0;
     private static final double MAX_TORQUE = 16.0;
     private static final double DRY_DRAG = 0.04;

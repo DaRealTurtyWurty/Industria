@@ -50,11 +50,8 @@ import java.util.Optional;
 
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.extract;
 
-public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        BlockEntityWithGui<BlockPosPayload>,
-        RecipeExperienceBlockEntity,
-        BlockEntityContentsDropper {
+public class ElectricFurnaceBlockEntity extends IndustriaBlockEntity implements SyncableTickableBlockEntity,
+    BlockEntityWithGui<BlockPosPayload>, RecipeExperienceBlockEntity, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("electric_furnace");
 
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

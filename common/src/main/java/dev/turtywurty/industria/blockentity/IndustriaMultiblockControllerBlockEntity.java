@@ -30,8 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public abstract class IndustriaMultiblockControllerBlockEntity extends MultiblockControllerBlockEntity
-    implements SyncableTickableBlockEntity,
-        UpdateableBlockEntityLike {
+    implements SyncableTickableBlockEntity, UpdateableBlockEntityLike {
     public static final Codec<ResourceKey<Recipe<?>>> RECIPE_CODEC = ResourceKey.codec(Registries.RECIPE);
 
     protected final IndustriaBlock blockRef;

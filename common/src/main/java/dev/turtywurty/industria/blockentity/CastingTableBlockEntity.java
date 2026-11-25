@@ -59,11 +59,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class CastingTableBlockEntity extends IndustriaBlockEntity
-    implements BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload>,
-        SyncableTickableBlockEntity,
-        TappingOutletBlockEntity.TappingOutletReceiver {
+public class CastingTableBlockEntity extends IndustriaBlockEntity implements BlockEntityContentsDropper,
+    BlockEntityWithGui<BlockPosPayload>, SyncableTickableBlockEntity, TappingOutletBlockEntity.TappingOutletReceiver {
     public static final Component TITLE = Industria.containerTitle("casting_table");
 
     private final WrappedContainerStorage<SyncingSimpleInventory> wrappedContainerStorage = new WrappedContainerStorage<>();

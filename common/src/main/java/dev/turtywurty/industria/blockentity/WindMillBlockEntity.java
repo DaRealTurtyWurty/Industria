@@ -29,9 +29,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import java.util.List;
 
 public class WindMillBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        MechanicalSource,
-        BlockEntityContentsDropper {
+    implements SyncableTickableBlockEntity, MechanicalSource, BlockEntityContentsDropper {
     private static final int SAIL_LENGTH = 3;
     private static final int SAIL_COUNT = 4;
     private static final double MAX_RPM = 20.0;

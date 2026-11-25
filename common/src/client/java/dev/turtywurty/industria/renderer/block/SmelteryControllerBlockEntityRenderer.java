@@ -23,9 +23,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class SmelteryControllerBlockEntityRenderer
-    implements
-        BlockEntityRenderer<SmelteryControllerBlockEntity, SmelteryControllerBlockEntityRenderer.SmelteryRenderState> {
+public class SmelteryControllerBlockEntityRenderer implements
+    BlockEntityRenderer<SmelteryControllerBlockEntity, SmelteryControllerBlockEntityRenderer.SmelteryRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderingComponent = new InWorldFluidRenderingComponent();
 
     public SmelteryControllerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

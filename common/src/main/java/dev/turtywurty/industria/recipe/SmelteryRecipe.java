@@ -29,8 +29,7 @@ public record SmelteryRecipe(
     int preferredTemperature,
     float maxSpeedMultiplier,
     int processTime
-)
-    implements Recipe<SingleItemStackRecipeInput> {
+) implements Recipe<SingleItemStackRecipeInput> {
     @Override
     public boolean matches(SingleItemStackRecipeInput input, Level world) {
         return this.input.testForRecipe(input.stack());

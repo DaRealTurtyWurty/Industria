@@ -44,9 +44,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 public class CastingBasinBlockEntity extends IndustriaBlockEntity
-    implements BlockEntityContentsDropper,
-        SyncableTickableBlockEntity,
-        TappingOutletBlockEntity.TappingOutletReceiver {
+    implements BlockEntityContentsDropper, SyncableTickableBlockEntity, TappingOutletBlockEntity.TappingOutletReceiver {
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();
     private final WrappedContainerStorage<SyncingSimpleInventory> wrappedContainerStorage = new WrappedContainerStorage<>();
 

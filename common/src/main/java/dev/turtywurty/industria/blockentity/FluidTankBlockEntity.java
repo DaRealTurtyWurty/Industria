@@ -37,8 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FluidTankBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("fluid_tank");
 
     private final WrappedFluidStorage<SyncingFluidStorage> wrappedFluidStorage = new WrappedFluidStorage<>();

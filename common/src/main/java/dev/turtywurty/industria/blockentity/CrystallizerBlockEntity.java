@@ -61,8 +61,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 // aluminium hydroxide (gibbsite) (item)
 // sodium carbonate (item) - by-product
 public class CrystallizerBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("crystallizer");
     public static final BlockPos ENERGY_PORT = new BlockPos(0, 3, 0);
     public static final long ENERGY_PER_TICK = 100;

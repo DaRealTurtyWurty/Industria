@@ -108,8 +108,7 @@ public record DigesterRecipe(SlurryStack inputSlurry, FluidStack outputFluid, in
         SlotDisplay craftingStation,
         FluidStack outputFluid,
         int processTime
-    )
-        implements RecipeDisplay {
+    ) implements RecipeDisplay {
         public static final MapCodec<DigesterRecipeDisplay> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 SlurryStack.CODEC.fieldOf("input_slurry").forGetter(DigesterRecipeDisplay::inputSlurry),

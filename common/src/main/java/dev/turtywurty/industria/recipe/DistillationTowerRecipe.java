@@ -27,8 +27,7 @@ public record DistillationTowerRecipe(
     FluidStack secondaryOutputFluid,
     int processTime,
     int energyCost
-)
-    implements Recipe<DistillationTowerRecipeInput> {
+) implements Recipe<DistillationTowerRecipeInput> {
     @Override
     public boolean matches(DistillationTowerRecipeInput input, Level world) {
         return input.fluidStack().matches(this.inputFluid);

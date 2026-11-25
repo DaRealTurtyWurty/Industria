@@ -37,8 +37,7 @@ public record MixerRecipe(
     OutputItemStack output,
     SlurryStack outputSlurry,
     int processTime
-)
-    implements Recipe<MixerRecipeInput> {
+) implements Recipe<MixerRecipeInput> {
     @Override
     public boolean matches(MixerRecipeInput input, Level world) {
         if (!input.fluidStack().matches(this.inputFluid) || input.temperature() < this.minTemp

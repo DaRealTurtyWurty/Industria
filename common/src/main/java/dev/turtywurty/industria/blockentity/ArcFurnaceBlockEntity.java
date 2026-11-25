@@ -65,8 +65,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
 public class ArcFurnaceBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("arc_furnace");
 
     private static final int INPUT_PORT_X = 2;

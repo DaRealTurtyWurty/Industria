@@ -34,9 +34,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class CastingTableBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<CastingTableBlockEntity, CastingTableBlockEntityRenderer.CastingTableRenderState> {
+public class CastingTableBlockEntityRenderer extends
+    IndustriaBlockEntityRenderer<CastingTableBlockEntity, CastingTableBlockEntityRenderer.CastingTableRenderState> {
     private static final MoldCastSurface.Snapshot FLAT = new MoldCastSurface().snapshot();
     private static final float TRAY_HEIGHT = 15f / 16f;
     private static final float MOLD_SIZE = 14f / 16f;

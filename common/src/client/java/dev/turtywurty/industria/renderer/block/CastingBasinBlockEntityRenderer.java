@@ -23,9 +23,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class CastingBasinBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<CastingBasinBlockEntity, CastingBasinBlockEntityRenderer.CastingBasinRenderState> {
+public class CastingBasinBlockEntityRenderer extends
+    IndustriaBlockEntityRenderer<CastingBasinBlockEntity, CastingBasinBlockEntityRenderer.CastingBasinRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public CastingBasinBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

@@ -31,8 +31,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.setEnergy;
 
 public class WindTurbineBlockEntity extends IndustriaBlockEntity
-    implements SyncableTickableBlockEntity,
-        ChainedGeneratorEnergyOutput {
+    implements SyncableTickableBlockEntity, ChainedGeneratorEnergyOutput {
     public static final Component TITLE = Industria.containerTitle("wind_turbine");
 
     private final WrappedEnergyStorage energy = new WrappedEnergyStorage();

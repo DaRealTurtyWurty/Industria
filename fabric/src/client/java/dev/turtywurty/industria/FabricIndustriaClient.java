@@ -30,7 +30,8 @@ public class FabricIndustriaClient implements ClientModInitializer {
         IndustriaClient.onInitializeClient();
         IndustriaClient.onRegistriesAppliedClient();
 
-        ParticleProviderRegistry.getInstance().register(ModParticleTypes.COKE_OVEN_SMOKE.get(), CokeOvenSmokeProvider::new);
+        ParticleProviderRegistry.getInstance().register(ModParticleTypes.COKE_OVEN_SMOKE.get(),
+            CokeOvenSmokeProvider::new);
         PictureInPictureRendererRegistry.register(_ -> new MoldCastPreviewRenderer());
 
         UnbakedModelDeserializer.register(Industria.id("connected"), new FabricConnectedTextureDeserializer());

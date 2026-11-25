@@ -16,8 +16,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.OptionalInt;
 
 public interface BlockEntityWithGui<T extends CustomPacketPayload>
-    extends ExtendedMenuProvider<T>,
-        SelfOpeningMenuProvider {
+    extends ExtendedMenuProvider<T>, SelfOpeningMenuProvider {
     @Override
     default OptionalInt openMenu(ServerPlayer player) {
         T openingData = getMenuOpeningData(player);

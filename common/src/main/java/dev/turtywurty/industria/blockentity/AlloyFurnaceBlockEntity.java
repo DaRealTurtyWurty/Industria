@@ -45,9 +45,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.util.RandomSource;
 
 public class AlloyFurnaceBlockEntity extends DoorContainerBlockEntity
-    implements SyncableTickableBlockEntity,
-        BlockEntityWithGui<BlockPosPayload>,
-        BlockEntityContentsDropper {
+    implements SyncableTickableBlockEntity, BlockEntityWithGui<BlockPosPayload>, BlockEntityContentsDropper {
     public static final Component TITLE = Industria.containerTitle("alloy_furnace");
     public static final int INPUT_SLOT_0 = 0, INPUT_SLOT_1 = 1, FUEL_SLOT = 2, OUTPUT_SLOT = 3;
     private final WrappedContainerStorage<SimpleContainer> wrappedContainerStorage = new WrappedContainerStorage<>();

@@ -53,8 +53,7 @@ import static dev.turtywurty.industria.blockentity.util.StorageOperations.extrac
 import static dev.turtywurty.industria.blockentity.util.StorageOperations.set;
 
 public class ClarifierBlockEntity extends IndustriaMultiblockControllerBlockEntity
-    implements BlockEntityContentsDropper,
-        BlockEntityWithGui<BlockPosPayload> {
+    implements BlockEntityContentsDropper, BlockEntityWithGui<BlockPosPayload> {
     public static final Component TITLE = Industria.containerTitle("clarifier");
     public static final BlockPos ENERGY_PORT = new BlockPos(-2, 1, 0);
     public static final BlockPos FLUID_INPUT_PORT = new BlockPos(-2, 2, 0);

@@ -16,9 +16,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-public class TappingOutletBlockEntityRenderer
-    extends
-        IndustriaBlockEntityRenderer<TappingOutletBlockEntity, TappingOutletBlockEntityRenderer.TappingOutletRenderState> {
+public class TappingOutletBlockEntityRenderer extends
+    IndustriaBlockEntityRenderer<TappingOutletBlockEntity, TappingOutletBlockEntityRenderer.TappingOutletRenderState> {
     private final InWorldFluidRenderingComponent fluidRenderer = new InWorldFluidRenderingComponent();
 
     public TappingOutletBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

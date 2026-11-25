@@ -13,8 +13,7 @@ public record CastingRecipeInput(
     FluidStack fluidStack,
     Optional<Identifier> moldId,
     ItemStack template
-)
-    implements RecipeInput {
+) implements RecipeInput {
     public CastingRecipeInput(CastingRecipe.BlockType blockType, FluidStack fluidStack, Optional<Identifier> moldId) {
         this(blockType, fluidStack, moldId, ItemStack.EMPTY);
     }
