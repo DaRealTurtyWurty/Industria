@@ -12,6 +12,7 @@ public class ModEntityModelLayers {
     public static void init() {
         ClientRegistrations.registerModelLayer(BlastFurnaceBlockEntityRenderer.LAYER,
             BlastFurnaceBlockEntityRenderer::createLayer);
+        ClientRegistrations.registerModelLayer(CokeOvenModel.LAYER_LOCATION, CokeOvenModel::createMainLayer);
         ClientRegistrations.registerModelLayer(AlloyFurnaceModel.LAYER_LOCATION, AlloyFurnaceModel::createBodyLayer);
         ClientRegistrations.registerModelLayer(AlloyFurnaceModel.ITEM_LAYER_LOCATION,
             AlloyFurnaceModel::createItemLayer);

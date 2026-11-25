@@ -129,9 +129,7 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
             .getInventory(Direction.SOUTH);
         SyncingSimpleInventory outputInventory = (SyncingSimpleInventory) this.wrappedInventoryStorage
             .getInventory(Direction.DOWN);
-        SyncingFluidStorage outputFluidStorage = this.wrappedFluidStorage.getStorage(Direction.NORTH);
-
-        return List.of(inputInventory, fuelInventory, outputInventory, outputFluidStorage);
+        return List.of(inputInventory, fuelInventory, outputInventory, getOutputTank());
     }
 
     @Override
@@ -150,7 +148,7 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
             if (!this.bufferedFluidStack.isEmpty() && canOutput(this.bufferedFluidStack)) {
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                    this.wrappedFluidStorage.getStorage(Direction.NORTH).insertInternal(
+                    getOutputTank().insertInternal(
                         this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount(), transaction);
                     transaction.commit();
                 }
@@ -224,7 +222,7 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
                 this.bufferedStack = this.wrappedInventoryStorage.getInventory(Direction.DOWN)
                     .addItem(this.bufferedStack);
                 try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-                    long inserted = this.wrappedFluidStorage.getStorage(Direction.NORTH)
+                    long inserted = getOutputTank()
                         .insertInternal(this.bufferedFluidStack.variant(), this.bufferedFluidStack.amount(),
                             transaction);
                     this.bufferedFluidStack = inserted == this.bufferedFluidStack.amount()
@@ -255,7 +253,7 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
     public boolean canOutput(FluidStack output) {
         try (TransferTransaction transaction = TransferTransaction.openRoot()) {
-            long inserted = this.wrappedFluidStorage.getStorage(Direction.NORTH)
+            long inserted = getOutputTank()
                 .insertInternal(output.variant(), output.amount(), transaction);
             return inserted == output.amount();
         }
@@ -335,12 +333,16 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
         return TITLE;
     }
 
-    public @Nullable SyncingFluidStorage getFluidProvider(@Nullable Direction direction) {
-        return this.wrappedFluidStorage.getStorage(direction);
+    public SyncingFluidStorage getOutputTank() {
+        return this.wrappedFluidStorage.getStorage(Direction.NORTH);
     }
 
-    public ResourceStorage<ResourceVariant<Item>> getInventoryProvider(@Nullable Direction direction) {
-        return this.wrappedInventoryStorage.getStorage(direction);
+    public @Nullable SyncingFluidStorage getFluidProvider(@Nullable Direction direction) {
+        return isFormed() ? null : this.wrappedFluidStorage.getStorage(direction);
+    }
+
+    public @Nullable ResourceStorage<ResourceVariant<Item>> getInventoryProvider(@Nullable Direction direction) {
+        return isFormed() ? null : this.wrappedInventoryStorage.getStorage(direction);
     }
 
     @Override
@@ -350,13 +352,13 @@ public class CokeOvenBlockEntity extends IndustriaMultiblockControllerBlockEntit
 
     @Override
     protected void definePorts(PortRegistrar ports) {
-        ports.input(TransferType.ITEM, () -> getInventoryProvider(Direction.UP))
-            .atSides(new BlockPos(0, 1, -1), Direction.UP);
-        ports.input(TransferType.ITEM, () -> getInventoryProvider(Direction.SOUTH))
+        ports.input(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.UP))
+            .atSides(new BlockPos(1, 0, -1), Direction.EAST);
+        ports.input(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.SOUTH))
+            .atSides(new BlockPos(-1, 0, -1), Direction.WEST);
+        ports.output(TransferType.ITEM, () -> this.wrappedInventoryStorage.getStorage(Direction.DOWN))
+            .atSides(new BlockPos(-1, 0, -3), Direction.NORTH);
+        ports.output(TransferType.FLUID, this::getOutputTank)
             .atSides(new BlockPos(1, 0, -3), Direction.NORTH);
-        ports.output(TransferType.ITEM, () -> getInventoryProvider(Direction.DOWN))
-            .atSides(new BlockPos(0, 0, -3), Direction.DOWN);
-        ports.output(TransferType.FLUID, () -> getFluidProvider(Direction.NORTH))
-            .atSides(new BlockPos(0, 1, -3), Direction.NORTH);
     }
 }

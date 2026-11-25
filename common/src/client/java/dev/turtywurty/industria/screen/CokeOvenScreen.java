@@ -7,7 +7,6 @@ import dev.turtywurty.industria.util.ScreenUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -30,7 +29,7 @@ public class CokeOvenScreen extends AbstractContainerScreen<CokeOvenMenu> {
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         CokeOvenBlockEntity oven = this.menu.getBlockEntity();
-        addRenderableOnly(new FluidWidget.Builder(oven.getFluidProvider(Direction.NORTH))
+        addRenderableOnly(new FluidWidget.Builder(oven.getOutputTank())
             .bounds(this.leftPos + 147, this.topPos + 18, 20, 46)
             .posSupplier(oven::getBlockPos)
             .build());

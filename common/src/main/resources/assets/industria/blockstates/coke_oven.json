@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "industria:block/coke_oven" },
+    "facing=east": { "model": "industria:block/coke_oven", "y": 90 },
+    "facing=south": { "model": "industria:block/coke_oven", "y": 180 },
+    "facing=west": { "model": "industria:block/coke_oven", "y": 270 }
+  }
+}

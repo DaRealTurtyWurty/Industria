@@ -52,6 +52,7 @@ public class Industria {
         ModMetals.init();
         ModAttachmentTypes.init();
         ModPositionSourceTypes.init();
+        ModParticleTypes.init();
         ModDataComponentTypes.init();
         ModEntityTypes.init();
         ModRecipeBookCategories.init();

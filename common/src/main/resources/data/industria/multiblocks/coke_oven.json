@@ -18,6 +18,12 @@
         ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
         ["industria:firebrick", "industria:firebrick", "industria:firebrick"],
         ["industria:firebrick", "industria:firebrick", "industria:firebrick"]
+      ],
+      [
+        ["minecraft:air", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:air"],
+        ["industria:chimney", "minecraft:air", "minecraft:air"],
+        ["minecraft:air", "minecraft:air", "minecraft:air"]
       ]
     ]
   }

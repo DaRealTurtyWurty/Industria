@@ -3,6 +3,7 @@ package dev.turtywurty.industria.neoforge;
 import dev.turtywurty.industria.Industria;
 import dev.turtywurty.industria.IndustriaClient;
 import dev.turtywurty.industria.connected.ConnectedTextureSettings;
+import dev.turtywurty.industria.init.ModParticleTypes;
 import dev.turtywurty.industria.molding.MoldCastPreviewRenderer;
 import dev.turtywurty.industria.molding.MoldCastPreviewState;
 import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureLoader;
@@ -10,6 +11,7 @@ import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedTextureModel
 import dev.turtywurty.industria.neoforge.connected.NeoForgeConnectedUnbakedModel;
 import dev.turtywurty.industria.neoforge.connected.model.NeoForgeVerticalConnectedBlockStateModel;
 import dev.turtywurty.industria.neoforge.connected.model.NeoForgeVerticalConnectedModelLoader;
+import dev.turtywurty.industria.particle.CokeOvenSmokeProvider;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ResolvedModel;
@@ -20,6 +22,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -34,6 +37,8 @@ public final class IndustriaNeoForgeClient {
         modBus.addListener(FMLClientSetupEvent.class,
             event -> event.enqueueWork(IndustriaClient::onRegistriesAppliedClient));
 
+        modBus.addListener(RegisterParticleProvidersEvent.class, event ->
+            event.registerSpriteSet(ModParticleTypes.COKE_OVEN_SMOKE.get(), CokeOvenSmokeProvider::new));
         modBus.addListener(RegisterPictureInPictureRenderersEvent.class, this::registerPictureInPictureRenderers);
 
         modBus.addListener(ModelEvent.RegisterLoaders.class, this::registerModelLoaders);

@@ -5,12 +5,15 @@ import dev.turtywurty.industria.connected.FabricConnectedTextureDeserializer;
 import dev.turtywurty.industria.connected.FabricConnectedTextureModel;
 import dev.turtywurty.industria.connected.FabricConnectedUnbakedModel;
 import dev.turtywurty.industria.connected.model.*;
+import dev.turtywurty.industria.init.ModParticleTypes;
 import dev.turtywurty.industria.molding.MoldCastPreviewRenderer;
+import dev.turtywurty.industria.particle.CokeOvenSmokeProvider;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
 import net.fabricmc.fabric.api.client.renderer.v1.sprite.SpriteFinder;
 import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
@@ -27,6 +30,7 @@ public class FabricIndustriaClient implements ClientModInitializer {
         IndustriaClient.onInitializeClient();
         IndustriaClient.onRegistriesAppliedClient();
 
+        ParticleProviderRegistry.getInstance().register(ModParticleTypes.COKE_OVEN_SMOKE.get(), CokeOvenSmokeProvider::new);
         PictureInPictureRendererRegistry.register(_ -> new MoldCastPreviewRenderer());
 
         UnbakedModelDeserializer.register(Industria.id("connected"), new FabricConnectedTextureDeserializer());
